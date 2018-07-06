@@ -1,0 +1,56 @@
+server:
+  port: ${port:8080}
+
+spring:
+  data:
+    rest:
+      base-path: /api/admin
+      default-page-size: 10
+  main:
+    show_banner: false
+  profiles:
+    active: ${profile:local}
+  datasource:
+    url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    username: mybeautip
+    password: akdlqbxlq#1@Jocoos
+    test-on-borrow: true
+    validation-query: SELECT 1
+  jackson:
+    serialization-inclusion: NON_NULL
+  flyway:
+    baselineOnMigrate: true
+    locations: classpath:db/mysql
+
+security:
+  oauth2:
+    private-key:
+      -----BEGIN RSA PRIVATE KEY-----
+      MIICXAIBAAKBgGy1sRWsm0ELfGdHk07lrqMvVmVnZy9vdiP/eRQRMjFquACq1MPQ
+      nCUnuw4MlP/VwKIiv++sYJ3f2AqLBbdvnfQHudv6duWK8E4lRePRBSECGwyQxblN
+      LDdVWAkDjuAN1zJANzbVaS7fcZfpuTVvqJimAsCOtlfLad3ak4C4mlUnAgMBAAEC
+      gYBAM7oG8+6pJpBtKo9sLCfMhlt+/eep0ykxr2KhoFpFZyKOelW3488j/mfxryqc
+      QXBIET/L28Ef3CBqcZqJsGjW+86MA5dECiQwP3SkoAJQ9x0D4h2RBUJ2YAymgKx6
+      icv6zJ4ei7MHqHg3GG/E4FBSXcdSJLhEflJTZGvRUK6xIQJBAMQKNAF8vqdsoxxs
+      lqiR+68B41gOeyWsUKKBcpZEfGSKCLn8fuqkPGyS3ub2xFozPfsufrlIx7M5BKfG
+      UZDi4VcCQQCN9Zhcv97gwuc7bYYJBRLV06WBwK/W0ueCPMdnBUAYZvXCGCv2lcC7
+      zFuuWdLtF09X3sEaQi+cOSvASHQaqrixAkEAkJSt0kL8IWJf0cDMRDqWEnYkA3d6
+      n0g8l/08U1LjIwsicHil6cuCvNh9CH4KRjPwjGW4FFJ25dkxc8MxuNd7NQJANMSr
+      GybzSScJ3wxKO4YYR0WCCyY99qO1DLNdB81q0udKyRhFF0b5OpWvKrMW9aypgKc7
+      rnAV1INn4PTNu6/kMQJBAJRwBtsDwG3NvAqGpspml+1q5mXKkAiNmKw16vGQC8MI
+      2S276FsagKGbfXbNKdXqqI8UuZ9YGu+h/zBLqm6ATeY=
+      -----END RSA PRIVATE KEY-----
+    public-key:
+      -----BEGIN PUBLIC KEY-----
+      MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgGy1sRWsm0ELfGdHk07lrqMvVmVn
+      Zy9vdiP/eRQRMjFquACq1MPQnCUnuw4MlP/VwKIiv++sYJ3f2AqLBbdvnfQHudv6
+      duWK8E4lRePRBSECGwyQxblNLDdVWAkDjuAN1zJANzbVaS7fcZfpuTVvqJimAsCO
+      tlfLad3ak4C4mlUnAgMBAAE=
+      -----END PUBLIC KEY-----
+
+---
+spring:
+  profiles: local
+
+logging:
+  config: classpath:log/log4j2-console.yml

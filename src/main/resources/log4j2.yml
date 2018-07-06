@@ -1,0 +1,6 @@
+Configutation:
+  status: warn
+
+  Loggers:
+    Root:
+      level: info

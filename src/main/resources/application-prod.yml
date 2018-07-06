@@ -1,0 +1,22 @@
+spring:
+  profiles: production
+  datasource:
+    url: jdbc:mysql://db:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    username: mybeautip
+    password: akdlqbxlq#1@Jocoos
+    test-on-borrow: true
+    validation-query: SELECT 1
+  rabbitmq:
+    host: mq
+    port: 5672
+    username: mybeautip
+    password: xmfostmzhej#1@Jocoos
+  flyway:
+    baselineOnMigrate: true
+    locations: classpath:db/mysql
+
+server:
+  port: 8080
+
+logging:
+  config: classpath:log/log4j2-file.yml
