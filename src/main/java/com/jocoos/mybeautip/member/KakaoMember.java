@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
@@ -21,4 +22,9 @@ public class KakaoMember {
   @Column(nullable = false)
   @CreatedDate
   private Date createdAt;
+
+  public KakaoMember(String kakaoId, Long memberId) {
+    this.kakaoId = kakaoId;
+    this.memberId = memberId;
+  }
 }

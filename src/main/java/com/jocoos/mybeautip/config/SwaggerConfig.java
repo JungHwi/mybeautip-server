@@ -39,7 +39,6 @@ public class SwaggerConfig {
     return new ApiInfoBuilder()
         .title("Transcoder-server REST API")
         .description("This documents describes about mybeautip-server api.")
-        .contact("tekhun.jeong@jocoos.com")
         .version("2.0")
         .build();
   }

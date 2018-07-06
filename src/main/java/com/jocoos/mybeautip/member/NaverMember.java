@@ -1,14 +1,17 @@
 package com.jocoos.mybeautip.member;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Map;
 
 @Entity
 @Table(name = "naver_members")
 @Data
+@NoArgsConstructor
 public class NaverMember {
 
   @Id
@@ -33,4 +36,13 @@ public class NaverMember {
   @Column(nullable = false)
   @CreatedDate
   private Date createdAt;
+
+  public NaverMember(Map<String, String> params, Long memberId) {
+    this.naverId = params.get("naver_id");
+    this.nickname = params.get("nickname");
+    this.gender = params.get("gender");
+    this.age = Integer.parseInt(params.get("age"));
+    this.birthday = params.get("birthday");
+    this.memberId = memberId;
+  }
 }
