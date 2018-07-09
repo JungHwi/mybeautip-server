@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.security;
 
 import java.util.Map;
 
+import com.google.common.base.Strings;
+import com.jocoos.mybeautip.exception.InvalidRequestException;
 import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +33,10 @@ public class NaverTokenGranter extends AbstractTokenGranter {
     Map<String, String> requestParameters = tokenRequest.getRequestParameters();
     String naverId = requestParameters.get("naver_id");
     log.debug("naver id: {}", naverId);
+
+    if (Strings.isNullOrEmpty(naverId)) {
+      throw new InvalidRequestException("naver ID is required");
+    }
 
     return naverMemberRepository.findById(naverId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))

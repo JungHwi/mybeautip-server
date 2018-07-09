@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.security;
 
 import java.util.Map;
 
+import com.google.common.base.Strings;
+import com.jocoos.mybeautip.exception.InvalidRequestException;
 import com.jocoos.mybeautip.member.FacebookMember;
 import com.jocoos.mybeautip.member.FacebookMemberRepository;
 import com.jocoos.mybeautip.member.Member;
@@ -35,6 +37,10 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     String facebookId = requestParameters.get("facebook_id");
     log.debug("facebook id: {}", facebookId);
 
+    if (Strings.isNullOrEmpty(facebookId)) {
+      throw new InvalidRequestException("facebook ID is required");
+    }
+
     return facebookMemberRepository.findById(facebookId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
         .orElse(generateToken(createRookie(requestParameters), client, tokenRequest));
@@ -46,10 +52,11 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
   }
 
   private Member createRookie(Map<String, String> params) {
+    Member member1 = new Member(params);
+    log.debug("member1: {}", member1);
+
     Member member = memberRepository.save(new Member(params));
     facebookMemberRepository.save(new FacebookMember(params.get("facebook_id"), member.getId()));
     return member;
   }
-
-  
 }
