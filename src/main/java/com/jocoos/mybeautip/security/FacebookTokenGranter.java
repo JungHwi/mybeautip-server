@@ -35,10 +35,15 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
   protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
     Map<String, String> requestParameters = tokenRequest.getRequestParameters();
     String facebookId = requestParameters.get("facebook_id");
-    log.debug("facebook id: {}", facebookId);
+    String username = requestParameters.get("facebook_id");
+    log.debug("facebook id: {}, username: {}", facebookId, username);
 
     if (Strings.isNullOrEmpty(facebookId)) {
       throw new InvalidRequestException("facebook ID is required");
+    }
+
+    if (Strings.isNullOrEmpty(username)) {
+      throw new InvalidRequestException("username is required");
     }
 
     return facebookMemberRepository.findById(facebookId)

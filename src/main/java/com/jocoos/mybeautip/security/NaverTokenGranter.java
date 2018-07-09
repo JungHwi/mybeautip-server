@@ -32,10 +32,16 @@ public class NaverTokenGranter extends AbstractTokenGranter {
   protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
     Map<String, String> requestParameters = tokenRequest.getRequestParameters();
     String naverId = requestParameters.get("naver_id");
-    log.debug("naver id: {}", naverId);
+    String username = requestParameters.get("naver_id");
+
+    log.debug("naver id: {}, username: {}", naverId, username);
 
     if (Strings.isNullOrEmpty(naverId)) {
       throw new InvalidRequestException("naver ID is required");
+    }
+
+    if (Strings.isNullOrEmpty(username)) {
+      throw new InvalidRequestException("username is required");
     }
 
     return naverMemberRepository.findById(naverId)
