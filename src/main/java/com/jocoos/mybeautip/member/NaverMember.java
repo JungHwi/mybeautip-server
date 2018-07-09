@@ -1,6 +1,9 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.audit.DateAuditable;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -12,7 +15,8 @@ import java.util.Map;
 @Table(name = "naver_members")
 @Data
 @NoArgsConstructor
-public class NaverMember {
+@EqualsAndHashCode(callSuper = false)
+public class NaverMember extends CreatedDateAuditable {
 
   @Id
   @Column(nullable = false, length = 30)
@@ -32,10 +36,6 @@ public class NaverMember {
 
   @Column(nullable = false)
   private Long memberId;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   public NaverMember(Map<String, String> params, Long memberId) {
     this.naverId = params.get("naver_id");

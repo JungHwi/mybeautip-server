@@ -6,9 +6,11 @@ CREATE TABLE `members` (
   `username` VARCHAR(50) NOT NULL,
   `avatar_url` VARCHAR(100) DEFAULT NULL,
   `email` VARCHAR(50) DEFAULT NULL,
+  `coin` INT DEFAULT 0,
+  `intro` VARCHAR(200) DEFAULT NULL,
   `link` TINYINT UNSIGNED DEFAULT '0' COMMENT 'or flag, 1:facebook 2:naver 4:kakao',
   `created_at` DATETIME NOT NULL,
-  `updated_at` DATETIME DEFAULT NULL,
+  `modified_at` DATETIME DEFAULT NULL,
   `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

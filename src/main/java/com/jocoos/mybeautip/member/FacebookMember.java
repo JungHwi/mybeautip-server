@@ -1,20 +1,21 @@
 package com.jocoos.mybeautip.member;
 
-import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Table(name = "facebook_members")
 @Data
 @NoArgsConstructor
-public class FacebookMember {
+@EqualsAndHashCode(callSuper = false)
+public class FacebookMember extends CreatedDateAuditable {
 
   @Id
   @Column(nullable = false, length = 20)
@@ -22,10 +23,6 @@ public class FacebookMember {
 
   @Column(nullable = false)
   private Long memberId;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   public FacebookMember(String facebookId, Long memberId) {
     this.facebookId = facebookId;
