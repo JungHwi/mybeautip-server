@@ -14,6 +14,6 @@ public class AuthenticationException extends ClientAuthenticationException {
 
   @Override
   public String getOAuth2ErrorCode() {
-    return "mybeautip_oauth_error";
+    return "mybeautip authentication error";
   }
 }
