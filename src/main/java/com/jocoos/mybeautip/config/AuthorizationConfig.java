@@ -28,6 +28,10 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
   static final String SCOPE_WRITE = "write";
   static final int ACCESS_TOKEN_VALIDITY_SECONDS = 1*60*60;
   static final int REFRESH_TOKEN_VALIDITY_SECONDS = 6*60*60;
+  static final String GRANT_TYPE_FACEBOOK = "facebook";
+  static final String GRANT_TYPE_NAVER = "naver";
+  static final String GRANT_TYPE_KAKAO = "kakao";
+  static final String GRANT_TYPE_CLIENT = "client";
 
   @Autowired
   private MemberRepository memberRepository;
@@ -63,8 +67,8 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
         .pathMapping("/oauth/token", "/api/1/token")
         .authenticationManager(authenticationManager)
         .accessTokenConverter(accessTokenConverter())
-        .tokenStore(jwtTokenStore())
-        .tokenGranter(tokenGranter(endpoints));
+        .tokenGranter(tokenGranter(endpoints))
+        .tokenStore(jwtTokenStore());
   }
 
   @Override
@@ -72,7 +76,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     clients.inMemory()
         .withClient("mybeautip-ios")
         .secret(passwordEncoder.encode("akdlqbxlqdkdldhdptm"))
-        .authorizedGrantTypes("facebook", "naver", "kakao", "client")
+        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT)
         .scopes(SCOPE_READ, SCOPE_WRITE)
         .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
         .refreshTokenValiditySeconds(REFRESH_TOKEN_VALIDITY_SECONDS)
@@ -80,7 +84,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
         .withClient("mybeautip-android")
         .secret(passwordEncoder.encode("akdlqbxlqdksemfhdlem"))
         .scopes(SCOPE_READ, SCOPE_WRITE)
-        .authorizedGrantTypes("facebook", "naver", "kakao", "client")
+        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT)
         .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
         .refreshTokenValiditySeconds(REFRESH_TOKEN_VALIDITY_SECONDS);
   }

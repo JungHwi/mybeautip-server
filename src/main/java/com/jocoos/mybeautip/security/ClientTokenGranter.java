@@ -13,7 +13,7 @@ public class ClientTokenGranter extends AbstractTokenGranter {
       AuthorizationServerTokenServices tokenServices,
       ClientDetailsService clientDetailsService,
       OAuth2RequestFactory requestFactory) {
-    super(tokenServices, clientDetailsService, requestFactory, "guest");
+    super(tokenServices, clientDetailsService, requestFactory, "client");
   }
 
   @Override
