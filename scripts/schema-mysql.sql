@@ -3,7 +3,7 @@
 --
 CREATE TABLE `members` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `username` VARCHAR(50) NOT NULL,
+  `username` VARCHAR(50) DEFAULT NULL,
   `avatar_url` VARCHAR(100) DEFAULT NULL,
   `email` VARCHAR(50) DEFAULT NULL,
   `coin` INT DEFAULT 0,
@@ -41,7 +41,7 @@ CREATE TABLE `kakao_members` (
 CREATE TABLE `naver_members` (
   `naver_id` VARCHAR(30) NOT NULL,
   `nickname` VARCHAR(30) DEFAULT NULL,
-  `gender` VARCHAR(2) DEFAULT NULL,
+  `gender` VARCHAR(1) DEFAULT NULL,
   `age` VARCHAR(10) DEFAULT NULL,
   `birthday` VARCHAR(10) DEFAULT NULL,
   `member_id` BIGINT NOT NULL,

@@ -25,11 +25,11 @@ public class NaverMember extends CreatedDateAuditable {
   @Column(length = 30)
   private String nickname;
 
-  @Column(length = 2)
+  @Column(length = 1)
   private String gender;
 
   @Column(length = 10)
-  private int age;
+  private String age;
 
   @Column(length = 10)
   private String birthday;
@@ -41,7 +41,7 @@ public class NaverMember extends CreatedDateAuditable {
     this.naverId = params.get("naver_id");
     this.nickname = params.get("nickname");
     this.gender = params.get("gender");
-    this.age = Integer.parseInt(params.get("age"));
+    this.age = params.get("age");
     this.birthday = params.get("birthday");
     this.memberId = memberId;
   }

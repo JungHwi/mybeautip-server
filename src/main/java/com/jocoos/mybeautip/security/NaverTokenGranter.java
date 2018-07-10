@@ -40,10 +40,6 @@ public class NaverTokenGranter extends AbstractTokenGranter {
       throw new InvalidRequestException("naver ID is required");
     }
 
-    if (Strings.isNullOrEmpty(username)) {
-      throw new InvalidRequestException("username is required");
-    }
-
     return naverMemberRepository.findById(naverId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
@@ -59,6 +55,4 @@ public class NaverTokenGranter extends AbstractTokenGranter {
     naverMemberRepository.save(new NaverMember(params, member.getId()));
     return member;
   }
-
-  
 }

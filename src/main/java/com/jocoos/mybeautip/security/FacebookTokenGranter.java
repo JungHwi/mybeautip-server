@@ -42,10 +42,6 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
       throw new InvalidRequestException("facebook ID is required");
     }
 
-    if (Strings.isNullOrEmpty(username)) {
-      throw new InvalidRequestException("username is required");
-    }
-
     return facebookMemberRepository.findById(facebookId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));

@@ -28,7 +28,6 @@ public class Member extends DateAuditable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotNull
   @Column(length = 50, nullable = false)
   private String username;
 

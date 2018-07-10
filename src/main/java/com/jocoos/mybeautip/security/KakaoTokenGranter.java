@@ -40,10 +40,6 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
       throw new AuthenticationException("kakao ID is required");
     }
 
-    if (Strings.isNullOrEmpty(username)) {
-      throw new AuthenticationException("username is required");
-    }
-
     return kakaoMemberRepository.findById(kakaoId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
