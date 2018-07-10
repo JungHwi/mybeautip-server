@@ -46,7 +46,7 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
 
     return kakaoMemberRepository.findById(kakaoId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
-        .orElse(generateToken(createRookie(requestParameters), client, tokenRequest));
+        .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
   }
 
   private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
