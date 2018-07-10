@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import static org.springframework.http.HttpMethod.*;
 
 @Configuration
+@EnableResourceServer
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
   static final String RESOURCE_ID = "mybeautip-resource-server";
