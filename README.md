@@ -1,34 +1,64 @@
 # mybeautip Server #
 
-## Build local ##
+## Build ##
 ```
-./gradlew clean build
-docker build -t dev.jocoos.com/mybeautip-server:develop .
-docker push dev.jocoos.com/mybeautip-server:develop
-
-// in dev server
-docker pull dev.jocoos.com/mybeautip-server:develop
-docker rm mybeautip-server
-docker run -d --name mybeautip-server -v /var/log/mybeautip-server:/mybeautip-server/logs --net=host dev.jocoos.com/mybeautip-server:develop
-
+./gradlew build
 ```
 
-## Run ##
-
-### Run with in memory h2 database ###
+## DB setting ##
 ```
-$ ./gradlew build buildDocker
-$ docker run -it --name mybeautip-server -e SERVER_PROFILE=local -p 8080:8080 mybeautip-server
-```
-
-### Run with local mysql ###
-```
-$ ./gradlew build buildDocker
-$ docker run -it --net=host --name mybeautip-server -e SERVER_PROFILE=local-mysql -p 8080:8080 mybeautip-server
+create database mybeautip charset=utf8;
+create user mybeautip@'%' identified by 'akdlqbxlq#1@Jocoos';
+grant all privileges on mybeautip.* to mybeautip@'%';
 ```
 
-## API Documents ##
+## Run with java application ##
+```
+./gradlew build && java -jar build/libs/mybeautip-server-0.0.1.jar
+
+```
+
+## API for developers ##
 
 ```
 {server_ip:port}/swagger-ui.html
+```
+
+```
+## Build and run with docker ##
+```
+./gradlew clean build
+docker build -t dev.jocoos.com/mybeautip-server:develop .
+docker run --name mybeautip-server --net=host -d dev.jocoos.com/mybeautip-server:develop
+```
+
+## distribute for devleop ##
+```
+// in dev server
+docker pull dev.jocoos.com/mybeautip-server:develop
+docker rm -f mybeautip-server
+docker run --name mybeautip-server -e SERVER_PROFILE=develop -v /var/log/mybeautip-server:/mybeautip-server/logs --net=host -d dev.jocoos.com/mybeautip-server:develop
+
+or
+
+docker-compose -f mybeautip-server-dev.yml up -d
+
+
+```
+
+## distribute for production ##
+```
+./gradlew clean build
+docker build -t dev.jocoos.com/mybeautip-server:production .
+docker push dev.jocoos.com/mybeautip-server:production .
+
+// in prod server
+docker pull dev.jocoos.com/mybeautip-server:production
+docker rm -f mybeautip-server
+
+docker run --name mybeautip-server -e SERVER_PROFILE=production -v /var/log/mybeautip-server:/mybeautip-server/logs --net=host -d dev.jocoos.com/mybeautip-server:production
+
+or
+
+docker-compose -f mybeautip-server-prod.yml up -d
 ```
