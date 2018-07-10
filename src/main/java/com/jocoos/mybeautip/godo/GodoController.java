@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/1/godo")
 public class GodoController {
-	@Autowired
-	private GodoService godoService;
-	
-	@GetMapping("/category")
-	public void getCategoriesFromGodo() {
-		godoService.getCategoriesFromGodo();
-	}
-	
-	@GetMapping("/goods")
-	public void getGoodsList() {
-		godoService.getGoodsFromGodo();
-	}
+  @Autowired
+  private GodoService godoService;
+  
+  @GetMapping("/category")
+  public void getCategoriesFromGodo() {
+    godoService.getCategoriesFromGodo();
+  }
+  
+  @GetMapping("/goods")
+  public void getGoodsList() {
+    godoService.getGoodsFromGodo();
+  }
 }

@@ -13,9 +13,9 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
 public class Response {
-	private Integer code;
-	private String message;
-	
-	private List<Goods> goods;
-	private String nextCursor;
+  private Integer code;
+  private String message;
+  
+  private List<Goods> goods;
+  private String nextCursor;
 }

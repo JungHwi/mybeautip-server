@@ -14,27 +14,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/1/goods")
 public class GoodsController {
-	
-	@Autowired
-	private GoodsService goodsService;
-	
-	@GetMapping
-	public ResponseEntity<? extends Object> getGoodsList(GoodsListRequest request) {
-		if (request.getCount() == null) {
-			request.setCount(20);	// FIXME: Use constant value
-		}
-		
-		if (request.getCount() > 100) {	// FIXME: Use constant value
-			request.setCount(100);
-		}
-		
-		Response response = goodsService.getGoodsList(request);
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
-	
-	@GetMapping("/{goodsNo}")
-	public ResponseEntity<Goods> getGoods(@PathVariable("goodsNo") String goodsNo ) {
-		Goods goods = goodsService.getGoods(goodsNo);
-		return ResponseEntity.ok(goods);
-	}
+  
+  @Autowired
+  private GoodsService goodsService;
+  
+  @GetMapping
+  public ResponseEntity<? extends Object> getGoodsList(GoodsListRequest request) {
+    if (request.getCount() == null) {
+      request.setCount(20);  // FIXME: Use constant value
+    }
+    
+    if (request.getCount() > 100) {  // FIXME: Use constant value
+      request.setCount(100);
+    }
+    
+    Response response = goodsService.getGoodsList(request);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+  
+  @GetMapping("/{goodsNo}")
+  public ResponseEntity<Goods> getGoods(@PathVariable("goodsNo") String goodsNo) {
+    Goods goods = goodsService.getGoods(goodsNo);
+    return ResponseEntity.ok(goods);
+  }
 }

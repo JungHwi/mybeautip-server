@@ -12,18 +12,18 @@ import javax.persistence.Table;
 @Table(name = "goods_categories")
 @Data
 public class Category {
-	@Id
-	private String code;
-	
-	@JsonIgnore
-	@Column(name = "parent_code")
-	private String group;
-	
-	@Column(name = "category_name")
-	private String name;
-	
-	@JsonIgnore
-	private String displayOnPc;
-	@JsonIgnore
-	private String displayOnMobile;
+  @Id
+  private String code;
+  
+  @JsonIgnore
+  @Column(name = "parent_code")
+  private String group;
+  
+  @Column(name = "category_name")
+  private String name;
+  
+  @JsonIgnore
+  private String displayOnPc;
+  @JsonIgnore
+  private String displayOnMobile;
 }

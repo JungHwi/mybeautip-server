@@ -14,12 +14,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/1/goods/categories")
 public class CategoryController {
-	@Autowired
-	private CategoryService categoryService;
-	
-	@GetMapping
-	public ResponseEntity getAllCategories() {
-		List<CategoryGroup> allCategories = categoryService.getGoodsCategories();
-		return new ResponseEntity(allCategories, HttpStatus.OK);
-	}
+  @Autowired
+  private CategoryService categoryService;
+  
+  @GetMapping
+  public ResponseEntity getAllCategories() {
+    List<CategoryGroup> allCategories = categoryService.getGoodsCategories();
+    return new ResponseEntity(allCategories, HttpStatus.OK);
+  }
 }
