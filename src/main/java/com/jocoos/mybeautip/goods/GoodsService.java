@@ -16,9 +16,12 @@ import static org.springframework.data.domain.PageRequest.of;
 @Service
 @Slf4j
 public class GoodsService {
+  private final GoodsRepository goodsRepository;
   
   @Autowired
-  private GoodsRepository goodsRepository;
+  public GoodsService(GoodsRepository goodsRepository) {
+    this.goodsRepository = goodsRepository;
+  }
   
   public Goods getGoods(String goodsNo) {
     Optional<Goods> optional = goodsRepository.findById(goodsNo);

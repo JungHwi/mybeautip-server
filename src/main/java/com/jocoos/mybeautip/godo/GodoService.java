@@ -22,15 +22,9 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class GodoService {
-  
-  @Autowired
-  private RestTemplate restTemplate;
-  
-  @Autowired
-  private CategoryRepository categoryRepository;
-  
-  @Autowired
-  private GoodsRepository goodsRepository;
+  private final RestTemplate restTemplate;
+  private final CategoryRepository categoryRepository;
+  private final GoodsRepository goodsRepository;
   
   @Value("${godomall.base-url}")
   private String baseUrl;
@@ -52,6 +46,15 @@ public class GodoService {
   
   private static int newCount;
   private static int updatedCount;
+  
+  @Autowired
+  public GodoService(CategoryRepository categoryRepository,
+                     GoodsRepository goodsRepository,
+                     RestTemplate restTemplate) {
+    this.categoryRepository = categoryRepository;
+    this.goodsRepository = goodsRepository;
+    this.restTemplate = restTemplate;
+  }
   
   @Scheduled(initialDelay = 30000, fixedRate = 86400000)  // 30 sec, 1 day
   public void gatheringCategoriesFromGodomall() {

@@ -10,10 +10,13 @@ import java.util.List;
 @Service
 @Slf4j
 public class CategoryService {
-  @Autowired
-  private CategoryRepository categoryRepository;
-  
+  private final CategoryRepository categoryRepository;
   private static final String GOODS_CATEGORY_TOP = "0";
+  
+  @Autowired
+  public CategoryService(CategoryRepository categoryRepository) {
+    this.categoryRepository = categoryRepository;
+  }
   
   public List<CategoryGroup> getGoodsCategories() {
     List<CategoryGroup> groups = new ArrayList<>();
