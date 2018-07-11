@@ -18,7 +18,6 @@ import static org.springframework.data.domain.PageRequest.of;
 public class GoodsService {
   private final GoodsRepository goodsRepository;
   
-  @Autowired
   public GoodsService(GoodsRepository goodsRepository) {
     this.goodsRepository = goodsRepository;
   }

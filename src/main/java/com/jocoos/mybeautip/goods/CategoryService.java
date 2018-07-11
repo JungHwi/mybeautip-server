@@ -13,7 +13,6 @@ public class CategoryService {
   private final CategoryRepository categoryRepository;
   private static final String GOODS_CATEGORY_TOP = "0";
   
-  @Autowired
   public CategoryService(CategoryRepository categoryRepository) {
     this.categoryRepository = categoryRepository;
   }

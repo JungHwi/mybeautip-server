@@ -47,7 +47,6 @@ public class GodoService {
   private static int newCount;
   private static int updatedCount;
   
-  @Autowired
   public GodoService(CategoryRepository categoryRepository,
                      GoodsRepository goodsRepository,
                      RestTemplate restTemplate) {
