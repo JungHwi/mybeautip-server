@@ -67,7 +67,7 @@ public class GodoService {
       }
     }
     
-    log.debug("Elapsed: " + (System.currentTimeMillis() - start));
+    log.debug(String.format("Elapsed: %d miliseconds", (System.currentTimeMillis() - start)));
   }
   
   private List<GodoCategoryResponse.CategoryData> getCategoriesWithCode(String code) {
@@ -79,7 +79,6 @@ public class GodoService {
     
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<String> request = new HttpEntity<>(headers);
-//	log.debug("Request Url: " + sb.toString());
     ResponseEntity<GodoCategoryResponse> response = restTemplate.exchange(requestUrl.toString(),
         HttpMethod.GET, request, GodoCategoryResponse.class);
     
@@ -132,12 +131,12 @@ public class GodoService {
       nextPage = nowPage + 1;
     } while (maxPage > nowPage);
     
-    log.debug("Elapsed: " + (System.currentTimeMillis() - start));
-    log.debug(String.format("New items: %d, Updated items: %d", newCount, updatedCount));
+    log.debug(String.format("Elapsed: %d miliseconds, new goods items: %d, updated goods items: %d",
+        (System.currentTimeMillis() - start), newCount, updatedCount));
     newCount = updatedCount = 0;
   }
   
-  public GodoGoodsResponse.Header getGoodsFromGodo(int nextPage) {
+  private GodoGoodsResponse.Header getGoodsFromGodo(int nextPage) {
     StringBuilder requestUrl = new StringBuilder();
     requestUrl.append(baseUrl).append(goodsSearchUrl)
         .append("partner_key=").append(partnerKey)
@@ -147,7 +146,6 @@ public class GodoService {
     
     HttpHeaders headers = new HttpHeaders();
     HttpEntity<String> request = new HttpEntity<>(headers);
-//	log.debug("Request Url: " + sb.toString());
     ResponseEntity<GodoGoodsResponse> response = restTemplate.exchange(requestUrl.toString(),
         HttpMethod.GET, request, GodoGoodsResponse.class);
     
