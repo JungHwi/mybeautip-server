@@ -12,15 +12,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestController
 public class ErrorResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
+  @ExceptionHandler(BadRequestException.class)
+  public final ResponseEntity<ErrorResponse> handleInvalidRequestException(BadRequestException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), e.getDescription());
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(MemberNotFoundException.class)
-  public final ResponseEntity<ErrorDetails> handleMemberNotFoundException(MemberNotFoundException e, WebRequest request) {
-    ErrorDetails errorDetails = new ErrorDetails(e.getMessage(), request.getDescription(false));
-    return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+  public final ResponseEntity<ErrorResponse> handleMemberNotFoundException(MemberNotFoundException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), e.getDescription());
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)
-  public final ResponseEntity<ErrorDetails> handleAllExceptions(Exception e, WebRequest request) {
-    ErrorDetails errorDetails = new ErrorDetails(e.getMessage(), request.getDescription(false));
-    return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+  public final ResponseEntity<ErrorResponse> handleAllExceptions(Exception e, WebRequest request) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), request.getDescription(false));
+    return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

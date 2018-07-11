@@ -3,7 +3,7 @@ package com.jocoos.mybeautip.security;
 import java.util.Map;
 
 import com.google.common.base.Strings;
-import com.jocoos.mybeautip.exception.InvalidRequestException;
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.FacebookMember;
 import com.jocoos.mybeautip.member.FacebookMemberRepository;
 import com.jocoos.mybeautip.member.Member;
@@ -39,7 +39,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     log.debug("facebook id: {}, username: {}", facebookId, username);
 
     if (Strings.isNullOrEmpty(facebookId)) {
-      throw new InvalidRequestException("facebook ID is required");
+      throw new BadRequestException("facebook ID is required");
     }
 
     return facebookMemberRepository.findById(facebookId)
