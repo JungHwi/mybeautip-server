@@ -24,17 +24,18 @@ public class Goods {
   private String goodsDiscountUnit;  // 상품 할인 단위 ( percent=%, price=원)
   private BigDecimal goodsPrice;  // 판매가
   private BigDecimal fixedPrice;  // 정가
-  private String shortDescription;  // 짧은 설명 (250자 이내)
   private String goodsDescription;  // PC 쇼핑몰 상세설명
-  private String goodsDescriptionMobile;  // 모바일 쇼핑몰 상세설명
-  private Integer reviewCnt;  // 상품평수
   private URL listImageData;  // 썸네일 이미지 정보
-  private URL mainImageData;  // 리스트 이미지 정보
-  private URL magnifyImageData;  // 확대이미지 정보
-  private URL detailImageData;  // 상세 이미지 정보
-  private String regDt;  // 상품등록일
-  private String modDt;  // 상품수정일
   
+  
+  @JsonIgnore private Integer reviewCnt;  // 상품평수
+  @JsonIgnore private String shortDescription;  // 짧은 설명 (250자 이내)
+  @JsonIgnore private String goodsDescriptionMobile;  // 모바일 쇼핑몰 상세설명
+  @JsonIgnore private String regDt;  // 상품등록일
+  @JsonIgnore private String modDt;  // 상품수정일
+  @JsonIgnore private URL mainImageData;  // 리스트 이미지 정보
+  @JsonIgnore private URL magnifyImageData;  // 확대이미지 정보
+  @JsonIgnore private URL detailImageData;  // 상세 이미지 정보
   @JsonIgnore
   private String goodsNmFl;  // 상품명 타입 (d=기본, e=확장)
   @JsonIgnore
