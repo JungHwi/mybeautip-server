@@ -95,10 +95,8 @@ public class GodoService {
         .append("&key=").append(key)
         .append("&cateCd=").append(code);
     
-    HttpHeaders headers = new HttpHeaders();
-    HttpEntity<String> request = new HttpEntity<>(headers);
-    ResponseEntity<GodoCategoryResponse> response = restTemplate.exchange(requestUrl.toString(),
-        HttpMethod.GET, request, GodoCategoryResponse.class);
+    ResponseEntity<GodoCategoryResponse> response
+        = restTemplate.getForEntity(requestUrl.toString(), GodoCategoryResponse.class);
     
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoCategoryResponse.CategoryData> dataList = response.getBody().getBody();
@@ -162,10 +160,8 @@ public class GodoService {
         .append("&page=").append(nextPage)
         .append("&size=25");
     
-    HttpHeaders headers = new HttpHeaders();
-    HttpEntity<String> request = new HttpEntity<>(headers);
-    ResponseEntity<GodoGoodsResponse> response = restTemplate.exchange(requestUrl.toString(),
-        HttpMethod.GET, request, GodoGoodsResponse.class);
+    ResponseEntity<GodoGoodsResponse> response
+        = restTemplate.getForEntity(requestUrl.toString(), GodoGoodsResponse.class);
     
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoGoodsResponse.GoodsData> dataList = response.getBody().getBody();
