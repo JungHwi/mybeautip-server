@@ -12,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -51,6 +52,20 @@ public class GodoService {
   
   private static int newCount;
   private static int updatedCount;
+  
+  @Scheduled(initialDelay = 30000, fixedRate = 86400000)  // 30 sec, 1 day
+  public void gatheringCategoriesFromGodomall() {
+    log.debug("GatheringCategoriesFromGodomall task started...");
+    getCategoriesFromGodo();
+    log.debug("GatheringCategoriesFromGodomall task ended");
+  }
+  
+  @Scheduled(initialDelay = 60000, fixedRate = 3600000) // 60 sec, 1 hour
+  public void gatheringGoodsFromGodomall() {
+    log.debug("GatheringGoodsFromGodomall task started...");
+    getGoodsFromGodo();
+    log.debug("GatheringGoodsFromGodomall task ended");
+  }
   
   /**
    * Retrieve All categories using GodoMall Open API
