@@ -14,7 +14,7 @@ public class GoodsListRequest {
   private Integer count = 20;
   
   @Size(max=6, message = "Invalid category")
-  private String category;
+  private String category = "";
   
   @Size(max=100, message = "Invalid keyword")
   private String keyword = "";

@@ -49,21 +49,21 @@ public class GoodsService {
     switch (filter) {
       case ALL:
         slice = goodsRepository.getGoodsList(startCursor,
-            of(0, request.getCount() + 1));
+            of(0, request.getCount()));
         break;
       case CATEGORY:
         slice = goodsRepository.findAllByCategory(request.getCategory(), startCursor,
-            of(0, request.getCount() + 1));
+            of(0, request.getCount()));
         break;
         
       case KEYWORD:
         slice = goodsRepository.findAllByKeyword(request.getKeyword(), startCursor,
-            of(0, request.getCount() + 1));
+            of(0, request.getCount()));
         break;
         
       case CATEGORY_AND_KEYWORD:
         slice = goodsRepository.findAllByCategoryAndKeyword(request.getCategory(),
-            request.getKeyword(), startCursor, of(0, request.getCount() + 1));
+            request.getKeyword(), startCursor, of(0, request.getCount()));
         break;
       
       default:
@@ -75,12 +75,14 @@ public class GoodsService {
     }
     
     Response response = new Response();
-    if (list.size() >= request.getCount() + 1) {
+    if (list.size() >= request.getCount()) {
       Goods goods = list.get(list.size() - 1);
       response.setNextCursor(goods.getUpdatedAt().toString());
-      list.remove(goods);
+      String nextRef = response.generateNextRef(request, goods.getUpdatedAt().toString());
+      response.setNextRef(nextRef);
     } else {
       response.setNextCursor("");
+      response.setNextRef("");
     }
     
     response.setGoods(list);
