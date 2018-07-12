@@ -25,7 +25,6 @@ CREATE TABLE `goods` (
   `brand_cd` VARCHAR(12),
   `maker_nm` VARCHAR(40),
   `origin_nm` VARCHAR(40),
-
   `make_ymd` VARCHAR(20),
   `launch_ymd` VARCHAR(20),
   `effective_start_ymd` VARCHAR(20),
@@ -36,7 +35,6 @@ CREATE TABLE `goods` (
   `sales_unit` INT(10),
   `min_order_cnt` INT(5),
   `max_order_cnt` INT(5),
-
   `sales_start_ymd` VARCHAR(20),
   `sales_end_ymd` VARCHAR(20),
   `goods_discount_fl` VARCHAR(1),
@@ -47,7 +45,6 @@ CREATE TABLE `goods` (
   `fixed_price` DECIMAL(12,2),
   `delivery_sno` INT(10),
   `short_description` VARCHAR(255),
-
   `goods_description` MEDIUMTEXT,
   `goods_description_mobile` MEDIUMTEXT,
   `order_cnt` INT(10),
@@ -58,11 +55,9 @@ CREATE TABLE `goods` (
   `list_image_data` VARCHAR(255),
   `main_image_data` VARCHAR(255),
   `magnify_image_data` VARCHAR(255),
-
   `detail_image_data` VARCHAR(255),
   `reg_dt` VARCHAR(20),
   `mod_dt` VARCHAR(20),
-
   `created_at` LONG,
   `updated_at` LONG,
   PRIMARY KEY(`goods_no`)
