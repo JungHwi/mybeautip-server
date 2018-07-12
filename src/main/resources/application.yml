@@ -23,7 +23,7 @@ spring:
     baselineOnMigrate: true
     locations: classpath:db/mysql
   jpa:
-    show-sql: true
+    show-sql: false
 
 security:
   oauth2:
