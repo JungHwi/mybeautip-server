@@ -45,15 +45,15 @@ public class MemberController {
   }
 
   @GetMapping("/me")
-  public Resource<Member> getMe(Principal principal) {
+  public Resource<MemberInfo> getMe(Principal principal) {
     log.debug("member id: {}", principal.getName());
     return memberRepository.findById(Long.parseLong(principal.getName()))
-              .map(m -> new Resource<>(m))
+              .map(m -> new Resource<>(new MemberInfo(m)))
               .orElseThrow(() -> new MemberNotFoundException("member_not_found"));
   }
 
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Member> updateMember(Principal principal,
+  public ResponseEntity<MemberInfo> updateMember(Principal principal,
                                              @Valid @RequestBody UpdateMemberRequest updateMemberRequest,
                                              BindingResult bindingResult) {
 
@@ -69,14 +69,15 @@ public class MemberController {
         .map(m -> {
           BeanUtils.copyProperties(updateMemberRequest, m);
           memberRepository.save(m);
-          return new ResponseEntity<>(m, HttpStatus.OK);
+
+          return new ResponseEntity<>(new MemberInfo(m), HttpStatus.OK);
         })
         .orElseThrow(() -> new MemberNotFoundException(principal.getName()));
   }
 
   @GetMapping
   @ResponseBody
-  public CursorResponse<MemberInfo> getMembers(@RequestParam(defaultValue = "10") int count,
+  public CursorResponse<MemberInfo> getMembers(@RequestParam(defaultValue = "20") int count,
                                                @RequestParam(required = false) String cursor,
                                                @RequestParam(required = false) String keyword) {
     Slice<Member> list = findMembers(keyword, cursor, count);
@@ -136,7 +137,7 @@ public class MemberController {
   class Cursor<T> {
     private String keyword;
     private T cursor;
-    private int count = 10;
+    private int count = 20;
 
     public boolean hasKeyword() {
       return !Strings.isNullOrEmpty(keyword);
@@ -215,17 +216,17 @@ public class MemberController {
   public static class MemberInfo {
     private Long id;
     private String username;
-    private String avatarUrl;
     private String email;
+    private String avatarUrl;
     private String intro;
     private String createdAt;
 
     public MemberInfo(Member member) {
       this.id = member.getId();
       this.username = member.getUsername();
-      this.avatarUrl = member.getAvatarUrl();
+      this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
       this.email = member.getEmail();
-      this.intro = member.getIntro();
+      this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
       this.createdAt = String.valueOf(member.getCreatedAt().getTime());
     }
   }
