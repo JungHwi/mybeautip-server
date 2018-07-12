@@ -20,4 +20,3 @@ server:
 
 logging:
   config: classpath:log/log4j2-file.yml
-

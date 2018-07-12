@@ -17,7 +17,7 @@ spring:
     test-on-borrow: true
     validation-query: SELECT 1
   jackson:
-    serialization-inclusion: NON_NULL
+    default-property-inclusion: NON_NULL
   flyway:
     baselineOnMigrate: true
     locations: classpath:db/mysql
@@ -54,3 +54,10 @@ spring:
 
 logging:
   config: classpath:log/log4j2-console.yml
+
+godomall:
+  base-url: https://openhub.godo.co.kr/godomall5
+  partner-key: JUY0JUUwciVEMyVBQUxESg==
+  key: aSU4QmwlMTklRjQ0JTNCJUZEJTA0JTg2JThGRnElQzQlRUElRDJQJUYycCVDMyUxQyUwQSVDQiVDNU1DSTglQzFuJUQyJUY4JTgxJUI2JTBEJUU4
+  category-search-url: /goods/Category_Search.php?
+  goods-search-url: /goods/Goods_Search.php?
