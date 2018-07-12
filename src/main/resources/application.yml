@@ -22,6 +22,8 @@ spring:
   flyway:
     baselineOnMigrate: true
     locations: classpath:db/mysql
+  jpa:
+    show-sql: true
 
 security:
   oauth2:
