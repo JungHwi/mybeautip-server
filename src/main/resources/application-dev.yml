@@ -9,4 +9,4 @@ spring:
     validation-query: SELECT 1
 
 logging:
-  config: classpath:log/log4j2-console.yml
+  config: classpath:log/log4j2-file.yml
