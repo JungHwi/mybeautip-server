@@ -49,6 +49,10 @@ public class Member extends DateAuditable {
   @Column
   private Date deletedAt;
 
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
   public int parseLink(String grantType) {
     switch (grantType) {
       case "facebook": {

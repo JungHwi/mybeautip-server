@@ -18,9 +18,12 @@ spring:
     validation-query: SELECT 1
   jackson:
     default-property-inclusion: NON_NULL
+    property-naming-strategy: CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
   flyway:
     baselineOnMigrate: true
     locations: classpath:db/mysql
+  jpa:
+    show-sql: true
 
 security:
   oauth2:

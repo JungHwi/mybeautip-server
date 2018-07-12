@@ -3,7 +3,7 @@ package com.jocoos.mybeautip.security;
 import java.util.Map;
 
 import com.google.common.base.Strings;
-import com.jocoos.mybeautip.exception.InvalidRequestException;
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,7 +37,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
     log.debug("naver id: {}, username: {}", naverId, username);
 
     if (Strings.isNullOrEmpty(naverId)) {
-      throw new InvalidRequestException("naver ID is required");
+      throw new BadRequestException("naver ID is required");
     }
 
     return naverMemberRepository.findById(naverId)

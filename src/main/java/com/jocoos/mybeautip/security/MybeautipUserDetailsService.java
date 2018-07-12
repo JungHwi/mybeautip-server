@@ -23,7 +23,7 @@ public class MybeautipUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    log.debug("username: {}", username);
+    log.debug("load user by username: {}", username);
 
     switch (username) {
       case "0": {
@@ -33,7 +33,7 @@ public class MybeautipUserDetailsService implements UserDetailsService {
         return new MybeautipGuestUserDetails();
       }
       default: {
-        return memberRepository.findByUsername(username)
+        return memberRepository.findById(Long.parseLong(username))
             .map(m -> new MybeautipUserDetails(m))
             .orElseThrow(() -> new UsernameNotFoundException("username not found"));
       }
@@ -42,7 +42,7 @@ public class MybeautipUserDetailsService implements UserDetailsService {
 
   class MybeautipUserDetails extends User {
     public MybeautipUserDetails(Member member) {
-      super(member.getUsername(), "", AuthorityUtils.createAuthorityList("ROLE_USER"));
+      super(member.getId().toString(), "", AuthorityUtils.createAuthorityList("ROLE_USER"));
     }
   }
 

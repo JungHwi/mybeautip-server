@@ -17,6 +17,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
@@ -26,7 +29,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
   static final String SCOPE_READ = "read";
   static final String SCOPE_WRITE = "write";
-  static final int ACCESS_TOKEN_VALIDITY_SECONDS = 1*60*60;
+  static final int ACCESS_TOKEN_VALIDITY_SECONDS = 24*60*60;
   static final int REFRESH_TOKEN_VALIDITY_SECONDS = 6*60*60;
   static final String GRANT_TYPE_FACEBOOK = "facebook";
   static final String GRANT_TYPE_NAVER = "naver";
@@ -66,9 +69,10 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     endpoints
         .pathMapping("/oauth/token", "/api/1/token")
         .authenticationManager(authenticationManager)
-        .accessTokenConverter(accessTokenConverter())
+        .accessTokenConverter(jwtTokenEnhencer())
         .tokenGranter(tokenGranter(endpoints))
-        .tokenStore(jwtTokenStore());
+        .tokenStore(jwtTokenStore())
+        .userDetailsService(userDetailService);
   }
 
   @Override
@@ -90,16 +94,26 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
   }
 
   @Bean
-  public JwtAccessTokenConverter accessTokenConverter() {
+  public JwtAccessTokenConverter jwtTokenEnhencer() {
     JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
     jwtAccessTokenConverter.setSigningKey(privateKey);
     jwtAccessTokenConverter.setVerifierKey(publicKey);
+    jwtAccessTokenConverter.setAccessTokenConverter(accessTokenConverter());
     return jwtAccessTokenConverter;
   }
 
   @Bean
   public JwtTokenStore jwtTokenStore() {
-    return new JwtTokenStore(accessTokenConverter());
+    return new JwtTokenStore(jwtTokenEnhencer());
+  }
+
+  private AccessTokenConverter accessTokenConverter() {
+    DefaultUserAuthenticationConverter userAuthenticationConverter = new DefaultUserAuthenticationConverter();
+    userAuthenticationConverter.setUserDetailsService(userDetailService);
+
+    DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+    accessTokenConverter.setUserTokenConverter(userAuthenticationConverter);
+    return accessTokenConverter;
   }
 
   private CompositeTokenGranter tokenGranter(AuthorizationServerEndpointsConfigurer endpoints) {
