@@ -24,7 +24,7 @@ grant all privileges on mybeautip.* to mybeautip@'%';
 {server_ip:port}/swagger-ui.html
 ```
 
-```
+
 ## Build and run with docker ##
 ```
 ./gradlew clean build
@@ -37,12 +37,11 @@ docker run --name mybeautip-server --net=host -d dev.jocoos.com/mybeautip-server
 // in dev server
 docker pull dev.jocoos.com/mybeautip-server:develop
 docker rm -f mybeautip-server
-docker run --name mybeautip-server -e SERVER_PROFILE=develop -v /var/log/mybeautip-server:/mybeautip-server/logs --net=host -d dev.jocoos.com/mybeautip-server:develop
+docker run --name mybeautip-server -v /var/log/mybeautip-server:/mybeautip-server/logs --net=host -d dev.jocoos.com/mybeautip-server:develop
 
 or
 
 docker-compose -f mybeautip-server-dev.yml up -d
-
 
 ```
 
