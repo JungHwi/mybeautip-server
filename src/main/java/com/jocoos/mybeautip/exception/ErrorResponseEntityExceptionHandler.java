@@ -8,12 +8,27 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @ControllerAdvice
 @RestController
 public class ErrorResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
+  @ExceptionHandler(ConflictException.class)
+  public final ResponseEntity<ErrorResponse> handleConflictException(ConflictException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), e.getDescription());
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  public final ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), e.getDescription());
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(BadRequestException.class)
-  public final ResponseEntity<ErrorResponse> handleInvalidRequestException(BadRequestException e) {
+  public final ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e) {
     ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), e.getDescription());
     return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
@@ -26,6 +41,7 @@ public class ErrorResponseEntityExceptionHandler extends ResponseEntityException
 
   @ExceptionHandler(Exception.class)
   public final ResponseEntity<ErrorResponse> handleAllExceptions(Exception e, WebRequest request) {
+    log.error("exception", e);
     ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), request.getDescription(false));
     return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }

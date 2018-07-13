@@ -5,6 +5,11 @@
 ./gradlew build
 ```
 
+## DB connect db on docker with charset ##
+```
+docker exec -it transcoder-db mysql -u mybeautip -p mybeautip --default-character-set=utf8
+```
+
 ## DB setting ##
 ```
 create database mybeautip charset=utf8;
