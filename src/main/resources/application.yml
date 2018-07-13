@@ -51,6 +51,10 @@ security:
       tlfLad3ak4C4mlUnAgMBAAE=
       -----END PUBLIC KEY-----
 
+mybeautip:
+  addr:
+    confirm-key: U01TX0FVVEgyMDE3MDExMDE1NDM0NTE4MjAx
+
 godomall:
   base-url: https://openhub.godo.co.kr/godomall5
   partner-key: JUY0JUUwciVEMyVBQUxESg==
