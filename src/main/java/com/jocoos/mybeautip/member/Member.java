@@ -1,15 +1,15 @@
 package com.jocoos.mybeautip.member;
 
+import javax.persistence.*;
 import java.util.Date;
 import java.util.Map;
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
-import com.jocoos.mybeautip.audit.DateAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import com.jocoos.mybeautip.audit.DateAuditable;
 
 
 @Entity

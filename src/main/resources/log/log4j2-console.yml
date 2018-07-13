@@ -15,15 +15,15 @@ Configutation:
         - ref: CONSOLE
     Logger:
       - name: com.jocoos.mybeautip
-        level: trace
+        level: debug
       - name: jdbc
         level: error
       - name: org.springframework.web
         level: info
       - name: org.springframework.web.filter.CommonsRequestLoggingFilter
-        level: debug
+        level: error
       - name: org.springframework.security
-        level: debug
+        level: error
       - name: org.hibernate
         level: error
       - name: org.hibernate.SQL
