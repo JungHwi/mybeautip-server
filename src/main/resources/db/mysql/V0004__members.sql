@@ -20,5 +20,8 @@ CREATE TABLE `members_block` (
   `i` BIGINT(20) NOT NULL,
   `you` BIGINT(20) NOT NULL,
   `created_at` BIGINT(13) NOT NULL,
-  PRIMARY KEY(`id`)
+  PRIMARY KEY(`id`),
+  UNIQUE KEY `uk_block` (`i`, `you`),
+  CONSTRAINT `fk_block_i` FOREIGN KEY (`i`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_block_you` FOREIGN KEY (`you`) REFERENCES `members` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

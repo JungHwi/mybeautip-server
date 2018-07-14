@@ -25,4 +25,13 @@ public class Response<T> {
     
     return nextRef.toString();
   }
+  
+  public String generateNextRef(String requestUri, String nextCursor, int count) {
+    StringBuilder nextRef = new StringBuilder();
+    nextRef.append(requestUri)
+        .append("?cursor=").append(nextCursor)
+        .append("&count=").append(count);
+    
+    return nextRef.toString();
+  }
 }
