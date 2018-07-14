@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.follow.member;
+package com.jocoos.mybeautip.member.follow;
 
 import com.jocoos.mybeautip.restapi.Response;
 import lombok.extern.slf4j.Slf4j;

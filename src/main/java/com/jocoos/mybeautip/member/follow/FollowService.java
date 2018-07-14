@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.follow.member;
+package com.jocoos.mybeautip.member.follow;
 
 import com.jocoos.mybeautip.member.MemberController;
 import com.jocoos.mybeautip.member.MemberRepository;

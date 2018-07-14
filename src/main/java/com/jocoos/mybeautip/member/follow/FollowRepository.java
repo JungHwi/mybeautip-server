@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.follow.member;
+package com.jocoos.mybeautip.member.follow;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
