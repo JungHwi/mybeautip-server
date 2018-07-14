@@ -3,18 +3,18 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsListRequest;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-public class Response {
-  private Integer code;
-  private String message;
-  
+public class Response<T> {
   private List<Goods> goods;
+  private List<T> content;
+  
   private String nextCursor;
   private String nextRef;
+  
+  private Boolean follow;
   
   public String generateNextRef(GoodsListRequest request, String nextCursor) {
     StringBuilder nextRef = new StringBuilder();
