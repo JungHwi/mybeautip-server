@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.config;
 import com.google.common.collect.Lists;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -27,6 +28,7 @@ public class SwaggerConfig {
         .apis(RequestHandlerSelectors.basePackage("com.jocoos.mybeautip"))
         .paths(PathSelectors.any())
         .build()
+        .genericModelSubstitutes(ResponseEntity.class)
         .apiInfo(apiInfo())
         .useDefaultResponseMessages(false)
         .globalResponseMessage(RequestMethod.POST,

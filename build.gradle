@@ -4,7 +4,7 @@ buildscript {
     springCloudVersion = '1.2.2.RELEASE'
     springOauth2Version = '2.2.1.RELEASE'
     springJwtVersion = '1.0.9.RELEASE'
-    swaggerVersion = '2.8.0'
+    swaggerVersion = '2.9.2'
     awsSdkVersion = '1.10.73'
     jacksonDataFormatVersion = '2.7.3'
   }
