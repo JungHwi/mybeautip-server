@@ -18,8 +18,8 @@ public class CategoryController {
   private CategoryService categoryService;
   
   @GetMapping
-  public ResponseEntity getAllCategories() {
+  public ResponseEntity<List<CategoryGroup>> getAllCategories() {
     List<CategoryGroup> allCategories = categoryService.getGoodsCategories();
-    return new ResponseEntity(allCategories, HttpStatus.OK);
+    return new ResponseEntity<>(allCategories, HttpStatus.OK);
   }
 }

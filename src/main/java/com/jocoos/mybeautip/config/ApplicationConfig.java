@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.config;
 
+import javax.servlet.Servlet;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
@@ -39,9 +41,7 @@ public class ApplicationConfig {
 
   @Bean
   public ServletRegistrationBean h2servletRegistration(){
-    ServletRegistrationBean registrationBean = new ServletRegistrationBean(new WebServlet());
-    registrationBean.addUrlMappings("/console/*");
-    return registrationBean;
+    return new ServletRegistrationBean<WebServlet>(new WebServlet(), "/console/*");
   }
 
 

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.following;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import java.util.Date;
 @Table(name = "members_followings")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class Following extends CreatedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

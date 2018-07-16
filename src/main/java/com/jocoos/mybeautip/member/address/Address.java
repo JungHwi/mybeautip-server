@@ -5,14 +5,16 @@ import javax.persistence.*;
 import java.util.Date;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.audit.Auditable;
 
 @Slf4j
-@Data
 @Entity
 @Table(name = "addresses")
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class Address extends Auditable<Long> {
 
   static final int BASE_PRIMARY = 0;

@@ -74,7 +74,7 @@ public class GoodsService {
       slice.forEach(list::add);
     }
     
-    Response response = new Response();
+    Response<List<Goods>> response = new Response<>();
     if (list.size() >= request.getCount()) {
       Goods goods = list.get(list.size() - 1);
       response.setNextCursor(goods.getUpdatedAt().toString());
