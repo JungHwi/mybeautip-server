@@ -1,22 +1,19 @@
 spring:
   profiles: production
   datasource:
-    url: jdbc:mysql://db:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
     username: mybeautip
     password: akdlqbxlq#1@Jocoos
     test-on-borrow: true
     validation-query: SELECT 1
-  rabbitmq:
-    host: mq
-    port: 5672
-    username: mybeautip
-    password: xmfostmzhej#1@Jocoos
   flyway:
-    baselineOnMigrate: true
+    baselineOnMigrate: false
     locations: classpath:db/mysql
 
-server:
-  port: 8080
+mybeautip:
+  security:
+    access-token-validity-seconds: 3600      # 1 hours
+    refresh-token-validity-seconds: 1800     # .5 hours
 
 logging:
   config: classpath:log/log4j2-file.yml

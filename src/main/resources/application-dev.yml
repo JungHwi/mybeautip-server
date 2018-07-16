@@ -7,5 +7,10 @@ spring:
     test-on-borrow: true
     validation-query: SELECT 1
 
+mybeautip:
+  security:
+    access-token-validity-seconds: 7200     # 2 hours
+    refresh-token-validity-seconds: 3600    # 1 hours
+
 logging:
   config: classpath:log/log4j2-file.yml

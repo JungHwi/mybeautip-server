@@ -1,6 +1,10 @@
 package com.jocoos.mybeautip.config;
 
+import javax.annotation.PostConstruct;
+
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+
 import com.jocoos.mybeautip.member.FacebookMemberRepository;
 import com.jocoos.mybeautip.member.KakaoMemberRepository;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -23,14 +27,14 @@ import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticat
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+@Slf4j
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
   static final String SCOPE_READ = "read";
   static final String SCOPE_WRITE = "write";
-  static final int ACCESS_TOKEN_VALIDITY_SECONDS = 24*60*60;
-  static final int REFRESH_TOKEN_VALIDITY_SECONDS = 6*60*60;
+
   static final String GRANT_TYPE_FACEBOOK = "facebook";
   static final String GRANT_TYPE_NAVER = "naver";
   static final String GRANT_TYPE_KAKAO = "kakao";
@@ -63,6 +67,17 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
   @Autowired
   private MybeautipUserDetailsService userDetailService;
 
+  @Value("${mybeautip.security.access-token-validity-seconds}")
+  private int accessTokenValiditySeconds;
+
+  @Value("${mybeautip.security.refresh-token-validity-seconds}")
+  private int refreshTokenValiditySeconds;
+
+  @PostConstruct
+  public void postConstruct() {
+    log.debug("accessTokenValiditySeconds: {}", accessTokenValiditySeconds);
+    log.debug("refreshTokenValiditySeconds: {}", refreshTokenValiditySeconds);
+  }
 
   @Override
   public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
@@ -82,15 +97,15 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
         .secret(passwordEncoder.encode("akdlqbxlqdkdldhdptm"))
         .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT)
         .scopes(SCOPE_READ, SCOPE_WRITE)
-        .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
-        .refreshTokenValiditySeconds(REFRESH_TOKEN_VALIDITY_SECONDS)
+        .accessTokenValiditySeconds(accessTokenValiditySeconds)
+        .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
         .and()
         .withClient("mybeautip-android")
         .secret(passwordEncoder.encode("akdlqbxlqdksemfhdlem"))
         .scopes(SCOPE_READ, SCOPE_WRITE)
         .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT)
-        .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
-        .refreshTokenValiditySeconds(REFRESH_TOKEN_VALIDITY_SECONDS);
+        .accessTokenValiditySeconds(accessTokenValiditySeconds)
+        .refreshTokenValiditySeconds(refreshTokenValiditySeconds);
   }
 
   @Bean

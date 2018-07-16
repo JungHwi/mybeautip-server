@@ -54,6 +54,9 @@ security:
 mybeautip:
   addr:
     confirm-key: U01TX0FVVEgyMDE3MDExMDE1NDM0NTE4MjAx
+  security:
+    access-token-validity-seconds: 86400      # 24 hours
+    refresh-token-validity-seconds: 28800     # 8 hours
 
 godomall:
   base-url: https://openhub.godo.co.kr/godomall5
