@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.member.block;
 
 import com.jocoos.mybeautip.member.MemberController;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingInfo;
 import com.jocoos.mybeautip.restapi.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.springframework.data.domain.PageRequest.of;
@@ -24,25 +27,23 @@ public class BlockService {
     this.memberRepository = memberRepository;
   }
   
-  public Response getBlockMembers(String requestUri, long i, String cursor, int count) {
-    long startCursor;
+  public Response getBlockMembers(String requestUri, long me, String cursor, int count) {
+    Date startCursor = (Strings.isBlank(cursor)) ?
+        new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
     
-    if (Strings.isBlank(cursor)) {
-      startCursor = System.currentTimeMillis();
-    } else {
-      startCursor = Long.parseLong(cursor);
-    }
-    
-    List<MemberController.MemberInfo> list = new ArrayList<>();
-    Slice<Block> slice = blockRepository.findAllByI(i, startCursor, of(0, count));
+    Slice<Block> slice = blockRepository.findAllByMe(me, startCursor, of(0, count));
+    List<BlockInfo> list = new ArrayList<>();
+    BlockInfo blockInfo;
     for (Block block : slice.getContent()) {
-      list.add(new MemberController.MemberInfo(memberRepository.getOne(block.getYou())));
+      blockInfo = new BlockInfo(block);
+      blockInfo.setMember(new MemberController.MemberInfo(memberRepository.getOne(block.getYou())));
+      list.add(blockInfo);
     }
     
-    Response<MemberController.MemberInfo> response = new Response();
+    Response<BlockInfo> response = new Response<>();
     if (slice.getContent().size() >= count) {
       Block block = slice.getContent().get(slice.getSize() - 1);
-      String nextCursor = String.valueOf(block.getCreatedAt());
+      String nextCursor = String.valueOf(block.getCreatedAt().getTime());
       String nextRef = response.generateNextRef(requestUri, nextCursor, count);
       response.setNextCursor(nextCursor);
       response.setNextRef(nextRef);

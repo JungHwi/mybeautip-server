@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.member.block;
+package com.jocoos.mybeautip.member.following;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;
@@ -8,17 +8,17 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "members_blocks")
+@Table(name = "members_followings")
 @Data
 @NoArgsConstructor
-public class Block extends CreatedDateAuditable {
+public class Following extends CreatedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   private Long me;
   private Long you;
   
-  public Block(Long me, Long you) {
+  Following(Long me, Long you) {
     this.me = me;
     this.you = you;
   }

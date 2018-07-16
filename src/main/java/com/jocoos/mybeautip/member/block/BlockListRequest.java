@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 
 @Data
 public class BlockListRequest {
-  @Size(max = 13, message = "Invalid cursor")
+  @Size(max = 13)
   private String cursor = "";
   
   @Max(200)

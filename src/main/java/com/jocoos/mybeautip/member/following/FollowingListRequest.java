@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.member.follow;
+package com.jocoos.mybeautip.member.following;
 
 import lombok.Data;
 
@@ -6,8 +6,8 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Size;
 
 @Data
-public class FollowListRequest {
-  @Size(max = 13, message = "Invalid cursor")
+public class FollowingListRequest {
+  @Size(max = 13)
   private String cursor = "";
   
   @Max(200)

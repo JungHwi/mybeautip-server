@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.Optional;
 
 public interface BlockRepository extends CrudRepository<Block, Long> {
-  Optional<Block> findByIAndYou(long i, long you);
+  Optional<Block> findByMeAndYou(long me, long you);
   
-  @Query("select b from Block b where b.i = :i and b.createdAt < :cursor order by b.createdAt desc")
-  Slice<Block> findAllByI(@Param("i")long i, @Param("cursor")long cursor, Pageable of);
+  @Query("select b from Block b where b.me = :me and b.createdAt < :cursor order by b.createdAt desc")
+  Slice<Block> findAllByMe(@Param("me")long me, @Param("cursor")Date cursor, Pageable of);
 }

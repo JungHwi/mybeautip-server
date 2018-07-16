@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.member.block;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.restapi.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -7,11 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/1/members/me/blocks", produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class BlockController {
   private static BlockService blockService;
@@ -22,53 +25,42 @@ public class BlockController {
     this.blockRepository = blockRepository;
   }
   
-  /**
-   * Block {id}
-   * @param principal
-   * @param id
-   */
-  @PostMapping("/api/1/members/me/block/{id}")
-  public void blockMember(Principal principal, @PathVariable("id") String id) {
-    // TODO: Validation, if i == you, throw exception
-    log.debug("Block " + principal.getName() + ": " + id);
+  @PostMapping
+  public Response blockMember(Principal principal,
+                              @Valid @RequestBody BlockMemberRequest blockMemberRequest) {
+    // TODO: will be replaced common method
+    long me = Long.valueOf(principal.getName());
+    long you = blockMemberRequest.getMemberId();
     
-    Optional<Block> optional
-        = blockRepository.findByIAndYou(Long.parseLong(principal.getName()), Long.parseLong(id));
+    if (me == you) {
+      throw new BadRequestException("Can't block myself");
+    }
+    log.debug("Block " + principal.getName() + ": " + you);
+    
+    Optional<Block> optional = blockRepository.findByMeAndYou(me, you);
+    Response response = new Response();
     
     if (optional.isPresent()) {
-      log.debug("Already blocked");
+      response.setId(optional.get().getId());
     } else {
-      Block block = new Block(principal.getName(), id);
-      blockRepository.save(block);
+      Block block = blockRepository.save(new Block(me, you));
+      response.setId(block.getId());
     }
+    return response;
   }
   
-  /**
-   * Unblock {id}
-   * @param principal
-   * @param id
-   */
-  @DeleteMapping("/api/1/members/me/block/{id}")
-  public void unblockMember(Principal principal, @PathVariable("id") String id) {
-    // TODO: Validation, i == you, throw exception
-    log.debug("UnBlock " + principal.getName() + ": " + id);
-    
-    Optional<Block> optional
-        = blockRepository.findByIAndYou(Long.parseLong(principal.getName()), Long.parseLong(id));
-    if (optional.isPresent()) {
+  @DeleteMapping("{id}")
+  public void unblockMember(@PathVariable("id") String id) {
+    Optional<Block> optional = blockRepository.findById(Long.parseLong(id));
+    if (!optional.isPresent()) {
+      throw new MybeautipRuntimeException("Access denied", "Can't unfollow");
+    } else {
       blockRepository.delete(optional.get());
-    } else {
-      log.debug("Already unblocked or not exist");
     }
   }
   
-  /**
-   * Retrieve Member list who I blocked
-   * @param principal
-   * @return
-   */
-  @GetMapping("/api/1/members/me/block")
-  public ResponseEntity<Response> getBlockMembers(Principal principal,
+  @GetMapping
+  public ResponseEntity<Response> getMyBlockMembers(Principal principal,
                                                BlockListRequest request,
                                                HttpServletRequest httpServletRequest) {
     Response response = blockService.getBlockMembers(httpServletRequest.getRequestURI(),

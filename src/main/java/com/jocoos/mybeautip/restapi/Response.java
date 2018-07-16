@@ -14,7 +14,7 @@ public class Response<T> {
   private String nextCursor;
   private String nextRef;
   
-  private Boolean follow;
+  private Long id;
   
   public String generateNextRef(GoodsListRequest request, String nextCursor) {
     StringBuilder nextRef = new StringBuilder();
