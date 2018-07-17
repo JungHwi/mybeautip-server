@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -168,12 +169,13 @@ public class GodoService {
         BeanUtils.copyProperties(goodsData, goods);
         optional = goodsRepository.findById(goods.getGoodsNo());
         if (optional.isPresent()) {  // Already exist
-          goods.setUpdatedAt(System.currentTimeMillis());
           updatedCount++;
+          goods.setCreatedAt(optional.get().getCreatedAt());
+          goods.setModifiedAt(new Date());
         } else {  // New item
-          goods.setCreatedAt(System.currentTimeMillis());
-          goods.setUpdatedAt(System.currentTimeMillis());
           newCount++;
+          goods.setCreatedAt(new Date());
+          goods.setModifiedAt(new Date());
         }
         goodsRepository.save(goods);
       }

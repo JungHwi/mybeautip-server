@@ -7,15 +7,15 @@ import javax.validation.constraints.Size;
 
 @Data
 public class GoodsListRequest {
-  @Size(max = 120, message = "Invalid cursor")
+  @Size(max = 13)
   private String cursor = "";
   
   @Max(100)
-  private Integer count = 20;
+  private int count = 20;
   
-  @Size(max=6, message = "Invalid category")
+  @Size(max=6)
   private String category = "";
   
-  @Size(max=100, message = "Invalid keyword")
+  @Size(max=100)
   private String keyword = "";
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,29 +24,15 @@ public class GoodsService {
     this.goodsRepository = goodsRepository;
   }
   
-  public Goods getGoods(String goodsNo) {
-    Optional<Goods> optional = goodsRepository.findById(goodsNo);
-    if (optional.isPresent()) {
-      return optional.get();
-    } else {
-      throw new RuntimeException("Not found");  // FIXME: Use defined exception
-    }
-  }
-  
   public Response getGoodsList(GoodsListRequest request) {
-    long startCursor;
-    
-    if (Strings.isBlank(request.getCursor())) {
-      startCursor = System.currentTimeMillis();
-    } else {
-      startCursor = Long.parseLong(request.getCursor());
-    }
+    Date startCursor = (Strings.isBlank(request.getCursor())) ?
+        new Date() : new Date(Long.parseLong(request.getCursor()));
     
     List<Goods> list = new ArrayList<>();
     Slice<Goods> slice = null;
     
     FILTER filter  = getRequestFilter(request);
-    log.debug("filter: " + filter.toString());
+    log.debug("GetGoodsList filter by: " + filter.toString());
     switch (filter) {
       case ALL:
         slice = goodsRepository.getGoodsList(startCursor,
@@ -73,19 +60,24 @@ public class GoodsService {
     if (slice != null && slice.hasContent()) {
       slice.forEach(list::add);
     }
-    
-    Response<List<Goods>> response = new Response<>();
+  
+    Response<GoodsInfo> response = new Response<>();
     if (list.size() >= request.getCount()) {
       Goods goods = list.get(list.size() - 1);
-      response.setNextCursor(goods.getUpdatedAt().toString());
-      String nextRef = response.generateNextRef(request, goods.getUpdatedAt().toString());
+      String nextCursor = String.valueOf(goods.getModifiedAt().getTime());
+      String nextRef = response.generateNextRef(request, nextCursor);
+      response.setNextCursor(nextCursor);
       response.setNextRef(nextRef);
     } else {
       response.setNextCursor("");
       response.setNextRef("");
     }
-    
-    response.setGoods(list);
+  
+    List<GoodsInfo> goodsInfoList = new ArrayList<>();
+    for (Goods goods : list) {
+      goodsInfoList.add(new GoodsInfo(goods));
+    }
+    response.setContent(goodsInfoList);
     return response;
   }
   
