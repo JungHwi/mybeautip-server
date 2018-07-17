@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsListRequest;
 import lombok.Data;
 
@@ -8,9 +7,7 @@ import java.util.List;
 
 @Data
 public class Response<T> {
-  private List<Goods> goods;
   private List<T> content;
-  
   private String nextCursor;
   private String nextRef;
   
