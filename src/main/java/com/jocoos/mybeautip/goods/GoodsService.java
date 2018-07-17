@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.data.domain.PageRequest.of;
 
@@ -41,12 +42,12 @@ public class GoodsService {
         slice = goodsRepository.findAllByCategory(request.getCategory(), startCursor,
             of(0, request.getCount()));
         break;
-      
+        
       case KEYWORD:
         slice = goodsRepository.findAllByKeyword(request.getKeyword(), startCursor,
             of(0, request.getCount()));
         break;
-      
+        
       case CATEGORY_AND_KEYWORD:
         slice = goodsRepository.findAllByCategoryAndKeyword(request.getCategory(),
             request.getKeyword(), startCursor, of(0, request.getCount()));
@@ -55,11 +56,11 @@ public class GoodsService {
       default:
         break;
     }
-    
+  
     if (slice != null && slice.hasContent()) {
       slice.forEach(list::add);
     }
-    
+  
     Response<GoodsInfo> response = new Response<>();
     if (list.size() >= request.getCount()) {
       Goods goods = list.get(list.size() - 1);
@@ -71,7 +72,7 @@ public class GoodsService {
       response.setNextCursor("");
       response.setNextRef("");
     }
-    
+  
     List<GoodsInfo> goodsInfoList = new ArrayList<>();
     for (Goods goods : list) {
       goodsInfoList.add(new GoodsInfo(goods));

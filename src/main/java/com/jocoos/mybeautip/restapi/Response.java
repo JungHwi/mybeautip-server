@@ -8,6 +8,7 @@ import java.util.List;
 @Data
 public class Response<T> {
   private List<T> content;
+  
   private String nextCursor;
   private String nextRef;
   
