@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.block;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -10,13 +11,13 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/1/members/me/blocks", produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class BlockController {
+  private static MemberService memberService;
   private static BlockService blockService;
   private static BlockRepository blockRepository;
   
@@ -26,16 +27,15 @@ public class BlockController {
   }
   
   @PostMapping
-  public Response blockMember(Principal principal,
-                              @Valid @RequestBody BlockMemberRequest blockMemberRequest) {
+  public Response blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest) {
     // TODO: will be replaced common method
-    long me = Long.valueOf(principal.getName());
+    long me = memberService.currentMemberId();
     long you = blockMemberRequest.getMemberId();
     
     if (me == you) {
       throw new BadRequestException("Can't block myself");
     }
-    log.debug("Block " + principal.getName() + ": " + you);
+    log.debug("Block " + me + " : " + you);
     
     Optional<Block> optional = blockRepository.findByMeAndYou(me, you);
     Response response = new Response();
@@ -60,11 +60,10 @@ public class BlockController {
   }
   
   @GetMapping
-  public ResponseEntity<Response> getMyBlockMembers(Principal principal,
-                                               BlockListRequest request,
-                                               HttpServletRequest httpServletRequest) {
+  public ResponseEntity<Response> getMyBlockMembers(BlockListRequest request,
+                                                    HttpServletRequest httpServletRequest) {
     Response response = blockService.getBlockMembers(httpServletRequest.getRequestURI(),
-        Long.parseLong(principal.getName()), request.getCursor(), request.getCount());
+        memberService.currentMemberId(), request.getCursor(), request.getCount());
     return ResponseEntity.ok(response);
   }
 }
