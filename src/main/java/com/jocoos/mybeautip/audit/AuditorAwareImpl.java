@@ -9,32 +9,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 
 import lombok.extern.slf4j.Slf4j;
+import org.flywaydb.core.internal.util.StringUtils;
 
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
 
 @Slf4j
 public class AuditorAwareImpl implements AuditorAware<Long> {
 
   @Autowired
-  private MemberRepository memberRepository;
+  private MemberService memberService;
 
   @Override
   public Optional<Long> getCurrentAuditor() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    if (authentication != null) {
-      log.debug("authentication: {}", authentication);
-      log.debug("principal: {}", authentication.getPrincipal());
-
-      String username = ((User) authentication.getPrincipal()).getUsername();
-      Long userId = Long.parseLong(username);
-
-      return memberRepository.findById(userId)
-         .map(m -> Optional.of(m.getId()))
-         .orElseThrow(() -> new MemberNotFoundException());
-    }
-
-    return Optional.empty();
+    return Optional.ofNullable(memberService.currentMemberId());
   }
 }

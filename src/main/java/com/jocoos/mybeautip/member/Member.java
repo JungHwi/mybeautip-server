@@ -4,21 +4,24 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.Map;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.jocoos.mybeautip.audit.DateAuditable;
 
-
-@Entity
-@Table(name = "members")
 @Data
 @NoArgsConstructor
 @Slf4j
 @EqualsAndHashCode(callSuper = false)
-public class Member extends DateAuditable {
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "members")
+public class Member {
 
   static final int LINK_FACEBOOK = 1;
   static final int LINK_NAVER = 2;
@@ -47,11 +50,15 @@ public class Member extends DateAuditable {
   private int link;
 
   @Column
-  private Date deletedAt;
+  @CreatedDate
+  private Date createdAt;
 
-  public Date getCreatedAt() {
-    return createdAt;
-  }
+  @Column
+  @LastModifiedDate
+  private Date modifiedAt;
+
+  @Column
+  private Date deletedAt;
 
   public int parseLink(String grantType) {
     switch (grantType) {
