@@ -1,15 +1,20 @@
 package com.jocoos.mybeautip.member.report;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/1/members/{id}/reports", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/1/members/me/reports", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ReportController {
   private static MemberService memberService;
   private static ReportRepository reportRepository;
@@ -19,10 +24,15 @@ public class ReportController {
     this.reportRepository = reportRepository;
   }
   
-  @PutMapping({"id"})
-  public void reportMember(@PathVariable("id") Long id,
-                           @Valid @RequestBody ReportRequest reportRequest) {
-    Report report = new Report(memberService.currentMemberId(), id, reportRequest.getReason());
+  @PutMapping()
+  public void reportMember(@Valid @RequestBody ReportRequest reportRequest) {
+    long me = memberService.currentMemberId();
+    long you = reportRequest.getMemberId();
+    Report report = new Report(me, you, reportRequest.getReason());
+    Optional<Report> optional = reportRepository.findByMeAndYou(me, you);
+    if (optional.isPresent()) {
+      throw new BadRequestException("Already reported.");
+    }
     reportRepository.save(report);
   }
 }
