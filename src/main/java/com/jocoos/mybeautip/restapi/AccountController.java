@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -54,7 +55,12 @@ public class AccountController {
   @PatchMapping
   public ResponseEntity<AccountInfo> saveAccount(@Valid @RequestBody UpdateAccountInfo updateAccountInfo,
                                                  BindingResult bindingResult) {
+
     log.debug("updateAccountInfo: {}", updateAccountInfo);
+
+    if (bindingResult.hasErrors()) {
+      throw new BadRequestException(bindingResult.getFieldError());
+    }
 
     Long memberId = memberService.currentMemberId();
     return accountRepository.findById(memberId)
