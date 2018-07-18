@@ -1,12 +1,15 @@
 package com.jocoos.mybeautip.member.block;
 
+import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,14 +24,20 @@ public class BlockController {
   private static BlockService blockService;
   private static BlockRepository blockRepository;
   
-  public BlockController(BlockService blockService, BlockRepository blockRepository) {
+  public BlockController(MemberService memberService, BlockService blockService, BlockRepository blockRepository) {
+    this.memberService = memberService;
     this.blockService = blockService;
     this.blockRepository = blockRepository;
   }
   
   @PostMapping
-  public Response blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest) {
-    // TODO: will be replaced common method
+  public Response blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest,
+                              BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      log.debug("bindingResult: {}", bindingResult);
+      throw new BadRequestException("invalid blocks request");
+    }
+
     long me = memberService.currentMemberId();
     long you = blockMemberRequest.getMemberId();
     
@@ -53,14 +62,14 @@ public class BlockController {
   public void unblockMember(@PathVariable("id") String id) {
     Optional<Block> optional = blockRepository.findById(Long.parseLong(id));
     if (!optional.isPresent()) {
-      throw new MybeautipRuntimeException("Access denied", "Can't unfollow");
+      throw new AccessDeniedException("Can't unblock");
     } else {
       blockRepository.delete(optional.get());
     }
   }
   
   @GetMapping
-  public ResponseEntity<Response> getMyBlockMembers(BlockListRequest request,
+  public ResponseEntity<Response> getMyBlockMembers(@Valid BlockListRequest request,
                                                     HttpServletRequest httpServletRequest) {
     Response response = blockService.getBlockMembers(httpServletRequest.getRequestURI(),
         memberService.currentMemberId(), request.getCursor(), request.getCount());

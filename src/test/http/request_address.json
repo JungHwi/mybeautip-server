@@ -1,0 +1,11 @@
+{
+	"base":true,
+	"title":"회사",
+	"recipient":"정택헌",
+	"phone":"010-9799-8095",
+	"zip_no":"04147",
+	"road_addr_part1":"서울시 마포구 백범로31길 21 (공덕동)",
+	"road_addr_part2":"802호",
+	"jibun_addr":"서울시 마포구 공덕동 ",
+	"detail_address":"802호"
+}

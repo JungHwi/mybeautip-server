@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,13 @@ public class ReportController {
   }
   
   @PutMapping()
-  public void reportMember(@Valid @RequestBody ReportRequest reportRequest) {
+  public void reportMember(@Valid @RequestBody ReportRequest reportRequest,
+                           BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      log.debug("bindingResult: {}", bindingResult);
+      throw new BadRequestException("invalid followings request");
+    }
+
     long me = memberService.currentMemberId();
     long you = reportRequest.getMemberId();
     Report report = new Report(me, you, reportRequest.getReason());
@@ -33,6 +40,7 @@ public class ReportController {
     if (optional.isPresent()) {
       throw new BadRequestException("Already reported.");
     }
+
     reportRepository.save(report);
   }
 }

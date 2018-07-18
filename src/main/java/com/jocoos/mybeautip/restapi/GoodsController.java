@@ -1,9 +1,11 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsListRequest;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/1/goods")
-@Slf4j
 public class GoodsController {
 
   private final GoodsService goodsService;
