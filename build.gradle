@@ -57,6 +57,7 @@ dependencies {
   compile "org.springframework.security.oauth:spring-security-oauth2:${springOauth2Version}"
   compile "org.springframework.security:spring-security-jwt:${springJwtVersion}"
   compile "org.springframework.boot:spring-boot-devtools:${springVersion}"
+  compile "org.springframework.cloud:spring-cloud-aws-messaging:${springVersion}"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonDataFormatVersion}"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonDataFormatVersion}"
   compile 'org.projectlombok:lombok:1.16.20'
