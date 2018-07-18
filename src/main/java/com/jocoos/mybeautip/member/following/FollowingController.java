@@ -1,12 +1,16 @@
 package com.jocoos.mybeautip.member.following;
 
+import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.Response;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +34,13 @@ public class FollowingController {
   }
 
   @PostMapping("/me/followings")
-  public Response followMember(@Valid @RequestBody FollowingMemberRequest followingMemberRequest) {
+  public Response followMember(@Valid @NonNull @RequestBody FollowingMemberRequest followingMemberRequest,
+                               BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      log.debug("bindingResult: {}", bindingResult);
+      throw new BadRequestException("invalid followings request");
+    }
+
     long me = memberService.currentMemberId();
     long you = followingMemberRequest.getMemberId();
     
@@ -55,7 +65,7 @@ public class FollowingController {
   public void unfollowMember(@PathVariable("id") Long id) {
     Optional<Following> optional = followingRepository.findById(id);
     if (!optional.isPresent()) {
-      throw new MybeautipRuntimeException("Access denied", "Can't unfollow");
+      throw new AccessDeniedException("Can't unfollow");
     } else {
       followingRepository.delete(optional.get());
     }
