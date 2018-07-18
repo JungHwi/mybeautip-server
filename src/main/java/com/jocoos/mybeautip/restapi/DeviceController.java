@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,10 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.devices.NoticeService;
+import com.jocoos.mybeautip.exception.BadRequestException;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/1/devices")
+@RequestMapping(value = "/api/1/devices", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DeviceController {
 
   private final NoticeService noticeService;
@@ -38,8 +39,14 @@ public class DeviceController {
     this.deviceService = deviceService;
   }
 
-  @PutMapping
-  public ResponseEntity<NoticeResponse> register(@Valid @RequestParam DeviceController.DeviceInfo request) {
+  @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<NoticeResponse> register(@Valid @RequestBody DeviceController.DeviceInfo request,
+                                                 BindingResult bindingResult) {
+
+    if (bindingResult.hasErrors()) {
+      throw new BadRequestException(bindingResult.getFieldError());
+    }
+
     log.debug("request: {}", request);
     deviceService.saveOrUpdate(request);
 

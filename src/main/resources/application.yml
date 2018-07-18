@@ -57,6 +57,23 @@ mybeautip:
   security:
     access-token-validity-seconds: 86400      # 24 hours
     refresh-token-validity-seconds: 28800     # 8 hours
+  iam:
+    sns:
+      access-key: AKIAJ2JQQK5OFPSV5XHA
+      secret-key: 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
+  aws:
+    sns:
+      application:
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/gambang-tv-dev"
+
+cloud:
+  aws:
+    credentials:
+      accessKey: AKIAJ2JQQK5OFPSV5XHA
+      secretKey: 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
+    region:
+      static: ap-northeast-2
+
 
 godomall:
   base-url: https://openhub.godo.co.kr/godomall5

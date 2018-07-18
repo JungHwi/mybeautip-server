@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.exception;
 
-import com.sun.org.apache.bcel.internal.classfile.Field;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import lombok.Getter;
 
 @Getter
 @ResponseStatus(HttpStatus.BAD_REQUEST)

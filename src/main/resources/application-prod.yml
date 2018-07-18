@@ -14,6 +14,14 @@ mybeautip:
   security:
     access-token-validity-seconds: 3600      # 1 hours
     refresh-token-validity-seconds: 1800     # .5 hours
+  iam:
+    sns:
+      access-key: AKIAIR6VYJSAQ5ROEGTA
+      secret-key: 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
+  aws:
+    sns:
+      application:
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/gambang-tv"
 
 logging:
   config: classpath:log/log4j2-file.yml
