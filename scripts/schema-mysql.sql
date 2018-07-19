@@ -50,6 +50,21 @@ CREATE TABLE `naver_members` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
+-- members reports
+--
+CREATE TABLE `members_reports` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+  `me` BIGINT(20) NOT NULL,
+  `you` BIGINT(20) NOT NULL,
+  `reason` VARCHAR(400) NOT NULL,
+  `created_at` DATETIME NOT NULL,
+  PRIMARY KEY(`id`),
+  UNIQUE KEY `uk_reports` (`me`, `you`),
+  CONSTRAINT `fk_reports_me` FOREIGN KEY (`me`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_reports_you` FOREIGN KEY (`you`) REFERENCES `members` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
 -- goods categories
 --
 CREATE TABLE `goods_categories` (
@@ -60,7 +75,6 @@ CREATE TABLE `goods_categories` (
   `display_on_mobile` enum('y', 'n') NOT NULL COMMENT 'or flag, 1:yes 2:no',
   PRIMARY KEY(`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 --
 -- goods
@@ -109,8 +123,22 @@ CREATE TABLE `goods` (
   `detail_image_data` VARCHAR(255),
   `reg_dt` VARCHAR(20),
   `mod_dt` VARCHAR(20),
-  `created_at` LONG,
-  `updated_at` LONG,
+  `created_at` DATETIME NOT NULL,
+  `modified_at` DATETIME DEFAULT NULL ,
   PRIMARY KEY(`goods_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Videos
+--
+CREATE TABLE `videos` (
+	id serial,
+	video_key VARCHAR(100) NOT NULL,
+	type VARCHAR(11) NOT NULL,
+	thumbnail_url VARCHAR(200) NOT NULL,
+	goods_no VARCHAR(10) NOT NULL,
+	member_id BIGINT(20) NOT NULL,
+	created_at DATETIME NOT NULL,
+	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
