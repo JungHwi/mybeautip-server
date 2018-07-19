@@ -15,8 +15,8 @@ import java.util.Date;
 @NoArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "videos")
-public class Video extends CreatedDateAuditable {
+@Table(name = "video_goods")
+public class VideoGoods extends CreatedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -49,7 +49,8 @@ public class Video extends CreatedDateAuditable {
     return createdAt;
   }
 
-  public Video(String videoKey, String goodsNo, long me, String videoType, String thumbnailUrl) {
+  public VideoGoods(String videoKey, String goodsNo, long me,
+                    String videoType, String thumbnailUrl) {
     this.videoKey = videoKey;
     this.goodsNo = goodsNo;
     this.memberId = me;

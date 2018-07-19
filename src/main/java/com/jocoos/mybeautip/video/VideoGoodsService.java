@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.member.MemberController;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.restapi.CursorRequest;
 import com.jocoos.mybeautip.restapi.Response;
-import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.restapi.VideoGoodsController;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Slice;
@@ -18,12 +18,13 @@ import static org.springframework.data.domain.PageRequest.of;
 
 @Slf4j
 @Service
-public class VideoService {
-  private final VideoRepository videoRepository;
+public class VideoGoodsService {
+  private final VideoGoodsRepository videoGoodsRepository;
   private final MemberRepository memberRepository;
 
-  public VideoService(VideoRepository videoRepository, MemberRepository memberRepository) {
-    this.videoRepository = videoRepository;
+  public VideoGoodsService(VideoGoodsRepository videoGoodsRepository,
+                           MemberRepository memberRepository) {
+    this.videoGoodsRepository = videoGoodsRepository;
     this.memberRepository = memberRepository;
   }
 
@@ -31,19 +32,20 @@ public class VideoService {
     Date startCursor = (Strings.isBlank(request.getCursor())) ?
             new Date(System.currentTimeMillis()) : new Date(Long.parseLong(request.getCursor()));
 
-    Slice<Video> slice = videoRepository.findByGoodsNo(goodsNo, startCursor, of(0, request.getCount()));
-    List<VideoController.VideoInfo> list = new ArrayList<>();
-    VideoController.VideoInfo videoInfo;
-    for (Video video : slice.getContent()) {
-      videoInfo = new VideoController.VideoInfo(video);
+    Slice<VideoGoods> slice = videoGoodsRepository.findByGoodsNo(goodsNo, startCursor,
+            of(0, request.getCount()));
+    List<VideoGoodsController.VideoGoodsInfo> list = new ArrayList<>();
+    VideoGoodsController.VideoGoodsInfo videoInfo;
+    for (VideoGoods video : slice.getContent()) {
+      videoInfo = new VideoGoodsController.VideoGoodsInfo(video);
       videoInfo.setMember(new MemberController.MemberInfo(memberRepository.getOne(video.getMemberId())));
       list.add(videoInfo);
     }
 
-    Response<VideoController.VideoInfo> response = new Response<>();
+    Response<VideoGoodsController.VideoGoodsInfo> response = new Response<>();
     if (slice.getContent().size() >= request.getCount()) {
-      Video video = slice.getContent().get(slice.getSize() - 1);
-      String nextCursor = String.valueOf(video.getCreatedAt().getTime());
+      VideoGoods videoGoods = slice.getContent().get(slice.getSize() - 1);
+      String nextCursor = String.valueOf(videoGoods.getCreatedAt().getTime());
       String nextRef = response.generateNextRef(requestUri, nextCursor, request.getCount());
       response.setNextCursor(nextCursor);
       response.setNextRef(nextRef);

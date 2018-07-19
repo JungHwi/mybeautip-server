@@ -6,7 +6,7 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsListRequest;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.video.VideoService;
+import com.jocoos.mybeautip.video.VideoGoodsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +25,14 @@ import javax.validation.Valid;
 public class GoodsController {
 
   private final GoodsService goodsService;
-  private final VideoService videoService;
+  private final VideoGoodsService videoGoodsService;
   private final GoodsRepository goodsRepository;
 
   public GoodsController(GoodsService goodsService,
-                         VideoService videoService,
+                         VideoGoodsService videoGoodsService,
                          GoodsRepository goodsRepository) {
     this.goodsService = goodsService;
-    this.videoService = videoService;
+    this.videoGoodsService = videoGoodsService;
     this.goodsRepository = goodsRepository;
   }
 
@@ -63,7 +63,7 @@ public class GoodsController {
       throw new BadRequestException("invalid goods_no: " + goodsNo);
     }
 
-    Response response = videoService.getVideos(goodsNo, request, httpServletRequest.getRequestURI());
+    Response response = videoGoodsService.getVideos(goodsNo, request, httpServletRequest.getRequestURI());
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

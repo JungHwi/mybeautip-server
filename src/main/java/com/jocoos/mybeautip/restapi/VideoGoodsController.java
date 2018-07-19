@@ -7,8 +7,8 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.MemberController;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -27,26 +26,25 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-public class VideoController {
+public class VideoGoodsController {
   private final MemberService memberService;
-  private final VideoRepository videoRepository;
+  private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsRepository goodsRepository;
 
-  public VideoController(MemberService memberService,
-                         VideoRepository videoRepository,
-                         GoodsRepository goodsRepository) {
+  public VideoGoodsController(MemberService memberService,
+                              VideoGoodsRepository videoGoodsRepository,
+                              GoodsRepository goodsRepository) {
     this.memberService = memberService;
-    this.videoRepository = videoRepository;
+    this.videoGoodsRepository = videoGoodsRepository;
     this.goodsRepository = goodsRepository;
   }
 
-  @PostMapping("/api/1/videos")
-  @Transactional
-  public void createVideo(@Valid @RequestBody CreateVideoRequest request,
+  @PostMapping("/api/1/videos/{video_key}/goods")
+  public void createVideo(@PathVariable("video_key") String videoKey,
+                          @Valid @RequestBody CreateVideoGoodsRequest request,
                           BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
-      log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid videos request");
+      throw new BadRequestException(bindingResult.getFieldError());
     }
 
     List<String> relatedGoods = request.getRelatedGoods();
@@ -65,39 +63,30 @@ public class VideoController {
     }
 
     long me = memberService.currentMemberId();
-    String videoKey = request.getVideoKey();
 
     for (String goodsNo : relatedGoods) {
       log.debug("goodsNo: " + goodsNo);
-      videoRepository.findByVideoKeyAndGoodsNo(videoKey, goodsNo)
-              .orElseGet(() -> videoRepository.save(new Video(videoKey, goodsNo, me,
+      videoGoodsRepository.findByVideoKeyAndGoodsNo(videoKey, goodsNo)
+              .orElseGet(() -> videoGoodsRepository.save(new VideoGoods(videoKey, goodsNo, me,
                       request.getType(), request.getThumbnailUrl())));
     }
   }
 
   @DeleteMapping("/api/1/videos/{video_key}")
   public void setVideoRelatedGoods(@PathVariable("video_key") String videoKey) {
-    if (videoKey.length() < 4 || videoKey.length() > 100) {
-      throw new BadRequestException("invalid video_key: " + videoKey);
-    }
-
-    List<Video> Videos = videoRepository.findAllByVideoKey(videoKey);
-    videoRepository.deleteAll(Videos);
+    List<VideoGoods> videoGoodsList = videoGoodsRepository.findAllByVideoKey(videoKey);
+    videoGoodsRepository.deleteAll(videoGoodsList);
   }
 
   @GetMapping("/api/1/videos/{video_key}/goods")
   public List<GoodsInfo> getRelatedGoods(@PathVariable("video_key") String videoKey) {
-    if (videoKey.length() < 4 || videoKey.length() > 100) {
-      throw new BadRequestException("invalid video_key: " + videoKey);
-    }
-
-    List<Video> list = videoRepository.findAllByVideoKey(videoKey);
-    if (list == null) {
+    List<VideoGoods> list = videoGoodsRepository.findAllByVideoKey(videoKey);
+    if (list == null || list.size() == 0) {
       throw new NotFoundException("goods_not_found", "goods not found: " + videoKey);
     }
 
     List<GoodsInfo> relatedGoods = new ArrayList<>();
-    for (Video video : list) {
+    for (VideoGoods video : list) {
       Optional<Goods> optional = goodsRepository.findById(video.getGoodsNo());
       optional.ifPresent(goods -> relatedGoods.add(new GoodsInfo(goods)));
     }
@@ -105,11 +94,7 @@ public class VideoController {
   }
 
   @Data
-  public class CreateVideoRequest {
-    @NotNull
-    @Size(min = 4, max = 100)
-    String videoKey;
-
+  public static class CreateVideoGoodsRequest {
     @NotNull
     String type;
 
@@ -123,13 +108,13 @@ public class VideoController {
 
   @Data
   @NoArgsConstructor
-  public static class VideoInfo {
+  public static class VideoGoodsInfo {
     private String videoKey;
     private String type;
     private String thumbnailUrl;
     private MemberController.MemberInfo member;
 
-    public VideoInfo(Video video) {
+    public VideoGoodsInfo(VideoGoods video) {
       this.videoKey = video.getVideoKey();
       this.type = video.getVideoType();
       this.thumbnailUrl = video.getThumbnailUrl();

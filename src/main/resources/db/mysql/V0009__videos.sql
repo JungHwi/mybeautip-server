@@ -1,8 +1,8 @@
 --
--- Videos
+-- Video with Goods
 --
-CREATE TABLE `videos` (
-	id serial,
+CREATE TABLE `video_goods` (
+	id BIGINT NOT NULL AUTO_INCREMENT,
 	video_key VARCHAR(100) NOT NULL,
 	type VARCHAR(11) NOT NULL,
 	thumbnail_url VARCHAR(200) NOT NULL,
