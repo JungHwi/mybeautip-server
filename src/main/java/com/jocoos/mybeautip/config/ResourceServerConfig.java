@@ -39,7 +39,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         .antMatchers(GET, "/api/1/members/**/products").permitAll()
         .antMatchers(GET, "/api/1/members/**/news").permitAll()
         .antMatchers(GET, "/api/1/members/**/broadcast_count").permitAll()
-        .antMatchers(GET, "/api/1/broadcasts", "/api/1/broadcasts/**").permitAll()
+        .antMatchers(GET, "/api/1/videos", "/api/1/videos/**").authenticated()
         .antMatchers(GET, "/api/1/advertisements", "/api/1/advertisements/**").permitAll()
         .antMatchers(GET, "/api/1/commercials", "/api/1/commercials/**").permitAll()
         .antMatchers(GET, "/api/1/goods", "/api/1/goods/**").authenticated()
