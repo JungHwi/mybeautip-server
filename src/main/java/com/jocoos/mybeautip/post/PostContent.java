@@ -1,10 +1,8 @@
 package com.jocoos.mybeautip.post;
 
-import javax.persistence.*;
-import javax.validation.constraints.Max;
+import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
 import java.io.Serializable;
 
 import lombok.AllArgsConstructor;

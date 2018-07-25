@@ -56,6 +56,7 @@ public class Post {
      @AttributeOverride(name = "category", column = @Column(name = "category")),
      @AttributeOverride(name = "content", column = @Column(name = "content"))
   })
+  @OrderBy("seq")
   private List<PostContent> contents;
 
   @ElementCollection(fetch = FetchType.EAGER)
