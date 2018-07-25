@@ -82,6 +82,11 @@ godomall:
   category-search-url: /goods/Category_Search.php?
   goods-search-url: /goods/Goods_Search.php?
 
+
+management:
+  endpoints:
+    web:
+      base-path: /monitor
 ---
 spring:
   profiles: local

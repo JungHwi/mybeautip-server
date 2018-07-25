@@ -40,6 +40,16 @@ bootJar {
   version = '0.0.1'
 }
 
+springBoot {
+  buildInfo {
+    properties {
+      version = '0.0.2'
+      name = 'myBeautip Server Application'
+      group = 'com.jocoos.mybeautip'
+    }
+  }
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
