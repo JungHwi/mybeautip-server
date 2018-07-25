@@ -2,17 +2,19 @@ package com.jocoos.mybeautip.security;
 
 import java.util.Map;
 
-import com.google.common.base.Strings;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.FacebookMember;
-import com.jocoos.mybeautip.member.FacebookMemberRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+
+import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
+
+import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.member.FacebookMember;
+import com.jocoos.mybeautip.member.FacebookMemberRepository;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
 
 @Slf4j
 public class FacebookTokenGranter extends AbstractTokenGranter {
@@ -39,7 +41,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     log.debug("facebook id: {}, username: {}", facebookId, username);
 
     if (Strings.isNullOrEmpty(facebookId)) {
-      throw new BadRequestException("facebook ID is required");
+      throw new AuthenticationException("facebook ID is required");
     }
 
     return facebookMemberRepository.findById(facebookId)
