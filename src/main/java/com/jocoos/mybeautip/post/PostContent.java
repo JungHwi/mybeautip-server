@@ -1,30 +1,30 @@
 package com.jocoos.mybeautip.post;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
+import java.io.Serializable;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+@AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Entity
-@Table(name = "post_contents")
-public class PostContent {
+@Embeddable
+public class PostContent implements Serializable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @NotNull
+  private int seq;
 
-  @Column(nullable = false)
-  private Long postId;
-
-  @Column(nullable = false)
-  private int priority;
-
-  @Column(nullable = false)
+  @NotNull
   private int category;
 
-  @Column(nullable = false)
+  @NotNull
+  @Size(max = 1000)
   private String content;
-
 }

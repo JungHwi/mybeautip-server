@@ -24,23 +24,23 @@ CREATE TABLE `posts` (
 -- Post contents
 --
 CREATE TABLE `post_contents` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `post_id` BIGINT DEFAULT NULL,
-  `priority` INT NOT NULL,
+  `post_id` BIGINT NOT NULL,
+  `seq` INT NOT NULL,
   `category` TINYINT NOT NULL DEFAULT 1 COMMENT '1: text, 2: image, 4: video',
   `content` VARCHAR(1000) NOT NULL,
-  PRIMARY KEY(`id`)
+  PRIMARY KEY(`post_id`, `seq`),
+  CONSTRAINT `fk_post_contents` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Post goods
 --
 CREATE TABLE `post_goods` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `post_id` BIGINT DEFAULT NULL,
-  `priority` INT NOT NULL,
+  `post_id` BIGINT NOT NULL,
+  `seq` INT NOT NULL,
   `goods_no` VARCHAR(10) NOT NULL,
-  PRIMARY KEY(`id`)
+  PRIMARY KEY(`post_id`, `seq`),
+  CONSTRAINT `fk_post_goods` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

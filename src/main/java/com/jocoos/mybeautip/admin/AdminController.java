@@ -11,14 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostContent;
-import com.jocoos.mybeautip.post.PostGoods;
 import com.jocoos.mybeautip.post.PostRepository;
 
 @Slf4j
@@ -38,41 +36,20 @@ public class AdminController {
   }
 
   @PostMapping("/posts")
-  public ResponseEntity<Post> createPost(@RequestBody CreatePostRequest request) {
-    log.debug("{}", request.toString());
+  public ResponseEntity<PostInfo> createPost(@RequestBody CreatePostRequest request) {
+    log.debug("request: {}", request.toString());
 
     Post post = new Post();
     BeanUtils.copyProperties(request, post);
-
-    List<PostContent> contents = Lists.newArrayList();
-    request.getContents().stream().forEach(content -> {
-      log.debug("content: {}", content);
-      PostContent postContent = new PostContent();
-      BeanUtils.copyProperties(content, postContent);
-      log.debug("post content: {}", postContent);
-      contents.add(postContent);
-    });
-
-    request.setContents(null);
-    post.setContents(contents);
-
-    List<PostGoods> postGoodsList = Lists.newArrayList();
-    request.getGoods().stream().forEach(goods -> {
-      log.debug("goods: {}", goods);
-      PostGoods postGoods = new PostGoods();
-      BeanUtils.copyProperties(goods, postGoods);
-      log.debug("post goods: {}", postGoods);
-      postGoodsList.add(postGoods);
-    });
-
-    request.setGoods(null);
-    post.setPostGoods(postGoodsList);
 
     log.debug("post: {}", post);
     post = postRepository.save(post);
 
     log.debug("saved post: {}", post);
-    return new ResponseEntity<Post>(post, HttpStatus.OK);
+    PostInfo info = new PostInfo();
+    BeanUtils.copyProperties(post, info);
+
+    return new ResponseEntity<PostInfo>(info, HttpStatus.OK);
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -93,20 +70,23 @@ public class AdminController {
     private String description;
     private String thumbnailUrl;
     private int category;
-    private List<CreatePostContent> contents;
-    private List<CreatePostGoods> goods;
+    private List<PostContent> contents;
+    private List<String> goods;
   }
 
   @Data
-  public static class CreatePostContent {
-    private int priority;
+  public static class PostInfo {
+    private String title;
+    private String bannerText;
+    private String description;
+    private String thumbnailUrl;
     private int category;
-    private String content;
-  }
-
-  @Data
-  public static class CreatePostGoods {
-    private int priority;
-    private String goodsNo;
+    private List<PostContent> contents;
+    private List<String> goods;
+    private Long likeCount;
+    private Long commentCount;
+    private Long viewCount;
+    private Long createdBy;
+    private Date createdAt;
   }
 }

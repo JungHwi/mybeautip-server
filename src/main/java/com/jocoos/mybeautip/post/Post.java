@@ -9,11 +9,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
 @Data
@@ -50,21 +47,25 @@ public class Post {
   @Column(nullable = false)
   private Long commentCount = 0l;
 
-  @OneToMany(cascade = CascadeType.ALL,
-     orphanRemoval = true,
-     fetch = FetchType.EAGER
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+     name = "post_contents",
+     joinColumns = @JoinColumn(name = "post_id")
   )
-  @JoinColumn(name = "postId")
-  @OrderColumn(name = "priority")
+  @AttributeOverrides({
+     @AttributeOverride(name = "category", column = @Column(name = "category")),
+     @AttributeOverride(name = "content", column = @Column(name = "content"))
+  })
   private List<PostContent> contents;
 
-  @OneToMany(cascade = CascadeType.ALL,
-     orphanRemoval = true,
-     fetch = FetchType.EAGER
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+     name = "post_goods",
+     joinColumns = @JoinColumn(name = "post_id")
   )
-  @JoinColumn(name = "postId")
-  @OrderColumn(name = "priority")
-  private List<PostGoods> postGoods;
+  @OrderColumn(name = "seq")
+  @Column(name = "goods_no")
+  private List<String> goods;
 
 
   @Column(nullable = false)
@@ -82,12 +83,4 @@ public class Post {
 
   @Column
   private Date deletedAt;
-
-  public void addContent(PostContent content) {
-    if (contents == null) {
-      contents = Lists.newArrayList();
-    }
-
-    contents.add(content);
-  }
 }
