@@ -2,12 +2,14 @@ package com.jocoos.mybeautip.member.report;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 @Entity
 @Table(name = "members_reports")
 @NoArgsConstructor

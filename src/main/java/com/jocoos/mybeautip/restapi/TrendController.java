@@ -133,11 +133,11 @@ public class TrendController {
     }
 
     return trendRepository.findById(id)
-       .map(trend -> postLikeRepository.findById(likeId).map(like -> {
-         postLikeRepository.delete(like);
-         return new ResponseEntity(HttpStatus.OK);
-       })
-       .orElseThrow(() -> new NotFoundException("like_not_found", "invalid post like id")))
+       .map(trend -> postLikeRepository.findById(likeId)
+          .map(like -> {
+             postLikeRepository.delete(like);
+             return new ResponseEntity(HttpStatus.OK);
+          }).orElseThrow(() -> new NotFoundException("like_not_found", "invalid post like id")))
        .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
   }
 

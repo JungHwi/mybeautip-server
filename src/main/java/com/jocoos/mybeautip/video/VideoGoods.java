@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.member.Member;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -12,6 +13,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 @NoArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
