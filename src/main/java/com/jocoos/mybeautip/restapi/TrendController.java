@@ -18,13 +18,14 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.post.PostContent;
-import com.jocoos.mybeautip.post.PostRepository;
-import com.jocoos.mybeautip.post.Trend;
-import com.jocoos.mybeautip.post.TrendRepository;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.post.*;
 
 @Slf4j
 @RestController
@@ -35,18 +36,27 @@ public class TrendController {
 
   private final PostRepository postRepository;
 
+  private final PostLikeRepository postLikeRepository;
+
   private final GoodsRepository goodsRepository;
+
+  private final MemberService memberService;
 
   public TrendController(TrendRepository trendRepository,
                          PostRepository postRepository,
-                         GoodsRepository goodsRepository) {
+                         PostLikeRepository postLikeRepository,
+                         GoodsRepository goodsRepository,
+                         MemberService memberService) {
     this.postRepository = postRepository;
     this.trendRepository = trendRepository;
+    this.postLikeRepository = postLikeRepository;
     this.goodsRepository = goodsRepository;
+    this.memberService = memberService;
   }
 
   @GetMapping
   public ResponseEntity<List<TrendInfo>> getTrends(@RequestParam(defaultValue = "5") int count) {
+    Long memberId = memberService.currentMemberId();
     Slice<Trend> trends = trendRepository.findAll(PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<TrendInfo> result = Lists.newArrayList();
 
@@ -54,6 +64,9 @@ public class TrendController {
       TrendInfo trendInfo = new TrendInfo();
       BeanUtils.copyProperties(t.getPost(), trendInfo);
       log.debug("trend info: {}", trendInfo);
+
+      postLikeRepository.findByPostIdAndCreatedBy(t.getPost().getId(), memberId)
+         .ifPresent(like -> trendInfo.setLikeId(like.getId()));
 
       result.add(trendInfo);
     });
@@ -73,7 +86,7 @@ public class TrendController {
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("trned_not_found", "invalid trend id"));
+       .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
   }
 
   @Transactional
@@ -86,7 +99,46 @@ public class TrendController {
          postRepository.updateViewCount(trend.getPost().getId(), 1L);
          return new ResponseEntity(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("trned_not_found", "invalid trend id"));
+       .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
+  }
+
+  @Transactional
+  @PostMapping("/{id:.+}/likes")
+  public ResponseEntity<PostLikeInfo> addTrendLike(@PathVariable Long id) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    return trendRepository.findById(id)
+       .map(trend -> {
+         Long postId = trend.getPost().getId();
+         if (postLikeRepository.findByPostIdAndCreatedBy(postId, memberId).isPresent()) {
+           throw new BadRequestException("duplicated_post_like", "Already post liked");
+         }
+
+         PostLike postLike = postLikeRepository.save(new PostLike(postId));
+         return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
+       })
+       .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
+  }
+
+  @Transactional
+  @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
+  public ResponseEntity<?> removeTrendLike(@PathVariable Long id,
+                                           @PathVariable Long likeId){
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    return trendRepository.findById(id)
+       .map(trend -> postLikeRepository.findById(likeId).map(like -> {
+         postLikeRepository.delete(like);
+         return new ResponseEntity(HttpStatus.OK);
+       })
+       .orElseThrow(() -> new NotFoundException("like_not_found", "invalid post like id")))
+       .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
   }
 
   /**
@@ -106,5 +158,16 @@ public class TrendController {
     private Long commentCount;
     private Long viewCount;
     private Date createdAt;
+    private Long likeId;
+  }
+
+  @Data
+  public static class PostLikeInfo {
+    private Long id;
+    private Date createdAt;
+
+    public PostLikeInfo(PostLike postLike) {
+      BeanUtils.copyProperties(postLike, this);
+    }
   }
 }

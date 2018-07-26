@@ -17,7 +17,7 @@ public class BadRequestException extends MybeautipRuntimeException {
   }
 
   public BadRequestException(String message, String description) {
-    super(DEFAULT_MESSAGE, description);
+    super(message, description);
   }
 
   public BadRequestException(FieldError error) {
