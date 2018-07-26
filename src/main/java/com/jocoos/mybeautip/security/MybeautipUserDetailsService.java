@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class MybeautipUserDetailsService implements UserDetailsService {
       default: {
         return memberRepository.findById(Long.parseLong(username))
             .map(m -> new MybeautipUserDetails(m))
-            .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+            .orElseThrow(() -> new AuthenticationException("username not found"));
       }
     }
   }

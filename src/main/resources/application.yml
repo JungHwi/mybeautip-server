@@ -23,6 +23,8 @@ spring:
     baselineOnMigrate: true
     locations: classpath:db/mysql
   jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
     show-sql: false
 
 security:

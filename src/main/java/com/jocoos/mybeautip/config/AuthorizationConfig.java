@@ -5,6 +5,7 @@ import javax.annotation.PostConstruct;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.admin.AdminMemberRepository;
 import com.jocoos.mybeautip.member.FacebookMemberRepository;
 import com.jocoos.mybeautip.member.KakaoMemberRepository;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -34,11 +35,13 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
   static final String SCOPE_READ = "read";
   static final String SCOPE_WRITE = "write";
+  static final String SCOPE_ADMIN = "admin";
 
   static final String GRANT_TYPE_FACEBOOK = "facebook";
   static final String GRANT_TYPE_NAVER = "naver";
   static final String GRANT_TYPE_KAKAO = "kakao";
   static final String GRANT_TYPE_CLIENT = "client";
+  static final String GRANT_TYPE_ADMIN = "admin";
 
   @Autowired
   private MemberRepository memberRepository;
@@ -51,6 +54,9 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
   @Autowired
   private KakaoMemberRepository kakaoMemberRepository;
+
+  @Autowired
+  private AdminMemberRepository adminMemberRepository;
 
   @Autowired
   private PasswordEncoder passwordEncoder;
@@ -105,6 +111,13 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
         .scopes(SCOPE_READ, SCOPE_WRITE)
         .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT)
         .accessTokenValiditySeconds(accessTokenValiditySeconds)
+        .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
+        .and()
+        .withClient("mybeautip-web")
+        .secret(passwordEncoder.encode("akdlqbxlqdjemals"))
+        .scopes(SCOPE_READ, SCOPE_WRITE, SCOPE_ADMIN)
+        .authorizedGrantTypes(GRANT_TYPE_ADMIN)
+        .accessTokenValiditySeconds(accessTokenValiditySeconds)
         .refreshTokenValiditySeconds(refreshTokenValiditySeconds);
   }
 
@@ -155,7 +168,14 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
             new ClientTokenGranter(
                 endpoints.getTokenServices(),
                 endpoints.getClientDetailsService(),
-                endpoints.getOAuth2RequestFactory())
+                endpoints.getOAuth2RequestFactory()),
+             new AdminTokenGranter(
+                endpoints.getTokenServices(),
+                endpoints.getClientDetailsService(),
+                endpoints.getOAuth2RequestFactory(),
+                memberRepository,
+                adminMemberRepository,
+                passwordEncoder)
         )
     );
   }
