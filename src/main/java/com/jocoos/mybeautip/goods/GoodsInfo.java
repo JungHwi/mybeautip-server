@@ -19,8 +19,8 @@ public class GoodsInfo {
   private String goodsDiscountFl;  // 상품 할인 설정 ( y=사용함, n=사용안함)
   private BigDecimal goodsDiscount;  // 상품 할인 값
   private String goodsDiscountUnit;  // 상품 할인 단위 ( percent=%, price=원)
-  private BigDecimal goodsPrice;  // 판매가
-  private BigDecimal fixedPrice;  // 정가
+  private int goodsPrice;  // 판매가
+  private int fixedPrice;  // 정가
   private String goodsDescription;  // PC 쇼핑몰 상세설명
   private URL listImageData;  // 썸네일 이미지 정보
   
@@ -38,9 +38,16 @@ public class GoodsInfo {
     this.goodsDiscountFl = goods.getGoodsDiscountFl();
     this.goodsDiscount = goods.getGoodsDiscount();
     this.goodsDiscountUnit = goods.getGoodsDiscountUnit();
-    this.goodsPrice = goods.getGoodsPrice();
-    this.fixedPrice = goods.getFixedPrice();
+    this.goodsPrice = toIntPrice(goods.getGoodsPrice());
+    this.fixedPrice = toIntPrice(goods.getFixedPrice());
     this.goodsDescription = goods.getGoodsDescription();
     this.listImageData = goods.getListImageData();
+  }
+
+  private int toIntPrice(BigDecimal price) {
+    if (price != null) {
+      return price.intValue();
+    }
+    return 0;
   }
 }
