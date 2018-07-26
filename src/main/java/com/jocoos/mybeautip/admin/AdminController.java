@@ -3,13 +3,9 @@ package com.jocoos.mybeautip.admin;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +14,14 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.post.*;
+import com.jocoos.mybeautip.post.Post;
+import com.jocoos.mybeautip.post.PostRepository;
+import com.jocoos.mybeautip.post.Trend;
+import com.jocoos.mybeautip.post.TrendRepository;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/manual")
 public class AdminController {
 
   private final PostRepository postRepository;
@@ -32,28 +31,6 @@ public class AdminController {
                          TrendRepository trendRepository) {
     this.postRepository = postRepository;
     this.trendRepository = trendRepository;
-  }
-
-  @GetMapping("/posts")
-  public ResponseEntity<Page<Post>> getPosts(Pageable pageable) {
-    return new ResponseEntity<Page<Post>>(postRepository.findAll(pageable), HttpStatus.OK);
-  }
-
-  @PostMapping("/posts")
-  public ResponseEntity<PostInfo> createPost(@RequestBody CreatePostRequest request) {
-    log.debug("request: {}", request.toString());
-
-    Post post = new Post();
-    BeanUtils.copyProperties(request, post);
-
-    log.debug("post: {}", post);
-    post = postRepository.save(post);
-
-    log.debug("saved post: {}", post);
-    PostInfo info = new PostInfo();
-    BeanUtils.copyProperties(post, info);
-
-    return new ResponseEntity<PostInfo>(info, HttpStatus.OK);
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -66,7 +43,6 @@ public class AdminController {
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
-
 
   @PostMapping("/trends")
   public ResponseEntity<TrendInfo> createTrend(@RequestBody CreateTrendRequest request) throws ParseException {
@@ -94,33 +70,6 @@ public class AdminController {
       return new ResponseEntity<>(info, HttpStatus.OK);
     })
     .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
-  }
-
-  @Data
-  public static class CreatePostRequest {
-    private String title;
-    private String bannerText;
-    private String description;
-    private String thumbnailUrl;
-    private int category;
-    private Set<PostContent> contents;
-    private List<String> goods;
-  }
-
-  @Data
-  public static class PostInfo {
-    private String title;
-    private String bannerText;
-    private String description;
-    private String thumbnailUrl;
-    private int category;
-    private Set<PostContent> contents;
-    private List<String> goods;
-    private Long likeCount;
-    private Long commentCount;
-    private Long viewCount;
-    private Long createdBy;
-    private Date createdAt;
   }
 
   @Data
