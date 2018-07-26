@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.restapi;
 import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
@@ -133,11 +134,15 @@ public class TrendController {
     }
 
     return trendRepository.findById(id)
-       .map(trend -> postLikeRepository.findById(likeId)
-          .map(like -> {
-             postLikeRepository.delete(like);
-             return new ResponseEntity(HttpStatus.OK);
-          }).orElseThrow(() -> new NotFoundException("like_not_found", "invalid post like id")))
+       .map(trend -> {
+         Optional<PostLike> liked = postLikeRepository.findById(likeId);
+         if (!liked.isPresent()) {
+           throw new NotFoundException("like_not_found", "invalid post like id");
+         }
+
+         postLikeRepository.delete(liked.get());
+         return new ResponseEntity(HttpStatus.OK);
+       })
        .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
   }
 
