@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -11,16 +12,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.post.PostContent;
+import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.post.Trend;
 import com.jocoos.mybeautip.post.TrendRepository;
 
@@ -31,8 +33,16 @@ public class TrendController {
 
   private final TrendRepository trendRepository;
 
-  public TrendController(TrendRepository trendRepository) {
+  private final PostRepository postRepository;
+
+  private final GoodsRepository goodsRepository;
+
+  public TrendController(TrendRepository trendRepository,
+                         PostRepository postRepository,
+                         GoodsRepository goodsRepository) {
+    this.postRepository = postRepository;
     this.trendRepository = trendRepository;
+    this.goodsRepository = goodsRepository;
   }
 
   @GetMapping
@@ -49,6 +59,34 @@ public class TrendController {
     });
 
     return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+
+  @GetMapping("/{id:.+}/goods")
+  public ResponseEntity<List<GoodsInfo>> getGoods(@PathVariable Long id) {
+    return trendRepository.findById(id)
+       .map(trend -> {
+         List<GoodsInfo> result = Lists.newArrayList();
+         trend.getPost().getGoods().stream().forEach(gno -> {
+           goodsRepository.findById(gno).ifPresent(g -> {
+             result.add(new GoodsInfo(g));
+           });
+         });
+         return new ResponseEntity<>(result, HttpStatus.OK);
+       })
+       .orElseThrow(() -> new NotFoundException("trned_not_found", "invalid trend id"));
+  }
+
+  @Transactional
+  @PostMapping("/{id:.+}/view_count")
+  public ResponseEntity<?> addViewCount(@PathVariable Long id) {
+
+    // TODO: Add history using spring AOP!!
+    return trendRepository.findById(id)
+       .map(trend -> {
+         postRepository.updateViewCount(trend.getPost().getId(), 1L);
+         return new ResponseEntity(HttpStatus.OK);
+       })
+       .orElseThrow(() -> new NotFoundException("trned_not_found", "invalid trend id"));
   }
 
   /**
