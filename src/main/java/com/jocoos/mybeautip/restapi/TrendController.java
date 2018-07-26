@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +44,7 @@ public class TrendController {
       TrendInfo trendInfo = new TrendInfo();
       BeanUtils.copyProperties(t.getPost(), trendInfo);
       log.debug("trend info: {}", trendInfo);
+
       result.add(trendInfo);
     });
 
@@ -60,7 +62,7 @@ public class TrendController {
     private String description;
     private String thumbnailUrl;
     private int category;
-    private List<PostContent> contents;
+    private Set<PostContent> contents;
     private List<String> goods;
     private Long likeCount;
     private Long commentCount;

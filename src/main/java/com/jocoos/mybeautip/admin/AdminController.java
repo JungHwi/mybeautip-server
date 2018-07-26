@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -69,11 +70,11 @@ public class AdminController {
 
   @PostMapping("/trends")
   public ResponseEntity<TrendInfo> createTrend(@RequestBody CreateTrendRequest request) throws ParseException {
-    log.debug("request: {}");
+    log.debug("request: {}", request);
 
     Trend trend = new Trend();
     BeanUtils.copyProperties(request, trend);
-    log.debug("request: {}");
+    log.debug("trend: {}", trend);
 
     return postRepository.findById(request.getPostId()).map(p -> {
       trend.setPost(p);
@@ -102,7 +103,7 @@ public class AdminController {
     private String description;
     private String thumbnailUrl;
     private int category;
-    private List<PostContent> contents;
+    private Set<PostContent> contents;
     private List<String> goods;
   }
 
@@ -113,7 +114,7 @@ public class AdminController {
     private String description;
     private String thumbnailUrl;
     private int category;
-    private List<PostContent> contents;
+    private Set<PostContent> contents;
     private List<String> goods;
     private Long likeCount;
     private Long commentCount;

@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.post;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -57,7 +58,7 @@ public class Post {
      @AttributeOverride(name = "content", column = @Column(name = "content"))
   })
   @OrderBy("seq")
-  private List<PostContent> contents;
+  private Set<PostContent> contents;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
@@ -67,7 +68,6 @@ public class Post {
   @OrderColumn(name = "seq")
   @Column(name = "goods_no")
   private List<String> goods;
-
 
   @Column(nullable = false)
   @CreatedBy
