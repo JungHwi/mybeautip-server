@@ -108,6 +108,8 @@ public class GodoService {
   
   private Category copyPropertiesFrom(GodoCategoryResponse.CategoryData source) {
     Category target = new Category();
+    final String CATEGORY_S3_PREFIX = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/category/";
+    final String CATEGORY_S3_SUFFIX = ".png";
     
     if (source.getCateCd().length() == 3) {  // top category, FIXME: Use contant value
       target.setGroup(GOODS_CATEGORY_TOP);
@@ -121,6 +123,7 @@ public class GodoService {
     target.setName(source.getCateNm());
     target.setDisplayOnPc(source.getCateDisplayFl());
     target.setDisplayOnMobile(source.getCateDisplayMobileFl());
+    target.setThumbnailUrl(CATEGORY_S3_PREFIX + source.getCateCd() + CATEGORY_S3_SUFFIX);
     
     return target;
   }
