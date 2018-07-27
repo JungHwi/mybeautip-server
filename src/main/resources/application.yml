@@ -83,6 +83,7 @@ godomall:
   key: aSU4QmwlMTklRjQ0JTNCJUZEJTA0JTg2JThGRnElQzQlRUElRDJQJUYycCVDMyUxQyUwQSVDQiVDNU1DSTglQzFuJUQyJUY4JTgxJUI2JTBEJUU4
   category-search-url: /goods/Category_Search.php?
   goods-search-url: /goods/Goods_Search.php?
+  common-code-url: /common/Code_Search.php?
 
 
 management:
