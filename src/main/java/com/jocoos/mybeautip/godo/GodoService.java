@@ -209,6 +209,10 @@ public class GodoService {
     int newCount = 0;
     int updatedCount = 0;
 
+    final String S3_STORE_PREFIX = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/";
+    final String S3_STORE_IMG_SUFFIX = ".png";
+    final String S3_STORE_THUMBNAIL_SUFFIX = "-thumbnail.png";
+
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
     headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
@@ -234,6 +238,8 @@ public class GodoService {
           updatedCount++;
         } else {
           store = new Store(Long.parseLong(scm.getScmNo()));
+          store.setImageUrl(S3_STORE_PREFIX + scm.getScmNo() + S3_STORE_IMG_SUFFIX);
+          store.setThumbnailUrl(S3_STORE_PREFIX + scm.getScmNo() + S3_STORE_THUMBNAIL_SUFFIX);
           newCount++;
         }
         store.setName(scm.getCompanyNm());
