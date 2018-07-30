@@ -31,6 +31,7 @@ public class CategoryService {
       categoryGroup = new CategoryGroup();
       categoryGroup.setCode(c.getCode());
       categoryGroup.setName(c.getName());
+      categoryGroup.setThumbnailUrl(c.getThumbnailUrl());
       categoryGroup.setSubs(subCategories);
       
       groups.add(categoryGroup);

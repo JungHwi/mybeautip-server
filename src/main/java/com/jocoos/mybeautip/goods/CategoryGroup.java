@@ -8,5 +8,6 @@ import java.util.List;
 public class CategoryGroup {
   private String code;
   private String name;
+  private String thumbnailUrl;
   private List<Category> subs;
 }

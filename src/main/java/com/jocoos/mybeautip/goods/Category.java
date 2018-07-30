@@ -2,15 +2,17 @@ package com.jocoos.mybeautip.goods;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+@NoArgsConstructor
+@Data
 @Entity
 @Table(name = "goods_categories")
-@Data
 public class Category {
   @Id
   private String code;
@@ -26,4 +28,7 @@ public class Category {
   private String displayOnPc;
   @JsonIgnore
   private String displayOnMobile;
+
+  @Column
+  private String thumbnailUrl;
 }
