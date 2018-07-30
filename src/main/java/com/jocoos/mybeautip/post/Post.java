@@ -28,9 +28,6 @@ public class Post {
   private String title;
 
   @Column(nullable = false)
-  private String bannerText;
-
-  @Column(nullable = false)
   private String description;
 
   @Column(nullable = false)

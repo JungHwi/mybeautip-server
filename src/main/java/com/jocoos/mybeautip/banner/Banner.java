@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.post;
+package com.jocoos.mybeautip.banner;
 
 import javax.persistence.*;
 
@@ -9,33 +9,46 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @NoArgsConstructor
-@AllArgsConstructor
+@Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "trends")
-public class Trend {
+@Table(name = "banners")
+public class Banner {
 
   @Id
-  @Column(name = "post_id")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @MapsId
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(
-     name = "post_id",
-     referencedColumnName = "id",
-     foreignKey = @ForeignKey(name = "fk_trends_posts")
-  )
-  private Post post;
+  @Column(nullable = false)
+  private String title;
+
+  @Column(nullable = false)
+  private String description;
+
+  @Column(nullable = false)
+  private String thumbnailUrl;
+
+  @Column(nullable = false)
+  private int category;
 
   @Column(nullable = false)
   private int seq;
+
+  @Column(nullable = false)
+  private Long viewCount = 0l;
+
+  @Column(nullable = false)
+  private String link;
+
+  @Column
+  private Date startedAt;
+
+  @Column
+  private Date endedAt;
 
   @Column(nullable = false)
   @CreatedBy
@@ -50,9 +63,5 @@ public class Trend {
   private Date modifiedAt;
 
   @Column
-  private Date startedAt;
-
-  @Column
-  private Date endedAt;
-
+  private Date deletedAt;
 }
