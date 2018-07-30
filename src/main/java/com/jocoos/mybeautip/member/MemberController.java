@@ -212,6 +212,7 @@ public class MemberController {
     private String intro;
   }
 
+  @NoArgsConstructor
   @Data
   public static class MemberInfo {
     private Long id;

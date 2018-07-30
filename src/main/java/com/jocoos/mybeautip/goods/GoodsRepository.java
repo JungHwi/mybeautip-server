@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
+import java.util.Optional;
 
 public interface GoodsRepository extends CrudRepository<Goods, String> {
   
@@ -36,4 +37,6 @@ public interface GoodsRepository extends CrudRepository<Goods, String> {
                                            @Param("keyword")String keyword,
                                            @Param("cursor")Date cursor,
                                            Pageable of);
+
+  Optional<Goods> findByGoodsNo(String goodsNo);
 }
