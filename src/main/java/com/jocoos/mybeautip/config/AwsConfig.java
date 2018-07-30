@@ -1,5 +1,8 @@
 package com.jocoos.mybeautip.config;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.NotificationMessagingTemplate;
 import org.springframework.context.annotation.Bean;
@@ -30,10 +33,18 @@ public class AwsConfig {
        new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))
     ).build();
   }
+
+  @Bean
+  public AWSSecurityTokenService awsSTS() {
+    return AWSSecurityTokenServiceClientBuilder.standard()
+      .withRegion(region)
+      .withCredentials(
+        new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))
+      ).build();
+  }
+
   @Bean
   public NotificationMessagingTemplate notificationMessagingTemplate(AmazonSNS amazonSNS) {
     return new NotificationMessagingTemplate(amazonSNS);
   }
-
-
 }
