@@ -79,6 +79,7 @@ dependencies {
   compile 'org.apache.httpcomponents:httpclient:4.5.5'
   compile 'mysql:mysql-connector-java'
   compile 'com.h2database:h2'
+  compile 'com.amazonaws:aws-java-sdk-sts:1.11.375'
   testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.0.RELEASE'
   testCompile ("org.springframework.boot:spring-boot-starter-test:${springVersion}") {
     exclude module: 'commons-logging'
