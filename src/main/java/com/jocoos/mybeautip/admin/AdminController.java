@@ -1,10 +1,14 @@
 package com.jocoos.mybeautip.admin;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.banner.Banner;
+import com.jocoos.mybeautip.banner.BannerRepository;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
@@ -22,9 +26,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
-import com.jocoos.mybeautip.post.Trend;
 import com.jocoos.mybeautip.post.TrendRepository;
 
 @Slf4j
@@ -33,20 +35,21 @@ import com.jocoos.mybeautip.post.TrendRepository;
 public class AdminController {
 
   private final PostRepository postRepository;
-  private final TrendRepository trendRepository;
+  private final BannerRepository bannerRepository;
   private final MemberRepository memberRepository;
   private final GoodsRepository goodsRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
+  private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
 
   public AdminController(PostRepository postRepository,
-                         TrendRepository trendRepository,
+                         BannerRepository bannerRepository,
                          MemberRepository memberRepository,
                          GoodsRepository goodsRepository,
                          MemberRecommendationRepository memberRecommendationRepository,
                          GoodsRecommendationRepository goodsRecommendationRepository) {
     this.postRepository = postRepository;
-    this.trendRepository = trendRepository;
+    this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
@@ -64,32 +67,40 @@ public class AdminController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
-  @PostMapping("/trends")
-  public ResponseEntity<TrendInfo> createTrend(@RequestBody CreateTrendRequest request) throws ParseException {
+  @PostMapping("/banners")
+  public ResponseEntity<BannerInfo> createTrend(@RequestBody CreateBannerRequest request) throws ParseException {
     log.debug("request: {}", request);
 
-    Trend trend = new Trend();
-    BeanUtils.copyProperties(request, trend);
-    log.debug("trend: {}", trend);
+    Banner banner = new Banner();
+    BeanUtils.copyProperties(request, banner);
+    log.debug("banner: {}", banner);
 
-    return postRepository.findById(request.getPostId()).map(p -> {
-      trend.setPost(p);
+    try {
+      banner.setStartedAt(df.parse(request.getStartedAt()));
+      banner.setEndedAt(df.parse(request.getEndedAt()));
+    } catch (ParseException e) {
+      log.error("invalid date format", e);
+    }
 
-      SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
-      try {
-        trend.setStartedAt(df.parse(request.getStartedAt()));
-        trend.setEndedAt(df.parse(request.getEndedAt()));
-      } catch (ParseException e) {
-        log.error("invalid date format", e);
-      }
+    bannerRepository.save(banner);
 
-      trendRepository.save(trend);
+    BannerInfo info = new BannerInfo();
+    BeanUtils.copyProperties(banner, info);
+    return new ResponseEntity<>(info, HttpStatus.OK);
 
-      TrendInfo info = new TrendInfo();
-      BeanUtils.copyProperties(trend, info);
-      return new ResponseEntity<>(info, HttpStatus.OK);
-    })
-    .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+  }
+
+  @DeleteMapping("/banners/{id:.+}")
+  public ResponseEntity<?> deleteBanner(@PathVariable Long id) {
+    bannerRepository.findById(id)
+       .map(banner -> {
+         banner.setDeletedAt(new Date());
+         bannerRepository.save(banner);
+         return Optional.empty();
+       })
+       .orElseThrow(() -> new NotFoundException("banner_not_found", "invalid banner id"));
+
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PostMapping("/members")
@@ -162,17 +173,34 @@ public class AdminController {
   }
 
   @Data
-  public static class CreateTrendRequest {
-    private Long postId;
+  public static class CreateBannerRequest {
+    @NotNull @Size(max = 22)
+    private String title;
+    @NotNull @Size(max = 34)
+    private String description;
+    @NotNull @Size(max = 255)
+    private String thumbnailUrl;
+    @NotNull
     private int seq;
+    @NotNull
+    private int category;
+    @NotNull @Size(max = 255)
+    private String link;
+    @NotNull
     private String startedAt;
+    @NotNull
     private String endedAt;
   }
 
   @Data
-  public static class TrendInfo {
+  public static class BannerInfo {
     private Long id;
-    private Post post;
+    private String title;
+    private String description;
+    private String thumbnailUrl;
+    private int seq;
+    private int category;
+    private String link;
     private Long createdBy;
     private Date createdAt;
     private Date startedAt;
