@@ -118,6 +118,7 @@ public class TrendController {
            throw new BadRequestException("duplicated_post_like", "Already post liked");
          }
 
+         postRepository.updateLikeCount(id, 1L);
          PostLike postLike = postLikeRepository.save(new PostLike(postId));
          return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
        })
@@ -141,6 +142,7 @@ public class TrendController {
          }
 
          postLikeRepository.delete(liked.get());
+         postRepository.updateLikeCount(id, -1L);
          return new ResponseEntity(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
