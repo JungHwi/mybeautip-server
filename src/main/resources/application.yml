@@ -59,20 +59,21 @@ mybeautip:
   security:
     access-token-validity-seconds: 86400      # 24 hours
     refresh-token-validity-seconds: 28800     # 8 hours
-  iam:
-    sns:
-      access-key: AKIAJ2JQQK5OFPSV5XHA
-      secret-key: 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
   aws:
     sns:
       application:
         gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/gambang-tv-dev"
+    s3:
+      bucket: 'mybeautip-dev'
+      region: 'ap-northeast-2'
+    sts:
+      token-validity-duration-seconds: 129600 # 30days
 
 cloud:
   aws:
     credentials:
-      accessKey: AKIAJ2JQQK5OFPSV5XHA
-      secretKey: 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
+      accessKey: AKIAIV3IWTDTFUA4GYSQ
+      secretKey: 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
     region:
       static: ap-northeast-2
 
