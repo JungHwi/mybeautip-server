@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.post.PostRepository;
-import com.jocoos.mybeautip.post.TrendRepository;
 
 @Slf4j
 @RestController

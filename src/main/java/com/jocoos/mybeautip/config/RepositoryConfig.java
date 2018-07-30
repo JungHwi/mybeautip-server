@@ -6,7 +6,6 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapt
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.Trend;
 
 @Configuration
 public class RepositoryConfig extends RepositoryRestConfigurerAdapter {

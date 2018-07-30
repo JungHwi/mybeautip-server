@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -30,10 +29,9 @@ import com.jocoos.mybeautip.post.*;
 
 @Slf4j
 @RestController
-@RequestMapping(path = "/api/1/trends", produces = MediaType.APPLICATION_JSON_VALUE)
-public class TrendController {
+@RequestMapping(path = "/api/1/posts", produces = MediaType.APPLICATION_JSON_VALUE)
+public class PostController {
 
-  private final TrendRepository trendRepository;
 
   private final PostRepository postRepository;
 
@@ -43,44 +41,58 @@ public class TrendController {
 
   private final MemberService memberService;
 
-  public TrendController(TrendRepository trendRepository,
-                         PostRepository postRepository,
-                         PostLikeRepository postLikeRepository,
-                         GoodsRepository goodsRepository,
-                         MemberService memberService) {
+  public PostController(PostRepository postRepository,
+                        PostLikeRepository postLikeRepository,
+                        GoodsRepository goodsRepository,
+                        MemberService memberService) {
     this.postRepository = postRepository;
-    this.trendRepository = trendRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsRepository = goodsRepository;
     this.memberService = memberService;
   }
 
   @GetMapping
-  public ResponseEntity<List<TrendInfo>> getTrends(@RequestParam(defaultValue = "5") int count) {
+  public ResponseEntity<List<PostInfo>> getPosts(@RequestParam(defaultValue = "20") int count) {
     Long memberId = memberService.currentMemberId();
-    Slice<Trend> trends = trendRepository.findAll(PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
-    List<TrendInfo> result = Lists.newArrayList();
+    Slice<Post> posts = postRepository.findAll(PageRequest.of(0, count));
+    List<PostInfo> result = Lists.newArrayList();
 
-    trends.stream().forEach(t -> {
-      TrendInfo trendInfo = new TrendInfo();
-      BeanUtils.copyProperties(t.getPost(), trendInfo);
-      log.debug("trend info: {}", trendInfo);
+    posts.stream().forEach(post -> {
+      PostInfo info = new PostInfo();
+      BeanUtils.copyProperties(post, info);
+      log.debug("post info: {}", info);
 
-      postLikeRepository.findByPostIdAndCreatedBy(t.getPost().getId(), memberId)
-         .ifPresent(like -> trendInfo.setLikeId(like.getId()));
+      postLikeRepository.findByPostIdAndCreatedBy(post.getId(), memberId)
+         .ifPresent(like -> info.setLikeId(like.getId()));
 
-      result.add(trendInfo);
+      result.add(info);
     });
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
+  @GetMapping("/{id:.+}")
+  public ResponseEntity<List<PostInfo>> getPost(@PathVariable Long id) {
+    Long memberId = memberService.currentMemberId();
+    return postRepository.findById(id)
+       .map(post -> {
+         PostInfo info = new PostInfo();
+         BeanUtils.copyProperties(post, info);
+         log.debug("post info: {}", info);
+
+         postLikeRepository.findByPostIdAndCreatedBy(post.getId(), memberId)
+            .ifPresent(like -> info.setLikeId(like.getId()));
+         return new ResponseEntity(info, HttpStatus.OK);
+       })
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+  }
+
   @GetMapping("/{id:.+}/goods")
   public ResponseEntity<List<GoodsInfo>> getGoods(@PathVariable Long id) {
-    return trendRepository.findById(id)
-       .map(trend -> {
+    return postRepository.findById(id)
+       .map(post -> {
          List<GoodsInfo> result = Lists.newArrayList();
-         trend.getPost().getGoods().stream().forEach(gno -> {
+         post.getGoods().stream().forEach(gno -> {
            goodsRepository.findById(gno).ifPresent(g -> {
              result.add(new GoodsInfo(g));
            });
@@ -95,9 +107,9 @@ public class TrendController {
   public ResponseEntity<?> addViewCount(@PathVariable Long id) {
 
     // TODO: Add history using spring AOP!!
-    return trendRepository.findById(id)
-       .map(trend -> {
-         postRepository.updateViewCount(trend.getPost().getId(), 1L);
+    return postRepository.findById(id)
+       .map(post -> {
+         postRepository.updateViewCount(post.getId(), 1L);
          return new ResponseEntity(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
@@ -111,9 +123,9 @@ public class TrendController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return trendRepository.findById(id)
-       .map(trend -> {
-         Long postId = trend.getPost().getId();
+    return postRepository.findById(id)
+       .map(post -> {
+         Long postId = post.getId();
          if (postLikeRepository.findByPostIdAndCreatedBy(postId, memberId).isPresent()) {
            throw new BadRequestException("duplicated_post_like", "Already post liked");
          }
@@ -134,7 +146,7 @@ public class TrendController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return trendRepository.findById(id)
+    return postRepository.findById(id)
        .map(trend -> {
          Optional<PostLike> liked = postLikeRepository.findById(likeId);
          if (!liked.isPresent()) {
@@ -152,7 +164,7 @@ public class TrendController {
    * @see com.jocoos.mybeautip.post.Post
    */
   @Data
-  public static class TrendInfo {
+  public static class PostInfo {
     private Long id;
     private String title;
     private String bannerText;
