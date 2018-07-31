@@ -246,8 +246,7 @@ public class MemberController {
     public MemberInfo(Member member) {
       this.id = member.getId();
       this.username = member.getUsername();
-      this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : String.format("%s/%s",
-        "https://s3.ap-northeast-2.amazonaws.com/mybeautip-dev", member.getAvatarUrl());
+      this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
       this.email = member.getEmail();
       this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
       this.createdAt = String.valueOf(member.getCreatedAt().getTime());
