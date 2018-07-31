@@ -48,9 +48,6 @@ public class StoreController {
       Store store = optional.get();
       storeInfo = new StoreInfo(store);
 
-      // Like count FIXME: it is calculated from store_likes tables
-      storeInfo.setLikeCount(storeLikeRepository.countByStoreId(store.getId()));
-
       // Like ID
       Optional<StoreLike> optionalStoreLike = storeLikeRepository
               .findByStoreIdAndCreatedBy(store.getId(), memberId);
@@ -77,6 +74,7 @@ public class StoreController {
                 throw new BadRequestException("duplicated_store_like", "Already store liked");
               }
 
+              storeRepository.updateLikeCount(id, 1L);
               StoreLike storeLike = storeLikeRepository.save(new StoreLike(storeId));
               return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
             })
@@ -100,6 +98,7 @@ public class StoreController {
               }
 
               storeLikeRepository.delete(liked.get());
+              storeRepository.updateLikeCount(id, -1L);
               return new ResponseEntity(HttpStatus.OK);
             })
             .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
@@ -125,6 +124,7 @@ public class StoreController {
       this.description = Strings.isNullOrEmpty(store.getDescription()) ? "" : store.getDescription();
       this.imageUrl = Strings.isNullOrEmpty(store.getImageUrl()) ? "" : store.getImageUrl();
       this.thumbnailUrl = Strings.isNullOrEmpty(store.getThumbnailUrl()) ? "" : store.getThumbnailUrl();
+      this.likeCount = store.getLikeCount();
     }
   }
 

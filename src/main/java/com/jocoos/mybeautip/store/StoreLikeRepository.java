@@ -6,6 +6,4 @@ import java.util.Optional;
 
 public interface StoreLikeRepository extends JpaRepository<StoreLike, Long> {
   Optional<StoreLike> findByStoreIdAndCreatedBy(Long storeId, Long memberId);
-
-  Long countByStoreId(Long id);
 }
