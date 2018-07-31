@@ -9,7 +9,6 @@ import java.util.Set;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +31,9 @@ import com.jocoos.mybeautip.post.*;
 @RequestMapping(path = "/api/1/posts", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PostController {
 
-
   private final PostRepository postRepository;
-
   private final PostLikeRepository postLikeRepository;
-
   private final GoodsRepository goodsRepository;
-
   private final MemberService memberService;
 
   public PostController(PostRepository postRepository,
