@@ -66,13 +66,13 @@ public class MemberController {
     }
 
     // Validation check: username cannot be empty
-    if (updateMemberRequest.getUsername() != null && updateMemberRequest.getUsername().isEmpty()) {
+    if ("".equals(updateMemberRequest.getUsername())) {
       log.debug("bindingResult: {}", bindingResult);
       throw new BadRequestException("invalid member request - username");
     }
 
     // Validation check: email cannot be empty
-    if (updateMemberRequest.getEmail() != null && updateMemberRequest.getEmail().isEmpty()) {
+    if ("".equals(updateMemberRequest.getEmail())) {
       log.debug("bindingResult: {}", bindingResult);
       throw new BadRequestException("invalid member request - email");
     }
@@ -221,11 +221,9 @@ public class MemberController {
   public static class UpdateMemberRequest {
 
     @Size(max = 50)
-//    @NotNull
     private String username;
 
     @Size(max = 50)
-//    @NotNull
     private String email;
 
     @Size(max = 100)
