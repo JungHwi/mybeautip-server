@@ -65,9 +65,32 @@ public class MemberController {
       throw new BadRequestException("invalid member request");
     }
 
+    // Validation check: username cannot be empty
+    if ("".equals(updateMemberRequest.getUsername())) {
+      log.debug("bindingResult: {}", bindingResult);
+      throw new BadRequestException("invalid member request - username");
+    }
+
+    // Validation check: email cannot be empty
+    if ("".equals(updateMemberRequest.getEmail())) {
+      log.debug("bindingResult: {}", bindingResult);
+      throw new BadRequestException("invalid member request - email");
+    }
+
     return memberRepository.findById(Long.parseLong(principal.getName()))
         .map(m -> {
-          BeanUtils.copyProperties(updateMemberRequest, m);
+          if (updateMemberRequest.getUsername() != null) {
+            m.setUsername(updateMemberRequest.getUsername());
+          }
+          if (updateMemberRequest.getEmail() != null) {
+            m.setEmail(updateMemberRequest.getEmail());
+          }
+          if (updateMemberRequest.getAvatarUrl() != null) {
+            m.setAvatarUrl(updateMemberRequest.getAvatarUrl());
+          }
+          if (updateMemberRequest.getIntro() != null) {
+            m.setIntro(updateMemberRequest.getIntro());
+          }
           memberRepository.save(m);
 
           return new ResponseEntity<>(new MemberInfo(m), HttpStatus.OK);
@@ -198,11 +221,9 @@ public class MemberController {
   public static class UpdateMemberRequest {
 
     @Size(max = 50)
-    @NotNull
     private String username;
 
     @Size(max = 50)
-    @NotNull
     private String email;
 
     @Size(max = 100)
