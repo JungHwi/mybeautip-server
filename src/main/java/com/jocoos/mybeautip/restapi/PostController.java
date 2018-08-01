@@ -184,4 +184,17 @@ public class PostController {
       BeanUtils.copyProperties(postLike, this);
     }
   }
+
+  @Data
+  public static class PostBasicInfo {
+    private Long id;
+    private String title;
+    private int category;
+    private String thumbnailUrl;
+    private Date createdAt;
+
+    public PostBasicInfo(Post post) {
+      BeanUtils.copyProperties(post, this);
+    }
+  }
 }

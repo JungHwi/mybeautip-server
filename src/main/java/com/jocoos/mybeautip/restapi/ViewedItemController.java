@@ -84,13 +84,13 @@ public class ViewedItemController {
     private Long postId;
     private Date createdAt;
 
-    private PostController.PostInfo post;
+    private PostController.PostBasicInfo post;
 
     public ViewedPostInfo(ViewedPost viewedPost, Post src) {
       BeanUtils.copyProperties(viewedPost, this);
-
-      post = new PostController.PostInfo();
-      BeanUtils.copyProperties(src, post);
+      if (src != null) {
+        post = new PostController.PostBasicInfo(src);
+      }
     }
   }
 
