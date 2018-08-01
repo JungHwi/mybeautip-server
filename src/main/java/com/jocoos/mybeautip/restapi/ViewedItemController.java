@@ -45,9 +45,9 @@ public class ViewedItemController {
    */
   @GetMapping(params = "category=post")
   @ResponseBody
-  public CursorResponse<ViewedPostInfo>  findAllViewedPosts(@RequestParam(defaultValue = "20") int count,
-                                                                 @RequestParam String category,
-                                                                 @RequestParam(required = false) String cursor) {
+  public CursorResponse  findAllViewedPosts(@RequestParam(defaultValue = "20") int count,
+                                                             @RequestParam String category,
+                                                             @RequestParam(required = false) String cursor) {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
 
     Date now = null;
@@ -75,7 +75,10 @@ public class ViewedItemController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse<>(result, category, nextCursor, count, "/api/1/views");
+    return new CursorResponse.Builder<ViewedPostInfo>("/api/1/views", result)
+       .withCategory(category)
+       .withCount(count)
+       .withCursor(nextCursor).toBuild();
   }
 
   @Data
@@ -91,44 +94,6 @@ public class ViewedItemController {
       if (src != null) {
         post = new PostController.PostBasicInfo(src);
       }
-    }
-  }
-
-  // TODO: how to make CursorResponse to public
-  @Data
-  @NoArgsConstructor
-  class CursorResponse<T> {
-    private List<T> content;
-    private int count;
-    private String cursor;
-    private String category;
-    private String nextRef;
-
-    @JsonIgnore
-    private String api;
-    @JsonIgnore
-    private MultiValueMap<String, String> properties = new LinkedMultiValueMap<>();
-
-    public CursorResponse(List<T> content, String category, String nextCursor, int count, String api) {
-      this.content = content;
-      this.count = count;
-      this.category = category;
-
-      this.properties.add("category", category);
-      this.properties.add("count", String.valueOf(count));
-
-      this.cursor = nextCursor;
-      if (!Strings.isNullOrEmpty(nextCursor)) {
-        this.properties.add("cursor", nextCursor);
-      }
-      createRef(api);
-    }
-
-    private void createRef(String api) {
-      String nextRef = UriComponentsBuilder.newInstance()
-         .fromUriString(api).queryParams(properties).build().toUriString();
-      log.debug("next ref: {}", nextRef);
-      this.nextRef = nextRef;
     }
   }
 }
