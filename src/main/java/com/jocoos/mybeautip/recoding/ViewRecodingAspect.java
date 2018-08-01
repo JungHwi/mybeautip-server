@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.support.aspect;
+package com.jocoos.mybeautip.recoding;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,21 +10,19 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.post.ViewedPost;
-import com.jocoos.mybeautip.post.ViewedPostRepository;
 
 @Slf4j
 @Aspect
 @Component
-public class RecentlyViewedAspect {
+public class ViewRecodingAspect {
 
   private final MemberService memberService;
-  private final ViewedPostRepository viewedPostRepository;
+  private final ViewRecodingRepository viewRecodingRepository;
 
-  public RecentlyViewedAspect(MemberService memberService,
-                              ViewedPostRepository viewedPostRepository) {
+  public ViewRecodingAspect(MemberService memberService,
+                            ViewRecodingRepository viewRecodingRepository) {
     this.memberService = memberService;
-    this.viewedPostRepository = viewedPostRepository;
+    this.viewRecodingRepository = viewRecodingRepository;
   }
 
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.PostController.addViewCount(..))",
@@ -43,7 +41,7 @@ public class RecentlyViewedAspect {
         if (response.getStatusCode() == HttpStatus.OK) {
           log.debug("response status code: {}", response.getStatusCode());
           if (memberService.currentMemberId() != null) {
-            viewedPostRepository.save(new ViewedPost(postId));
+            viewRecodingRepository.save(new ViewRecoding(String.valueOf(postId), ViewRecoding.CATEGORY_POST));
           }
         }
       } else {
