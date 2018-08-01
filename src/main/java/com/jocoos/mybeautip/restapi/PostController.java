@@ -95,17 +95,17 @@ public class PostController {
 
     // FIXME: How to make a code gracefully
     if (category > 0 && !Strings.isNullOrEmpty(keyword) && dateCursor != null) {
-      posts = postRepository.findByCategoryAndTitleContainingAndCreatedAtBeforeAndDeletedAtIsNull(category, keyword, dateCursor, page);
+      posts = postRepository.findByCategoryAndTitleContainingOrDescriptionContainingAndCreatedAtBeforeAndDeletedAtIsNull(category, keyword, keyword, dateCursor, page);
     } else if (!Strings.isNullOrEmpty(keyword) && dateCursor != null) {
-      posts = postRepository.findByTitleContainingAndCreatedAtBeforeAndDeletedAtIsNull(keyword, dateCursor, page);
+      posts = postRepository.findByTitleContainingOrDescriptionContainingAndCreatedAtBeforeAndDeletedAtIsNull(keyword, keyword, dateCursor, page);
     } else if (category > 0 && !Strings.isNullOrEmpty(keyword)) {
-      posts = postRepository.findByCategoryAndTitleContainingAndDeletedAtIsNull(category, keyword, page);
+      posts = postRepository.findByCategoryAndTitleContainingOrDescriptionContainingAndDeletedAtIsNull(category, keyword, keyword, page);
     } else if (category > 0 && dateCursor != null) {
       posts = postRepository.findByCategoryAndCreatedAtBeforeAndDeletedAtIsNull(category, dateCursor, page);
     } else if (dateCursor != null) {
       posts = postRepository.findByCreatedAtBeforeAndDeletedAtIsNull(dateCursor, page);
     } else if (!Strings.isNullOrEmpty(keyword)) {
-      posts = postRepository.findByTitleContainingAndDeletedAtIsNull(keyword, page);
+      posts = postRepository.findByTitleContainingOrDescriptionContainingAndDeletedAtIsNull(keyword, keyword, page);
     } else if (category > 0){
       posts = postRepository.findByCategoryAndDeletedAtIsNull(category, page);
     } else {
