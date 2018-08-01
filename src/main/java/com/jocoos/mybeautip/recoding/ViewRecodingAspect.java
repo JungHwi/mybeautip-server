@@ -52,4 +52,32 @@ public class ViewRecodingAspect {
       log.warn("Invalid args length.");
     }
   }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.GoodsController.getGoodsDetail(..))",
+     returning = "result")
+  public void onAfterReturningGoodsDetailHandler(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    Object[] args = joinPoint.getArgs();
+    if (args != null && args.length > 0) {
+      String goodsNo = args[0].toString();
+      log.debug("goodsNo: {}", goodsNo);
+
+      if (result instanceof ResponseEntity) {
+        log.debug("response entity");
+        ResponseEntity response = (ResponseEntity) result;
+        if (response.getStatusCode() == HttpStatus.OK) {
+          log.debug("response status code: {}", response.getStatusCode());
+          if (memberService.currentMemberId() != null) {
+            viewRecodingRepository.save(new ViewRecoding(goodsNo, ViewRecoding.CATEGORY_GOODS));
+          }
+        }
+      } else {
+        log.warn("Unknown response type.");
+      }
+    } else {
+      log.debug("joinPoint: {}", joinPoint.toLongString());
+      log.warn("Invalid args length.");
+    }
+  }
 }
