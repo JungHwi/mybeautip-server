@@ -1,0 +1,87 @@
+package com.jocoos.mybeautip.restapi;
+
+import java.util.List;
+
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Strings;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.util.Asserts;
+
+@Slf4j
+@EqualsAndHashCode
+@ToString
+@Getter
+public class CursorResponse<E> {
+  private List<E> content;
+  private String nextCursor;
+  private String nextRef;
+
+  public static class Builder<E> {
+    private List<E> content;
+    private String nextCursor;
+    private String nextRef;
+
+    @JsonIgnore
+    private String uri;
+
+    @JsonIgnore
+    private MultiValueMap<String, String> properties = new LinkedMultiValueMap<>();
+
+    public Builder(String uri, List<E> content) {
+      this.uri = uri;
+      this.content = content;
+    }
+
+    private void createRef() {
+      this.nextRef = UriComponentsBuilder.newInstance()
+         .fromUriString(uri).queryParams(properties).build().toUriString();
+    }
+
+    public Builder withCategory(String category) {
+      if (!Strings.isNullOrEmpty(category)) {
+        this.properties.add("category", category);
+      }
+      return this;
+    }
+
+    public Builder withKeyword(String keyword) {
+      if (!Strings.isNullOrEmpty(keyword)) {
+        this.properties.add("keyword", keyword);
+      }
+      return this;
+    }
+
+    public Builder withCount(int count) {
+      this.properties.add("count", String.valueOf(count));
+      return this;
+    }
+
+    public Builder withCursor(String cursor) {
+      if (!Strings.isNullOrEmpty(cursor)) {
+        this.nextCursor = cursor;
+        this.properties.add("cursor", String.valueOf(cursor));
+      }
+      return this;
+    }
+
+    public CursorResponse<E> toBuild() {
+      createRef();
+      log.debug("created nextRef: {}", nextRef);
+      return new CursorResponse<>(this);
+    }
+  }
+
+  public CursorResponse(Builder<E> builder) {
+    this.content = builder.content;
+    this.nextCursor = builder.nextCursor;
+    this.nextRef = builder.nextRef;
+  }
+}

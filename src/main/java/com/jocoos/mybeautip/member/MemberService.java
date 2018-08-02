@@ -27,7 +27,6 @@ public class MemberService {
 
     if (authentication != null) {
       log.debug("authentication: {}", authentication);
-      log.debug("principal: {}", authentication.getPrincipal());
 
       String username = ((User) authentication.getPrincipal()).getUsername();
       if (StringUtils.isNumeric(username)) {

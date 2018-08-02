@@ -15,9 +15,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.flywaydb.core.internal.util.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
@@ -32,13 +35,9 @@ import com.jocoos.mybeautip.post.*;
 @RequestMapping(path = "/api/1/posts", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PostController {
 
-
   private final PostRepository postRepository;
-
   private final PostLikeRepository postLikeRepository;
-
   private final GoodsRepository goodsRepository;
-
   private final MemberService memberService;
 
   public PostController(PostRepository postRepository,
@@ -52,9 +51,14 @@ public class PostController {
   }
 
   @GetMapping
-  public ResponseEntity<List<PostInfo>> getPosts(@RequestParam(defaultValue = "20") int count) {
+  public CursorResponse getPosts(@RequestParam(defaultValue = "20") int count,
+                                   @RequestParam(required = false, defaultValue = "0") int category,
+                                   @RequestParam(required = false) String keyword,
+                                   @RequestParam(required = false) String cursor) {
+
     Long memberId = memberService.currentMemberId();
-    Slice<Post> posts = postRepository.findAll(PageRequest.of(0, count));
+
+    Slice<Post> posts = findPosts(count, category, keyword, cursor);
     List<PostInfo> result = Lists.newArrayList();
 
     posts.stream().forEach(post -> {
@@ -68,7 +72,47 @@ public class PostController {
       result.add(info);
     });
 
-    return new ResponseEntity<>(result, HttpStatus.OK);
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder("/api/1/posts", result)
+       .withCount(count)
+       .withCursor(nextCursor)
+       .withKeyword(keyword)
+       .withCategory(String.valueOf(category)).toBuild();
+  }
+
+  private Slice<Post> findPosts(int count, int category, String keyword, String cursor) {
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<Post> posts = null;
+    Date dateCursor = null;
+
+    if (!Strings.isNullOrEmpty(cursor) && StringUtils.isNumeric(cursor)) {
+      dateCursor = new Date(Long.parseLong(cursor));
+    }
+
+    // FIXME: How to make a code gracefully
+    if (category > 0 && !Strings.isNullOrEmpty(keyword) && dateCursor != null) {
+      posts = postRepository.findByCategoryAndTitleContainingOrDescriptionContainingAndCreatedAtBeforeAndDeletedAtIsNull(category, keyword, keyword, dateCursor, page);
+    } else if (!Strings.isNullOrEmpty(keyword) && dateCursor != null) {
+      posts = postRepository.findByTitleContainingOrDescriptionContainingAndCreatedAtBeforeAndDeletedAtIsNull(keyword, keyword, dateCursor, page);
+    } else if (category > 0 && !Strings.isNullOrEmpty(keyword)) {
+      posts = postRepository.findByCategoryAndTitleContainingOrDescriptionContainingAndDeletedAtIsNull(category, keyword, keyword, page);
+    } else if (category > 0 && dateCursor != null) {
+      posts = postRepository.findByCategoryAndCreatedAtBeforeAndDeletedAtIsNull(category, dateCursor, page);
+    } else if (dateCursor != null) {
+      posts = postRepository.findByCreatedAtBeforeAndDeletedAtIsNull(dateCursor, page);
+    } else if (!Strings.isNullOrEmpty(keyword)) {
+      posts = postRepository.findByTitleContainingOrDescriptionContainingAndDeletedAtIsNull(keyword, keyword, page);
+    } else if (category > 0){
+      posts = postRepository.findByCategoryAndDeletedAtIsNull(category, page);
+    } else {
+      posts = postRepository.findAll(page);
+    }
+
+    return posts;
   }
 
   @GetMapping("/{id:.+}")
@@ -187,6 +231,19 @@ public class PostController {
 
     public PostLikeInfo(PostLike postLike) {
       BeanUtils.copyProperties(postLike, this);
+    }
+  }
+
+  @Data
+  public static class PostBasicInfo {
+    private Long id;
+    private String title;
+    private int category;
+    private String thumbnailUrl;
+    private Date createdAt;
+
+    public PostBasicInfo(Post post) {
+      BeanUtils.copyProperties(post, this);
     }
   }
 }

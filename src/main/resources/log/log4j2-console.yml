@@ -10,7 +10,7 @@ Configutation:
 
   Loggers:
     Root:
-      level: debug
+      level: info
       AppenderRef:
         - ref: CONSOLE
     Logger:

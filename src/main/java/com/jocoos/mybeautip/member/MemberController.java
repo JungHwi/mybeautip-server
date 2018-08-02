@@ -1,13 +1,10 @@
 package com.jocoos.mybeautip.member;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.security.Principal;
 import java.util.Date;
-import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -15,13 +12,9 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
@@ -32,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.restapi.CursorResponse;
 
 @Slf4j
 @RestController
@@ -113,46 +107,10 @@ public class MemberController {
       nextCursor = members.get(members.size() - 1).getCreatedAt();
     }
 
-    return new CursorResponse<MemberInfo>(members, keyword, nextCursor, count, "/api/1/members");
-  }
-
-  // TODO: Refactor cursor
-  @Data
-  @NoArgsConstructor
-  class CursorResponse<T> {
-    private List<T> content;
-    private String keyword;
-    private int count;
-    private String cursor;
-    private String nextRef;
-
-    @JsonIgnore
-    private String api;
-    @JsonIgnore
-    private MultiValueMap<String, String> properties = new LinkedMultiValueMap<>();
-
-    public CursorResponse(List<T> content, String keyword, String nextCursor, int count, String api) {
-      this.content = content;
-      this.keyword = keyword;
-      this.count = count;
-
-      this.properties.add("keyword", keyword);
-      this.properties.add("count", String.valueOf(count));
-
-      this.cursor = nextCursor;
-      if (!Strings.isNullOrEmpty(nextCursor)) {
-        this.properties.add("cursor", nextCursor);
-      }
-
-      createRef(api);
-    }
-
-    private void createRef(String api) {
-      String nextRef = UriComponentsBuilder.newInstance()
-         .fromUriString(api).queryParams(properties).build().toUriString();
-      log.debug("next ref: {}", nextRef);
-      this.nextRef = nextRef;
-    }
+    return new CursorResponse.Builder<MemberInfo>("/api/1/members", members)
+       .withKeyword(keyword)
+       .withCount(count)
+       .withCursor(nextCursor).toBuild();
   }
 
   @AllArgsConstructor

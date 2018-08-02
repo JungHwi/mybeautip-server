@@ -43,6 +43,12 @@ public class ErrorResponseEntityExceptionHandler extends ResponseEntityException
     return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(IllegalArgumentException.class)
+  public final ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e, WebRequest request) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), request.getDescription(false));
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(Exception.class)
   public final ResponseEntity<ErrorResponse> handleAllExceptions(Exception e, WebRequest request) {
     log.error("exception", e);

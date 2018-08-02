@@ -66,4 +66,10 @@ public class GoodsController {
     Response response = videoGoodsService.getVideos(goodsNo, request, httpServletRequest.getRequestURI());
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
+
+  @GetMapping("/{goodsNo}/details")
+  public ResponseEntity<?> getGoodsDetail(@PathVariable String goodsNo) {
+    //TODO: Implementation for web view
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
 }
