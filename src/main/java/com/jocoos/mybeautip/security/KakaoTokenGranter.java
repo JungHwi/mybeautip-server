@@ -39,6 +39,10 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
       throw new AuthenticationException("kakao ID is required");
     }
 
+    if (kakaoId.length() > 30) {
+      throw new AuthenticationException("The kakao ID must be less or equals to 30");
+    }
+
     return kakaoMemberRepository.findById(kakaoId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));

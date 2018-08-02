@@ -44,6 +44,10 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
       throw new AuthenticationException("facebook ID is required");
     }
 
+    if (facebookId.length() > 20) {
+      throw new AuthenticationException("The facebook ID must be less or equals to 20");
+    }
+
     return facebookMemberRepository.findById(facebookId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));

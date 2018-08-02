@@ -51,6 +51,10 @@ public class AdminTokenGranter extends AbstractTokenGranter {
       throw new AuthenticationException("admin ID is required");
     }
 
+    if (adminId.length() > 30) {
+      throw new AuthenticationException("The admin ID must be less or equals to 30");
+    }
+
     if (Strings.isNullOrEmpty(password)) {
       throw new AuthenticationException("admin password is required");
     }

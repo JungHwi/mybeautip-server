@@ -42,6 +42,10 @@ public class NaverTokenGranter extends AbstractTokenGranter {
       throw new AuthenticationException("naver ID is required");
     }
 
+    if (naverId.length() > 30) {
+      throw new AuthenticationException("The naver ID must be less or equals to 30");
+    }
+
     return naverMemberRepository.findById(naverId)
         .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
