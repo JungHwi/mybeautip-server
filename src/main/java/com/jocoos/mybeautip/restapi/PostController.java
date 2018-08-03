@@ -287,7 +287,9 @@ public class PostController {
       new BadRequestException(bindingResult.getFieldError());
     }
 
+    Long memberId = memberService.currentMemberId();
     return postCommentRepository.findById(id)
+       .filter(comment -> comment.getCreatedBy().equals(memberId))
        .map(comment -> {
          comment.setComment(request.getComment());
          return new ResponseEntity(
@@ -303,8 +305,10 @@ public class PostController {
   public ResponseEntity<?> removePostComment(@PathVariable Long postId,
                                              @PathVariable Long id) {
 
+    Long memberId = memberService.currentMemberId();
     postRepository.updateCommentCount(id, -1);
     return postCommentRepository.findById(id)
+       .filter(comment -> comment.getCreatedBy().equals(memberId))
        .map(comment -> {
          if (comment.getParentId() != null) {
            postCommentRepository.updateCommentCount(comment.getParentId(), -1);
