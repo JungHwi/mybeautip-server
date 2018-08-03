@@ -1,23 +1,26 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.internal.util.StringUtils;
@@ -27,6 +30,7 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.post.*;
 
@@ -37,15 +41,18 @@ public class PostController {
 
   private final PostRepository postRepository;
   private final PostLikeRepository postLikeRepository;
+  private final PostCommentRepository postCommentRepository;
   private final GoodsRepository goodsRepository;
   private final MemberService memberService;
 
   public PostController(PostRepository postRepository,
                         PostLikeRepository postLikeRepository,
+                        PostCommentRepository postCommentRepository,
                         GoodsRepository goodsRepository,
                         MemberService memberService) {
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
+    this.postCommentRepository = postCommentRepository;
     this.goodsRepository = goodsRepository;
     this.memberService = memberService;
   }
@@ -204,6 +211,85 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
   }
 
+  @GetMapping("/{id:.+}/comments")
+  public CursorResponse getPostComments(@PathVariable Long id,
+                                        @RequestParam(defaultValue = "20") int count,
+                                        @RequestParam(required = false) String cursor) {
+    PageRequest page = PageRequest.of(0, count);
+    Slice<PostComment> comments = null;
+    if (StringUtils.hasLength(cursor) && StringUtils.isNumeric(cursor)) {
+      Date createdAt = new Date(Long.parseLong(cursor));
+      comments = postCommentRepository.findByPostIdAndCreatedAtAfter(id, createdAt, page);
+    } else {
+      comments = postCommentRepository.findByPostId(id, page);
+    }
+
+    List<PostCommentInfo> result = Lists.newArrayList();
+
+    comments.stream().forEach(comment -> {
+      result.add(new PostCommentInfo(comment));
+    });
+
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse
+       .Builder<PostCommentInfo>("/api/1/posts/" + id + "/comments", result)
+       .withCount(count)
+       .withCursor(nextCursor).toBuild();
+  }
+
+  @PostMapping("/{id:.+}/comments")
+  public ResponseEntity addPostComment(@PathVariable Long id,
+                                       @RequestBody CreateCommentRequest request,
+                                       BindingResult bindingResult) {
+    if (bindingResult != null && bindingResult.hasErrors()) {
+      new BadRequestException(bindingResult.getFieldError());
+    }
+
+    PostComment postComment = new PostComment(id);
+    BeanUtils.copyProperties(request, postComment);
+
+    return new ResponseEntity(
+       new PostCommentInfo(postCommentRepository.save(postComment)),
+       HttpStatus.OK
+    );
+  }
+
+  @PatchMapping("/{postId:.+}/comments/{id:.+}")
+  public ResponseEntity updatePostComment(@PathVariable Long postId,
+                                          @PathVariable Long id,
+                                          @RequestBody UpdateCommentRequest request,
+                                          BindingResult bindingResult) {
+
+    if (bindingResult != null && bindingResult.hasErrors()) {
+      new BadRequestException(bindingResult.getFieldError());
+    }
+
+    return postCommentRepository.findById(id)
+       .map(comment -> {
+         comment.setComment(request.getComment());
+         return new ResponseEntity(
+            new PostCommentInfo(postCommentRepository.save(comment)),
+            HttpStatus.OK
+         );
+       })
+       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid comment id"));
+  }
+
+  @DeleteMapping("/{postId:.+}/comments/{id:.+}")
+  public ResponseEntity<?> removePostComment(@PathVariable Long postId,
+                                          @PathVariable Long id) {
+    return postCommentRepository.findById(id)
+       .map(comment -> {
+         postCommentRepository.delete(comment);
+         return new ResponseEntity<>(HttpStatus.OK);
+       })
+       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid comment id"));
+  }
+
   /**
    * @see com.jocoos.mybeautip.post.Post
    */
@@ -244,6 +330,34 @@ public class PostController {
 
     public PostBasicInfo(Post post) {
       BeanUtils.copyProperties(post, this);
+    }
+  }
+
+  @Data
+  public static class CreateCommentRequest {
+    @NotNull @Size(max = 500)
+    private String comment;
+
+    private Long parentId;
+  }
+
+  @Data
+  public static class UpdateCommentRequest {
+    @NotNull @Size(max = 500)
+    private String comment;
+  }
+
+  @Data
+  public static class PostCommentInfo {
+    private Long id;
+    private Long postId;
+    private String comment;
+    private Long parentId;
+    private Long createdBy;
+    private Date createdAt;
+
+    public PostCommentInfo(PostComment comment) {
+      BeanUtils.copyProperties(comment, this);
     }
   }
 }
