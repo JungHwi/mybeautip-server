@@ -304,9 +304,9 @@ public class PostController {
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removePostComment(@PathVariable Long postId,
                                              @PathVariable Long id) {
+    postRepository.updateCommentCount(postId, -1);
 
     Long memberId = memberService.currentMemberId();
-    postRepository.updateCommentCount(id, -1);
     return postCommentRepository.findById(id)
        .filter(comment -> comment.getCreatedBy().equals(memberId))
        .map(comment -> {
