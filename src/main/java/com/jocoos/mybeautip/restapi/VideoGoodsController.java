@@ -1,27 +1,29 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.member.MemberController;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.video.VideoGoods;
-import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
 
 @Slf4j
 @RestController
@@ -112,7 +114,7 @@ public class VideoGoodsController {
     private String videoKey;
     private String type;
     private String thumbnailUrl;
-    private MemberController.MemberInfo member;
+    private MemberInfo member;
 
     public VideoGoodsInfo(VideoGoods video) {
       this.videoKey = video.getVideoKey();

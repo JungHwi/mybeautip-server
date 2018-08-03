@@ -1,20 +1,22 @@
 package com.jocoos.mybeautip.video;
 
-import com.jocoos.mybeautip.member.MemberController;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.restapi.CursorRequest;
-import com.jocoos.mybeautip.restapi.Response;
-import com.jocoos.mybeautip.restapi.VideoGoodsController;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+
 import static org.springframework.data.domain.PageRequest.of;
+
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.restapi.CursorRequest;
+import com.jocoos.mybeautip.restapi.Response;
+import com.jocoos.mybeautip.restapi.VideoGoodsController;
 
 @Slf4j
 @Service
@@ -38,7 +40,7 @@ public class VideoGoodsService {
     VideoGoodsController.VideoGoodsInfo videoInfo;
     for (VideoGoods video : slice.getContent()) {
       videoInfo = new VideoGoodsController.VideoGoodsInfo(video);
-      videoInfo.setMember(new MemberController.MemberInfo(memberRepository.getOne(video.getMemberId())));
+      videoInfo.setMember(new MemberInfo(memberRepository.getOne(video.getMemberId())));
       list.add(videoInfo);
     }
 

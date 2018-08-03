@@ -1,18 +1,20 @@
 package com.jocoos.mybeautip.member.following;
 
-import com.jocoos.mybeautip.member.MemberController;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.restapi.Response;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+
 import static org.springframework.data.domain.PageRequest.of;
+
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.restapi.Response;
 
 @Service
 @Slf4j
@@ -35,7 +37,7 @@ public class FollowingService {
     FollowingInfo followingInfo;
     for (Following following : slice.getContent()) {
       followingInfo = new FollowingInfo(following);
-      followingInfo.setMember(new MemberController.MemberInfo(memberRepository.getOne(following.getYou())));
+      followingInfo.setMember(new MemberInfo(memberRepository.getOne(following.getYou())));
       list.add(followingInfo);
     }
   
@@ -65,7 +67,7 @@ public class FollowingService {
     
     for (Following following : slice.getContent()) {
       followingInfo = new FollowingInfo(following);
-      followingInfo.setMember(new MemberController.MemberInfo(memberRepository.getOne(following.getYou())));
+      followingInfo.setMember(new MemberInfo(memberRepository.getOne(following.getYou())));
       list.add(followingInfo);
     }
     
