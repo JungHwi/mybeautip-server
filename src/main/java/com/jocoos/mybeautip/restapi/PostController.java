@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -30,8 +29,7 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.post.*;
 
 @Slf4j
@@ -44,17 +42,20 @@ public class PostController {
   private final PostCommentRepository postCommentRepository;
   private final GoodsRepository goodsRepository;
   private final MemberService memberService;
+  private final MemberRepository memberRepository;
 
   public PostController(PostRepository postRepository,
                         PostLikeRepository postLikeRepository,
                         PostCommentRepository postCommentRepository,
                         GoodsRepository goodsRepository,
-                        MemberService memberService) {
+                        MemberService memberService,
+                        MemberRepository memberRepository) {
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
     this.postCommentRepository = postCommentRepository;
     this.goodsRepository = goodsRepository;
     this.memberService = memberService;
+    this.memberRepository = memberRepository;
   }
 
   @GetMapping
@@ -227,7 +228,10 @@ public class PostController {
     List<PostCommentInfo> result = Lists.newArrayList();
 
     comments.stream().forEach(comment -> {
-      result.add(new PostCommentInfo(comment));
+      result.add(memberRepository.findById(comment.getCreatedBy())
+         .map(member -> new PostCommentInfo(comment, member))
+         .orElseGet(() -> new PostCommentInfo(comment))
+      );
     });
 
     String nextCursor = null;
@@ -355,9 +359,15 @@ public class PostController {
     private Long parentId;
     private Long createdBy;
     private Date createdAt;
+    private MemberInfo owner;
 
     public PostCommentInfo(PostComment comment) {
       BeanUtils.copyProperties(comment, this);
+    }
+
+    public PostCommentInfo(PostComment comment, Member member) {
+      this(comment);
+      this.owner = new MemberInfo(member);
     }
   }
 }
