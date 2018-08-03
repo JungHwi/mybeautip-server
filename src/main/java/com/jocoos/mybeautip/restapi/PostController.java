@@ -37,6 +37,7 @@ import com.jocoos.mybeautip.post.*;
 @RequestMapping(path = "/api/1/posts", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PostController {
 
+  private final PostService postService;
   private final PostRepository postRepository;
   private final PostLikeRepository postLikeRepository;
   private final PostCommentRepository postCommentRepository;
@@ -44,12 +45,14 @@ public class PostController {
   private final MemberService memberService;
   private final MemberRepository memberRepository;
 
-  public PostController(PostRepository postRepository,
+  public PostController(PostService postService,
+                        PostRepository postRepository,
                         PostLikeRepository postLikeRepository,
                         PostCommentRepository postCommentRepository,
                         GoodsRepository goodsRepository,
                         MemberService memberService,
                         MemberRepository memberRepository) {
+    this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
     this.postCommentRepository = postCommentRepository;
@@ -151,7 +154,7 @@ public class PostController {
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
   }
 
   @Transactional
@@ -161,15 +164,15 @@ public class PostController {
     // TODO: Add history using spring AOP!!
     return postRepository.findById(id)
        .map(post -> {
-         postRepository.updateViewCount(post.getId(), 1L);
+         postRepository.updateViewCount(post.getId(), 1);
          return new ResponseEntity(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
   }
 
   @Transactional
   @PostMapping("/{id:.+}/likes")
-  public ResponseEntity<PostLikeInfo> addTrendLike(@PathVariable Long id) {
+  public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id) {
     Long memberId = memberService.currentMemberId();
     if (memberId == null) {
       throw new MemberNotFoundException("Login required");
@@ -182,55 +185,56 @@ public class PostController {
            throw new BadRequestException("duplicated_post_like", "Already post liked");
          }
 
-         postRepository.updateLikeCount(id, 1L);
+         postRepository.updateLikeCount(id, 1);
          PostLike postLike = postLikeRepository.save(new PostLike(postId));
          return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
   }
 
   @Transactional
   @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
-  public ResponseEntity<?> removeTrendLike(@PathVariable Long id,
-                                           @PathVariable Long likeId){
+  public ResponseEntity<?> removePostLike(@PathVariable Long id,
+                                          @PathVariable Long likeId){
     Long memberId = memberService.currentMemberId();
     if (memberId == null) {
       throw new MemberNotFoundException("Login required");
     }
 
     return postRepository.findById(id)
-       .map(trend -> {
+       .map(post -> {
          Optional<PostLike> liked = postLikeRepository.findById(likeId);
          if (!liked.isPresent()) {
            throw new NotFoundException("like_not_found", "invalid post like id");
          }
 
          postLikeRepository.delete(liked.get());
-         postRepository.updateLikeCount(id, -1L);
+         postRepository.updateLikeCount(id, -1);
          return new ResponseEntity(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("trend_not_found", "invalid trend id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
   }
 
   @GetMapping("/{id:.+}/comments")
   public CursorResponse getPostComments(@PathVariable Long id,
                                         @RequestParam(defaultValue = "20") int count,
-                                        @RequestParam(required = false) String cursor) {
+                                        @RequestParam(required = false) String cursor,
+                                        @RequestParam(required = false) Long parentId) {
     PageRequest page = PageRequest.of(0, count);
     Slice<PostComment> comments = null;
-    if (StringUtils.hasLength(cursor) && StringUtils.isNumeric(cursor)) {
-      Date createdAt = new Date(Long.parseLong(cursor));
-      comments = postCommentRepository.findByPostIdAndCreatedAtAfter(id, createdAt, page);
+
+    if (parentId != null) {
+      comments = postService.findCommentsByParentId(parentId, cursor, page);
     } else {
-      comments = postCommentRepository.findByPostId(id, page);
+      comments = postService.findCommentsByPostId(id, cursor, page);
     }
 
     List<PostCommentInfo> result = Lists.newArrayList();
-
     comments.stream().forEach(comment -> {
-      result.add(memberRepository.findById(comment.getCreatedBy())
-         .map(member -> new PostCommentInfo(comment, member))
-         .orElseGet(() -> new PostCommentInfo(comment))
+      result.add(
+         memberRepository.findById(comment.getCreatedBy())
+            .map(member -> new PostCommentInfo(comment, member))
+            .orElseGet(() -> new PostCommentInfo(comment))
       );
     });
 
@@ -245,6 +249,7 @@ public class PostController {
        .withCursor(nextCursor).toBuild();
   }
 
+  @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addPostComment(@PathVariable Long id,
                                        @RequestBody CreateCommentRequest request,
@@ -253,8 +258,18 @@ public class PostController {
       new BadRequestException(bindingResult.getFieldError());
     }
 
+    if (request.getParentId() != null) {
+      postCommentRepository.findById(request.getParentId())
+         .map(parent -> {
+            postCommentRepository.updateCommentCount(parent.getId(), 1);
+            return Optional.empty();
+         })
+         .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
+    }
+
     PostComment postComment = new PostComment(id);
     BeanUtils.copyProperties(request, postComment);
+    postRepository.updateCommentCount(id, 1);
 
     return new ResponseEntity(
        new PostCommentInfo(postCommentRepository.save(postComment)),
@@ -283,11 +298,17 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid comment id"));
   }
 
+  @Transactional
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removePostComment(@PathVariable Long postId,
-                                          @PathVariable Long id) {
+                                             @PathVariable Long id) {
+
+    postRepository.updateCommentCount(id, -1);
     return postCommentRepository.findById(id)
        .map(comment -> {
+         if (comment.getParentId() != null) {
+           postCommentRepository.updateCommentCount(comment.getParentId(), -1);
+         }
          postCommentRepository.delete(comment);
          return new ResponseEntity<>(HttpStatus.OK);
        })
@@ -357,17 +378,27 @@ public class PostController {
     private Long postId;
     private String comment;
     private Long parentId;
+    private int commentCount;
     private Long createdBy;
     private Date createdAt;
     private MemberInfo owner;
+    private String commentRef;
 
     public PostCommentInfo(PostComment comment) {
       BeanUtils.copyProperties(comment, this);
+      setCommentRef(comment);
     }
 
     public PostCommentInfo(PostComment comment, Member member) {
       this(comment);
       this.owner = new MemberInfo(member);
+      setCommentRef(comment);
+    }
+
+    private void setCommentRef(PostComment comment) {
+      if (comment != null && comment.getCommentCount() > 0) {
+        this.commentRef = String.format("/api/1/posts/%d/comments?parentId=%d", comment.getPostId(), comment.getId());
+      }
     }
   }
 }
