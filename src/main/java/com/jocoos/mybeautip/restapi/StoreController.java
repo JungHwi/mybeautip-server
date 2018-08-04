@@ -115,7 +115,7 @@ public class StoreController {
     private String description;
     private String imageUrl;
     private String thumbnailUrl;
-    private Long likeCount;
+    private Integer likeCount;
     private Long likeId;
 
     public StoreInfo(Store store) {
