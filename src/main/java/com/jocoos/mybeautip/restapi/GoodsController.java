@@ -1,39 +1,50 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsListRequest;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.video.VideoGoodsService;
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import java.util.Date;
+import java.util.Optional;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.video.VideoGoodsService;
+
 
 @Slf4j
 @RestController
 @RequestMapping("/api/1/goods")
 public class GoodsController {
 
+  private final MemberService memberService;
   private final GoodsService goodsService;
   private final VideoGoodsService videoGoodsService;
   private final GoodsRepository goodsRepository;
+  private final GoodsLikeRepository goodsLikeRepository;
 
-  public GoodsController(GoodsService goodsService,
+
+  public GoodsController(MemberService memberService,
+                         GoodsService goodsService,
                          VideoGoodsService videoGoodsService,
-                         GoodsRepository goodsRepository) {
+                         GoodsRepository goodsRepository,
+                         GoodsLikeRepository goodsLikeRepository) {
+    this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoGoodsService = videoGoodsService;
     this.goodsRepository = goodsRepository;
+    this.goodsLikeRepository = goodsLikeRepository;
   }
 
   @GetMapping
@@ -44,16 +55,19 @@ public class GoodsController {
 
   @GetMapping("/{goodsNo}")
   public GoodsInfo getGoods(@PathVariable("goodsNo") String goodsNo) {
-    return goodsRepository.findById(goodsNo)
-        .map(GoodsInfo::new)
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
+    Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
+    if (optional.isPresent()) {
+      return goodsService.generateGoodsInfo(optional.get());
+    } else {
+      throw new NotFoundException("goods_not_found", "goods not found: " + goodsNo);
+    }
   }
 
   @GetMapping("/{goods_no}/videos")
   public ResponseEntity<Response> getRelatedVideos(@PathVariable("goods_no") String goodsNo,
-                                              @Valid CursorRequest request,
-                                              HttpServletRequest httpServletRequest,
-                                              BindingResult bindingResult) {
+                                                   @Valid CursorRequest request,
+                                                   HttpServletRequest httpServletRequest,
+                                                   BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
       throw new BadRequestException("invalid request");
@@ -71,5 +85,59 @@ public class GoodsController {
   public ResponseEntity<?> getGoodsDetail(@PathVariable String goodsNo) {
     //TODO: Implementation for web view
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @Transactional
+  @PostMapping("/{goodsNo:.+}/likes")
+  public ResponseEntity<GoodsLikeInfo> addGoodsLike(@PathVariable String goodsNo) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    return goodsRepository.findByGoodsNo(goodsNo)
+        .map(goods -> {
+          if (goodsLikeRepository.findByGoodsNoAndCreatedBy(goodsNo, memberId).isPresent()) {
+            throw new BadRequestException("duplicated_goods_like", "Already goods liked");
+          }
+
+          goodsRepository.updateLikeCount(goodsNo, 1);
+          GoodsLike goodsLike = goodsLikeRepository.save(new GoodsLike(goodsNo));
+          return new ResponseEntity<>(new GoodsLikeInfo(goodsLike), HttpStatus.OK);
+        })
+        .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
+  }
+
+  @Transactional
+  @DeleteMapping("/{goodsNo:.+}/likes/{likeId:.+}")
+  public ResponseEntity<?> removeGoodsLike(@PathVariable String goodsNo,
+                                           @PathVariable Long likeId) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    return goodsRepository.findById(goodsNo)
+        .map(goods -> {
+          Optional<GoodsLike> liked = goodsLikeRepository.findById(likeId);
+          if (!liked.isPresent()) {
+            throw new NotFoundException("like_not_found", "invalid goods like id");
+          }
+
+          goodsLikeRepository.delete(liked.get());
+          goodsRepository.updateLikeCount(goodsNo, -1);
+          return new ResponseEntity(HttpStatus.OK);
+        })
+        .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
+  }
+
+  @Data
+  public static class GoodsLikeInfo {
+    private Long id;
+    private Date createdAt;
+
+    public GoodsLikeInfo(GoodsLike goodsLike) {
+      BeanUtils.copyProperties(goodsLike, this);
+    }
   }
 }

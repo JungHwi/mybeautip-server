@@ -20,6 +20,7 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
@@ -31,13 +32,16 @@ import com.jocoos.mybeautip.video.VideoGoodsRepository;
 public class VideoGoodsController {
   private final MemberService memberService;
   private final VideoGoodsRepository videoGoodsRepository;
+  private final GoodsService goodsService;
   private final GoodsRepository goodsRepository;
 
   public VideoGoodsController(MemberService memberService,
                               VideoGoodsRepository videoGoodsRepository,
+                              GoodsService goodsService,
                               GoodsRepository goodsRepository) {
     this.memberService = memberService;
     this.videoGoodsRepository = videoGoodsRepository;
+    this.goodsService = goodsService;
     this.goodsRepository = goodsRepository;
   }
 
@@ -90,7 +94,7 @@ public class VideoGoodsController {
     List<GoodsInfo> relatedGoods = new ArrayList<>();
     for (VideoGoods video : list) {
       Optional<Goods> optional = goodsRepository.findById(video.getGoodsNo());
-      optional.ifPresent(goods -> relatedGoods.add(new GoodsInfo(goods)));
+      optional.ifPresent(goods -> relatedGoods.add(goodsService.generateGoodsInfo(goods)));
     }
     return relatedGoods;
   }

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.goods;
 
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -57,6 +58,10 @@ public class Goods {
   private Integer hitCnt;  // 조회수
   private URL add1ImageData;
   private URL add2ImageData;
+
+  @Column(nullable = false)
+  private int likeCount;
+
   private Date createdAt;
   private Date modifiedAt;
 }
