@@ -184,7 +184,7 @@ public class MemberController {
     @Size(max = 50)
     private String email;
 
-    @Size(max = 100)
+    @Size(max = 200)
     private String avatarUrl;
 
     @Size(max = 200)
