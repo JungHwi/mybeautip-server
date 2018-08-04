@@ -190,24 +190,4 @@ public class MemberController {
     @Size(max = 200)
     private String intro;
   }
-
-  @NoArgsConstructor
-  @Data
-  public static class MemberInfo {
-    private Long id;
-    private String username;
-    private String email;
-    private String avatarUrl;
-    private String intro;
-    private String createdAt;
-
-    public MemberInfo(Member member) {
-      this.id = member.getId();
-      this.username = member.getUsername();
-      this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
-      this.email = member.getEmail();
-      this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
-      this.createdAt = String.valueOf(member.getCreatedAt().getTime());
-    }
-  }
 }

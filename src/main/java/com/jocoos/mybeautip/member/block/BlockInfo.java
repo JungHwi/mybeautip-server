@@ -1,15 +1,16 @@
 package com.jocoos.mybeautip.member.block;
 
-import com.jocoos.mybeautip.member.MemberController;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.member.MemberInfo;
 
 @Data
 @NoArgsConstructor
 public class BlockInfo {
   private Long blockId;
   private Long createdAt;
-  private MemberController.MemberInfo member;
+  private MemberInfo member;
   
   public BlockInfo(Block block) {
     this.blockId = block.getId();

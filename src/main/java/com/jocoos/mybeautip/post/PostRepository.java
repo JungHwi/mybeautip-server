@@ -15,11 +15,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   @Modifying
   @Query("update Post p set p.viewCount = p.viewCount + ?2, p.modifiedAt = now() where p.id = ?1")
-  void updateViewCount(Long id, Long count);
+  void updateViewCount(Long id, int count);
 
   @Modifying
   @Query("update Post p set p.likeCount = p.likeCount + ?2, p.modifiedAt = now() where p.id = ?1")
-  void updateLikeCount(Long id, Long count);
+  void updateLikeCount(Long id, int count);
+
+  @Modifying
+  @Query("update Post p set p.commentCount = p.commentCount + ?2, p.modifiedAt = now() where p.id = ?1")
+  void updateCommentCount(Long id, int count);
 
 
   Slice<Post> findByCategoryAndDeletedAtIsNull(int category, Pageable pageable);

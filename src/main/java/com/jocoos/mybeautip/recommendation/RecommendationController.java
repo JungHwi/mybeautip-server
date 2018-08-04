@@ -1,9 +1,7 @@
 package com.jocoos.mybeautip.recommendation;
 
-import com.google.common.collect.Lists;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.member.MemberController;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -15,7 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.member.MemberInfo;
 
 @Slf4j
 @RestController
@@ -32,14 +34,14 @@ public class RecommendationController {
   }
 
   @GetMapping("/members")
-  public ResponseEntity<List<MemberController.MemberInfo>> getRecommendedMembers(
+  public ResponseEntity<List<MemberInfo>> getRecommendedMembers(
       @RequestParam(defaultValue = "5") int count) {
     Slice<MemberRecommendation> members = memberRecommendationRepository.findAll(
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
-    List<MemberController.MemberInfo> result = Lists.newArrayList();
+    List<MemberInfo> result = Lists.newArrayList();
 
     members.stream().forEach(recommendation -> {
-      MemberController.MemberInfo memberInfo = new MemberController.MemberInfo();
+      MemberInfo memberInfo = new MemberInfo();
       BeanUtils.copyProperties(recommendation.getMember(), memberInfo);
       log.debug("member info: {}", memberInfo);
 

@@ -37,13 +37,13 @@ public class Post {
   private int category;
 
   @Column(nullable = false)
-  private Long viewCount = 0l;
+  private int viewCount;
 
   @Column(nullable = false)
-  private Long likeCount = 0l;
+  private int likeCount;
 
   @Column(nullable = false)
-  private Long commentCount = 0l;
+  private int commentCount;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(

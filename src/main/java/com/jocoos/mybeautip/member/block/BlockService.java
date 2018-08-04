@@ -1,20 +1,20 @@
 package com.jocoos.mybeautip.member.block;
 
-import com.jocoos.mybeautip.member.MemberController;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.following.Following;
-import com.jocoos.mybeautip.member.following.FollowingInfo;
-import com.jocoos.mybeautip.restapi.Response;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+
 import static org.springframework.data.domain.PageRequest.of;
+
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.restapi.Response;
 
 @Service
 @Slf4j
@@ -36,7 +36,7 @@ public class BlockService {
     BlockInfo blockInfo;
     for (Block block : slice.getContent()) {
       blockInfo = new BlockInfo(block);
-      blockInfo.setMember(new MemberController.MemberInfo(memberRepository.getOne(block.getYou())));
+      blockInfo.setMember(new MemberInfo(memberRepository.getOne(block.getYou())));
       list.add(blockInfo);
     }
     
