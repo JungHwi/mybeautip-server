@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
 
 @Slf4j
@@ -24,11 +25,14 @@ import com.jocoos.mybeautip.member.MemberInfo;
 @RequestMapping("/api/1/recommendations")
 public class RecommendationController {
 
+  private final GoodsService goodsService;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
 
-  public RecommendationController(MemberRecommendationRepository memberRecommendationRepository,
+  public RecommendationController(GoodsService goodsService,
+                                  MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository) {
+    this.goodsService = goodsService;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
   }
@@ -58,13 +62,8 @@ public class RecommendationController {
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
     List<GoodsInfo> result = Lists.newArrayList();
-    goods.stream().forEach(recommendation -> {
-      GoodsInfo goodsInfo = new GoodsInfo();
-      BeanUtils.copyProperties(recommendation.getGoods(), goodsInfo);
-      log.debug("goods info: {}", goodsInfo);
-
-      result.add(goodsInfo);
-    });
+    goods.stream().forEach(recommendation
+        -> result.add(goodsService.generateGoodsInfo(recommendation.getGoods())));
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
