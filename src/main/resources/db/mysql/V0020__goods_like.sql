@@ -1,3 +1,6 @@
+--
+-- Goods likes
+--
 CREATE TABLE `goods_likes` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `goods_no` VARCHAR(10) NOT NULL,
@@ -9,5 +12,7 @@ CREATE TABLE `goods_likes` (
   CONSTRAINT `fk_goods_likes_post` FOREIGN KEY (`goods_no`) REFERENCES `goods` (`goods_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+--
+-- Goods
+--
 ALTER TABLE `goods` ADD `like_count` INT NOT NULL DEFAULT 0;
