@@ -2,7 +2,9 @@
 -- members
 --
 ALTER TABLE `members` CHANGE `avatar_url` `avatar_url` VARCHAR(200) DEFAULT NULL;
-
+ALTER TABLE `members` ADD `video_count` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `link`;
+ALTER TABLE `members` ADD `following_count` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `link`;
+ALTER TABLE `members` ADD `follower_count` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `link`;
 
 -- Alter date column data type from DATETIME to DATETIME(3)
 ALTER TABLE `accounts` modify COLUMN `created_at` DATETIME(3) NOT NULL;

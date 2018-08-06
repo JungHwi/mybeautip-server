@@ -14,6 +14,9 @@ public class MemberInfo {
   private String email;
   private String avatarUrl;
   private String intro;
+  private Integer followerCount;
+  private Integer followingCount;
+  private Integer videoCount;
   private Date createdAt;
 
   public MemberInfo(Member member) {
@@ -23,5 +26,8 @@ public class MemberInfo {
     this.email = member.getEmail();
     this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
     this.createdAt = member.getCreatedAt();
+    this.followerCount = member.getFollowerCount();
+    this.followingCount = member.getFollowingCount();
+    this.videoCount = member.getVideoCount();
   }
 }

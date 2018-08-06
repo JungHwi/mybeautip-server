@@ -49,6 +49,15 @@ public class Member {
   @Column(nullable = false)
   private int link;
 
+  @Column(nullable = false)
+  private int followerCount;
+
+  @Column(nullable = false)
+  private int followingCount;
+
+  @Column(nullable = false)
+  private int videoCount;
+
   @Column
   @CreatedDate
   private Date createdAt;
