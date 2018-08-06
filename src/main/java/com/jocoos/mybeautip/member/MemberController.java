@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import java.security.Principal;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -16,8 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -98,12 +98,11 @@ public class MemberController {
                                                @RequestParam(required = false) String cursor,
                                                @RequestParam(required = false) String keyword) {
     Slice<Member> list = findMembers(keyword, cursor, count);
-    ImmutableList<MemberInfo> members = FluentIterable.from(list)
-       .transform(m -> new MemberInfo(m))
-       .toList();
+    List<MemberInfo> members = Lists.newArrayList();
+    list.stream().forEach(m -> members.add(new MemberInfo(m)));
 
     String nextCursor = null;
-    if (members != null && members.size() > 1) {
+    if (members != null && members.size() > 0) {
       nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
     }
 
@@ -156,13 +155,13 @@ public class MemberController {
     PageRequest page = PageRequest.of(0, cursor.getCount(), new Sort(Sort.Direction.DESC, "createdAt"));
 
     if (cursor.hasCursor() && cursor.hasKeyword()) {
-      list = memberRepository.findMembersByKeywordAndCursor(cursor.getKeyword(), cursor.getCursor(), page);
+      list = memberRepository.findByUsernameContainingOrIntroContainingAndCreatedAtBeforeAndDeletedAtIsNull(cursor.getKeyword(), cursor.getKeyword(), cursor.getCursor(), page);
     } else if (cursor.hasCursor()) {
-      list = memberRepository.findMembersByCursor(cursor.getCursor(), page);
+      list = memberRepository.findByCreatedAtBeforeAndDeletedAtIsNull(cursor.getCursor(), page);
     } else if (cursor.hasKeyword()) {
-      list = memberRepository.findMembersByKeyword(cursor.getKeyword(), page);
+      list = memberRepository.findByUsernameContainingOrIntroContainingAndDeletedAtIsNull(cursor.getKeyword(), cursor.getKeyword(), page);
     } else {
-      list = memberRepository.findMembers(page);
+      list = memberRepository.findByDeletedAtIsNull(page);
     }
 
     return list;

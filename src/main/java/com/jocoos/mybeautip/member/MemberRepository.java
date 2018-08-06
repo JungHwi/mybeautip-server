@@ -12,16 +12,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   Optional<Member> findByUsername(String username);
 
-  @Query("select m from Member m where m.deletedAt is null")
-  Slice<Member> findMembers(Pageable pageable);
+  Slice<Member> findByDeletedAtIsNull(Pageable pageable);
 
-  @Query("select m from Member m where m.deletedAt is null and m.createdAt < ?1")
-  Slice<Member> findMembersByCursor(Date cursor, Pageable pageable);
+  Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNull(Date createdAt, Pageable pageable);
 
-  @Query("select m from Member m where m.deletedAt is null and m.username like %?1%")
-  Slice<Member> findMembersByKeyword(String keyword, Pageable pageable);
+  Slice<Member> findByUsernameContainingOrIntroContainingAndDeletedAtIsNull(String username, String intro, Pageable pageable);
 
-  @Query("select m from Member m where m.deletedAt is null and m.username like %?1% and m.createdAt < ?2")
-  Slice<Member> findMembersByKeywordAndCursor(String keyword, Date cursor, Pageable pageable);
-
+  Slice<Member> findByUsernameContainingOrIntroContainingAndCreatedAtBeforeAndDeletedAtIsNull(String username, String intro, Date createdAt, Pageable pageable);
 }
