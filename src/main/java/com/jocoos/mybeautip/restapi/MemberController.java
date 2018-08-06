@@ -28,17 +28,25 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.restapi.CursorResponse;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.post.PostLike;
+import com.jocoos.mybeautip.post.PostLikeRepository;
 
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MemberController {
 
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
+  private final PostLikeRepository postLikeRepository;
 
-  public MemberController(MemberRepository memberRepository) {
+  public MemberController(MemberService memberService,
+                          MemberRepository memberRepository,
+                          PostLikeRepository postLikeRepository) {
+    this.memberService = memberService;
     this.memberRepository = memberRepository;
+    this.postLikeRepository = postLikeRepository;
   }
 
   @GetMapping("/me")
@@ -174,6 +182,35 @@ public class MemberController {
   public MemberInfo getMember(@PathVariable Long id) {
     return memberRepository.findById(id).map(m -> new MemberInfo(m))
         .orElseThrow(() -> new MemberNotFoundException(id));
+  }
+
+  @GetMapping(value = "/me/likes", params = {"category=post"})
+  public CursorResponse getMyLikes(@RequestParam String category,
+                                   @RequestParam(defaultValue = "20") int count,
+                                   @RequestParam(required = false) Long cursor) {
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<PostLike> postLikes = null;
+    List<PostController.PostLikeInfo> result = Lists.newArrayList();
+    Long me = memberService.currentMemberId();
+
+    if (cursor != null) {
+      postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedBy(new Date(cursor), me, pageable);
+    } else {
+      postLikes = postLikeRepository.findByCreatedBy(me, pageable);
+    }
+
+    postLikes.stream().forEach(like -> result.add(new PostController.PostLikeInfo(like)));
+
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<PostController.PostLikeInfo>("/api/1/members/me/likes", result)
+       .withCategory(category)
+       .withCursor(nextCursor)
+       .withCount(count).toBuild();
   }
 
   @NoArgsConstructor

@@ -190,7 +190,7 @@ public class PostController {
          }
 
          postRepository.updateLikeCount(id, 1);
-         PostLike postLike = postLikeRepository.save(new PostLike(postId));
+         PostLike postLike = postLikeRepository.save(new PostLike(post));
          return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
@@ -344,10 +344,13 @@ public class PostController {
   @Data
   public static class PostLikeInfo {
     private Long id;
+    private Long createdBy;
     private Date createdAt;
+    private PostBasicInfo post;
 
     public PostLikeInfo(PostLike postLike) {
       BeanUtils.copyProperties(postLike, this);
+      post = new PostBasicInfo(postLike.getPost());
     }
   }
 
