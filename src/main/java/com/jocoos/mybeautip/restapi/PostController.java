@@ -205,7 +205,7 @@ public class PostController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return postRepository.findById(id)
+    return postLikeRepository.findByIdAndPostIdAndCreatedBy(likeId, id, memberId)
        .map(post -> {
          Optional<PostLike> liked = postLikeRepository.findById(likeId);
          if (!liked.isPresent()) {
@@ -216,7 +216,7 @@ public class PostController {
          postRepository.updateLikeCount(id, -1);
          return new ResponseEntity(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or like id"));
   }
 
   @GetMapping("/{id:.+}/comments")
