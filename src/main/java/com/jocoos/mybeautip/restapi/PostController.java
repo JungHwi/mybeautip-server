@@ -29,6 +29,7 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.post.*;
 
@@ -41,6 +42,7 @@ public class PostController {
   private final PostRepository postRepository;
   private final PostLikeRepository postLikeRepository;
   private final PostCommentRepository postCommentRepository;
+  private final GoodsService goodsService;
   private final GoodsRepository goodsRepository;
   private final MemberService memberService;
   private final MemberRepository memberRepository;
@@ -49,6 +51,7 @@ public class PostController {
                         PostRepository postRepository,
                         PostLikeRepository postLikeRepository,
                         PostCommentRepository postCommentRepository,
+                        GoodsService goodsService,
                         GoodsRepository goodsRepository,
                         MemberService memberService,
                         MemberRepository memberRepository) {
@@ -56,6 +59,7 @@ public class PostController {
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
     this.postCommentRepository = postCommentRepository;
+    this.goodsService = goodsService;
     this.goodsRepository = goodsRepository;
     this.memberService = memberService;
     this.memberRepository = memberRepository;
@@ -149,7 +153,7 @@ public class PostController {
          List<GoodsInfo> result = Lists.newArrayList();
          post.getGoods().stream().forEach(gno -> {
            goodsRepository.findById(gno).ifPresent(g -> {
-             result.add(new GoodsInfo(g));
+             result.add(goodsService.generateGoodsInfo(g));
            });
          });
          return new ResponseEntity<>(result, HttpStatus.OK);

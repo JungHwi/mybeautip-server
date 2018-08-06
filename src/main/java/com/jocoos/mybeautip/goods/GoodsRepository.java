@@ -2,14 +2,15 @@ package com.jocoos.mybeautip.goods;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.Optional;
 
-public interface GoodsRepository extends CrudRepository<Goods, String> {
+public interface GoodsRepository extends JpaRepository<Goods, String> {
   
   @Query("select g from Goods g where g.modifiedAt < :cursor order by g.modifiedAt desc")
   Slice<Goods> getGoodsList(@Param("cursor")Date cursor,
@@ -39,4 +40,9 @@ public interface GoodsRepository extends CrudRepository<Goods, String> {
                                            Pageable of);
 
   Optional<Goods> findByGoodsNo(String goodsNo);
+
+  @Modifying
+  @Query("update Goods g set g.likeCount = g.likeCount + ?2, g.modifiedAt = now() " +
+      "where g.goodsNo = ?1")
+  void updateLikeCount(String goodsNo, int count);
 }

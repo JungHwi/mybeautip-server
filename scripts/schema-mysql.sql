@@ -71,6 +71,7 @@ CREATE TABLE `goods_categories` (
   `code` VARCHAR(6) NOT NULL,
   `parent_code` VARCHAR(3) NOT NULL,
   `category_name` VARCHAR(100) NOT NULL,
+  `thumbnail_url` VARCHAR(255),
   `display_on_pc` enum('y', 'n') NOT NULL COMMENT 'or flag, 1:yes 2:no',
   `display_on_mobile` enum('y', 'n') NOT NULL COMMENT 'or flag, 1:yes 2:no',
   PRIMARY KEY(`code`)
@@ -123,6 +124,7 @@ CREATE TABLE `goods` (
   `detail_image_data` VARCHAR(255),
   `reg_dt` VARCHAR(20),
   `mod_dt` VARCHAR(20),
+  `like_count` INT NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL,
   `modified_at` DATETIME DEFAULT NULL ,
   PRIMARY KEY(`goods_no`)
@@ -132,13 +134,90 @@ CREATE TABLE `goods` (
 -- Video with Goods
 --
 CREATE TABLE `video_goods` (
-	id BIGINT NOT NULL AUTO_INCREMENT,
-	video_key VARCHAR(100) NOT NULL,
-	type VARCHAR(11) NOT NULL,
-	thumbnail_url VARCHAR(200) NOT NULL,
-	goods_no VARCHAR(10) NOT NULL,
-	member_id BIGINT(20) NOT NULL,
-	created_at DATETIME NOT NULL,
-	PRIMARY KEY (id)
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  video_key VARCHAR(100) NOT NULL,
+  type VARCHAR(11) NOT NULL,
+  thumbnail_url VARCHAR(200) NOT NULL,
+  goods_no VARCHAR(10) NOT NULL,
+  member_id BIGINT(20) NOT NULL,
+  created_at DATETIME NOT NULL,
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- stores
+--
+CREATE TABLE `stores` (
+  `id` BIGINT NOT NULL,
+  `name` VARCHAR(50) NOT NULL,
+  `description` VARCHAR(255),
+  `image_url` VARCHAR(255),
+  `thumbnail_url` VARCHAR(255),
+  `like_count` INT NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL,
+  `modified_at` DATETIME DEFAULT NULL,
+  `deleted_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- store likes
+--
+CREATE TABLE `store_likes` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `store_id` BIGINT NOT NULL,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME NOT NULL,
+  PRIMARY KEY(`id`),
+  UNIQUE KEY `uk_store_likes` (`created_by`, `store_id`),
+  CONSTRAINT `fk_store_likes_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_store_likes_store` FOREIGN KEY (`store_id`) REFERENCES `stores` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- member recommendations
+--
+CREATE TABLE `member_recommendations` (
+  `member_id` BIGINT NOT NULL,
+  `seq` INT NOT NULL,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME NOT NULL,
+  `modified_at` DATETIME DEFAULT NULL,
+  `started_at` DATETIME DEFAULT NULL,
+  `ended_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY(`member_id`),
+  CONSTRAINT `fk_member_recommendations_members` FOREIGN KEY (`member_id`) REFERENCES `members`
+  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- goods recommendations
+--
+CREATE TABLE `goods_recommendations` (
+  `goods_no` VARCHAR(10) NOT NULL,
+  `seq` INT NOT NULL,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME NOT NULL,
+  `modified_at` DATETIME DEFAULT NULL,
+  `started_at` DATETIME DEFAULT NULL,
+  `ended_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY(`goods_no`),
+  CONSTRAINT `fk_goods_recommendations_goods` FOREIGN KEY (`goods_no`) REFERENCES `goods`
+  (`goods_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Goods likes
+--
+CREATE TABLE `goods_likes` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `goods_no` VARCHAR(10) NOT NULL,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME NOT NULL,
+  PRIMARY KEY(`id`),
+  UNIQUE KEY `uk_goods_likes` (`created_by`, `goods_no`),
+  CONSTRAINT `fk_goods_likes_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_goods_likes_goods` FOREIGN KEY (`goods_no`) REFERENCES `goods` (`goods_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 

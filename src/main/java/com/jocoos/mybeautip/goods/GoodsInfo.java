@@ -23,12 +23,15 @@ public class GoodsInfo {
   private int fixedPrice;  // 정가
   private String goodsDescription;  // PC 쇼핑몰 상세설명
   private URL listImageData;  // 썸네일 이미지 정보
-  
+
+  private Integer likeCount;
+  private Long likeId;
+
   @JsonIgnore
   private Date createdAt;
   @JsonIgnore
   private Date modifiedAt;
-  
+
   public GoodsInfo(Goods goods) {
     this.goodsNo = goods.getGoodsNo();
     this.goodsNm = goods.getGoodsNm();
@@ -42,6 +45,7 @@ public class GoodsInfo {
     this.fixedPrice = toIntPrice(goods.getFixedPrice());
     this.goodsDescription = goods.getGoodsDescription();
     this.listImageData = goods.getListImageData();
+    this.likeCount = goods.getLikeCount();
   }
 
   private int toIntPrice(BigDecimal price) {

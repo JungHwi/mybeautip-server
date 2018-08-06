@@ -32,7 +32,7 @@ public class Store {
   private String thumbnailUrl;
 
   @Column(nullable = false)
-  private Long likeCount = 0L;
+  private int likeCount;
 
   @Column(nullable = false)
   @CreatedDate
