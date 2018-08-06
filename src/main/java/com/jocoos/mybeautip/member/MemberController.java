@@ -104,7 +104,7 @@ public class MemberController {
 
     String nextCursor = null;
     if (members != null && members.size() > 1) {
-      nextCursor = members.get(members.size() - 1).getCreatedAt();
+      nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
     }
 
     return new CursorResponse.Builder<MemberInfo>("/api/1/members", members)

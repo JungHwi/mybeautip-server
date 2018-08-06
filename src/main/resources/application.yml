@@ -17,6 +17,8 @@ spring:
     test-on-borrow: true
     validation-query: SELECT 1
   jackson:
+    serialization:
+      write-dates-as-timestamps: true
     default-property-inclusion: NON_NULL
     property-naming-strategy: CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
   flyway:
