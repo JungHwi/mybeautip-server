@@ -190,7 +190,7 @@ public class PostController {
          }
 
          postRepository.updateLikeCount(id, 1);
-         PostLike postLike = postLikeRepository.save(new PostLike(postId));
+         PostLike postLike = postLikeRepository.save(new PostLike(post));
          return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
@@ -205,7 +205,7 @@ public class PostController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return postRepository.findById(id)
+    return postLikeRepository.findByIdAndPostIdAndCreatedBy(likeId, id, memberId)
        .map(post -> {
          Optional<PostLike> liked = postLikeRepository.findById(likeId);
          if (!liked.isPresent()) {
@@ -216,7 +216,7 @@ public class PostController {
          postRepository.updateLikeCount(id, -1);
          return new ResponseEntity(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or like id"));
   }
 
   @GetMapping("/{id:.+}/comments")
@@ -344,10 +344,13 @@ public class PostController {
   @Data
   public static class PostLikeInfo {
     private Long id;
+    private Long createdBy;
     private Date createdAt;
+    private PostBasicInfo post;
 
     public PostLikeInfo(PostLike postLike) {
       BeanUtils.copyProperties(postLike, this);
+      post = new PostBasicInfo(postLike.getPost());
     }
   }
 

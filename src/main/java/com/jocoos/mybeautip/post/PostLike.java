@@ -22,8 +22,9 @@ public class PostLike {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private Long postId;
+  @ManyToOne
+  @JoinColumn(name = "post_id")
+  private Post post;
 
   @Column(nullable = false)
   @CreatedBy
@@ -33,7 +34,7 @@ public class PostLike {
   @CreatedDate
   private Date createdAt;
 
-  public PostLike(Long postId) {
-    this.postId = postId;
+  public PostLike(Post post) {
+    this.post = post;
   }
 }
