@@ -292,8 +292,7 @@ public class PostController {
     }
 
     Long memberId = memberService.currentMemberId();
-    return postCommentRepository.findById(id)
-       .filter(comment -> comment.getCreatedBy().equals(memberId))
+    return postCommentRepository.findByIdAndPostIdAndCreatedBy(id, postId, memberId)
        .map(comment -> {
          comment.setComment(request.getComment());
          return new ResponseEntity(
@@ -301,7 +300,7 @@ public class PostController {
             HttpStatus.OK
          );
        })
-       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid comment id"));
+       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post id or comment id"));
   }
 
   @Transactional
@@ -311,8 +310,7 @@ public class PostController {
     postRepository.updateCommentCount(postId, -1);
 
     Long memberId = memberService.currentMemberId();
-    return postCommentRepository.findById(id)
-       .filter(comment -> comment.getCreatedBy().equals(memberId))
+    return postCommentRepository.findByIdAndPostIdAndCreatedBy(id, postId, memberId)
        .map(comment -> {
          if (comment.getParentId() != null) {
            postCommentRepository.updateCommentCount(comment.getParentId(), -1);
@@ -320,7 +318,7 @@ public class PostController {
          postCommentRepository.delete(comment);
          return new ResponseEntity<>(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid comment id"));
+       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post id or comment id"));
   }
 
   /**
