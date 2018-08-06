@@ -189,15 +189,29 @@ public class MemberController {
                                    @RequestParam(defaultValue = "20") int count,
                                    @RequestParam(required = false) Long cursor) {
 
+    return createLikeResponse(memberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes");
+  }
+
+  @GetMapping(value = "/{id:.+}/likes", params = {"category=post"})
+  public CursorResponse getMemberLikes(@PathVariable Long id,
+                                       @RequestParam String category,
+                                       @RequestParam(defaultValue = "20") int count,
+                                       @RequestParam(required = false) Long cursor) {
+
+    log.debug("id:{}", id);
+
+    return createLikeResponse(id, category, count, cursor, String.format("/api/1/members/%d/likes", id));
+  }
+
+  private CursorResponse createLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<PostLike> postLikes = null;
     List<PostController.PostLikeInfo> result = Lists.newArrayList();
-    Long me = memberService.currentMemberId();
 
     if (cursor != null) {
-      postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedBy(new Date(cursor), me, pageable);
+      postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedBy(new Date(cursor), memberId, pageable);
     } else {
-      postLikes = postLikeRepository.findByCreatedBy(me, pageable);
+      postLikes = postLikeRepository.findByCreatedBy(memberId, pageable);
     }
 
     postLikes.stream().forEach(like -> result.add(new PostController.PostLikeInfo(like)));
@@ -207,7 +221,7 @@ public class MemberController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder<PostController.PostLikeInfo>("/api/1/members/me/likes", result)
+    return new CursorResponse.Builder<PostController.PostLikeInfo>(uri, result)
        .withCategory(category)
        .withCursor(nextCursor)
        .withCount(count).toBuild();
