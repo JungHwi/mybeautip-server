@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.member;
+package com.jocoos.mybeautip.restapi;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
@@ -25,6 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.restapi.CursorResponse;
 
 @Slf4j
