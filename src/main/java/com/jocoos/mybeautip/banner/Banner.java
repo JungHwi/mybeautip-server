@@ -32,6 +32,9 @@ public class Banner {
   @Column(nullable = false)
   private String thumbnailUrl;
 
+  /**
+   * 1: post(trend), 2: goods(goods list), 3: events, 4: video
+   */
   @Column(nullable = false)
   private int category;
 

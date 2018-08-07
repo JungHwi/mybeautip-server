@@ -30,7 +30,10 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.*;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.post.*;
 
 @Slf4j
@@ -154,6 +157,21 @@ public class PostController {
          post.getGoods().stream().forEach(gno -> {
            goodsRepository.findById(gno).ifPresent(g -> {
              result.add(goodsService.generateGoodsInfo(g));
+           });
+         });
+         return new ResponseEntity<>(result, HttpStatus.OK);
+       })
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+  }
+
+  @GetMapping("/{id:.+}/winners")
+  public ResponseEntity<List<MemberInfo>> getWinners(@PathVariable Long id) {
+    return postRepository.findById(id)
+       .map(post -> {
+         List<MemberInfo> result = Lists.newArrayList();
+         post.getWinners().stream().forEach(mid -> {
+           memberRepository.findById(mid).ifPresent(m -> {
+             result.add(new MemberInfo(m));
            });
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
@@ -332,8 +350,10 @@ public class PostController {
     private String description;
     private String thumbnailUrl;
     private int category;
+    private int progress;
     private Set<PostContent> contents;
     private List<String> goods;
+    private Set<Long> winners;
     private Long likeCount;
     private Long commentCount;
     private Long viewCount;
@@ -359,6 +379,7 @@ public class PostController {
     private Long id;
     private String title;
     private int category;
+    private int progress;
     private String thumbnailUrl;
     private Date createdAt;
 
