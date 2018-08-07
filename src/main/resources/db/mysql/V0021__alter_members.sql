@@ -77,3 +77,5 @@ ALTER TABLE `store_likes` modify COLUMN `created_at` DATETIME(3) NOT NULL;
 ALTER TABLE `video_goods` modify COLUMN `created_at` DATETIME(3) NOT NULL;
 
 ALTER TABLE `view_recodings` modify COLUMN `created_at` DATETIME(3) NOT NULL;
+
+UPDATE `members` SET modified_at = created_at where `username` = 'mybeautip.tv';
