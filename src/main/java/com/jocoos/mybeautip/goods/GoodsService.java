@@ -106,17 +106,13 @@ public class GoodsService {
   }
 
   public GoodsInfo generateGoodsInfo(Goods goods) {
-    GoodsInfo goodsInfo = new GoodsInfo(goods);
-
     // Set like ID if exist
-    Long memberId = memberService.currentMemberId();
-    if (memberId != null) {
-      Optional<GoodsLike> optional = goodsLikeRepository
-          .findByGoodsNoAndCreatedBy(goods.getGoodsNo(), memberId);
-      if (optional.isPresent()) {
-        goodsInfo.setLikeId(optional.get().getId());
-      }
+    Long me = memberService.currentMemberId();
+    Long likeId = null;
+    if (me != null) {
+      Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goods.getGoodsNo(), me);
+      likeId = optional.isPresent() ? optional.get().getId() : null;
     }
-    return goodsInfo;
+    return new GoodsInfo(goods, likeId);
   }
 }

@@ -97,12 +97,12 @@ public class GoodsController {
 
     return goodsRepository.findByGoodsNo(goodsNo)
         .map(goods -> {
-          if (goodsLikeRepository.findByGoodsNoAndCreatedBy(goodsNo, memberId).isPresent()) {
+          if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goodsNo, memberId).isPresent()) {
             throw new BadRequestException("duplicated_goods_like", "Already goods liked");
           }
 
           goodsRepository.updateLikeCount(goodsNo, 1);
-          GoodsLike goodsLike = goodsLikeRepository.save(new GoodsLike(goodsNo));
+          GoodsLike goodsLike = goodsLikeRepository.save(new GoodsLike(goods));
           return new ResponseEntity<>(new GoodsLikeInfo(goodsLike), HttpStatus.OK);
         })
         .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
@@ -117,7 +117,7 @@ public class GoodsController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return goodsRepository.findById(goodsNo)
+    return goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedBy(likeId, goodsNo, memberId)
         .map(goods -> {
           Optional<GoodsLike> liked = goodsLikeRepository.findById(likeId);
           if (!liked.isPresent()) {
@@ -128,16 +128,19 @@ public class GoodsController {
           goodsRepository.updateLikeCount(goodsNo, -1);
           return new ResponseEntity(HttpStatus.OK);
         })
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
+        .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no or like id"));
   }
 
   @Data
   public static class GoodsLikeInfo {
     private Long id;
+    private Long createdBy;
     private Date createdAt;
+    private GoodsInfo goodsInfo;
 
     public GoodsLikeInfo(GoodsLike goodsLike) {
       BeanUtils.copyProperties(goodsLike, this);
+      goodsInfo = new GoodsInfo(goodsLike.getGoods(), goodsLike.getId());
     }
   }
 }

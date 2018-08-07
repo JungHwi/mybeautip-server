@@ -25,12 +25,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsLike;
+import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
+import com.jocoos.mybeautip.store.StoreLike;
+import com.jocoos.mybeautip.store.StoreLikeRepository;
 
 @Slf4j
 @RestController
@@ -40,13 +45,19 @@ public class MemberController {
   private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final PostLikeRepository postLikeRepository;
+  private final GoodsLikeRepository goodsLikeRepository;
+  private final StoreLikeRepository storeLikeRepository;
 
   public MemberController(MemberService memberService,
                           MemberRepository memberRepository,
-                          PostLikeRepository postLikeRepository) {
+                          PostLikeRepository postLikeRepository,
+                          GoodsLikeRepository goodsLikeRepository,
+                          StoreLikeRepository storeLikeRepository) {
     this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.postLikeRepository = postLikeRepository;
+    this.goodsLikeRepository = goodsLikeRepository;
+    this.storeLikeRepository = storeLikeRepository;
   }
 
   @GetMapping("/me")
@@ -184,7 +195,29 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(id));
   }
 
-  @GetMapping(value = "/me/likes", params = {"category=post"})
+  @GetMapping(value = "/me/likes/count")
+  public LikeCountResponse getMyLikesCount() {
+    LikeCountResponse response = new LikeCountResponse();
+
+    // TODO: Add video likes count
+    response.setGoods(goodsLikeRepository.countByCreatedBy(memberService.currentMemberId()));
+    response.setStore(storeLikeRepository.countByCreatedBy(memberService.currentMemberId()));
+    response.setPost(postLikeRepository.countByCreatedBy(memberService.currentMemberId()));
+    return response;
+  }
+
+  @GetMapping(value = "/{id:.+}/likes/count")
+  public LikeCountResponse getMemberLikesCount(@PathVariable Long id) {
+    LikeCountResponse response = new LikeCountResponse();
+
+    // TODO: Add video likes count
+    response.setGoods(goodsLikeRepository.countByCreatedBy(id));
+    response.setStore(storeLikeRepository.countByCreatedBy(id));
+    response.setPost(postLikeRepository.countByCreatedBy(id));
+    return response;
+  }
+
+  @GetMapping(value = "/me/likes")
   public CursorResponse getMyLikes(@RequestParam String category,
                                    @RequestParam(defaultValue = "20") int count,
                                    @RequestParam(required = false) Long cursor) {
@@ -192,7 +225,7 @@ public class MemberController {
     return createLikeResponse(memberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes");
   }
 
-  @GetMapping(value = "/{id:.+}/likes", params = {"category=post"})
+  @GetMapping(value = "/{id:.+}/likes")
   public CursorResponse getMemberLikes(@PathVariable Long id,
                                        @RequestParam String category,
                                        @RequestParam(defaultValue = "20") int count,
@@ -204,6 +237,19 @@ public class MemberController {
   }
 
   private CursorResponse createLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
+    switch (category) {
+      case "post":
+        return createPostLikeResponse(memberId, category, count, cursor, uri);
+      case "goods":
+        return createGoodsLikeResponse(memberId, category, count, cursor, uri);
+      case "store":
+        return createStoreLikeResponse(memberId, category, count, cursor, uri);
+      default:
+        throw new BadRequestException("invalid category: " + category);
+    }
+  }
+
+  private CursorResponse createPostLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<PostLike> postLikes = null;
     List<PostController.PostLikeInfo> result = Lists.newArrayList();
@@ -227,6 +273,65 @@ public class MemberController {
        .withCount(count).toBuild();
   }
 
+  private CursorResponse createGoodsLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<GoodsLike> goodsLikes;
+    List<GoodsInfo> result = Lists.newArrayList();
+
+    if (cursor != null) {
+      goodsLikes = goodsLikeRepository.findByCreatedAtBeforeAndCreatedBy(
+        new Date(cursor), memberId, pageable);
+    } else {
+      goodsLikes = goodsLikeRepository.findByCreatedBy(memberId, pageable);
+    }
+
+    Long likeId;
+    Long me = memberService.currentMemberId();
+    for (GoodsLike like : goodsLikes) {
+      likeId = me.equals(like.getCreatedBy())? like.getId() : null;
+      result.add(new GoodsInfo(like.getGoods(), likeId));
+    }
+
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(goodsLikes.getContent().get(goodsLikes.getContent().size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>(uri, result)
+      .withCategory(category)
+      .withCursor(nextCursor)
+      .withCount(count).toBuild();
+  }
+
+  private CursorResponse createStoreLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<StoreLike> storeLikes = null;
+    List<StoreController.StoreInfo> result = Lists.newArrayList();
+
+    if (cursor != null) {
+      storeLikes = storeLikeRepository.findByCreatedAtBeforeAndCreatedBy(new Date(cursor), memberId, pageable);
+    } else {
+      storeLikes = storeLikeRepository.findByCreatedBy(memberId, pageable);
+    }
+
+    Long likeId;
+    Long me = memberService.currentMemberId();
+    for (StoreLike like : storeLikes) {
+      likeId = me.equals(like.getCreatedBy())? like.getId() : null;
+      result.add(new StoreController.StoreInfo(like.getStore(), likeId));
+    }
+
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(storeLikes.getContent().get(storeLikes.getContent().size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>(uri, result)
+      .withCategory(category)
+      .withCursor(nextCursor)
+      .withCount(count).toBuild();
+  }
+
   @NoArgsConstructor
   @Data
   public static class UpdateMemberRequest {
@@ -242,5 +347,13 @@ public class MemberController {
 
     @Size(max = 200)
     private String intro;
+  }
+
+  @Data
+  private static class LikeCountResponse {
+    private Integer video = 0;
+    private Integer goods = 0;
+    private Integer store = 0;
+    private Integer post = 0;
   }
 }

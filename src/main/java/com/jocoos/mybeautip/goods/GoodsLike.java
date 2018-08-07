@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,8 +22,9 @@ public class GoodsLike {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private String goodsNo;
+  @ManyToOne
+  @JoinColumn(name = "goods_no")
+  private Goods goods;
 
   @Column(nullable = false)
   @CreatedBy
@@ -32,7 +34,7 @@ public class GoodsLike {
   @CreatedDate
   private Date createdAt;
 
-  public GoodsLike(String goodsNo) {
-    this.goodsNo = goodsNo;
+  public GoodsLike(Goods goods) {
+    this.goods = goods;
   }
 }

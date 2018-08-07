@@ -32,7 +32,7 @@ public class GoodsInfo {
   @JsonIgnore
   private Date modifiedAt;
 
-  public GoodsInfo(Goods goods) {
+  public GoodsInfo(Goods goods, Long likeId) {
     this.goodsNo = goods.getGoodsNo();
     this.goodsNm = goods.getGoodsNm();
     this.cateCd = goods.getCateCd();
@@ -46,6 +46,7 @@ public class GoodsInfo {
     this.goodsDescription = goods.getGoodsDescription();
     this.listImageData = goods.getListImageData();
     this.likeCount = goods.getLikeCount();
+    this.likeId = likeId;
   }
 
   private int toIntPrice(BigDecimal price) {
