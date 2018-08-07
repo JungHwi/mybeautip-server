@@ -128,7 +128,7 @@ public class GoodsController {
           goodsRepository.updateLikeCount(goodsNo, -1);
           return new ResponseEntity(HttpStatus.OK);
         })
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no or like id\""));
+        .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no or like id"));
   }
 
   @Data
