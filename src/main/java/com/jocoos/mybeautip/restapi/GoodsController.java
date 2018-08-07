@@ -97,12 +97,12 @@ public class GoodsController {
 
     return goodsRepository.findByGoodsNo(goodsNo)
         .map(goods -> {
-          if (goodsLikeRepository.findByGoodsNoAndCreatedBy(goodsNo, memberId).isPresent()) {
+          if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goodsNo, memberId).isPresent()) {
             throw new BadRequestException("duplicated_goods_like", "Already goods liked");
           }
 
           goodsRepository.updateLikeCount(goodsNo, 1);
-          GoodsLike goodsLike = goodsLikeRepository.save(new GoodsLike(goodsNo, goods));
+          GoodsLike goodsLike = goodsLikeRepository.save(new GoodsLike(goods));
           return new ResponseEntity<>(new GoodsLikeInfo(goodsLike), HttpStatus.OK);
         })
         .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
@@ -117,7 +117,7 @@ public class GoodsController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return goodsLikeRepository.findByIdAndGoodsNoAndCreatedBy(likeId, goodsNo, memberId)
+    return goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedBy(likeId, goodsNo, memberId)
         .map(goods -> {
           Optional<GoodsLike> liked = goodsLikeRepository.findById(likeId);
           if (!liked.isPresent()) {

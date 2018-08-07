@@ -22,12 +22,8 @@ public class GoodsLike {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @JsonIgnore
-  @Column(name = "goods_no")
-  private String goodsNo;
-
-  @OneToOne(cascade = {CascadeType.ALL})
-  @JoinColumn(name = "goods_no", insertable = false, updatable = false)
+  @ManyToOne
+  @JoinColumn(name = "goods_no")
   private Goods goods;
 
   @Column(nullable = false)
@@ -38,8 +34,7 @@ public class GoodsLike {
   @CreatedDate
   private Date createdAt;
 
-  public GoodsLike(String goodsNo, Goods goods) {
-    this.goodsNo = goodsNo;
+  public GoodsLike(Goods goods) {
     this.goods = goods;
   }
 }

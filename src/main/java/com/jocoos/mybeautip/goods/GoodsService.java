@@ -110,7 +110,7 @@ public class GoodsService {
     Long me = memberService.currentMemberId();
     Long likeId = null;
     if (me != null) {
-      Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsNoAndCreatedBy(goods.getGoodsNo(), me);
+      Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goods.getGoodsNo(), me);
       likeId = optional.isPresent() ? optional.get().getId() : null;
     }
     return new GoodsInfo(goods, likeId);
