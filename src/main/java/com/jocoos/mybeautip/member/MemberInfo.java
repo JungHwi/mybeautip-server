@@ -18,14 +18,16 @@ public class MemberInfo {
   private Integer followingCount;
   private Integer videoCount;
   private Date createdAt;
+  private Date modifiedAt;
 
   public MemberInfo(Member member) {
     this.id = member.getId();
     this.username = member.getUsername();
-    this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
     this.email = member.getEmail();
+    this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
     this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
     this.createdAt = member.getCreatedAt();
+    this.modifiedAt = member.getModifiedAt();
     this.followerCount = member.getFollowerCount();
     this.followingCount = member.getFollowingCount();
     this.videoCount = member.getVideoCount();
