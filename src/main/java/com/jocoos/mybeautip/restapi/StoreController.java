@@ -41,18 +41,17 @@ public class StoreController {
 
   @GetMapping("/{id:.+}")
   public ResponseEntity<StoreController.StoreInfo> getStore(@PathVariable Long id) {
-    Long memberId = memberService.currentMemberId();
+    long me = memberService.currentMemberId();
     Optional<Store> optional = storeRepository.findById(id);
     StoreInfo storeInfo;
     if (optional.isPresent()) {
       Store store = optional.get();
-      storeInfo = new StoreInfo(store);
 
-      // Like ID
-      Optional<StoreLike> optionalStoreLike = storeLikeRepository
-              .findByStoreIdAndCreatedBy(store.getId(), memberId);
-      optionalStoreLike.ifPresent(storeLike -> storeInfo.setLikeId(storeLike.getId()));
+      // Set like ID
+      Optional<StoreLike> optionalStoreLike = storeLikeRepository.findByStoreIdAndCreatedBy(store.getId(), me);
+      Long likeId = optionalStoreLike.isPresent() ? optionalStoreLike.get().getId() : null;
 
+      storeInfo = new StoreInfo(store, likeId);
       return new ResponseEntity<>(storeInfo, HttpStatus.OK);
     } else {
       throw new NotFoundException("store_not_found", "invalid store id");
@@ -74,8 +73,8 @@ public class StoreController {
                 throw new BadRequestException("duplicated_store_like", "Already store liked");
               }
 
-              storeRepository.updateLikeCount(id, 1L);
-              StoreLike storeLike = storeLikeRepository.save(new StoreLike(storeId));
+              storeRepository.updateLikeCount(id, 1);
+              StoreLike storeLike = storeLikeRepository.save(new StoreLike(store));
               return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
             })
             .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
@@ -90,7 +89,7 @@ public class StoreController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return storeRepository.findById(id)
+    return storeLikeRepository.findByIdAndStoreIdAndCreatedBy(likeId, id, memberId)
             .map(store -> {
               Optional<StoreLike> liked = storeLikeRepository.findById(likeId);
               if (!liked.isPresent()) {
@@ -98,10 +97,10 @@ public class StoreController {
               }
 
               storeLikeRepository.delete(liked.get());
-              storeRepository.updateLikeCount(id, -1L);
+              storeRepository.updateLikeCount(id, -1);
               return new ResponseEntity(HttpStatus.OK);
             })
-            .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
+            .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id or like id"));
   }
 
   /**
@@ -118,23 +117,27 @@ public class StoreController {
     private Integer likeCount;
     private Long likeId;
 
-    public StoreInfo(Store store) {
+    public StoreInfo(Store store, Long likeId) {
       this.id = store.getId();
       this.name = store.getName();
       this.description = Strings.isNullOrEmpty(store.getDescription()) ? "" : store.getDescription();
       this.imageUrl = Strings.isNullOrEmpty(store.getImageUrl()) ? "" : store.getImageUrl();
       this.thumbnailUrl = Strings.isNullOrEmpty(store.getThumbnailUrl()) ? "" : store.getThumbnailUrl();
       this.likeCount = store.getLikeCount();
+      this.likeId = likeId;
     }
   }
 
   @Data
   public static class StoreLikeInfo {
     private Long id;
+    private Long createdBy;
     private Date createdAt;
+    private StoreInfo storeInfo;
 
     public StoreLikeInfo(StoreLike storeLike) {
       BeanUtils.copyProperties(storeLike, this);
+      storeInfo = new StoreInfo(storeLike.getStore(), storeLike.getId());
     }
   }
 }

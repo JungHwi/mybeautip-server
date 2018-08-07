@@ -19,8 +19,9 @@ public class StoreLike {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private Long storeId;
+  @ManyToOne
+  @JoinColumn(name="store_id")
+  private Store store;
 
   @Column(nullable = false)
   @CreatedBy
@@ -30,7 +31,7 @@ public class StoreLike {
   @CreatedDate
   private Date createdAt;
 
-  public StoreLike(Long storeId) {
-    this.storeId = storeId;
+  public StoreLike(Store store) {
+    this.store = store;
   }
 }
