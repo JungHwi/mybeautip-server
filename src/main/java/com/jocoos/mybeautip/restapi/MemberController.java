@@ -195,22 +195,18 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(id));
   }
 
-  @GetMapping(value = "/me/likes/count")
+  @GetMapping(value = "/me/like_count")
   public LikeCountResponse getMyLikesCount() {
     LikeCountResponse response = new LikeCountResponse();
-
-    // TODO: Add video likes count
     response.setGoods(goodsLikeRepository.countByCreatedBy(memberService.currentMemberId()));
     response.setStore(storeLikeRepository.countByCreatedBy(memberService.currentMemberId()));
     response.setPost(postLikeRepository.countByCreatedBy(memberService.currentMemberId()));
     return response;
   }
 
-  @GetMapping(value = "/{id:.+}/likes/count")
+  @GetMapping(value = "/{id:.+}/like_count")
   public LikeCountResponse getMemberLikesCount(@PathVariable Long id) {
     LikeCountResponse response = new LikeCountResponse();
-
-    // TODO: Add video likes count
     response.setGoods(goodsLikeRepository.countByCreatedBy(id));
     response.setStore(storeLikeRepository.countByCreatedBy(id));
     response.setPost(postLikeRepository.countByCreatedBy(id));
@@ -351,7 +347,6 @@ public class MemberController {
 
   @Data
   private static class LikeCountResponse {
-    private Integer video = 0;
     private Integer goods = 0;
     private Integer store = 0;
     private Integer post = 0;
