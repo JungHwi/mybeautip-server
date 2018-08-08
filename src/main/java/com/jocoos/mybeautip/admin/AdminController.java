@@ -107,21 +107,16 @@ public class AdminController {
   public ResponseEntity<RecommendedMemberInfo> createRecommendedMember(
       @RequestBody CreateRecommendedMemberRequest request) {
     log.debug("request: {}", request);
-    MemberRecommendation recommendation;
+
     Optional<MemberRecommendation> optional
         = memberRecommendationRepository.findById(request.getMemberId());
-    if (optional.isPresent()) {
-      recommendation = optional.get();
-    } else {
-      recommendation = new MemberRecommendation();
-    }
+    MemberRecommendation recommendation = optional.orElseGet(MemberRecommendation::new);
     BeanUtils.copyProperties(request, recommendation);
     log.debug("recommended member: {}", recommendation);
 
     return memberRepository.findById(request.getMemberId()).map(m -> {
       recommendation.setMember(m);
 
-      SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
       try {
         recommendation.setStartedAt(df.parse(request.getStartedAt()));
         recommendation.setEndedAt(df.parse(request.getEndedAt()));
@@ -142,21 +137,16 @@ public class AdminController {
       @RequestBody CreateRecommendedGoodsRequest request) {
     log.debug("request: {}", request);
 
-    GoodsRecommendation recommendation;
+
     Optional<GoodsRecommendation> optional
         = goodsRecommendationRepository.findByGoodsNo(request.getGoodsNo());
-    if (optional.isPresent()) {
-      recommendation = optional.get();
-    } else {
-      recommendation = new GoodsRecommendation();
-    }
+    GoodsRecommendation recommendation = optional.orElseGet(GoodsRecommendation::new);
     BeanUtils.copyProperties(request, recommendation);
     log.debug("recommended goods: {}", recommendation);
 
     return goodsRepository.findByGoodsNo(request.getGoodsNo()).map(g -> {
       recommendation.setGoods(g);
 
-      SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
       try {
         recommendation.setStartedAt(df.parse(request.getStartedAt()));
         recommendation.setEndedAt(df.parse(request.getEndedAt()));
@@ -177,13 +167,8 @@ public class AdminController {
     @RequestBody CreateRecommendedMotdRequest request) {
     log.debug("request: {}", request);
 
-    MotdRecommendation recommendation;
     Optional<MotdRecommendation> optional = motdRecommendationRepository.findByVideoKey(request.getVideoKey());
-    if (optional.isPresent()) {
-      recommendation = optional.get();
-    } else {
-      recommendation = new MotdRecommendation();
-    }
+    MotdRecommendation recommendation = optional.orElseGet(MotdRecommendation::new);
     BeanUtils.copyProperties(request, recommendation);
     log.debug("recommended motd: {}", recommendation);
 
@@ -238,7 +223,7 @@ public class AdminController {
   }
 
   @Data
-  public static class CreateRecommendedMemberRequest {
+  private static class CreateRecommendedMemberRequest {
     private Long memberId;
     private int seq;
     private String startedAt;
@@ -246,7 +231,7 @@ public class AdminController {
   }
 
   @Data
-  public static class RecommendedMemberInfo {
+  private static class RecommendedMemberInfo {
     private Long id;
     private Member member;
     private Long createdBy;
@@ -256,7 +241,7 @@ public class AdminController {
   }
 
   @Data
-  public static class CreateRecommendedGoodsRequest {
+  private static class CreateRecommendedGoodsRequest {
     private String goodsNo;
     private int seq;
     private String startedAt;
@@ -264,7 +249,7 @@ public class AdminController {
   }
 
   @Data
-  public static class RecommendedGoodsInfo {
+  private static class RecommendedGoodsInfo {
     private String goodsNo;
     private Goods goods;
     private Long createdBy;
@@ -274,7 +259,7 @@ public class AdminController {
   }
 
   @Data
-  public static class CreateRecommendedMotdRequest {
+  private static class CreateRecommendedMotdRequest {
     private String videoKey;
     private int seq;
     private String startedAt;
@@ -282,7 +267,7 @@ public class AdminController {
   }
 
   @Data
-  public static class RecommendedMotdInfo {
+  private static class RecommendedMotdInfo {
     private String videoKey;
     private VideoGoodsInfo video;
     private Long createdBy;
