@@ -3,96 +3,109 @@ package com.jocoos.mybeautip.member.following;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
-import static org.springframework.data.domain.PageRequest.of;
-
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.restapi.Response;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.restapi.CursorResponse;
 
 @Service
 @Slf4j
 public class FollowingService {
-  private static FollowingRepository followingRepository;
-  private static MemberRepository memberRepository;
-  
-  public FollowingService(FollowingRepository followingRepository, MemberRepository memberRepository) {
+
+  private final MemberService memberService;
+  private final FollowingRepository followingRepository;
+
+  public FollowingService(MemberService memberService,
+                          FollowingRepository followingRepository) {
+    this.memberService = memberService;
     this.followingRepository = followingRepository;
-    this.memberRepository = memberRepository;
   }
   
-  public Response getFollowings(String requestUri, long me, String cursor, int count) {
+  CursorResponse getFollowings(String requestUri, long me, String cursor, int count) {
+    Date startCursor = (Strings.isBlank(cursor)) ?
+      new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<Following> slice = followingRepository.findByCreatedAtBeforeAndMemberMeId(startCursor, me, pageable);
+    
+    List<FollowingInfo> result = new ArrayList<>();
+    FollowingInfo followingInfo;
+
+    for (Following following : slice.getContent()) {
+      followingInfo = new FollowingInfo(following, new MemberInfo(following.getMemberYou()));
+
+      // Add following id when I follow
+      Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(
+        memberService.currentMemberId(), following.getMemberYou().getId());
+      if (optional.isPresent()) {
+        followingInfo.setFollowingId(optional.get().getId());
+      }
+      result.add(followingInfo);
+    }
+
+    if (result.size() > 0) {
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt());
+      return new CursorResponse.Builder<>(requestUri, result)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
+    } else {
+      return new CursorResponse.Builder<>(requestUri, result).toBuild();
+    }
+  }
+  
+  CursorResponse getFollowers(String requestUri, long you, String cursor, int count) {
     Date startCursor = (Strings.isBlank(cursor)) ?
         new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
-  
-    Slice<Following> slice = followingRepository.findAllByMe(me, startCursor, of(0, count));
-    
-    List<FollowingInfo> list = new ArrayList<>();
-    FollowingInfo followingInfo;
-    for (Following following : slice.getContent()) {
-      followingInfo = new FollowingInfo(following);
-      followingInfo.setMember(new MemberInfo(memberRepository.getOne(following.getYou())));
-      list.add(followingInfo);
-    }
-  
-    Response<FollowingInfo> response = new Response<>();
-    if (slice.getContent().size() >= count) {
-      Following following = slice.getContent().get(slice.getSize() - 1);
-      String nextCursor = String.valueOf(following.getCreatedAt().getTime());
-      String nextRef = generateNextRef(requestUri, nextCursor, count);
-      response.setNextCursor(nextCursor);
-      response.setNextRef(nextRef);
-    } else {
-      response.setNextCursor("");
-      response.setNextRef("");
-    }
-    
-    response.setContent(list);
-    return response;
-  }
-  
-  public Response getFollowers(String requestUri, long you, String cursor, int count) {
-    Date startCursor = (Strings.isBlank(cursor)) ?
-        new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
-    
-    Slice<Following> slice = followingRepository.findAllByYou(you, startCursor, of(0, count));
-    List<FollowingInfo> list = new ArrayList<>();
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<Following> slice = followingRepository.findByCreatedAtBeforeAndMemberYouId(startCursor, you, pageable);
+
+    List<FollowingInfo> result = new ArrayList<>();
     FollowingInfo followingInfo;
     
-    for (Following following : slice.getContent()) {
-      followingInfo = new FollowingInfo(following);
-      followingInfo.setMember(new MemberInfo(memberRepository.getOne(following.getYou())));
-      list.add(followingInfo);
+    for (Following follower : slice.getContent()) {
+      followingInfo = new FollowingInfo(follower, new MemberInfo(follower.getMemberMe()));
+
+      // Add following id when I follow
+      Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(
+        memberService.currentMemberId(), follower.getMemberMe().getId());
+      if (optional.isPresent()) {
+        followingInfo.setFollowingId(optional.get().getId());
+      }
+      result.add(followingInfo);
     }
-    
-    Response<FollowingInfo> response = new Response<>();
-    if (slice.getContent().size() >= count) {
-      Following following = slice.getContent().get(slice.getSize() - 1);
-      String nextCursor = String.valueOf(following.getCreatedAt().getTime());
-      String nextRef = generateNextRef(requestUri, nextCursor, count);
-      response.setNextCursor(nextCursor);
-      response.setNextRef(nextRef);
+
+    if (result.size() > 0) {
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt());
+      return new CursorResponse.Builder<>(requestUri, result)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
     } else {
-      response.setNextCursor("");
-      response.setNextRef("");
+      return new CursorResponse.Builder<>(requestUri, result).toBuild();
     }
-    
-    response.setContent(list);
-    return response;
   }
-  
-  private String generateNextRef(String requestUri, String nextCursor, int count) {
-    StringBuilder nextRef = new StringBuilder();
-    nextRef.append(requestUri)
-        .append("?cursor=").append(nextCursor)
-        .append("&count=").append(count);
-    
-    return nextRef.toString();
+
+  @Data
+  @NoArgsConstructor
+  public class FollowingInfo {
+    public Long followingId;
+    public Long createdAt;
+    public MemberInfo member;
+
+    FollowingInfo(Following following, MemberInfo member) {
+      this.createdAt = following.getCreatedAt().getTime();
+      this.member = member;
+    }
   }
 }
