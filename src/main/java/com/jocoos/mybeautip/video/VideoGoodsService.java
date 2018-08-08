@@ -16,7 +16,6 @@ import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.restapi.CursorRequest;
 import com.jocoos.mybeautip.restapi.Response;
-import com.jocoos.mybeautip.restapi.VideoGoodsController;
 
 @Slf4j
 @Service
@@ -36,15 +35,15 @@ public class VideoGoodsService {
 
     Slice<VideoGoods> slice = videoGoodsRepository.findByGoodsNo(goodsNo, startCursor,
             of(0, request.getCount()));
-    List<VideoGoodsController.VideoGoodsInfo> list = new ArrayList<>();
-    VideoGoodsController.VideoGoodsInfo videoInfo;
+    List<VideoGoodsInfo> list = new ArrayList<>();
+    VideoGoodsInfo videoInfo;
     for (VideoGoods video : slice.getContent()) {
-      videoInfo = new VideoGoodsController.VideoGoodsInfo(video);
-      videoInfo.setMember(new MemberInfo(memberRepository.getOne(video.getMemberId())));
+      videoInfo = new VideoGoodsInfo(video,
+        new MemberInfo(memberRepository.getOne(video.getMemberId())));
       list.add(videoInfo);
     }
 
-    Response<VideoGoodsController.VideoGoodsInfo> response = new Response<>();
+    Response<VideoGoodsInfo> response = new Response<>();
     if (slice.getContent().size() >= request.getCount()) {
       VideoGoods videoGoods = slice.getContent().get(slice.getSize() - 1);
       String nextCursor = String.valueOf(videoGoods.getCreatedAt().getTime());
