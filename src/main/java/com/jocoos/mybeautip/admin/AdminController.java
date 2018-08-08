@@ -7,16 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
-import com.jocoos.mybeautip.banner.Banner;
-import com.jocoos.mybeautip.banner.BannerRepository;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.recommendation.GoodsRecommendation;
-import com.jocoos.mybeautip.recommendation.GoodsRecommendationRepository;
-import com.jocoos.mybeautip.recommendation.MemberRecommendation;
-import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +15,16 @@ import org.springframework.web.bind.annotation.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.banner.Banner;
+import com.jocoos.mybeautip.banner.BannerRepository;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.post.PostRepository;
+import com.jocoos.mybeautip.recommendation.*;
+import com.jocoos.mybeautip.video.VideoGoodsInfo;
 
 @Slf4j
 @RestController
@@ -39,6 +37,7 @@ public class AdminController {
   private final GoodsRepository goodsRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
+  private final MotdRecommendationRepository motdRecommendationRepository;
   private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
 
   public AdminController(PostRepository postRepository,
@@ -46,13 +45,15 @@ public class AdminController {
                          MemberRepository memberRepository,
                          GoodsRepository goodsRepository,
                          MemberRecommendationRepository memberRecommendationRepository,
-                         GoodsRecommendationRepository goodsRecommendationRepository) {
+                         GoodsRecommendationRepository goodsRecommendationRepository,
+                         MotdRecommendationRepository motdRecommendationRepository) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
+    this.motdRecommendationRepository = motdRecommendationRepository;
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -104,7 +105,7 @@ public class AdminController {
 
   @PostMapping("/members")
   public ResponseEntity<RecommendedMemberInfo> createRecommendedMember(
-      @RequestBody CreateRecommendedMemberRequest request) throws ParseException {
+      @RequestBody CreateRecommendedMemberRequest request) {
     log.debug("request: {}", request);
     MemberRecommendation recommendation;
     Optional<MemberRecommendation> optional
@@ -138,7 +139,7 @@ public class AdminController {
 
   @PostMapping("/goods")
   public ResponseEntity<RecommendedGoodsInfo> createRecommendedGoods(
-      @RequestBody CreateRecommendedGoodsRequest request) throws ParseException {
+      @RequestBody CreateRecommendedGoodsRequest request) {
     log.debug("request: {}", request);
 
     GoodsRecommendation recommendation;
@@ -169,6 +170,36 @@ public class AdminController {
       BeanUtils.copyProperties(recommendation, info);
       return new ResponseEntity<>(info, HttpStatus.OK);
     }).orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
+  }
+
+  @PostMapping("/motd")
+  public ResponseEntity<RecommendedMotdInfo> createRecommendedMotd(
+    @RequestBody CreateRecommendedMotdRequest request) {
+    log.debug("request: {}", request);
+
+    MotdRecommendation recommendation;
+    Optional<MotdRecommendation> optional = motdRecommendationRepository.findByVideoKey(request.getVideoKey());
+    if (optional.isPresent()) {
+      recommendation = optional.get();
+    } else {
+      recommendation = new MotdRecommendation();
+    }
+    BeanUtils.copyProperties(request, recommendation);
+    log.debug("recommended motd: {}", recommendation);
+
+    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
+    try {
+      recommendation.setStartedAt(df.parse(request.getStartedAt()));
+      recommendation.setEndedAt(df.parse(request.getEndedAt()));
+    } catch (ParseException e) {
+      log.error("invalid date format", e);
+    }
+
+    motdRecommendationRepository.save(recommendation);
+
+    RecommendedMotdInfo info = new RecommendedMotdInfo();
+    BeanUtils.copyProperties(recommendation, info);
+    return new ResponseEntity<>(info, HttpStatus.OK);
   }
 
   @Data
@@ -236,6 +267,24 @@ public class AdminController {
   public static class RecommendedGoodsInfo {
     private String goodsNo;
     private Goods goods;
+    private Long createdBy;
+    private Date createdAt;
+    private Date startedAt;
+    private Date endedAt;
+  }
+
+  @Data
+  public static class CreateRecommendedMotdRequest {
+    private String videoKey;
+    private int seq;
+    private String startedAt;
+    private String endedAt;
+  }
+
+  @Data
+  public static class RecommendedMotdInfo {
+    private String videoKey;
+    private VideoGoodsInfo video;
     private Long createdBy;
     private Date createdAt;
     private Date startedAt;
