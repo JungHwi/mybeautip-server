@@ -1,16 +1,18 @@
 package com.jocoos.mybeautip.recommendation;
 
-import com.jocoos.mybeautip.goods.Goods;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import javax.persistence.*;
+import java.util.Date;
+
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.*;
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.goods.Goods;
 
 @Data
 @NoArgsConstructor
@@ -24,12 +26,12 @@ public class GoodsRecommendation {
   @Column(name = "goods_no")
   private String goodsNo;
 
-  @MapsId
+  @MapsId("goods_no")
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(
-      name = "goods_no",
-      referencedColumnName = "goods_no",
-      foreignKey = @ForeignKey(name = "fk_goods_recommendations_goods")
+    name = "goods_no",
+    referencedColumnName = "goods_no",
+    foreignKey = @ForeignKey(name = "fk_goods_recommendations_goods")
   )
   private Goods goods;
 
