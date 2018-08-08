@@ -1,21 +1,32 @@
-package com.jocoos.mybeautip.member.following;
+package com.jocoos.mybeautip.restapi;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.restapi.CursorResponse;
-import com.jocoos.mybeautip.restapi.Response;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingMemberRequest;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
 
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -23,16 +34,13 @@ import com.jocoos.mybeautip.restapi.Response;
 public class FollowingController {
 
   private final MemberService memberService;
-  private final FollowingService followingService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
   
   public FollowingController(MemberService memberService,
-                             FollowingService followingService,
                              MemberRepository memberRepository,
                              FollowingRepository followingRepository) {
     this.memberService = memberService;
-    this.followingService = followingService;
     this.memberRepository = memberRepository;
     this.followingRepository = followingRepository;
   }
@@ -85,7 +93,7 @@ public class FollowingController {
   public CursorResponse getFollowing(@RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
-    return followingService.getFollowings(httpServletRequest.getRequestURI(),
+    return getFollowings(httpServletRequest.getRequestURI(),
         memberService.currentMemberId(), cursor, count);
   }
 
@@ -93,7 +101,7 @@ public class FollowingController {
   public CursorResponse getFollowers(@RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
-    return followingService.getFollowers(httpServletRequest.getRequestURI(),
+    return getFollowers(httpServletRequest.getRequestURI(),
         memberService.currentMemberId(), cursor, count);
   }
 
@@ -102,7 +110,7 @@ public class FollowingController {
                                      @RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
-    return followingService.getFollowings(httpServletRequest.getRequestURI(), id, cursor, count);
+    return getFollowings(httpServletRequest.getRequestURI(), id, cursor, count);
   }
   
   @GetMapping("/{id}/followers")
@@ -110,6 +118,84 @@ public class FollowingController {
                                      @RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
-    return followingService.getFollowers(httpServletRequest.getRequestURI(), id, cursor, count);
+    return getFollowers(httpServletRequest.getRequestURI(), id, cursor, count);
+  }
+
+
+  private CursorResponse getFollowings(String requestUri, long me, String cursor, int count) {
+    Date startCursor = (Strings.isBlank(cursor)) ?
+      new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<Following> slice = followingRepository.findByCreatedAtBeforeAndMemberMeId(startCursor, me, pageable);
+
+    List<FollowingInfo> result = new ArrayList<>();
+    FollowingInfo followingInfo;
+
+    for (Following following : slice.getContent()) {
+      followingInfo = new FollowingInfo(following, new MemberInfo(following.getMemberYou()));
+
+      // Add following id when I follow
+      Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(
+        memberService.currentMemberId(), following.getMemberYou().getId());
+      if (optional.isPresent()) {
+        followingInfo.setFollowingId(optional.get().getId());
+      }
+      result.add(followingInfo);
+    }
+
+    if (result.size() > 0) {
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt());
+      return new CursorResponse.Builder<>(requestUri, result)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
+    } else {
+      return new CursorResponse.Builder<>(requestUri, result).toBuild();
+    }
+  }
+
+  private CursorResponse getFollowers(String requestUri, long you, String cursor, int count) {
+    Date startCursor = (Strings.isBlank(cursor)) ?
+      new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<Following> slice = followingRepository.findByCreatedAtBeforeAndMemberYouId(startCursor, you, pageable);
+
+    List<FollowingInfo> result = new ArrayList<>();
+    FollowingInfo followingInfo;
+
+    for (Following follower : slice.getContent()) {
+      followingInfo = new FollowingInfo(follower, new MemberInfo(follower.getMemberMe()));
+
+      // Add following id when I follow
+      Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(
+        memberService.currentMemberId(), follower.getMemberMe().getId());
+      if (optional.isPresent()) {
+        followingInfo.setFollowingId(optional.get().getId());
+      }
+      result.add(followingInfo);
+    }
+
+    if (result.size() > 0) {
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt());
+      return new CursorResponse.Builder<>(requestUri, result)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
+    } else {
+      return new CursorResponse.Builder<>(requestUri, result).toBuild();
+    }
+  }
+
+  @Data
+  @NoArgsConstructor
+  public class FollowingInfo {
+    public Long followingId;
+    public Long createdAt;
+    public MemberInfo member;
+
+    FollowingInfo(Following following, MemberInfo member) {
+      this.createdAt = following.getCreatedAt().getTime();
+      this.member = member;
+    }
   }
 }

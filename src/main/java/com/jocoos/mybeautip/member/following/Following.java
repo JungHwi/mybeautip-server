@@ -34,7 +34,7 @@ public class Following extends CreatedDateAuditable {
   @CreatedDate
   public Date createdAt;
 
-  Following(Member memberMe, Member memberYou) {
+  public Following(Member memberMe, Member memberYou) {
     this.memberMe = memberMe;
     this.memberYou = memberYou;
   }
