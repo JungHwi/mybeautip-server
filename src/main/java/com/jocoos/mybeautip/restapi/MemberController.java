@@ -116,7 +116,7 @@ public class MemberController {
 
   @GetMapping
   @ResponseBody
-  public CursorResponse<MemberInfo> getMembers(@RequestParam(defaultValue = "20") int count,
+  public CursorResponse getMembers(@RequestParam(defaultValue = "20") int count,
                                                @RequestParam(required = false) String cursor,
                                                @RequestParam(required = false) String keyword) {
     Slice<Member> list = findMembers(keyword, cursor, count);
@@ -128,7 +128,7 @@ public class MemberController {
       nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder<MemberInfo>("/api/1/members", members)
+    return new CursorResponse.Builder<>("/api/1/members", members)
        .withKeyword(keyword)
        .withCount(count)
        .withCursor(nextCursor).toBuild();

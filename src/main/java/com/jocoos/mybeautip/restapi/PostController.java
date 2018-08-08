@@ -95,7 +95,7 @@ public class PostController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder("/api/1/posts", result)
+    return new CursorResponse.Builder<>("/api/1/posts", result)
        .withCount(count)
        .withCursor(nextCursor)
        .withKeyword(keyword)
@@ -134,7 +134,7 @@ public class PostController {
   }
 
   @GetMapping("/{id:.+}")
-  public ResponseEntity<List<PostInfo>> getPost(@PathVariable Long id) {
+  public ResponseEntity<PostInfo> getPost(@PathVariable Long id) {
     Long memberId = memberService.currentMemberId();
     return postRepository.findById(id)
        .map(post -> {
@@ -144,7 +144,7 @@ public class PostController {
 
          postLikeRepository.findByPostIdAndCreatedBy(post.getId(), memberId)
             .ifPresent(like -> info.setLikeId(like.getId()));
-         return new ResponseEntity(info, HttpStatus.OK);
+         return new ResponseEntity<>(info, HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
   }
@@ -293,7 +293,7 @@ public class PostController {
     BeanUtils.copyProperties(request, postComment);
     postRepository.updateCommentCount(id, 1);
 
-    return new ResponseEntity(
+    return new ResponseEntity<>(
        new PostCommentInfo(postCommentRepository.save(postComment)),
        HttpStatus.OK
     );
@@ -313,7 +313,7 @@ public class PostController {
     return postCommentRepository.findByIdAndPostIdAndCreatedBy(id, postId, memberId)
        .map(comment -> {
          comment.setComment(request.getComment());
-         return new ResponseEntity(
+         return new ResponseEntity<>(
             new PostCommentInfo(postCommentRepository.save(comment)),
             HttpStatus.OK
          );
