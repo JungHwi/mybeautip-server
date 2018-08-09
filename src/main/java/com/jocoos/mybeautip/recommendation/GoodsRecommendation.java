@@ -28,11 +28,7 @@ public class GoodsRecommendation {
 
   @MapsId("goods_no")
   @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(
-    name = "goods_no",
-    referencedColumnName = "goods_no",
-    foreignKey = @ForeignKey(name = "fk_goods_recommendations_goods")
-  )
+  @JoinColumn(name = "goods_no")
   private Goods goods;
 
   @Column(nullable = false)

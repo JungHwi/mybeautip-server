@@ -26,11 +26,7 @@ public class MemberRecommendation {
 
   @MapsId
   @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(
-      name = "member_id",
-      referencedColumnName = "id",
-      foreignKey = @ForeignKey(name = "fk_member_recommendations_members")
-  )
+  @JoinColumn(name = "member_id")
   private Member member;
 
   @Column(nullable = false)
