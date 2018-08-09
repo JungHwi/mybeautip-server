@@ -31,7 +31,7 @@ import com.jocoos.mybeautip.video.VideoGoodsRepository;
 public class RecommendationController {
 
   private final GoodsService goodsService;
-  private final MemberService memberService;
+  private final MemberService memberServie;
   private final VideoGoodsRepository videoGoodsRepository;
   private final MemberRepository memberRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
@@ -39,14 +39,14 @@ public class RecommendationController {
   private final MotdRecommendationRepository motdRecommendationRepository;
 
   public RecommendationController(GoodsService goodsService,
-                                  MemberService memberService,
+                                  MemberService memberServie,
                                   VideoGoodsRepository videoGoodsRepository,
                                   MemberRepository memberRepository,
                                   MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository,
                                   MotdRecommendationRepository motdRecommendationRepository) {
     this.goodsService = goodsService;
-    this.memberService = memberService;
+    this.memberServie = memberServie;
     this.videoGoodsRepository = videoGoodsRepository;
     this.memberRepository = memberRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
@@ -97,7 +97,7 @@ public class RecommendationController {
       if (list.size() > 0) {
         result.add(new VideoGoodsInfo(list.get(0),
           new MemberInfo(memberRepository.getOne(list.get(0).getMember().getId()),
-          memberService.getFollowingId(list.get(0).getMember()))));
+            memberServie.getFollowingId(list.get(0).getMember()))));
       }
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
