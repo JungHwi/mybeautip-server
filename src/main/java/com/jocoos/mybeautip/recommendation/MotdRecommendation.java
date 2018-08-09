@@ -12,28 +12,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.goods.Goods;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "goods_recommendations")
-public class GoodsRecommendation {
-
+@Table(name = "motd_recommendations")
+public class MotdRecommendation {
   @Id
-  @Column(name = "goods_no")
-  private String goodsNo;
-
-  @MapsId("goods_no")
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(
-    name = "goods_no",
-    referencedColumnName = "goods_no",
-    foreignKey = @ForeignKey(name = "fk_goods_recommendations_goods")
-  )
-  private Goods goods;
+  @Column(name = "video_key")
+  private String videoKey;
 
   @Column(nullable = false)
   private int seq;

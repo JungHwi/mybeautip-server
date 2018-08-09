@@ -19,6 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsInfo;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
 
 @Slf4j
 @RestController
@@ -26,15 +31,27 @@ import com.jocoos.mybeautip.member.MemberInfo;
 public class RecommendationController {
 
   private final GoodsService goodsService;
+  private final MemberService memberServie;
+  private final VideoGoodsRepository videoGoodsRepository;
+  private final MemberRepository memberRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
+  private final MotdRecommendationRepository motdRecommendationRepository;
 
   public RecommendationController(GoodsService goodsService,
+                                  MemberService memberServie,
+                                  VideoGoodsRepository videoGoodsRepository,
+                                  MemberRepository memberRepository,
                                   MemberRecommendationRepository memberRecommendationRepository,
-                                  GoodsRecommendationRepository goodsRecommendationRepository) {
+                                  GoodsRecommendationRepository goodsRecommendationRepository,
+                                  MotdRecommendationRepository motdRecommendationRepository) {
     this.goodsService = goodsService;
+    this.memberServie = memberServie;
+    this.videoGoodsRepository = videoGoodsRepository;
+    this.memberRepository = memberRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
+    this.motdRecommendationRepository = motdRecommendationRepository;
   }
 
   @GetMapping("/members")
@@ -65,6 +82,24 @@ public class RecommendationController {
     goods.stream().forEach(recommendation
         -> result.add(goodsService.generateGoodsInfo(recommendation.getGoods())));
 
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+
+  @GetMapping("/motd")
+  public ResponseEntity<List<VideoGoodsInfo>> getRecommendedMotds(
+    @RequestParam(defaultValue = "5") int count) {
+    Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
+      PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+
+    List<VideoGoodsInfo> result = Lists.newArrayList();
+    for (MotdRecommendation recommendation : videos) {
+      List<VideoGoods> list = videoGoodsRepository.findAllByVideoKey(recommendation.getVideoKey());
+      if (list.size() > 0) {
+        result.add(new VideoGoodsInfo(list.get(0),
+          new MemberInfo(memberRepository.getOne(list.get(0).getMember().getId()),
+            memberServie.getFollowingId(list.get(0).getMember()))));
+      }
+    }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 }
