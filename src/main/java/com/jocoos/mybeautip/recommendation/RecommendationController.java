@@ -56,7 +56,7 @@ public class RecommendationController {
 
   @GetMapping("/members")
   public ResponseEntity<List<MemberInfo>> getRecommendedMembers(
-      @RequestParam int count) {
+      @RequestParam(defaultValue = "100") int count) {
     Slice<MemberRecommendation> members = memberRecommendationRepository.findAll(
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
@@ -70,7 +70,7 @@ public class RecommendationController {
 
   @GetMapping("/goods")
   public ResponseEntity<List<GoodsInfo>> getRecommendedGoods(
-      @RequestParam int count) {
+      @RequestParam(defaultValue = "100") int count) {
     Slice<GoodsRecommendation> goods = goodsRecommendationRepository.findAll(
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
@@ -83,7 +83,7 @@ public class RecommendationController {
 
   @GetMapping("/motd")
   public ResponseEntity<List<VideoGoodsInfo>> getRecommendedMotds(
-    @RequestParam int count) {
+    @RequestParam(defaultValue = "100") int count) {
     Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
       PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
