@@ -23,7 +23,7 @@ public class GoodsInfo {
   private int fixedPrice;  // 정가
   private String goodsDescription;  // PC 쇼핑몰 상세설명
   private URL listImageData;  // 썸네일 이미지 정보
-
+  private String detailRef;   // 상품 상세 페이지를 볼 수 있는 Html 주소
   private Integer likeCount;
   private Long likeId;
 
@@ -48,6 +48,7 @@ public class GoodsInfo {
     this.likeCount = goods.getLikeCount();
     this.createdAt = goods.getCreatedAt();
     this.likeId = likeId;
+    this.detailRef = String.format("/api/1/goods/%s/details", goodsNo);
   }
 
   private int toIntPrice(BigDecimal price) {
