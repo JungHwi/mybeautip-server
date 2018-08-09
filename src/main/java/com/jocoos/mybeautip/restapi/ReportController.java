@@ -1,8 +1,8 @@
-package com.jocoos.mybeautip.member.report;
+package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.MemberService;
-import lombok.extern.slf4j.Slf4j;
+import javax.validation.Valid;
+import java.util.Optional;
+
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -10,15 +10,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.report.Report;
+import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.member.report.ReportRequest;
 
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/members/me/reports", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ReportController {
-  private static MemberService memberService;
-  private static ReportRepository reportRepository;
+  private final MemberService memberService;
+  private final ReportRepository reportRepository;
   
   public ReportController(MemberService memberService, ReportRepository reportRepository) {
     this.memberService = memberService;

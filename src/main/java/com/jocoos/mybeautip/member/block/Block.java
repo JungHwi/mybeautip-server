@@ -1,31 +1,37 @@
 package com.jocoos.mybeautip.member.block;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
 import java.util.Date;
 
-@Data
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.member.Member;
+
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@Data
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "members_blocks")
-public class Block extends CreatedDateAuditable {
+public class Block {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   private Long me;
-  private Long you;
+
+  @ManyToOne
+  @JoinColumn(name = "you")
+  private Member memberYou;
+
+  @Column
+  @CreatedDate
+  public Date createdAt;
   
-  public Block(Long me, Long you) {
+  public Block(Long me, Member memberYou) {
     this.me = me;
-    this.you = you;
-  }
-  
-  public Date getCreatedAt() {
-    return createdAt;
+    this.memberYou = memberYou;
   }
 }

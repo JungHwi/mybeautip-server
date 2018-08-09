@@ -4,20 +4,19 @@ import javax.persistence.*;
 import java.util.Date;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.member.Member;
 
-@Entity
-@Table(name = "members_followings")
-@Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class Following extends CreatedDateAuditable {
+@Data
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "members_followings")
+public class Following {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
