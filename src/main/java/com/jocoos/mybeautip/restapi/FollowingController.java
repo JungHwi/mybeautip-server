@@ -14,8 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
@@ -129,23 +127,15 @@ public class FollowingController {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<Following> slice = followingRepository.findByCreatedAtBeforeAndMemberMeId(startCursor, me, pageable);
 
-    List<FollowingInfo> result = new ArrayList<>();
-    FollowingInfo followingInfo;
+    List<MemberInfo> result = new ArrayList<>();
 
     for (Following following : slice.getContent()) {
-      followingInfo = new FollowingInfo(following, new MemberInfo(following.getMemberYou()));
-
-      // Add following id when I follow
-      Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(
-        memberService.currentMemberId(), following.getMemberYou().getId());
-      if (optional.isPresent()) {
-        followingInfo.setFollowingId(optional.get().getId());
-      }
-      result.add(followingInfo);
+      // Add following id when I follow you
+      result.add(new MemberInfo(following.getMemberYou(), memberService.getFollowingId(following.getMemberYou())));
     }
 
     if (result.size() > 0) {
-      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt());
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
       return new CursorResponse.Builder<>(requestUri, result)
         .withCount(count)
         .withCursor(nextCursor).toBuild();
@@ -161,41 +151,20 @@ public class FollowingController {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<Following> slice = followingRepository.findByCreatedAtBeforeAndMemberYouId(startCursor, you, pageable);
 
-    List<FollowingInfo> result = new ArrayList<>();
-    FollowingInfo followingInfo;
+    List<MemberInfo> result = new ArrayList<>();
 
     for (Following follower : slice.getContent()) {
-      followingInfo = new FollowingInfo(follower, new MemberInfo(follower.getMemberMe()));
-
       // Add following id when I follow
-      Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(
-        memberService.currentMemberId(), follower.getMemberMe().getId());
-      if (optional.isPresent()) {
-        followingInfo.setFollowingId(optional.get().getId());
-      }
-      result.add(followingInfo);
+      result.add(new MemberInfo(follower.getMemberMe(), memberService.getFollowingId(follower.getMemberMe())));
     }
 
     if (result.size() > 0) {
-      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt());
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
       return new CursorResponse.Builder<>(requestUri, result)
         .withCount(count)
         .withCursor(nextCursor).toBuild();
     } else {
       return new CursorResponse.Builder<>(requestUri, result).toBuild();
-    }
-  }
-
-  @Data
-  @NoArgsConstructor
-  public class FollowingInfo {
-    public Long followingId;
-    public Long createdAt;
-    public MemberInfo member;
-
-    FollowingInfo(Following following, MemberInfo member) {
-      this.createdAt = following.getCreatedAt().getTime();
-      this.member = member;
     }
   }
 }

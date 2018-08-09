@@ -17,10 +17,11 @@ public class MemberInfo {
   private Integer followerCount;
   private Integer followingCount;
   private Integer videoCount;
+  private Long followingId;
   private Date createdAt;
   private Date modifiedAt;
 
-  public MemberInfo(Member member) {
+  public MemberInfo(Member member, Long followingId) {
     this.id = member.getId();
     this.username = member.getUsername();
     this.email = member.getEmail();
@@ -31,5 +32,6 @@ public class MemberInfo {
     this.followerCount = member.getFollowerCount();
     this.followingCount = member.getFollowingCount();
     this.videoCount = member.getVideoCount();
+    this.followingId = followingId;
   }
 }

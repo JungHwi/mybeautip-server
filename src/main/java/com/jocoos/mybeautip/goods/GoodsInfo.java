@@ -46,6 +46,7 @@ public class GoodsInfo {
     this.goodsDescription = goods.getGoodsDescription();
     this.listImageData = goods.getListImageData();
     this.likeCount = goods.getLikeCount();
+    this.createdAt = goods.getCreatedAt();
     this.likeId = likeId;
   }
 

@@ -20,6 +20,7 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsInfo;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -30,6 +31,7 @@ import com.jocoos.mybeautip.video.VideoGoodsRepository;
 public class RecommendationController {
 
   private final GoodsService goodsService;
+  private final MemberService memberService;
   private final VideoGoodsRepository videoGoodsRepository;
   private final MemberRepository memberRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
@@ -37,12 +39,14 @@ public class RecommendationController {
   private final MotdRecommendationRepository motdRecommendationRepository;
 
   public RecommendationController(GoodsService goodsService,
+                                  MemberService memberService,
                                   VideoGoodsRepository videoGoodsRepository,
                                   MemberRepository memberRepository,
                                   MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository,
                                   MotdRecommendationRepository motdRecommendationRepository) {
     this.goodsService = goodsService;
+    this.memberService = memberService;
     this.videoGoodsRepository = videoGoodsRepository;
     this.memberRepository = memberRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
@@ -92,7 +96,8 @@ public class RecommendationController {
       List<VideoGoods> list = videoGoodsRepository.findAllByVideoKey(recommendation.getVideoKey());
       if (list.size() > 0) {
         result.add(new VideoGoodsInfo(list.get(0),
-          new MemberInfo(memberRepository.getOne(list.get(0).getMemberId()))));
+          new MemberInfo(memberRepository.getOne(list.get(0).getMember().getId()),
+          memberService.getFollowingId(list.get(0).getMember()))));
       }
     }
     return new ResponseEntity<>(result, HttpStatus.OK);

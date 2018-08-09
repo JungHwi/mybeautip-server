@@ -3,10 +3,15 @@ package com.jocoos.mybeautip.restapi;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -14,13 +19,16 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.video.VideoGoodsService;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
 
 
 @Slf4j
@@ -30,27 +38,25 @@ public class GoodsController {
 
   private final MemberService memberService;
   private final GoodsService goodsService;
-  private final VideoGoodsService videoGoodsService;
   private final GoodsRepository goodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
-
+  private final VideoGoodsRepository videoGoodsRepository;
 
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
-                         VideoGoodsService videoGoodsService,
                          GoodsRepository goodsRepository,
-                         GoodsLikeRepository goodsLikeRepository) {
+                         GoodsLikeRepository goodsLikeRepository,
+                         VideoGoodsRepository videoGoodsRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
-    this.videoGoodsService = videoGoodsService;
     this.goodsRepository = goodsRepository;
     this.goodsLikeRepository = goodsLikeRepository;
+    this.videoGoodsRepository = videoGoodsRepository;
   }
 
   @GetMapping
-  public ResponseEntity<Response> getGoodsList(@Valid GoodsListRequest request) {
-    Response response = goodsService.getGoodsList(request);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+  public CursorResponse getGoodsList(@Valid GoodsListRequest request) {
+    return goodsService.getGoodsList(request);
   }
 
   @GetMapping("/{goodsNo}")
@@ -64,10 +70,11 @@ public class GoodsController {
   }
 
   @GetMapping("/{goods_no}/videos")
-  public ResponseEntity<Response> getRelatedVideos(@PathVariable("goods_no") String goodsNo,
-                                                   @Valid CursorRequest request,
-                                                   HttpServletRequest httpServletRequest,
-                                                   BindingResult bindingResult) {
+  public CursorResponse getRelatedVideos(@PathVariable("goods_no") String goodsNo,
+                                         @RequestParam(defaultValue = "50") int count,
+                                         @RequestParam(required = false) String cursor,
+                                         HttpServletRequest httpServletRequest,
+                                         BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
       throw new BadRequestException("invalid request");
@@ -77,8 +84,7 @@ public class GoodsController {
       throw new BadRequestException("invalid goods_no: " + goodsNo);
     }
 
-    Response response = videoGoodsService.getVideos(goodsNo, request, httpServletRequest.getRequestURI());
-    return new ResponseEntity<>(response, HttpStatus.OK);
+   return getVideos(goodsNo, count, cursor, httpServletRequest.getRequestURI());
   }
 
   @GetMapping("/{goodsNo}/details")
@@ -141,6 +147,30 @@ public class GoodsController {
     public GoodsLikeInfo(GoodsLike goodsLike) {
       BeanUtils.copyProperties(goodsLike, this);
       goodsInfo = new GoodsInfo(goodsLike.getGoods(), goodsLike.getId());
+    }
+  }
+
+  private CursorResponse getVideos(String goodsNo, int count, String cursor, String requestUri) {
+    Date startCursor = (Strings.isBlank(cursor)) ?
+      new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNo(startCursor, goodsNo, pageable);
+    List<VideoGoodsController.VideoGoodsInfo> result = new ArrayList<>();
+    VideoGoodsController.VideoGoodsInfo videoInfo;
+    for (VideoGoods video : slice.getContent()) {
+      videoInfo = new VideoGoodsController.VideoGoodsInfo(video,
+        new MemberInfo(video.getMember(), memberService.getFollowingId(video.getMember())));
+      result.add(videoInfo);
+    }
+
+    if (result.size() > 0) {
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      return new CursorResponse.Builder<>(requestUri, result)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
+    } else {
+      return new CursorResponse.Builder<>(requestUri, result).toBuild();
     }
   }
 }
