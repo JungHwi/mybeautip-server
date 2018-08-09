@@ -108,7 +108,7 @@ public class StoreController {
    */
   @Data
   @NoArgsConstructor
-  public static class StoreInfo {
+  static class StoreInfo {
     private Long id;
     private String name;
     private String description;
@@ -117,7 +117,7 @@ public class StoreController {
     private Integer likeCount;
     private Long likeId;
 
-    public StoreInfo(Store store, Long likeId) {
+    StoreInfo(Store store, Long likeId) {
       this.id = store.getId();
       this.name = store.getName();
       this.description = Strings.isNullOrEmpty(store.getDescription()) ? "" : store.getDescription();
@@ -135,7 +135,7 @@ public class StoreController {
     private Date createdAt;
     private StoreInfo store;
 
-    public StoreLikeInfo(StoreLike storeLike) {
+    StoreLikeInfo(StoreLike storeLike) {
       BeanUtils.copyProperties(storeLike, this);
       store = new StoreInfo(storeLike.getStore(), storeLike.getId());
     }

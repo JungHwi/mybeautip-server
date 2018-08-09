@@ -149,7 +149,7 @@ public class GoodsController {
     private Date createdAt;
     private GoodsInfo goods;
 
-    public GoodsLikeInfo(GoodsLike goodsLike) {
+    GoodsLikeInfo(GoodsLike goodsLike) {
       BeanUtils.copyProperties(goodsLike, this);
       goods = new GoodsInfo(goodsLike.getGoods(), goodsLike.getId());
     }
