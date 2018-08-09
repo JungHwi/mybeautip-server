@@ -112,6 +112,7 @@ public class GoodsController {
           }
 
           goodsRepository.updateLikeCount(goodsNo, 1);
+          goods.setLikeCount(goods.getLikeCount() + 1);
           GoodsLike goodsLike = goodsLikeRepository.save(new GoodsLike(goods));
           return new ResponseEntity<>(new GoodsLikeInfo(goodsLike), HttpStatus.OK);
         })

@@ -207,6 +207,7 @@ public class PostController {
          }
 
          postRepository.updateLikeCount(id, 1);
+         post.setLikeCount(post.getLikeCount() + 1);
          PostLike postLike = postLikeRepository.save(new PostLike(post));
          return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
        })

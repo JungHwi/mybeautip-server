@@ -73,6 +73,7 @@ public class StoreController {
               }
 
               storeRepository.updateLikeCount(id, 1);
+              store.setLikeCount(store.getLikeCount() + 1);
               StoreLike storeLike = storeLikeRepository.save(new StoreLike(store));
               return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
             })
