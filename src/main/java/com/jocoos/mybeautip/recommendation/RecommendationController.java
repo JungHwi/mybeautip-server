@@ -56,17 +56,13 @@ public class RecommendationController {
 
   @GetMapping("/members")
   public ResponseEntity<List<MemberInfo>> getRecommendedMembers(
-      @RequestParam(defaultValue = "5") int count) {
+      @RequestParam int count) {
     Slice<MemberRecommendation> members = memberRecommendationRepository.findAll(
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
 
-    members.stream().forEach(recommendation -> {
-      MemberInfo memberInfo = new MemberInfo();
-      BeanUtils.copyProperties(recommendation.getMember(), memberInfo);
-      log.debug("member info: {}", memberInfo);
-
-      result.add(memberInfo);
+    members.stream().forEach(r -> {
+      result.add(new MemberInfo(r.getMember(), memberServie.getFollowingId(r.getMember())));
     });
 
     return new ResponseEntity<>(result, HttpStatus.OK);
@@ -74,7 +70,7 @@ public class RecommendationController {
 
   @GetMapping("/goods")
   public ResponseEntity<List<GoodsInfo>> getRecommendedGoods(
-      @RequestParam(defaultValue = "5") int count) {
+      @RequestParam int count) {
     Slice<GoodsRecommendation> goods = goodsRecommendationRepository.findAll(
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
@@ -87,7 +83,7 @@ public class RecommendationController {
 
   @GetMapping("/motd")
   public ResponseEntity<List<VideoGoodsInfo>> getRecommendedMotds(
-    @RequestParam(defaultValue = "5") int count) {
+    @RequestParam int count) {
     Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
       PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
