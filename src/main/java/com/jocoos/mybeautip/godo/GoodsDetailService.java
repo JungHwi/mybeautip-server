@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class GoodsDetailService {
   @Value("${godomall.goods-view-url}")
   private String goodsViewUrl;
 
+  @Cacheable("goods_detail")
   public String getGoodsDetailPage(String goodsNo, boolean includeVideo)  {
     UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(goodsViewUrl);
     builder.queryParam("goodsNo", goodsNo);
