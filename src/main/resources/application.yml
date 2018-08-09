@@ -87,7 +87,7 @@ godomall:
   category-search-url: /goods/Category_Search.php?
   goods-search-url: /goods/Goods_Search.php?
   common-code-url: /common/Code_Search.php?
-
+  goods-view-url: http://m.mybeautip.tv/goods/goods_view.php
 
 management:
   endpoints:

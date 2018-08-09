@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,16 +33,20 @@ public class MemberService {
 
     if (authentication != null) {
       log.debug("authentication: {}", authentication);
+      Object principal = authentication.getPrincipal();
+      if (principal instanceof UserDetails) {
+        String username = ((User) authentication.getPrincipal()).getUsername();
+        if (StringUtils.isNumeric(username)) {
+          Long userId = Long.parseLong(username);
 
-      String username = ((User) authentication.getPrincipal()).getUsername();
-      if (StringUtils.isNumeric(username)) {
-        Long userId = Long.parseLong(username);
-
-        return memberRepository.findById(userId)
-           .map(m -> m.getId())
-           .orElseThrow(() -> new MemberNotFoundException(userId));
+          return memberRepository.findById(userId)
+             .map(m -> m.getId())
+             .orElseThrow(() -> new MemberNotFoundException(userId));
+        } else {
+          log.warn("user id can't convert to number: {}", username);
+        }
       } else {
-        log.warn("user id can't convert to number: {}", username);
+        log.warn("Unknown principal type");
       }
     }
 
