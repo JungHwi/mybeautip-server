@@ -147,11 +147,11 @@ public class GoodsController {
     private Long id;
     private Long createdBy;
     private Date createdAt;
-    private GoodsInfo goodsInfo;
+    private GoodsInfo goods;
 
     public GoodsLikeInfo(GoodsLike goodsLike) {
       BeanUtils.copyProperties(goodsLike, this);
-      goodsInfo = new GoodsInfo(goodsLike.getGoods(), goodsLike.getId());
+      goods = new GoodsInfo(goodsLike.getGoods(), goodsLike.getId());
     }
   }
 

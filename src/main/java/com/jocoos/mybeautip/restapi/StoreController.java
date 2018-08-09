@@ -133,11 +133,11 @@ public class StoreController {
     private Long id;
     private Long createdBy;
     private Date createdAt;
-    private StoreInfo storeInfo;
+    private StoreInfo store;
 
     public StoreLikeInfo(StoreLike storeLike) {
       BeanUtils.copyProperties(storeLike, this);
-      storeInfo = new StoreInfo(storeLike.getStore(), storeLike.getId());
+      store = new StoreInfo(storeLike.getStore(), storeLike.getId());
     }
   }
 }
