@@ -4,22 +4,24 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -29,17 +31,20 @@ import com.jocoos.mybeautip.video.VideoGoodsRepository;
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class VideoGoodsController {
   private final MemberService memberService;
-  private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsService goodsService;
+  private final MemberRepository memberRepository;
   private final GoodsRepository goodsRepository;
+  private final VideoGoodsRepository videoGoodsRepository;
 
   public VideoGoodsController(MemberService memberService,
                               VideoGoodsRepository videoGoodsRepository,
                               GoodsService goodsService,
+                              MemberRepository memberRepository,
                               GoodsRepository goodsRepository) {
     this.memberService = memberService;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsService = goodsService;
+    this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
   }
 
@@ -70,9 +75,10 @@ public class VideoGoodsController {
 
     for (String goodsNo : relatedGoods) {
       log.debug("goodsNo: " + goodsNo);
-      videoGoodsRepository.findByVideoKeyAndGoodsNo(videoKey, goodsNo)
-              .orElseGet(() -> videoGoodsRepository.save(new VideoGoods(videoKey, goodsNo, me,
-                      request.getType(), request.getThumbnailUrl())));
+      videoGoodsRepository.findByVideoKeyAndGoodsGoodsNo(videoKey, goodsNo)
+              .orElseGet(() -> videoGoodsRepository.save(
+                new VideoGoods(videoKey, request.getType(), request.getThumbnailUrl(),
+                goodsRepository.getOne(goodsNo), memberRepository.getOne(me))));
     }
   }
 
@@ -91,8 +97,7 @@ public class VideoGoodsController {
 
     List<GoodsInfo> relatedGoods = new ArrayList<>();
     for (VideoGoods video : list) {
-      Optional<Goods> optional = goodsRepository.findById(video.getGoodsNo());
-      optional.ifPresent(goods -> relatedGoods.add(goodsService.generateGoodsInfo(goods)));
+      relatedGoods.add(goodsService.generateGoodsInfo(video.getGoods()));
     }
     return relatedGoods;
   }
@@ -108,5 +113,23 @@ public class VideoGoodsController {
 
     @NotNull
     List<String> relatedGoods;
+  }
+
+  @Data
+  @NoArgsConstructor
+  public static class VideoGoodsInfo {
+    private String videoKey;
+    private String type;
+    private String thumbnailUrl;
+    private MemberInfo member;
+    private Date createdAt;
+
+    public VideoGoodsInfo(VideoGoods video, MemberInfo member) {
+      this.videoKey = video.getVideoKey();
+      this.type = video.getVideoType();
+      this.thumbnailUrl = video.getThumbnailUrl();
+      this.member = member;
+      this.createdAt = video.getCreatedAt();
+    }
   }
 }

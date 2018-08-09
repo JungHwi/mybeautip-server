@@ -1,18 +1,20 @@
 package com.jocoos.mybeautip.goods;
 
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.restapi.Response;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+
 import static org.springframework.data.domain.PageRequest.of;
+
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.restapi.CursorResponse;
 
 @Service
 @Slf4j
@@ -31,11 +33,11 @@ public class GoodsService {
     this.goodsLikeRepository = goodsLikeRepository;
   }
   
-  public Response getGoodsList(GoodsListRequest request) {
+  public CursorResponse getGoodsList(GoodsListRequest request) {
     Date startCursor = (Strings.isBlank(request.getCursor())) ?
         new Date() : new Date(Long.parseLong(request.getCursor()));
     
-    List<Goods> list = new ArrayList<>();
+    List<GoodsInfo> result = new ArrayList<>();
     Slice<Goods> slice = null;
     
     FILTER filter  = getRequestFilter(request);
@@ -65,27 +67,21 @@ public class GoodsService {
     }
   
     if (slice != null && slice.hasContent()) {
-      slice.forEach(list::add);
-    }
-  
-    Response<GoodsInfo> response = new Response<>();
-    if (list.size() >= request.getCount()) {
-      Goods goods = list.get(list.size() - 1);
-      String nextCursor = String.valueOf(goods.getModifiedAt().getTime());
-      String nextRef = response.generateNextRef(request, nextCursor);
-      response.setNextCursor(nextCursor);
-      response.setNextRef(nextRef);
-    } else {
-      response.setNextCursor("");
-      response.setNextRef("");
+      for (Goods goods : slice.getContent()) {
+        result.add(generateGoodsInfo(goods));
+      }
     }
 
-    List<GoodsInfo> goodsInfoList = new ArrayList<>();
-    for (Goods goods : list) {
-      goodsInfoList.add(generateGoodsInfo(goods));
+    if (result.size() > 0) {
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      return new CursorResponse.Builder<>("/api/1/goods", result)
+        .withCount(request.getCount())
+        .withCursor(nextCursor)
+        .withCategory(request.getCategory())
+        .withKeyword(request.getKeyword()).toBuild();
+    } else {
+      return new CursorResponse.Builder<>("/api/1/goods", result).toBuild();
     }
-    response.setContent(goodsInfoList);
-    return response;
   }
 
   private FILTER getRequestFilter(GoodsListRequest request) {
@@ -111,7 +107,7 @@ public class GoodsService {
     Long likeId = null;
     if (me != null) {
       Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goods.getGoodsNo(), me);
-      likeId = optional.isPresent() ? optional.get().getId() : null;
+      likeId = optional.map(GoodsLike::getId).orElse(null);
     }
     return new GoodsInfo(goods, likeId);
   }

@@ -64,7 +64,7 @@ public class MemberController {
   public Resource<MemberInfo> getMe(Principal principal) {
     log.debug("member id: {}", principal.getName());
     return memberRepository.findById(Long.parseLong(principal.getName()))
-              .map(m -> new Resource<>(new MemberInfo(m)))
+              .map(m -> new Resource<>(new MemberInfo(m, null)))
               .orElseThrow(() -> new MemberNotFoundException("member_not_found"));
   }
 
@@ -109,7 +109,7 @@ public class MemberController {
           }
           memberRepository.save(m);
 
-          return new ResponseEntity<>(new MemberInfo(m), HttpStatus.OK);
+          return new ResponseEntity<>(new MemberInfo(m, null), HttpStatus.OK);
         })
         .orElseThrow(() -> new MemberNotFoundException(principal.getName()));
   }
@@ -121,7 +121,7 @@ public class MemberController {
                                                @RequestParam(required = false) String keyword) {
     Slice<Member> list = findMembers(keyword, cursor, count);
     List<MemberInfo> members = Lists.newArrayList();
-    list.stream().forEach(m -> members.add(new MemberInfo(m)));
+    list.stream().forEach(m -> members.add(new MemberInfo(m, memberService.getFollowingId(m.getId()))));
 
     String nextCursor = null;
     if (members != null && members.size() > 0) {
@@ -191,7 +191,7 @@ public class MemberController {
 
   @GetMapping("/{id:.+}")
   public MemberInfo getMember(@PathVariable Long id) {
-    return memberRepository.findById(id).map(m -> new MemberInfo(m))
+    return memberRepository.findById(id).map(m -> new MemberInfo(m, memberService.getFollowingId(m)))
         .orElseThrow(() -> new MemberNotFoundException(id));
   }
 
@@ -301,7 +301,7 @@ public class MemberController {
 
   private CursorResponse createStoreLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<StoreLike> storeLikes = null;
+    Slice<StoreLike> storeLikes;
     List<StoreController.StoreInfo> result = Lists.newArrayList();
 
     if (cursor != null) {

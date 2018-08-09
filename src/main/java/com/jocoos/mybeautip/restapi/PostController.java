@@ -30,7 +30,6 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
@@ -171,7 +170,7 @@ public class PostController {
          List<MemberInfo> result = Lists.newArrayList();
          post.getWinners().stream().forEach(mid -> {
            memberRepository.findById(mid).ifPresent(m -> {
-             result.add(new MemberInfo(m));
+             result.add(new MemberInfo(m, memberService.getFollowingId(id)));
            });
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
@@ -255,7 +254,7 @@ public class PostController {
     comments.stream().forEach(comment -> {
       result.add(
          memberRepository.findById(comment.getCreatedBy())
-            .map(member -> new PostCommentInfo(comment, member))
+            .map(member -> new PostCommentInfo(comment, new MemberInfo(member, memberService.getFollowingId(member))))
             .orElseGet(() -> new PostCommentInfo(comment))
       );
     });
@@ -419,9 +418,9 @@ public class PostController {
       setCommentRef(comment);
     }
 
-    public PostCommentInfo(PostComment comment, Member member) {
+    public PostCommentInfo(PostComment comment, MemberInfo member) {
       this(comment);
-      this.owner = new MemberInfo(member);
+      this.owner = member;
       setCommentRef(comment);
     }
 
