@@ -103,8 +103,8 @@ public class GoodsService {
 
   public GoodsInfo generateGoodsInfo(Goods goods) {
     // Set like ID if exist
-    Long me = memberService.currentMemberId();
     Long likeId = null;
+    Long me = memberService.currentMemberId();
     if (me != null) {
       Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goods.getGoodsNo(), me);
       likeId = optional.map(GoodsLike::getId).orElse(null);

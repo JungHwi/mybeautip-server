@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -91,16 +92,22 @@ public class FollowingController {
   public CursorResponse getFollowing(@RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
-    return getFollowings(httpServletRequest.getRequestURI(),
-        memberService.currentMemberId(), cursor, count);
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+    return getFollowings(httpServletRequest.getRequestURI(), memberId, cursor, count);
   }
 
   @GetMapping("/me/followers")
   public CursorResponse getFollowers(@RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
-    return getFollowers(httpServletRequest.getRequestURI(),
-        memberService.currentMemberId(), cursor, count);
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+    return getFollowers(httpServletRequest.getRequestURI(), memberId, cursor, count);
   }
 
   @GetMapping("/{id}/followings")
@@ -108,6 +115,10 @@ public class FollowingController {
                                      @RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
     return getFollowings(httpServletRequest.getRequestURI(), id, cursor, count);
   }
   

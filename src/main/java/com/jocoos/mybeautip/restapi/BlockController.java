@@ -21,6 +21,7 @@ import org.apache.logging.log4j.util.Strings;
 
 import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
@@ -86,6 +87,10 @@ public class BlockController {
   public CursorResponse getMyBlockMembers(@RequestParam(defaultValue = "50") int count,
                                           @RequestParam(required = false) String cursor,
                                           HttpServletRequest httpServletRequest) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
     return getBlockMembers(httpServletRequest.getRequestURI(), cursor, count);
   }
 

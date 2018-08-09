@@ -41,15 +41,18 @@ public class StoreController {
 
   @GetMapping("/{id:.+}")
   public ResponseEntity<StoreController.StoreInfo> getStore(@PathVariable Long id) {
-    long me = memberService.currentMemberId();
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
     Optional<Store> optional = storeRepository.findById(id);
     StoreInfo storeInfo;
     if (optional.isPresent()) {
       Store store = optional.get();
 
       // Set like ID
-      Optional<StoreLike> optionalStoreLike = storeLikeRepository.findByStoreIdAndCreatedBy(store.getId(), me);
-      Long likeId = optionalStoreLike.isPresent() ? optionalStoreLike.get().getId() : null;
+      Optional<StoreLike> optionalStoreLike = storeLikeRepository.findByStoreIdAndCreatedBy(store.getId(), memberId);
+      Long likeId = optionalStoreLike.map(StoreLike::getId).orElse(null);
 
       storeInfo = new StoreInfo(store, likeId);
       return new ResponseEntity<>(storeInfo, HttpStatus.OK);
@@ -62,10 +65,6 @@ public class StoreController {
   @PostMapping("/{id:.+}/likes")
   public ResponseEntity<StoreController.StoreLikeInfo> addStoreLike(@PathVariable Long id) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     return storeRepository.findById(id)
             .map(store -> {
               Long storeId = store.getId();

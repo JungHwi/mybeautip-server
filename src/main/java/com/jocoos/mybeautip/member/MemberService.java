@@ -49,12 +49,18 @@ public class MemberService {
   }
 
   public Long getFollowingId(Long you) {
+    if (currentMemberId() == null) {
+      return null;
+    }
     Optional<Following> optional
       = followingRepository.findByMemberMeIdAndMemberYouId(currentMemberId(), you);
     return optional.map(Following::getId).orElse(null);
   }
 
   public Long getFollowingId(Member member) {
+    if (currentMemberId() == null) {
+      return null;
+    }
     Optional<Following> optional
       = followingRepository.findByMemberMeIdAndMemberYouId(currentMemberId(), member.getId());
     return optional.map(Following::getId).orElse(null);
