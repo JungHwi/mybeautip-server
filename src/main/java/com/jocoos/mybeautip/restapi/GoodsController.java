@@ -24,7 +24,7 @@ import org.apache.logging.log4j.util.Strings;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.godo.GodoWebService;
+import com.jocoos.mybeautip.godo.GoodsDetailService;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
@@ -42,20 +42,20 @@ public class GoodsController {
   private final GoodsRepository goodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final VideoGoodsRepository videoGoodsRepository;
-  private final GodoWebService godoWebService;
+  private final GoodsDetailService goodsDetailService;
 
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
                          GoodsRepository goodsRepository,
                          GoodsLikeRepository goodsLikeRepository,
                          VideoGoodsRepository videoGoodsRepository,
-                         GodoWebService godoWebService) {
+                         GoodsDetailService goodsDetailService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.goodsRepository = goodsRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.videoGoodsRepository = videoGoodsRepository;
-    this.godoWebService = godoWebService;
+    this.goodsDetailService = goodsDetailService;
   }
 
   @GetMapping
@@ -92,8 +92,9 @@ public class GoodsController {
   }
 
   @GetMapping("/{goodsNo}/details")
-  public String getGoodsDetail(@PathVariable String goodsNo) {
-    return godoWebService.getGoodsViewPage(goodsNo);
+  public ResponseEntity<String> getGoodsDetail(@PathVariable String goodsNo,
+                                               @RequestParam(defaultValue = "false") boolean includeVideo) {
+    return new ResponseEntity<>(goodsDetailService.getGoodsDetailPage(goodsNo, includeVideo), HttpStatus.OK);
   }
 
   @Transactional
