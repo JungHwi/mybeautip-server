@@ -12,7 +12,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -21,7 +20,6 @@ import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -110,20 +108,5 @@ public class VideoGoodsController {
 
     @NotNull
     List<String> relatedGoods;
-  }
-
-  @Data
-  @NoArgsConstructor
-  public static class VideoGoodsInfo {
-    private String videoKey;
-    private String type;
-    private String thumbnailUrl;
-    private MemberInfo member;
-
-    public VideoGoodsInfo(VideoGoods video) {
-      this.videoKey = video.getVideoKey();
-      this.type = video.getVideoType();
-      this.thumbnailUrl = video.getThumbnailUrl();
-    }
   }
 }
