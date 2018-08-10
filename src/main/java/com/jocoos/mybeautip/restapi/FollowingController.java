@@ -62,7 +62,7 @@ public class FollowingController {
     }
 
     if (!memberRepository.existsById(you)) {
-      throw new NotFoundException("member_not_found", "Member not found: " + you);
+      throw new MemberNotFoundException(you);
     }
     
     Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(me, you);
