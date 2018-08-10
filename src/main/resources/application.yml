@@ -71,6 +71,20 @@ mybeautip:
     sts:
       token-validity-duration-seconds: 129600 # 30days
 
+ignore:
+  usernames:
+    - 마이뷰팁
+    - 관리자
+    - 매니저
+    - 테스트
+    - 요쿠스
+    - mybeautip
+    - admin
+    - dev
+    - manager
+    - jocoos
+    - test
+
 cloud:
   aws:
     credentials:

@@ -23,6 +23,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.config.IgnoreConfig;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
@@ -47,17 +48,20 @@ public class MemberController {
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
+  private final IgnoreConfig ignoreConfig;
 
   public MemberController(MemberService memberService,
                           MemberRepository memberRepository,
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
-                          StoreLikeRepository storeLikeRepository) {
+                          StoreLikeRepository storeLikeRepository,
+                          IgnoreConfig ignoreConfig) {
     this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeLikeRepository = storeLikeRepository;
+    this.ignoreConfig = ignoreConfig;
   }
 
   @GetMapping("/me")
@@ -96,7 +100,7 @@ public class MemberController {
     return memberRepository.findById(Long.parseLong(principal.getName()))
         .map(m -> {
           if (updateMemberRequest.getUsername() != null) {
-            m.setUsername(updateMemberRequest.getUsername());
+            m.setUsername(validateUsername(updateMemberRequest.getUsername()));
           }
           if (updateMemberRequest.getEmail() != null) {
             m.setEmail(updateMemberRequest.getEmail());
@@ -112,6 +116,20 @@ public class MemberController {
           return new ResponseEntity<>(new MemberInfo(m, null), HttpStatus.OK);
         })
         .orElseThrow(() -> new MemberNotFoundException(principal.getName()));
+  }
+
+  private String validateUsername(String username) {
+    String lowerCase = username.toLowerCase();
+    ignoreConfig.getUsernames().stream().forEach(forbidden -> {
+      if (lowerCase.contains(forbidden.toLowerCase())) {
+        throw new BadRequestException("invalid_username", "username is not available");
+      }
+    });
+
+    // TODO: check duplicated username
+
+
+    return username;
   }
 
   @GetMapping
