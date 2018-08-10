@@ -100,7 +100,7 @@ public class MemberController {
     return memberRepository.findById(Long.parseLong(principal.getName()))
         .map(m -> {
           if (updateMemberRequest.getUsername() != null) {
-            m.setUsername(validateUsername(updateMemberRequest.getUsername()));
+            m.setUsername(validateUsername(m.getUsername(), updateMemberRequest.getUsername()));
           }
           if (updateMemberRequest.getEmail() != null) {
             m.setEmail(updateMemberRequest.getEmail());
@@ -118,16 +118,21 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(principal.getName()));
   }
 
-  private String validateUsername(String username) {
+  private String validateUsername(String origin, String username) {
+    if (origin.equalsIgnoreCase(username)) {
+      throw new BadRequestException("invalid_username", "Your username is the same as before");
+    }
+
     String lowerCase = username.toLowerCase();
     ignoreConfig.getUsernames().stream().forEach(forbidden -> {
       if (lowerCase.contains(forbidden.toLowerCase())) {
-        throw new BadRequestException("invalid_username", "username is not available");
+        throw new BadRequestException("invalid_username", "Your username is not available");
       }
     });
 
-    // TODO: check duplicated username
-
+    if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
+      throw new BadRequestException("duplicated_username", "Your username is already in use");
+    }
 
     return username;
   }
