@@ -14,7 +14,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.Data;
@@ -26,7 +25,6 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.godo.GoodsDetailService;
 import com.jocoos.mybeautip.goods.*;
-import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -77,13 +75,7 @@ public class GoodsController {
   public CursorResponse getRelatedVideos(@PathVariable("goods_no") String goodsNo,
                                          @RequestParam(defaultValue = "50") int count,
                                          @RequestParam(required = false) String cursor,
-                                         HttpServletRequest httpServletRequest,
-                                         BindingResult bindingResult) {
-    if (bindingResult.hasErrors()) {
-      log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid request");
-    }
-
+                                         HttpServletRequest httpServletRequest) {
     if (goodsNo.length() != 10) {
       throw new BadRequestException("invalid goods_no: " + goodsNo);
     }
@@ -161,12 +153,11 @@ public class GoodsController {
 
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNo(startCursor, goodsNo, pageable);
-    List<VideoGoodsController.VideoGoodsInfo> result = new ArrayList<>();
-    VideoGoodsController.VideoGoodsInfo videoInfo;
-    for (VideoGoods video : slice.getContent()) {
-      videoInfo = new VideoGoodsController.VideoGoodsInfo(video,
-        new MemberInfo(video.getMember(), memberService.getFollowingId(video.getMember())));
-      result.add(videoInfo);
+    List<VideoController.VideoInfo> result = new ArrayList<>();
+
+    for (VideoGoods videoGoods : slice.getContent()) {
+      result.add(new VideoController.VideoInfo(videoGoods.getVideo(),
+        memberService.getMemberInfo(videoGoods.getVideo().getMember())));
     }
 
     if (result.size() > 0) {

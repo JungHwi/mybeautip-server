@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.recommendation;
+package com.jocoos.mybeautip.video;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -8,23 +8,33 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @NoArgsConstructor
-@AllArgsConstructor
+@Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "motd_recommendations")
-public class MotdRecommendation {
+@Table(name = "video_comments")
+public class VideoComment {
   @Id
-  @Column(name = "video_key")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(nullable = false)
   private Long videoKey;
 
   @Column(nullable = false)
-  private int seq;
+  private String comment;
+
+  @Column
+  private Long parentId;
+
+  @Column
+  private int likeCount;
+
+  @Column
+  private int commentCount;
 
   @Column(nullable = false)
   @CreatedBy
@@ -38,9 +48,7 @@ public class MotdRecommendation {
   @LastModifiedDate
   private Date modifiedAt;
 
-  @Column
-  private Date startedAt;
-
-  @Column
-  private Date endedAt;
+  public VideoComment(Long videoKey) {
+    this.videoKey = videoKey;
+  }
 }

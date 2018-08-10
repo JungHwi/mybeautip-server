@@ -24,7 +24,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
-import com.jocoos.mybeautip.video.VideoGoodsInfo;
+import com.jocoos.mybeautip.restapi.VideoController;
 
 @Slf4j
 @RestController
@@ -269,7 +269,7 @@ public class AdminController {
   @Data
   private static class RecommendedMotdInfo {
     private String videoKey;
-    private VideoGoodsInfo video;
+    private VideoController.VideoInfo video;
     private Long createdBy;
     private Date createdAt;
     private Date startedAt;
