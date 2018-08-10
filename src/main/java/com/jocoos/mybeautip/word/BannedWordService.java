@@ -1,5 +1,8 @@
 package com.jocoos.mybeautip.word;
 
+import java.util.Hashtable;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -23,17 +26,29 @@ public class BannedWordService {
     }
 
     String lowerCase = word.toLowerCase();
-    bannedWordRepository.findByCategory(BannedWord.CATEGORY_USERNAME).stream().forEach(
-       w -> {
-         if (lowerCase.contains(w.getWord().toLowerCase())) {
-           throw new BadRequestException("invalid_username", "Your username is not available");
-         }
-       }
-    );
+    getDictionary(BannedWord.CATEGORY_USERNAME).forEach((key, value) -> {
+      if (lowerCase.contains(value.getWord().toLowerCase())) {
+        throw new BadRequestException("invalid_username", "Your username is not available");
+      }
+    });
+
     return word;
   }
 
   public String findWordAndReplaceWord(String word) {
+    // TODO: Find word and replace later
+
     return word;
+  }
+
+  @Cacheable("banned_word")
+  private Hashtable<String, BannedWord> getDictionary(int category) {
+    Hashtable<String, BannedWord> dictionary = new Hashtable<>();
+    bannedWordRepository.findByCategory(category).stream().forEach(
+       word -> {
+         dictionary.put(word.getWord(), word);
+       }
+    );
+    return dictionary;
   }
 }

@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "ignore_words")
+@Table(name = "banned_words")
 public class BannedWord {
 
   public static final int CATEGORY_USERNAME = 1;
