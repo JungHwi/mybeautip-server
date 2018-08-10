@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,7 +45,7 @@ public class FollowingController {
     this.followingRepository = followingRepository;
   }
 
-
+  @Transactional
   @PostMapping("/me/followings")
   public Response followMember(@Valid @RequestBody FollowingMemberRequest followingMemberRequest,
                                BindingResult bindingResult) {
@@ -59,6 +60,10 @@ public class FollowingController {
     if (me == you) {
       throw new BadRequestException("Can't follow myself");
     }
+
+    if (!memberRepository.existsById(you)) {
+      throw new NotFoundException("member_not_found", "Member not found: " + you);
+    }
     
     Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(me, you);
     Response response = new Response();
@@ -70,10 +75,13 @@ public class FollowingController {
       Following following = followingRepository.save(
         new Following(memberRepository.getOne(me), memberRepository.getOne(you)));
       response.setId(following.getId());
+      memberRepository.updateFollowingLikeCount(me, 1);
+      memberRepository.updateFollowerLikeCount(you, 1);
     }
     return response;
   }
-  
+
+  @Transactional
   @DeleteMapping("/me/followings/{id}")
   public void unFollowMember(@PathVariable("id") Long id) {
     Optional<Following> optional = followingRepository.findById(id);
@@ -83,6 +91,8 @@ public class FollowingController {
         throw new BadRequestException("Invalid following id: " + id);
       }
       followingRepository.delete(optional.get());
+      memberRepository.updateFollowingLikeCount(memberService.currentMemberId(), -1);
+      memberRepository.updateFollowerLikeCount(optional.get().getMemberYou().getId(), -1);
     } else {
       throw new NotFoundException("following_not_found", "following not found, id: " + id);
     }

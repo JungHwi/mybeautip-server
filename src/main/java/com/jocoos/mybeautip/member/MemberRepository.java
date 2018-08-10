@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -19,4 +20,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Slice<Member> findByUsernameContainingOrIntroContainingAndDeletedAtIsNull(String username, String intro, Pageable pageable);
 
   Slice<Member> findByUsernameContainingOrIntroContainingAndCreatedAtBeforeAndDeletedAtIsNull(String username, String intro, Date createdAt, Pageable pageable);
+
+  @Modifying
+  @Query("update Member m set m.followingCount = m.followingCount + ?2, m.modifiedAt = now() where m.id = ?1")
+  void updateFollowingLikeCount(Long id, Integer count);
+
+  @Modifying
+  @Query("update Member m set m.followerCount = m.followerCount + ?2, m.modifiedAt = now() where m.id = ?1")
+  void updateFollowerLikeCount(Long id, Integer count);
 }
