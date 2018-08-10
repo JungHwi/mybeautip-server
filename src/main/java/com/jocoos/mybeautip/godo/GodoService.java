@@ -127,9 +127,9 @@ public class GodoService {
     final String CATEGORY_S3_PREFIX = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/category/";
     final String CATEGORY_S3_SUFFIX = ".png";
 
-    if (source.getCateCd().length() == 3) {  // top category, FIXME: Use contant value
+    if (source.getCateCd().length() == 3) {  // top category,
       target.setGroup(GOODS_CATEGORY_TOP);
-    } else if (source.getCateCd().length() == 6) {  // sub category, FIXME: Use contant value
+    } else if (source.getCateCd().length() == 6) {  // sub category,
       target.setGroup(source.getCateCd().substring(0, 3));
     } else {
       log.warn("Category code is invalid: " + source.getCateCd());
