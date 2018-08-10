@@ -129,7 +129,7 @@ public class VideoController {
       this.videoKey = video.getVideoKey();
       this.type = video.getType();
       this.thumbnailUrl = video.getThumbnailUrl();
-      this.member = member; // FIXME:
+      this.member = member;
       this.createdAt = video.getCreatedAt();
     }
   }
