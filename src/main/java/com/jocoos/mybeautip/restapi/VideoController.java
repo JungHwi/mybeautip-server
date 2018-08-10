@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -23,77 +24,77 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-public class VideoGoodsController {
+public class VideoController {
   private final MemberService memberService;
   private final GoodsService goodsService;
   private final MemberRepository memberRepository;
   private final GoodsRepository goodsRepository;
+  private final VideoRepository videoRepository;
   private final VideoGoodsRepository videoGoodsRepository;
 
-  public VideoGoodsController(MemberService memberService,
-                              VideoGoodsRepository videoGoodsRepository,
-                              GoodsService goodsService,
-                              MemberRepository memberRepository,
-                              GoodsRepository goodsRepository) {
+  public VideoController(MemberService memberService,
+                         VideoGoodsRepository videoGoodsRepository,
+                         GoodsService goodsService,
+                         MemberRepository memberRepository,
+                         GoodsRepository goodsRepository,
+                         VideoRepository videoRepository) {
     this.memberService = memberService;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsService = goodsService;
     this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
+    this.videoRepository = videoRepository;
   }
 
-  @PostMapping("/api/1/videos/{video_key}/goods")
-  public void createVideo(@PathVariable("video_key") String videoKey,
+  @Transactional
+  @PostMapping("/api/1/videos/{video_key}")
+  public void createVideo(@PathVariable("video_key") Long videoKey,
                           @Valid @RequestBody CreateVideoGoodsRequest request,
                           BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
+    if (videoRepository.findByVideoKey(videoKey).isPresent()) {
+      throw new BadRequestException("Already exist, video key: " + videoKey);
+    }
+
+    Long me = memberService.currentMemberId();
+
     List<String> relatedGoods = request.getRelatedGoods();
-    if (relatedGoods.size() == 0) {
-      throw new BadRequestException("more than one related goods_no needed");
+    if (relatedGoods.size() == 0 || relatedGoods.size() > 10) {
+      throw new BadRequestException("related goods count is valid between 1 to 10.");
     }
 
-    for (String goodsNo : relatedGoods) {
-      if (goodsNo.length() != 10) {
-        throw new BadRequestException("invalid goods_no: " + goodsNo);
-      }
+    Video video = videoRepository.save(new Video(videoKey, request.getType(),
+      request.getThumbnailUrl(), memberRepository.getOne(me)));
 
+    for (String goodsNo : relatedGoods) {
       goodsRepository.findById(goodsNo)
-              .orElseThrow(() -> new NotFoundException("goods_not_found",
-                      "goods not found: " + goodsNo));
-    }
-
-    long me = memberService.currentMemberId();
-
-    for (String goodsNo : relatedGoods) {
-      log.debug("goodsNo: " + goodsNo);
-      videoGoodsRepository.findByVideoKeyAndGoodsGoodsNo(videoKey, goodsNo)
-              .orElseGet(() -> videoGoodsRepository.save(
-                new VideoGoods(videoKey, request.getType(), request.getThumbnailUrl(),
-                goodsRepository.getOne(goodsNo), memberRepository.getOne(me))));
+        .map(goods -> videoGoodsRepository.save(new VideoGoods(video, goods)))
+        .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
     }
   }
 
+  @Transactional
   @DeleteMapping("/api/1/videos/{video_key}")
-  public void setVideoRelatedGoods(@PathVariable("video_key") String videoKey) {
-    List<VideoGoods> videoGoodsList = videoGoodsRepository.findAllByVideoKey(videoKey);
-    videoGoodsRepository.deleteAll(videoGoodsList);
+  public void setVideoRelatedGoods(@PathVariable("video_key") Long videoKey) {
+    videoGoodsRepository.deleteByVideoVideoKey(videoKey);
+
+    videoRepository.deleteByVideoKey(videoKey);
   }
 
   @GetMapping("/api/1/videos/{video_key}/goods")
-  public List<GoodsInfo> getRelatedGoods(@PathVariable("video_key") String videoKey) {
-    List<VideoGoods> list = videoGoodsRepository.findAllByVideoKey(videoKey);
-    if (list == null || list.size() == 0) {
-      throw new NotFoundException("goods_not_found", "goods not found: " + videoKey);
-    }
+  public List<GoodsInfo> getRelatedGoods(@PathVariable("video_key") Long videoKey) {
+    List<VideoGoods> list = videoGoodsRepository.findAllByVideoVideoKey(videoKey);
 
     List<GoodsInfo> relatedGoods = new ArrayList<>();
     for (VideoGoods video : list) {
@@ -117,18 +118,18 @@ public class VideoGoodsController {
 
   @Data
   @NoArgsConstructor
-  public static class VideoGoodsInfo {
-    private String videoKey;
+  public static class VideoInfo {
+    private Long videoKey;
     private String type;
     private String thumbnailUrl;
     private MemberInfo member;
     private Date createdAt;
 
-    public VideoGoodsInfo(VideoGoods video, MemberInfo member) {
+    public VideoInfo(Video video, MemberInfo member) {
       this.videoKey = video.getVideoKey();
-      this.type = video.getVideoType();
+      this.type = video.getType();
       this.thumbnailUrl = video.getThumbnailUrl();
-      this.member = member;
+      this.member = member; // FIXME:
       this.createdAt = video.getCreatedAt();
     }
   }
