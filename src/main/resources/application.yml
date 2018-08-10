@@ -71,20 +71,6 @@ mybeautip:
     sts:
       token-validity-duration-seconds: 129600 # 30days
 
-ignore:
-  usernames:
-    - 마이뷰팁
-    - 관리자
-    - 매니저
-    - 테스트
-    - 요쿠스
-    - mybeautip
-    - admin
-    - dev
-    - manager
-    - jocoos
-    - test
-
 cloud:
   aws:
     credentials:
@@ -92,7 +78,6 @@ cloud:
       secretKey: jhN1cDDPMLa1qkEKYXhDcQwgiZv+PDVD4HnneJdA
     region:
       static: ap-northeast-2
-
 
 godomall:
   base-url: https://openhub.godo.co.kr/godomall5
@@ -107,10 +92,12 @@ management:
   endpoints:
     web:
       base-path: /monitor
+
 ---
 spring:
   profiles: local
 
 logging:
   config: classpath:log/log4j2-console.yml
+
 

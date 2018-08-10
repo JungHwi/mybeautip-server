@@ -23,12 +23,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.jocoos.mybeautip.config.IgnoreConfig;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
+import com.jocoos.mybeautip.word.BannedWordService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -48,20 +48,20 @@ public class MemberController {
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
-  private final IgnoreConfig ignoreConfig;
+  private final BannedWordService bannedWordService;
 
   public MemberController(MemberService memberService,
                           MemberRepository memberRepository,
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
                           StoreLikeRepository storeLikeRepository,
-                          IgnoreConfig ignoreConfig) {
+                          BannedWordService bannedWordService) {
     this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeLikeRepository = storeLikeRepository;
-    this.ignoreConfig = ignoreConfig;
+    this.bannedWordService = bannedWordService;
   }
 
   @GetMapping("/me")
@@ -123,18 +123,11 @@ public class MemberController {
       throw new BadRequestException("invalid_username", "Your username is the same as before");
     }
 
-    String lowerCase = username.toLowerCase();
-    ignoreConfig.getUsernames().stream().forEach(forbidden -> {
-      if (lowerCase.contains(forbidden.toLowerCase())) {
-        throw new BadRequestException("invalid_username", "Your username is not available");
-      }
-    });
-
     if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
       throw new BadRequestException("duplicated_username", "Your username is already in use");
     }
 
-    return username;
+    return bannedWordService.findWordAndThrowException(username);
   }
 
   @GetMapping
