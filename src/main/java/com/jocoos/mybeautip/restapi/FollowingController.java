@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
@@ -47,7 +49,7 @@ public class FollowingController {
 
   @Transactional
   @PostMapping("/me/followings")
-  public Response followMember(@Valid @RequestBody FollowingMemberRequest followingMemberRequest,
+  public FollowingResponse followMember(@Valid @RequestBody FollowingMemberRequest followingMemberRequest,
                                BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
@@ -66,19 +68,17 @@ public class FollowingController {
     }
     
     Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(me, you);
-    Response response = new Response();
     
     if (optional.isPresent()) {
       log.debug("Already followed");
-      response.setId(optional.get().getId());
+      return new FollowingResponse(optional.get().getId());
     } else {
       Following following = followingRepository.save(
         new Following(memberRepository.getOne(me), memberRepository.getOne(you)));
-      response.setId(following.getId());
       memberRepository.updateFollowingCount(me, 1);
       memberRepository.updateFollowerCount(you, 1);
+      return new FollowingResponse(following.getId());
     }
-    return response;
   }
 
   @Transactional
@@ -187,5 +187,11 @@ public class FollowingController {
     } else {
       return new CursorResponse.Builder<>(requestUri, result).toBuild();
     }
+  }
+
+  @Data
+  @AllArgsConstructor
+  class FollowingResponse {
+    Long id;
   }
 }
