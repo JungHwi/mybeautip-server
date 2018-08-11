@@ -32,19 +32,6 @@ CREATE TABLE `video_comments` (
   CONSTRAINT `fk_video_comments_videos` FOREIGN KEY (`video_key`) REFERENCES `videos` (`video_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Comment Likes
---
-CREATE TABLE `comment_likes` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `category` TINYINT NOT NULL DEFAULT 1 COMMENT '1: post_comments, 2: video_comments, 3: comments',
-  `comment_id` BIGINT NOT NULL,
-  `created_by` BIGINT NOT NULL,
-  `created_at` DATETIME(3) NOT NULL,
-  `modified_at` DATETIME(3) NULL,
-  PRIMARY KEY(`id`),
-  CONSTRAINT `fk_comment_likes_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE `video_goods`;
 --
