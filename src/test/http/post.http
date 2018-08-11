@@ -1,0 +1,74 @@
+### 헬스 체크
+GET http://{{host}}/monitor/health
+
+### 토큰 발급
+POST http://{{host}}/api/1/token
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic {{username}} {{password}}
+
+grant_type=naver&naver_id=33007614
+
+> {% client.global.set("access_token", response.body.access_token); %}
+
+### 내 정보 조회
+GET http://{{host}}/api/1/members/me
+Authorization: Bearer {{access_token}}
+
+### 배너 조회
+GET http://{{host}}/api/1/banners
+Authorization: Bearer {{access_token}}
+
+### 게시물 조회
+GET http://{{host}}/api/1/posts/2
+Authorization: Bearer {{access_token}}
+
+### 게시물 조회
+GET http://{{host}}/api/1/posts/2
+Authorization: Bearer {{access_token}}
+
+### 게시물 댓글 조회
+GET http://{{host}}/api/1/posts/1/comments
+Authorization: Bearer {{access_token}}
+
+### 게시물 댓글 등록
+POST http://{{host}}/api/1/posts/1/comments
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "comment": "아 갖고싶네요"
+}
+
+### 게시물 댓글 등록
+POST http://{{host}}/api/1/posts/1/comments
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "comment": "동감입니다.",
+  "parent_id": 8
+}
+
+### 게시물 댓글 변경
+PATCH http://{{host}}/api/1/posts/1/comments/9
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "comment": "저도 동감입니다."
+}
+
+### 게시물 댓글 삭제
+DELETE http://{{host}}/api/1/posts/1/comments/9
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+Accept: application/json
+
+### 게시물 댓글 조회
+GET http://{{host}}/api/1/posts/1/comments
+Authorization: Bearer {{access_token}}
+
+###

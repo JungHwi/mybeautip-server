@@ -1,0 +1,129 @@
+### 헬스 체크
+GET http://{{host}}/monitor/health
+
+### 토큰 발급
+POST http://{{host}}/api/1/token
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic {{username}} {{password}}
+
+grant_type=naver&naver_id=33007614
+
+> {% client.global.set("access_token", response.body.access_token); %}
+
+
+### FlipFlop 토큰 발급
+POST http://dev.flipflop.tv/oauth/token
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic dGVzdGFwcDM6dGVzdGFwcHNlY3JldDM=
+
+grant_type=client_credentials&user_id=black
+
+> {% client.global.set("flipflop_access_token", response.body.access_token); %}
+
+### FlipFlop 방송목록 조회
+GET https://dev.flipflop.tv/v1/videos?state=LIVE&count=2
+Authorization: Bearer {{flipflop_access_token}}
+
+11550
+
+### FlipFlop 방송 조회
+GET https://dev.flipflop.tv/v1/videos/11550
+Authorization: Bearer {{flipflop_access_token}}
+
+### 상품목록 조회
+GET http://{{host}}/api/1/goods?count=3
+Authorization: Bearer {{access_token}}
+
+### 방송정보 등록
+POST http://{{host}}/api/1/videos/11550
+Authorization: Bearer {{access_token}}
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+
+{
+  "type": "UPLOADED",
+  "thumbnail_url": "https://s3.ap-northeast-2.amazonaws.com/flipflop-dev/testapp3/videos/11550/thumbnail.jpg",
+  "related_goods": ["1000028365", "1000028364", "1000028363"]
+}
+
+### 방송정보 삭제
+DELETE http://{{host}}/api/1/videos/11550
+Authorization: Bearer {{access_token}}
+
+### 방송에 관련된 상품 조회
+GET http://{{host}}/api/1/videos/11550/goods
+Authorization: Bearer {{access_token}}
+
+### 상품에 관련된 방송 조회 (동영상 리뷰)
+GET http://{{host}}/api/1/goods/1000029818/videos
+Authorization: Bearer {{access_token}}
+
+### 방송 댓글 개수 조회
+GET http://{{host}}/api/1/videos/11550/comment_count
+Authorization: Bearer {{access_token}}
+
+### 방송 댓글 등록
+POST http://{{host}}/api/1/videos/11550/comments
+Authorization: Bearer {{access_token}}
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+
+{
+  "comment": "Good!"
+}
+
+### 방송 댓글 좋아요
+POST http://{{host}}/api/1/videocomment/2/likes
+Authorization: Bearer {{access_token}}
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+
+### 방송 댓글 좋아요 취소
+DELETE http://{{host}}/api/1/videocomment/2/likes/1
+Authorization: Bearer {{access_token}}
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+
+
+### 방송 댓글 등록
+POST http://{{host}}/api/1/videos/11550/comments
+Authorization: Bearer {{access_token}}
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+
+{
+  "comment": "Good! Good!",
+  "parent_id": 6
+}
+
+### 방송 댓글 수정
+PATCH http://{{host}}/api/1/videos/11550/comments/11
+Authorization: Bearer {{access_token}}
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+
+{
+  "comment": "Good! I love it."
+}
+
+### 방송 댓글 삭제
+DELETE http://{{host}}/api/1/videos/11550/comments/11
+Authorization: Bearer {{access_token}}
+Content-Type: application/json; charset=utf-8
+Accept: application/json
+
+### 방송 댓글 조회
+GET http://{{host}}/api/1/videos/11550/comments
+Authorization: Bearer {{access_token}}
+
+### 방송 댓글 목록 조회
+GET http://{{host}}/api/1/videos/11550/comments
+Authorization: Bearer {{access_token}}
+
+### 추천 MOTD
+GET http://{{host}}/api/1/recommendations/motd
+Authorization: Bearer {{access_token}}
+
+### 추천 LIVE
+GET http://{{host}}/api/1/recommendations/live
+Authorization: Bearer {{access_token}}

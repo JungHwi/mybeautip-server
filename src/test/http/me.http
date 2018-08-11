@@ -1,0 +1,35 @@
+### 헬스 체크
+GET http://{{host}}/monitor/health
+
+### 토큰 발급
+POST http://{{host}}/api/1/token
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic {{username}} {{password}}
+
+grant_type=naver&naver_id=33007614
+
+> {% client.global.set("access_token", response.body.access_token); %}
+
+### 내 정보 조회
+GET http://{{host}}/api/1/members/me
+Authorization: Bearer {{access_token}}
+
+### 사용자 업데이트
+PATCH http://{{host}}/api/1/members/me
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+Accept: application/json
+
+< ./request_member.json
+
+### 사용자 목록 조회
+GET http://{{host}}/api/1/members
+Authorization: Bearer {{access_token}}
+
+### 내가 팔로우 하는 사용자들 조회
+GET http://{{host}}/api/1/members/me/followings?count=2
+Authorization: Bearer {{access_token}}
+
+### 내 팔로워 조회
+GET http://{{host}}/api/1/members/me/followers
+Authorization: Bearer {{access_token}}

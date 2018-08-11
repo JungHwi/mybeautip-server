@@ -75,8 +75,8 @@ public class FollowingController {
       Following following = followingRepository.save(
         new Following(memberRepository.getOne(me), memberRepository.getOne(you)));
       response.setId(following.getId());
-      memberRepository.updateFollowingLikeCount(me, 1);
-      memberRepository.updateFollowerLikeCount(you, 1);
+      memberRepository.updateFollowingCount(me, 1);
+      memberRepository.updateFollowerCount(you, 1);
     }
     return response;
   }
@@ -91,8 +91,8 @@ public class FollowingController {
         throw new BadRequestException("Invalid following id: " + id);
       }
       followingRepository.delete(optional.get());
-      memberRepository.updateFollowingLikeCount(memberService.currentMemberId(), -1);
-      memberRepository.updateFollowerLikeCount(optional.get().getMemberYou().getId(), -1);
+      memberRepository.updateFollowingCount(memberService.currentMemberId(), -1);
+      memberRepository.updateFollowerCount(optional.get().getMemberYou().getId(), -1);
     } else {
       throw new NotFoundException("following_not_found", "following not found, id: " + id);
     }
