@@ -164,6 +164,9 @@ public class VideoController {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
+    videoRepository.findByVideoKey(videoKey)
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, video key: " + videoKey));
+
     if (request.getParentId() != null) {
       videoCommentRepository.findById(request.getParentId())
         .map(parent -> {
@@ -269,7 +272,7 @@ public class VideoController {
   }
 
   @Data
-  public static class VideoCommentInfo {
+  static class VideoCommentInfo {
     private Long id;
     private Long videoKey;
     private String comment;
