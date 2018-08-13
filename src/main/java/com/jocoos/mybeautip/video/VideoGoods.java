@@ -22,7 +22,7 @@ public class VideoGoods {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "video_key")
+  @JoinColumn(name = "video_id")
   private Video video;
 
   @ManyToOne

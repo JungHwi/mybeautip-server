@@ -19,6 +19,10 @@ import com.jocoos.mybeautip.member.Member;
 @Table(name = "videos")
 public class Video {
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column
   private Long videoKey;
 
   @Column

@@ -7,11 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 public interface VideoRepository extends CrudRepository<Video, Long> {
+
   @Modifying
-  @Query("update Video v set v.commentCount = v.commentCount + ?2, v.modifiedAt = now() where v.videoKey = ?1")
-  void updateCommentCount(Long videoKey, int count);
+  @Query("update Video v set v.commentCount = v.commentCount + ?2, v.modifiedAt = now() where v.id = ?1")
+  void updateCommentCount(Long id, int count);
 
   Optional<Video> findByVideoKey(Long videoKey);
-
-  void deleteByVideoKey(Long videoKey);
 }

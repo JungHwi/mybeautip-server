@@ -12,6 +12,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.jocoos.mybeautip.video.Video;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,8 +22,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "motd_recommendations")
 public class MotdRecommendation {
   @Id
-  @Column(name = "video_key")
-  private Long videoKey;
+  @Column(name = "video_id")
+  private Long videoId;
+
+  @MapsId
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "video_id")
+  private Video video;
 
   @Column(nullable = false)
   private int seq;

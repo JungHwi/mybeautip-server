@@ -82,7 +82,7 @@ public class RecommendationController {
 
     List<VideoController.VideoInfo> result = Lists.newArrayList();
     for (MotdRecommendation recommendation : videos) {
-      videoRepository.findByVideoKey(recommendation.getVideoKey()).map(video ->
+      videoRepository.findById(recommendation.getVideoId()).map(video ->
         result.add(new VideoController.VideoInfo(video, memberServie.getMemberInfo(video.getMember()))));
     }
     return new ResponseEntity<>(result, HttpStatus.OK);

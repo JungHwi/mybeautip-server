@@ -22,7 +22,7 @@ public class VideoComment {
   private Long id;
 
   @Column(nullable = false)
-  private Long videoKey;
+  private Long videoId;
 
   @Column(nullable = false)
   private String comment;
@@ -48,7 +48,7 @@ public class VideoComment {
   @LastModifiedDate
   private Date modifiedAt;
 
-  public VideoComment(Long videoKey) {
-    this.videoKey = videoKey;
+  public VideoComment(Long videoId) {
+    this.videoId = videoId;
   }
 }

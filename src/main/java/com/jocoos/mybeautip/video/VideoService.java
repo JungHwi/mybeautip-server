@@ -17,19 +17,19 @@ public class VideoService {
     this.videoCommentRepository = videoCommentRepository;
   }
 
-  public Slice<VideoComment> findCommentsByVideoKey(Long videoKey, String cursor, Pageable pageable) {
-    Slice<VideoComment> comments = null;
+  public Slice<VideoComment> findCommentsByVideoId(Long id, String cursor, Pageable pageable) {
+    Slice<VideoComment> comments;
     if (StringUtils.hasLength(cursor) && StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
-      comments = videoCommentRepository.findByVideoKeyAndCreatedAtAfterAndParentIdIsNull(videoKey, createdAt, pageable);
+      comments = videoCommentRepository.findByVideoIdAndCreatedAtAfterAndParentIdIsNull(id, createdAt, pageable);
     } else {
-      comments = videoCommentRepository.findByVideoKeyAndParentIdIsNull(videoKey, pageable);
+      comments = videoCommentRepository.findByVideoIdAndParentIdIsNull(id, pageable);
     }
     return comments;
   }
 
   public Slice<VideoComment> findCommentsByParentId(Long parentId, String cursor, Pageable pageable) {
-    Slice<VideoComment> comments = null;
+    Slice<VideoComment> comments;
     if (StringUtils.hasLength(cursor) && StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
       comments = videoCommentRepository.findByParentIdAndCreatedAtAfter(parentId, createdAt, pageable);

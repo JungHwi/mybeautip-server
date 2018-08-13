@@ -66,16 +66,15 @@ public class VideoController {
   }
 
   @Transactional
-  @PostMapping("/{video_key}")
-  public void createVideo(@PathVariable("video_key") Long videoKey,
-                          @Valid @RequestBody CreateVideoGoodsRequest request,
+  @PostMapping
+  public CreateVideoResponse createVideo(@Valid @RequestBody CreateVideoGoodsRequest request,
                           BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
-    if (videoRepository.findByVideoKey(videoKey).isPresent()) {
-      throw new BadRequestException("Already exist, video key: " + videoKey);
+    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
+      throw new BadRequestException("Already exist, video key: " + request.getVideoKey());
     }
 
     Long me = memberService.currentMemberId();
@@ -85,7 +84,7 @@ public class VideoController {
       throw new BadRequestException("related goods count is valid between 1 to 10.");
     }
 
-    Video video = videoRepository.save(new Video(videoKey, request.getType(),
+    Video video = videoRepository.save(new Video(request.getVideoKey(), request.getType(),
       request.getThumbnailUrl(), memberRepository.getOne(me)));
 
     memberRepository.updateVideoCount(me, 1);
@@ -95,19 +94,21 @@ public class VideoController {
         .map(goods -> videoGoodsRepository.save(new VideoGoods(video, goods)))
         .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
     }
+
+    return new CreateVideoResponse(video.getId());
   }
 
   @Transactional
-  @DeleteMapping("/{video_key}")
-  public void setVideoRelatedGoods(@PathVariable("video_key") Long videoKey) {
-    videoGoodsRepository.deleteByVideoVideoKey(videoKey);
-    videoRepository.deleteByVideoKey(videoKey);
+  @DeleteMapping("/{id}")
+  public void setVideoRelatedGoods(@PathVariable("id") Long id) {
+    videoGoodsRepository.deleteByVideoId(id);
+    videoRepository.deleteById(id);
     memberRepository.updateVideoCount(memberService.currentMemberId(), -1);
   }
 
-  @GetMapping("/{video_key}/goods")
-  public List<GoodsInfo> getRelatedGoods(@PathVariable("video_key") Long videoKey) {
-    List<VideoGoods> list = videoGoodsRepository.findAllByVideoVideoKey(videoKey);
+  @GetMapping("/{id}/goods")
+  public List<GoodsInfo> getRelatedGoods(@PathVariable("id") Long id) {
+    List<VideoGoods> list = videoGoodsRepository.findAllByVideoId(id);
 
     List<GoodsInfo> relatedGoods = new ArrayList<>();
     for (VideoGoods video : list) {
@@ -116,15 +117,15 @@ public class VideoController {
     return relatedGoods;
   }
 
-  @GetMapping("/{videoKey}/comment_count")
-  public CommentCountResponse getVideoCommentCount(@PathVariable Long videoKey) {
-    return videoRepository.findByVideoKey(videoKey)
+  @GetMapping("/{id}/comment_count")
+  public CommentCountResponse getVideoCommentCount(@PathVariable Long id) {
+    return videoRepository.findById(id)
       .map(v -> new CommentCountResponse(v.getCommentCount()))
-      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, video key: " + videoKey));
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
   }
 
-  @GetMapping("/{videoKey}/comments")
-  public CursorResponse getVideoComments(@PathVariable Long videoKey,
+  @GetMapping("/{id}/comments")
+  public CursorResponse getVideoComments(@PathVariable Long id,
                                          @RequestParam(defaultValue = "20") int count,
                                          @RequestParam(required = false) String cursor,
                                          @RequestParam(required = false) Long parentId) {
@@ -134,7 +135,7 @@ public class VideoController {
     if (parentId != null) {
       comments = videoService.findCommentsByParentId(parentId, cursor, page);
     } else {
-      comments = videoService.findCommentsByVideoKey(videoKey, cursor, page);
+      comments = videoService.findCommentsByVideoId(id, cursor, page);
     }
 
     List<VideoController.VideoCommentInfo> result = Lists.newArrayList();
@@ -150,22 +151,22 @@ public class VideoController {
     }
 
     return new CursorResponse
-      .Builder<>("/api/1/videos/" + videoKey + "/comments", result)
+      .Builder<>("/api/1/videos/" + id + "/comments", result)
       .withCount(count)
       .withCursor(nextCursor).toBuild();
   }
 
   @Transactional
-  @PostMapping("/{videoKey:.+}/comments")
-  public ResponseEntity addVideoComment(@PathVariable Long videoKey,
+  @PostMapping("/{id:.+}/comments")
+  public ResponseEntity addVideoComment(@PathVariable Long id,
                                         @RequestBody VideoController.CreateCommentRequest request,
                                         BindingResult bindingResult) {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
-    videoRepository.findByVideoKey(videoKey)
-      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, video key: " + videoKey));
+    videoRepository.findById(id)
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
 
     if (request.getParentId() != null) {
       videoCommentRepository.findById(request.getParentId())
@@ -176,9 +177,9 @@ public class VideoController {
         .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
     }
 
-    VideoComment videoComment = new VideoComment(videoKey);
+    VideoComment videoComment = new VideoComment(id);
     BeanUtils.copyProperties(request, videoComment);
-    videoRepository.updateCommentCount(videoKey, 1);
+    videoRepository.updateCommentCount(id, 1);
 
     return new ResponseEntity<>(
       new VideoController.VideoCommentInfo(videoCommentRepository.save(videoComment)),
@@ -186,8 +187,8 @@ public class VideoController {
     );
   }
 
-  @PatchMapping("/{videoKey:.+}/comments/{id:.+}")
-  public ResponseEntity updateVideoComment(@PathVariable Long videoKey,
+  @PatchMapping("/{videoId:.+}/comments/{id:.+}")
+  public ResponseEntity updateVideoComment(@PathVariable Long videoId,
                                            @PathVariable Long id,
                                            @RequestBody VideoController.UpdateCommentRequest request,
                                            BindingResult bindingResult) {
@@ -197,7 +198,7 @@ public class VideoController {
     }
 
     Long memberId = memberService.currentMemberId();
-    return videoCommentRepository.findByIdAndVideoKeyAndCreatedBy(id, videoKey, memberId)
+    return videoCommentRepository.findByIdAndVideoIdAndCreatedBy(id, videoId, memberId)
       .map(comment -> {
         comment.setComment(request.getComment());
         return new ResponseEntity<>(
@@ -209,13 +210,13 @@ public class VideoController {
   }
 
   @Transactional
-  @DeleteMapping("/{videoKey:.+}/comments/{id:.+}")
-  public ResponseEntity<?> removeVideoComment(@PathVariable Long videoKey,
+  @DeleteMapping("/{videoId:.+}/comments/{id:.+}")
+  public ResponseEntity<?> removeVideoComment(@PathVariable Long videoId,
                                               @PathVariable Long id) {
-    videoRepository.updateCommentCount(videoKey, -1);
+    videoRepository.updateCommentCount(videoId, -1);
 
     Long memberId = memberService.currentMemberId();
-    return videoCommentRepository.findByIdAndVideoKeyAndCreatedBy(id, videoKey, memberId)
+    return videoCommentRepository.findByIdAndVideoIdAndCreatedBy(id, videoId, memberId)
       .map(comment -> {
         if (comment.getParentId() != null) {
           videoCommentRepository.updateCommentCount(comment.getParentId(), -1);
@@ -228,6 +229,10 @@ public class VideoController {
 
   @Data
   public static class CreateVideoGoodsRequest {
+
+    @NotNull
+    Long videoKey;
+
     @NotNull
     String type;
 
@@ -242,6 +247,7 @@ public class VideoController {
   @Data
   @NoArgsConstructor
   public static class VideoInfo {
+    private Long id;
     private Long videoKey;
     private String type;
     private String thumbnailUrl;
@@ -274,7 +280,7 @@ public class VideoController {
   @Data
   static class VideoCommentInfo {
     private Long id;
-    private Long videoKey;
+    private Long videoId;
     private String comment;
     private Long parentId;
     private int commentCount;
@@ -296,9 +302,15 @@ public class VideoController {
 
     private void setCommentRef(VideoComment comment) {
       if (comment != null && comment.getCommentCount() > 0) {
-        this.commentRef = String.format("/api/1/videos/%d/comments?parentId=%d", comment.getVideoKey(), comment.getId());
+        this.commentRef = String.format("/api/1/videos/%d/comments?parentId=%d", comment.getVideoId(), comment.getId());
       }
     }
+  }
+
+  @Data
+  @AllArgsConstructor
+  private class CreateVideoResponse {
+    private Long id;
   }
 
   @Data

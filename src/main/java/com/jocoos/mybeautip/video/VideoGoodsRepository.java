@@ -8,9 +8,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.repository.CrudRepository;
 
 public interface VideoGoodsRepository extends CrudRepository<VideoGoods, Long> {
-  List<VideoGoods> findAllByVideoVideoKey(Long videoKey);
 
   Slice<VideoGoods> findByCreatedAtBeforeAndGoodsGoodsNo(Date cursor, String goodsNo, Pageable pageable);
 
-  void deleteByVideoVideoKey(Long videoKey);
+  void deleteByVideoId(Long id);
+
+  List<VideoGoods> findAllByVideoId(Long id);
 }
