@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class BlockController {
   }
   
   @PostMapping
-  public Response blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest,
+  public BlockResponse blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest,
                               BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
@@ -62,15 +63,13 @@ public class BlockController {
     log.debug("Block " + me + " : " + you);
     
     Optional<Block> optional = blockRepository.findByMeAndMemberYouId(me, you);
-    Response response = new Response();
-    
+
     if (optional.isPresent()) {
-      response.setId(optional.get().getId());
+      return new BlockResponse(optional.get().getId());
     } else {
       Block block = blockRepository.save(new Block(me, memberRepository.getOne(you)));
-      response.setId(block.getId());
+      return new BlockResponse(block.getId());
     }
-    return response;
   }
   
   @DeleteMapping("{id}")
@@ -130,5 +129,11 @@ public class BlockController {
       this.createdAt = block.getCreatedAt();
       this.member = member;
     }
+  }
+
+  @Data
+  @AllArgsConstructor
+  class BlockResponse {
+    Long id;
   }
 }

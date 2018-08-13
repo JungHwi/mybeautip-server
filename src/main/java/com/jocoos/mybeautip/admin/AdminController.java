@@ -24,7 +24,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
-import com.jocoos.mybeautip.video.VideoGoodsInfo;
+import com.jocoos.mybeautip.restapi.VideoController;
 
 @Slf4j
 @RestController
@@ -167,7 +167,7 @@ public class AdminController {
     @RequestBody CreateRecommendedMotdRequest request) {
     log.debug("request: {}", request);
 
-    Optional<MotdRecommendation> optional = motdRecommendationRepository.findByVideoKey(request.getVideoKey());
+    Optional<MotdRecommendation> optional = motdRecommendationRepository.findByVideoId(request.getVideoId());
     MotdRecommendation recommendation = optional.orElseGet(MotdRecommendation::new);
     BeanUtils.copyProperties(request, recommendation);
     log.debug("recommended motd: {}", recommendation);
@@ -260,7 +260,7 @@ public class AdminController {
 
   @Data
   private static class CreateRecommendedMotdRequest {
-    private String videoKey;
+    private Long videoId;
     private int seq;
     private String startedAt;
     private String endedAt;
@@ -268,8 +268,8 @@ public class AdminController {
 
   @Data
   private static class RecommendedMotdInfo {
-    private String videoKey;
-    private VideoGoodsInfo video;
+    private Long id;
+    private VideoController.VideoInfo video;
     private Long createdBy;
     private Date createdAt;
     private Date startedAt;

@@ -70,4 +70,8 @@ public class MemberService {
       = followingRepository.findByMemberMeIdAndMemberYouId(currentMemberId(), member.getId());
     return optional.map(Following::getId).orElse(null);
   }
+
+  public MemberInfo getMemberInfo(Member member) {
+    return new MemberInfo(member, getFollowingId(member));
+  }
 }

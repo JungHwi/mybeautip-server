@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.recommendation;
 
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -19,11 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.video.VideoGoods;
-import com.jocoos.mybeautip.video.VideoGoodsInfo;
-import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @RestController
@@ -32,23 +29,20 @@ public class RecommendationController {
 
   private final GoodsService goodsService;
   private final MemberService memberServie;
-  private final VideoGoodsRepository videoGoodsRepository;
-  private final MemberRepository memberRepository;
+  private final VideoRepository videoRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberServie,
-                                  VideoGoodsRepository videoGoodsRepository,
-                                  MemberRepository memberRepository,
+                                  VideoRepository videoRepository,
                                   MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository,
                                   MotdRecommendationRepository motdRecommendationRepository) {
     this.goodsService = goodsService;
     this.memberServie = memberServie;
-    this.videoGoodsRepository = videoGoodsRepository;
-    this.memberRepository = memberRepository;
+    this.videoRepository = videoRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
@@ -61,9 +55,8 @@ public class RecommendationController {
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
 
-    members.stream().forEach(r -> {
-      result.add(new MemberInfo(r.getMember(), memberServie.getFollowingId(r.getMember())));
-    });
+    members.stream().forEach(r ->
+      result.add(new MemberInfo(r.getMember(), memberServie.getFollowingId(r.getMember()))));
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
@@ -82,19 +75,15 @@ public class RecommendationController {
   }
 
   @GetMapping("/motd")
-  public ResponseEntity<List<VideoGoodsInfo>> getRecommendedMotds(
+  public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedMotds(
     @RequestParam(defaultValue = "100") int count) {
     Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
       PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
-    List<VideoGoodsInfo> result = Lists.newArrayList();
+    List<VideoController.VideoInfo> result = Lists.newArrayList();
     for (MotdRecommendation recommendation : videos) {
-      List<VideoGoods> list = videoGoodsRepository.findAllByVideoKey(recommendation.getVideoKey());
-      if (list.size() > 0) {
-        result.add(new VideoGoodsInfo(list.get(0),
-          new MemberInfo(memberRepository.getOne(list.get(0).getMember().getId()),
-            memberServie.getFollowingId(list.get(0).getMember()))));
-      }
+      videoRepository.findById(recommendation.getVideoId()).map(video ->
+        result.add(new VideoController.VideoInfo(video, memberServie.getMemberInfo(video.getMember()))));
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
