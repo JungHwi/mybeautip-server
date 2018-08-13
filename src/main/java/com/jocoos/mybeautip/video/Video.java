@@ -23,7 +23,7 @@ public class Video {
   private Long id;
 
   @Column
-  private Long videoKey;
+  private String videoKey;
 
   @Column
   private String type;
@@ -49,7 +49,7 @@ public class Video {
   @Column
   public Date deletedAt;
 
-  public Video(Long videoKey, String type, String thumbnailUrl, Member member) {
+  public Video(String videoKey, String type, String thumbnailUrl, Member member) {
     this.videoKey = videoKey;
     this.type = type;
     this.thumbnailUrl = thumbnailUrl;

@@ -231,7 +231,7 @@ public class VideoController {
   public static class CreateVideoGoodsRequest {
 
     @NotNull
-    Long videoKey;
+    String videoKey;
 
     @NotNull
     String type;
@@ -248,7 +248,7 @@ public class VideoController {
   @NoArgsConstructor
   public static class VideoInfo {
     private Long id;
-    private Long videoKey;
+    private String videoKey;
     private String type;
     private String thumbnailUrl;
     private Integer commentCount;

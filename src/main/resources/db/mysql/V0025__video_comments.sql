@@ -3,7 +3,7 @@
 --
 CREATE TABLE `videos` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `video_key` BIGINT NOT NULL,
+  `video_key` VARCHAR(10) NOT NULL,
   `type` VARCHAR(11) NOT NULL,
   `thumbnail_url` VARCHAR(200) NOT NULL,
   `comment_count` INT NOT NULL DEFAULT 0,
@@ -40,13 +40,13 @@ DROP TABLE `video_goods`;
 -- Video with Goods
 --
 CREATE TABLE `video_goods` (
-	id BIGINT NOT NULL AUTO_INCREMENT,
-	video_id BIGINT NOT NULL,
-	goods_no VARCHAR(10) NOT NULL,
-	created_at DATETIME(3) NOT NULL,
-	PRIMARY KEY (id),
-	CONSTRAINT `fk_video_goods_videos` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`),
-	CONSTRAINT `fk_video_goods_goods` FOREIGN KEY (`goods_no`) REFERENCES `goods` (`goods_no`)
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  video_id BIGINT NOT NULL,
+  goods_no VARCHAR(10) NOT NULL,
+  created_at DATETIME(3) NOT NULL,
+  PRIMARY KEY (id),
+  CONSTRAINT `fk_video_goods_videos` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`),
+  CONSTRAINT `fk_video_goods_goods` FOREIGN KEY (`goods_no`) REFERENCES `goods` (`goods_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
