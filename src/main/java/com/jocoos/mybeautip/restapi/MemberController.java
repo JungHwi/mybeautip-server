@@ -28,6 +28,7 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
+import com.jocoos.mybeautip.word.BannedWordService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -47,17 +48,20 @@ public class MemberController {
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
+  private final BannedWordService bannedWordService;
 
   public MemberController(MemberService memberService,
                           MemberRepository memberRepository,
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
-                          StoreLikeRepository storeLikeRepository) {
+                          StoreLikeRepository storeLikeRepository,
+                          BannedWordService bannedWordService) {
     this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeLikeRepository = storeLikeRepository;
+    this.bannedWordService = bannedWordService;
   }
 
   @GetMapping("/me")
@@ -96,7 +100,7 @@ public class MemberController {
     return memberRepository.findById(Long.parseLong(principal.getName()))
         .map(m -> {
           if (updateMemberRequest.getUsername() != null) {
-            m.setUsername(updateMemberRequest.getUsername());
+            m.setUsername(validateUsername(updateMemberRequest.getUsername()));
           }
           if (updateMemberRequest.getEmail() != null) {
             m.setEmail(updateMemberRequest.getEmail());
@@ -112,6 +116,14 @@ public class MemberController {
           return new ResponseEntity<>(new MemberInfo(m, null), HttpStatus.OK);
         })
         .orElseThrow(() -> new MemberNotFoundException(principal.getName()));
+  }
+
+  private String validateUsername(String username) {
+    if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
+      throw new BadRequestException("duplicated_username", "Your username is already in use");
+    }
+
+    return bannedWordService.findWordAndThrowException(username);
   }
 
   @GetMapping

@@ -79,7 +79,6 @@ cloud:
     region:
       static: ap-northeast-2
 
-
 godomall:
   base-url: https://openhub.godo.co.kr/godomall5
   partner-key: JUY0JUUwciVEMyVBQUxESg==
@@ -93,10 +92,12 @@ management:
   endpoints:
     web:
       base-path: /monitor
+
 ---
 spring:
   profiles: local
 
 logging:
   config: classpath:log/log4j2-console.yml
+
 
