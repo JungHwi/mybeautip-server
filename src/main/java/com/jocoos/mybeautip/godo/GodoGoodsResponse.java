@@ -41,12 +41,12 @@ public class GodoGoodsResponse {
     private String goodsNm;  // 상품명
     private Integer scmNo;  // 공급사번호 (1=본사, 그외 공급사)
     private String cateCd;  // 대표 카테고리
+    private String allCateCd; // 상품에 연결된 전체 카테고리
     private String goodsColor;  // 상품 색상
     private String goodsState;  // n: new, u: used, r: return
     private String brandCd;  // 브랜드코드
     private String makerNm;  // 제조사
     private String originNm;  // 원산지
-    
     private String makeYmd;  // 제조일
     private String launchYmd;  // 출시일
     private String effectiveStartYmd;  // 유효일자 시작일
@@ -57,7 +57,7 @@ public class GodoGoodsResponse {
     private Integer salesUnit;  // 묶음주문 단위
     private Integer minOrderCnt;  // 최소 구매수량
     private Integer maxOrderCnt;  // 최대 구매수량
-    
+
     private String salesStartYmd;  // 판매 시작일
     private String salesEndYmd;  // 판매 종료일
     private String goodsDiscountFl;  // 상품 할인 설정 ( y=사용함, n=사용안함)
@@ -68,7 +68,6 @@ public class GodoGoodsResponse {
     private BigDecimal fixedPrice;  // 정가
     private Integer deliverySno;  // 배송비 코드
     private String shortDescription;  // 짧은 설명 (250자 이내)
-    
     private String goodsDescription;  // PC 쇼핑몰 상세설명
     private String goodsDescriptionMobile;  // 모바일 쇼핑몰 상세설명
     private Integer orderCnt;  // 주문수
@@ -79,9 +78,35 @@ public class GodoGoodsResponse {
     private URL listImageData;  // 썸네일 이미지 정보
     private URL mainImageData;  // 리스트 이미지 정보
     private URL magnifyImageData;  // 확대이미지 정보
-    
     private URL detailImageData;  // 상세 이미지 정보
     private String regDt;  // 상품등록일
     private String modDt;  // 상품수정일
+
+    private String optionFl;  // 옵션 사용여부 (y|n)
+    private String optionDisplayFl; // 옵션 노출 타입 (s: 일체형, d: 분리형)
+    private String optionName; // 옵션명 (구분자 ^|^)
+    private String optionTextFl; // 텍스트옵션여부 (y|n)
+    private String addGoodsFl; // 추가상품여부 (y|n)
+    private String relationFl;  // 관련상품 설(n: 사용안함 a: auto, m:manual)
+    private String relationGoodsNo; // 관련상품코드 (구분자 ||)
+
+    private String detailInfoDeliveryFl;  // no
+    private String detailInfoDelivery; // 배송안내 (0=사용안함)
+    private String detailInfoDeliveryDirectInput;
+
+    private String detailInfoASFl;  // direct
+    private String detailInfoAS; // AS안내 (0=사용안함)
+    private String detailInfoASDirectInput;
+
+    private String detailInfoRefundFl;  // direct
+    private String detailInfoRefund; // 환불안내 (0=사용안함)
+    private String detailInfoRefundDirectInput;
+
+    private String detailInfoExchangeFl;  // no
+    private String detailInfoExchange; // 교환안내 (0=사용안함)
+    private String detailInfoExchangeDirectInput;
+
+    private String goodsSellFl;
+    private String goodsDisplayFl;
   }
 }

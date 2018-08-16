@@ -17,7 +17,7 @@ import java.util.Date;
 public class Store {
 
   @Id
-  private Long id;
+  private Integer id;
 
   @Column(nullable = false)
   private String name;
@@ -45,7 +45,7 @@ public class Store {
   @Column
   private Date deletedAt;
 
-  public Store(Long scmNo) {
+  public Store(Integer scmNo) {
     this.setId(scmNo);
   }
 }
