@@ -93,6 +93,11 @@ management:
     web:
       base-path: /monitor
 
+redis:
+  host: localhost
+  port: 6379
+  password: akdlqbxlq#1@Jocoos
+
 ---
 spring:
   profiles: local
