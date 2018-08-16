@@ -1,7 +1,7 @@
-package com.jocoos.mybeautip.member.cart;
+package com.jocoos.mybeautip.restapi;
 
-import java.util.List;
-import java.util.Optional;
+import javax.validation.Valid;
+import java.util.*;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
@@ -18,6 +19,8 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.cart.Cart;
+import com.jocoos.mybeautip.member.cart.CartRepository;
 
 @Slf4j
 @RestController
@@ -40,7 +43,7 @@ public class CartController {
   }
 
   @PostMapping
-  public CartResponse addCart(AddCartRequest request) {
+  public CartResponse addCart(@Valid @RequestBody AddCartRequest request) {
     Optional<Goods> optional = goodsRepository.findById(request.getGoodsNo());
     Goods goods;
 
@@ -64,12 +67,13 @@ public class CartController {
 
   @PatchMapping("{id}")
   public CartResponse updateCart(@PathVariable Long id,
-                                 UpdateCartRequest request) {
+                         @Valid @RequestBody UpdateCartRequest request) {
     Optional<Cart> optional = cartRepository.findById(id);
     Cart cart;
 
     if (optional.isPresent()) {
       cart = optional.get();
+      cart.setQuantity(request.getQuantity());
     } else {
       throw new NotFoundException("cart_item_not_found", "cart item not found, id: " + id);
     }
@@ -97,49 +101,85 @@ public class CartController {
     return new CartCountResponse(cartRepository.countByCreatedBy(memberId));
   }
 
-  @Data
-  class AddCartRequest {
-    String goodsNo;
-    Integer optionNo;
-    Integer quantity;
+  @GetMapping
+  public List<CartItemGroup> getCartItems() {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    List<Cart> carts = cartRepository.getCartItems(memberId);
+
+    Map<Integer, List<CartInfo>> map = new HashMap<>();
+    List<Integer> orderedScmNo = new ArrayList<>();
+    List<CartInfo> list;
+
+    for (Cart cart : carts) {
+      if (map.containsKey(cart.getScmNo())) {
+        list = map.get(cart.getScmNo());
+      } else {
+        list = new ArrayList<>();
+      }
+      list.add(new CartInfo(cart, goodsService.generateGoodsInfo(cart.getGoods())));
+      map.put(cart.getScmNo(), list);
+      if (!orderedScmNo.contains(cart.getScmNo())) {
+        orderedScmNo.add(cart.getScmNo());
+      }
+    }
+
+    List<CartItemGroup> result = new ArrayList<>();
+    for (int scmNo : orderedScmNo) {
+      result.add(new CartItemGroup(scmNo, map.get(scmNo)));
+    }
+
+    return result;
   }
 
   @Data
-  class UpdateCartRequest {
-    Integer quantity;
+  @NoArgsConstructor
+  private static class AddCartRequest {
+    private String goodsNo;
+    private Integer optionNo;
+    private Integer quantity;
+  }
+
+  @Data
+  @NoArgsConstructor
+  private static class UpdateCartRequest {
+    private Integer quantity;
   }
 
   @Data
   @AllArgsConstructor
-  class CartResponse {
-    Long id;
+  private static class CartResponse {
+    private Long id;
   }
 
   @Data
   @AllArgsConstructor
-  class CartCountResponse {
-    Integer count;
+  private static class CartCountResponse {
+    private Integer count;
   }
 
   @Data
-  class CartItemGroup {
-    Integer scmNo;
-    List<CartInfo> content;
+  private static class CartItemGroup {
+    private Integer scmNo;
+    private List<CartInfo> content;
 
-    public CartItemGroup(Integer scmNo, List<CartInfo> content) {
+    CartItemGroup(Integer scmNo, List<CartInfo> content) {
       this.scmNo = scmNo;
       this.content = content;
     }
   }
 
   @Data
-  class CartInfo {
-    Long id;
-    GoodsInfo goods;
-    Integer optionNo;
-    Integer quantity;
+  private static class CartInfo {
+    private Long id;
+    private GoodsInfo goods;
+    private Integer optionNo;
+    private Integer quantity;
 
-    public CartInfo(Cart cart, GoodsInfo goods) {
+    CartInfo(Cart cart, GoodsInfo goods) {
       BeanUtils.copyProperties(cart, this);
       this.goods = goods;
     }

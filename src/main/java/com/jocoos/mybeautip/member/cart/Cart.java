@@ -23,20 +23,20 @@ public class Cart {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column
-  private Boolean checked;
+  @Column(nullable = false)
+  private Boolean checked = false;
 
   @ManyToOne
   @JoinColumn(name = "goods_no")
   private Goods goods;
 
-  @Column
+  @Column(nullable = false)
   private Integer optionNo;
 
-  @Column
+  @Column(nullable = false)
   private Integer scmNo;
 
-  @Column
+  @Column(nullable = false)
   private Integer quantity;
 
   @Column(nullable = false)
@@ -51,8 +51,6 @@ public class Cart {
   @LastModifiedDate
   private Date modifiedAt;
 
-  @Column
-  private Date deletedAt;
 
   public Cart(Goods goods, int optionNo, int quantity) {
     this.goods = goods;
