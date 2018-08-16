@@ -13,10 +13,14 @@ public class JedisTest {
     JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
     JedisPool jedisPool = new JedisPool(jedisPoolConfig, "localhost", 6379, 2000, "akdlqbxlq#1@Jocoos");
     Jedis jedis = jedisPool.getResource();
+    System.out.println(jedis);
 
     Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores("mycom", "+inf", "1998");
     for(Tuple t: tuples) {
       System.out.println(t.getScore() + ", " + t.getElement());
     }
+
+    jedis.disconnect();
+    jedis.close();
   }
 }

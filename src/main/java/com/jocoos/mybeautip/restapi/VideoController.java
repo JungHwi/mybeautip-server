@@ -101,6 +101,7 @@ public class VideoController {
   @Transactional
   @DeleteMapping("/{id}")
   public void setVideoRelatedGoods(@PathVariable("id") Long id) {
+    // FIXME: Why doesn't check the video owner and exist the video?
     videoGoodsRepository.deleteByVideoId(id);
     videoRepository.deleteById(id);
     memberRepository.updateVideoCount(memberService.currentMemberId(), -1);
