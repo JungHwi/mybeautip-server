@@ -1,23 +1,30 @@
 package com.jocoos.mybeautip.goods;
 
-import lombok.Data;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Date;
 
-@Entity
-@Table(name = "goods")
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "goods")
 public class Goods {
   @Id
   private String goodsNo;  // 상품번호
   private String goodsNm;  // 상품명
   private String cateCd;  // 대표 카테고리
+  private String allCd;  // 대표 카테고리
   private String goodsColor;  // 상품 색상
   private String soldOutFl;  // 품절상태 (n= 정상, y=품절(수동))
   private String goodsDiscountFl;  // 상품 할인 설정 ( y=사용함, n=사용안함)
@@ -58,10 +65,17 @@ public class Goods {
   private Integer hitCnt;  // 조회수
   private URL add1ImageData;
   private URL add2ImageData;
+  private String videoUrl;
+
 
   @Column(nullable = false)
   private int likeCount;
 
+  @Column
+  @CreatedDate
   private Date createdAt;
+
+  @Column
+  @LastModifiedDate
   private Date modifiedAt;
 }

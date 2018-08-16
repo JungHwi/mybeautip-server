@@ -8,9 +8,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StoreLikeRepository extends JpaRepository<StoreLike, Long> {
-  Optional<StoreLike> findByStoreIdAndCreatedBy(Long storeId, Long memberId);
+  Optional<StoreLike> findByStoreIdAndCreatedBy(Integer storeId, Long memberId);
 
-  Optional<StoreLike> findByIdAndStoreIdAndCreatedBy(Long id, Long storeId, Long createdBy);
+  Optional<StoreLike> findByIdAndStoreIdAndCreatedBy(Long id, Integer storeId, Long createdBy);
 
   Slice<StoreLike> findByCreatedAtBeforeAndCreatedBy(Date createdAt, Long createdBy, Pageable pageable);
 

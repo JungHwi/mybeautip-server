@@ -1,12 +1,9 @@
 package com.jocoos.mybeautip.godo;
 
-import com.jocoos.mybeautip.goods.Category;
-import com.jocoos.mybeautip.goods.CategoryRepository;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.store.Store;
-import com.jocoos.mybeautip.store.StoreRepository;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -16,7 +13,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+
+import com.jocoos.mybeautip.goods.Category;
+import com.jocoos.mybeautip.goods.CategoryRepository;
+import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.store.Store;
+import com.jocoos.mybeautip.store.StoreRepository;
 
 @Service
 @Slf4j
@@ -84,7 +90,7 @@ public class GodoService {
   /**
    * Retrieve All categories using GodoMall Open API
    */
-  public synchronized void getCategoriesFromGodo() {
+  private synchronized void getCategoriesFromGodo() {
     long start = System.currentTimeMillis();
 
     List<GodoCategoryResponse.CategoryData> categories = getCategoriesWithCode("");
@@ -101,14 +107,13 @@ public class GodoService {
   }
 
   private List<GodoCategoryResponse.CategoryData> getCategoriesWithCode(String code) {
-    StringBuilder requestUrl = new StringBuilder();
-    requestUrl.append(baseUrl).append(categorySearchUrl)
-            .append("partner_key=").append(partnerKey)
-            .append("&key=").append(key)
-            .append("&cateCd=").append(code);
+    String requestUrl = baseUrl.concat(categorySearchUrl)
+            .concat("partner_key=").concat(partnerKey)
+            .concat("&key=").concat(key)
+            .concat("&cateCd=").concat(code);
 
     ResponseEntity<GodoCategoryResponse> response
-            = restTemplate.getForEntity(requestUrl.toString(), GodoCategoryResponse.class);
+            = restTemplate.getForEntity(requestUrl, GodoCategoryResponse.class);
 
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoCategoryResponse.CategoryData> dataList = response.getBody().getBody();
@@ -147,7 +152,7 @@ public class GodoService {
   /**
    * Retrieve All goods using GodoMall Open API
    */
-  public synchronized void getGoodsFromGodo() {
+  private synchronized void getGoodsFromGodo() {
     long start = System.currentTimeMillis();
     int nextPage = 1;
     int maxPage;
@@ -169,34 +174,40 @@ public class GodoService {
   }
 
   private GodoGoodsResponse.Header getGoodsFromGodo(int nextPage) {
-    StringBuilder requestUrl = new StringBuilder();
-    requestUrl.append(baseUrl).append(goodsSearchUrl)
-            .append("partner_key=").append(partnerKey)
-            .append("&key=").append(key)
-            .append("&page=").append(nextPage)
-            .append("&size=15");
+    String requestUrl = baseUrl.concat(goodsSearchUrl)
+      .concat("partner_key=").concat(partnerKey)
+      .concat("&key=").concat(key)
+      .concat("&page=").concat(String.valueOf(nextPage))
+      .concat("&size=15");
 
     ResponseEntity<GodoGoodsResponse> response
-            = restTemplate.getForEntity(requestUrl.toString(), GodoGoodsResponse.class);
+            = restTemplate.getForEntity(requestUrl, GodoGoodsResponse.class);
+
+
 
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoGoodsResponse.GoodsData> dataList = response.getBody().getBody();
-      Optional<Goods> optional;
       Goods goods;
 
       for (GodoGoodsResponse.GoodsData goodsData : dataList) {
-        goods = new Goods();
+        Optional<Goods> optional = goodsRepository.findById(goodsData.getGoodsNo());
+        goods = optional.orElseGet(Goods::new);
         BeanUtils.copyProperties(goodsData, goods);
-        optional = goodsRepository.findById(goods.getGoodsNo());
-        if (optional.isPresent()) {  // Already exist
-          updatedCount++;
-          goods.setCreatedAt(optional.get().getCreatedAt());
-          goods.setModifiedAt(new Date());
-        } else {  // New item
-          newCount++;
-          goods.setCreatedAt(new Date());
-          goods.setModifiedAt(new Date());
+
+        if ("n".equalsIgnoreCase(goodsData.getGoodsDisplayFl())
+          || "n".equalsIgnoreCase(goodsData.getGoodsSellFl())) {
+          goodsRepository.delete(goods);
+          continue;
         }
+
+        if (Strings.isNotEmpty(goodsData.getCateCd())) {
+          goods.setAllCd(generateCategoryStr(goodsData.getCateCd()));
+        }
+
+        if (Strings.isNotEmpty(goodsData.getAllCateCd())) {
+          goods.setAllCd(generateCategoryStr(goodsData.getAllCateCd()));
+        }
+
         goodsRepository.save(goods);
       }
       return response.getBody().getHeader();
@@ -207,7 +218,7 @@ public class GodoService {
   /**
    * Retrieve All stores(scm) using GodoMall Open API
    */
-  public synchronized void getStoresFromGodo() {
+  private synchronized void getStoresFromGodo() {
     long start = System.currentTimeMillis();
     int newCount = 0;
     int updatedCount = 0;
@@ -218,7 +229,7 @@ public class GodoService {
 
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-    headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
 
     String requestUrl = baseUrl + commonCodeUrl + "partner_key=" + partnerKey + "&key=" + key;
 
@@ -234,13 +245,13 @@ public class GodoService {
       List<GodoScmResponse.CodeData> dataList = response.getBody().getBody();
 
       for (GodoScmResponse.CodeData scm : dataList) {
-        Optional<Store> optional = storeRepository.findById(Long.parseLong(scm.getScmNo()));
+        Optional<Store> optional = storeRepository.findById(scm.getScmNo());
         Store store;
         if (optional.isPresent()) {
           store = optional.get();
           updatedCount++;
         } else {
-          store = new Store(Long.parseLong(scm.getScmNo()));
+          store = new Store(scm.getScmNo());
           store.setImageUrl(S3_STORE_PREFIX + scm.getScmNo() + S3_STORE_IMG_SUFFIX);
           store.setThumbnailUrl(S3_STORE_PREFIX + scm.getScmNo() + S3_STORE_THUMBNAIL_SUFFIX);
           newCount++;
@@ -253,5 +264,14 @@ public class GodoService {
     log.debug(String.format("GatheringStoreFromGodomall elapsed: %d miliseconds, " +
                     "new store items: %d, updated store items: %d",
             (System.currentTimeMillis() - start), newCount, updatedCount));
+  }
+
+  private String generateCategoryStr(String src) {
+    String result = "";
+    String[] strArray = StringUtils.split(src, "|");
+    for (String str : strArray) {
+      result = result.concat("|").concat(str).concat("|");
+    }
+    return result;
   }
 }

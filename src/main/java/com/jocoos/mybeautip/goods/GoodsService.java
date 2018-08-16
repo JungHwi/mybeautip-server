@@ -48,8 +48,9 @@ public class GoodsService {
             of(0, request.getCount()));
         break;
       case CATEGORY:
-        slice = goodsRepository.findAllByCategory(request.getCategory(), startCursor,
-            of(0, request.getCount()));
+        slice = goodsRepository.findAllByCategory(
+          generateSearchableCategory(request.getCategory()),
+          startCursor, of(0, request.getCount()));
         break;
         
       case KEYWORD:
@@ -58,8 +59,9 @@ public class GoodsService {
         break;
         
       case CATEGORY_AND_KEYWORD:
-        slice = goodsRepository.findAllByCategoryAndKeyword(request.getCategory(),
-            request.getKeyword(), startCursor, of(0, request.getCount()));
+        slice = goodsRepository.findAllByCategoryAndKeyword(
+          generateSearchableCategory(request.getCategory()),
+          request.getKeyword(), startCursor, of(0, request.getCount()));
         break;
       
       default:
@@ -97,7 +99,7 @@ public class GoodsService {
     if (Strings.isNotEmpty(request.getKeyword()) && Strings.isNotEmpty(request.getCategory())) {
       return FILTER.CATEGORY_AND_KEYWORD;
     }
-    
+
     return FILTER.ALL;
   }
 
@@ -110,5 +112,9 @@ public class GoodsService {
       likeId = optional.map(GoodsLike::getId).orElse(null);
     }
     return new GoodsInfo(goods, likeId);
+  }
+
+  private String generateSearchableCategory(String category) {
+    return "|".concat(category).concat("|");
   }
 }

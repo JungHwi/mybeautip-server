@@ -4,6 +4,10 @@ import com.google.common.base.Strings;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.store.Store;
 import com.jocoos.mybeautip.store.StoreLike;
@@ -13,13 +17,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -28,19 +38,25 @@ import java.util.Optional;
 public class StoreController {
 
   private final MemberService memberService;
+  private final GoodsService goodsService;
   private final StoreRepository storeRepository;
   private final StoreLikeRepository storeLikeRepository;
+  private final GoodsRepository goodsRepository;
 
   public StoreController(MemberService memberService,
+                         GoodsService goodsService,
                          StoreRepository storeRepository,
-                         StoreLikeRepository storeLikeRepository) {
+                         StoreLikeRepository storeLikeRepository,
+                         GoodsRepository goodsRepository) {
     this.memberService = memberService;
+    this.goodsService = goodsService;
     this.storeRepository = storeRepository;
     this.storeLikeRepository = storeLikeRepository;
+    this.goodsRepository = goodsRepository;
   }
 
   @GetMapping("/{id:.+}")
-  public ResponseEntity<StoreController.StoreInfo> getStore(@PathVariable Long id) {
+  public ResponseEntity<StoreController.StoreInfo> getStore(@PathVariable Integer id) {
     Long memberId = memberService.currentMemberId();
     if (memberId == null) {
       throw new MemberNotFoundException("Login required");
@@ -61,13 +77,50 @@ public class StoreController {
     }
   }
 
+  @GetMapping("/{id:.+}/goods")
+  public CursorResponse getStoreGoods(@PathVariable Integer id,
+                                      @RequestParam(defaultValue = "50") int count,
+                                      @RequestParam(required = false) String cursor,
+                                      HttpServletRequest httpServletRequest) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    storeRepository.findById(id)
+      .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
+
+    Date startCursor = (org.apache.logging.log4j.util.Strings.isBlank(cursor)) ?
+      new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<Goods> slice = goodsRepository.findByScmNo(startCursor, id, pageable);
+
+    List<GoodsInfo> result = new ArrayList<>();
+    if (slice != null && slice.hasContent()) {
+      for (Goods goods : slice.getContent()) {
+        result.add(goodsService.generateGoodsInfo(goods));
+      }
+    }
+
+    if (result.size() > 0) {
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      return new CursorResponse.Builder<>(httpServletRequest.getRequestURI(), result)
+        .withCount(count)
+        .withCursor(nextCursor)
+        .toBuild();
+    } else {
+      return new CursorResponse.Builder<>(httpServletRequest.getRequestURI(), result).toBuild();
+    }
+  }
+
   @Transactional
   @PostMapping("/{id:.+}/likes")
-  public ResponseEntity<StoreController.StoreLikeInfo> addStoreLike(@PathVariable Long id) {
+  public ResponseEntity<StoreController.StoreLikeInfo> addStoreLike(@PathVariable Integer id) {
     Long memberId = memberService.currentMemberId();
     return storeRepository.findById(id)
             .map(store -> {
-              Long storeId = store.getId();
+              Integer storeId = store.getId();
               if (storeLikeRepository.findByStoreIdAndCreatedBy(storeId, memberId).isPresent()) {
                 throw new BadRequestException("duplicated_store_like", "Already store liked");
               }
@@ -82,7 +135,7 @@ public class StoreController {
 
   @Transactional
   @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
-  public ResponseEntity<?> removeStoreLike(@PathVariable Long id,
+  public ResponseEntity<?> removeStoreLike(@PathVariable Integer id,
                                            @PathVariable Long likeId){
     Long memberId = memberService.currentMemberId();
     if (memberId == null) {
@@ -109,7 +162,7 @@ public class StoreController {
   @Data
   @NoArgsConstructor
   static class StoreInfo {
-    private Long id;
+    private Integer id;
     private String name;
     private String description;
     private String imageUrl;
