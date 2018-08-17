@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member.following;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -13,4 +14,6 @@ public interface FollowingRepository extends CrudRepository<Following, Long> {
   Slice<Following> findByCreatedAtBeforeAndMemberMeId(Date createdAt, Long me, Pageable pageable);
 
   Slice<Following> findByCreatedAtBeforeAndMemberYouId(Date createdAt, Long you, Pageable pageable);
+
+  List<Following> findByCreatedAtBeforeAndMemberYouId(Date createdAt, Long you);
 }

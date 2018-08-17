@@ -1,15 +1,6 @@
 package com.jocoos.mybeautip.config;
 
-import javax.servlet.Servlet;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
-import lombok.extern.slf4j.Slf4j;
-import org.h2.server.web.WebServlet;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -17,7 +8,11 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+import lombok.extern.slf4j.Slf4j;
+import org.h2.server.web.WebServlet;
 
 @Configuration
 @Slf4j
@@ -43,7 +38,6 @@ public class ApplicationConfig {
   public ServletRegistrationBean h2servletRegistration(){
     return new ServletRegistrationBean<WebServlet>(new WebServlet(), "/console/*");
   }
-
 
   @Bean
   public RestTemplate restTemplate() {
