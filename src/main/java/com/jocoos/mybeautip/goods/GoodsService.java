@@ -23,7 +23,7 @@ public class GoodsService {
   private final GoodsRepository goodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   
-  private enum FILTER {ALL, CATEGORY, KEYWORD, CATEGORY_AND_KEYWORD};
+  private enum FILTER {ALL, CATEGORY, KEYWORD, CATEGORY_AND_KEYWORD}
   
   public GoodsService(MemberService memberService,
                       GoodsRepository goodsRepository,
@@ -75,7 +75,7 @@ public class GoodsService {
     }
 
     if (result.size() > 0) {
-      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      String nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
       return new CursorResponse.Builder<>("/api/1/goods", result)
         .withCount(request.getCount())
         .withCursor(nextCursor)
