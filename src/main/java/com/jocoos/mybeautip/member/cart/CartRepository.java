@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface CartRepository extends JpaRepository<Cart, Long> {
   Optional<Cart> findByGoodsGoodsNoAndOptionNo(String goodsNo, Integer optionNo);
 
+  Optional<Cart> findByIdAndCreatedBy(Long id, Long memberId);
+
   Integer countByCreatedBy(Long createdBy);
 
   @Query("select c from Cart c where c.createdBy = ?1 order by c.modifiedAt desc")

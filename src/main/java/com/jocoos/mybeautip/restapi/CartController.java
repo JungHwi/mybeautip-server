@@ -1,10 +1,14 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
@@ -43,7 +47,7 @@ public class CartController {
   }
 
   @PostMapping
-  public CartResponse addCart(@Valid @RequestBody AddCartRequest request) {
+  public ResponseEntity<CartInfo> addCart(@Valid @RequestBody AddCartRequest request) {
     Optional<Goods> optional = goodsRepository.findById(request.getGoodsNo());
     Goods goods;
 
@@ -53,8 +57,9 @@ public class CartController {
       throw new NotFoundException("goods_not_found", "goods not found: " + request.getGoodsNo());
     }
 
+    Optional<Cart> optionalCart = cartRepository.findByGoodsGoodsNoAndOptionNo(
+      request.getGoodsNo(), request.getOptionNo());
     Cart cart;
-    Optional<Cart> optionalCart = cartRepository.findByGoodsGoodsNoAndOptionNo(request.getGoodsNo(), request.getOptionNo());
     if (optionalCart.isPresent()) { // Update quantity
       cart = optionalCart.get();
       cart.setQuantity(request.getQuantity());
@@ -62,13 +67,19 @@ public class CartController {
       cart = new Cart(goods, request.getOptionNo(), request.getQuantity());
     }
     Cart result = cartRepository.save(cart);
-    return new CartResponse(result.getId());
+    return new ResponseEntity<>(
+      new CartInfo(result, goodsService.generateGoodsInfo(result.getGoods())), HttpStatus.OK);
   }
 
   @PatchMapping("{id}")
-  public CartResponse updateCart(@PathVariable Long id,
+  public ResponseEntity<CartInfo> updateCart(@PathVariable Long id,
                          @Valid @RequestBody UpdateCartRequest request) {
-    Optional<Cart> optional = cartRepository.findById(id);
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    Optional<Cart> optional = cartRepository.findByIdAndCreatedBy(id, memberId);
     Cart cart;
 
     if (optional.isPresent()) {
@@ -78,12 +89,18 @@ public class CartController {
       throw new NotFoundException("cart_item_not_found", "cart item not found, id: " + id);
     }
     Cart result = cartRepository.save(cart);
-    return new CartResponse(result.getId());
+    return new ResponseEntity<>(
+      new CartInfo(result, goodsService.generateGoodsInfo(result.getGoods())), HttpStatus.OK);
   }
 
   @DeleteMapping("{id}")
   public void removeCart(@PathVariable Long id) {
-    Optional<Cart> optional = cartRepository.findById(id);
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    Optional<Cart> optional = cartRepository.findByIdAndCreatedBy(id, memberId);
 
     if (optional.isPresent()) {
       cartRepository.deleteById(id);
@@ -108,13 +125,13 @@ public class CartController {
       throw new MemberNotFoundException("Login required");
     }
 
-    List<Cart> carts = cartRepository.getCartItems(memberId);
+    List<Cart> allCartItems = cartRepository.getCartItems(memberId);
 
     Map<Integer, List<CartInfo>> map = new HashMap<>();
     List<Integer> orderedScmNo = new ArrayList<>();
     List<CartInfo> list;
 
-    for (Cart cart : carts) {
+    for (Cart cart : allCartItems) {
       if (map.containsKey(cart.getScmNo())) {
         list = map.get(cart.getScmNo());
       } else {
@@ -138,21 +155,23 @@ public class CartController {
   @Data
   @NoArgsConstructor
   private static class AddCartRequest {
+    @NotNull
     private String goodsNo;
-    private Integer optionNo;
-    private Integer quantity;
+
+    @NotNull
+    private int optionNo;
+
+    @NotNull
+    @Max(100)
+    private int quantity;
   }
 
   @Data
   @NoArgsConstructor
   private static class UpdateCartRequest {
-    private Integer quantity;
-  }
-
-  @Data
-  @AllArgsConstructor
-  private static class CartResponse {
-    private Long id;
+    @NotNull
+    @Max(100)
+    private int quantity;
   }
 
   @Data
