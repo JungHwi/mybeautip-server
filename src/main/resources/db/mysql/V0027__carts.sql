@@ -4,7 +4,7 @@
 CREATE TABLE `carts` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `goods_no` VARCHAR(10) NOT NULL,
-  `option_no` INT DEFAULT NULL,
+  `option_no` INT NOT NULL DEFAULT 0,
   `scm_no` INT NOT NULL,
   `quantity` INT NOT NULL DEFAULT 0,
   `created_by` BIGINT NOT NULL,
@@ -17,4 +17,11 @@ CREATE TABLE `carts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+ALTER TABLE `stores` modify COLUMN `created_at` DATETIME(3) NOT NULL;
+ALTER TABLE `stores` modify COLUMN `modified_at` DATETIME(3) DEFAULT NULL;
+ALTER TABLE `stores` modify COLUMN `started_at` DATETIME(3) DEFAULT NULL;
+
+ALTER TABLE `store_likes` modify COLUMN `created_at` DATETIME(3) DEFAULT NULL;
+
+ALTER TABLE `banned_words` modify COLUMN `created_at` DATETIME(3) DEFAULT NULL;
 
