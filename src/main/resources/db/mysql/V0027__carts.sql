@@ -3,7 +3,6 @@
 --
 CREATE TABLE `carts` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `checked` TINYINT NOT NULL DEFAULT 0,
   `goods_no` VARCHAR(10) NOT NULL,
   `option_no` INT DEFAULT NULL,
   `scm_no` INT NOT NULL,

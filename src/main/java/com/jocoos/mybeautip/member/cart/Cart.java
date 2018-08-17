@@ -23,9 +23,6 @@ public class Cart {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private Boolean checked = false;
-
   @ManyToOne
   @JoinColumn(name = "goods_no")
   private Goods goods;
