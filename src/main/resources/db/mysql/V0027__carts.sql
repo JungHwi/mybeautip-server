@@ -19,7 +19,7 @@ CREATE TABLE `carts` (
 
 ALTER TABLE `stores` modify COLUMN `created_at` DATETIME(3) NOT NULL;
 ALTER TABLE `stores` modify COLUMN `modified_at` DATETIME(3) DEFAULT NULL;
-ALTER TABLE `stores` modify COLUMN `started_at` DATETIME(3) DEFAULT NULL;
+ALTER TABLE `stores` modify COLUMN `deleted_at` DATETIME(3) DEFAULT NULL;
 
 ALTER TABLE `store_likes` modify COLUMN `created_at` DATETIME(3) DEFAULT NULL;
 
