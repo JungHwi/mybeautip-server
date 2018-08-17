@@ -49,5 +49,4 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
   @Query("update Goods g set g.likeCount = g.likeCount + ?2, g.modifiedAt = now() " +
       "where g.goodsNo = ?1")
   void updateLikeCount(String goodsNo, Integer count);
-
 }
