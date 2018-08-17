@@ -1,13 +1,8 @@
 # mybeautip Server #
 
-## Build ##
+## DB on docker with charset ##
 ```
-./gradlew build
-```
-
-## DB connect db on docker with charset ##
-```
-docker exec -it transcoder-db mysql -u mybeautip -p mybeautip --default-character-set=utf8
+docker exec -it mybeautip-db mysql -u mybeautip -p mybeautip --default-character-set=utf8
 ```
 
 ## DB setting ##
@@ -15,6 +10,21 @@ docker exec -it transcoder-db mysql -u mybeautip -p mybeautip --default-characte
 create database mybeautip charset=utf8;
 create user mybeautip@'%' identified by 'akdlqbxlq#1@Jocoos';
 grant all privileges on mybeautip.* to mybeautip@'%';
+```
+
+## Redis on docker ##
+```
+$ docker run --name mybeautip-redis -d -p 6379:6379 -v /your/dir:/data redis redis-server --requirepass akdlqbxlq#1@Jocoos --appendonly yes
+$ docker exec -it mybeautip-redis redis-cli
+
+> auth akdlqbxlq#1@Jocoos
+> config get requirepass
+```
+
+
+## Build ##
+```
+./gradlew build
 ```
 
 ## Run with java application ##
