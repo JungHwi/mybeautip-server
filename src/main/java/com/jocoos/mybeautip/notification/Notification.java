@@ -18,6 +18,13 @@ import com.jocoos.mybeautip.member.Member;
 @Table(name = "notifications")
 public class Notification {
 
+  public static final String VIDEO_STARTED = "notification.video_started";
+  public static final String MENTION = "notification.mention";
+  public static final String VIDEO_COMMENT = "notification.video_comment";
+  public static final String COMMENT_REPLY = "notification.comment_reply";
+  public static final String FOLLOWING = "notification.following";
+  public static final String VIDEO_LIKE = "notification.video_like";
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
