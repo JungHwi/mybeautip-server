@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.godo;
 
+import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -17,10 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
-import com.jocoos.mybeautip.goods.Category;
-import com.jocoos.mybeautip.goods.CategoryRepository;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.recommendation.GoodsRecommendation;
+import com.jocoos.mybeautip.recommendation.GoodsRecommendationRepository;
 import com.jocoos.mybeautip.store.Store;
 import com.jocoos.mybeautip.store.StoreRepository;
 
@@ -31,6 +31,8 @@ public class GodoService {
   private final CategoryRepository categoryRepository;
   private final GoodsRepository goodsRepository;
   private final StoreRepository storeRepository;
+  private final GoodsLikeRepository goodsLikeRepository;
+  private final GoodsRecommendationRepository goodsRecommendationRepository;
 
   @Value("${godomall.base-url}")
   private String baseUrl;
@@ -56,14 +58,18 @@ public class GodoService {
   private static int newCount;
   private static int updatedCount;
 
-  public GodoService(CategoryRepository categoryRepository,
+  public GodoService(RestTemplate restTemplate,
+                     CategoryRepository categoryRepository,
                      GoodsRepository goodsRepository,
-                     RestTemplate restTemplate,
-                     StoreRepository storeRepository) {
+                     StoreRepository storeRepository,
+                     GoodsLikeRepository goodsLikeRepository,
+                     GoodsRecommendationRepository goodsRecommendationRepository) {
+    this.restTemplate = restTemplate;
     this.categoryRepository = categoryRepository;
     this.goodsRepository = goodsRepository;
-    this.restTemplate = restTemplate;
     this.storeRepository = storeRepository;
+    this.goodsLikeRepository = goodsLikeRepository;
+    this.goodsRecommendationRepository = goodsRecommendationRepository;
   }
 
   @Scheduled(initialDelay = 30000, fixedRate = 86400000)  // 30 sec, 1 day
@@ -196,7 +202,7 @@ public class GodoService {
 
         if ("n".equalsIgnoreCase(goodsData.getGoodsDisplayFl())
           || "n".equalsIgnoreCase(goodsData.getGoodsSellFl())) {
-          goodsRepository.delete(goods);
+          deleteGoods(goods);
           continue;
         }
 
@@ -273,5 +279,16 @@ public class GodoService {
       result = result.concat("|").concat(str).concat("|");
     }
     return result;
+  }
+
+  @Transactional
+  public void deleteGoods(Goods goods) {
+    List<GoodsRecommendation> recommendations = goodsRecommendationRepository.findAllByGoodsGoodsNo(goods.getGoodsNo());
+    goodsRecommendationRepository.deleteAll(recommendations);
+
+    List<GoodsLike> goodsLikes = goodsLikeRepository.findAllByGoodsGoodsNo(goods.getGoodsNo());
+    goodsLikeRepository.deleteAll(goodsLikes);
+
+    goodsRepository.delete(goods);
   }
 }

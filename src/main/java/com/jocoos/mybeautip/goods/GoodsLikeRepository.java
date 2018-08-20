@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.goods;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,6 @@ public interface GoodsLikeRepository extends JpaRepository<GoodsLike, Long> {
   Slice<GoodsLike> findByCreatedBy(Long createdBy, Pageable pageable);
 
   Integer countByCreatedBy(Long createdBy);
+
+  List<GoodsLike> findAllByGoodsGoodsNo(String goodsNo);
 }
