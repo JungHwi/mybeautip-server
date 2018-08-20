@@ -10,7 +10,6 @@ import org.aspectj.lang.annotation.Before;
 
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @Aspect
@@ -30,8 +29,10 @@ public class FeedAspect {
 
     if (result instanceof Video) {
       Video video = (Video) result;
-      log.debug("video: {}", video);
-      feedService.feedVideo(video);
+      if (video.getDeletedAt() == null) {
+        log.debug("video: {}", video);
+        feedService.feedVideo(video);
+      }
     }
   }
 
@@ -62,14 +63,17 @@ public class FeedAspect {
     }
   }
 
-  @Before(value = "execution(* com.jocoos.mybeautip.video.VideoRepository.deleteById(..))")
+  @Before(value = "execution(* com.jocoos.mybeautip.video.VideoRepository.save(..))")
   public void onBeforeDeleteVideo(JoinPoint joinPoint) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
     Object arg = joinPoint.getArgs()[0];
-    if (arg instanceof Long) {
-      Long videoId = (Long) arg;
-      log.debug("videoId: {}", videoId);
-      feedService.feedDeletedVideo(videoId);
+    if (arg instanceof Video) {
+      Video video = (Video) arg;
+
+      if (video.getDeletedAt() != null) {
+        log.debug("videoId: {}", video.getId());
+        feedService.feedDeletedVideo(video.getId());
+      }
     }
   }
 
