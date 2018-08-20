@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -73,7 +74,7 @@ public class VideoController {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
-    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
+    if (videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey()).isPresent()) {
       throw new BadRequestException("Already exist, video key: " + request.getVideoKey());
     }
 
@@ -100,11 +101,19 @@ public class VideoController {
 
   @Transactional
   @DeleteMapping("/{id}")
-  public void setVideoRelatedGoods(@PathVariable("id") Long id) {
-    // FIXME: Why doesn't check the video owner and exist the video?
-    videoGoodsRepository.deleteByVideoId(id);
-    videoRepository.deleteById(id);
-    memberRepository.updateVideoCount(memberService.currentMemberId(), -1);
+  public void deleteVideo(@PathVariable("id") Long id) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    videoRepository.findByIdAndMemberIdAndDeletedAtIsNull(id, memberId).map(video -> {
+      videoGoodsRepository.deleteByVideoId(id);
+      video.setDeletedAt(new Date());
+      videoRepository.save(video);
+      memberRepository.updateVideoCount(memberService.currentMemberId(), -1);
+      return Optional.empty();
+    }).orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
   }
 
   @GetMapping("/{id}/goods")
