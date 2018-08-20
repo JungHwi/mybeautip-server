@@ -26,12 +26,6 @@ public class Video {
   private String videoKey;
 
   @Column
-  private String type;
-
-  @Column
-  private String thumbnailUrl;
-
-  @Column
   private int commentCount;
 
   @ManyToOne
@@ -49,10 +43,8 @@ public class Video {
   @Column
   public Date deletedAt;
 
-  public Video(String videoKey, String type, String thumbnailUrl, Member member) {
+  public Video(String videoKey, Member member) {
     this.videoKey = videoKey;
-    this.type = type;
-    this.thumbnailUrl = thumbnailUrl;
     this.member = member;
   }
 }

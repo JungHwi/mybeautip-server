@@ -25,3 +25,5 @@ ALTER TABLE `store_likes` modify COLUMN `created_at` DATETIME(3) DEFAULT NULL;
 
 ALTER TABLE `banned_words` modify COLUMN `created_at` DATETIME(3) DEFAULT NULL;
 
+ALTER TABLE `videos` DROP COLUMN `type`;
+ALTER TABLE `videos` DROP COLUMN `thumbnail_url`;

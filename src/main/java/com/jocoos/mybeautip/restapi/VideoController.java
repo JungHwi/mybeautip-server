@@ -85,8 +85,7 @@ public class VideoController {
       throw new BadRequestException("related goods count is valid between 1 to 10.");
     }
 
-    Video video = videoRepository.save(new Video(request.getVideoKey(), request.getType(),
-      request.getThumbnailUrl(), memberRepository.getOne(me)));
+    Video video = videoRepository.save(new Video(request.getVideoKey(), memberRepository.getOne(me)));
 
     memberRepository.updateVideoCount(me, 1);
 
@@ -244,13 +243,6 @@ public class VideoController {
     String videoKey;
 
     @NotNull
-    String type;
-
-    @NotNull
-    @Size(max = 200)
-    String thumbnailUrl;
-
-    @NotNull
     List<String> relatedGoods;
   }
 
@@ -259,8 +251,6 @@ public class VideoController {
   public static class VideoInfo {
     private Long id;
     private String videoKey;
-    private String type;
-    private String thumbnailUrl;
     private Integer commentCount;
     private MemberInfo member;
     private Date createdAt;
