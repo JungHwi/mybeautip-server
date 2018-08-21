@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.notification;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -76,14 +75,14 @@ public class Notification {
   @CreatedDate
   private Date createdAt;
 
-  public Notification(Video video, Member target) {
+  public Notification(Video video, String thumbnail, Member target) {
     this.type = VIDEO_STARTED;
     this.targetMember = target;
     this.args = Lists.newArrayList(video.getMember().getUsername());
     this.resourceType = "video";
     this.resourceId = video.getId();
     this.resourceOwner = video.getMember().getId();
-    this.imageUrl = video.getThumbnailUrl();
+    this.imageUrl = thumbnail;
   }
 
   public Notification(Following following) {
@@ -108,20 +107,20 @@ public class Notification {
     this.args = Lists.newArrayList(source.getUsername(), videoComment.getComment());
   }
 
-  public Notification(Video video, VideoComment videoComment, Member source, Member target) {
+  public Notification(String thumbnail, VideoComment videoComment, Member source, Member target) {
     this.type = VIDEO_COMMENT_REPLY;
     this.targetMember = target;
     this.read = false;
     this.resourceType = "video_comment";
     this.resourceId = videoComment.getId();
     this.resourceOwner = videoComment.getCreatedBy();
-    this.imageUrl = video.getThumbnailUrl();
+    this.imageUrl = thumbnail;
     this.args = Lists.newArrayList(source.getUsername(), videoComment.getComment());
   }
 
-  public Notification(String type, Post post, PostComment postComment, Member source, Member target) {
-    this.type = type;
-    this.targetMember = target;
+  public Notification(Post post, PostComment postComment, Member source) {
+    this.type = POST_COMMENT;
+    this.targetMember = post.getCreator();
     this.read = false;
     this.resourceType = "post_comment";
     this.resourceId = postComment.getId();
@@ -130,4 +129,14 @@ public class Notification {
     this.args = Lists.newArrayList(source.getUsername(), postComment.getComment());
   }
 
+  public Notification(String thumbnail, PostComment postComment, Member source, Member target) {
+    this.type = POST_COMMENT_REPLY;
+    this.targetMember = target;
+    this.read = false;
+    this.resourceType = "post_comment";
+    this.resourceId = postComment.getId();
+    this.resourceOwner = postComment.getCreatedBy();
+    this.imageUrl = thumbnail;
+    this.args = Lists.newArrayList(source.getUsername(), postComment.getComment());
+  }
 }

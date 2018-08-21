@@ -21,7 +21,12 @@ mybeautip:
   aws:
     sns:
       application:
-        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/gambang-tv"
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip-dev"
+
+flipflop:
+  app-key: testapp3
+  video:
+    thumbnail-format: https://s3.ap-northeast-2.amazonaws.com/flipflop/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 logging:
   config: classpath:log/log4j2-file.yml

@@ -52,7 +52,7 @@ public class NotificationAspect {
     }
   }
 
-  @Before(value = "execution(* com.jocoos.mybeautip.video.VideoCommentRepository.save(..))")
+  @Before(value = "execution(* com.jocoos.mybeautip.member.following.FollowingRepository.save(..))")
   public void onBeforeSaveFollowingMember(JoinPoint joinPoint) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
     Object o = joinPoint.getArgs()[0];

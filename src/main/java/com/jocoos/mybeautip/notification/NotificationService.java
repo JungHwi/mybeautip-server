@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.notification;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,9 @@ import com.jocoos.mybeautip.video.VideoRepository;
 @Slf4j
 @Service
 public class NotificationService {
+
+  @Value("${flipflop.video.thumbnail-format}")
+  private  String videoThumbnailFormat;
 
   private final MemberRepository memberRepository;
   private final VideoRepository videoRepository;
@@ -54,26 +58,31 @@ public class NotificationService {
     Long creator = video.getMember().getId();
     followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator)
        .forEach(f -> {
-         Notification n = new Notification(video, f.getMemberMe());
-         log.debug("notification: {}", n);
+         Notification notification = new Notification(video, getVideoThumbnail(video.getVideoKey()),  f.getMemberMe());
+         log.debug("notification: {}", notification);
 
-         notificationRepository.save(new Notification(video, f.getMemberMe()));
-         deviceService.push(n);
+         notificationRepository.save(notification);
+         deviceService.push(notification);
        });
+  }
+
+  private String getVideoThumbnail(String videoKey) {
+    return String.format(videoThumbnailFormat, videoKey);
   }
 
   public void notifyFollowMember(Following following) {
     Notification n = notificationRepository.save(new Notification(following));
+    log.debug("notification: {}", n);
     deviceService.push(n);
   }
-
 
   public void notifyAddVideoComment(VideoComment videoComment) {
     videoRepository.findById(videoComment.getVideoId())
       .ifPresent(v ->
         memberRepository.findById(videoComment.getCreatedBy())
-           .ifPresent(m -> {
-             Notification n = notificationRepository.save(new Notification(v, videoComment, m));
+           .ifPresent(source -> {
+             v.setThumbnailUrl(getVideoThumbnail(v.getVideoKey()));
+             Notification n = notificationRepository.save(new Notification(v, videoComment, source));
              deviceService.push(n);
            })
       );
@@ -88,21 +97,19 @@ public class NotificationService {
     videoRepository.findById(videoComment.getVideoId())
        .ifPresent(v ->
           memberRepository.findById(videoComment.getCreatedBy())
-             .ifPresent(m -> {
-               Notification n = notificationRepository.save(new Notification(v, videoComment, m, parentMember));
+             .ifPresent(source -> {
+               Notification n = notificationRepository.save(new Notification(getVideoThumbnail(v.getVideoKey()), videoComment, source, parentMember));
                deviceService.push(n);
              })
        );
   }
 
   public void notifyAddPostComment(PostComment postComment) {
-    Member source = memberRepository.findById(postComment.getCreatedBy()).get();
-
     postRepository.findById(postComment.getPostId())
        .ifPresent(post ->
           memberRepository.findById(postComment.getCreatedBy())
-             .ifPresent(m -> {
-               Notification n = notificationRepository.save(new Notification(Notification.POST_COMMENT, post, postComment, source, m));
+             .ifPresent(source -> {
+               Notification n = notificationRepository.save(new Notification(post, postComment, source));
                deviceService.push(n);
              })
        );
@@ -110,15 +117,15 @@ public class NotificationService {
 
   public void notifyAddPostCommentReply(PostComment postComment) {
     Member parentMember = Optional.ofNullable(postComment.getParentId())
-       .flatMap(parent -> videoCommentRepository.findById(parent))
+       .flatMap(parent -> postCommentRepository.findById(parent))
        .flatMap(comment -> memberRepository.findById(comment.getCreatedBy()))
        .get();
 
     postRepository.findById(postComment.getPostId())
        .ifPresent(post ->
           memberRepository.findById(postComment.getCreatedBy())
-             .ifPresent(m -> {
-               Notification n = notificationRepository.save(new Notification(Notification.POST_COMMENT_REPLY, post, postComment, m, parentMember));
+             .ifPresent(source -> {
+               Notification n = notificationRepository.save(new Notification(post.getThumbnailUrl(), postComment, source, parentMember));
                deviceService.push(n);
              })
        );
