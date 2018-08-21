@@ -53,6 +53,7 @@ public class NotificationController {
     List<NotificationInfo> result = Lists.newArrayList();
     notificationRepository.findByTargetMemberId(memberId, page)
        .forEach(n -> {
+         log.debug("n: {}", n);
          String message = messageSource.getMessage(n.getType(), n.getArgs().toArray(), Locale.KOREAN);
          log.debug("message: {}", message);
          result.add(new NotificationInfo(n, message));
@@ -63,8 +64,7 @@ public class NotificationController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    List<Notification> notifications = Lists.newArrayList();
-    return new CursorResponse.Builder<>("/api/1/members/me/notifications", notifications)
+    return new CursorResponse.Builder<>("/api/1/members/me/notifications", result)
        .withCount(count).
           withCursor(nextCursor).toBuild();
   }

@@ -10,9 +10,10 @@ spring:
     show_banner: false
   messages:
     always-use-message-format: false
-    cache-seconds: -1
-    basename: i18n/message
+    basename: i18n/messages
+    cache-duration: -1
     encoding: UTF-8
+    use-code-as-default-message: true
   profiles:
     active: ${profile:local}
   datasource:
@@ -31,6 +32,7 @@ spring:
     locations: classpath:db/mysql
   jpa:
     properties:
+      hibernate.globally_quoted_identifiers: true
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
     show-sql: false
 

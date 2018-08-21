@@ -54,7 +54,10 @@ public class NotificationService {
     Long creator = video.getMember().getId();
     followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator)
        .forEach(f -> {
-         Notification n = notificationRepository.save(new Notification(video, f.getMemberMe()));
+         Notification n = new Notification(video, f.getMemberMe());
+         log.debug("notification: {}", n);
+
+         notificationRepository.save(new Notification(video, f.getMemberMe()));
          deviceService.push(n);
        });
   }

@@ -56,7 +56,7 @@ public class NotificationAspect {
   public void onBeforeSaveFollowingMember(JoinPoint joinPoint) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
     Object o = joinPoint.getArgs()[0];
-    if (o instanceof VideoComment) {
+    if (o instanceof Following) {
       Following f = (Following) o;
       log.debug("following: {}", f);
       notificationService.notifyFollowMember(f);

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.following.Following;
@@ -18,6 +19,7 @@ import com.jocoos.mybeautip.post.PostComment;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoComment;
 
+@NoArgsConstructor
 @Data
 @EntityListeners(AuditingEntityListener.class)
 @Entity
@@ -39,19 +41,15 @@ public class Notification {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "source_member")
-  private Member sourceMember;
-
-  @ManyToOne
+  @ManyToOne(optional = false)
   @JoinColumn(name = "target_member")
   private Member targetMember;
 
-  @Column(length = 50)
+  @Column(length = 50, nullable = false)
   private String type;
 
-  @Column
-  private boolean read;
+  @Column(nullable = false)
+  private boolean read = false;
 
   @Column
   private String resourceType;
@@ -71,17 +69,8 @@ public class Notification {
      joinColumns = @JoinColumn(name = "notification_id")
   )
   @OrderColumn(name = "seq")
-  @Column(name = "goods_no")
+  @Column(name = "arg")
   private List<String> args;
-
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
-     name = "notification_customs",
-     joinColumns = @JoinColumn(name = "notification_id")
-  )
-  @MapKeyColumn(name = "key")
-  @Column(name = "value")
-  private Map<String, String> custom;
 
   @Column
   @CreatedDate
@@ -90,12 +79,11 @@ public class Notification {
   public Notification(Video video, Member target) {
     this.type = VIDEO_STARTED;
     this.targetMember = target;
-    this.read = false;
+    this.args = Lists.newArrayList(video.getMember().getUsername());
     this.resourceType = "video";
     this.resourceId = video.getId();
     this.resourceOwner = video.getMember().getId();
     this.imageUrl = video.getThumbnailUrl();
-    this.args = Lists.newArrayList(video.getMember().getUsername());
   }
 
   public Notification(Following following) {

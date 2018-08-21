@@ -24,7 +24,6 @@ import com.jocoos.mybeautip.restapi.DeviceController;
 @Service
 public class DeviceService {
 
-  private static final String NOTIFICATION_FORMAT = "notification.%s";
   private static final String MESSAGE_STRUCTURE = "json";
   private final DeviceRepository deviceRepository;
   private final MessageSource messageSource;
@@ -76,7 +75,7 @@ public class DeviceService {
 
   private void push(Device device, Notification notification) {
     String message = convertToGcmMessage(notification, device.getOs());
-    log.debug("message: {}", message);
+    log.debug("gcm message: {}", message);
 
     try {
       PublishRequest request = new PublishRequest()
@@ -92,13 +91,14 @@ public class DeviceService {
       log.error("platformApplicationDisabledException", e);
     } catch (EndpointDisabledException e) {
       log.error("EndpointDisabledException", e);
-      deviceRepository.delete(device);
+//      deviceRepository.delete(device);
     }
   }
 
   private String convertToGcmMessage(Notification notification, String os) {
     String message = messageSource.getMessage(
-      String.format(NOTIFICATION_FORMAT, notification.getType()), notification.getArgs().toArray(), Locale.KOREAN);
+       notification.getType(), notification.getArgs().toArray(), Locale.KOREAN);
+    log.debug("detail message: {}", message);
 
     Map<String, String> data = Maps.newHashMap();
     data.put("id", String.valueOf(notification.getId()));
