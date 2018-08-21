@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.restapi;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.MessageSource;
@@ -31,6 +32,8 @@ public class NotificationController {
   // TODO: Default avatar URL
   private static final String DEFAULT_AVATAR = "";
 
+  private static final String CUSTOM_KEY_FOLLOW_ID = "follow_id";
+
   private final NotificationService notificationService;
   private final NotificationRepository notificationRepository;
   private final MemberService memberService;
@@ -56,7 +59,13 @@ public class NotificationController {
          log.debug("n: {}", n);
          String message = messageSource.getMessage(n.getType(), n.getArgs().toArray(), Locale.KOREAN);
          log.debug("message: {}", message);
-         result.add(new NotificationInfo(n, message));
+
+         Map<String, String> custom = n.getCustom();
+         if (custom  != null && custom.containsKey(CUSTOM_KEY_FOLLOW_ID)) {
+           result.add(new NotificationInfo(n, message, Long.parseLong(custom.get(CUSTOM_KEY_FOLLOW_ID))));
+         } else {
+           result.add(new NotificationInfo(n, message));
+         }
        });
 
     String nextCursor = null;
@@ -94,11 +103,17 @@ public class NotificationController {
     private String imageUrl;
     private String message;
     private Date createdAt;
+    private Long followId;
 
     public NotificationInfo(Notification notification, String message) {
       BeanUtils.copyProperties(notification, this);
       this.message = message;
       this.imageUrl = !Strings.isNullOrEmpty(notification.getImageUrl()) ? imageUrl : DEFAULT_AVATAR;
+    }
+
+    public NotificationInfo(Notification notification, String message, Long followId) {
+      this(notification, message);
+      this.followId = followId;
     }
   }
 }

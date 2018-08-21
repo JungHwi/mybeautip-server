@@ -3,11 +3,13 @@ package com.jocoos.mybeautip.notification;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -71,6 +73,15 @@ public class Notification {
   @Column(name = "arg")
   private List<String> args;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+     name = "notification_customs",
+     joinColumns = @JoinColumn(name = "notification_id")
+  )
+  @MapKeyColumn(name = "key")
+  @Column(name = "value")
+  private Map<String, String> custom;
+
   @Column
   @CreatedDate
   private Date createdAt;
@@ -85,7 +96,7 @@ public class Notification {
     this.imageUrl = thumbnail;
   }
 
-  public Notification(Following following) {
+  public Notification(Following following, Long followId) {
     this.type = FOLLOWING;
     this.targetMember = following.getMemberYou();
     this.read = false;
@@ -94,6 +105,10 @@ public class Notification {
     this.resourceOwner = following.getMemberMe().getId();
     this.imageUrl = following.getMemberMe().getAvatarUrl();
     this.args = Lists.newArrayList(following.getMemberMe().getUsername());
+    if (followId != null) {
+      custom = Maps.newHashMap();
+      custom.put("follow_id", String.valueOf(followId));
+    }
   }
 
   public Notification(Video video, VideoComment videoComment, Member source) {

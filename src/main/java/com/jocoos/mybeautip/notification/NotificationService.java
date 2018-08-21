@@ -71,7 +71,12 @@ public class NotificationService {
   }
 
   public void notifyFollowMember(Following following) {
-    Notification n = notificationRepository.save(new Notification(following));
+    Notification notification = followingRepository.findByMemberMeIdAndMemberYouId(
+       following.getMemberYou().getId(), following.getMemberMe().getId())
+         .map(f -> new Notification(following, f.getId()))
+         .orElseGet(() -> new Notification(following, null));
+
+    Notification n = notificationRepository.save(notification);
     log.debug("notification: {}", n);
     deviceService.push(n);
   }
