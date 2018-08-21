@@ -69,7 +69,7 @@ mybeautip:
   aws:
     sns:
       application:
-        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/gambang-tv-dev"
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip-dev"
     s3:
       bucket: 'mybeautip-dev'
       region: 'ap-northeast-2'
