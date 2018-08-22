@@ -27,16 +27,16 @@ import com.jocoos.mybeautip.video.VideoComment;
 @Table(name = "notifications")
 public class Notification {
 
-  public static final String VIDEO_STARTED = "notification.video_started";
-  public static final String MENTION = "notification.mention";
-  public static final String VIDEO_COMMENT = "notification.video_comment";
-  public static final String VIDEO_COMMENT_REPLY = "notification.video_comment_reply";
-  public static final String VIDEO_COMMENT_LIKE = "notification.video_comment_like";
-  public static final String POST_COMMENT = "notification.post_comment";
-  public static final String POST_COMMENT_REPLY = "notification.post_comment_reply";
-  public static final String POST_COMMENT_LIKE = "notification.post_comment_like";
-  public static final String FOLLOWING = "notification.following";
-  public static final String VIDEO_LIKE = "notification.video_like";
+  public static final String VIDEO_STARTED = "video_started";
+  public static final String MENTION = "mention";
+  public static final String VIDEO_COMMENT = "video_comment";
+  public static final String VIDEO_COMMENT_REPLY = "video_comment_reply";
+  public static final String VIDEO_COMMENT_LIKE = "video_comment_like";
+  public static final String POST_COMMENT = "post_comment";
+  public static final String POST_COMMENT_REPLY = "post_comment_reply";
+  public static final String POST_COMMENT_LIKE = "post_comment_like";
+  public static final String FOLLOWING = "following";
+  public static final String VIDEO_LIKE = "video_like";
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

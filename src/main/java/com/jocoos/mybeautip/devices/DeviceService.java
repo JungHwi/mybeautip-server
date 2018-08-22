@@ -17,6 +17,7 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
 import com.jocoos.mybeautip.restapi.DeviceController;
 
@@ -26,7 +27,7 @@ public class DeviceService {
 
   private static final String MESSAGE_STRUCTURE = "json";
   private final DeviceRepository deviceRepository;
-  private final MessageSource messageSource;
+  private final MessageService messageService;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.aws.sns.application.gcm-arn}")
@@ -36,11 +37,11 @@ public class DeviceService {
   private AmazonSNS amazonSNS;
 
   public DeviceService(DeviceRepository deviceRepository,
-                       MessageSource messageSource,
+                       MessageService messageService,
                        ObjectMapper objectMapper,
                        AmazonSNS amazonSNS) {
     this.deviceRepository = deviceRepository;
-    this.messageSource = messageSource;
+    this.messageService = messageService;
     this.objectMapper = objectMapper;
     this.amazonSNS = amazonSNS;
   }
@@ -69,7 +70,11 @@ public class DeviceService {
   public void push(Notification notification) {
     deviceRepository.findByCreatedBy(notification.getTargetMember().getId())
        .forEach(d -> {
-         push(d, notification);
+         if (d.isPushable()) {
+           push(d, notification);
+         } else {
+           log.warn("device pushable false: {}", d.getId());
+         }
        });
   }
 
@@ -91,14 +96,21 @@ public class DeviceService {
       log.error("platformApplicationDisabledException", e);
     } catch (EndpointDisabledException e) {
       log.error("EndpointDisabledException", e);
-//      deviceRepository.delete(device);
+
+      /**
+       * FIXME: Change pushable false or delete device info?
+       * deviceRepository.delete(device);
+       */
+      if (device.isPushable()) {
+        device.setPushable(false);
+        deviceRepository.save(device);
+      }
     }
   }
 
   private String convertToGcmMessage(Notification notification, String os) {
-    String message = messageSource.getMessage(
-       notification.getType(), notification.getArgs().toArray(), Locale.KOREAN);
-    log.debug("detail message: {}", message);
+    String message = messageService.getNotificationMessage(
+       notification.getType(), notification.getArgs().toArray());
 
     Map<String, String> data = Maps.newHashMap();
     data.put("id", String.valueOf(notification.getId()));

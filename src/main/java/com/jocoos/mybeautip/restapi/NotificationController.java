@@ -2,11 +2,9 @@ package com.jocoos.mybeautip.restapi;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -21,9 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
 import com.jocoos.mybeautip.notification.NotificationRepository;
-import com.jocoos.mybeautip.notification.NotificationService;
 
 @Slf4j
 @RestController
@@ -34,19 +32,16 @@ public class NotificationController {
 
   private static final String CUSTOM_KEY_FOLLOW_ID = "follow_id";
 
-  private final NotificationService notificationService;
   private final NotificationRepository notificationRepository;
   private final MemberService memberService;
-  private final MessageSource messageSource;
+  private final MessageService messageService;
 
-  public NotificationController(NotificationService notificationService,
-                                NotificationRepository notificationRepository,
+  public NotificationController(NotificationRepository notificationRepository,
                                 MemberService memberService,
-                                MessageSource messageSource) {
-    this.notificationService = notificationService;
+                                MessageService messageService) {
     this.notificationRepository = notificationRepository;
     this.memberService = memberService;
-    this.messageSource = messageSource;
+    this.messageService = messageService;
   }
 
   @GetMapping
@@ -57,9 +52,7 @@ public class NotificationController {
     notificationRepository.findByTargetMemberId(memberId, page)
        .forEach(n -> {
          log.debug("n: {}", n);
-         String message = messageSource.getMessage(n.getType(), n.getArgs().toArray(), Locale.KOREAN);
-         log.debug("message: {}", message);
-
+         String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
          Map<String, String> custom = n.getCustom();
          if (custom  != null && custom.containsKey(CUSTOM_KEY_FOLLOW_ID)) {
            result.add(new NotificationInfo(n, message, Long.parseLong(custom.get(CUSTOM_KEY_FOLLOW_ID))));
