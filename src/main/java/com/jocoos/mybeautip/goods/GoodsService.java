@@ -25,7 +25,7 @@ public class GoodsService {
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
   private final GoodsLikeRepository goodsLikeRepository;
-  private final String BEST_CATEGORY = "001";
+  private static final String BEST_CATEGORY = "001";
 
   public List<Goods> getRelatedGoods(String goodsNo) {
     Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
@@ -33,7 +33,7 @@ public class GoodsService {
     if (optional.isPresent()) {
       category = optional.get().getCateCd();
     }
-    PageRequest pageable = PageRequest.of(0, 5, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, 10, new Sort(Sort.Direction.DESC, "id"));
     return goodsRepository.findRelatedGoods(category, goodsNo, pageable);
   }
 

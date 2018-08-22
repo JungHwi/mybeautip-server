@@ -91,7 +91,6 @@ public class GoodsController {
 
   @GetMapping("/{goodsNo}/related-goods")
   public ResponseEntity<List<GoodsInfo>> getRelatedGoods(@PathVariable String goodsNo) {
-    PageRequest pageable = PageRequest.of(0, 5, new Sort(Sort.Direction.DESC, "id"));
     List<Goods> relatedGoods = goodsService.getRelatedGoods(goodsNo);
     List<GoodsInfo> result = new ArrayList<>();
     for (Goods goods : relatedGoods) {
