@@ -49,6 +49,9 @@ public class Video {
   @Column
   public Date deletedAt;
 
+  @Transient
+  private String thumbnailUrl;
+
   public Video(String videoKey, Member member, int goodsCount, String goodsThumbnailUrl) {
     this.videoKey = videoKey;
     this.member = member;

@@ -6,7 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
-import org.flywaydb.core.internal.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+
 
 @Service
 public class VideoService {
@@ -19,7 +20,7 @@ public class VideoService {
 
   public Slice<VideoComment> findCommentsByVideoId(Long id, String cursor, Pageable pageable) {
     Slice<VideoComment> comments;
-    if (StringUtils.hasLength(cursor) && StringUtils.isNumeric(cursor)) {
+    if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
       comments = videoCommentRepository.findByVideoIdAndCreatedAtAfterAndParentIdIsNull(id, createdAt, pageable);
     } else {
@@ -30,7 +31,7 @@ public class VideoService {
 
   public Slice<VideoComment> findCommentsByParentId(Long parentId, String cursor, Pageable pageable) {
     Slice<VideoComment> comments;
-    if (StringUtils.hasLength(cursor) && StringUtils.isNumeric(cursor)) {
+    if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
       comments = videoCommentRepository.findByParentIdAndCreatedAtAfter(parentId, createdAt, pageable);
     } else {

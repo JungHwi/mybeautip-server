@@ -8,6 +8,12 @@ spring:
       default-page-size: 10
   main:
     show_banner: false
+  messages:
+    always-use-message-format: false
+    basename: i18n/messages
+    cache-duration: -1
+    encoding: UTF-8
+    use-code-as-default-message: true
   profiles:
     active: ${profile:local}
   datasource:
@@ -26,6 +32,7 @@ spring:
     locations: classpath:db/mysql
   jpa:
     properties:
+      hibernate.globally_quoted_identifiers: true
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
     show-sql: false
 
@@ -64,7 +71,7 @@ mybeautip:
   aws:
     sns:
       application:
-        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/gambang-tv-dev"
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip-dev"
     s3:
       bucket: 'mybeautip-dev'
       region: 'ap-northeast-2'
@@ -92,6 +99,11 @@ management:
   endpoints:
     web:
       base-path: /monitor
+
+flipflop:
+  app-key: testapp3
+  video:
+    thumbnail-format: https://s3.ap-northeast-2.amazonaws.com/flipflop-dev/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 redis:
   host: localhost

@@ -5,13 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
 @Data
@@ -84,10 +85,9 @@ public class Post {
   @Column(name = "goods_no")
   private List<String> goods;
 
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
-
+  @ManyToOne
+  @JoinColumn(name = "created_by")
+  private Member creator;
 
   @Column(nullable = false)
   @CreatedDate

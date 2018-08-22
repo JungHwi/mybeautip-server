@@ -6,7 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
-import org.flywaydb.core.internal.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+
 
 @Service
 public class PostService {
@@ -19,7 +20,7 @@ public class PostService {
 
   public Slice<PostComment> findCommentsByPostId(Long postId, String cursor, Pageable pageable) {
     Slice<PostComment> comments = null;
-    if (StringUtils.hasLength(cursor) && StringUtils.isNumeric(cursor)) {
+    if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
       comments = postCommentRepository.findByPostIdAndCreatedAtAfterAndParentIdIsNull(postId, createdAt, pageable);
     } else {
@@ -30,7 +31,7 @@ public class PostService {
 
   public Slice<PostComment> findCommentsByParentId(Long parentId, String cursor, Pageable pageable) {
     Slice<PostComment> comments = null;
-    if (StringUtils.hasLength(cursor) && StringUtils.isNumeric(cursor)) {
+    if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
       comments = postCommentRepository.findByParentIdAndCreatedAtAfter(parentId, createdAt, pageable);
     } else {

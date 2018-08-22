@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.flywaydb.core.internal.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
@@ -106,7 +106,7 @@ public class PostController {
     Slice<Post> posts = null;
     Date dateCursor = null;
 
-    if (!Strings.isNullOrEmpty(cursor) && StringUtils.isNumeric(cursor)) {
+    if (StringUtils.isNumeric(cursor)) {
       dateCursor = new Date(Long.parseLong(cursor));
     }
 
