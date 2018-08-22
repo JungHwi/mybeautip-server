@@ -12,8 +12,8 @@ spring:
 
 mybeautip:
   security:
-    access-token-validity-seconds: 3600      # 1 hours
-    refresh-token-validity-seconds: 1800     # .5 hours
+    access-token-validity-seconds: 7776000      # 90 days
+    refresh-token-validity-seconds: 31536000     # 1 year
   iam:
     sns:
       access-key: AKIAIR6VYJSAQ5ROEGTA
