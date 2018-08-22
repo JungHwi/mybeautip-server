@@ -32,8 +32,10 @@ public class NotificationAspect {
 
     if (result instanceof Video) {
       Video video = (Video) result;
-      log.debug("video: {}", video);
-      notificationService.notifyCreateVideo(video);
+      if (video.getDeletedAt() == null) {
+        log.debug("video: {}", video);
+        notificationService.notifyCreateVideo(video);
+      }
     }
   }
 
