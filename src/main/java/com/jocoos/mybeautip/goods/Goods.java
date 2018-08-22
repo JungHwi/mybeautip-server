@@ -28,10 +28,10 @@ public class Goods {
   private String goodsColor;  // 상품 색상
   private String soldOutFl;  // 품절상태 (n= 정상, y=품절(수동))
   private String goodsDiscountFl;  // 상품 할인 설정 ( y=사용함, n=사용안함)
-  private BigDecimal goodsDiscount;  // 상품 할인 값
+  private Integer goodsDiscount;  // 상품 할인 값
   private String goodsDiscountUnit;  // 상품 할인 단위 ( percent=%, price=원)
-  private BigDecimal goodsPrice;  // 판매가
-  private BigDecimal fixedPrice;  // 정가
+  private Integer goodsPrice;  // 판매가
+  private Integer fixedPrice;  // 정가
   private String goodsDescription;  // PC 쇼핑몰 상세설명
   private URL listImageData;  // 썸네일 이미지 정보
   private Integer reviewCnt;  // 상품평수
@@ -66,7 +66,9 @@ public class Goods {
   private URL add1ImageData;
   private URL add2ImageData;
   private String videoUrl;
-
+  private String goodsMustInfo;
+  private String optionFl;
+  private String optionName;
 
   @Column(nullable = false)
   private int likeCount;

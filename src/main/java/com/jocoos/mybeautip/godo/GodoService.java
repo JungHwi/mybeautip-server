@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.godo;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +16,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -30,6 +36,7 @@ public class GodoService {
   private final RestTemplate restTemplate;
   private final CategoryRepository categoryRepository;
   private final GoodsRepository goodsRepository;
+  private final GoodsOptionRepository goodsOptionRepository;
   private final StoreRepository storeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
@@ -61,12 +68,14 @@ public class GodoService {
   public GodoService(RestTemplate restTemplate,
                      CategoryRepository categoryRepository,
                      GoodsRepository goodsRepository,
+                     GoodsOptionRepository goodsOptionRepository,
                      StoreRepository storeRepository,
                      GoodsLikeRepository goodsLikeRepository,
                      GoodsRecommendationRepository goodsRecommendationRepository) {
     this.restTemplate = restTemplate;
     this.categoryRepository = categoryRepository;
     this.goodsRepository = goodsRepository;
+    this.goodsOptionRepository = goodsOptionRepository;
     this.storeRepository = storeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
@@ -87,7 +96,7 @@ public class GodoService {
   }
 
   @Scheduled(initialDelay = 60000, fixedRate = 86400000) // 60 sec, 1 day
-  public void gatheringGoodsFromGodomall() {
+  public void gatheringGoodsFromGodomall() throws IOException {
     log.debug("GatheringGoodsFromGodomall task started...");
     getGoodsFromGodo();
     log.debug("GatheringGoodsFromGodomall task ended");
@@ -158,7 +167,7 @@ public class GodoService {
   /**
    * Retrieve All goods using GodoMall Open API
    */
-  private synchronized void getGoodsFromGodo() {
+  private synchronized void getGoodsFromGodo() throws IOException {
     long start = System.currentTimeMillis();
     int nextPage = 1;
     int maxPage;
@@ -179,7 +188,7 @@ public class GodoService {
     newCount = updatedCount = 0;
   }
 
-  private GodoGoodsResponse.Header getGoodsFromGodo(int nextPage) {
+  private GodoGoodsResponse.Header getGoodsFromGodo(int nextPage) throws IOException {
     String requestUrl = baseUrl.concat(goodsSearchUrl)
       .concat("partner_key=").concat(partnerKey)
       .concat("&key=").concat(key)
@@ -187,9 +196,7 @@ public class GodoService {
       .concat("&size=15");
 
     ResponseEntity<GodoGoodsResponse> response
-            = restTemplate.getForEntity(requestUrl, GodoGoodsResponse.class);
-
-
+      = restTemplate.getForEntity(requestUrl, GodoGoodsResponse.class);
 
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoGoodsResponse.GoodsData> dataList = response.getBody().getBody();
@@ -199,6 +206,9 @@ public class GodoService {
         Optional<Goods> optional = goodsRepository.findById(goodsData.getGoodsNo());
         goods = optional.orElseGet(Goods::new);
         BeanUtils.copyProperties(goodsData, goods);
+        goods.setFixedPrice(goodsData.getFixedPrice().intValue());
+        goods.setGoodsPrice(goodsData.getGoodsPrice().intValue());
+        goods.setGoodsDiscount(goodsData.getGoodsDiscount().intValue());
 
         if ("n".equalsIgnoreCase(goodsData.getGoodsDisplayFl())
           || "n".equalsIgnoreCase(goodsData.getGoodsSellFl())) {
@@ -214,7 +224,32 @@ public class GodoService {
           goods.setAllCd(generateCategoryStr(goodsData.getAllCateCd()));
         }
 
+        List<MustInfo> list = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (GodoGoodsResponse.GoodsMustInfoData mustInfo : goodsData.getGoodsMustInfoData()) {
+          list.add(new MustInfo(mustInfo.getStepData().getInfoTitle(), mustInfo.getStepData().getInfoValue()));
+        }
+        goods.setGoodsMustInfo(mapper.writeValueAsString(list));
         goodsRepository.save(goods);
+
+        if (goodsData.getOptionData() != null) {
+          Optional<GoodsOption> optionalGoodsOption;
+          GoodsOption goodsOption;
+          for (GodoGoodsResponse.OptionData optionData : goodsData.getOptionData()) {
+            optionalGoodsOption = goodsOptionRepository.findById(optionData.getSno());
+            goodsOption = optionalGoodsOption.orElseGet(GoodsOption::new);
+            BeanUtils.copyProperties(optionData, goodsOption);
+            goodsOption.setOptionPrice(optionData.getOptionPrice().intValue());
+            goodsOption.setOptionCostPrice(optionData.getOptionCostPrice().intValue());
+            goodsOption.setStockCnt(optionData.getStockCnt().intValue());
+
+            if ("y".equalsIgnoreCase(optionData.getOptionViewFl())) {
+              goodsOptionRepository.save(goodsOption);
+            } else {
+              goodsOptionRepository.delete(goodsOption);
+            }
+          }
+        }
       }
       return response.getBody().getHeader();
     }
@@ -290,5 +325,13 @@ public class GodoService {
     goodsLikeRepository.deleteAll(goodsLikes);
 
     goodsRepository.delete(goods);
+  }
+
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class MustInfo {
+    String key;
+    String value;
   }
 }

@@ -89,6 +89,23 @@ public class GoodsController {
     return new ResponseEntity<>(goodsDetailService.getGoodsDetailPage(goodsNo, includeVideo), HttpStatus.OK);
   }
 
+  @GetMapping("/{goodsNo}/related-goods")
+  public ResponseEntity<List<GoodsInfo>> getRelatedGoods(@PathVariable String goodsNo) {
+    PageRequest pageable = PageRequest.of(0, 5, new Sort(Sort.Direction.DESC, "id"));
+    List<Goods> relatedGoods = goodsService.getRelatedGoods(goodsNo);
+    List<GoodsInfo> result = new ArrayList<>();
+    for (Goods goods : relatedGoods) {
+      result.add(goodsService.generateGoodsInfo(goods));
+    }
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+
+  @GetMapping("/{goodsNo}/options")
+  public ResponseEntity<List<GoodsOption>> getGoodsOptions(@PathVariable Integer goodsNo) {
+    List<GoodsOption> options = goodsService.getAllGoodsOptions(goodsNo);
+    return new ResponseEntity<>(options, HttpStatus.OK);
+  }
+
   @Transactional
   @PostMapping("/{goodsNo:.+}/likes")
   public ResponseEntity<GoodsLikeInfo> addGoodsLike(@PathVariable String goodsNo) {
