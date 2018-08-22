@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
+import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
@@ -42,6 +43,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
   static final String GRANT_TYPE_KAKAO = "kakao";
   static final String GRANT_TYPE_CLIENT = "client";
   static final String GRANT_TYPE_ADMIN = "admin";
+  static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
 
   @Autowired
   private MemberRepository memberRepository;
@@ -101,7 +103,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     clients.inMemory()
         .withClient("mybeautip-ios")
         .secret(passwordEncoder.encode("akdlqbxlqdkdldhdptm"))
-        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT)
+        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
         .scopes(SCOPE_READ, SCOPE_WRITE)
         .accessTokenValiditySeconds(accessTokenValiditySeconds)
         .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
@@ -109,14 +111,14 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
         .withClient("mybeautip-android")
         .secret(passwordEncoder.encode("akdlqbxlqdksemfhdlem"))
         .scopes(SCOPE_READ, SCOPE_WRITE)
-        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT)
+        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
         .accessTokenValiditySeconds(accessTokenValiditySeconds)
         .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
         .and()
         .withClient("mybeautip-web")
         .secret(passwordEncoder.encode("akdlqbxlqdjemals"))
         .scopes(SCOPE_READ, SCOPE_WRITE, SCOPE_ADMIN)
-        .authorizedGrantTypes(GRANT_TYPE_ADMIN)
+        .authorizedGrantTypes(GRANT_TYPE_ADMIN, GRANT_TYPE_REFRESH_TOKEN)
         .accessTokenValiditySeconds(accessTokenValiditySeconds)
         .refreshTokenValiditySeconds(refreshTokenValiditySeconds);
   }
@@ -145,6 +147,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
   }
 
   private CompositeTokenGranter tokenGranter(AuthorizationServerEndpointsConfigurer endpoints) {
+
     return new CompositeTokenGranter(
         Lists.newArrayList(
             new FacebookTokenGranter(
@@ -175,7 +178,10 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                 endpoints.getOAuth2RequestFactory(),
                 memberRepository,
                 adminMemberRepository,
-                passwordEncoder)
+                passwordEncoder),
+             new RefreshTokenGranter(endpoints.getTokenServices(),
+                endpoints.getClientDetailsService(),
+                endpoints.getOAuth2RequestFactory())
         )
     );
   }
