@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
@@ -45,11 +47,21 @@ public class NotificationController {
   }
 
   @GetMapping
-  public CursorResponse getNotifications(@RequestParam(defaultValue = "20") int count) {
+  public CursorResponse getNotifications(@RequestParam(defaultValue = "20") int count,
+                                         @RequestParam(required = false) String cursor) {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Long memberId = memberService.currentMemberId();
     List<NotificationInfo> result = Lists.newArrayList();
-    notificationRepository.findByTargetMemberId(memberId, page)
+
+    Slice<Notification> notifications = null;
+
+    if (StringUtils.isNumeric(cursor)) {
+      notifications = notificationRepository.findByTargetMemberIdAndCreatedAtBefore(memberId, new Date(Long.parseLong(cursor)), page);
+    } else {
+      notifications = notificationRepository.findByTargetMemberId(memberId, page);
+    }
+
+    notifications
        .forEach(n -> {
          log.debug("n: {}", n);
          String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
@@ -67,8 +79,8 @@ public class NotificationController {
     }
 
     return new CursorResponse.Builder<>("/api/1/members/me/notifications", result)
-       .withCount(count).
-          withCursor(nextCursor).toBuild();
+       .withCount(count)
+       .withCursor(nextCursor).toBuild();
   }
 
   @PatchMapping("/{id:.+}")
