@@ -156,11 +156,11 @@ CREATE TABLE `goods` (
   `sales_start_ymd` VARCHAR(20),
   `sales_end_ymd` VARCHAR(20),
   `goods_discount_fl` VARCHAR(1),
-  `goods_discount` DECIMAL(12,2),
+  `goods_discount` INT NOT NULL DEFAULT 0,
   `goods_discount_unit` VARCHAR(7),
   `goods_price_string` VARCHAR(60),
-  `goods_price` DECIMAL(12,2),
-  `fixed_price` DECIMAL(12,2),
+  `goods_price` INT NOT NULL DEFAULT 0,
+  `fixed_price` INT NOT NULL DEFAULT 0,
   `delivery_sno` INT(10),
   `short_description` VARCHAR(255),
   `goods_description` MEDIUMTEXT,
@@ -174,6 +174,9 @@ CREATE TABLE `goods` (
   `main_image_data` VARCHAR(255),
   `magnify_image_data` VARCHAR(255),
   `detail_image_data` VARCHAR(255),
+  `goods_must_info` TEXT DEFAULT NULL,
+  `option_fl` VARCHAR(1) DEFAULT NULL,
+  `option_name` VARCHAR(255) DEFAULT NULL,
   `video_url` VARCHAR(200) NULL DEFAULT NULL,
   `reg_dt` VARCHAR(20),
   `mod_dt` VARCHAR(20),
@@ -280,6 +283,8 @@ CREATE TABLE `videos` (
   `type` VARCHAR(11) NOT NULL,
   `thumbnail_url` VARCHAR(200) NOT NULL,
   `comment_count` INT NOT NULL DEFAULT 0,
+  `related_goods_count` TINYINT DEFAULT 0,
+  `related_goods_thumbnail_url` VARCHAR(255),
   `owner` BIGINT NOT NULL,
   `created_at` DATETIME(3) NOT NULL,
   `modified_at` DATETIME(3) DEFAULT NULL,
@@ -568,3 +573,19 @@ INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('manager', 1
 INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('jocoos', 1, now());
 INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('yocoos', 1, now());
 INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('test', 1, now());
+
+--
+-- Goods OptionData
+--
+CREATE TABLE `goods_options` (
+  `sno` BIGINT NOT NULL,
+  `goods_no` INT NOT NULL,
+  `option_no` TINYINT UNSIGNED NOT NULL,
+  `option_value1` VARCHAR(40) DEFAULT NULL,
+  `option_price` INT NOT NULL DEFAULT 0,
+  `option_cost_price` INT NOT NULL DEFAULT 0,
+  `stock_cnt` INT NOT NULL DEFAULT 0,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY(`sno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

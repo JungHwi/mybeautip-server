@@ -1,11 +1,14 @@
 package com.jocoos.mybeautip.godo;
 
-import lombok.Data;
-
 import javax.xml.bind.annotation.*;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.List;
+
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @XmlRootElement(name = "data")
@@ -108,5 +111,80 @@ public class GodoGoodsResponse {
 
     private String goodsSellFl;
     private String goodsDisplayFl;
+
+
+    @JacksonXmlElementWrapper(useWrapping = false)
+    private List<OptionData> optionData;
+
+    @JacksonXmlElementWrapper(useWrapping = false)
+    private List<GoodsMustInfoData> goodsMustInfoData;
+
+  }
+
+  @Data
+  @XmlAccessorType(XmlAccessType.FIELD)
+  @XmlType(name = "", propOrder = {
+    "stepData"
+  })
+  public static class GoodsMustInfoData {
+    @XmlElement(required = true)
+    protected StepData stepData;
+    @XmlAttribute(name = "idx")
+    protected Byte idx;
+  }
+
+  @Data
+  public static class StepData {
+    @XmlElement(required = true)
+    protected String infoTitle;
+    @XmlElement(required = true)
+    protected String infoValue;
+    @XmlAttribute(name = "idx")
+    protected Byte idx;
+  }
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @XmlAccessorType(XmlAccessType.FIELD)
+  @XmlType(name = "", propOrder = {
+    "sno",
+    "goodsNo",
+    "optionNo",
+    "optionValue1",
+    "optionValue2",
+    "optionValue3",
+    "optionValue4",
+    "optionValue5",
+    "optionPrice",
+    "optionCostPrice",
+    "optionViewFl",
+    "optionSellFl",
+    "optionCode",
+    "stockCnt",
+    "optionMemo",
+    "regDt",
+    "modDt",
+    "optionImage"
+  })
+  public static class OptionData {
+    private int sno;  // 옵션고유번호
+    private int goodsNo;  // 상품코드
+    private int optionNo;  // 옵션순
+    private String optionValue1;  // 1차 옵션명
+    private String optionValue2;  // 2차 옵션명
+    private String optionValue3;  // 3차 옵션명
+    private String optionValue4;  // 4차 옵션명
+    private String optionValue5;  // 5차 옵션명
+    private BigDecimal optionPrice; // 옵션가
+    private BigDecimal optionCostPrice;
+    private String optionViewFl;  // 옵션 노출여부(y|n)
+    private String optionSellFl;  // 옵션 판매여부
+    private String optionCode;  // 옵션 자체코드
+    private BigDecimal stockCnt;   // 재고
+    private String optionMemo;
+    private String regDt;
+    private String modDt;
+    private String optionImage;
   }
 }

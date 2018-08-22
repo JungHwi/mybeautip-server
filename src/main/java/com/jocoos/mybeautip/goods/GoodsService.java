@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,15 +23,33 @@ import com.jocoos.mybeautip.restapi.CursorResponse;
 public class GoodsService {
   private final MemberService memberService;
   private final GoodsRepository goodsRepository;
+  private final GoodsOptionRepository goodsOptionRepository;
   private final GoodsLikeRepository goodsLikeRepository;
-  
+  private final String BEST_CATEGORY = "001";
+
+  public List<Goods> getRelatedGoods(String goodsNo) {
+    Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
+    String category = BEST_CATEGORY;
+    if (optional.isPresent()) {
+      category = optional.get().getCateCd();
+    }
+    PageRequest pageable = PageRequest.of(0, 5, new Sort(Sort.Direction.DESC, "id"));
+    return goodsRepository.findRelatedGoods(category, goodsNo, pageable);
+  }
+
+  public List<GoodsOption> getAllGoodsOptions(Integer goodsNo) {
+    return goodsOptionRepository.findByGoodsNo(goodsNo);
+  }
+
   private enum FILTER {ALL, CATEGORY, KEYWORD, CATEGORY_AND_KEYWORD}
   
   public GoodsService(MemberService memberService,
                       GoodsRepository goodsRepository,
+                      GoodsOptionRepository goodsOptionRepository,
                       GoodsLikeRepository goodsLikeRepository) {
     this.memberService = memberService;
     this.goodsRepository = goodsRepository;
+    this.goodsOptionRepository = goodsOptionRepository;
     this.goodsLikeRepository = goodsLikeRepository;
   }
   

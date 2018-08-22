@@ -25,6 +25,7 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.cart.Cart;
 import com.jocoos.mybeautip.member.cart.CartRepository;
+import com.jocoos.mybeautip.store.StoreRepository;
 
 @Slf4j
 @RestController
@@ -35,15 +36,18 @@ public class CartController {
   private final GoodsService goodsService;
   private final CartRepository cartRepository;
   private final GoodsRepository goodsRepository;
+  private final StoreRepository storeRepository;
 
   public CartController(MemberService memberService,
                         GoodsService goodsService,
                         CartRepository cartRepository,
-                        GoodsRepository goodsRepository) {
+                        GoodsRepository goodsRepository,
+                        StoreRepository storeRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.cartRepository = cartRepository;
     this.goodsRepository = goodsRepository;
+    this.storeRepository = storeRepository;
   }
 
   @PostMapping
@@ -146,7 +150,7 @@ public class CartController {
 
     List<CartItemGroup> result = new ArrayList<>();
     for (int scmNo : orderedScmNo) {
-      result.add(new CartItemGroup(scmNo, map.get(scmNo)));
+      result.add(new CartItemGroup(scmNo, storeRepository.getOne(scmNo).getName(), map.get(scmNo)));
     }
 
     return result;
@@ -183,10 +187,12 @@ public class CartController {
   @Data
   private static class CartItemGroup {
     private Integer scmNo;
+    private String storeName;
     private List<CartInfo> content;
 
-    CartItemGroup(Integer scmNo, List<CartInfo> content) {
+    CartItemGroup(Integer scmNo, String storeName, List<CartInfo> content) {
       this.scmNo = scmNo;
+      this.storeName = storeName;
       this.content = content;
     }
   }

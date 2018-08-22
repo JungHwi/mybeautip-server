@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.goods;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -45,8 +46,19 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
 
   Optional<Goods> findByGoodsNo(String goodsNo);
 
+  @Query("select g.listImageData from Goods g where g.goodsNo = ?1")
+  default String findListImageDataByGoodsNo(String goodsNo) {
+    return null;
+  }
+
   @Modifying
   @Query("update Goods g set g.likeCount = g.likeCount + ?2, g.modifiedAt = now() " +
       "where g.goodsNo = ?1")
   void updateLikeCount(String goodsNo, Integer count);
+
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
+    "and g.goodsNo != :itself order by g.hitCnt desc")
+  List<Goods> findRelatedGoods(@Param("category")String category,
+                              @Param("itself")String itself,
+                              Pageable pageable);
 }
