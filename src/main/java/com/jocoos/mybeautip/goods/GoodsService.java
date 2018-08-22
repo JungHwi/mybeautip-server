@@ -37,10 +37,6 @@ public class GoodsService {
     return goodsRepository.findRelatedGoods(category, goodsNo, pageable);
   }
 
-  public List<GoodsOption> getAllGoodsOptions(Integer goodsNo) {
-    return goodsOptionRepository.findByGoodsNo(goodsNo);
-  }
-
   private enum FILTER {ALL, CATEGORY, KEYWORD, CATEGORY_AND_KEYWORD}
   
   public GoodsService(MemberService memberService,

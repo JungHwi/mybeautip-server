@@ -38,6 +38,7 @@ public class GoodsController {
   private final MemberService memberService;
   private final GoodsService goodsService;
   private final GoodsRepository goodsRepository;
+  private final GoodsOptionRepository goodsOptionRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsDetailService goodsDetailService;
@@ -45,12 +46,14 @@ public class GoodsController {
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
                          GoodsRepository goodsRepository,
+                         GoodsOptionRepository goodsOptionRepository,
                          GoodsLikeRepository goodsLikeRepository,
                          VideoGoodsRepository videoGoodsRepository,
                          GoodsDetailService goodsDetailService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.goodsRepository = goodsRepository;
+    this.goodsOptionRepository = goodsOptionRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsDetailService = goodsDetailService;
@@ -100,9 +103,13 @@ public class GoodsController {
   }
 
   @GetMapping("/{goodsNo}/options")
-  public ResponseEntity<List<GoodsOption>> getGoodsOptions(@PathVariable Integer goodsNo) {
-    List<GoodsOption> options = goodsService.getAllGoodsOptions(goodsNo);
-    return new ResponseEntity<>(options, HttpStatus.OK);
+  public ResponseEntity<List<GoodsOptionInfo>> getGoodsOptions(@PathVariable Integer goodsNo) {
+    List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
+    List<GoodsOptionInfo> result = new ArrayList<>();
+    for (GoodsOption option : options) {
+      result.add(new GoodsOptionInfo(option));
+    }
+    return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
   @Transactional
@@ -160,6 +167,21 @@ public class GoodsController {
     GoodsLikeInfo(GoodsLike goodsLike) {
       BeanUtils.copyProperties(goodsLike, this);
       goods = new GoodsInfo(goodsLike.getGoods(), goodsLike.getId());
+    }
+  }
+
+  @Data
+  public static class GoodsOptionInfo {
+    private Integer optionNo;
+    private String optionValue;
+    private Integer optionPrice;
+    private Integer stockCnt;
+
+    GoodsOptionInfo(GoodsOption option) {
+      this.optionNo = option.getOptionNo();
+      this.optionValue = option.getOptionValue1();
+      this.optionPrice = option.getOptionPrice();
+      this.stockCnt = option.getStockCnt();
     }
   }
 
