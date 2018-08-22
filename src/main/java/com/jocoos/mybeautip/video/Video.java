@@ -28,6 +28,12 @@ public class Video {
   @Column
   private int commentCount;
 
+  @Column
+  private int relatedGoodsCount;
+
+  @Column
+  private String relatedGoodsThumbnailUrl;
+
   @ManyToOne
   @JoinColumn(name = "owner")
   private Member member;
@@ -43,8 +49,10 @@ public class Video {
   @Column
   public Date deletedAt;
 
-  public Video(String videoKey, Member member) {
+  public Video(String videoKey, Member member, int goodsCount, String goodsThumbnailUrl) {
     this.videoKey = videoKey;
     this.member = member;
+    this.relatedGoodsCount = goodsCount;
+    this.relatedGoodsThumbnailUrl = (goodsThumbnailUrl == null) ? "" : goodsThumbnailUrl;
   }
 }
