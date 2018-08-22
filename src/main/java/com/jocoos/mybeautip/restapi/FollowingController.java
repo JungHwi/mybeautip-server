@@ -125,10 +125,6 @@ public class FollowingController {
                                      @RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
     return getFollowings(httpServletRequest.getRequestURI(), id, cursor, count);
   }
   
