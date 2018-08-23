@@ -8,4 +8,6 @@ public interface VideoLikeRepository extends JpaRepository<VideoLike, Long> {
   Optional<VideoLike> findByVideoIdAndCreatedBy(Long videoId, Long memberId);
 
   Optional<VideoLike> findByIdAndVideoIdAndCreatedBy(Long likeId, Long videoId, Long memberId);
+
+  Integer countByCreatedBy(Long memberId);
 }
