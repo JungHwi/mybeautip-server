@@ -77,11 +77,14 @@ public class FeedService {
     List<Following> followers = followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator);
     log.debug("followers: {}", followers);
 
-    addVideoFeed(String.format(MEMBER_KEY, creator), video);
+    addMyVideo(String.format(MEMBER_KEY, creator), video);
 
+    List<String> receives = Lists.newArrayList(String.format(FEED_KEY, creator));
     for (Following f: followers) {
-      addVideoFeed(String.format(FEED_KEY, f.getMemberMe().getId()), video);
+      receives.add(String.format(FEED_KEY, f.getMemberMe().getId()));
     }
+
+    addVideoLinkFeed(receives, video);
   }
 
   public void followMember(Long me, Long follower) {
@@ -96,7 +99,9 @@ public class FeedService {
       jedis = jedisPool.getResource();
       Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
       for (Tuple t: tuples) {
-        jedis.zadd(myFeedKey, t.getScore(), t.getElement());
+        Video video = readValue(t.getElement());
+        log.debug("video key: {}", video.getVideoKey());
+        jedis.zadd(myFeedKey, t.getScore(), video.getVideoKey());
       }
     } finally {
       if (jedis != null) {
@@ -109,6 +114,8 @@ public class FeedService {
   public void unfollowMember(Long me, Long follower) {
     String followerKey = String.format(MEMBER_KEY, follower);
     String myFeedKey = String.format(FEED_KEY, me);
+    log.debug("follower: {}, feed: {}", followerKey, myFeedKey);
+
     removeVideos(followerKey, myFeedKey);
   }
 
@@ -118,7 +125,9 @@ public class FeedService {
       jedis = jedisPool.getResource();
       Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
       for (Tuple t: tuples) {
-        jedis.zrem(myFeedKey, t.getElement());
+        Video video = readValue(t.getElement());
+        log.debug("video key: {}", video.getVideoKey());
+        jedis.zrem(myFeedKey, video.getVideoKey());
       }
     } finally {
       if (jedis != null) {
@@ -135,30 +144,40 @@ public class FeedService {
         List<Following> followers = followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator);
         log.debug("followers: {}", followers);
 
-        String video = removeAndGetVideo(String.format(MEMBER_KEY, creator), v);
-        log.debug("element video: {}", video);
+        String videoKey = removeMyVideoAndGetVideoKey(creator, String.valueOf(v.getCreatedAt().getTime()));
+        log.debug("video element: {}", videoKey);
 
-        if (video != null) {
+        List<String> receives = Lists.newArrayList(String.format(FEED_KEY, v.getMember().getId()));
+        if (videoKey != null) {
           for (Following f: followers) {
-            removeVideo(String.format(FEED_KEY, f.getMemberMe().getId()), video);
+            receives.add(String.format(FEED_KEY, f.getMemberMe().getId()));
           }
+          removeFeedVideos(receives, videoKey);
         }
       }
     );
   }
 
-  private String removeAndGetVideo(String key, Video video) {
+  private String removeMyVideoAndGetVideoKey(Long creatorId, String createdAt) {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
-      String max = String.valueOf(video.getCreatedAt().getTime());
-      Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(key, max, max);
-      log.debug("removed: {}", tuples.size());
+      String myVideo = String.format(MEMBER_KEY, creatorId);
+      String myFeed = String.format(FEED_KEY, creatorId);
+      Set<Tuple> videos = jedis.zrevrangeByScoreWithScores(myVideo, createdAt, createdAt);
+      if (videos.size() == 1) {
+        for (Tuple t: videos) {
+          jedis.zrem(myVideo, t.getElement());
+        }
+      }
 
-      if (tuples.size() == 1) {
-        for (Tuple t: tuples) {
+      Set<Tuple> feeds = jedis.zrevrangeByScoreWithScores(myFeed, createdAt, createdAt);
+      log.debug("removed: {}", feeds.size());
+
+      if (feeds.size() == 1) {
+        for (Tuple t: feeds) {
           String element = t.getElement();
-          jedis.zrem(key, element);
+          jedis.zrem(myFeed, element);
           return element;
         }
       }
@@ -171,11 +190,14 @@ public class FeedService {
     }
   }
 
-  private void removeVideo(String key, String video) {
+  private void removeFeedVideos(List<String> receives, String videoKey) {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
-      jedis.zrem(key, video);
+      for (String key : receives) {
+        log.debug("key: {}, videoKey: {}", key, videoKey);
+        jedis.zrem(key, videoKey);
+      }
     } finally {
       if (jedis != null) {
         jedis.disconnect();
@@ -184,20 +206,7 @@ public class FeedService {
     }
   }
 
-  private void removeVideo(String key, Video video) {
-    Jedis jedis = null;
-    try {
-      jedis = jedisPool.getResource();
-      jedis.zrem(key, writeAsString(video));
-    } finally {
-      if (jedis != null) {
-        jedis.disconnect();
-        close(jedis);
-      }
-    }
-  }
-
-  private void addVideoFeed(String key, Video video) {
+  private void addMyVideo(String key, Video video) {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
@@ -210,9 +219,34 @@ public class FeedService {
     }
   }
 
+  private void addVideoLinkFeed(List<String> keys, Video video) {
+    Jedis jedis = null;
+    try {
+      jedis = jedisPool.getResource();
+      for(String key: keys) {
+        log.debug("key: {}, videoKey: {}", key, video.getVideoKey() );
+        jedis.zadd(key, video.getCreatedAt().getTime(), video.getVideoKey());
+      }
+    } finally {
+      if (jedis != null) {
+        jedis.disconnect();
+        close(jedis);
+      }
+    }
+  }
+
   private String writeAsString(Video video) {
     try {
       return objectMapper.writeValueAsString(video);
+    } catch (IOException e) {
+      log.error("failed to write as string", e);
+    }
+    return null;
+  }
+
+  private Video readValue(String video) {
+    try {
+      return objectMapper.readValue(video, Video.class);
     } catch (IOException e) {
       log.error("failed to write as string", e);
     }
