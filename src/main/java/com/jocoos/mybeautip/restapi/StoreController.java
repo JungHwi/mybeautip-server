@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -45,6 +46,15 @@ public class StoreController {
   private final StoreLikeRepository storeLikeRepository;
   private final GoodsRepository goodsRepository;
 
+  @Value("${mybeautip.store.image-path.prefix}")
+  private String storeImagePrefix;
+
+  @Value("${mybeautip.store.image-path.cover-suffix}")
+  private String storeImageSuffix;
+
+  @Value("${mybeautip.store.image-path.thumbnail-suffix}")
+  private String storeImageThumbnailSuffix;
+
   public StoreController(MemberService memberService,
                          GoodsService goodsService,
                          StoreRepository storeRepository,
@@ -72,7 +82,9 @@ public class StoreController {
         likeId = optionalStoreLike.map(StoreLike::getId).orElse(null);
       }
 
-      storeInfo = new StoreInfo(store, likeId);
+      String imageUrl = String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageSuffix);
+      String thumbnailUrl = String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageThumbnailSuffix);
+      storeInfo = new StoreInfo(store, likeId, imageUrl, thumbnailUrl);
       return new ResponseEntity<>(storeInfo, HttpStatus.OK);
     } else {
       throw new NotFoundException("store_not_found", "invalid store id");
@@ -128,8 +140,12 @@ public class StoreController {
 
               storeRepository.updateLikeCount(id, 1);
               store.setLikeCount(store.getLikeCount() + 1);
+
+              String imageUrl = String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageSuffix);
+              String thumbnailUrl = String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageThumbnailSuffix);
+
               StoreLike storeLike = storeLikeRepository.save(new StoreLike(store));
-              return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
+              return new ResponseEntity<>(new StoreLikeInfo(storeLike, imageUrl, thumbnailUrl), HttpStatus.OK);
             })
             .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
   }
@@ -171,17 +187,12 @@ public class StoreController {
     private Integer likeCount;
     private Long likeId;
 
-    public StoreInfo(Store store, Long likeId) {
+    public StoreInfo(Store store, Long likeId, String imageUrl, String thumbnailUrl) {
       this.id = store.getId();
       this.name = store.getName();
       this.description = Strings.isNullOrEmpty(store.getDescription()) ? "" : store.getDescription();
-
-      String S3_STORE_PREFIX = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/";
-      String S3_STORE_IMG_SUFFIX = ".png";
-      String S3_STORE_THUMBNAIL_SUFFIX = "_thumbnail.png";
-
-      this.imageUrl = String.format("%s%d%s", S3_STORE_PREFIX, store.getId(), S3_STORE_IMG_SUFFIX);
-      this.thumbnailUrl = String.format("%s%d%s", S3_STORE_PREFIX, store.getId(), S3_STORE_THUMBNAIL_SUFFIX);
+      this.imageUrl = imageUrl;
+      this.thumbnailUrl = thumbnailUrl;
       this.likeCount = store.getLikeCount();
       this.likeId = likeId;
     }
@@ -194,9 +205,9 @@ public class StoreController {
     private Date createdAt;
     private StoreInfo store;
 
-    StoreLikeInfo(StoreLike storeLike) {
+    StoreLikeInfo(StoreLike storeLike, String imageUrl, String thumbnailUrl) {
       BeanUtils.copyProperties(storeLike, this);
-      store = new StoreInfo(storeLike.getStore(), storeLike.getId());
+      store = new StoreInfo(storeLike.getStore(), storeLike.getId(), imageUrl, thumbnailUrl);
     }
   }
 }

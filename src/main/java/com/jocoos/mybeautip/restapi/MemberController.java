@@ -6,6 +6,7 @@ import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -49,6 +50,15 @@ public class MemberController {
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
   private final BannedWordService bannedWordService;
+
+  @Value("${mybeautip.store.image-path.prefix}")
+  private String storeImagePrefix;
+
+  @Value("${mybeautip.store.image-path.cover-suffix}")
+  private String storeImageSuffix;
+
+  @Value("${mybeautip.store.image-path.thumbnail-suffix}")
+  private String storeImageThumbnailSuffix;
 
   public MemberController(MemberService memberService,
                           MemberRepository memberRepository,
@@ -326,7 +336,9 @@ public class MemberController {
     Long me = memberService.currentMemberId();
     for (StoreLike like : storeLikes) {
       likeId = me.equals(like.getCreatedBy())? like.getId() : null;
-      result.add(new StoreController.StoreInfo(like.getStore(), likeId));
+      String imageUrl = String.format("%s%d%s", storeImagePrefix, like.getStore().getId(), storeImageSuffix);
+      String thumbnailUrl = String.format("%s%d%s", storeImagePrefix, like.getStore().getId(), storeImageThumbnailSuffix);
+      result.add(new StoreController.StoreInfo(like.getStore(), likeId, imageUrl, thumbnailUrl));
     }
 
     String nextCursor = null;

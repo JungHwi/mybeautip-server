@@ -53,7 +53,8 @@ public class GoodsInfo {
     this.likeId = likeId;
   }
 
-  public GoodsInfo(Goods goods, Long likeId, Integer relatedVideoTotalCount) {
+  public GoodsInfo(Goods goods, Long likeId, Integer relatedVideoTotalCount,
+                   String deliveryInfo, String refundInfo, String asInfo) {
     BeanUtils.copyProperties(goods, this);
     this.likeId = likeId;
     this.relatedVideoTotalCount = relatedVideoTotalCount;
@@ -73,14 +74,8 @@ public class GoodsInfo {
       this.goodsMustInfo = info;
     }
 
-    String GOODS_DELIVERY_TEXT = "마이뷰팁은 통신판매중개자로 통신판매의 당사자가 아니며,\n" +
-      "상품의 주문, 배송 및 환불 등과 관련한 의무와 책임은 각 판매자에게 있습니다.";
-    String S3_STORE_PREFIX = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/";
-    String S3_STORE_REFUND_SUFFIX = "_refund.png";
-    String S3_STORE_AS_SUFFIX = "_as.png";
-
-    this.deliveryInfo = GOODS_DELIVERY_TEXT;
-    this.refundInfo = String.format("%s%d%s", S3_STORE_PREFIX, goods.getScmNo(), S3_STORE_REFUND_SUFFIX);
-    this.asInfo = String.format("%s%d%s", S3_STORE_PREFIX, goods.getScmNo(), S3_STORE_AS_SUFFIX);
+    this.deliveryInfo = deliveryInfo;
+    this.refundInfo = refundInfo;
+    this.asInfo = asInfo;
   }
 }

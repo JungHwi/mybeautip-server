@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.util.Strings;
 import static org.springframework.data.domain.PageRequest.of;
 
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.CursorResponse;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 
@@ -23,10 +25,21 @@ import com.jocoos.mybeautip.video.VideoGoodsRepository;
 @Slf4j
 public class GoodsService {
   private final MemberService memberService;
+  private final MessageService messageService;
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private static final String BEST_CATEGORY = "001";
+
+  @Value("${mybeautip.store.image-path.prefix}")
+  private String storeImagePrefix;
+
+  @Value("${mybeautip.store.image-path.refund-suffix}")
+  private String storeImageRefundSuffix;
+
+  @Value("${mybeautip.store.image-path.as-suffix}")
+  private String storeImageAsSuffix;
+
 
   public List<Goods> getRelatedGoods(String goodsNo) {
     Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
@@ -41,10 +54,12 @@ public class GoodsService {
   private enum FILTER {ALL, CATEGORY, KEYWORD, CATEGORY_AND_KEYWORD}
   
   public GoodsService(MemberService memberService,
+                      MessageService messageService,
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
                       GoodsLikeRepository goodsLikeRepository) {
     this.memberService = memberService;
+    this.messageService = messageService;
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsLikeRepository = goodsLikeRepository;
@@ -130,8 +145,11 @@ public class GoodsService {
     }
     // Set total count of related videos
     int relatedVideoTotalCount = videoGoodsRepository.countByGoodsGoodsNo(goods.getGoodsNo());
+    String deliveryInfo = messageService.getGoodsDeliveryMessage();
+    String refundInfo = String.format("%s%d%s", storeImagePrefix, goods.getScmNo(), storeImageRefundSuffix);
+    String asInfo = String.format("%s%d%s", storeImagePrefix, goods.getScmNo(), storeImageAsSuffix);
 
-    return new GoodsInfo(goods, likeId, relatedVideoTotalCount);
+    return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, asInfo);
   }
 
   private String generateSearchableCategory(String category) {
