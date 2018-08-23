@@ -14,4 +14,6 @@ public interface VideoGoodsRepository extends CrudRepository<VideoGoods, Long> {
   void deleteByVideoId(Long id);
 
   List<VideoGoods> findAllByVideoId(Long id);
+
+  int countByGoodsGoodsNo(String goodsNo);
 }

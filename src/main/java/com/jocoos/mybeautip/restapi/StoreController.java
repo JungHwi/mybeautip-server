@@ -60,17 +60,17 @@ public class StoreController {
   @GetMapping("/{id:.+}")
   public ResponseEntity<StoreController.StoreInfo> getStore(@PathVariable Integer id) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
     Optional<Store> optional = storeRepository.findById(id);
     StoreInfo storeInfo;
+    Long likeId = null;
     if (optional.isPresent()) {
       Store store = optional.get();
 
-      // Set like ID
-      Optional<StoreLike> optionalStoreLike = storeLikeRepository.findByStoreIdAndCreatedBy(store.getId(), memberId);
-      Long likeId = optionalStoreLike.map(StoreLike::getId).orElse(null);
+      if (memberId != null) {
+        // Set like ID
+        Optional<StoreLike> optionalStoreLike = storeLikeRepository.findByStoreIdAndCreatedBy(store.getId(), memberId);
+        likeId = optionalStoreLike.map(StoreLike::getId).orElse(null);
+      }
 
       storeInfo = new StoreInfo(store, likeId);
       return new ResponseEntity<>(storeInfo, HttpStatus.OK);
@@ -84,11 +84,6 @@ public class StoreController {
                                       @RequestParam(defaultValue = "50") int count,
                                       @RequestParam(required = false) String cursor,
                                       HttpServletRequest httpServletRequest) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     storeRepository.findById(id)
       .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
 
@@ -163,7 +158,7 @@ public class StoreController {
    */
   @Data
   @NoArgsConstructor
-  static class StoreInfo {
+  public static class StoreInfo {
     private Integer id;
     private String name;
     private String description;
@@ -172,12 +167,17 @@ public class StoreController {
     private Integer likeCount;
     private Long likeId;
 
-    StoreInfo(Store store, Long likeId) {
+    public StoreInfo(Store store, Long likeId) {
       this.id = store.getId();
       this.name = store.getName();
       this.description = Strings.isNullOrEmpty(store.getDescription()) ? "" : store.getDescription();
-      this.imageUrl = Strings.isNullOrEmpty(store.getImageUrl()) ? "" : store.getImageUrl();
-      this.thumbnailUrl = Strings.isNullOrEmpty(store.getThumbnailUrl()) ? "" : store.getThumbnailUrl();
+
+      String S3_STORE_PREFIX = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/";
+      String S3_STORE_IMG_SUFFIX = ".png";
+      String S3_STORE_THUMBNAIL_SUFFIX = "_thumbnail.png";
+
+      this.imageUrl = String.format("%s%d%s", S3_STORE_PREFIX, store.getId(), S3_STORE_IMG_SUFFIX);
+      this.thumbnailUrl = String.format("%s%d%s", S3_STORE_PREFIX, store.getId(), S3_STORE_THUMBNAIL_SUFFIX);
       this.likeCount = store.getLikeCount();
       this.likeId = likeId;
     }

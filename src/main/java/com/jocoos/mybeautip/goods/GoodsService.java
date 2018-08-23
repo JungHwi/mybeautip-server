@@ -17,13 +17,14 @@ import static org.springframework.data.domain.PageRequest.of;
 
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.CursorResponse;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
 
 @Service
 @Slf4j
 public class GoodsService {
   private final MemberService memberService;
   private final GoodsRepository goodsRepository;
-  private final GoodsOptionRepository goodsOptionRepository;
+  private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private static final String BEST_CATEGORY = "001";
 
@@ -41,11 +42,11 @@ public class GoodsService {
   
   public GoodsService(MemberService memberService,
                       GoodsRepository goodsRepository,
-                      GoodsOptionRepository goodsOptionRepository,
+                      VideoGoodsRepository videoGoodsRepository,
                       GoodsLikeRepository goodsLikeRepository) {
     this.memberService = memberService;
     this.goodsRepository = goodsRepository;
-    this.goodsOptionRepository = goodsOptionRepository;
+    this.videoGoodsRepository = videoGoodsRepository;
     this.goodsLikeRepository = goodsLikeRepository;
   }
   
@@ -127,7 +128,10 @@ public class GoodsService {
       Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goods.getGoodsNo(), me);
       likeId = optional.map(GoodsLike::getId).orElse(null);
     }
-    return new GoodsInfo(goods, likeId);
+    // Set total count of related videos
+    int relatedVideoTotalCount = videoGoodsRepository.countByGoodsGoodsNo(goods.getGoodsNo());
+
+    return new GoodsInfo(goods, likeId, relatedVideoTotalCount);
   }
 
   private String generateSearchableCategory(String category) {
