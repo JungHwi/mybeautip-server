@@ -418,9 +418,9 @@ public class MemberController {
 
   @Data
   private static class LikeCountResponse {
+    private Integer video = 0;
     private Integer goods = 0;
     private Integer store = 0;
     private Integer post = 0;
-    private Integer video = 0;
   }
 }
