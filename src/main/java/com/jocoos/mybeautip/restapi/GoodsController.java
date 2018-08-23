@@ -28,6 +28,7 @@ import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.VideoService;
 
 
 @Slf4j
@@ -37,6 +38,7 @@ public class GoodsController {
 
   private final MemberService memberService;
   private final GoodsService goodsService;
+  private final VideoService videoService;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
   private final GoodsLikeRepository goodsLikeRepository;
@@ -45,6 +47,7 @@ public class GoodsController {
 
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
+                         VideoService videoService,
                          GoodsRepository goodsRepository,
                          GoodsOptionRepository goodsOptionRepository,
                          GoodsLikeRepository goodsLikeRepository,
@@ -52,6 +55,7 @@ public class GoodsController {
                          GoodsDetailService goodsDetailService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
+    this.videoService = videoService;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
     this.goodsLikeRepository = goodsLikeRepository;
@@ -195,8 +199,7 @@ public class GoodsController {
     List<VideoController.VideoInfo> result = new ArrayList<>();
 
     for (VideoGoods videoGoods : slice.getContent()) {
-      result.add(new VideoController.VideoInfo(videoGoods.getVideo(),
-        memberService.getMemberInfo(videoGoods.getVideo().getMember())));
+      result.add(videoService.generateVideoInfo(videoGoods.getVideo()));
     }
 
     if (result.size() > 0) {

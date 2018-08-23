@@ -47,6 +47,7 @@ public class VideoController {
   private final VideoRepository videoRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final VideoCommentRepository videoCommentRepository;
+  private final VideoLikeRepository videoLikeRepository;
 
   public VideoController(MemberService memberService,
                          VideoService videoService,
@@ -55,7 +56,8 @@ public class VideoController {
                          MemberRepository memberRepository,
                          GoodsRepository goodsRepository,
                          VideoRepository videoRepository,
-                         VideoCommentRepository videoCommentRepository) {
+                         VideoCommentRepository videoCommentRepository,
+                         VideoLikeRepository videoLikeRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.videoGoodsRepository = videoGoodsRepository;
@@ -64,6 +66,7 @@ public class VideoController {
     this.goodsRepository = goodsRepository;
     this.videoRepository = videoRepository;
     this.videoCommentRepository = videoCommentRepository;
+    this.videoLikeRepository = videoLikeRepository;
   }
 
   @Transactional
@@ -241,9 +244,54 @@ public class VideoController {
       .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video key or comment id"));
   }
 
+  @Transactional
+  @PostMapping("/{videoId:.+}/likes")
+  public ResponseEntity<VideoLikeInfo> addVideoLike(@PathVariable Long videoId) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    return videoRepository.findByIdAndDeletedAtIsNull(videoId)
+      .map(video -> {
+        if (videoLikeRepository.findByVideoIdAndCreatedBy(videoId, memberId).isPresent()) {
+          throw new BadRequestException("duplicated_video_like", "Already video liked");
+        }
+
+        videoRepository.updateLikeCount(videoId, 1);
+        video.setLikeCount(video.getLikeCount() + 1);
+        VideoLike videoLike = videoLikeRepository.save(new VideoLike(video));
+        VideoLikeInfo info = new VideoLikeInfo(videoLike, videoService.generateVideoInfo(video));
+        return new ResponseEntity<>(info, HttpStatus.OK);
+      })
+      .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id: " + videoId));
+  }
+
+  @Transactional
+  @DeleteMapping("/{videoId:.+}/likes/{likeId:.+}")
+  public ResponseEntity<?> removeVideoLike(@PathVariable Long videoId,
+                                           @PathVariable Long likeId) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    return videoLikeRepository.findByIdAndVideoIdAndCreatedBy(likeId, videoId, memberId)
+      .map(video -> {
+        Optional<VideoLike> liked = videoLikeRepository.findById(likeId);
+        if (!liked.isPresent()) {
+          throw new NotFoundException("like_not_found", "invalid video like id");
+        }
+
+        videoLikeRepository.delete(liked.get());
+        videoRepository.updateLikeCount(videoId, -1);
+        return new ResponseEntity(HttpStatus.OK);
+      })
+      .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id or like id"));
+  }
+
   @Data
   public static class CreateVideoGoodsRequest {
-
     @NotNull
     String videoKey;
 
@@ -259,12 +307,15 @@ public class VideoController {
     private Integer commentCount;
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
+    private Integer likeCount;
+    private Long likeId;
     private MemberInfo member;
     private Date createdAt;
 
-    public VideoInfo(Video video, MemberInfo member) {
+    public VideoInfo(Video video, MemberInfo member, Long likeId) {
       BeanUtils.copyProperties(video, this);
       this.member = member;
+      this.likeId = likeId;
     }
   }
 
@@ -324,5 +375,18 @@ public class VideoController {
   @AllArgsConstructor
   private class CommentCountResponse {
     private Integer commentCount;
+  }
+
+  @Data
+  public static class VideoLikeInfo {
+    private Long id;
+    private Long createdBy;
+    private Date createdAt;
+    private VideoInfo video;
+
+    VideoLikeInfo(VideoLike videoLike, VideoInfo video) {
+      BeanUtils.copyProperties(videoLike, this);
+      this.video = video;
+    }
   }
 }

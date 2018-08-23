@@ -21,6 +21,7 @@ import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @RestController
@@ -29,6 +30,7 @@ public class RecommendationController {
 
   private final GoodsService goodsService;
   private final MemberService memberServie;
+  private final VideoService videoService;
   private final VideoRepository videoRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
@@ -36,12 +38,14 @@ public class RecommendationController {
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberServie,
+                                  VideoService videoService,
                                   VideoRepository videoRepository,
                                   MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository,
                                   MotdRecommendationRepository motdRecommendationRepository) {
     this.goodsService = goodsService;
     this.memberServie = memberServie;
+    this.videoService = videoService;
     this.videoRepository = videoRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
@@ -83,7 +87,7 @@ public class RecommendationController {
     List<VideoController.VideoInfo> result = Lists.newArrayList();
     for (MotdRecommendation recommendation : videos) {
       videoRepository.findById(recommendation.getVideoId()).map(video ->
-        result.add(new VideoController.VideoInfo(video, memberServie.getMemberInfo(video.getMember()))));
+        result.add(videoService.generateVideoInfo(video)));
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
