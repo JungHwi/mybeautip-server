@@ -38,6 +38,9 @@ public class Video {
   @JoinColumn(name = "owner")
   private Member member;
 
+  @Column(nullable = false)
+  private int likeCount;
+
   @Column
   @CreatedDate
   public Date createdAt;

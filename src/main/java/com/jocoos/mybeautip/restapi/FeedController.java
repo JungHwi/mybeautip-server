@@ -14,6 +14,7 @@ import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @RestController
@@ -22,13 +23,16 @@ public class FeedController {
 
   private final FeedService feedService;
   private final MemberService memberService;
+  private final VideoService videoService;
   private final MemberRepository memberRepository;
 
   public FeedController(FeedService feedService,
                         MemberService memberService,
+                        VideoService videoService,
                         MemberRepository memberRepository) {
     this.feedService = feedService;
     this.memberService = memberService;
+    this.videoService = videoService;
     this.memberRepository = memberRepository;
   }
 
@@ -40,7 +44,7 @@ public class FeedController {
     List<VideoController.VideoInfo> result = Lists.newArrayList();
 
     videos.stream()
-       .forEach(v -> result.add(new VideoController.VideoInfo(v, memberService.getMemberInfo(v.getMember()))));
+       .forEach(v -> result.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
     if (result.size() > 0) {
