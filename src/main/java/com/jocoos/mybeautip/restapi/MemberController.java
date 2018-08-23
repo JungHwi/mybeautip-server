@@ -29,6 +29,7 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.word.BannedWordService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
@@ -45,6 +46,7 @@ import com.jocoos.mybeautip.store.StoreLikeRepository;
 public class MemberController {
 
   private final MemberService memberService;
+  private final GoodsService goodsService;
   private final MemberRepository memberRepository;
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
@@ -61,12 +63,14 @@ public class MemberController {
   private String storeImageThumbnailSuffix;
 
   public MemberController(MemberService memberService,
+                          GoodsService goodsService,
                           MemberRepository memberRepository,
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
                           StoreLikeRepository storeLikeRepository,
                           BannedWordService bannedWordService) {
     this.memberService = memberService;
+    this.goodsService = goodsService;
     this.memberRepository = memberRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
@@ -306,8 +310,7 @@ public class MemberController {
     Long likeId;
     Long me = memberService.currentMemberId();
     for (GoodsLike like : goodsLikes) {
-      likeId = me.equals(like.getCreatedBy())? like.getId() : null;
-      result.add(new GoodsInfo(like.getGoods(), likeId));
+      result.add(goodsService.generateGoodsInfo(like.getGoods()));
     }
 
     String nextCursor = null;

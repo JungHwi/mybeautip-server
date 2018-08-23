@@ -48,11 +48,6 @@ public class GoodsInfo {
   @JsonIgnore
   private Date modifiedAt;
 
-  public GoodsInfo(Goods goods, Long likeId) {
-    BeanUtils.copyProperties(goods, this);
-    this.likeId = likeId;
-  }
-
   public GoodsInfo(Goods goods, Long likeId, Integer relatedVideoTotalCount,
                    String deliveryInfo, String refundInfo, String asInfo) {
     BeanUtils.copyProperties(goods, this);
