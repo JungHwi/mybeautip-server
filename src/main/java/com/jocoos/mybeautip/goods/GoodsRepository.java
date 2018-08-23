@@ -46,11 +46,6 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
 
   Optional<Goods> findByGoodsNo(String goodsNo);
 
-  @Query("select g.listImageData from Goods g where g.goodsNo = ?1")
-  default String findListImageDataByGoodsNo(String goodsNo) {
-    return null;
-  }
-
   @Modifying
   @Query("update Goods g set g.likeCount = g.likeCount + ?2, g.modifiedAt = now() " +
       "where g.goodsNo = ?1")

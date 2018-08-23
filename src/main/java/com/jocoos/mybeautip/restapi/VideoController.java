@@ -85,7 +85,7 @@ public class VideoController {
       throw new BadRequestException("related goods count is valid between 1 to 10.");
     }
 
-    String url = goodsRepository.findListImageDataByGoodsNo(relatedGoods.get(0));
+    String url = goodsRepository.getOne(relatedGoods.get(0)).getListImageData().toString();
     Video video = videoRepository.save(new Video(request.getVideoKey(),
       memberRepository.getOne(me), relatedGoods.size(), url));
 
