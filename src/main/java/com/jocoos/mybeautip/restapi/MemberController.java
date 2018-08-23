@@ -30,7 +30,9 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
+import com.jocoos.mybeautip.video.VideoService;
 import com.jocoos.mybeautip.word.BannedWordService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
@@ -48,6 +50,7 @@ public class MemberController {
 
   private final MemberService memberService;
   private final GoodsService goodsService;
+  private final VideoService videoService;
   private final MemberRepository memberRepository;
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
@@ -66,6 +69,7 @@ public class MemberController {
 
   public MemberController(MemberService memberService,
                           GoodsService goodsService,
+                          VideoService videoService,
                           MemberRepository memberRepository,
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
@@ -74,6 +78,7 @@ public class MemberController {
                           BannedWordService bannedWordService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
+    this.videoService = videoService;
     this.memberRepository = memberRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
@@ -258,7 +263,7 @@ public class MemberController {
     if (memberId == null) {
       throw new MemberNotFoundException("Login required");
     }
-    return createLikeResponse(memberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes");
+    return createLikeResponse(memberId, category, count, cursor, "/api/1/members/me/likes");
   }
 
   @GetMapping(value = "/{id:.+}/likes")
@@ -266,9 +271,7 @@ public class MemberController {
                                        @RequestParam String category,
                                        @RequestParam(defaultValue = "20") int count,
                                        @RequestParam(required = false) Long cursor) {
-
-    log.debug("id:{}", id);
-
+    log.debug("id:{}, category:{}", id, category);
     return createLikeResponse(id, category, count, cursor, String.format("/api/1/members/%d/likes", id));
   }
 
@@ -280,6 +283,8 @@ public class MemberController {
         return createGoodsLikeResponse(memberId, category, count, cursor, uri);
       case "store":
         return createStoreLikeResponse(memberId, category, count, cursor, uri);
+      case "video":
+        return createVideoLikeResponse(memberId, category, count, cursor, uri);
       default:
         throw new BadRequestException("invalid category: " + category);
     }
@@ -321,8 +326,6 @@ public class MemberController {
       goodsLikes = goodsLikeRepository.findByCreatedBy(memberId, pageable);
     }
 
-    Long likeId;
-    Long me = memberService.currentMemberId();
     for (GoodsLike like : goodsLikes) {
       result.add(goodsService.generateGoodsInfo(like.getGoods()));
     }
@@ -361,6 +364,33 @@ public class MemberController {
     String nextCursor = null;
     if (result.size() > 0) {
       nextCursor = String.valueOf(storeLikes.getContent().get(storeLikes.getContent().size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>(uri, result)
+      .withCategory(category)
+      .withCursor(nextCursor)
+      .withCount(count).toBuild();
+  }
+
+  private CursorResponse createVideoLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<VideoLike> videoLikes;
+    List<VideoController.VideoInfo> result = Lists.newArrayList();
+
+    if (cursor != null) {
+      videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedBy(
+        new Date(cursor), memberId, pageable);
+    } else {
+      videoLikes = videoLikeRepository.findByCreatedBy(memberId, pageable);
+    }
+
+    for (VideoLike like : videoLikes) {
+      result.add(videoService.generateVideoInfo(like.getVideo()));
+    }
+
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(videoLikes.getContent().get(videoLikes.getContent().size() - 1).getCreatedAt().getTime());
     }
 
     return new CursorResponse.Builder<>(uri, result)
