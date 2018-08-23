@@ -30,6 +30,7 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.video.VideoLikeRepository;
 import com.jocoos.mybeautip.word.BannedWordService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
@@ -51,6 +52,7 @@ public class MemberController {
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
+  private final VideoLikeRepository videoLikeRepository;
   private final BannedWordService bannedWordService;
 
   @Value("${mybeautip.store.image-path.prefix}")
@@ -68,6 +70,7 @@ public class MemberController {
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
                           StoreLikeRepository storeLikeRepository,
+                          VideoLikeRepository videoLikeRepository,
                           BannedWordService bannedWordService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
@@ -75,6 +78,7 @@ public class MemberController {
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeLikeRepository = storeLikeRepository;
+    this.videoLikeRepository = videoLikeRepository;
     this.bannedWordService = bannedWordService;
   }
 
@@ -223,10 +227,16 @@ public class MemberController {
 
   @GetMapping(value = "/me/like_count")
   public LikeCountResponse getMyLikesCount() {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
     LikeCountResponse response = new LikeCountResponse();
-    response.setGoods(goodsLikeRepository.countByCreatedBy(memberService.currentMemberId()));
-    response.setStore(storeLikeRepository.countByCreatedBy(memberService.currentMemberId()));
-    response.setPost(postLikeRepository.countByCreatedBy(memberService.currentMemberId()));
+    response.setGoods(goodsLikeRepository.countByCreatedBy(memberId));
+    response.setStore(storeLikeRepository.countByCreatedBy(memberId));
+    response.setPost(postLikeRepository.countByCreatedBy(memberId));
+    response.setVideo(videoLikeRepository.countByCreatedBy(memberId));
     return response;
   }
 
@@ -236,6 +246,7 @@ public class MemberController {
     response.setGoods(goodsLikeRepository.countByCreatedBy(id));
     response.setStore(storeLikeRepository.countByCreatedBy(id));
     response.setPost(postLikeRepository.countByCreatedBy(id));
+    response.setVideo(videoLikeRepository.countByCreatedBy(id));
     return response;
   }
 
@@ -243,7 +254,10 @@ public class MemberController {
   public CursorResponse getMyLikes(@RequestParam String category,
                                    @RequestParam(defaultValue = "20") int count,
                                    @RequestParam(required = false) Long cursor) {
-
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
     return createLikeResponse(memberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes");
   }
 
@@ -377,5 +391,6 @@ public class MemberController {
     private Integer goods = 0;
     private Integer store = 0;
     private Integer post = 0;
+    private Integer video = 0;
   }
 }
