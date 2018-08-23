@@ -15,4 +15,6 @@ public interface VideoRepository extends CrudRepository<Video, Long> {
   Optional<Video> findByVideoKeyAndDeletedAtIsNull(String videoKey);
 
   Optional<Video> findByIdAndMemberIdAndDeletedAtIsNull(Long id, Long memberId);
+
+  Optional<Object> findByVideoKey(String videoKey);
 }

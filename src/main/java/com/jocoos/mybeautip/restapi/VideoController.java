@@ -70,15 +70,18 @@ public class VideoController {
   @PostMapping
   public CreateVideoResponse createVideo(@Valid @RequestBody CreateVideoGoodsRequest request,
                           BindingResult bindingResult) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
-    if (videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey()).isPresent()) {
+    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
       throw new BadRequestException("Already exist, video key: " + request.getVideoKey());
     }
-
-    Long me = memberService.currentMemberId();
 
     List<String> relatedGoods = request.getRelatedGoods();
     if (relatedGoods.size() == 0 || relatedGoods.size() > 10) {
@@ -87,9 +90,9 @@ public class VideoController {
 
     String url = goodsRepository.getOne(relatedGoods.get(0)).getListImageData().toString();
     Video video = videoRepository.save(new Video(request.getVideoKey(),
-      memberRepository.getOne(me), relatedGoods.size(), url));
+      memberRepository.getOne(memberId), relatedGoods.size(), url));
 
-    memberRepository.updateVideoCount(me, 1);
+    memberRepository.updateVideoCount(memberId, 1);
 
     for (String goodsNo : relatedGoods) {
       goodsRepository.findById(goodsNo)
