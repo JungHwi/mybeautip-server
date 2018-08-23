@@ -15,7 +15,6 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "stores")
 public class Store {
-
   @Id
   private Integer id;
 
@@ -24,12 +23,6 @@ public class Store {
 
   @Column
   private String description;
-
-  @Column
-  private String imageUrl;
-
-  @Column
-  private String thumbnailUrl;
 
   @Column(nullable = false)
   private int likeCount;
