@@ -32,11 +32,16 @@ public class GoodsInfo {
   private Integer likeCount;
   private Long likeId;
   private List<GodoService.MustInfo> goodsMustInfo;
+  private Integer relatedVideoTotalCount; // 관련 방송(동영상 리뷰) 전체 개수
+  private String deliveryInfo;
+  private String refundInfo;
+  private String asInfo;
   private String optionFl;    // 옵션 사용여부
   private String optionName;  // 옵션 이름
   private String detailRef;   // 상품 상세 페이지를 볼 수 있는 Html 주소
   private String optionRef;   // 상품 옵션 데이터를 볼 수 있는 주소
   private String relatedGoodsRef;   // 관련 상품을 볼 수 있는 주소
+  private String relatedVideoRef;   // 관련 방송(동영상 리뷰)를 볼 수 있는 주소
 
   @JsonIgnore
   private Date createdAt;
@@ -46,12 +51,17 @@ public class GoodsInfo {
   public GoodsInfo(Goods goods, Long likeId) {
     BeanUtils.copyProperties(goods, this);
     this.likeId = likeId;
+  }
+
+  public GoodsInfo(Goods goods, Long likeId, Integer relatedVideoTotalCount,
+                   String deliveryInfo, String refundInfo, String asInfo) {
+    BeanUtils.copyProperties(goods, this);
+    this.likeId = likeId;
+    this.relatedVideoTotalCount = relatedVideoTotalCount;
     this.detailRef = String.format("/api/1/goods/%s/details", goodsNo);
     this.relatedGoodsRef = String.format("/api/1/goods/%s/related-goods", goodsNo);
-
-    if ("y".equalsIgnoreCase(goods.getOptionFl())) {
-      this.optionRef = String.format("/api/1/goods/%s/options", goodsNo);
-    }
+    this.relatedVideoRef = (relatedVideoTotalCount > 0) ? String.format("/api/1/goods/%s/videos", goodsNo) : "";
+    this.optionRef = ("y".equalsIgnoreCase(goods.getOptionFl())) ? String.format("/api/1/goods/%s/options", goodsNo) : "";
 
     if (goods.getGoodsMustInfo() != null) {
       ObjectMapper mapper = new ObjectMapper();
@@ -63,5 +73,9 @@ public class GoodsInfo {
       }
       this.goodsMustInfo = info;
     }
+
+    this.deliveryInfo = deliveryInfo;
+    this.refundInfo = refundInfo;
+    this.asInfo = asInfo;
   }
 }

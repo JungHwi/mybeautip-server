@@ -59,6 +59,12 @@ public class GodoService {
   @Value("${godomall.common-code-url}")
   private String commonCodeUrl;
 
+  @Value("${mybeautip.category.image-path.prefix}")
+  private String categoryImagePrefix;
+
+  @Value("${mybeautip.category.image-path.suffix}")
+  private String categoryImageSuffix;
+
   private static final String GODOMALL_RESPONSE_OK = "000";
   private static final String GOODS_CATEGORY_TOP = "0";
 
@@ -144,8 +150,6 @@ public class GodoService {
 
   private Category copyPropertiesFrom(GodoCategoryResponse.CategoryData source) {
     Category target = new Category();
-    final String CATEGORY_S3_PREFIX = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/category/";
-    final String CATEGORY_S3_SUFFIX = ".png";
 
     if (source.getCateCd().length() == 3) {  // top category,
       target.setGroup(GOODS_CATEGORY_TOP);
@@ -159,7 +163,7 @@ public class GodoService {
     target.setName(source.getCateNm());
     target.setDisplayOnPc(source.getCateDisplayFl());
     target.setDisplayOnMobile(source.getCateDisplayMobileFl());
-    target.setThumbnailUrl(CATEGORY_S3_PREFIX + source.getCateCd() + CATEGORY_S3_SUFFIX);
+    target.setThumbnailUrl(String.format("%s%s%s", categoryImagePrefix, source.getCateCd(), categoryImageSuffix));
 
     return target;
   }
@@ -264,10 +268,6 @@ public class GodoService {
     int newCount = 0;
     int updatedCount = 0;
 
-    final String S3_STORE_PREFIX = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/";
-    final String S3_STORE_IMG_SUFFIX = ".png";
-    final String S3_STORE_THUMBNAIL_SUFFIX = "-thumbnail.png";
-
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
@@ -293,8 +293,6 @@ public class GodoService {
           updatedCount++;
         } else {
           store = new Store(scm.getScmNo());
-          store.setImageUrl(S3_STORE_PREFIX + scm.getScmNo() + S3_STORE_IMG_SUFFIX);
-          store.setThumbnailUrl(S3_STORE_PREFIX + scm.getScmNo() + S3_STORE_THUMBNAIL_SUFFIX);
           newCount++;
         }
         store.setName(scm.getCompanyNm());
