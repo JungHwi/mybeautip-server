@@ -17,4 +17,7 @@ public interface VideoRepository extends CrudRepository<Video, Long> {
   Optional<Video> findByIdAndMemberIdAndDeletedAtIsNull(Long id, Long memberId);
 
   Optional<Object> findByVideoKey(String videoKey);
+
+  @Query("select v.commentCount from Video v where v.id= ?1")
+  int getCommentCount(Long id);
 }
