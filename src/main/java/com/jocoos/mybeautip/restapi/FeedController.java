@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.feed.FeedService;
-import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.Video;
 
@@ -22,23 +21,27 @@ public class FeedController {
 
   private final FeedService feedService;
   private final MemberService memberService;
-  private final MemberRepository memberRepository;
 
   public FeedController(FeedService feedService,
-                        MemberService memberService,
-                        MemberRepository memberRepository) {
+                        MemberService memberService) {
     this.feedService = feedService;
     this.memberService = memberService;
-    this.memberRepository = memberRepository;
   }
 
   @GetMapping
   public CursorResponse getFeeds(@RequestParam(defaultValue = "20") int count,
                                  @RequestParam(required = false) String cursor) {
     Long memberId = memberService.currentMemberId();
-    List<Video> videos = feedService.getVideos(memberId, cursor, count);
-    List<VideoController.VideoInfo> result = Lists.newArrayList();
+    List<Video> videos = feedService.getVideoKeys(memberId, cursor, count);
 
+    List<String> videoKeys = Lists.newArrayList();
+    if (videos != null && videos.size() > 0) {
+      videos.forEach(v -> {
+        videoKeys.add(v.getVideoKey());
+      });
+    }
+
+    List<VideoController.VideoInfo> result = Lists.newArrayList();
     videos.stream()
        .forEach(v -> result.add(new VideoController.VideoInfo(v, memberService.getMemberInfo(v.getMember()))));
 

@@ -8,9 +8,9 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -28,27 +28,23 @@ public class FeedService {
   private static final String MEMBER_KEY = "member:%s";
   private static final String FEED_KEY = "feed:%s";
 
-  private final ObjectMapper objectMapper;
   private final JedisPool jedisPool;
   private final FollowingRepository followingRepository;
   private final VideoRepository videoRepository;
 
-  public FeedService(ObjectMapper objectMapper,
-                     JedisPool jedisPool,
+  public FeedService(JedisPool jedisPool,
                      FollowingRepository followingRepository,
                      VideoRepository videoRepository) {
-
-    this.objectMapper = objectMapper;
     this.jedisPool = jedisPool;
     this.followingRepository = followingRepository;
     this.videoRepository = videoRepository;
   }
 
-  public List<Video> getVideos(Long memberId, String cursor, int count) {
+  public List<Video> getVideoKeys(Long memberId, String cursor, int count) {
     String key = String.format(FEED_KEY, memberId);
-    List<Video> videos = Lists.newArrayList();
     Jedis jedis = null;
     log.debug("memberId: {}, cursor: {}, count: {}", memberId, cursor, count);
+    List<Video> videos = Lists.newArrayList();
 
     try {
       jedis = jedisPool.getResource();
@@ -58,9 +54,10 @@ public class FeedService {
       } else {
         tuples = jedis.zrevrangeByScoreWithScores(key, "(" + cursor, "-inf", 0, count);
       }
+
       for (Tuple t: tuples) {
-        Video video = getVideo(t.getElement());
-        videos.add(video);
+        videoRepository.findByVideoKeyAndDeletedAtIsNull(t.getElement())
+           .ifPresent(v -> videos.add(v));
       }
     } finally {
       if (jedis != null) {
@@ -68,7 +65,6 @@ public class FeedService {
         close(jedis);
       }
     }
-
     return videos;
   }
 
@@ -90,18 +86,17 @@ public class FeedService {
   public void followMember(Long me, Long follower) {
     String followerKey = String.format(MEMBER_KEY, follower);
     String myFeedKey = String.format(FEED_KEY, me);
-    copyFollowerVideoToMe(followerKey, myFeedKey);
+    copyVideos(followerKey, myFeedKey);
   }
 
-  private void copyFollowerVideoToMe(String followerKey, String myFeedKey) {
+  private void copyVideos(String followerKey, String myFeedKey) {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
       Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
       for (Tuple t: tuples) {
-        Video video = readValue(t.getElement());
-        log.debug("video key: {}", video.getVideoKey());
-        jedis.zadd(myFeedKey, t.getScore(), video.getVideoKey());
+        log.debug("copey videos key: {}, element: {}", t.getScore(), t.getElement());
+        jedis.zadd(myFeedKey, t.getScore(), t.getElement());
       }
     } finally {
       if (jedis != null) {
@@ -125,9 +120,7 @@ public class FeedService {
       jedis = jedisPool.getResource();
       Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
       for (Tuple t: tuples) {
-        Video video = readValue(t.getElement());
-        log.debug("video key: {}", video.getVideoKey());
-        jedis.zrem(myFeedKey, video.getVideoKey());
+        jedis.zrem(myFeedKey, t.getElement());
       }
     } finally {
       if (jedis != null) {
@@ -163,21 +156,11 @@ public class FeedService {
     try {
       jedis = jedisPool.getResource();
       String myVideo = String.format(MEMBER_KEY, creatorId);
-      String myFeed = String.format(FEED_KEY, creatorId);
       Set<Tuple> videos = jedis.zrevrangeByScoreWithScores(myVideo, createdAt, createdAt);
       if (videos.size() == 1) {
         for (Tuple t: videos) {
-          jedis.zrem(myVideo, t.getElement());
-        }
-      }
-
-      Set<Tuple> feeds = jedis.zrevrangeByScoreWithScores(myFeed, createdAt, createdAt);
-      log.debug("removed: {}", feeds.size());
-
-      if (feeds.size() == 1) {
-        for (Tuple t: feeds) {
           String element = t.getElement();
-          jedis.zrem(myFeed, element);
+          jedis.zrem(myVideo, element);
           return element;
         }
       }
@@ -210,7 +193,7 @@ public class FeedService {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
-      jedis.zadd(key, video.getCreatedAt().getTime(), writeAsString(video));
+      jedis.zadd(key, video.getCreatedAt().getTime(), video.getVideoKey());
     } finally {
       if (jedis != null) {
         jedis.disconnect();
@@ -235,35 +218,6 @@ public class FeedService {
     }
   }
 
-  private String writeAsString(Video video) {
-    try {
-      return objectMapper.writeValueAsString(video);
-    } catch (IOException e) {
-      log.error("failed to write as string", e);
-    }
-    return null;
-  }
-
-  private Video readValue(String video) {
-    try {
-      return objectMapper.readValue(video, Video.class);
-    } catch (IOException e) {
-      log.error("failed to write as string", e);
-    }
-    return null;
-  }
-
-  private Video getVideo(String element) {
-    log.debug("element: {}", element);
-
-    try {
-      return objectMapper.readValue(element, Video.class);
-    } catch (IOException e) {
-      log.error("cann't read element to video", e);
-    }
-    return null;
-  }
-
   private void close(Closeable... closeables) {
     for (Closeable c : closeables) {
       try {
@@ -272,5 +226,11 @@ public class FeedService {
         log.error("Cann't close exception", e);
       }
     }
+  }
+
+  @Data
+  private static class VideoStore {
+    private String key;
+    private String video;
   }
 }
