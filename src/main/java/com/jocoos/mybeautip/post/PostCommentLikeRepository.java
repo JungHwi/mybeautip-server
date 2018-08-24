@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostCommentLikeRepository extends JpaRepository<PostCommentLike, Long> {
 
-  Optional<PostCommentLike> findByPostIdAndCreatedBy(Long postId, Long createdBy);
+  Optional<PostCommentLike> findByCommentIdAndCreatedById(Long commentId, Long createdBy);
+
+  Optional<PostCommentLike> findByIdAndCommentIdAndCreatedById(Long id, Long commentId, Long createdBy);
 
 }

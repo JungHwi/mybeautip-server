@@ -23,8 +23,8 @@ public class PostCommentLike {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "post_comment")
-  private PostComment postComment;
+  @JoinColumn(name = "comment_id")
+  private PostComment comment;
 
   @ManyToOne
   @JoinColumn(name = "created_by")
@@ -34,8 +34,8 @@ public class PostCommentLike {
   @CreatedDate
   private Date createdAt;
 
-  public PostCommentLike(PostComment postComment, Member createdBy) {
-    this.postComment = postComment;
+  public PostCommentLike(PostComment comment, Member createdBy) {
+    this.comment = comment;
     this.createdBy = createdBy;
   }
 }

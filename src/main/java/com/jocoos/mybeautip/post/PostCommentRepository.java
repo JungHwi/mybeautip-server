@@ -15,6 +15,12 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
   @Query("update PostComment p set p.commentCount = p.commentCount + ?2, p.modifiedAt = now() where p.id = ?1")
   void updateCommentCount(Long id, int count);
 
+  @Modifying
+  @Query("update PostComment p set p.likeCount = p.likeCount + ?2, p.modifiedAt = now() where p.id = ?1")
+  void updateLikeCount(Long id, int count);
+
+  Optional<PostComment> findByIdAndPostId(Long id, Long postId);
+
   Optional<PostComment> findByIdAndPostIdAndCreatedBy(Long id, Long postId, Long createdBy);
 
   Slice<PostComment> findByPostIdAndParentIdIsNull(Long postId, Pageable pageable);
