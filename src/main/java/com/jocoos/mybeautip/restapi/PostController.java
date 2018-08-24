@@ -378,6 +378,7 @@ public class PostController {
   public static class PostBasicInfo {
     private Long id;
     private String title;
+    private String description;
     private int category;
     private int progress;
     private String thumbnailUrl;
