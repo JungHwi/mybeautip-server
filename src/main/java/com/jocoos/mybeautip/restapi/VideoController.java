@@ -134,13 +134,6 @@ public class VideoController {
     return relatedGoods;
   }
 
-  @GetMapping("/{id}/comment_count")
-  public CommentCountResponse getVideoCommentCount(@PathVariable Long id) {
-    return videoRepository.findById(id)
-      .map(v -> new CommentCountResponse(v.getCommentCount()))
-      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
-  }
-
   @GetMapping("/{id}/comments")
   public CursorResponse getVideoComments(@PathVariable Long id,
                                          @RequestParam(defaultValue = "20") int count,
@@ -170,7 +163,8 @@ public class VideoController {
     return new CursorResponse
       .Builder<>("/api/1/videos/" + id + "/comments", result)
       .withCount(count)
-      .withCursor(nextCursor).toBuild();
+      .withCursor(nextCursor)
+      .withTotalCount(videoRepository.getCommentCount(id)).toBuild();
   }
 
   @Transactional
