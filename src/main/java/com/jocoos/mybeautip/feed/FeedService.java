@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -226,11 +225,5 @@ public class FeedService {
         log.error("Cann't close exception", e);
       }
     }
-  }
-
-  @Data
-  private static class VideoStore {
-    private String key;
-    private String video;
   }
 }
