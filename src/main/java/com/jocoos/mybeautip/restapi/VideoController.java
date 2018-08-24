@@ -163,7 +163,8 @@ public class VideoController {
     return new CursorResponse
       .Builder<>("/api/1/videos/" + id + "/comments", result)
       .withCount(count)
-      .withCursor(nextCursor).toBuild();
+      .withCursor(nextCursor)
+      .withTotalCount(videoRepository.getCommentCount(id)).toBuild();
   }
 
   @Transactional
