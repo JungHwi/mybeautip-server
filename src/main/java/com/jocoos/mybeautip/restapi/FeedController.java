@@ -16,7 +16,7 @@ import com.jocoos.mybeautip.video.Video;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/1/feeds")
+@RequestMapping("/api/1/members/me/feeds")
 public class FeedController {
 
   private final FeedService feedService;
