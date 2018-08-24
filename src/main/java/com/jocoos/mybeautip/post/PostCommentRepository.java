@@ -21,7 +21,7 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
 
   Optional<PostComment> findByIdAndPostId(Long id, Long postId);
 
-  Optional<PostComment> findByIdAndPostIdAndCreatedBy(Long id, Long postId, Long createdBy);
+  Optional<PostComment> findByIdAndPostIdAndCreatedById(Long id, Long postId, Long createdBy);
 
   Slice<PostComment> findByPostIdAndParentIdIsNull(Long postId, Pageable pageable);
 

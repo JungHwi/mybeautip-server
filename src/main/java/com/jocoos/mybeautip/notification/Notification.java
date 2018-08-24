@@ -135,26 +135,26 @@ public class Notification {
     this.args = Lists.newArrayList(source.getUsername(), videoComment.getComment());
   }
 
-  public Notification(Post post, PostComment postComment, Member source) {
+  public Notification(Post post, PostComment postComment) {
     this.type = POST_COMMENT;
     this.targetMember = post.getCreator();
     this.read = false;
     this.resourceType = "post_comment";
     this.resourceId = postComment.getId();
-    this.resourceOwner = source;
+    this.resourceOwner = postComment.getCreatedBy();
     this.imageUrl = post.getThumbnailUrl();
-    this.args = Lists.newArrayList(source.getUsername(), postComment.getComment());
+    this.args = Lists.newArrayList(postComment.getCreatedBy().getUsername(), postComment.getComment());
   }
 
-  public Notification(String thumbnail, PostComment postComment, Member source, Member target) {
+  public Notification(String thumbnail, PostComment postComment, Member target) {
     this.type = POST_COMMENT_REPLY;
     this.targetMember = target;
     this.read = false;
     this.resourceType = "post_comment";
     this.resourceId = postComment.getId();
-    this.resourceOwner = source;
+    this.resourceOwner = postComment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(source.getUsername(), postComment.getComment());
+    this.args = Lists.newArrayList(postComment.getCreatedBy().getUsername(), postComment.getComment());
   }
 
   public Notification(VideoLike videoLike, String thumbnail, Member source) {

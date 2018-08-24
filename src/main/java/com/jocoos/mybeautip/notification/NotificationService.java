@@ -112,29 +112,24 @@ public class NotificationService {
 
   public void notifyAddPostComment(PostComment postComment) {
     postRepository.findById(postComment.getPostId())
-       .ifPresent(post ->
-          memberRepository.findById(postComment.getCreatedBy())
-             .ifPresent(source -> {
-               Notification n = notificationRepository.save(new Notification(post, postComment, source));
-               deviceService.push(n);
-             })
-       );
+       .ifPresent(post -> {
+         Notification n = notificationRepository.save(new Notification(post, postComment));
+         deviceService.push(n);
+       });
   }
 
   public void notifyAddPostCommentReply(PostComment postComment) {
     Member parentMember = Optional.ofNullable(postComment.getParentId())
        .flatMap(parent -> postCommentRepository.findById(parent))
-       .flatMap(comment -> memberRepository.findById(comment.getCreatedBy()))
-       .get();
+       .map(PostComment::getCreatedBy)
+       .orElse(null);
+
 
     postRepository.findById(postComment.getPostId())
-       .ifPresent(post ->
-          memberRepository.findById(postComment.getCreatedBy())
-             .ifPresent(source -> {
-               Notification n = notificationRepository.save(new Notification(post.getThumbnailUrl(), postComment, source, parentMember));
-               deviceService.push(n);
-             })
-       );
+       .ifPresent(post -> {
+         Notification n = notificationRepository.save(new Notification(post.getThumbnailUrl(), postComment, parentMember));
+         deviceService.push(n);
+       });
   }
 
   public void notifyAddVideoLike(VideoLike videoLike) {

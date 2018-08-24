@@ -11,6 +11,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.jocoos.mybeautip.member.Member;
+
 @NoArgsConstructor
 @Data
 @Entity
@@ -37,9 +39,9 @@ public class PostComment {
   @Column
   private int likeCount;
 
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "created_by")
+  private Member createdBy;
 
   @Column(nullable = false)
   @CreatedDate
@@ -49,7 +51,8 @@ public class PostComment {
   @LastModifiedDate
   private Date modifiedAt;
 
-  public PostComment(Long postId) {
+  public PostComment(Long postId, Member createdBy) {
     this.postId = postId;
+    this.createdBy = createdBy;
   }
 }

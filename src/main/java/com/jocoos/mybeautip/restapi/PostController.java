@@ -261,18 +261,11 @@ public class PostController {
       throw new MemberNotFoundException("Login required");
     }
 
-    // FIXME: Refactor PostComment createdBy type to Member
     comments.stream().forEach(comment -> {
-      result.add(
-         memberRepository.findById(comment.getCreatedBy())
-            .map(member -> {
-              PostCommentInfo commentInfo = new PostCommentInfo(comment, new MemberInfo(member, memberService.getFollowingId(member)));
-              postCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-                .ifPresent(liked -> commentInfo.setLikedId(liked.getId()));
-              return commentInfo;
-            })
-            .orElseGet(() -> new PostCommentInfo(comment))
-      );
+      PostCommentInfo commentInfo = new PostCommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
+      postCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+        .ifPresent(liked -> commentInfo.setLikedId(liked.getId()));
+      result.add(commentInfo);
     });
 
     String nextCursor = null;
@@ -292,6 +285,8 @@ public class PostController {
   public ResponseEntity addPostComment(@PathVariable Long id,
                                        @RequestBody CreateCommentRequest request,
                                        BindingResult bindingResult) {
+
+    Member me = memberService.currentMember();
     if (bindingResult != null && bindingResult.hasErrors()) {
       new BadRequestException(bindingResult.getFieldError());
     }
@@ -305,12 +300,12 @@ public class PostController {
          .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
     }
 
-    PostComment postComment = new PostComment(id);
+    PostComment postComment = new PostComment(id, me);
     BeanUtils.copyProperties(request, postComment);
     postRepository.updateCommentCount(id, 1);
 
     return new ResponseEntity<>(
-       new PostCommentInfo(postCommentRepository.save(postComment)),
+       new PostCommentInfo(postCommentRepository.save(postComment), createMemberInfo(postComment.getCreatedBy())),
        HttpStatus.OK
     );
   }
@@ -326,11 +321,11 @@ public class PostController {
     }
 
     Long memberId = memberService.currentMemberId();
-    return postCommentRepository.findByIdAndPostIdAndCreatedBy(id, postId, memberId)
+    return postCommentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
        .map(comment -> {
          comment.setComment(request.getComment());
          return new ResponseEntity<>(
-            new PostCommentInfo(postCommentRepository.save(comment)),
+            new PostCommentInfo(postCommentRepository.save(comment), createMemberInfo(comment.getCreatedBy())),
             HttpStatus.OK
          );
        })
@@ -344,7 +339,7 @@ public class PostController {
     postRepository.updateCommentCount(postId, -1);
 
     Long memberId = memberService.currentMemberId();
-    return postCommentRepository.findByIdAndPostIdAndCreatedBy(id, postId, memberId)
+    return postCommentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
        .map(comment -> {
          if (comment.getParentId() != null) {
            postCommentRepository.updateCommentCount(comment.getParentId(), -1);
@@ -399,6 +394,10 @@ public class PostController {
          return new ResponseEntity(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_comment_like_not_found", "invalid post comment like id"));
+  }
+
+  private MemberInfo createMemberInfo(Member member) {
+    return new MemberInfo(member, memberService.getFollowingId(member));
   }
 
   /**
@@ -472,9 +471,8 @@ public class PostController {
     private String comment;
     private Long parentId;
     private int commentCount;
-    private Long createdBy;
+    private MemberInfo createdBy;
     private Date createdAt;
-    private MemberInfo owner;
     private String commentRef;
     private Long likedId;
 
@@ -483,10 +481,9 @@ public class PostController {
       setCommentRef(comment);
     }
 
-    public PostCommentInfo(PostComment comment, MemberInfo member) {
+    public PostCommentInfo(PostComment comment, MemberInfo createdBy) {
       this(comment);
-      this.owner = member;
-      setCommentRef(comment);
+      this.createdBy = createdBy;
     }
 
     private void setCommentRef(PostComment comment) {
