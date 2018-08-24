@@ -34,6 +34,9 @@ public class PostComment {
   @Column
   private int commentCount;
 
+  @Column
+  private int likeCount;
+
   @Column(nullable = false)
   @CreatedBy
   private Long createdBy;
