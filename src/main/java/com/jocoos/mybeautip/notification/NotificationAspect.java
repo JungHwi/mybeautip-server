@@ -13,6 +13,7 @@ import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.post.PostComment;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoComment;
+import com.jocoos.mybeautip.video.VideoLike;
 
 @Slf4j
 @Aspect
@@ -84,5 +85,14 @@ public class NotificationAspect {
   // TODO : Not implement video comment like
   // TODO : Not implement post comment like
 
-  // TODO : How to get video like count
+  @After(value = "execution(* com.jocoos.mybeautip.video.VideoLikeRepository.save(..))")
+  public void onAfterSaveVideoLike(JoinPoint joinPoint) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+    Object o = joinPoint.getArgs()[0];
+    if (o instanceof VideoLike) {
+      VideoLike videoLike = (VideoLike) o;
+      log.debug("video like: {}", videoLike);
+      notificationService.notifyAddVideoLike(videoLike);
+    }
+  }
 }

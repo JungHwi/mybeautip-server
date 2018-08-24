@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @RestController
@@ -21,11 +22,14 @@ public class FeedController {
 
   private final FeedService feedService;
   private final MemberService memberService;
+  private final VideoService videoService;
 
   public FeedController(FeedService feedService,
-                        MemberService memberService) {
+                        MemberService memberService,
+                        VideoService videoService) {
     this.feedService = feedService;
     this.memberService = memberService;
+    this.videoService = videoService;
   }
 
   @GetMapping
@@ -43,7 +47,7 @@ public class FeedController {
 
     List<VideoController.VideoInfo> result = Lists.newArrayList();
     videos.stream()
-       .forEach(v -> result.add(new VideoController.VideoInfo(v, memberService.getMemberInfo(v.getMember()))));
+       .forEach(v -> result.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
     if (result.size() > 0) {
