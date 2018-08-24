@@ -25,6 +25,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   @Query("update Post p set p.commentCount = p.commentCount + ?2, p.modifiedAt = now() where p.id = ?1")
   void updateCommentCount(Long id, int count);
 
+  @Query("select p.commentCount from Post p where p.id= ?1")
+  int getCommentCount(Long id);
 
   Slice<Post> findByCategoryAndDeletedAtIsNull(int category, Pageable pageable);
 
