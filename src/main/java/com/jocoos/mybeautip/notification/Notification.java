@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostComment;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoComment;
+import com.jocoos.mybeautip.video.VideoLike;
 
 @NoArgsConstructor
 @Data
@@ -154,5 +155,16 @@ public class Notification {
     this.resourceOwner = source;
     this.imageUrl = thumbnail;
     this.args = Lists.newArrayList(source.getUsername(), postComment.getComment());
+  }
+
+  public Notification(VideoLike videoLike, String thumbnail, Member source) {
+    this.type = VIDEO_LIKE;
+    this.targetMember = videoLike.getVideo().getMember();
+    this.read = false;
+    this.resourceType = "video_like";
+    this.resourceId = videoLike.getId();
+    this.resourceOwner = source;
+    this.imageUrl = thumbnail;
+    this.args = Lists.newArrayList(source.getUsername());
   }
 }

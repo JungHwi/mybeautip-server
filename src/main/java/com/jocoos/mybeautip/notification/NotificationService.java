@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoComment;
 import com.jocoos.mybeautip.video.VideoCommentRepository;
+import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
@@ -136,4 +137,12 @@ public class NotificationService {
        );
   }
 
+  public void notifyAddVideoLike(VideoLike videoLike) {
+    memberRepository.findById(videoLike.getCreatedBy())
+      .ifPresent(source -> {
+        Notification n = notificationRepository.save(new Notification(videoLike,
+          getVideoThumbnail(videoLike.getVideo().getVideoKey()), source));
+        deviceService.push(n);
+      });
+  }
 }
