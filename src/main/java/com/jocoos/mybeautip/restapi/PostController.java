@@ -266,9 +266,10 @@ public class PostController {
     }
 
     return new CursorResponse
-       .Builder<PostCommentInfo>("/api/1/posts/" + id + "/comments", result)
-       .withCount(count)
-       .withCursor(nextCursor).toBuild();
+      .Builder<PostCommentInfo>("/api/1/posts/" + id + "/comments", result)
+      .withCount(count)
+      .withCursor(nextCursor)
+      .withTotalCount(postRepository.getCommentCount(id)).toBuild();
   }
 
   @Transactional
