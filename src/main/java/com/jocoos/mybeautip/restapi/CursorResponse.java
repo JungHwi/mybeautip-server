@@ -23,11 +23,13 @@ public class CursorResponse<E> {
   private List<E> content;
   private String nextCursor;
   private String nextRef;
+  private Integer totalCount;
 
   public static class Builder<E> {
     private List<E> content;
     private String nextCursor;
     private String nextRef;
+    private Integer totalCount;
 
     @JsonIgnore
     private String uri;
@@ -72,6 +74,11 @@ public class CursorResponse<E> {
       return this;
     }
 
+    public Builder withTotalCount(int totalCount) {
+      this.totalCount = totalCount;
+      return this;
+    }
+
     public CursorResponse<E> toBuild() {
       createRef();
       log.debug("created nextRef: {}", nextRef);
@@ -83,5 +90,6 @@ public class CursorResponse<E> {
     this.content = builder.content;
     this.nextCursor = builder.nextCursor;
     this.nextRef = builder.nextRef;
+    this.totalCount = builder.totalCount;
   }
 }
