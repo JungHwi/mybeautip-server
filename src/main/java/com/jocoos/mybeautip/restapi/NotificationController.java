@@ -63,7 +63,6 @@ public class NotificationController {
 
     notifications
        .forEach(n -> {
-         log.debug("n: {}", n);
          String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
          Map<String, String> custom = n.getCustom();
          if (custom  != null && custom.containsKey(CUSTOM_KEY_FOLLOW_ID)) {
@@ -98,13 +97,12 @@ public class NotificationController {
   @Data
   public static class NotificationInfo {
     private Long id;
-    private Member sourceMember;
     private Member targetMember;
     private String type;
     private boolean read;
     private String resourceType;
     private Long resourceId;
-    private Long resourceOwner;
+    private Member resourceOwner;
     private String imageUrl;
     private String message;
     private Date createdAt;

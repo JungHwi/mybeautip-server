@@ -58,8 +58,9 @@ public class Notification {
   @Column
   private Long resourceId;
 
-  @Column
-  private Long resourceOwner;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "resource_owner")
+  private Member resourceOwner;
 
   @Column
   private String imageUrl;
@@ -92,7 +93,7 @@ public class Notification {
     this.args = Lists.newArrayList(video.getMember().getUsername());
     this.resourceType = "video";
     this.resourceId = video.getId();
-    this.resourceOwner = video.getMember().getId();
+    this.resourceOwner = video.getMember();
     this.imageUrl = thumbnail;
   }
 
@@ -102,7 +103,7 @@ public class Notification {
     this.read = false;
     this.resourceType = "member";
     this.resourceId = following.getMemberMe().getId();
-    this.resourceOwner = following.getMemberMe().getId();
+    this.resourceOwner = following.getMemberMe();
     this.imageUrl = following.getMemberMe().getAvatarUrl();
     this.args = Lists.newArrayList(following.getMemberMe().getUsername());
     if (followId != null) {
@@ -117,7 +118,7 @@ public class Notification {
     this.read = false;
     this.resourceType = "video_comment";
     this.resourceId = videoComment.getId();
-    this.resourceOwner = videoComment.getCreatedBy();
+    this.resourceOwner = source;
     this.imageUrl = video.getThumbnailUrl();
     this.args = Lists.newArrayList(source.getUsername(), videoComment.getComment());
   }
@@ -128,7 +129,7 @@ public class Notification {
     this.read = false;
     this.resourceType = "video_comment";
     this.resourceId = videoComment.getId();
-    this.resourceOwner = videoComment.getCreatedBy();
+    this.resourceOwner = source;
     this.imageUrl = thumbnail;
     this.args = Lists.newArrayList(source.getUsername(), videoComment.getComment());
   }
@@ -139,7 +140,7 @@ public class Notification {
     this.read = false;
     this.resourceType = "post_comment";
     this.resourceId = postComment.getId();
-    this.resourceOwner = postComment.getCreatedBy();
+    this.resourceOwner = source;
     this.imageUrl = post.getThumbnailUrl();
     this.args = Lists.newArrayList(source.getUsername(), postComment.getComment());
   }
@@ -150,7 +151,7 @@ public class Notification {
     this.read = false;
     this.resourceType = "post_comment";
     this.resourceId = postComment.getId();
-    this.resourceOwner = postComment.getCreatedBy();
+    this.resourceOwner = source;
     this.imageUrl = thumbnail;
     this.args = Lists.newArrayList(source.getUsername(), postComment.getComment());
   }
