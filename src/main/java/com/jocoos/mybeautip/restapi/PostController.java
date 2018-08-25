@@ -344,6 +344,7 @@ public class PostController {
          if (comment.getParentId() != null) {
            postCommentRepository.updateCommentCount(comment.getParentId(), -1);
          }
+         // FIXME: need to delete comment_likes relevant to comment
          postCommentRepository.delete(comment);
          return new ResponseEntity<>(HttpStatus.OK);
        })
