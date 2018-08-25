@@ -9,6 +9,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.video.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -17,23 +33,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.video.*;
 
 @Slf4j
 @RestController
@@ -45,9 +44,10 @@ public class VideoController {
   private final MemberRepository memberRepository;
   private final GoodsRepository goodsRepository;
   private final VideoRepository videoRepository;
+  private final VideoLikeRepository videoLikeRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final VideoCommentRepository videoCommentRepository;
-  private final VideoLikeRepository videoLikeRepository;
+  private final VideoCommentLikeRepository videoCommentLikeRepository;
 
   public VideoController(MemberService memberService,
                          VideoService videoService,
@@ -57,7 +57,8 @@ public class VideoController {
                          GoodsRepository goodsRepository,
                          VideoRepository videoRepository,
                          VideoCommentRepository videoCommentRepository,
-                         VideoLikeRepository videoLikeRepository) {
+                         VideoLikeRepository videoLikeRepository,
+                         VideoCommentLikeRepository videoCommentLikeRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.videoGoodsRepository = videoGoodsRepository;
@@ -67,6 +68,7 @@ public class VideoController {
     this.videoRepository = videoRepository;
     this.videoCommentRepository = videoCommentRepository;
     this.videoLikeRepository = videoLikeRepository;
+    this.videoCommentLikeRepository = videoCommentLikeRepository;
   }
 
   @Transactional
@@ -141,6 +143,10 @@ public class VideoController {
                                          @RequestParam(required = false) Long parentId) {
     PageRequest page = PageRequest.of(0, count);
     Slice<VideoComment> comments;
+    Long me = memberService.currentMemberId();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
 
     if (parentId != null) {
       comments = videoService.findCommentsByParentId(parentId, cursor, page);
@@ -149,11 +155,13 @@ public class VideoController {
     }
 
     List<VideoController.VideoCommentInfo> result = Lists.newArrayList();
-    comments.stream().forEach(comment -> result.add(
-      memberRepository.findById(comment.getCreatedBy())
-        .map(member -> new VideoCommentInfo(comment, new MemberInfo(member, memberService.getFollowingId(member))))
-        .orElseGet(() -> new VideoCommentInfo(comment))
-    ));
+    comments.stream().forEach(comment -> {
+      VideoCommentInfo commentInfo = new VideoCommentInfo(comment, createMemberInfo(comment
+          .getCreatedBy()));
+      videoCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+          .ifPresent(liked -> commentInfo.setLikedId(liked.getId()));
+      result.add(commentInfo);
+    });
 
     String nextCursor = null;
     if (result.size() > 0) {
@@ -176,6 +184,11 @@ public class VideoController {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
+    Member me = memberService.currentMember();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
     videoRepository.findById(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
 
@@ -188,7 +201,7 @@ public class VideoController {
         .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
     }
 
-    VideoComment videoComment = new VideoComment(id);
+    VideoComment videoComment = new VideoComment(id, me);
     BeanUtils.copyProperties(request, videoComment);
     videoRepository.updateCommentCount(id, 1);
 
@@ -209,7 +222,7 @@ public class VideoController {
     }
 
     Long memberId = memberService.currentMemberId();
-    return videoCommentRepository.findByIdAndVideoIdAndCreatedBy(id, videoId, memberId)
+    return videoCommentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberId)
       .map(comment -> {
         comment.setComment(request.getComment());
         return new ResponseEntity<>(
@@ -227,11 +240,14 @@ public class VideoController {
     videoRepository.updateCommentCount(videoId, -1);
 
     Long memberId = memberService.currentMemberId();
-    return videoCommentRepository.findByIdAndVideoIdAndCreatedBy(id, videoId, memberId)
+    return videoCommentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberId)
       .map(comment -> {
         if (comment.getParentId() != null) {
           videoCommentRepository.updateCommentCount(comment.getParentId(), -1);
         }
+        List<VideoCommentLike> commentLikes = videoCommentLikeRepository.findAllByCommentId(
+            comment.getId());
+        videoCommentLikeRepository.deleteAll(commentLikes);
         videoCommentRepository.delete(comment);
         return new ResponseEntity<>(HttpStatus.OK);
       })
@@ -282,6 +298,58 @@ public class VideoController {
         return new ResponseEntity(HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id or like id"));
+  }
+
+  @Transactional
+  @PostMapping("/{videoId:.+}/comments/{commentId:.+}/likes")
+  public ResponseEntity<VideoCommentLikeInfo> addVideoCommentLike(@PathVariable Long videoId,
+                                                                  @PathVariable Long commentId) {
+    Member member = memberService.currentMember();
+    if (member == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    return videoCommentRepository.findByIdAndVideoId(commentId, videoId)
+        .map(comment -> {
+          if (videoCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId
+              ()).isPresent()) {
+            throw new BadRequestException("duplicated_video_comment_like", "Already video comment liked");
+          }
+
+
+          videoCommentRepository.updateLikeCount(comment.getId(), 1);
+          VideoCommentLike commentLikeLike = videoCommentLikeRepository.save(new VideoCommentLike
+              (comment, member));
+          return new ResponseEntity<>(new VideoCommentLikeInfo(commentLikeLike), HttpStatus.OK);
+        })
+        .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video or " +
+            "comment id"));
+  }
+
+  @Transactional
+  @DeleteMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+  public ResponseEntity<?> removeVideoCommentLike(@PathVariable Long videoId,
+                                                 @PathVariable Long commentId,
+                                                 @PathVariable Long likeId){
+    Member me = memberService.currentMember();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    VideoComment videoComment = videoCommentRepository.findByIdAndVideoId(commentId, videoId)
+        .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video id or comment " +
+            "id"));
+
+    return videoCommentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, videoComment
+        .getId(), me.getId())
+        .map(liked -> {
+          videoCommentLikeRepository.delete(liked);
+          videoCommentRepository.updateLikeCount(liked.getComment().getId(), -1);
+
+          return new ResponseEntity(HttpStatus.OK);
+        })
+        .orElseThrow(() -> new NotFoundException("video_comment_like_not_found", "invalid video " +
+            "comment like id"));
   }
 
   @Data
@@ -336,20 +404,19 @@ public class VideoController {
     private String comment;
     private Long parentId;
     private int commentCount;
-    private Long createdBy;
+    private MemberInfo createdBy;
     private Date createdAt;
-    private MemberInfo owner;
     private String commentRef;
+    private Long likedId;
 
     VideoCommentInfo(VideoComment comment) {
       BeanUtils.copyProperties(comment, this);
       setCommentRef(comment);
     }
 
-    VideoCommentInfo(VideoComment comment, MemberInfo member) {
+    VideoCommentInfo(VideoComment comment, MemberInfo createdBy) {
       this(comment);
-      this.owner = member;
-      setCommentRef(comment);
+      this.createdBy = createdBy;
     }
 
     private void setCommentRef(VideoComment comment) {
@@ -357,6 +424,10 @@ public class VideoController {
         this.commentRef = String.format("/api/1/videos/%d/comments?parentId=%d", comment.getVideoId(), comment.getId());
       }
     }
+  }
+
+  private MemberInfo createMemberInfo(Member member) {
+    return new MemberInfo(member, memberService.getFollowingId(member));
   }
 
   @Data
@@ -381,6 +452,19 @@ public class VideoController {
     VideoLikeInfo(VideoLike videoLike, VideoInfo video) {
       BeanUtils.copyProperties(videoLike, this);
       this.video = video;
+    }
+  }
+
+  @Data
+  public static class VideoCommentLikeInfo {
+    private Long id;
+    private MemberInfo createdBy;
+    private Date createdAt;
+    private VideoCommentInfo comment;
+
+    public VideoCommentLikeInfo(VideoCommentLike commentLike) {
+      BeanUtils.copyProperties(commentLike, this);
+      comment = new VideoCommentInfo(commentLike.getComment());
     }
   }
 }
