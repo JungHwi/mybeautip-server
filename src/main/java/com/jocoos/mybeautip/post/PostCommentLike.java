@@ -3,9 +3,7 @@ package com.jocoos.mybeautip.post;
 import javax.persistence.*;
 import java.util.Date;
 
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
@@ -17,29 +15,18 @@ import com.jocoos.mybeautip.member.Member;
 @Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "post_comments")
-public class PostComment {
+@Table(name = "post_comment_likes")
+public class PostCommentLike {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private Long postId;
+  @ManyToOne
+  @JoinColumn(name = "comment_id")
+  private PostComment comment;
 
-  @Column(nullable = false)
-  private String comment;
-
-  @Column
-  private Long parentId;
-
-  @Column
-  private int commentCount;
-
-  @Column
-  private int likeCount;
-
-  @ManyToOne(optional = false)
+  @ManyToOne
   @JoinColumn(name = "created_by")
   private Member createdBy;
 
@@ -47,12 +34,8 @@ public class PostComment {
   @CreatedDate
   private Date createdAt;
 
-  @Column(nullable = false)
-  @LastModifiedDate
-  private Date modifiedAt;
-
-  public PostComment(Long postId, Member createdBy) {
-    this.postId = postId;
+  public PostCommentLike(PostComment comment, Member createdBy) {
+    this.comment = comment;
     this.createdBy = createdBy;
   }
 }

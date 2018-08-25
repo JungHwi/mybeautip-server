@@ -29,6 +29,10 @@ public class MemberService {
   }
 
   public Long currentMemberId() {
+    return Optional.ofNullable(currentMember()).map(Member::getId).orElse(null);
+  }
+
+  public Member currentMember() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication != null) {
@@ -38,9 +42,7 @@ public class MemberService {
         String username = ((User) authentication.getPrincipal()).getUsername();
         if (StringUtils.isNumeric(username)) {
           Long userId = Long.parseLong(username);
-
           return memberRepository.findById(userId)
-             .map(m -> m.getId())
              .orElseThrow(() -> new MemberNotFoundException(userId));
         } else {
           log.warn("user id can't convert to number: {}", username);
