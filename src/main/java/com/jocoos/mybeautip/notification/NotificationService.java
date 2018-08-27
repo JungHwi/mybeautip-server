@@ -3,11 +3,6 @@ package com.jocoos.mybeautip.notification;
 import java.util.Date;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -21,6 +16,9 @@ import com.jocoos.mybeautip.video.VideoComment;
 import com.jocoos.mybeautip.video.VideoCommentRepository;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -84,30 +82,24 @@ public class NotificationService {
 
   public void notifyAddVideoComment(VideoComment videoComment) {
     videoRepository.findById(videoComment.getVideoId())
-      .ifPresent(v ->
-        memberRepository.findById(videoComment.getCreatedBy())
-           .ifPresent(source -> {
-             v.setThumbnailUrl(getVideoThumbnail(v.getVideoKey()));
-             Notification n = notificationRepository.save(new Notification(v, videoComment, source));
-             deviceService.push(n);
-           })
-      );
+      .ifPresent(v -> {
+         v.setThumbnailUrl(getVideoThumbnail(v.getVideoKey()));
+         Notification n = notificationRepository.save(new Notification(v, videoComment));
+         deviceService.push(n);
+      });
   }
 
   public void notifyAddVideoCommentReply(VideoComment videoComment) {
     Member parentMember = Optional.ofNullable(videoComment.getParentId())
       .flatMap(parent -> videoCommentRepository.findById(parent))
-      .flatMap(comment -> memberRepository.findById(comment.getCreatedBy()))
-      .get();
+      .map(VideoComment::getCreatedBy)
+      .orElse(null);
 
     videoRepository.findById(videoComment.getVideoId())
-       .ifPresent(v ->
-          memberRepository.findById(videoComment.getCreatedBy())
-             .ifPresent(source -> {
-               Notification n = notificationRepository.save(new Notification(getVideoThumbnail(v.getVideoKey()), videoComment, source, parentMember));
-               deviceService.push(n);
-             })
-       );
+       .ifPresent(v -> {
+         Notification n = notificationRepository.save(new Notification(getVideoThumbnail(v.getVideoKey()), videoComment, parentMember));
+         deviceService.push(n);
+      });
   }
 
   public void notifyAddPostComment(PostComment postComment) {

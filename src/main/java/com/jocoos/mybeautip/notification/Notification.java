@@ -5,14 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.post.Post;
@@ -20,6 +14,10 @@ import com.jocoos.mybeautip.post.PostComment;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoComment;
 import com.jocoos.mybeautip.video.VideoLike;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @NoArgsConstructor
 @Data
@@ -113,26 +111,26 @@ public class Notification {
     }
   }
 
-  public Notification(Video video, VideoComment videoComment, Member source) {
+  public Notification(Video video, VideoComment videoComment) {
     this.type = VIDEO_COMMENT;
     this.targetMember = video.getMember();
     this.read = false;
     this.resourceType = "video_comment";
     this.resourceId = videoComment.getId();
-    this.resourceOwner = source;
+    this.resourceOwner = videoComment.getCreatedBy();
     this.imageUrl = video.getThumbnailUrl();
-    this.args = Lists.newArrayList(source.getUsername(), videoComment.getComment());
+    this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
   }
 
-  public Notification(String thumbnail, VideoComment videoComment, Member source, Member target) {
+  public Notification(String thumbnail, VideoComment videoComment, Member target) {
     this.type = VIDEO_COMMENT_REPLY;
     this.targetMember = target;
     this.read = false;
     this.resourceType = "video_comment";
     this.resourceId = videoComment.getId();
-    this.resourceOwner = source;
+    this.resourceOwner = videoComment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(source.getUsername(), videoComment.getComment());
+    this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
   }
 
   public Notification(Post post, PostComment postComment) {

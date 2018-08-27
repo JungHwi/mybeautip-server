@@ -19,7 +19,9 @@ public interface VideoCommentRepository extends CrudRepository<VideoComment, Lon
   @Query("update VideoComment c set c.likeCount = c.likeCount + ?2, c.modifiedAt = now() where c.id = ?1")
   void updateLikeCount(Long id, int count);
 
-  Optional<VideoComment> findByIdAndVideoIdAndCreatedBy(Long id, Long videoId, Long memberId);
+  Optional<VideoComment> findByIdAndVideoId(Long id, Long videoId);
+
+  Optional<VideoComment> findByIdAndVideoIdAndCreatedById(Long id, Long videoId, Long createdBy);
 
   Slice<VideoComment> findByParentId(Long parentId, Pageable pageable);
 
