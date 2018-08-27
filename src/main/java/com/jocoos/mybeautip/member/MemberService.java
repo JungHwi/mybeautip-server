@@ -37,7 +37,7 @@ public class MemberService {
 
   public Member currentMember() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null && !authentication.isAuthenticated()) {
+    if (authentication == null || !authentication.isAuthenticated()) {
       return null;
     }
 
@@ -72,5 +72,4 @@ public class MemberService {
   public MemberInfo getMemberInfo(Member member) {
     return new MemberInfo(member, getFollowingId(member));
   }
-
 }
