@@ -5,10 +5,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 
 @Entity
 @Table(name = "kakao_members")
