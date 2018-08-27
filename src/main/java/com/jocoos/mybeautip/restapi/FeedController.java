@@ -54,7 +54,7 @@ public class FeedController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder<>("/api/1/feeds", videos)
+    return new CursorResponse.Builder<>("/api/1/members/me/feeds", videos)
        .withCount(count)
        .withCursor(nextCursor).toBuild();
   }
