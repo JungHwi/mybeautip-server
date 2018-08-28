@@ -16,4 +16,8 @@ public class MyBeautipUserDetails extends User {
     super(member.getId().toString(), "", AuthorityUtils.createAuthorityList("ROLE_USER"));
     this.member = member;
   }
+
+  public MyBeautipUserDetails(String username, String authority) {
+    super(username, "", AuthorityUtils.createAuthorityList(authority));
+  }
 }
