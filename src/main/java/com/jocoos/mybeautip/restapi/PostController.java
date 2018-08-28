@@ -288,7 +288,6 @@ public class PostController {
                                        @RequestBody CreateCommentRequest request,
                                        BindingResult bindingResult) {
 
-    Member me = memberService.currentMember();
     if (bindingResult != null && bindingResult.hasErrors()) {
       new BadRequestException(bindingResult.getFieldError());
     }
@@ -302,7 +301,7 @@ public class PostController {
          .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
     }
 
-    PostComment postComment = new PostComment(id, me);
+    PostComment postComment = new PostComment(id);
     BeanUtils.copyProperties(request, postComment);
     postRepository.updateCommentCount(id, 1);
 
@@ -370,7 +369,7 @@ public class PostController {
 
 
          postCommentRepository.updateLikeCount(comment.getId(), 1);
-         PostCommentLike commentLikeLike = postCommentLikeRepository.save(new PostCommentLike(comment, member));
+         PostCommentLike commentLikeLike = postCommentLikeRepository.save(new PostCommentLike(comment));
          return new ResponseEntity<>(new PostCommentLikeInfo(commentLikeLike), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post or comment id"));

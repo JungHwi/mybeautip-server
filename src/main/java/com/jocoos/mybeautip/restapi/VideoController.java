@@ -205,7 +205,7 @@ public class VideoController {
         .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
     }
 
-    VideoComment videoComment = new VideoComment(id, me);
+    VideoComment videoComment = new VideoComment(id);
     BeanUtils.copyProperties(request, videoComment);
     videoRepository.updateCommentCount(id, 1);
 
@@ -322,8 +322,7 @@ public class VideoController {
 
 
           videoCommentRepository.updateLikeCount(comment.getId(), 1);
-          VideoCommentLike commentLikeLike = videoCommentLikeRepository.save(new VideoCommentLike
-              (comment, member));
+          VideoCommentLike commentLikeLike = videoCommentLikeRepository.save(new VideoCommentLike(comment));
           return new ResponseEntity<>(new VideoCommentLikeInfo(commentLikeLike), HttpStatus.OK);
         })
         .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video or " +

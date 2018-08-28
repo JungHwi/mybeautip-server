@@ -135,7 +135,7 @@ public class Notification {
 
   public Notification(Post post, PostComment postComment) {
     this.type = POST_COMMENT;
-    this.targetMember = post.getCreator();
+    this.targetMember = post.getCreatedBy();
     this.read = false;
     this.resourceType = "post_comment";
     this.resourceId = postComment.getId();
