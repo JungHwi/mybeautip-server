@@ -125,11 +125,8 @@ public class NotificationService {
   }
 
   public void notifyAddVideoLike(VideoLike videoLike) {
-    memberRepository.findById(videoLike.getCreatedBy())
-      .ifPresent(source -> {
-        Notification n = notificationRepository.save(new Notification(videoLike,
-          getVideoThumbnail(videoLike.getVideo().getVideoKey()), source));
-        deviceService.push(n);
-      });
+    Notification n = notificationRepository.save(new Notification(videoLike,
+      getVideoThumbnail(videoLike.getVideo().getVideoKey()), videoLike.getCreatedBy()));
+    deviceService.push(n);
   }
 }

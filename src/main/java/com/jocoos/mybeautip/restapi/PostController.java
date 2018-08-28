@@ -87,7 +87,7 @@ public class PostController {
       BeanUtils.copyProperties(post, info);
       log.debug("post info: {}", info);
 
-      postLikeRepository.findByPostIdAndCreatedBy(post.getId(), memberId)
+      postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
          .ifPresent(like -> info.setLikeId(like.getId()));
 
       result.add(info);
@@ -145,7 +145,7 @@ public class PostController {
          BeanUtils.copyProperties(post, info);
          log.debug("post info: {}", info);
 
-         postLikeRepository.findByPostIdAndCreatedBy(post.getId(), memberId)
+         postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
             .ifPresent(like -> info.setLikeId(like.getId()));
          return new ResponseEntity<>(info, HttpStatus.OK);
        })
@@ -206,7 +206,7 @@ public class PostController {
     return postRepository.findById(id)
        .map(post -> {
          Long postId = post.getId();
-         if (postLikeRepository.findByPostIdAndCreatedBy(postId, memberId).isPresent()) {
+         if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
            throw new BadRequestException("duplicated_post_like", "Already post liked");
          }
 
@@ -227,7 +227,7 @@ public class PostController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return postLikeRepository.findByIdAndPostIdAndCreatedBy(likeId, id, memberId)
+    return postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
        .map(post -> {
          Optional<PostLike> liked = postLikeRepository.findById(likeId);
          if (!liked.isPresent()) {
@@ -288,7 +288,6 @@ public class PostController {
                                        @RequestBody CreateCommentRequest request,
                                        BindingResult bindingResult) {
 
-    Member me = memberService.currentMember();
     if (bindingResult != null && bindingResult.hasErrors()) {
       new BadRequestException(bindingResult.getFieldError());
     }
@@ -302,7 +301,7 @@ public class PostController {
          .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
     }
 
-    PostComment postComment = new PostComment(id, me);
+    PostComment postComment = new PostComment(id);
     BeanUtils.copyProperties(request, postComment);
     postRepository.updateCommentCount(id, 1);
 
@@ -370,7 +369,7 @@ public class PostController {
 
 
          postCommentRepository.updateLikeCount(comment.getId(), 1);
-         PostCommentLike commentLikeLike = postCommentLikeRepository.save(new PostCommentLike(comment, member));
+         PostCommentLike commentLikeLike = postCommentLikeRepository.save(new PostCommentLike(comment));
          return new ResponseEntity<>(new PostCommentLikeInfo(commentLikeLike), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post or comment id"));

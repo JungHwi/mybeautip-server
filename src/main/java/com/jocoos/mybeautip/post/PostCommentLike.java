@@ -7,16 +7,19 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "post_comment_likes")
-public class PostCommentLike {
+public class PostCommentLike extends MemberAuditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,16 +29,7 @@ public class PostCommentLike {
   @JoinColumn(name = "comment_id")
   private PostComment comment;
 
-  @ManyToOne
-  @JoinColumn(name = "created_by")
-  private Member createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
-
-  public PostCommentLike(PostComment comment, Member createdBy) {
+  public PostCommentLike(PostComment comment) {
     this.comment = comment;
-    this.createdBy = createdBy;
   }
 }

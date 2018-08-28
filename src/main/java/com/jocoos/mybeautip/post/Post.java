@@ -5,21 +5,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.audit.MemberAuditable;
 
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "posts")
-public class Post {
+public class Post extends MemberAuditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,14 +85,6 @@ public class Post {
   @OrderColumn(name = "seq")
   @Column(name = "goods_no")
   private List<String> goods;
-
-  @ManyToOne
-  @JoinColumn(name = "created_by")
-  private Member creator;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   @Column
   @LastModifiedDate

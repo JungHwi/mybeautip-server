@@ -1,8 +1,10 @@
 package com.jocoos.mybeautip.recommendation;
 
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,14 +17,15 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member_recommendations")
-public class MemberRecommendation {
+public class MemberRecommendation extends MemberAuditable {
 
   @Id
   @Column(name = "member_id")
-  private Long member_id;
+  private Long memberId;
 
   @MapsId
   @OneToOne(fetch = FetchType.EAGER)
@@ -31,14 +34,6 @@ public class MemberRecommendation {
 
   @Column(nullable = false)
   private int seq;
-
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   @Column
   @LastModifiedDate

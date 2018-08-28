@@ -1,15 +1,13 @@
 package com.jocoos.mybeautip.member;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import com.jocoos.mybeautip.audit.DateAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.Map;
+
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 
 @Entity
 @Table(name = "naver_members")

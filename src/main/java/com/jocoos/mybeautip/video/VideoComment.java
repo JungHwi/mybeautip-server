@@ -3,8 +3,10 @@ package com.jocoos.mybeautip.video;
 import javax.persistence.*;
 import java.util.Date;
 
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.member.Member;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,10 +14,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "video_comments")
-public class VideoComment {
+public class VideoComment extends MemberAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -35,20 +38,11 @@ public class VideoComment {
   @Column
   private int likeCount;
 
-  @ManyToOne(optional = false)
-  @JoinColumn(name = "created_by")
-  private Member createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
-
   @Column
   @LastModifiedDate
   private Date modifiedAt;
 
-  public VideoComment(Long videoId, Member createdBy) {
+  public VideoComment(Long videoId) {
     this.videoId = videoId;
-    this.createdBy = createdBy;
   }
 }

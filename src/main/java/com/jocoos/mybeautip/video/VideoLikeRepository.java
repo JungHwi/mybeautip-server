@@ -8,13 +8,13 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface VideoLikeRepository extends JpaRepository<VideoLike, Long> {
-  Optional<VideoLike> findByVideoIdAndCreatedBy(Long videoId, Long memberId);
+  Optional<VideoLike> findByVideoIdAndCreatedById(Long videoId, Long memberId);
 
-  Optional<VideoLike> findByIdAndVideoIdAndCreatedBy(Long likeId, Long videoId, Long memberId);
+  Optional<VideoLike> findByIdAndVideoIdAndCreatedById(Long likeId, Long videoId, Long memberId);
 
-  Slice<VideoLike> findByCreatedAtBeforeAndCreatedBy(Date createdAt, Long createdBy, Pageable pageable);
+  Slice<VideoLike> findByCreatedAtBeforeAndCreatedById(Date createdAt, Long createdBy, Pageable pageable);
 
-  Slice<VideoLike> findByCreatedBy(Long createdBy, Pageable pageable);
+  Slice<VideoLike> findByCreatedById(Long createdBy, Pageable pageable);
 
-  Integer countByCreatedBy(Long memberId);
+  Integer countByCreatedById(Long memberId);
 }

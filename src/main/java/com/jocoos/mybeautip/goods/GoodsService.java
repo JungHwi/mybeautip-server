@@ -140,7 +140,7 @@ public class GoodsService {
     Long likeId = null;
     Long me = memberService.currentMemberId();
     if (me != null) {
-      Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goods.getGoodsNo(), me);
+      Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goods.getGoodsNo(), me);
       likeId = optional.map(GoodsLike::getId).orElse(null);
     }
     // Set total count of related videos

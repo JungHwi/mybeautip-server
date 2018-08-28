@@ -9,13 +9,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
-  Optional<PostLike> findByPostIdAndCreatedBy(Long postId, Long createdBy);
+  Optional<PostLike> findByPostIdAndCreatedById(Long postId, Long createdBy);
 
-  Optional<PostLike> findByIdAndPostIdAndCreatedBy(Long id, Long postId, Long createdBy);
+  Optional<PostLike> findByIdAndPostIdAndCreatedById(Long id, Long postId, Long createdBy);
 
-  Slice<PostLike> findByCreatedAtBeforeAndCreatedBy(Date createdAt, Long createdBy, Pageable pageable);
+  Slice<PostLike> findByCreatedAtBeforeAndCreatedById(Date createdAt, Long createdBy, Pageable pageable);
 
-  Slice<PostLike> findByCreatedBy(Long createdBy, Pageable pageable);
+  Slice<PostLike> findByCreatedById(Long createdBy, Pageable pageable);
 
-  Integer countByCreatedBy(Long createdBy);
+  Integer countByCreatedById(Long createdBy);
 }

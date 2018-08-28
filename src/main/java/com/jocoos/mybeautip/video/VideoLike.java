@@ -8,14 +8,18 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
+import com.jocoos.mybeautip.audit.MemberAuditable;
+
 @Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "video_likes")
-public class VideoLike {
+public class VideoLike extends MemberAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -23,14 +27,6 @@ public class VideoLike {
   @ManyToOne
   @JoinColumn(name = "video_id")
   private Video video;
-
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   public VideoLike(Video video) {
     this.video = video;

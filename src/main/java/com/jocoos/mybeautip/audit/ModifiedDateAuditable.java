@@ -13,13 +13,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class Auditable<U> {
+public abstract class ModifiedDateAuditable {
 
   @Column(nullable = false)
-  @CreatedBy
-  protected U createdBy;
-
-  @Column
   @CreatedDate
   protected Date createdAt;
 
@@ -27,15 +23,4 @@ public abstract class Auditable<U> {
   @LastModifiedDate
   protected Date modifiedAt;
 
-  public U getCreatedBy() {
-    return createdBy;
-  }
-
-  public Date getCreatedAt() {
-    return createdAt;
-  }
-
-  public Date getModifiedAt() {
-    return modifiedAt;
-  }
 }

@@ -54,7 +54,7 @@ public class VideoService {
     Long likeId = null;
     Long me = memberService.currentMemberId();
     if (me != null) {
-      Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedBy(video.getId(), me);
+      Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me);
       likeId = optional.map(VideoLike::getId).orElse(null);
     }
     return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId);

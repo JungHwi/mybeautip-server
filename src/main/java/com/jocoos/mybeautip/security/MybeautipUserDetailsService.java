@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -31,25 +30,17 @@ public class MybeautipUserDetailsService implements UserDetailsService {
         return new User("admin", "", AuthorityUtils.createAuthorityList("ROLE_ADMIN"));
       }
       case "guest": {
-        return new MybeautipGuestUserDetails();
+        return createGuestUserDetails();
       }
       default: {
         return memberRepository.findById(Long.parseLong(username))
-            .map(m -> new MybeautipUserDetails(m))
+            .map(m -> new MyBeautipUserDetails(m))
             .orElseThrow(() -> new AuthenticationException("username not found"));
       }
     }
   }
 
-  class MybeautipUserDetails extends User {
-    public MybeautipUserDetails(Member member) {
-      super(member.getId().toString(), "", AuthorityUtils.createAuthorityList("ROLE_USER"));
-    }
-  }
-
-  class MybeautipGuestUserDetails extends User {
-    public MybeautipGuestUserDetails() {
-      super("guest", "", AuthorityUtils.createAuthorityList("ROLE_USER"));
-    }
+  private MyBeautipUserDetails createGuestUserDetails() {
+    return new MyBeautipUserDetails("guest", "ROLE_USER");
   }
 }

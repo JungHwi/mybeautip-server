@@ -83,8 +83,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
   @PostConstruct
   public void postConstruct() {
-    log.debug("accessTokenValiditySeconds: {}", accessTokenValiditySeconds);
-    log.debug("refreshTokenValiditySeconds: {}", refreshTokenValiditySeconds);
+    log.debug("accessTokenValiditySeconds: {}, refreshTokenValiditySeconds: {}", accessTokenValiditySeconds, refreshTokenValiditySeconds);
   }
 
   @Override

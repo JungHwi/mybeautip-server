@@ -78,7 +78,7 @@ public class StoreController {
 
       if (memberId != null) {
         // Set like ID
-        Optional<StoreLike> optionalStoreLike = storeLikeRepository.findByStoreIdAndCreatedBy(store.getId(), memberId);
+        Optional<StoreLike> optionalStoreLike = storeLikeRepository.findByStoreIdAndCreatedById(store.getId(), memberId);
         likeId = optionalStoreLike.map(StoreLike::getId).orElse(null);
       }
 
@@ -134,7 +134,7 @@ public class StoreController {
     return storeRepository.findById(id)
             .map(store -> {
               Integer storeId = store.getId();
-              if (storeLikeRepository.findByStoreIdAndCreatedBy(storeId, memberId).isPresent()) {
+              if (storeLikeRepository.findByStoreIdAndCreatedById(storeId, memberId).isPresent()) {
                 throw new BadRequestException("duplicated_store_like", "Already store liked");
               }
 
@@ -159,7 +159,7 @@ public class StoreController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return storeLikeRepository.findByIdAndStoreIdAndCreatedBy(likeId, id, memberId)
+    return storeLikeRepository.findByIdAndStoreIdAndCreatedById(likeId, id, memberId)
             .map(store -> {
               Optional<StoreLike> liked = storeLikeRepository.findById(likeId);
               if (!liked.isPresent()) {

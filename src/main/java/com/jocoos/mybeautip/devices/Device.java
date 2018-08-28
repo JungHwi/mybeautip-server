@@ -10,14 +10,18 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.audit.MemberAuditable;
 
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "devices")
-public class Device {
+public class Device extends MemberAuditable {
 
   @Id
   private String id;
@@ -45,14 +49,6 @@ public class Device {
 
   @Column
   private boolean pushable;
-
-  @Column
-  @CreatedBy
-  private Long createdBy;
-
-  @Column
-  @CreatedDate
-  private Date createdAt;
 
   @Column
   @LastModifiedDate

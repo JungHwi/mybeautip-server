@@ -10,14 +10,19 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
 @Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "banners")
-public class Banner {
+@EqualsAndHashCode(callSuper = false)
+public class Banner extends MemberAuditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,14 +57,6 @@ public class Banner {
 
   @Column
   private Date endedAt;
-
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   @Column
   @LastModifiedDate

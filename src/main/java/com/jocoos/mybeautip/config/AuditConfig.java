@@ -10,13 +10,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 
 import com.jocoos.mybeautip.audit.AuditorAwareImpl;
+import com.jocoos.mybeautip.member.Member;
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class AuditConfig {
 
   @Bean
-  public AuditorAware<Long> auditorAware() {
+  public AuditorAware<Member> auditorAware() {
     return new AuditorAwareImpl();
   }
 }

@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.member;
 
 import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -14,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 
 @Slf4j
 @Service
@@ -34,24 +37,17 @@ public class MemberService {
 
   public Member currentMember() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    if (authentication != null) {
-      log.debug("authentication: {}", authentication);
-      Object principal = authentication.getPrincipal();
-      if (principal instanceof UserDetails) {
-        String username = ((User) authentication.getPrincipal()).getUsername();
-        if (StringUtils.isNumeric(username)) {
-          Long userId = Long.parseLong(username);
-          return memberRepository.findById(userId)
-             .orElseThrow(() -> new MemberNotFoundException(userId));
-        } else {
-          log.warn("user id can't convert to number: {}", username);
-        }
-      } else {
-        log.warn("Unknown principal type");
-      }
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return null;
     }
 
+    log.debug("authentication: {}", authentication);
+    Object principal = authentication.getPrincipal();
+    if (principal instanceof UserDetails) {
+      return ((MyBeautipUserDetails) principal).getMember();
+    } else {
+      log.warn("Unknown principal type");
+    }
     return null;
   }
 
