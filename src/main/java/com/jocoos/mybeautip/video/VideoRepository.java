@@ -23,7 +23,4 @@ public interface VideoRepository extends CrudRepository<Video, Long> {
   @Modifying
   @Query("update Video v set v.likeCount = v.likeCount + ?2, v.modifiedAt = now() where v.id = ?1")
   void updateLikeCount(Long id, int i);
-
-  @Query("select v.commentCount from Video v where v.id= ?1")
-  int getCommentCount(Long id);
 }

@@ -273,11 +273,13 @@ public class PostController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
+    int totalCount = postRepository.findById(id).map(Post::getLikeCount).orElse(0);
+
     return new CursorResponse
       .Builder<PostCommentInfo>("/api/1/posts/" + id + "/comments", result)
       .withCount(count)
       .withCursor(nextCursor)
-      .withTotalCount(postRepository.getCommentCount(id)).toBuild();
+      .withTotalCount(totalCount).toBuild();
   }
 
   @Transactional
