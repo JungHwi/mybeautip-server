@@ -9,14 +9,18 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.audit.MemberAuditable;
 
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "goods_likes")
-public class GoodsLike {
+public class GoodsLike extends MemberAuditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,14 +29,6 @@ public class GoodsLike {
   @ManyToOne
   @JoinColumn(name = "goods_no")
   private Goods goods;
-
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   public GoodsLike(Goods goods) {
     this.goods = goods;

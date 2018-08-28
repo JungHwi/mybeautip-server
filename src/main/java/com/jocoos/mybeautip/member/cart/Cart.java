@@ -9,16 +9,19 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.goods.Goods;
 
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "carts")
-public class Cart {
+public class Cart extends MemberAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -35,14 +38,6 @@ public class Cart {
 
   @Column(nullable = false)
   private Integer quantity;
-
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   @Column
   @LastModifiedDate

@@ -268,7 +268,7 @@ public class VideoController {
 
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
       .map(video -> {
-        if (videoLikeRepository.findByVideoIdAndCreatedBy(videoId, memberId).isPresent()) {
+        if (videoLikeRepository.findByVideoIdAndCreatedById(videoId, memberId).isPresent()) {
           throw new BadRequestException("duplicated_video_like", "Already video liked");
         }
 
@@ -290,7 +290,7 @@ public class VideoController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return videoLikeRepository.findByIdAndVideoIdAndCreatedBy(likeId, videoId, memberId)
+    return videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
       .map(video -> {
         Optional<VideoLike> liked = videoLikeRepository.findById(likeId);
         if (!liked.isPresent()) {

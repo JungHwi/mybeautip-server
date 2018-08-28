@@ -10,17 +10,20 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.goods.Goods;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "goods_recommendations")
-public class GoodsRecommendation {
+public class GoodsRecommendation extends MemberAuditable {
 
   @Id
   @Column(name = "goods_no")
@@ -33,14 +36,6 @@ public class GoodsRecommendation {
 
   @Column(nullable = false)
   private int seq;
-
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   @Column
   @LastModifiedDate

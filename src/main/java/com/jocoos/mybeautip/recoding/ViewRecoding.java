@@ -9,14 +9,18 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.audit.MemberAuditable;
 
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "view_recodings")
-public class ViewRecoding {
+public class ViewRecoding extends MemberAuditable {
 
   public static final int CATEGORY_POST = 1;
   public static final int CATEGORY_GOODS = 2;
@@ -33,14 +37,6 @@ public class ViewRecoding {
    */
   @Column(nullable = false)
   private int category;
-
-  @Column(nullable = false)
-  @CreatedBy
-  private Long createdBy;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
 
   public ViewRecoding(String itemId, int category) {
     this.itemId = itemId;

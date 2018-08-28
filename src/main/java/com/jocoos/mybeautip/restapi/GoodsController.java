@@ -126,7 +126,7 @@ public class GoodsController {
 
     return goodsRepository.findByGoodsNo(goodsNo)
         .map(goods -> {
-          if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedBy(goodsNo, memberId).isPresent()) {
+          if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goodsNo, memberId).isPresent()) {
             throw new BadRequestException("duplicated_goods_like", "Already goods liked");
           }
 
@@ -148,7 +148,7 @@ public class GoodsController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedBy(likeId, goodsNo, memberId)
+    return goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberId)
         .map(goods -> {
           Optional<GoodsLike> liked = goodsLikeRepository.findById(likeId);
           if (!liked.isPresent()) {

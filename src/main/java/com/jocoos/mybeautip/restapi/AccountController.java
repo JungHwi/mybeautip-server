@@ -48,8 +48,8 @@ public class AccountController {
          BeanUtils.copyProperties(account, accountInfo);
          log.debug("accountInfo: {}", accountInfo);
 
-         return new ResponseEntity<AccountInfo>(accountInfo, HttpStatus.OK);
-       }).orElseGet(() -> saveOrUpdate(null, null));
+         return new ResponseEntity<>(accountInfo, HttpStatus.OK);
+       }).orElseGet(() -> new ResponseEntity<>(HttpStatus.OK));
   }
 
   @PatchMapping
@@ -64,15 +64,14 @@ public class AccountController {
 
     Long memberId = memberService.currentMemberId();
     return accountRepository.findById(memberId)
-       .map(account -> saveOrUpdate(updateAccountInfo, account))
-       .orElseGet(() -> saveOrUpdate(updateAccountInfo, null));
+       .map(account -> {
+         account.setMemberId(memberId);
+         return saveOrUpdate(updateAccountInfo, account);
+       })
+       .orElseGet(() -> saveOrUpdate(updateAccountInfo, new Account(memberId)));
   }
 
   private ResponseEntity<AccountInfo> saveOrUpdate(UpdateAccountInfo updateAccountInfo, Account account) {
-    if (account == null) {
-      account = new Account();
-    }
-
     if (updateAccountInfo != null) {
       BeanUtils.copyProperties(updateAccountInfo, account);
     }
@@ -107,6 +106,7 @@ public class AccountController {
   @Data
   @NoArgsConstructor
   public static class AccountInfo {
+    private Long memberId;
     private String email;
     private String bankName;
     private String bankAccount;

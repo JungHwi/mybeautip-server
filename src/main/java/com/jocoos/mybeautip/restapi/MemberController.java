@@ -238,20 +238,20 @@ public class MemberController {
     }
 
     LikeCountResponse response = new LikeCountResponse();
-    response.setGoods(goodsLikeRepository.countByCreatedBy(memberId));
-    response.setStore(storeLikeRepository.countByCreatedBy(memberId));
-    response.setPost(postLikeRepository.countByCreatedBy(memberId));
-    response.setVideo(videoLikeRepository.countByCreatedBy(memberId));
+    response.setGoods(goodsLikeRepository.countByCreatedById(memberId));
+    response.setStore(storeLikeRepository.countByCreatedById(memberId));
+    response.setPost(postLikeRepository.countByCreatedById(memberId));
+    response.setVideo(videoLikeRepository.countByCreatedById(memberId));
     return response;
   }
 
   @GetMapping(value = "/{id:.+}/like_count")
   public LikeCountResponse getMemberLikesCount(@PathVariable Long id) {
     LikeCountResponse response = new LikeCountResponse();
-    response.setGoods(goodsLikeRepository.countByCreatedBy(id));
-    response.setStore(storeLikeRepository.countByCreatedBy(id));
-    response.setPost(postLikeRepository.countByCreatedBy(id));
-    response.setVideo(videoLikeRepository.countByCreatedBy(id));
+    response.setGoods(goodsLikeRepository.countByCreatedById(id));
+    response.setStore(storeLikeRepository.countByCreatedById(id));
+    response.setPost(postLikeRepository.countByCreatedById(id));
+    response.setVideo(videoLikeRepository.countByCreatedById(id));
     return response;
   }
 
@@ -296,9 +296,9 @@ public class MemberController {
     List<PostController.PostLikeInfo> result = Lists.newArrayList();
 
     if (cursor != null) {
-      postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedBy(new Date(cursor), memberId, pageable);
+      postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedById(new Date(cursor), memberId, pageable);
     } else {
-      postLikes = postLikeRepository.findByCreatedBy(memberId, pageable);
+      postLikes = postLikeRepository.findByCreatedById(memberId, pageable);
     }
 
     postLikes.stream().forEach(like -> result.add(new PostController.PostLikeInfo(like)));
@@ -320,10 +320,10 @@ public class MemberController {
     List<GoodsInfo> result = Lists.newArrayList();
 
     if (cursor != null) {
-      goodsLikes = goodsLikeRepository.findByCreatedAtBeforeAndCreatedBy(
+      goodsLikes = goodsLikeRepository.findByCreatedAtBeforeAndCreatedById(
         new Date(cursor), memberId, pageable);
     } else {
-      goodsLikes = goodsLikeRepository.findByCreatedBy(memberId, pageable);
+      goodsLikes = goodsLikeRepository.findByCreatedById(memberId, pageable);
     }
 
     for (GoodsLike like : goodsLikes) {
@@ -347,9 +347,9 @@ public class MemberController {
     List<StoreController.StoreInfo> result = Lists.newArrayList();
 
     if (cursor != null) {
-      storeLikes = storeLikeRepository.findByCreatedAtBeforeAndCreatedBy(new Date(cursor), memberId, pageable);
+      storeLikes = storeLikeRepository.findByCreatedAtBeforeAndCreatedById(new Date(cursor), memberId, pageable);
     } else {
-      storeLikes = storeLikeRepository.findByCreatedBy(memberId, pageable);
+      storeLikes = storeLikeRepository.findByCreatedById(memberId, pageable);
     }
 
     Long likeId;
@@ -378,10 +378,10 @@ public class MemberController {
     List<VideoController.VideoInfo> result = Lists.newArrayList();
 
     if (cursor != null) {
-      videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedBy(
+      videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedById(
         new Date(cursor), memberId, pageable);
     } else {
-      videoLikes = videoLikeRepository.findByCreatedBy(memberId, pageable);
+      videoLikes = videoLikeRepository.findByCreatedById(memberId, pageable);
     }
 
     for (VideoLike like : videoLikes) {

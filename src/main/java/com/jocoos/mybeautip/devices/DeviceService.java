@@ -68,7 +68,7 @@ public class DeviceService {
   }
 
   public void push(Notification notification) {
-    deviceRepository.findByCreatedBy(notification.getTargetMember().getId())
+    deviceRepository.findByCreatedById(notification.getTargetMember().getId())
        .forEach(d -> {
          if (d.isPushable()) {
            push(d, notification);

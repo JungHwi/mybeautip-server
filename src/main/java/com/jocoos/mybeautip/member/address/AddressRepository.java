@@ -9,10 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
-  Long countByBaseAndCreatedByAndDeletedAtIsNull(boolean base, Long createdBy);
+  Long countByBaseAndCreatedByIdAndDeletedAtIsNull(boolean base, Long createdBy);
 
-  Optional<Address> findByIdAndCreatedBy(Long id, Long createdBy);
+  Optional<Address> findByIdAndCreatedById(Long id, Long createdBy);
 
-  List<Address> findByCreatedByAndDeletedAtIsNull(Long createdBy, Pageable pageable);
+  List<Address> findByCreatedByIdAndDeletedAtIsNull(Long createdBy, Pageable pageable);
 
 }

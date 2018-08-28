@@ -87,7 +87,7 @@ public class PostController {
       BeanUtils.copyProperties(post, info);
       log.debug("post info: {}", info);
 
-      postLikeRepository.findByPostIdAndCreatedBy(post.getId(), memberId)
+      postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
          .ifPresent(like -> info.setLikeId(like.getId()));
 
       result.add(info);
@@ -145,7 +145,7 @@ public class PostController {
          BeanUtils.copyProperties(post, info);
          log.debug("post info: {}", info);
 
-         postLikeRepository.findByPostIdAndCreatedBy(post.getId(), memberId)
+         postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
             .ifPresent(like -> info.setLikeId(like.getId()));
          return new ResponseEntity<>(info, HttpStatus.OK);
        })
@@ -206,7 +206,7 @@ public class PostController {
     return postRepository.findById(id)
        .map(post -> {
          Long postId = post.getId();
-         if (postLikeRepository.findByPostIdAndCreatedBy(postId, memberId).isPresent()) {
+         if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
            throw new BadRequestException("duplicated_post_like", "Already post liked");
          }
 
@@ -227,7 +227,7 @@ public class PostController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return postLikeRepository.findByIdAndPostIdAndCreatedBy(likeId, id, memberId)
+    return postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
        .map(post -> {
          Optional<PostLike> liked = postLikeRepository.findById(likeId);
          if (!liked.isPresent()) {

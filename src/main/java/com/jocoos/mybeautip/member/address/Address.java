@@ -1,21 +1,22 @@
 package com.jocoos.mybeautip.member.address;
 
 import javax.persistence.*;
-
 import java.util.Date;
+
+import org.springframework.data.annotation.LastModifiedDate;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
-import com.jocoos.mybeautip.audit.Auditable;
+import com.jocoos.mybeautip.audit.MemberAuditable;
 
 @Slf4j
+@Data
 @Entity
 @Table(name = "addresses")
-@Data
 @EqualsAndHashCode(callSuper = false)
-public class Address extends Auditable<Long> {
+public class Address extends MemberAuditable {
 
   static final int BASE_PRIMARY = 0;
 
@@ -49,6 +50,10 @@ public class Address extends Auditable<Long> {
 
   @Column(nullable = false)
   private String detailAddress;
+
+  @Column
+  @LastModifiedDate
+  private Date modifiedAt;
 
   @Column
   private Date deletedAt;

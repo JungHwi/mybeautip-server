@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.restapi;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -164,16 +162,7 @@ public class AddressController {
     private String detailAddress;
 
     public AddressInfo(Address address) {
-      this.id = address.getId();
-      this.base = address.isBase();
-      this.title = address.getTitle();
-      this.recipient = address.getRecipient();
-      this.phone = address.getPhone();
-      this.zipNo = address.getZipNo();
-      this.roadAddrPart1 = address.getRoadAddrPart1();
-      this.roadAddrPart2 = address.getRoadAddrPart2();
-      this.jibunAddr = address.getJibunAddr();
-      this.detailAddress = address.getDetailAddress();
+      BeanUtils.copyProperties(address, this);
     }
   }
 }

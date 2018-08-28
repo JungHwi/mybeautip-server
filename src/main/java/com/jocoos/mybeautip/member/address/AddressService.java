@@ -31,7 +31,7 @@ public class AddressService {
     Long createdBy = memberService.currentMemberId();
 
     if (address.isBase() &&
-        addressRepository.countByBaseAndCreatedByAndDeletedAtIsNull(true, createdBy) > 0) {
+        addressRepository.countByBaseAndCreatedByIdAndDeletedAtIsNull(true, createdBy) > 0) {
       throw new ConflictException("Already base address exists");
     }
     return addressRepository.save(address);
@@ -58,7 +58,7 @@ public class AddressService {
 
   public List<Address> getAddresses(Pageable pageable) {
     Long createdBy = memberService.currentMemberId();
-    return addressRepository.findByCreatedByAndDeletedAtIsNull(createdBy, pageable);
+    return addressRepository.findByCreatedByIdAndDeletedAtIsNull(createdBy, pageable);
   }
 
   public Address get(Long id, Long createdBy) {

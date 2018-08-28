@@ -8,13 +8,13 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StoreLikeRepository extends JpaRepository<StoreLike, Long> {
-  Optional<StoreLike> findByStoreIdAndCreatedBy(Integer storeId, Long memberId);
+  Optional<StoreLike> findByStoreIdAndCreatedById(Integer storeId, Long memberId);
 
-  Optional<StoreLike> findByIdAndStoreIdAndCreatedBy(Long id, Integer storeId, Long createdBy);
+  Optional<StoreLike> findByIdAndStoreIdAndCreatedById(Long id, Integer storeId, Long createdBy);
 
-  Slice<StoreLike> findByCreatedAtBeforeAndCreatedBy(Date createdAt, Long createdBy, Pageable pageable);
+  Slice<StoreLike> findByCreatedAtBeforeAndCreatedById(Date createdAt, Long createdBy, Pageable pageable);
 
-  Slice<StoreLike> findByCreatedBy(Long createdBy, Pageable pageable);
+  Slice<StoreLike> findByCreatedById(Long createdBy, Pageable pageable);
 
-  Integer countByCreatedBy(Long createdBy);
+  Integer countByCreatedById(Long createdBy);
 }

@@ -9,15 +9,19 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import com.jocoos.mybeautip.member.Member;
+
+@Data
+@NoArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "accounts")
-@Data
 public class Account {
 
   @Id
-  @CreatedBy
+  @Column(name = "member_id")
   private Long memberId;
 
   @Column
@@ -43,4 +47,7 @@ public class Account {
   @LastModifiedDate
   private Date modifiedAt;
 
+  public Account(Long memberId) {
+    this.memberId = memberId;
+  }
 }
