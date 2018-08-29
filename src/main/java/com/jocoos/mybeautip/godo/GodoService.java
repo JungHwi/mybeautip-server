@@ -139,9 +139,23 @@ public class GodoService {
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoCategoryResponse.CategoryData> dataList = response.getBody().getBody();
 
-      for (GodoCategoryResponse.CategoryData categoryData : dataList) {
-        Category category = copyPropertiesFrom(categoryData);
-        categoryRepository.save(category);
+      for (GodoCategoryResponse.CategoryData data : dataList) {
+        boolean hidden = "n".equals(data.getCateDisplayFl()) || "n".equals(data.getCateDisplayMobileFl());
+        Optional<Category> optional = categoryRepository.findById(data.getCateCd());
+        Category category;
+        if (optional.isPresent()) {
+          if (hidden) { // delete
+            categoryRepository.delete(optional.get());
+          } else {  // update
+            category = copyPropertiesFrom(data);
+            category.setCode(optional.get().getCode());
+            categoryRepository.save(category);
+          }
+        } else {  // insert
+          if (!hidden) {
+            categoryRepository.save(copyPropertiesFrom(data));
+          }
+        }
       }
       return dataList;
     }
@@ -161,8 +175,6 @@ public class GodoService {
 
     target.setCode(source.getCateCd());
     target.setName(source.getCateNm());
-    target.setDisplayOnPc(source.getCateDisplayFl());
-    target.setDisplayOnMobile(source.getCateDisplayMobileFl());
     target.setThumbnailUrl(String.format("%s%s%s", categoryImagePrefix, source.getCateCd(), categoryImageSuffix));
 
     return target;

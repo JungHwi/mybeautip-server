@@ -23,11 +23,6 @@ public class Category {
   
   @Column(name = "category_name")
   private String name;
-  
-  @JsonIgnore
-  private String displayOnPc;
-  @JsonIgnore
-  private String displayOnMobile;
 
   @Column
   private String thumbnailUrl;
