@@ -146,9 +146,6 @@ public class VideoController {
     PageRequest page = PageRequest.of(0, count);
     Slice<VideoComment> comments;
     Long me = memberService.currentMemberId();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
 
     if (parentId != null) {
       comments = videoService.findCommentsByParentId(parentId, cursor, page);
