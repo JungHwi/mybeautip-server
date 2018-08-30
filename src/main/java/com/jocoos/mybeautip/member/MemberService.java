@@ -43,7 +43,7 @@ public class MemberService {
 
     log.debug("authentication: {}", authentication);
     Object principal = authentication.getPrincipal();
-    if (principal instanceof UserDetails) {
+    if (principal instanceof MyBeautipUserDetails) {
       return ((MyBeautipUserDetails) principal).getMember();
     } else {
       log.warn("Unknown principal type");
