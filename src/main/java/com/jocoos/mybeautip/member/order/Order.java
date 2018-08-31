@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
 
-@NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
@@ -35,8 +34,11 @@ public class Order extends MemberAuditable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  /**
+   * Order number from Godomall
+   */
   @Column(nullable = false)
-  private Long number;
+  private String number;
 
   @Column(nullable = false)
   private int goodsCount;
@@ -47,6 +49,9 @@ public class Order extends MemberAuditable {
   @Column
   private int point;
 
+  /**
+   * Payment method. ex) card, bank transfer..
+   */
   @Column(nullable = false)
   private String method;
 
@@ -56,7 +61,7 @@ public class Order extends MemberAuditable {
   @Column
   private Long videoId;
 
-  @OneToMany
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "orderId")
   private List<Purchase> purchases;
 
@@ -66,4 +71,8 @@ public class Order extends MemberAuditable {
 
   @Column
   private Date deletedAt;
+
+  public Order() {
+    status = ORDER;
+  }
 }

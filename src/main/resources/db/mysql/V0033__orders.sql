@@ -3,7 +3,7 @@
 --
 CREATE TABLE `orders` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `number` BIGINT NOT NULL,
+  `number` VARCHAR(16) NOT NULL,
   `goods_count` INT NOT NULL,
   `price` BIGINT NOT NULL,
   `point` INT DEFAULT 0,
@@ -45,7 +45,7 @@ CREATE TABLE `order_payments` (
   `id` BIGINT NOT NULL,
   `payment_id` VARCHAR(30) DEFAULT NULL,
   `price` BIGINT NOT NULL,
-  `method` VARCHAR(20) NOT NULL COMMENT 'iamport',
+  `method` VARCHAR(20) DEFAULT "card",
   `state` TINYINT NOT NULL DEFAULT 0 COMMENT '0:created, 1: stopped, 2: failed, ...',
   `message` VARCHAR(255) DEFAULT NULL,
   `receipt` VARCHAR(255) DEFAULT NULL,

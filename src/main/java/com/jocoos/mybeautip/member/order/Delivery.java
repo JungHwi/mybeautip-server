@@ -5,6 +5,7 @@ import javax.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 
@@ -20,6 +21,7 @@ public class Delivery extends CreatedDateAuditable {
 
   @MapsId
   @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "id")
   private Order order;
 
   @Column(nullable = false)
@@ -51,4 +53,8 @@ public class Delivery extends CreatedDateAuditable {
 
   @Column
   private String carrierMessage;
+
+  public Delivery(Order order) {
+    this.order = order;
+  }
 }

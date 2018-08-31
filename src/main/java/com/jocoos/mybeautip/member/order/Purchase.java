@@ -49,4 +49,8 @@ public class Purchase extends CreatedDateAuditable {
 
   @Column
   private Date deletedAt;
+
+  public Purchase(Long orderId) {
+    this.orderId = orderId;
+  }
 }
