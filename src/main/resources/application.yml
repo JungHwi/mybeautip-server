@@ -88,6 +88,10 @@ mybeautip:
     image-path:
       prefix: "https://s3.ap-northeast-2.amazonaws.com/mybeautip/category/"
       suffix: ".png"
+  iamport:
+    api: https://api.iamport.kr
+    key: 5876646040523690
+    secret: Ge5fy5b7SXOyoqDTua9MQ6OyjiSpFkblyhA7mLefJ2O7tr1XBaKrhz0ARSZwcbRKssRPe64X9T5Ck6AW
 
 cloud:
   aws:
