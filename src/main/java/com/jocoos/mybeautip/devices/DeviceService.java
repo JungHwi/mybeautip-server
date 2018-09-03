@@ -15,6 +15,8 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
 import com.jocoos.mybeautip.restapi.DeviceController;
@@ -26,6 +28,8 @@ public class DeviceService {
   private static final String MESSAGE_STRUCTURE = "json";
   private static final String KEY_NOTIFICATION = "notification";
   private static final String KEY_DATA = "data";
+
+  private final MemberService memberService;
   private final DeviceRepository deviceRepository;
   private final MessageService messageService;
   private final ObjectMapper objectMapper;
@@ -36,10 +40,12 @@ public class DeviceService {
   @Autowired
   private AmazonSNS amazonSNS;
 
-  public DeviceService(DeviceRepository deviceRepository,
+  public DeviceService(MemberService memberService,
+                       DeviceRepository deviceRepository,
                        MessageService messageService,
                        ObjectMapper objectMapper,
                        AmazonSNS amazonSNS) {
+    this.memberService = memberService;
     this.deviceRepository = deviceRepository;
     this.messageService = messageService;
     this.objectMapper = objectMapper;
@@ -51,6 +57,8 @@ public class DeviceService {
     return deviceRepository.findById(info.getDeviceId())
        .map(device -> {
          copyDevice(info, device);
+
+         device.setCreatedBy(memberService.currentMember());
 
          log.debug("device: {}", device);
          return deviceRepository.save(device);

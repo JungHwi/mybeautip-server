@@ -14,6 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.member.Member;
 
 @Data
 @NoArgsConstructor
@@ -56,5 +57,9 @@ public class Device extends MemberAuditable {
 
   public Device(String id) {
     this.id = id;
+  }
+
+  public void setCreatedBy(Member createdBy) {
+    this.createdBy = createdBy;
   }
 }
