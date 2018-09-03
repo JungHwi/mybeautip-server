@@ -108,6 +108,7 @@ public class OrderService {
        .map(payment -> {
          int state = 0;
          String token = iamportService.getToken();
+         log.debug("access token:{}", token);
          PaymentResponse response = iamportService.getPayment(token, paymentId);
 
          if (response.getCode() == 0) {

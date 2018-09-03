@@ -23,10 +23,10 @@ public class OrderCallbackController {
   }
 
   @GetMapping("/complete")
-  public ResponseEntity<String> orderComplete(@RequestParam(required = true) String impUid,
-                                      @RequestParam(required = true) Long merchantUid,
-                                      @RequestParam(required = true) Boolean impSuccess,
-                                      @RequestParam(required = false) String errorMsg) {
+  public ResponseEntity<String> orderComplete(@RequestParam String impUid,
+                                              @RequestParam Long merchantUid,
+                                              @RequestParam Boolean impSuccess,
+                                              @RequestParam(required = false) String errorMsg) {
 
     String html = orderService.complete(impUid, merchantUid, impSuccess, errorMsg);
     return new ResponseEntity<>(html, HttpStatus.OK);

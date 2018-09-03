@@ -1,20 +1,18 @@
 package com.jocoos.mybeautip.support.payment;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import lombok.extern.slf4j.Slf4j;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.exception.NotFoundException;
 
 @Slf4j
 @Service
@@ -31,12 +29,9 @@ public class IamportService implements IamportApi {
   private String secret;
 
   private final RestTemplate restTemplate;
-  private final ObjectMapper objectMapper;
 
-  public IamportService(RestTemplate restTemplate,
-                        ObjectMapper objectMapper) {
+  public IamportService(RestTemplate restTemplate) {
     this.restTemplate = restTemplate;
-    this.objectMapper = objectMapper;
   }
 
   @Override
@@ -45,7 +40,7 @@ public class IamportService implements IamportApi {
        .fromUriString(api).path("/users/getToken").toUriString();
 
     HttpHeaders headers = new HttpHeaders();
-    headers.add(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
     MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
     body.add("imp_key", key);
@@ -54,7 +49,7 @@ public class IamportService implements IamportApi {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
     PaymentTokenResponse response = restTemplate.postForObject(tokenUri, request, PaymentTokenResponse.class);
-    log.debug("{}, {}", response.getCode(), response.getMessage());
+    log.debug("{}, {}", response.getCode(), response.getResponse());
     if (response.getCode() != 0) {
       throw new MybeautipRuntimeException(response.getMessage());
     }
@@ -71,16 +66,26 @@ public class IamportService implements IamportApi {
     headers.add(HttpHeaders.AUTHORIZATION, accessToken);
 
     HttpEntity<Object> request = new HttpEntity<>(headers);
-    ResponseEntity<PaymentResponse> responseEntity = restTemplate.exchange(tokenUri, HttpMethod.GET, request, PaymentResponse.class);
-    PaymentResponse response = responseEntity.getBody();
-    if (response != null) {
-      log.debug("{}, {}", response.getCode(), response.getMessage());
-      if (response.getCode() != 0) {
-        throw new MybeautipRuntimeException(response.getMessage());
+    ResponseEntity<PaymentResponse> responseEntity = null;
+    try {
+      responseEntity = restTemplate.exchange(tokenUri, HttpMethod.GET, request, PaymentResponse.class);
+      PaymentResponse response = responseEntity.getBody();
+      if (response != null) {
+        log.debug("{}, {}", response.getCode(), response.getMessage());
+        if (response.getCode() != 0) {
+          throw new MybeautipRuntimeException(response.getMessage());
+        }
       }
+
+      return response;
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+        throw new NotFoundException("payment_id_not_found", "invalid payment id");
+      }
+      // TODO: Catch more error cases
     }
 
-    return response;
+    return null;
   }
 
   @Override
@@ -95,7 +100,6 @@ public class IamportService implements IamportApi {
     headers.add(HttpHeaders.AUTHORIZATION, accessToken);
 
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-
 
     PaymentResponse response = restTemplate.postForObject(tokenUri, request, PaymentResponse.class);
     log.debug("{}, {}", response.getCode(), response.getMessage());
