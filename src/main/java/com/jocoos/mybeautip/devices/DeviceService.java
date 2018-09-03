@@ -2,12 +2,10 @@ package com.jocoos.mybeautip.devices;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.sns.AmazonSNS;
@@ -26,6 +24,8 @@ import com.jocoos.mybeautip.restapi.DeviceController;
 public class DeviceService {
 
   private static final String MESSAGE_STRUCTURE = "json";
+  private static final String KEY_NOTIFICATION = "notification";
+  private static final String KEY_DATA = "data";
   private final DeviceRepository deviceRepository;
   private final MessageService messageService;
   private final ObjectMapper objectMapper;
@@ -122,10 +122,10 @@ public class DeviceService {
 
     switch (os) {
       case "android": {
-        return createPushMessage("data", data);
+        return createPushMessage(data);
       }
       case "ios": {
-        return createPushMessage("notification", data);
+        return createPushMessage(data);
       }
       default: {
         throw new IllegalArgumentException("unknown os type");
@@ -133,10 +133,16 @@ public class DeviceService {
     }
   }
 
-  private String createPushMessage(String key, Map<String, String> message) {
+  private String createPushMessage(Map<String, String> message) {
     Map<String, String> map = Maps.newHashMap();
     Map<String, Map<String, String>> data = Maps.newHashMap();
-    data.put(key, message);
+    Map<String, String> notification = Maps.newHashMap();
+
+    notification.put("title", messageService.getNotificationMessage("title", null));
+    notification.put("body", message.get("body"));
+
+    data.put(KEY_NOTIFICATION, notification);
+    data.put(KEY_DATA, message);
 
     try {
       map.put("GCM", objectMapper.writeValueAsString(data));
