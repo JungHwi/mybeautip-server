@@ -30,6 +30,7 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
 import com.jocoos.mybeautip.video.VideoService;
@@ -273,6 +274,57 @@ public class MemberController {
                                        @RequestParam(required = false) Long cursor) {
     log.debug("id:{}, category:{}", id, category);
     return createLikeResponse(id, category, count, cursor, String.format("/api/1/members/%d/likes", id));
+  }
+
+  @GetMapping(value = "/me/videos")
+  public CursorResponse getMyVideos(@RequestParam(defaultValue = "20") int count,
+                                    @RequestParam(required = false) String cursor,
+                                    @RequestParam(required = false) String type,
+                                    @RequestParam(required = false) String state) {
+    Long memberId = memberService.currentMemberId();
+    if (memberId == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    Slice<Video> list = videoService.findMyVideos(memberService.currentMember(), type, state, cursor, count);
+    List<VideoController.VideoInfo> videos = Lists.newArrayList();
+    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+
+    String nextCursor = null;
+    if (videos.size() > 0) {
+      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/members/me/videos", videos)
+      .withType(type)
+      .withState(state)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
+  }
+
+  @GetMapping(value = "/{id:.+}/videos")
+  public CursorResponse getMemberVideos(@PathVariable Long id,
+                                        @RequestParam(defaultValue = "20") int count,
+                                        @RequestParam(required = false) String cursor,
+                                        @RequestParam(required = false) String type,
+                                        @RequestParam(required = false) String state) {
+    Member member = memberRepository.findById(id)
+      .orElseThrow(() -> new MemberNotFoundException(id));
+
+    Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
+    List<VideoController.VideoInfo> videos = Lists.newArrayList();
+    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+
+    String nextCursor = null;
+    if (videos.size() > 0) {
+      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/members/" + id + "/videos", videos)
+      .withType(type)
+      .withState(state)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
   }
 
   private CursorResponse createLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {

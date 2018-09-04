@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -73,58 +72,51 @@ public class VideoController {
     this.videoCommentLikeRepository = videoCommentLikeRepository;
   }
 
-  @Transactional
-  @PostMapping
-  public CreateVideoResponse createVideo(@Valid @RequestBody CreateVideoGoodsRequest request,
-                          BindingResult bindingResult) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
-    if (bindingResult.hasErrors()) {
-      throw new BadRequestException(bindingResult.getFieldError());
-    }
-
-    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
-      throw new BadRequestException("Already exist, video key: " + request.getVideoKey());
-    }
-
-    List<String> relatedGoods = request.getRelatedGoods();
-    if (relatedGoods.size() == 0 || relatedGoods.size() > 10) {
-      throw new BadRequestException("related goods count is valid between 1 to 10.");
-    }
-
-    String url = goodsRepository.getOne(relatedGoods.get(0)).getListImageData().toString();
-    Video video = videoRepository.save(new Video(request.getVideoKey(),
-      memberRepository.getOne(memberId), relatedGoods.size(), url));
-
-    memberRepository.updateVideoCount(memberId, 1);
-
-    for (String goodsNo : relatedGoods) {
-      goodsRepository.findById(goodsNo)
-        .map(goods -> videoGoodsRepository.save(new VideoGoods(video, goods)))
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
-    }
-
-    return new CreateVideoResponse(video.getId());
+  @GetMapping("{id}")
+  public VideoInfo getVideos(@PathVariable Long id) {
+    return videoRepository.findByIdAndDeletedAtIsNull(id)
+      .map(videoService::generateVideoInfo)
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
   }
 
-  @Transactional
-  @DeleteMapping("/{id}")
-  public void deleteVideo(@PathVariable("id") Long id) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
+  @GetMapping
+  public CursorResponse getVideos(@RequestParam(defaultValue = "50") int count,
+                                  @RequestParam(required = false) String cursor,
+                                  @RequestParam(required = false) String type,
+                                  @RequestParam(required = false) String state) {
+    Slice<Video> list = videoService.findVideos(type, state, cursor, count);
+    List<VideoInfo> videos = Lists.newArrayList();
+    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+
+    String nextCursor = null;
+    if (videos.size() > 0) {
+      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
     }
 
-    videoRepository.findByIdAndMemberIdAndDeletedAtIsNull(id, memberId).map(video -> {
-      videoGoodsRepository.deleteByVideoId(id);
-      video.setDeletedAt(new Date());
-      videoRepository.save(video);
-      memberRepository.updateVideoCount(memberService.currentMemberId(), -1);
-      return Optional.empty();
-    }).orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+    return new CursorResponse.Builder<>("/api/1/videos", videos)
+      .withType(type)
+      .withState(state)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
+  }
+
+  @GetMapping("/search")
+  public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
+                                  @RequestParam(required = false) String cursor,
+                                  @RequestParam String keyword) {
+    Slice<Video> list = videoService.findVideosWithKeyword(keyword, cursor, count);
+    List<VideoInfo> videos = Lists.newArrayList();
+    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+
+    String nextCursor = null;
+    if (videos.size() > 0) {
+      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/videos/search", videos)
+      .withKeyword(keyword)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
   }
 
   @GetMapping("/{id}/goods")
@@ -353,30 +345,33 @@ public class VideoController {
   }
 
   @Data
-  public static class CreateVideoGoodsRequest {
-    @NotNull
-    String videoKey;
-
-    @NotNull
-    List<String> relatedGoods;
-  }
-
-  @Data
   @NoArgsConstructor
   public static class VideoInfo {
     private Long id;
-    private String videoKey;
+    private String type;
+    private String state;
+    private String visibility;
+    private String title;
+    private String content;
+    private String url;
+    private String thumbnailUrl;
+    private String chatRoomId;
+    private Integer duration;
+    private String data;
+    private Integer watchCount;
+    private Integer viewCount;
+    private Integer heartCount;
+    private Integer likeCount;
     private Integer commentCount;
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
-    private Integer likeCount;
     private Long likeId;
-    private MemberInfo member;
+    private MemberInfo owner;
     private Date createdAt;
 
-    public VideoInfo(Video video, MemberInfo member, Long likeId) {
+    public VideoInfo(Video video, MemberInfo owner, Long likeId) {
       BeanUtils.copyProperties(video, this);
-      this.member = member;
+      this.owner = owner;
       this.likeId = likeId;
     }
   }
@@ -428,18 +423,6 @@ public class VideoController {
 
   private MemberInfo createMemberInfo(Member member) {
     return new MemberInfo(member, memberService.getFollowingId(member));
-  }
-
-  @Data
-  @AllArgsConstructor
-  private class CreateVideoResponse {
-    private Long id;
-  }
-
-  @Data
-  @AllArgsConstructor
-  private class CommentCountResponse {
-    private Integer commentCount;
   }
 
   @Data
