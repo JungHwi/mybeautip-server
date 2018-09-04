@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
 import com.jocoos.mybeautip.notification.NotificationRepository;
@@ -29,19 +30,18 @@ import com.jocoos.mybeautip.notification.NotificationRepository;
 @RestController
 @RequestMapping("/api/1/members/me/notifications")
 public class NotificationController {
-  // TODO: Default avatar URL
-  private static final String DEFAULT_AVATAR = "";
-
-  private static final String CUSTOM_KEY_FOLLOW_ID = "follow_id";
 
   private final NotificationRepository notificationRepository;
+  private final FollowingRepository followingRepository;
   private final MemberService memberService;
   private final MessageService messageService;
 
   public NotificationController(NotificationRepository notificationRepository,
+                                FollowingRepository followingRepository,
                                 MemberService memberService,
                                 MessageService messageService) {
     this.notificationRepository = notificationRepository;
+    this.followingRepository = followingRepository;
     this.memberService = memberService;
     this.messageService = messageService;
   }
@@ -64,9 +64,9 @@ public class NotificationController {
     notifications
        .forEach(n -> {
          String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
-         Map<String, String> custom = n.getCustom();
-         if (custom  != null && custom.containsKey(CUSTOM_KEY_FOLLOW_ID)) {
-           result.add(new NotificationInfo(n, message, Long.parseLong(custom.get(CUSTOM_KEY_FOLLOW_ID))));
+         Optional<Following> following = followingRepository.findByMemberMeIdAndMemberYouId(n.getTargetMember().getId(), n.getResourceOwner().getId());
+         if (following.isPresent()) {
+           result.add(new NotificationInfo(n, message, following.get().getId()));
          } else {
            result.add(new NotificationInfo(n, message));
          }
@@ -111,7 +111,6 @@ public class NotificationController {
     public NotificationInfo(Notification notification, String message) {
       BeanUtils.copyProperties(notification, this);
       this.message = message;
-      this.imageUrl = !Strings.isNullOrEmpty(notification.getImageUrl()) ? imageUrl : DEFAULT_AVATAR;
     }
 
     public NotificationInfo(Notification notification, String message, Long followId) {
