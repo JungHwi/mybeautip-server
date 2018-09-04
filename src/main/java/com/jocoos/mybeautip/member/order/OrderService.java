@@ -86,44 +86,45 @@ public class OrderService {
         .map(order -> {
           if (!isSuccess) {
             updatePaymentState(order.getId(), uid, Payment.STATE_STOPPED, message);
-            return errorHtml(id, message);
+            return getErrorHtml(id, message);
           }
 
-          checkPayment(order.getId(), uid);
-
-          Payment payment = updatePaymentState(order.getId(), uid, Payment.STATE_PURCHASED, message);
+          Payment payment = checkPaymentAndUpdate(order.getId(), uid);
           if ((payment.getState() & Payment.STATE_PAID) != 0) {
             if (!Order.PAID.equals(order.getStatus())) {
               completeOrder(order);
             }
           } else {
-            return errorHtml(id, message);
+            return getErrorHtml(id, message);
           }
-          return successHtml(id);
+          return getSuccessHtml(id);
        }).orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
   }
 
-  private Payment checkPayment(Long orderId, String paymentId) {
+  private Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
     return paymentRepository.findById(orderId)
        .map(payment -> {
          int state = 0;
          String token = iamportService.getToken();
-         log.debug("access token:{}", token);
+         log.debug("access token: {}", token);
          PaymentResponse response = iamportService.getPayment(token, paymentId);
-
+         log.debug("response: {}", response);
          if (response.getCode() == 0) {
            state = stateValue(response.getResponse().getStatus());
+           log.debug("state: {}", state);
            if (state == Payment.STATE_PAID && response.getResponse().getAmount() == payment.getPrice()) {
              payment.setMessage(response.getResponse().getStatus());
              payment.setReceipt(response.getResponse().getReceiptUrl());
+             payment.setState(state | Payment.STATE_PURCHASED);
            } else {
-             payment.setMessage(response.getResponse().getFailReason());
+             String failReason = response.getResponse().getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
+             log.warn("fail reason: {}", failReason);
+             payment.setMessage(failReason);
            }
          } else {
            payment.setMessage(response.getMessage());
          }
 
-         payment.setState(state | Payment.STATE_PURCHASED);
          payment.setPaymentId(paymentId);
          return paymentRepository.save(payment);
        })
@@ -170,13 +171,13 @@ public class OrderService {
     // TODO: Send To Slack Message?
   }
 
-  private String successHtml(Long id) {
+  private String getSuccessHtml(Long id) {
     return new StringBuilder("<script language=\"javascript\">")
        .append("mybeautip.success(" + id + ");")
        .append("</script>").toString();
   }
 
-  private String errorHtml(Long id, String message) {
+  private String getErrorHtml(Long id, String message) {
     return new StringBuilder("<script language=\"javascript\">")
        .append("mybeautip.fail(" + id + ", \"" + message + "\");")
        .append("</script>").toString();

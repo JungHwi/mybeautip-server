@@ -60,7 +60,7 @@ public class IamportService implements IamportApi {
   @Override
   public PaymentResponse getPayment(String accessToken, String id) {
     String tokenUri = UriComponentsBuilder.newInstance()
-       .fromUriString(api).path(String.format("/payments/{%s}", id)).toUriString();
+       .fromUriString(api).path(String.format("/payments/%s", id)).toUriString();
 
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.AUTHORIZATION, accessToken);
@@ -71,7 +71,7 @@ public class IamportService implements IamportApi {
       responseEntity = restTemplate.exchange(tokenUri, HttpMethod.GET, request, PaymentResponse.class);
       PaymentResponse response = responseEntity.getBody();
       if (response != null) {
-        log.debug("{}, {}", response.getCode(), response.getMessage());
+        log.debug("{}, {}", response.getCode(), response.getResponse());
         if (response.getCode() != 0) {
           throw new MybeautipRuntimeException(response.getMessage());
         }
@@ -79,6 +79,7 @@ public class IamportService implements IamportApi {
 
       return response;
     } catch (HttpClientErrorException e) {
+      log.error("Get payment error", e);
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         throw new NotFoundException("payment_id_not_found", "invalid payment id");
       }
