@@ -51,6 +51,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         .antMatchers(GET, "/api/1/searches", "/api/1/searches/**").permitAll()
         .antMatchers(GET, "/api/1/news", "/api/1/news/**").permitAll()
         .antMatchers(POST, "/api/1/payments", "/api/1/payments/**").permitAll()
+        .antMatchers("/api/1/callbacks/video").access("#oauth2.hasScope('admin')")
         .antMatchers("/api/admin/**").access("#oauth2.hasScope('admin')")
         .antMatchers(GET, "/api/**").access("#oauth2.hasScope('read')")
         .antMatchers(POST, "/api/**").access("#oauth2.hasScope('write')")

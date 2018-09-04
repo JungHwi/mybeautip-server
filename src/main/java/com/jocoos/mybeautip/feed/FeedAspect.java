@@ -22,17 +22,27 @@ public class FeedAspect {
     this.feedService = feedService;
   }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoRepository.save(..))",
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.createVideo(..))",
      returning = "result")
   public void onAfterReturningCreateVideo(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
 
     if (result instanceof Video) {
+    Video video = (Video) result;
+      log.debug("video: {}", video);
+      feedService.feedVideo(video);
+    }
+  }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.deleteVideo(..))",
+    returning = "result")
+  public void onAfterReturningDeleteVideo(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof Video) {
       Video video = (Video) result;
-      if (video.getDeletedAt() == null) {
-        log.debug("video: {}", video);
-        feedService.feedVideo(video);
-      }
+      log.debug("video: {}", video);
+      feedService.feedDeletedVideo(video.getId());
     }
   }
 
@@ -62,19 +72,4 @@ public class FeedAspect {
       feedService.unfollowMember(following.getMemberMe().getId(), following.getMemberYou().getId());
     }
   }
-
-  @Before(value = "execution(* com.jocoos.mybeautip.video.VideoRepository.save(..))")
-  public void onBeforeDeleteVideo(JoinPoint joinPoint) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-    Object arg = joinPoint.getArgs()[0];
-    if (arg instanceof Video) {
-      Video video = (Video) arg;
-
-      if (video.getDeletedAt() != null) {
-        log.debug("videoId: {}", video.getId());
-        feedService.feedDeletedVideo(video.getId());
-      }
-    }
-  }
-
 }

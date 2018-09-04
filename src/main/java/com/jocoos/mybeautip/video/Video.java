@@ -22,24 +22,63 @@ public class Video {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column
+  @Column(nullable = false)
   private String videoKey;
 
-  @Column
-  private int commentCount;
+  @Column(nullable = false)
+  private String type;
+
+  @Column(nullable = false)
+  private String state;
+
+  @Column(nullable = false)
+  private String visibility;
 
   @Column
-  private int relatedGoodsCount;
+  private String title;
 
   @Column
+  private String content;
+
+  @Column
+  private String url;
+
+  @Column
+  private String thumbnailUrl;
+
+  @Column
+  private String chatRoomId;
+
+  @Column(nullable = false)
+  private int duration;
+
+  @Column
+  private String data;
+
+  @Column(nullable = false)
+  private Integer watchCount;
+
+  @Column(nullable = false)
+  private Integer heartCount;
+
+  @Column(nullable = false)
+  private Integer viewCount;
+
+  @Column(nullable = false)
+  private Integer likeCount;
+
+  @Column(nullable = false)
+  private Integer commentCount;
+
+  @Column(nullable = false)
+  private Integer relatedGoodsCount;
+
+  @Column(nullable = false)
   private String relatedGoodsThumbnailUrl;
 
   @ManyToOne
   @JoinColumn(name = "owner")
   private Member member;
-
-  @Column(nullable = false)
-  private int likeCount;
 
   @Column
   @CreatedDate
@@ -51,14 +90,4 @@ public class Video {
 
   @Column
   public Date deletedAt;
-
-  @Transient
-  private String thumbnailUrl;
-
-  public Video(String videoKey, Member member, int goodsCount, String goodsThumbnailUrl) {
-    this.videoKey = videoKey;
-    this.member = member;
-    this.relatedGoodsCount = goodsCount;
-    this.relatedGoodsThumbnailUrl = (goodsThumbnailUrl == null) ? "" : goodsThumbnailUrl;
-  }
 }
