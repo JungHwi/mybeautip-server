@@ -121,10 +121,18 @@ public class OrderService {
         break;
       }
       case 1: {
-        if (Order.DELIVERING.equals(order.getStatus()) || Order.DELIVERED.equals(order.getStatus())) {
-          order.setStatus(Order.ORDER_CANCELLING);
+        if (Order.DELIVERED.equals(order.getStatus())) {
+          order.setStatus(Order.ORDER_EXCHANGING);
         } else {
-          throw new BadRequestException("invalid order exchange -" + order.getStatus());
+          throw new BadRequestException("invalid order exchange inquire -" + order.getStatus());
+        }
+        break;
+      }
+      case 2: {
+        if (Order.DELIVERED.equals(order.getStatus())) {
+          order.setStatus(Order.ORDER_RETURNING);
+        } else {
+          throw new BadRequestException("invalid order return inquire -" + order.getStatus());
         }
         break;
       }
@@ -155,6 +163,10 @@ public class OrderService {
 
     payment.setState(Payment.STATE_CANCELLED);
     paymentRepository.save(payment);
+
+    OrderInquiry orderInquiry = orderInquiryRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("inquire_not_found", "invalid inquire id"));
+    orderInquiry.setCompleted(true);
+    orderInquiryRepository.save(orderInquiry);
   }
 
   private Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
