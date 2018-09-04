@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
@@ -126,7 +127,10 @@ public class DeviceService {
     data.put("body", message);
     data.put("resource_type", notification.getResourceType());
     data.put("resource_id", String.valueOf(notification.getResourceId()));
-    data.put("member_id", String.valueOf(notification.getResourceOwner()));
+    data.put("member_id", String.valueOf(notification.getResourceOwner().getId()));
+    if (!Strings.isNullOrEmpty(notification.getImageUrl())) {
+      data.put("image", notification.getImageUrl());
+    }
 
     switch (os) {
       case "android": {
