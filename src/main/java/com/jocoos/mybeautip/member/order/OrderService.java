@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
@@ -26,15 +27,18 @@ public class OrderService {
   private final OrderRepository orderRepository;
   private final DeliveryRepository deliveryRepository;
   private final PaymentRepository paymentRepository;
+  private final OrderInquiryRepository orderInquiryRepository;
   private final IamportService iamportService;
 
   public OrderService(OrderRepository orderRepository,
                       DeliveryRepository deliveryRepository,
                       PaymentRepository paymentRepository,
+                      OrderInquiryRepository orderInquiryRepository,
                       IamportService iamportService) {
     this.orderRepository = orderRepository;
     this.deliveryRepository = deliveryRepository;
     this.paymentRepository = paymentRepository;
+    this.orderInquiryRepository = orderInquiryRepository;
     this.iamportService = iamportService;
   }
 
@@ -101,6 +105,58 @@ public class OrderService {
        }).orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
   }
 
+  @Transactional
+  public OrderInquiry inquireOrder(Order order, Byte state, String reason) {
+    if (Order.ORDER_CANCELLED.equals(order.getStatus()) || Order.ORDER_CANCELLING.equals(order.getStatus())) {
+      throw new BadRequestException("order_cancel_duplicated", "Already requested order canceling");
+    }
+
+    switch (state) {
+      case 0: {
+        if (Order.PAID.equals(order.getStatus()) || Order.PREPARING.equals(order.getStatus())) {
+          order.setStatus(Order.ORDER_CANCELLING);
+        } else {
+          throw new BadRequestException("Can not cancel payment -" + order.getStatus());
+        }
+        break;
+      }
+      case 1: {
+        if (Order.DELIVERING.equals(order.getStatus()) || Order.DELIVERED.equals(order.getStatus())) {
+          order.setStatus(Order.ORDER_CANCELLING);
+        } else {
+          throw new BadRequestException("invalid order exchange -" + order.getStatus());
+        }
+        break;
+      }
+      default: {
+        throw new IllegalArgumentException("Unknown state type");
+      }
+    }
+
+    // TODO: send message order cancel message to slack?
+
+    orderRepository.save(order);
+    return orderInquiryRepository.save(new OrderInquiry(order, state, reason));
+  }
+
+  @Transactional
+  public void cancelPayment(Order order) {
+    if (!Order.ORDER_CANCELLING.equals(order)) {
+      throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
+    }
+
+    String token = iamportService.getToken();
+
+    Payment payment = paymentRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
+    iamportService.cancelPayment(token, payment.getPaymentId());
+
+    order.setStatus(Order.ORDER_CANCELLED);
+    orderRepository.save(order);
+
+    payment.setState(Payment.STATE_CANCELLED);
+    paymentRepository.save(payment);
+  }
+
   private Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
     return paymentRepository.findById(orderId)
        .map(payment -> {
@@ -146,6 +202,7 @@ public class OrderService {
         throw new IllegalArgumentException("Unknown state type");
     }
   }
+
   @Transactional
   private Payment updatePaymentState(Long id, String paymentId, int state, String message) {
     return paymentRepository.findById(id)

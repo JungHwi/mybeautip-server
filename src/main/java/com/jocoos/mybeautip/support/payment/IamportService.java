@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 
@@ -73,7 +74,7 @@ public class IamportService implements IamportApi {
       if (response != null) {
         log.debug("{}, {}", response.getCode(), response.getResponse());
         if (response.getCode() != 0) {
-          throw new MybeautipRuntimeException(response.getMessage());
+          throw new BadRequestException("invalid_payment_request", response.getMessage());
         }
       }
 
@@ -95,7 +96,7 @@ public class IamportService implements IamportApi {
        .fromUriString(api).path("/payments/cancel").toUriString();
 
     MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-    body.add("merchant_uid", impUid);
+    body.add("imp_uid", impUid);
 
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.AUTHORIZATION, accessToken);
@@ -103,9 +104,9 @@ public class IamportService implements IamportApi {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
     PaymentResponse response = restTemplate.postForObject(tokenUri, request, PaymentResponse.class);
-    log.debug("{}, {}", response.getCode(), response.getMessage());
+    log.debug("{}, {}", response.getCode(), response.getResponse());
     if (response.getCode() != 0) {
-      throw new MybeautipRuntimeException(response.getMessage());
+      throw new BadRequestException("invalid_payment_request", response.getMessage());
     }
 
     return response;

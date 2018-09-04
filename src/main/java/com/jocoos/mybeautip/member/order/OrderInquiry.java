@@ -3,19 +3,21 @@ package com.jocoos.mybeautip.member.order;
 import javax.persistence.*;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
 
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "order_inquiries")
 public class OrderInquiry extends ModifiedDateAuditable {
 
-  public static int STATE_CANCEL_ORDER = 0;
-  public static int STATE_REQUEST_EXCHANGE = 1;
-  public static int STATE_REQUEST_RETURN = 2;
+  public static Byte STATE_CANCEL_ORDER = 0;
+  public static Byte STATE_REQUEST_EXCHANGE = 1;
+  public static Byte STATE_REQUEST_RETURN = 2;
 
   @Id
   private Long id;
