@@ -72,6 +72,53 @@ public class VideoController {
     this.videoCommentLikeRepository = videoCommentLikeRepository;
   }
 
+  @GetMapping("{id}")
+  public VideoInfo getVideos(@PathVariable Long id) {
+    return videoRepository.findByIdAndDeletedAtIsNull(id)
+      .map(videoService::generateVideoInfo)
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+  }
+
+  @GetMapping
+  public CursorResponse getVideos(@RequestParam(defaultValue = "50") int count,
+                                  @RequestParam(required = false) String cursor,
+                                  @RequestParam(required = false) String type,
+                                  @RequestParam(required = false) String state) {
+    Slice<Video> list = videoService.findVideos(type, state, cursor, count);
+    List<VideoInfo> videos = Lists.newArrayList();
+    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+
+    String nextCursor = null;
+    if (videos.size() > 0) {
+      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/videos", videos)
+      .withType(type)
+      .withState(state)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
+  }
+
+  @GetMapping("/search")
+  public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
+                                  @RequestParam(required = false) String cursor,
+                                  @RequestParam String keyword) {
+    Slice<Video> list = videoService.findVideosWithKeyword(keyword, cursor, count);
+    List<VideoInfo> videos = Lists.newArrayList();
+    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+
+    String nextCursor = null;
+    if (videos.size() > 0) {
+      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/videos/search", videos)
+      .withKeyword(keyword)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
+  }
+
   @GetMapping("/{id}/goods")
   public List<GoodsInfo> getRelatedGoods(@PathVariable("id") Long id) {
     List<VideoGoods> list = videoGoodsRepository.findAllByVideoId(id);
@@ -301,18 +348,30 @@ public class VideoController {
   @NoArgsConstructor
   public static class VideoInfo {
     private Long id;
-    private String videoKey;
+    private String type;
+    private String state;
+    private String visibility;
+    private String title;
+    private String content;
+    private String url;
+    private String thumbnailUrl;
+    private String chatRoomId;
+    private Integer duration;
+    private String data;
+    private Integer watchCount;
+    private Integer viewCount;
+    private Integer heartCount;
+    private Integer likeCount;
     private Integer commentCount;
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
-    private Integer likeCount;
     private Long likeId;
-    private MemberInfo member;
+    private MemberInfo owner;
     private Date createdAt;
 
-    public VideoInfo(Video video, MemberInfo member, Long likeId) {
+    public VideoInfo(Video video, MemberInfo owner, Long likeId) {
       BeanUtils.copyProperties(video, this);
-      this.member = member;
+      this.owner = owner;
       this.likeId = likeId;
     }
   }
@@ -364,18 +423,6 @@ public class VideoController {
 
   private MemberInfo createMemberInfo(Member member) {
     return new MemberInfo(member, memberService.getFollowingId(member));
-  }
-
-  @Data
-  @AllArgsConstructor
-  private class CreateVideoResponse {
-    private Long id;
-  }
-
-  @Data
-  @AllArgsConstructor
-  private class CommentCountResponse {
-    private Integer commentCount;
   }
 
   @Data

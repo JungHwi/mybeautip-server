@@ -8,12 +8,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.util.Asserts;
 
 @Slf4j
 @EqualsAndHashCode
@@ -57,6 +55,20 @@ public class CursorResponse<E> {
     public Builder withKeyword(String keyword) {
       if (!Strings.isNullOrEmpty(keyword)) {
         this.properties.add("keyword", keyword);
+      }
+      return this;
+    }
+
+    public Builder withType(String type) {
+      if (!Strings.isNullOrEmpty(type)) {
+        this.properties.add("type", type);
+      }
+      return this;
+    }
+
+    public Builder withState(String state) {
+      if (!Strings.isNullOrEmpty(state)) {
+        this.properties.add("state", state);
       }
       return this;
     }

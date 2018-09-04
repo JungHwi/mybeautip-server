@@ -3,29 +3,153 @@ package com.jocoos.mybeautip.video;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.VideoController;
 
-
+@Slf4j
 @Service
 public class VideoService {
 
   private final MemberService memberService;
+  private final VideoRepository videoRepository;
   private final VideoCommentRepository videoCommentRepository;
   private final VideoLikeRepository videoLikeRepository;
   
   public VideoService(MemberService memberService,
+                      VideoRepository videoRepository,
                       VideoCommentRepository videoCommentRepository,
                       VideoLikeRepository videoLikeRepository) {
     this.memberService = memberService;
+    this.videoRepository = videoRepository;
     this.videoCommentRepository = videoCommentRepository;
     this.videoLikeRepository = videoLikeRepository;
+  }
+
+  public VideoController.VideoInfo getVideoInfo(Video video) {
+    Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), video.getMember().getId());
+    Long likeId = optional.map(VideoLike::getId).orElse(null);
+    return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId);
+  }
+
+  public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
+    Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+
+    return videoRepository.findByTitleContainingOrContentContainingAndCreatedAtBeforeAndDeletedAtIsNull(keyword, keyword, startCursor, page);
+  }
+
+
+  public Slice<Video> findVideos(String type, String state, String cursor, int count) {
+    Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+
+    switch (getRequestFilter(type, state)) {
+      case "all":
+        return videoRepository.getAnyoneAllVideos(startCursor, PageRequest.of(0, count));
+      case "live":
+        return videoRepository.getAnyoneLiveVideos(startCursor, PageRequest.of(0, count));
+      case "vod":
+        return videoRepository.getAnyoneVodVideos(startCursor, PageRequest.of(0, count));
+      case "motd":
+        return videoRepository.getAnyoneMotdVideos(startCursor, PageRequest.of(0, count));
+      case "vod+motd":
+        return videoRepository.getAnyoneVodAndMotdVideos(startCursor, PageRequest.of(0, count));
+      case "live+vod":
+        return videoRepository.getAnyoneLiveAndVodVideos(startCursor, PageRequest.of(0, count));
+      default:
+        return null;
+    }
+  }
+
+  public Slice<Video> findMyVideos(Member me, String type, String state, String cursor, int count) {
+    Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+
+    switch (getRequestFilter(type, state)) {
+      case "all":
+        return videoRepository.getMyAllVideos(me, startCursor, PageRequest.of(0, count));
+      case "live":
+        return videoRepository.getMyLiveVideos(me, startCursor, PageRequest.of(0, count));
+      case "vod":
+        return videoRepository.getMyVodVideos(me, startCursor, PageRequest.of(0, count));
+      case "motd":
+        return videoRepository.getMyMotdVideos(me, startCursor, PageRequest.of(0, count));
+      case "vod+motd":
+        return videoRepository.getMyVodAndMotdVideos(me, startCursor, PageRequest.of(0, count));
+      case "live+vod":
+        return videoRepository.getMyLiveAndVodVideos(me, startCursor, PageRequest.of(0, count));
+      default:
+        return null;
+    }
+  }
+
+  public Slice<Video> findMemberVideos(Member member, String type, String state, String cursor, int count) {
+    Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+
+    switch (getRequestFilter(type, state)) {
+      case "all":
+        return videoRepository.getUserAllVideos(member, startCursor, PageRequest.of(0, count));
+      case "live":
+        return videoRepository.getUserLiveVideos(member, startCursor, PageRequest.of(0, count));
+      case "vod":
+        return videoRepository.getUserVodVideos(member, startCursor, PageRequest.of(0, count));
+      case "motd":
+        return videoRepository.getUserMotdVideos(member, startCursor, PageRequest.of(0, count));
+      case "vod+motd":
+        return videoRepository.getUserVodAndMotdVideos(member, startCursor, PageRequest.of(0, count));
+      case "live+vod":
+        return videoRepository.getUserLiveAndVodVideos(member, startCursor, PageRequest.of(0, count));
+      default:
+        return null;
+    }
+  }
+
+  private String getRequestFilter(String type, String state) {
+    if (type == null && state == null) {
+      return "all";
+    }
+
+    if (type == null && "live".equalsIgnoreCase(state)) {
+      return "live";
+    }
+
+    if (type == null && "vod".equalsIgnoreCase(state)) {
+      return "vod+motd";
+    }
+
+    if ("broadcasted".equalsIgnoreCase(type) && state == null) {
+      return "live+vod";
+    }
+
+    if ("broadcasted".equalsIgnoreCase(type) && "live".equalsIgnoreCase(state)) {
+      return "live";
+    }
+
+    if ("broadcasted".equalsIgnoreCase(type) && "vod".equalsIgnoreCase(state)) {
+      return "vod";
+    }
+
+    if ("uploaded".equalsIgnoreCase(type) && state == null) {
+      return "motd";
+    }
+
+    if ("uploaded".equalsIgnoreCase(type) && "live".equalsIgnoreCase(state)) {
+      return "invalid";
+    }
+
+    if ("uploaded".equalsIgnoreCase(type) && "vod".equalsIgnoreCase(state)) {
+      return "motd";
+    }
+
+    return "all";
   }
 
   public Slice<VideoComment> findCommentsByVideoId(Long id, String cursor, Pageable pageable) {
