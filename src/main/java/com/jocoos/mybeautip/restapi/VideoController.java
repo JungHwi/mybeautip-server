@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -71,60 +70,6 @@ public class VideoController {
     this.videoCommentRepository = videoCommentRepository;
     this.videoLikeRepository = videoLikeRepository;
     this.videoCommentLikeRepository = videoCommentLikeRepository;
-  }
-
-  @Transactional
-  @PostMapping
-  public CreateVideoResponse createVideo(@Valid @RequestBody CreateVideoGoodsRequest request,
-                          BindingResult bindingResult) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
-    if (bindingResult.hasErrors()) {
-      throw new BadRequestException(bindingResult.getFieldError());
-    }
-
-    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
-      throw new BadRequestException("Already exist, video key: " + request.getVideoKey());
-    }
-
-    List<String> relatedGoods = request.getRelatedGoods();
-    if (relatedGoods.size() == 0 || relatedGoods.size() > 10) {
-      throw new BadRequestException("related goods count is valid between 1 to 10.");
-    }
-
-    String url = goodsRepository.getOne(relatedGoods.get(0)).getListImageData().toString();
-    Video video = videoRepository.save(new Video(request.getVideoKey(),
-      memberRepository.getOne(memberId), relatedGoods.size(), url));
-
-    memberRepository.updateVideoCount(memberId, 1);
-
-    for (String goodsNo : relatedGoods) {
-      goodsRepository.findById(goodsNo)
-        .map(goods -> videoGoodsRepository.save(new VideoGoods(video, goods)))
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
-    }
-
-    return new CreateVideoResponse(video.getId());
-  }
-
-  @Transactional
-  @DeleteMapping("/{id}")
-  public void deleteVideo(@PathVariable("id") Long id) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
-    videoRepository.findByIdAndMemberIdAndDeletedAtIsNull(id, memberId).map(video -> {
-      videoGoodsRepository.deleteByVideoId(id);
-      video.setDeletedAt(new Date());
-      videoRepository.save(video);
-      memberRepository.updateVideoCount(memberService.currentMemberId(), -1);
-      return Optional.empty();
-    }).orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
   }
 
   @GetMapping("/{id}/goods")
@@ -350,15 +295,6 @@ public class VideoController {
         })
         .orElseThrow(() -> new NotFoundException("video_comment_like_not_found", "invalid video " +
             "comment like id"));
-  }
-
-  @Data
-  public static class CreateVideoGoodsRequest {
-    @NotNull
-    String videoKey;
-
-    @NotNull
-    List<String> relatedGoods;
   }
 
   @Data
