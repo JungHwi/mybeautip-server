@@ -145,32 +145,36 @@ public class OrderController {
   }
 
   @GetMapping("/inquiries")
-  public CursorResponse getInquires(@RequestParam(defaultValue = "cancel") String category,
+  public CursorResponse getInquires(@RequestParam String category,
                                     @RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) Long cursor) {
 
+    Long me = memberService.currentMemberId();
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<OrderInquiry> inquiries = null;
     switch (category) {
       case "cancel": {
         if (cursor != null) {
-          inquiries = orderInquiryRepository.findByStateAndCreatedAtBefore(OrderInquiry.STATE_CANCEL_ORDER, new Date(cursor), page);
+          inquiries = orderInquiryRepository.findByStateAndCreatedAtBeforeAndCreatedById(OrderInquiry.STATE_CANCEL_ORDER, new Date(cursor), me, page);
         } else {
-          inquiries = orderInquiryRepository.findByState(OrderInquiry.STATE_CANCEL_ORDER, page);
+          inquiries = orderInquiryRepository.findByStateAndCreatedById(OrderInquiry.STATE_CANCEL_ORDER, me, page);
         }
         break;
       }
-      default: {
+      case "exchange": {
         /**
          * case "exchange":
          * case "return"
          */
         if (cursor != null) {
-          inquiries = orderInquiryRepository.findByStateGreaterThanEqualAndCreatedAtBefore(OrderInquiry.STATE_REQUEST_EXCHANGE, new Date(cursor), page);
+          inquiries = orderInquiryRepository.findByStateGreaterThanEqualAndCreatedAtBeforeAndCreatedById(OrderInquiry.STATE_REQUEST_EXCHANGE, new Date(cursor), me, page);
         } else {
-          inquiries = orderInquiryRepository.findByStateGreaterThanEqual(OrderInquiry.STATE_REQUEST_EXCHANGE, page);
+          inquiries = orderInquiryRepository.findByCreatedByIdAndStateGreaterThanEqual(me, OrderInquiry.STATE_REQUEST_EXCHANGE, page);
         }
         break;
+      }
+      default: {
+        throw new BadRequestException("category_not_found", "invalid category name");
       }
     }
 

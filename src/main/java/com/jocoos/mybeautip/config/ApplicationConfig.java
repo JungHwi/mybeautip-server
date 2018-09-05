@@ -14,11 +14,11 @@ import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.server.web.WebServlet;
 
-@Configuration
 @Slf4j
+@Configuration
 public class ApplicationConfig {
 
-  private static final int CONNECTION_TIMEOUT = 1 * 1000;
+  private static final int CONNECTION_TIMEOUT = 30 * 1000;
 
   @Bean
   public MappingJackson2XmlHttpMessageConverter xmlHttpMessageConverter() {
