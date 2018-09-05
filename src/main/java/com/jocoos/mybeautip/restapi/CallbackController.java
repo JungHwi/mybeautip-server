@@ -114,6 +114,7 @@ public class CallbackController {
     return videoRepository.save(video);
   }
 
+  @Transactional
   @DeleteMapping
   public Video deleteVideo(@Valid @RequestBody CallbackDeleteVideoRequest request) {
     log.debug("deleteVideo {}", request.toString());
@@ -124,7 +125,7 @@ public class CallbackController {
         }
         v.setDeletedAt(new Date());
         videoRepository.save(v);
-        memberRepository.updateVideoCount(v.getMember().getId(), 1);
+        memberRepository.updateVideoCount(v.getMember().getId(), -1);
         return v;
       })
       .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
