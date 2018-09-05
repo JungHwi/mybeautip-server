@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.member;
 
 import java.util.Date;
+import java.util.List;
 
 import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.restapi.VideoController;
 
 @NoArgsConstructor
 @Data
@@ -16,8 +19,9 @@ public class MemberInfo {
   private String intro;
   private Integer followerCount;
   private Integer followingCount;
-  private Integer videoCount;
   private Long followingId;
+  private Integer videoCount;
+  private List<VideoController.VideoInfo> videos;
   private Date createdAt;
   private Date modifiedAt;
 

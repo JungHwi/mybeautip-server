@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.recommendation;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
 
@@ -58,9 +60,20 @@ public class RecommendationController {
     Slice<MemberRecommendation> members = memberRecommendationRepository.findAll(
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
+    List<VideoController.VideoInfo> videoList = Lists.newArrayList();
 
-    members.stream().forEach(r ->
-      result.add(new MemberInfo(r.getMember(), memberServie.getFollowingId(r.getMember()))));
+    members.stream().forEach(r -> {
+      MemberInfo memberInfo = new MemberInfo(r.getMember(), memberServie.getFollowingId(r.getMember()));
+
+      Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
+      if (slice.hasContent()) {
+        for (Video video : slice) {
+          videoList.add(videoService.generateVideoInfo(video));
+        }
+        memberInfo.setVideos(videoList);
+      }
+      result.add(memberInfo);
+    });
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
