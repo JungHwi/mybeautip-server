@@ -95,6 +95,8 @@ public class CallbackController {
         videoRepository.save(createdVideo);
       }
     }
+
+    memberRepository.updateVideoCount(video.getMember().getId(), 1);
     return createdVideo;
   }
 
@@ -122,6 +124,7 @@ public class CallbackController {
         }
         v.setDeletedAt(new Date());
         videoRepository.save(v);
+        memberRepository.updateVideoCount(v.getMember().getId(), 1);
         return v;
       })
       .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
