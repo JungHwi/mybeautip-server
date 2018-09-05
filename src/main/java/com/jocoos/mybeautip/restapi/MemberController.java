@@ -353,7 +353,12 @@ public class MemberController {
       postLikes = postLikeRepository.findByCreatedById(memberId, pageable);
     }
 
-    postLikes.stream().forEach(like -> result.add(new PostController.PostLikeInfo(like)));
+    postLikes.stream().forEach(like -> {
+      PostController.PostLikeInfo info = new PostController.PostLikeInfo(like);
+      postLikeRepository.findByPostIdAndCreatedById(like.getPost().getId(), memberId)
+        .ifPresent(likeByMe -> info.getPost().setLikeId(likeByMe.getId()));
+      result.add(info);
+    });
 
     String nextCursor = null;
     if (result.size() > 0) {
@@ -407,7 +412,7 @@ public class MemberController {
     Long likeId;
     Long me = memberService.currentMemberId();
     for (StoreLike like : storeLikes) {
-      likeId = me.equals(like.getCreatedBy())? like.getId() : null;
+      likeId = me.equals(like.getCreatedBy().getId())? like.getId() : null;
       String imageUrl = String.format("%s%d%s", storeImagePrefix, like.getStore().getId(), storeImageSuffix);
       String thumbnailUrl = String.format("%s%d%s", storeImagePrefix, like.getStore().getId(), storeImageThumbnailSuffix);
       result.add(new StoreController.StoreInfo(like.getStore(), likeId, imageUrl, thumbnailUrl));

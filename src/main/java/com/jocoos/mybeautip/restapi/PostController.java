@@ -417,17 +417,18 @@ public class PostController {
     private Set<PostContent> contents;
     private List<String> goods;
     private Set<Long> winners;
-    private Long likeCount;
+    private Integer likeCount;
     private Long commentCount;
     private Long viewCount;
     private Date createdAt;
+    private Member createdBy;
     private Long likeId;
   }
 
   @Data
   public static class PostLikeInfo {
     private Long id;
-    private Long createdBy;
+    private Member createdBy;
     private Date createdAt;
     private PostBasicInfo post;
 
@@ -446,6 +447,9 @@ public class PostController {
     private int progress;
     private String thumbnailUrl;
     private Date createdAt;
+    private Member createdBy;
+    private Integer likeCount;
+    private Long likeId;
 
     public PostBasicInfo(Post post) {
       BeanUtils.copyProperties(post, this);
