@@ -24,11 +24,16 @@ public class Order extends MemberAuditable {
   public static final String DELIVERING = "delivering";
   public static final String DELIVERED = "delivered";
 
-  public static final String PAYMENT_CANCELLED = "payment_cancelled";
-  public static final String ORDER_CANCELLED = "order_cancelled";
-  public static final String PAYMENT_FAILED = "payment_failed";
   public static final String PAYMENT_CANCELLING = "payment_cancelling";
-  public static final String ORDER_CANCELLING = "payment_cancelling";
+  public static final String PAYMENT_CANCELLED = "payment_cancelled";
+  public static final String ORDER_CANCELLING = "order_cancelling";
+  public static final String ORDER_CANCELLED = "order_cancelled";
+  public static final String ORDER_EXCHANGING = "order_exchanging";
+  public static final String ORDER_EXCHANGED = "order_exchanged";
+  public static final String ORDER_RETURNING = "order_returning";
+  public static final String ORDER_RETURNED = "order_returned";
+
+  public static final String PAYMENT_FAILED = "payment_failed";
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

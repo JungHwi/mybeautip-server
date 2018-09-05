@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -13,12 +13,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.NumberUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -29,7 +31,7 @@ import com.jocoos.mybeautip.member.order.*;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/1/members/me/orders", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/1/members/me", produces = MediaType.APPLICATION_JSON_VALUE)
 public class OrderController {
 
   private final MemberService memberService;
@@ -37,20 +39,23 @@ public class OrderController {
   private final OrderRepository orderRepository;
   private final PaymentRepository paymentRepository;
   private final DeliveryRepository deliveryRepository;
+  private final OrderInquiryRepository orderInquiryRepository;
 
   public OrderController(MemberService memberService,
                          OrderService orderService,
                          OrderRepository orderRepository,
                          PaymentRepository paymentRepository,
-                         DeliveryRepository deliveryRepository) {
+                         DeliveryRepository deliveryRepository,
+                         OrderInquiryRepository orderInquiryRepository) {
     this.memberService = memberService;
     this.orderService = orderService;
     this.orderRepository = orderRepository;
     this.paymentRepository = paymentRepository;
     this.deliveryRepository = deliveryRepository;
+    this.orderInquiryRepository = orderInquiryRepository;
   }
 
-  @PostMapping
+  @PostMapping("/orders")
   public ResponseEntity<OrderInfo> createOrder(@RequestBody CreateOrderRequest request,
                                                BindingResult bindingResult) {
 
@@ -64,7 +69,7 @@ public class OrderController {
     return new ResponseEntity<>(new OrderInfo(order), HttpStatus.OK);
   }
 
-  @GetMapping("/{id:.+}")
+  @GetMapping("/orders/{id:.+}")
   public ResponseEntity<OrderInfo> getOrder(@PathVariable Long id) {
     Long memberId = memberService.currentMemberId();
     return orderRepository.findByIdAndCreatedById(id, memberId)
@@ -77,7 +82,7 @@ public class OrderController {
        .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
   }
 
-  @GetMapping
+  @GetMapping("/orders")
   public CursorResponse getOrders(@RequestParam(defaultValue = "20") int count,
                                   @RequestParam(defaultValue = "delivery") String category,
                                   @RequestParam(required = false) Long cursor) {
@@ -115,6 +120,88 @@ public class OrderController {
        .toBuild();
   }
 
+  @PostMapping("/orders/{id:.+}/inquiries")
+  public ResponseEntity<OrderInquiryInfo> createInquiry(@PathVariable Long id,
+                                                        @Valid @RequestBody CreateOrderInquiry request,
+                                                        BindingResult bindingResult) {
+    log.debug("inquiry request: {}", request);
+    if (bindingResult.hasErrors()) {
+      throw new BadRequestException(bindingResult.getFieldError());
+    }
+
+    Long me = memberService.currentMemberId();
+    OrderInquiry inquiry = orderRepository.findByIdAndCreatedById(id, me)
+       .map(order -> {
+         OrderInquiry orderInquiry = orderService.inquireOrder(order, Byte.parseByte(request.getState()), request.getReason());
+         if (Byte.parseByte(request.getState()) == OrderInquiry.STATE_CANCEL_ORDER) {
+           orderService.cancelPayment(order);
+         }
+
+         return orderInquiry;
+       })
+       .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
+
+    return new ResponseEntity<>(new OrderInquiryInfo(inquiry), HttpStatus.OK);
+  }
+
+  @GetMapping("/inquiries")
+  public CursorResponse getInquires(@RequestParam String category,
+                                    @RequestParam(defaultValue = "20") int count,
+                                    @RequestParam(required = false) Long cursor) {
+
+    Long me = memberService.currentMemberId();
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    Slice<OrderInquiry> inquiries = null;
+    switch (category) {
+      case "cancel": {
+        if (cursor != null) {
+          inquiries = orderInquiryRepository.findByStateAndCreatedAtBeforeAndCreatedById(OrderInquiry.STATE_CANCEL_ORDER, new Date(cursor), me, page);
+        } else {
+          inquiries = orderInquiryRepository.findByStateAndCreatedById(OrderInquiry.STATE_CANCEL_ORDER, me, page);
+        }
+        break;
+      }
+      case "exchange": {
+        /**
+         * case "exchange":
+         * case "return"
+         */
+        if (cursor != null) {
+          inquiries = orderInquiryRepository.findByStateGreaterThanEqualAndCreatedAtBeforeAndCreatedById(OrderInquiry.STATE_REQUEST_EXCHANGE, new Date(cursor), me, page);
+        } else {
+          inquiries = orderInquiryRepository.findByCreatedByIdAndStateGreaterThanEqual(me, OrderInquiry.STATE_REQUEST_EXCHANGE, page);
+        }
+        break;
+      }
+      default: {
+        throw new BadRequestException("category_not_found", "invalid category name");
+      }
+    }
+
+    List<OrderInquiryInfo> result = Lists.newArrayList();
+    if (inquiries != null && inquiries.getSize() > 0) {
+      inquiries.stream().forEach(inquiry -> result.add(new OrderInquiryInfo(inquiry)));
+    }
+
+    String nextCursor = null;
+    if (!CollectionUtils.isEmpty(result)) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/members/me/inquiries", result)
+       .withCount(count)
+       .withCursor(nextCursor)
+       .withCategory(category)
+       .toBuild();
+  }
+
+  @Data
+  public static class CreateOrderInquiry {
+    @NotNull
+    private String state;
+    @NotNull
+    private String reason;
+  }
 
   @Data
   public static class CreateOrderRequest {
@@ -269,6 +356,23 @@ public class OrderController {
 
     public PurchaseInfo(Purchase purchase) {
       BeanUtils.copyProperties(purchase, this);
+    }
+  }
+
+  @NoArgsConstructor
+  @Data
+  public static class OrderInquiryInfo {
+    private Byte state;
+    private String reason;
+    private String comment;
+    private OrderInfo orderInfo;
+    private boolean completed;
+    private Date createdAt;
+    private Date modifiedAt;
+
+    public OrderInquiryInfo(OrderInquiry orderInquiry) {
+      BeanUtils.copyProperties(orderInquiry, this);
+      this.orderInfo = new OrderInfo(orderInquiry.getOrder());
     }
   }
 }
