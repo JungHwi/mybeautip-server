@@ -348,6 +348,7 @@ public class VideoController {
   @NoArgsConstructor
   public static class VideoInfo {
     private Long id;
+    private String videoKey;
     private String type;
     private String state;
     private String visibility;
