@@ -107,13 +107,13 @@ public class OrderService {
 
   @Transactional
   public OrderInquiry inquireOrder(Order order, Byte state, String reason) {
-    if (Order.ORDER_CANCELLED == order.getStatus() || Order.ORDER_CANCELLING == order.getStatus()) {
+    if (Order.ORDER_CANCELLED.equals(order.getStatus()) || Order.ORDER_CANCELLING.equals(order.getStatus())) {
       throw new BadRequestException("order_cancel_duplicated", "Already requested order canceling");
     }
 
     switch (state) {
       case 0: {
-        if (Order.PAID == order.getStatus() || Order.PREPARING == order.getStatus()) {
+        if (Order.PAID.equals(order.getStatus()) || Order.PREPARING.equals(order.getStatus())) {
           order.setStatus(Order.ORDER_CANCELLING);
         } else {
           throw new BadRequestException("Can not cancel payment -" + order.getStatus());
@@ -121,15 +121,15 @@ public class OrderService {
         break;
       }
       case 1: {
-        if (Order.DELIVERED == order.getStatus() || Order.DELIVERING == order.getStatus()) {
+        if (Order.DELIVERED.equals(order.getStatus()) || Order.DELIVERING.equals(order.getStatus())) {
           order.setStatus(Order.ORDER_EXCHANGING);
         } else {
-          throw new BadRequestException("invalid order exchange inquire -" + order.getStatus());
+          throw new BadRequestException("invalid order exchange inquire - " + order.getStatus());
         }
         break;
       }
       case 2: {
-        if (Order.DELIVERED == order.getStatus() || Order.DELIVERING == order.getStatus()) {
+        if (Order.DELIVERED.equals(order.getStatus()) || Order.DELIVERING.equals(order.getStatus())) {
           order.setStatus(Order.ORDER_RETURNING);
         } else {
           throw new BadRequestException("invalid order return inquire - " + order.getStatus());
