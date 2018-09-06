@@ -374,6 +374,8 @@ public class VideoController {
       BeanUtils.copyProperties(video, this);
       this.owner = owner;
       this.likeId = likeId;
+      if (this.relatedGoodsCount == null) { this.relatedGoodsCount = 0;}  // FIXME: check policy
+      if (this.relatedGoodsThumbnailUrl == null) { this.relatedGoodsThumbnailUrl = "";} // FIXME: check policy
     }
   }
 
