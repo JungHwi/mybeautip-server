@@ -14,4 +14,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   Optional<Order> findByIdAndCreatedById(Long id, Long createdBy);
 
   Slice<Order> findByCreatedByIdAndCreatedAtBefore(Long createdBy, Date createdAt, Pageable pageable);
+
+  Slice<Order> findByCreatedByIdAndCreatedAtBeforeAndStatusContains(Long createdBy, Date createdAt, String status, Pageable pageable);
 }

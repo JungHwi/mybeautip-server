@@ -84,22 +84,26 @@ public class OrderController {
 
   @GetMapping("/orders")
   public CursorResponse getOrders(@RequestParam(defaultValue = "20") int count,
-                                  @RequestParam(defaultValue = "delivery") String category,
+                                  @RequestParam(defaultValue = "") String category,
                                   @RequestParam(required = false) Long cursor) {
     Long memberId = memberService.currentMemberId();
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<Order> orders = null;
     List<OrderInfo> result = Lists.newArrayList();
 
+    Date createdAt = null;
+    if (cursor != null) {
+      createdAt = new Date(cursor);
+    } else {
+      createdAt = new Date();
+    }
+
     switch (category) {
+      case "delivery": {
+        orders = orderRepository.findByCreatedByIdAndCreatedAtBeforeAndStatusContains(memberId, createdAt, "deliver", page);
+        break;
+      }
       default: {
-        // category=delivery
-        Date createdAt = null;
-        if (cursor != null) {
-          createdAt = new Date(cursor);
-        } else {
-          createdAt = new Date();
-        }
         orders = orderRepository.findByCreatedByIdAndCreatedAtBefore(memberId, createdAt, page);
       }
     }
@@ -162,10 +166,6 @@ public class OrderController {
         break;
       }
       case "exchange": {
-        /**
-         * case "exchange":
-         * case "return"
-         */
         if (cursor != null) {
           inquiries = orderInquiryRepository.findByStateGreaterThanEqualAndCreatedAtBeforeAndCreatedById(OrderInquiry.STATE_REQUEST_EXCHANGE, new Date(cursor), me, page);
         } else {
@@ -193,6 +193,13 @@ public class OrderController {
        .withCursor(nextCursor)
        .withCategory(category)
        .toBuild();
+  }
+
+  @GetMapping("/inquiries/{id:.+}")
+  public ResponseEntity<OrderInquiryInfo> getInquiry(@PathVariable Long id) {
+    return orderInquiryRepository.findByIdAndCreatedById(id, memberService.currentMemberId())
+       .map(orderInquiry -> new ResponseEntity<>(new OrderInquiryInfo(orderInquiry), HttpStatus.OK))
+       .orElseThrow(() -> new NotFoundException("inquiry_not_found", "invalid inquiry id"));
   }
 
   @Data
