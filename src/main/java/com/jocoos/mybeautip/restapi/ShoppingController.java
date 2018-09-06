@@ -52,19 +52,19 @@ public class ShoppingController {
     Date weekAgo = getWeekAgo(now);
 
     // FIXME: Update after coupon implementation
-    int couponPoint = 0;
+    int couponCount = 0;
 
     // FIXME: Update after point implementation
     int point = 0;
 
     List<Order> orders = orderRepository.findByCreatedByIdAndCreatedAtBetween(member.getId(), weekAgo, now);
     if (CollectionUtils.isEmpty(orders)) {
-      return new ResponseEntity<>(new ShoppingInfo(member, couponPoint, point), HttpStatus.OK);
+      return new ResponseEntity<>(new ShoppingInfo(member, couponCount, point), HttpStatus.OK);
     }
 
     OrderCountInfo countInfo = createOrderCountByStatus(orders);
     log.debug("count info: {}", countInfo);
-    return new ResponseEntity<>(new ShoppingInfo(member, couponPoint, point, countInfo), HttpStatus.OK);
+    return new ResponseEntity<>(new ShoppingInfo(member, couponCount, point, countInfo), HttpStatus.OK);
   }
 
   private OrderCountInfo createOrderCountByStatus(List<Order> orders) {
