@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.video;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -12,9 +13,12 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.video.watches.VideoWatch;
+import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 
 @Slf4j
 @Service
@@ -24,15 +28,21 @@ public class VideoService {
   private final VideoRepository videoRepository;
   private final VideoCommentRepository videoCommentRepository;
   private final VideoLikeRepository videoLikeRepository;
+  private final VideoWatchRepository videoWatchRepository;
+
+  @Value("${mybeautip.video.watch-duration}")
+  private long watchDuration;
   
   public VideoService(MemberService memberService,
                       VideoRepository videoRepository,
                       VideoCommentRepository videoCommentRepository,
-                      VideoLikeRepository videoLikeRepository) {
+                      VideoLikeRepository videoLikeRepository,
+                      VideoWatchRepository videoWatchRepository) {
     this.memberService = memberService;
     this.videoRepository = videoRepository;
     this.videoCommentRepository = videoCommentRepository;
     this.videoLikeRepository = videoLikeRepository;
+    this.videoWatchRepository = videoWatchRepository;
   }
 
   public VideoController.VideoInfo getVideoInfo(Video video) {
@@ -177,10 +187,34 @@ public class VideoService {
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
     Long me = memberService.currentMemberId();
+    // Set likeID
     if (me != null) {
       Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me);
       likeId = optional.map(VideoLike::getId).orElse(null);
     }
+    // Set Watch count
+    if ("live".equalsIgnoreCase(video.getState())) {
+      long duration = new Date().getTime() - watchDuration;
+      video.setWatchCount(videoWatchRepository.countByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration)));
+    }
     return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId);
+  }
+
+  public VideoController.VideoInfo setWatcher(Long id, Member me) {
+    Video video = videoRepository.findById(id)
+      .map(v -> {
+        if ("live".equalsIgnoreCase(v.getState())) {
+          Optional<VideoWatch> optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());
+          if (optional.isPresent()) {
+            optional.get().setModifiedAt(new Date());
+            videoWatchRepository.save(optional.get());
+          } else {
+            videoWatchRepository.save(new VideoWatch(v, me));
+          }
+        }
+        return v;
+      })
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+    return generateVideoInfo(video);
   }
 }
