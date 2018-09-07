@@ -26,8 +26,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "notifications")
 public class Notification {
 
-  public static final String BROADCASTED_VIDEO_STARTED = "broadcasted_video_started";
-  public static final String UPLOADED_VIDEO_STARTED = "uploaded_video_started";
+  public static final String VIDEO_STARTED = "video_started";
+  public static final String VIDEO_UPLOADED = "video_uploaded";
   public static final String MENTION = "mention";
   public static final String VIDEO_COMMENT = "video_comment";
   public static final String VIDEO_COMMENT_REPLY = "video_comment_reply";
@@ -88,7 +88,7 @@ public class Notification {
   private Date createdAt;
 
   public Notification(Video video, String thumbnail, Member target) {
-    this.type = "broadcasted".equalsIgnoreCase(video.getType()) ? BROADCASTED_VIDEO_STARTED : UPLOADED_VIDEO_STARTED;
+    this.type = "broadcasted".equalsIgnoreCase(video.getType()) ? VIDEO_STARTED : VIDEO_UPLOADED;
     this.targetMember = target;
     this.args = Lists.newArrayList(video.getMember().getUsername());
     this.resourceType = "video";
