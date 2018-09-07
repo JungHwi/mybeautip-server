@@ -18,6 +18,8 @@ import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
 import com.jocoos.mybeautip.recoding.ViewRecodingService;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @RestController
@@ -29,13 +31,16 @@ public class RecodingController {
   private final ViewRecodingService viewRecodingService;
   private final PostRepository postRepository;
   private final GoodsRepository goodsRepository;
+  private final VideoRepository videoRepository;
 
   public RecodingController(ViewRecodingService viewRecodingService,
                             PostRepository postRepository,
-                            GoodsRepository goodsRepository) {
+                            GoodsRepository goodsRepository,
+                            VideoRepository videoRepository) {
     this.viewRecodingService = viewRecodingService;
     this.postRepository = postRepository;
     this.goodsRepository = goodsRepository;
+    this.videoRepository = videoRepository;
   }
 
   /**
@@ -75,6 +80,12 @@ public class RecodingController {
         return goodsRepository.findById(recoding.getItemId())
            .map(goods -> new RecodingInfo(recoding, goods))
            .orElseGet(() -> new RecodingInfo(recoding));
+
+      case 3:
+        return videoRepository.findById(Long.parseLong(recoding.getItemId()))
+          .map(video -> new RecodingInfo(recoding, video))
+          .orElseGet(() -> new RecodingInfo(recoding));
+
       default:
         throw new IllegalArgumentException("Unknown category type - " + recoding.getCategory());
     }
@@ -106,6 +117,13 @@ public class RecodingController {
         detail = new BasicInfo(src);
       }
     }
+
+    public RecodingInfo(ViewRecoding viewRecoding, Video src) {
+      BeanUtils.copyProperties(viewRecoding, this);
+      if (src != null) {
+        detail = new BasicInfo(src);
+      }
+    }
   }
 
   @Data
@@ -115,6 +133,8 @@ public class RecodingController {
     private String title;
     private int category;
     private String thumbnailUrl;
+    private String type;
+    private String state;
     private Date createdAt;
 
     public BasicInfo(Post post) {
@@ -125,6 +145,14 @@ public class RecodingController {
       BeanUtils.copyProperties(goods, this);
       this.title = goods.getGoodsNm();
       this.thumbnailUrl = goods.getMainImageData().toString();
+    }
+
+    public BasicInfo(Video video) {
+      BeanUtils.copyProperties(video, this);
+      this.title = video.getTitle();
+      this.thumbnailUrl = video.getThumbnailUrl();
+      this.type = video.getType();
+      this.state = video.getState();
     }
   }
 }

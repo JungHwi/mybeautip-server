@@ -437,7 +437,7 @@ public class VideoController {
    * Add Heart
    */
   @Transactional
-  @PatchMapping(value = "/{id:.+}/hearts")
+  @PostMapping(value = "/{id:.+}/hearts")
   public ResponseEntity<VideoInfo> heartVideo(@PathVariable Long id,
                                                @Valid @RequestBody(required = false) VideoHeartRequest request,
                                                BindingResult bindingResult) {
@@ -460,6 +460,21 @@ public class VideoController {
     video.setHeartCount(video.getHeartCount() + count);
 
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+  }
+
+  /**
+   * Add view_count
+   */
+  @Transactional
+  @PostMapping("/{id:.+}/view_count")
+  public ResponseEntity<VideoInfo> addViewCount(@PathVariable Long id) {
+    return videoRepository.findByIdAndDeletedAtIsNull(id)
+      .map(v -> {
+        videoRepository.updateViewCount(v.getId(), 1);
+        v.setViewCount(v.getViewCount() + 1);
+        return new ResponseEntity<>(videoService.generateVideoInfo(v), HttpStatus.OK);
+      })
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
   }
 
   @Data
