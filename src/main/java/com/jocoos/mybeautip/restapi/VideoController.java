@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,22 +20,22 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.watches.VideoWatch;
+import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 
 @Slf4j
 @RestController
@@ -42,34 +44,34 @@ public class VideoController {
   private final MemberService memberService;
   private final GoodsService goodsService;
   private final VideoService videoService;
-  private final MemberRepository memberRepository;
-  private final GoodsRepository goodsRepository;
   private final VideoRepository videoRepository;
   private final VideoLikeRepository videoLikeRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final VideoCommentRepository videoCommentRepository;
   private final VideoCommentLikeRepository videoCommentLikeRepository;
+  private final VideoWatchRepository videoWatchRepository;
+
+  @Value("${mybeautip.video.watch-duration}")
+  private long watchDuration;
 
   public VideoController(MemberService memberService,
                          VideoService videoService,
                          VideoGoodsRepository videoGoodsRepository,
                          GoodsService goodsService,
-                         MemberRepository memberRepository,
-                         GoodsRepository goodsRepository,
                          VideoRepository videoRepository,
                          VideoCommentRepository videoCommentRepository,
                          VideoLikeRepository videoLikeRepository,
-                         VideoCommentLikeRepository videoCommentLikeRepository) {
+                         VideoCommentLikeRepository videoCommentLikeRepository,
+                         VideoWatchRepository videoWatchRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsService = goodsService;
-    this.memberRepository = memberRepository;
-    this.goodsRepository = goodsRepository;
     this.videoRepository = videoRepository;
     this.videoCommentRepository = videoCommentRepository;
     this.videoLikeRepository = videoLikeRepository;
     this.videoCommentLikeRepository = videoCommentLikeRepository;
+    this.videoWatchRepository = videoWatchRepository;
   }
 
   @GetMapping("{id}")
@@ -342,6 +344,58 @@ public class VideoController {
         })
         .orElseThrow(() -> new NotFoundException("video_comment_like_not_found", "invalid video " +
             "comment like id"));
+  }
+
+  /**
+   * Watches
+   */
+  @Transactional
+  @RequestMapping(value = "/{id:.+}/watches", method = { RequestMethod.POST, RequestMethod.PATCH })
+  public ResponseEntity<VideoInfo> joinWatch(@PathVariable Long id) {
+    Member me = memberService.currentMember();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    return new ResponseEntity<>(videoService.setWatcher(id, me), HttpStatus.OK);
+  }
+
+  @Transactional
+  @DeleteMapping("/{id:.+}/watches")
+  public ResponseEntity<?> leaveWatch(@PathVariable Long id) {
+    Member me = memberService.currentMember();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    videoRepository.findById(id)
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+
+    videoWatchRepository.findByVideoIdAndCreatedById(id, me.getId())
+      .ifPresent(videoWatchRepository::delete);
+
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @GetMapping("/{id:.+}/watches")
+  public CursorResponse getWatcherList(@PathVariable Long id,
+                                       @RequestParam(defaultValue = "100") int count,
+                                       @RequestParam(required = false) String cursor) {
+    Long startCursor = StringUtils.isBlank(cursor) ? 0 : Long.parseLong(cursor);  // "createdBy" is used for cursor
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
+    long duration = new Date().getTime() - watchDuration;
+    Slice<VideoWatch> list = videoWatchRepository.findByVideoIdAndModifiedAtAfterAndCreatedByIdAfter(id, new Date(duration), startCursor, pageable);
+    List<MemberInfo> members = Lists.newArrayList();
+    list.stream().forEach(watch -> members.add(memberService.getMemberInfo(watch.getCreatedBy())));
+
+    String nextCursor = null;
+    if (members.size() > 0) {
+      nextCursor = String.valueOf(members.get(members.size() - 1).getId());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/videos/" + id + "/watches", members)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
   }
 
   @Data
