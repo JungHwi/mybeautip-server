@@ -42,7 +42,7 @@ public class MemberCouponController {
     Member member = memberService.currentMember();
     Date now = new Date();
     List<MemberCoupon> memberCoupons =
-       memberCouponRepository.findByCreatedByAndCouponStartedAtBeforeAndCouponEndedAtAfter(member, now, now);
+       memberCouponRepository.findByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfter(member, now, now);
     log.debug("coupons: {}", memberCoupons);
 
     if (!CollectionUtils.isEmpty(memberCoupons)) {
@@ -57,7 +57,6 @@ public class MemberCouponController {
   public static class MemberCouponInfo {
     private Long id;
     private CouponInfo coupon;
-    private boolean used;
     private Date modifiedAt;
 
     public MemberCouponInfo(MemberCoupon memberCoupon) {

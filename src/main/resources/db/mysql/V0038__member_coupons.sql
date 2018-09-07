@@ -26,13 +26,11 @@ CREATE TABLE `coupons` (
 CREATE TABLE `member_coupons` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `coupon_id` BIGINT NOT NULL,
-  `used` TINYINT NOT NULL DEFAULT 0 COMMENT '0:not yet, 1: used',
-  `created_by` BIGINT NOT NULL,
+  `member_id` BIGINT NOT NULL,
   `created_at` DATETIME NOT NULL,
-  `modified_at` DATETIME DEFAULT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_member_coupons_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`),
-  CONSTRAINT `fk_member_coupons_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
+  CONSTRAINT `fk_member_coupons_member` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

@@ -18,7 +18,6 @@ import com.jocoos.mybeautip.audit.MemberAuditable;
 @Table(name = "coupons")
 public class Coupon extends MemberAuditable {
 
-  public static int WELCOME_COUPON = 0;
   public static int DISCOUNT_FIXED_PRICE = 1;
   public static int DISCOUNT_FIXED_RATE = 2;
   public static int DISCOUNT_DELIVERY_FEE = 3;

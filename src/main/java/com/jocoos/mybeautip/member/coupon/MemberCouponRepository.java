@@ -9,5 +9,5 @@ import com.jocoos.mybeautip.member.Member;
 
 public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long> {
 
-  List<MemberCoupon> findByCreatedByAndCouponStartedAtBeforeAndCouponEndedAtAfter(Member member, Date statedAt, Date endedAt);
+  List<MemberCoupon> findByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfter(Member member, Date statedAt, Date endedAt);
 }
