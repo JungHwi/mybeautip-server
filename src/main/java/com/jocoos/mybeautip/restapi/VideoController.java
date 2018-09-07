@@ -189,7 +189,7 @@ public class VideoController {
       throw new MemberNotFoundException("Login required");
     }
 
-    videoRepository.findById(id)
+    videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
 
     if (request.getParentId() != null) {
@@ -373,7 +373,7 @@ public class VideoController {
       throw new MemberNotFoundException("Login required");
     }
 
-    videoRepository.findById(id)
+    videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
 
     videoWatchRepository.findByVideoIdAndCreatedById(id, me.getId())
@@ -420,7 +420,7 @@ public class VideoController {
       throw new MemberNotFoundException("Login required");
     }
 
-    Video video = videoRepository.findById(id)
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
 
     Optional<VideoReport> optional = videoReportRepository.findByVideoIdAndCreatedById(id, me.getId());
@@ -429,6 +429,35 @@ public class VideoController {
     } else {
       videoReportRepository.save(new VideoReport(video, me, request.getReason()));
     }
+
+    return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+  }
+
+  /**
+   * Add Heart
+   */
+  @Transactional
+  @PatchMapping(value = "/{id:.+}/hearts")
+  public ResponseEntity<VideoInfo> heartVideo(@PathVariable Long id,
+                                               @Valid @RequestBody(required = false) VideoHeartRequest request,
+                                               BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      throw new BadRequestException(bindingResult.getFieldError());
+    }
+    int count = 1;
+    if (request != null && request.getCount() != null) {
+      count = request.getCount();
+    }
+    Member me = memberService.currentMember();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+
+    videoRepository.updateHeartCount(id, count);
+    video.setHeartCount(video.getHeartCount() + count);
 
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
@@ -548,5 +577,10 @@ public class VideoController {
     @NotNull
     @Size(max = 80)
     private String reason;
+  }
+
+  @Data
+  private static class VideoHeartRequest {
+    private Integer count;
   }
 }
