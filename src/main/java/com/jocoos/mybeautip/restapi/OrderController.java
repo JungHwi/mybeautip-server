@@ -280,7 +280,7 @@ public class OrderController {
     private MemberInfo createdBy;
     private int point;
     private String method;
-    private int status;
+    private String status;
     private Long videoId;
     private DeliveryInfo delivery;
     private PaymentInfo payment;

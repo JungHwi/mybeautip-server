@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member.order;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -16,4 +17,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   Slice<Order> findByCreatedByIdAndCreatedAtBefore(Long createdBy, Date createdAt, Pageable pageable);
 
   Slice<Order> findByCreatedByIdAndCreatedAtBeforeAndStatusContains(Long createdBy, Date createdAt, String status, Pageable pageable);
+
+  List<Order> findByCreatedByIdAndCreatedAtBetween(Long createdBy, Date createdAtStart, Date createdAtEnd);
 }
