@@ -23,7 +23,7 @@ public class MemberCoupon extends MemberAuditable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "coupon_id")
   private Coupon coupon;
 
