@@ -60,11 +60,10 @@ public class RecommendationController {
     Slice<MemberRecommendation> members = memberRecommendationRepository.findAll(
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
-    List<VideoController.VideoInfo> videoList = Lists.newArrayList();
 
     members.stream().forEach(r -> {
       MemberInfo memberInfo = new MemberInfo(r.getMember(), memberServie.getFollowingId(r.getMember()));
-
+      List<VideoController.VideoInfo> videoList = Lists.newArrayList();
       Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
       if (slice.hasContent()) {
         for (Video video : slice) {
