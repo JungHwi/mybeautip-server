@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 
@@ -50,6 +53,7 @@ public class VideoController {
   private final VideoCommentRepository videoCommentRepository;
   private final VideoCommentLikeRepository videoCommentLikeRepository;
   private final VideoWatchRepository videoWatchRepository;
+  private final VideoReportRepository videoReportRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -62,7 +66,7 @@ public class VideoController {
                          VideoCommentRepository videoCommentRepository,
                          VideoLikeRepository videoLikeRepository,
                          VideoCommentLikeRepository videoCommentLikeRepository,
-                         VideoWatchRepository videoWatchRepository) {
+                         VideoWatchRepository videoWatchRepository, VideoReportRepository videoReportRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.videoGoodsRepository = videoGoodsRepository;
@@ -72,6 +76,7 @@ public class VideoController {
     this.videoLikeRepository = videoLikeRepository;
     this.videoCommentLikeRepository = videoCommentLikeRepository;
     this.videoWatchRepository = videoWatchRepository;
+    this.videoReportRepository = videoReportRepository;
   }
 
   @GetMapping("{id}")
@@ -398,6 +403,36 @@ public class VideoController {
       .withCursor(nextCursor).toBuild();
   }
 
+  /**
+   * Report
+   */
+  @Transactional
+  @PostMapping(value = "/{id:.+}/report")
+  public ResponseEntity<VideoInfo> reportVideo(@PathVariable Long id,
+                                               @Valid @RequestBody VideoReportRequest request,
+                                               BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      throw new BadRequestException(bindingResult.getFieldError());
+    }
+
+    Member me = memberService.currentMember();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    Video video = videoRepository.findById(id)
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+
+    Optional<VideoReport> optional = videoReportRepository.findByVideoIdAndCreatedById(id, me.getId());
+    if (optional.isPresent()) {
+      throw new BadRequestException("already_reported");
+    } else {
+      videoReportRepository.save(new VideoReport(video, me, request.getReason()));
+    }
+
+    return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+  }
+
   @Data
   @NoArgsConstructor
   public static class VideoInfo {
@@ -506,5 +541,12 @@ public class VideoController {
       BeanUtils.copyProperties(commentLike, this);
       comment = new VideoCommentInfo(commentLike.getComment());
     }
+  }
+
+  @Data
+  private static class VideoReportRequest {
+    @NotNull
+    @Size(max = 80)
+    private String reason;
   }
 }
