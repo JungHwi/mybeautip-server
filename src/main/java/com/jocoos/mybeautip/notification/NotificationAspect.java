@@ -26,17 +26,15 @@ public class NotificationAspect {
     this.notificationService = notificationService;
   }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoRepository.save(..))",
-     returning = "result")
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.createVideo(..))",
+    returning = "result")
   public void onAfterReturningCreateVideo(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
 
     if (result instanceof Video) {
       Video video = (Video) result;
-      if (video.getDeletedAt() == null) {
-        log.debug("video: {}", video);
-        notificationService.notifyCreateVideo(video);
-      }
+      log.debug("video: {}", video);
+      notificationService.notifyCreateVideo(video);
     }
   }
 
