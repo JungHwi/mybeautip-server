@@ -260,6 +260,9 @@ public class VideoController {
       .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video key or comment id"));
   }
 
+  /**
+   * Likes
+   */
   @Transactional
   @PostMapping("/{videoId:.+}/likes")
   public ResponseEntity<VideoLikeInfo> addVideoLike(@PathVariable Long videoId) {
@@ -306,6 +309,29 @@ public class VideoController {
       .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id or like id"));
   }
 
+  @GetMapping("/{id:.+}/likes")
+  public CursorResponse getLikedMemberList(@PathVariable Long id,
+                                           @RequestParam(defaultValue = "100") int count,
+                                           @RequestParam(required = false) String cursor) {
+    Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    Slice<VideoLike> list = videoLikeRepository.findByVideoIdAndCreatedAtBefore(id, startCursor, pageable);
+    List<MemberInfo> members = Lists.newArrayList();
+    list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
+
+    String nextCursor = null;
+    if (members.size() > 0) {
+      nextCursor = String.valueOf(members.get(members.size() - 1).getModifiedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/videos/" + id + "/likes", members)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
+  }
+
+  /**
+   * Comment Likes
+   */
   @Transactional
   @PostMapping("/{videoId:.+}/comments/{commentId:.+}/likes")
   public ResponseEntity<VideoCommentLikeInfo> addVideoCommentLike(@PathVariable Long videoId,

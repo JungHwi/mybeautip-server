@@ -14,6 +14,8 @@ public interface VideoLikeRepository extends JpaRepository<VideoLike, Long> {
 
   Slice<VideoLike> findByCreatedAtBeforeAndCreatedById(Date createdAt, Long createdBy, Pageable pageable);
 
+  Slice<VideoLike> findByVideoIdAndCreatedAtBefore(Long videoId, Date createdAt, Pageable pageable);
+
   Slice<VideoLike> findByCreatedById(Long createdBy, Pageable pageable);
 
   Integer countByCreatedById(Long memberId);
