@@ -37,6 +37,8 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
+import com.jocoos.mybeautip.video.view.VideoView;
+import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 
@@ -54,6 +56,7 @@ public class VideoController {
   private final VideoCommentLikeRepository videoCommentLikeRepository;
   private final VideoWatchRepository videoWatchRepository;
   private final VideoReportRepository videoReportRepository;
+  private final VideoViewRepository videoViewRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -66,7 +69,9 @@ public class VideoController {
                          VideoCommentRepository videoCommentRepository,
                          VideoLikeRepository videoLikeRepository,
                          VideoCommentLikeRepository videoCommentLikeRepository,
-                         VideoWatchRepository videoWatchRepository, VideoReportRepository videoReportRepository) {
+                         VideoWatchRepository videoWatchRepository,
+                         VideoReportRepository videoReportRepository,
+                         VideoViewRepository videoViewRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.videoGoodsRepository = videoGoodsRepository;
@@ -77,6 +82,7 @@ public class VideoController {
     this.videoCommentLikeRepository = videoCommentLikeRepository;
     this.videoWatchRepository = videoWatchRepository;
     this.videoReportRepository = videoReportRepository;
+    this.videoViewRepository = videoViewRepository;
   }
 
   @GetMapping("{id}")
@@ -357,6 +363,7 @@ public class VideoController {
   @Transactional
   @RequestMapping(value = "/{id:.+}/watches", method = { RequestMethod.POST, RequestMethod.PATCH })
   public ResponseEntity<VideoInfo> joinWatch(@PathVariable Long id) {
+    // Guest can not be inserted into watching list
     Member me = memberService.currentMember();
     if (me == null) {
       throw new MemberNotFoundException("Login required");
@@ -441,16 +448,13 @@ public class VideoController {
   public ResponseEntity<VideoInfo> heartVideo(@PathVariable Long id,
                                                @Valid @RequestBody(required = false) VideoHeartRequest request,
                                                BindingResult bindingResult) {
+    // Guest can add heart_count
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
     int count = 1;
     if (request != null && request.getCount() != null) {
       count = request.getCount();
-    }
-    Member me = memberService.currentMember();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
     }
 
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
@@ -462,19 +466,54 @@ public class VideoController {
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 
+
   /**
-   * Add view_count
+   * Views
    */
   @Transactional
-  @PostMapping("/{id:.+}/view_count")
-  public ResponseEntity<VideoInfo> addViewCount(@PathVariable Long id) {
+  @PostMapping("/{id:.+}/views")
+  public ResponseEntity<VideoInfo> addView(@PathVariable Long id) {
+    Member me = memberService.currentMember();
+
     return videoRepository.findByIdAndDeletedAtIsNull(id)
       .map(v -> {
         videoRepository.updateViewCount(v.getId(), 1);
         v.setViewCount(v.getViewCount() + 1);
+
+        if (me != null) {   // Guest can add view_count, but can not be inserted into viewer list
+          Optional<VideoView> optional = videoViewRepository.findByVideoIdAndCreatedById(id, me.getId());
+          if (optional.isPresent()) {
+            VideoView view = optional.get();
+            view.setModifiedAt(new Date());
+            videoViewRepository.save(view);
+          } else {
+            videoViewRepository.save(new VideoView(v, me));
+          }
+        }
+
         return new ResponseEntity<>(videoService.generateVideoInfo(v), HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+  }
+
+  @GetMapping("/{id:.+}/views")
+  public CursorResponse getViewerList(@PathVariable Long id,
+                                       @RequestParam(defaultValue = "100") int count,
+                                       @RequestParam(required = false) String cursor) {
+    Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
+    Slice<VideoView> list = videoViewRepository.findByVideoIdAndModifiedAtBefore(id, startCursor, pageable);
+    List<MemberInfo> members = Lists.newArrayList();
+    list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
+
+    String nextCursor = null;
+    if (members.size() > 0) {
+      nextCursor = String.valueOf(members.get(members.size() - 1).getModifiedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/videos/" + id + "/views", members)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
   }
 
   @Data
