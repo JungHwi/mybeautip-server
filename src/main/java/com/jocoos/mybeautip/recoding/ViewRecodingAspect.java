@@ -81,7 +81,7 @@ public class ViewRecodingAspect {
     }
   }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.VideoController.addViewCount(..))",
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.VideoController.addView(..))",
     returning = "result")
   public void onAfterReturningVideoAddViewCountHandler(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
