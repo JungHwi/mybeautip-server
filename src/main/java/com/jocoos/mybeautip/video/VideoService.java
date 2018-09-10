@@ -201,7 +201,7 @@ public class VideoService {
   }
 
   public VideoController.VideoInfo setWatcher(Long id, Member me) {
-    Video video = videoRepository.findById(id)
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .map(v -> {
         if ("live".equalsIgnoreCase(v.getState())) {
           Optional<VideoWatch> optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());

@@ -80,4 +80,32 @@ public class ViewRecodingAspect {
       log.warn("Invalid args length.");
     }
   }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.VideoController.addViewCount(..))",
+    returning = "result")
+  public void onAfterReturningVideoAddViewCountHandler(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    Object[] args = joinPoint.getArgs();
+    if (args != null && args.length > 0) {
+      Long videoId = Long.parseLong(args[0].toString());
+      log.debug("videoId: {}", videoId);
+
+      if (result instanceof ResponseEntity) {
+        log.debug("response entity");
+        ResponseEntity response = (ResponseEntity) result;
+        if (response.getStatusCode() == HttpStatus.OK) {
+          log.debug("response status code: {}", response.getStatusCode());
+          if (memberService.currentMemberId() != null) {
+            viewRecodingRepository.save(new ViewRecoding(String.valueOf(videoId), ViewRecoding.CATEGORY_VIDEO));
+          }
+        }
+      } else {
+        log.warn("Unknown response type.");
+      }
+    } else {
+      log.debug("joinPoint: {}", joinPoint.toLongString());
+      log.warn("Invalid args length.");
+    }
+  }
 }

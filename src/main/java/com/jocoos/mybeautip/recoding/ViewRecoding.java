@@ -24,6 +24,7 @@ public class ViewRecoding extends MemberAuditable {
 
   public static final int CATEGORY_POST = 1;
   public static final int CATEGORY_GOODS = 2;
+  public static final int CATEGORY_VIDEO = 3;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +34,7 @@ public class ViewRecoding extends MemberAuditable {
   private String itemId;
 
   /**
-   * 1. Post, 2. Goods
+   * 1. Post, 2. Goods, 3. Video
    */
   @Column(nullable = false)
   private int category;
