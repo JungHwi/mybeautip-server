@@ -409,10 +409,12 @@ public class MemberController {
       storeLikes = storeLikeRepository.findByCreatedById(memberId, pageable);
     }
 
-    Long likeId;
+    Long likeId = null;
     Long me = memberService.currentMemberId();
     for (StoreLike like : storeLikes) {
-      likeId = me.equals(like.getCreatedBy().getId())? like.getId() : null;
+      if (me != null) {
+        likeId = me.equals(like.getCreatedBy().getId()) ? like.getId() : null;
+      }
       String imageUrl = String.format("%s%d%s", storeImagePrefix, like.getStore().getId(), storeImageSuffix);
       String thumbnailUrl = String.format("%s%d%s", storeImagePrefix, like.getStore().getId(), storeImageThumbnailSuffix);
       result.add(new StoreController.StoreInfo(like.getStore(), likeId, imageUrl, thumbnailUrl));
