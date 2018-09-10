@@ -55,7 +55,6 @@ public class CallbackController {
     Video video = new Video();
     BeanUtils.copyProperties(request, video);
     video.setVisibility("PUBLIC");
-    video.setDuration(0);
     video.setCommentCount(0);
     video.setLikeCount(0);
     video.setViewCount(0);
@@ -198,6 +197,7 @@ public class CallbackController {
     String type;
 
     String state;
+    Integer duration = 0;
     String title ="";
     String content = "";
     String url ="";
