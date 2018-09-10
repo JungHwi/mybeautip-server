@@ -23,7 +23,7 @@ import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/1/recodings")
+@RequestMapping(value = "/api/1/members/me/recodings")
 public class RecodingController {
 
   private final int DAY_IN_MS = 1000 * 60 * 60 * 24;
@@ -51,8 +51,7 @@ public class RecodingController {
   @GetMapping
   @ResponseBody
   public CursorResponse  findAllViewedPosts(@RequestParam(defaultValue = "20") int count,
-                                                             @RequestParam(required = false) String category,
-                                                             @RequestParam(required = false) String cursor) {
+                                            @RequestParam(required = false) String cursor) {
     Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(count, cursor);
     List<RecodingInfo> result = Lists.newArrayList();
 
@@ -64,8 +63,7 @@ public class RecodingController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder<RecodingInfo>("/api/1/recodings", result)
-       .withCategory(category)
+    return new CursorResponse.Builder<RecodingInfo>("/api/1/members/me/recodings", result)
        .withCount(count)
        .withCursor(nextCursor).toBuild();
   }
@@ -131,7 +129,7 @@ public class RecodingController {
     private Long id;
     private String goodsNo;
     private String title;
-    private int category;
+    private Integer category;
     private String thumbnailUrl;
     private String type;
     private String state;
@@ -145,14 +143,12 @@ public class RecodingController {
       BeanUtils.copyProperties(goods, this);
       this.title = goods.getGoodsNm();
       this.thumbnailUrl = goods.getMainImageData().toString();
+      this.category = null;
     }
 
     public BasicInfo(Video video) {
       BeanUtils.copyProperties(video, this);
-      this.title = video.getTitle();
-      this.thumbnailUrl = video.getThumbnailUrl();
-      this.type = video.getType();
-      this.state = video.getState();
+      this.category = null;
     }
   }
 }
