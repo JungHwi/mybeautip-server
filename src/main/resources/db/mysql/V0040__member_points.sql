@@ -7,7 +7,7 @@ CREATE TABLE `member_points` (
   `point` INT NOT NULL DEFAULT 0,
   `member_id` BIGINT NOT NULL,
   `created_at` DATETIME NOT NULL,
-  `earned_at` DATETIME NOT NULL,
+  `earned_at` DATETIME DEFAULT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_member_points_member` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.order.Order;
 
 @NoArgsConstructor
 @Data
@@ -27,9 +28,6 @@ public class MemberPoint extends CreatedDateAuditable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  /**
-   * 0: Will be earned, 1: Earned points, 2: Use points, 3: Expired points
-   */
   @Column(nullable = false)
   private int state;
 
@@ -44,9 +42,13 @@ public class MemberPoint extends CreatedDateAuditable {
   private Date earnedAt;
 
   public MemberPoint(Member member, int point) {
+    this(member, point, STATE_WILL_BE_EARNED);
+    this.earnedAt = new Date();
+  }
+
+  public MemberPoint(Member member, int point, int state) {
     this.member = member;
     this.point = point;
-    this.state = STATE_WILL_BE_EARNED;
-    this.earnedAt = new Date();
+    this.state = state;
   }
 }

@@ -43,4 +43,15 @@ public class PointService {
     MemberPoint memberPoint = new MemberPoint(member, point);
     memberPointRepository.save(memberPoint);
   }
+
+  public void usePoints(Member member, int point) {
+    if (member == null) {
+      return;
+    }
+
+    log.debug("member id: {}, use point: {}", member.getId(), point);
+
+    MemberPoint memberPoint = new MemberPoint(member, point, MemberPoint.STATE_USE_POINT);
+    memberPointRepository.save(memberPoint);
+  }
 }

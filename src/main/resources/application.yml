@@ -95,6 +95,7 @@ mybeautip:
   video:
     watch-duration: 10000
   point:
+    minimum: 1000
     earn-ratio: 1 # %
     earn-after-days: 7
 
