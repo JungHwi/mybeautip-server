@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,26 +24,48 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.coupon.Coupon;
+import com.jocoos.mybeautip.member.coupon.CouponService;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderRepository;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/1/members/me/shoppings", produces = MediaType.APPLICATION_JSON_VALUE)
-public class ShoppingController {
+@RequestMapping(value = "/api/1/members/me", produces = MediaType.APPLICATION_JSON_VALUE)
+public class MemberShoppingController {
 
   private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   private final MemberService memberService;
+  private final CouponService couponService;
+
   private final OrderRepository orderRepository;
 
-  public ShoppingController(MemberService memberService,
-                            OrderRepository orderRepository) {
+  public MemberShoppingController(MemberService memberService,
+                                  CouponService couponService,
+                                  OrderRepository orderRepository) {
     this.memberService = memberService;
+    this.couponService = couponService;
     this.orderRepository = orderRepository;
   }
 
-  @GetMapping
+  @GetMapping("/coupons")
+  public ResponseEntity<List<MemberCouponInfo>> getCoupons() {
+    List<MemberCouponInfo> coupons = Lists.newArrayList();
+    List<MemberCoupon> memberCoupons = couponService.findMemberCouponsByMember(memberService.currentMember());
+    log.debug("coupons: {}", memberCoupons);
+
+    if (!CollectionUtils.isEmpty(memberCoupons)) {
+      memberCoupons
+         .stream().forEach(memberCoupon -> coupons.add(new MemberCouponInfo(memberCoupon)));
+    }
+
+    return new ResponseEntity<>(coupons, HttpStatus.OK);
+  }
+
+  @GetMapping("/shoppings")
   private ResponseEntity<ShoppingInfo> getShopping() {
     Member member = memberService.currentMember();
     if (member == null) {
@@ -51,20 +75,16 @@ public class ShoppingController {
     Date now = new Date();
     Date weekAgo = getWeekAgo(now);
 
-    // FIXME: Update after coupon implementation
-    int couponCount = 0;
-
-    // FIXME: Update after point implementation
-    int point = 0;
+    int couponCount = couponService.countByCoupons(member);
 
     List<Order> orders = orderRepository.findByCreatedByIdAndCreatedAtBetween(member.getId(), weekAgo, now);
     if (CollectionUtils.isEmpty(orders)) {
-      return new ResponseEntity<>(new ShoppingInfo(member, couponCount, point), HttpStatus.OK);
+      return new ResponseEntity<>(new ShoppingInfo(member, couponCount), HttpStatus.OK);
     }
 
     OrderCountInfo countInfo = createOrderCountByStatus(orders);
     log.debug("count info: {}", countInfo);
-    return new ResponseEntity<>(new ShoppingInfo(member, couponCount, point, countInfo), HttpStatus.OK);
+    return new ResponseEntity<>(new ShoppingInfo(member, couponCount, countInfo), HttpStatus.OK);
   }
 
   private OrderCountInfo createOrderCountByStatus(List<Order> orders) {
@@ -121,14 +141,14 @@ public class ShoppingController {
     private int point;
     private OrderCountInfo orderCounts;
 
-    public ShoppingInfo(Member member, int couponCount, int point) {
+    public ShoppingInfo(Member member, int couponCount) {
       this.member = new MemberInfo(member, null);
-      this.couponCount = 0;
-      this.point = point;
+      this.couponCount = couponCount;
+      this.point = member.getPoint();
     }
 
-    public ShoppingInfo(Member member, int couponCount, int point, OrderCountInfo orderCounts) {
-      this(member, couponCount, point);
+    public ShoppingInfo(Member member, int couponCount, OrderCountInfo orderCounts) {
+      this(member, couponCount);
       this.orderCounts = orderCounts;
     }
   }
@@ -161,6 +181,35 @@ public class ShoppingController {
 
     private void addDeliveredCount() {
       deliveredCount = deliveredCount + 1;
+    }
+  }
+
+  @Data
+  public static class MemberCouponInfo {
+    private Long id;
+    private CouponInfo coupon;
+    private Date createdAt;
+
+    public MemberCouponInfo(MemberCoupon memberCoupon) {
+      BeanUtils.copyProperties(memberCoupon, this);
+      this.coupon = new CouponInfo(memberCoupon.getCoupon());
+    }
+  }
+
+  @Data
+  public static class CouponInfo {
+    private int category;
+    private String title;
+    private String description;
+    private String condition;
+    private int discountPrice;
+    private int discountRate;
+    private int conditionPrice;
+    private Date startedAt;
+    private Date endedAt;
+
+    public CouponInfo(Coupon coupon) {
+      BeanUtils.copyProperties(coupon, this);
     }
   }
 }
