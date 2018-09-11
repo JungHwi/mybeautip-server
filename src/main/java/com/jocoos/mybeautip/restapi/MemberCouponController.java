@@ -58,7 +58,7 @@ public class MemberCouponController {
   public static class MemberCouponInfo {
     private Long id;
     private CouponInfo coupon;
-    private Date modifiedAt;
+    private Date createdAt;
 
     public MemberCouponInfo(MemberCoupon memberCoupon) {
       BeanUtils.copyProperties(memberCoupon, this);
@@ -68,14 +68,14 @@ public class MemberCouponController {
 
   @Data
   public static class CouponInfo {
-    private Long id;
+    private int category;
     private String title;
     private String description;
     private String condition;
     private int discountPrice;
     private int discountRate;
     private int conditionPrice;
-    private Date statedAt;
+    private Date startedAt;
     private Date endedAt;
 
     public CouponInfo(Coupon coupon) {
