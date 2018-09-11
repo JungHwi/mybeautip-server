@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -25,6 +27,8 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.godo.GoodsDetailService;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -88,6 +92,25 @@ public class GoodsController {
     }
 
    return getVideos(goodsNo, count, cursor, httpServletRequest.getRequestURI());
+  }
+
+  @GetMapping("/{goods_no}/reviewers")
+  public GoodsRelatedVideoInfoResponse getReviewers(@PathVariable("goods_no") String goodsNo) {
+    GoodsRelatedVideoInfoResponse response = new GoodsRelatedVideoInfoResponse();
+    return goodsRepository.findByGoodsNo(goodsNo)
+      .map(goods -> {
+        Page<Member> page = videoGoodsRepository.getDistinctMembers(goods, PageRequest.of(0, 6));
+        if (page.hasContent()) {
+          List<MemberInfo> result = new ArrayList<>();
+          for (Member m : page.getContent()) {
+            result.add(memberService.getMemberInfo(m));
+          }
+          response.setMembers(result);
+          response.setTotalMemberCount(page.getTotalElements());
+        }
+        return response;
+      })
+      .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
   }
 
   @GetMapping("/{goodsNo}/details")
@@ -209,6 +232,17 @@ public class GoodsController {
         .withCursor(nextCursor).toBuild();
     } else {
       return new CursorResponse.Builder<>(requestUri, result).toBuild();
+    }
+  }
+
+  @Data
+  @AllArgsConstructor
+  class GoodsRelatedVideoInfoResponse {
+    Long totalMemberCount;
+    List<MemberInfo> members;
+
+    GoodsRelatedVideoInfoResponse() {
+      totalMemberCount = 0L;
     }
   }
 }
