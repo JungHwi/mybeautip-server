@@ -41,7 +41,7 @@ public class Member {
   private String email;
 
   @Column
-  private int coin;
+  private int point;
 
   @Column(length = 200)
   private String intro;
@@ -91,6 +91,6 @@ public class Member {
     this.username = params.get("username");
     this.email = params.get("email");
     this.avatarUrl = params.get("avatar_url");
-    this.coin = 0;
+    this.point = 0;
   }
 }
