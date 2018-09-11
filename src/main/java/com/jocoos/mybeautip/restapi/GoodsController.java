@@ -94,7 +94,7 @@ public class GoodsController {
    return getVideos(goodsNo, count, cursor, httpServletRequest.getRequestURI());
   }
 
-  @GetMapping("/{goods_no}/video-info")
+  @GetMapping("/{goods_no}/reviewers")
   public GoodsRelatedVideoInfoResponse getRelatedVideoInfo(@PathVariable("goods_no") String goodsNo) {
     GoodsRelatedVideoInfoResponse response = new GoodsRelatedVideoInfoResponse();
     return goodsRepository.findByGoodsNo(goodsNo)
