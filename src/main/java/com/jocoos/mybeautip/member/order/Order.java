@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -65,6 +66,11 @@ public class Order extends MemberAuditable {
 
   @Column
   private Long videoId;
+
+  @ManyToOne
+  @JoinColumn(name = "coupon_id")
+  private MemberCoupon memberCoupon;
+
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "orderId")
