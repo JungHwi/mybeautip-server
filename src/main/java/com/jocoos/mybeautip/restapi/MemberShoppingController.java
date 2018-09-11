@@ -6,14 +6,19 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,9 +32,11 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.coupon.Coupon;
 import com.jocoos.mybeautip.member.coupon.CouponService;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderRepository;
+import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.point.MemberPointRepository;
+import com.jocoos.mybeautip.member.point.PointService;
 
 @Slf4j
 @RestController
@@ -40,15 +47,21 @@ public class MemberShoppingController {
 
   private final MemberService memberService;
   private final CouponService couponService;
+  private final PointService pointService;
 
   private final OrderRepository orderRepository;
+  private final MemberPointRepository memberPointRepository;
 
   public MemberShoppingController(MemberService memberService,
                                   CouponService couponService,
-                                  OrderRepository orderRepository) {
+                                  PointService pointService,
+                                  OrderRepository orderRepository,
+                                  MemberPointRepository memberPointRepository) {
     this.memberService = memberService;
     this.couponService = couponService;
+    this.pointService = pointService;
     this.orderRepository = orderRepository;
+    this.memberPointRepository = memberPointRepository;
   }
 
   @GetMapping("/coupons")
@@ -66,7 +79,7 @@ public class MemberShoppingController {
   }
 
   @GetMapping("/shoppings")
-  private ResponseEntity<ShoppingInfo> getShopping() {
+  public ResponseEntity<ShoppingInfo> getShopping() {
     Member member = memberService.currentMember();
     if (member == null) {
       throw new MemberNotFoundException("Login required");
@@ -76,15 +89,51 @@ public class MemberShoppingController {
     Date weekAgo = getWeekAgo(now);
 
     int couponCount = couponService.countByCoupons(member);
+    int expectedPoint = pointService.getExpectedPoint(member);
+
+    PointInfo pointInfo = new PointInfo(member.getPoint(), expectedPoint);
+    log.debug("point into: {}", pointInfo);
 
     List<Order> orders = orderRepository.findByCreatedByIdAndCreatedAtBetween(member.getId(), weekAgo, now);
     if (CollectionUtils.isEmpty(orders)) {
-      return new ResponseEntity<>(new ShoppingInfo(member, couponCount), HttpStatus.OK);
+      return new ResponseEntity<>(new ShoppingInfo(member, couponCount, pointInfo), HttpStatus.OK);
     }
 
     OrderCountInfo countInfo = createOrderCountByStatus(orders);
     log.debug("count info: {}", countInfo);
-    return new ResponseEntity<>(new ShoppingInfo(member, couponCount, countInfo), HttpStatus.OK);
+    return new ResponseEntity<>(new ShoppingInfo(member, couponCount, pointInfo, countInfo), HttpStatus.OK);
+  }
+
+  @GetMapping("/points")
+  public CursorResponse getPoints(@RequestParam(defaultValue = "50") int count,
+                                                   @RequestParam(required = false) Long cursor) {
+    Member me = memberService.currentMember();
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+
+    Date createdAt = null;
+    if (cursor != null) {
+      createdAt = new Date(cursor);
+    } else {
+      createdAt = new Date();
+    }
+
+    Slice<MemberPoint> points = memberPointRepository.findByMemberAndCreatedAtBefore(me, createdAt, page);
+    List<PointDetailInfo> details = Lists.newArrayList();
+
+    if (points != null) {
+      points.stream().forEach(point -> {
+        details.add(new PointDetailInfo(point));
+      });
+    }
+
+    String nextCursor = null;
+    if (!CollectionUtils.isEmpty(details)) {
+      nextCursor = String.valueOf(details.get(details.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/members/me/points", details)
+       .withCount(count)
+       .withCursor(nextCursor).toBuild();
   }
 
   private OrderCountInfo createOrderCountByStatus(List<Order> orders) {
@@ -138,17 +187,17 @@ public class MemberShoppingController {
   public static class ShoppingInfo {
     private MemberInfo member;
     private int couponCount;
-    private int point;
+    private PointInfo point;
     private OrderCountInfo orderCounts;
 
-    public ShoppingInfo(Member member, int couponCount) {
+    public ShoppingInfo(Member member, int couponCount, PointInfo point) {
       this.member = new MemberInfo(member, null);
       this.couponCount = couponCount;
-      this.point = member.getPoint();
+      this.point = point;
     }
 
-    public ShoppingInfo(Member member, int couponCount, OrderCountInfo orderCounts) {
-      this(member, couponCount);
+    public ShoppingInfo(Member member, int couponCount, PointInfo point, OrderCountInfo orderCounts) {
+      this(member, couponCount, point);
       this.orderCounts = orderCounts;
     }
   }
@@ -210,6 +259,27 @@ public class MemberShoppingController {
 
     public CouponInfo(Coupon coupon) {
       BeanUtils.copyProperties(coupon, this);
+    }
+  }
+
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @Data
+  public static class PointInfo {
+    private int earnedPoint;
+    private int expectedPoints;
+  }
+
+  @NoArgsConstructor
+  @Data
+  public static class PointDetailInfo {
+    private Long id;
+    private int state;
+    private int point;
+    private Date createdAt;
+
+    public PointDetailInfo(MemberPoint memberPoint) {
+      BeanUtils.copyProperties(memberPoint, this);
     }
   }
 }
