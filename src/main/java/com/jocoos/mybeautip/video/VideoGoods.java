@@ -34,11 +34,11 @@ public class VideoGoods {
 
   @ManyToOne
   @JoinColumn(name = "member_id")
-  protected Member member;
+  private Member member;
 
   @Column
   @CreatedDate
-  protected Date createdAt;
+  private Date createdAt;
 
   public VideoGoods(Video video, Goods goods, Member member) {
     this.video = video;
