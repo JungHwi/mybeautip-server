@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
@@ -95,28 +95,22 @@ public class GoodsController {
   }
 
   @GetMapping("/{goods_no}/reviewers")
-  public GoodsRelatedVideoInfoResponse getRelatedVideoInfo(@PathVariable("goods_no") String goodsNo) {
+  public GoodsRelatedVideoInfoResponse getReviewers(@PathVariable("goods_no") String goodsNo) {
     GoodsRelatedVideoInfoResponse response = new GoodsRelatedVideoInfoResponse();
     return goodsRepository.findByGoodsNo(goodsNo)
       .map(goods -> {
-        List<Member> list = videoGoodsRepository.getDistinctMembers(goods);
-
-        if (list != null) {
+        Page<Member> page = videoGoodsRepository.getDistinctMembers(goods, PageRequest.of(0, 6));
+        if (page.hasContent()) {
           List<MemberInfo> result = new ArrayList<>();
-          if (list.size() >= 6) {
-            for (Member m : list.subList(0, 6)) {
-              result.add(memberService.getMemberInfo(m));
-            }
-          } else {
-            for (Member m : list) {
-              result.add(memberService.getMemberInfo(m));
-            }
+          for (Member m : page.getContent()) {
+            result.add(memberService.getMemberInfo(m));
           }
           response.setMembers(result);
-          response.setTotalMemberCount(list.size());
-        } else {
-          response.setTotalMemberCount(0);
+          response.setTotalMemberCount(page.getTotalElements());
         }
+//        } else {
+//          response.setTotalMemberCount(0L);
+//        }
         return response;
       })
       .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
@@ -246,9 +240,12 @@ public class GoodsController {
 
   @Data
   @AllArgsConstructor
-  @NoArgsConstructor
   class GoodsRelatedVideoInfoResponse {
-    Integer totalMemberCount;
+    Long totalMemberCount;
     List<MemberInfo> members;
+
+    GoodsRelatedVideoInfoResponse() {
+      totalMemberCount = 0L;
+    }
   }
 }

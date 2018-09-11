@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.video;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,5 +21,5 @@ public interface VideoGoodsRepository extends JpaRepository<VideoGoods, Long> {
   int countByGoodsGoodsNo(String goodsNo);
 
   @Query("select distinct v.member from VideoGoods v where v.member in (select v2.member from VideoGoods v2 where v2.goods=?1)")
-  List<Member> getDistinctMembers(Goods goods);
+  Page<Member> getDistinctMembers(Goods goods, Pageable pageable);
 }
