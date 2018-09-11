@@ -94,6 +94,9 @@ mybeautip:
     secret: Ge5fy5b7SXOyoqDTua9MQ6OyjiSpFkblyhA7mLefJ2O7tr1XBaKrhz0ARSZwcbRKssRPe64X9T5Ck6AW
   video:
     watch-duration: 10000
+  point:
+    earn-ratio: 1 # %
+    earn-after-days: 7
 
 cloud:
   aws:

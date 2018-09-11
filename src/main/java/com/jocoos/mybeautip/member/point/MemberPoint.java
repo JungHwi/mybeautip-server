@@ -42,4 +42,11 @@ public class MemberPoint extends CreatedDateAuditable {
 
   @Column
   private Date earnedAt;
+
+  public MemberPoint(Member member, int point) {
+    this.member = member;
+    this.point = point;
+    this.state = STATE_WILL_BE_EARNED;
+    this.earnedAt = new Date();
+  }
 }

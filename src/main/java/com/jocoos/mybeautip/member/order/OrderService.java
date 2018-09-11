@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -18,6 +17,7 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
+import com.jocoos.mybeautip.member.point.PointService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentResponse;
@@ -32,6 +32,7 @@ public class OrderService {
   private final PaymentRepository paymentRepository;
   private final OrderInquiryRepository orderInquiryRepository;
   private final MemberCouponRepository memberCouponRepository;
+  private final PointService pointService;
   private final IamportService iamportService;
 
   public OrderService(OrderRepository orderRepository,
@@ -39,12 +40,14 @@ public class OrderService {
                       PaymentRepository paymentRepository,
                       OrderInquiryRepository orderInquiryRepository,
                       MemberCouponRepository memberCouponRepository,
+                      PointService pointService,
                       IamportService iamportService) {
     this.orderRepository = orderRepository;
     this.deliveryRepository = deliveryRepository;
     this.paymentRepository = paymentRepository;
     this.orderInquiryRepository = orderInquiryRepository;
     this.memberCouponRepository = memberCouponRepository;
+    this.pointService = pointService;
     this.iamportService = iamportService;
   }
 
@@ -248,7 +251,10 @@ public class OrderService {
     order.setStatus(Order.PAID);
     orderRepository.save(order);
 
-    // TODO: Update Coin use ?
+    if (order.getMemberCoupon() == null) {
+      pointService.earnPoints(order.getCreatedBy(), order.getPrice());
+    }
+
     // TODO: Notify ?
     // TODO: Send email ?
     // TODO: Send To Slack Message?
