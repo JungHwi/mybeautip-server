@@ -1,0 +1,1 @@
+ALTER TABLE `video_goods` ADD COLUMN `member_id` BIGINT NOT NULL after `goods_no`;

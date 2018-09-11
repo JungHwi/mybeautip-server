@@ -16,7 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 
@@ -25,6 +27,8 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.godo.GoodsDetailService;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -88,6 +92,34 @@ public class GoodsController {
     }
 
    return getVideos(goodsNo, count, cursor, httpServletRequest.getRequestURI());
+  }
+
+  @GetMapping("/{goods_no}/video-info")
+  public GoodsRelatedVideoInfoResponse getRelatedVideoInfo(@PathVariable("goods_no") String goodsNo) {
+    GoodsRelatedVideoInfoResponse response = new GoodsRelatedVideoInfoResponse();
+    return goodsRepository.findByGoodsNo(goodsNo)
+      .map(goods -> {
+        List<Member> list = videoGoodsRepository.getDistinctMembers(goods);
+
+        if (list != null) {
+          List<MemberInfo> result = new ArrayList<>();
+          if (list.size() >= 6) {
+            for (Member m : list.subList(0, 6)) {
+              result.add(memberService.getMemberInfo(m));
+            }
+          } else {
+            for (Member m : list) {
+              result.add(memberService.getMemberInfo(m));
+            }
+          }
+          response.setMembers(result);
+          response.setTotalMemberCount(list.size());
+        } else {
+          response.setTotalMemberCount(0);
+        }
+        return response;
+      })
+      .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
   }
 
   @GetMapping("/{goodsNo}/details")
@@ -210,5 +242,13 @@ public class GoodsController {
     } else {
       return new CursorResponse.Builder<>(requestUri, result).toBuild();
     }
+  }
+
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  class GoodsRelatedVideoInfoResponse {
+    Integer totalMemberCount;
+    List<MemberInfo> members;
   }
 }

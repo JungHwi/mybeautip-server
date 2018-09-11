@@ -79,7 +79,7 @@ public class CallbackController {
           continue;
         }
         goodsRepository.findByGoodsNo(goods).map(g -> {
-          videoGoods.add(new VideoGoods(createdVideo, g));
+          videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
           return Optional.empty();
         });
       }
