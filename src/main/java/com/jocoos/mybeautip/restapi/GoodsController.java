@@ -108,9 +108,6 @@ public class GoodsController {
           response.setMembers(result);
           response.setTotalMemberCount(page.getTotalElements());
         }
-//        } else {
-//          response.setTotalMemberCount(0L);
-//        }
         return response;
       })
       .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
