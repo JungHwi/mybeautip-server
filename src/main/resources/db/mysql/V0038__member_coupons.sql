@@ -28,9 +28,13 @@ CREATE TABLE `member_coupons` (
   `coupon_id` BIGINT NOT NULL,
   `member_id` BIGINT NOT NULL,
   `created_at` DATETIME NOT NULL,
+  `used_at` DATETIME DEFAULT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_member_coupons_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`),
   CONSTRAINT `fk_member_coupons_member` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+ALTER TABLE `orders` ADD COLUMN `coupon_id` BIGINT DEFAULT NULL after `status`;
+ALTER TABLE `orders` ADD CONSTRAINT `fk_orders_member_coupons` FOREIGN KEY (`coupon_id`) REFERENCES `member_coupons` (`id`);
 

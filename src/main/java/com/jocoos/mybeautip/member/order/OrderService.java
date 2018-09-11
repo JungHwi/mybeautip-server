@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -15,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentResponse;
@@ -28,17 +31,20 @@ public class OrderService {
   private final DeliveryRepository deliveryRepository;
   private final PaymentRepository paymentRepository;
   private final OrderInquiryRepository orderInquiryRepository;
+  private final MemberCouponRepository memberCouponRepository;
   private final IamportService iamportService;
 
   public OrderService(OrderRepository orderRepository,
                       DeliveryRepository deliveryRepository,
                       PaymentRepository paymentRepository,
                       OrderInquiryRepository orderInquiryRepository,
+                      MemberCouponRepository memberCouponRepository,
                       IamportService iamportService) {
     this.orderRepository = orderRepository;
     this.deliveryRepository = deliveryRepository;
     this.paymentRepository = paymentRepository;
     this.orderInquiryRepository = orderInquiryRepository;
+    this.memberCouponRepository = memberCouponRepository;
     this.iamportService = iamportService;
   }
 
@@ -48,6 +54,13 @@ public class OrderService {
     BeanUtils.copyProperties(request, order);
     order.setGoodsCount(Optional.of(request.getPurchases()).map(List::size).orElse(0));
     order.setNumber(orderNumber());
+
+    if (request.getCouponId() != null) {
+      MemberCoupon memberCoupon = memberCouponRepository.findById(request.getCouponId()).orElseThrow(() -> new BadRequestException("coupon_not_found", "invalid member coupon id"));
+      order.setMemberCoupon(memberCoupon);
+      memberCoupon.setUsedAt(new Date());
+      memberCouponRepository.save(memberCoupon);
+  }
 
     // remove PurchaseRequest
     order.setPurchases(null);

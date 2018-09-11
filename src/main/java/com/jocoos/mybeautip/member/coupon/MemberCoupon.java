@@ -2,6 +2,10 @@ package com.jocoos.mybeautip.member.coupon;
 
 import javax.persistence.*;
 
+import java.util.Date;
+
+import org.springframework.data.annotation.LastModifiedDate;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -29,4 +33,7 @@ public class MemberCoupon extends CreatedDateAuditable {
   @ManyToOne
   @JoinColumn(name = "member_id")
   private Member member;
+
+  @Column
+  private Date usedAt;
 }

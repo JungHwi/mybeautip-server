@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.coupon.Coupon;
+import com.jocoos.mybeautip.member.coupon.CouponService;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 
@@ -28,21 +29,21 @@ import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 public class MemberCouponController {
 
   private final MemberService memberService;
+  private final CouponService couponService;
   private final MemberCouponRepository memberCouponRepository;
 
   public MemberCouponController(MemberService memberService,
+                                CouponService couponService,
                                 MemberCouponRepository memberCouponRepository) {
     this.memberService = memberService;
+    this.couponService = couponService;
     this.memberCouponRepository = memberCouponRepository;
   }
 
   @GetMapping
   public ResponseEntity<List<MemberCouponInfo>> getCoupons() {
     List<MemberCouponInfo> coupons = Lists.newArrayList();
-    Member member = memberService.currentMember();
-    Date now = new Date();
-    List<MemberCoupon> memberCoupons =
-       memberCouponRepository.findByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfter(member, now, now);
+    List<MemberCoupon> memberCoupons = couponService.findMemberCouponsByMember(memberService.currentMember());
     log.debug("coupons: {}", memberCoupons);
 
     if (!CollectionUtils.isEmpty(memberCoupons)) {

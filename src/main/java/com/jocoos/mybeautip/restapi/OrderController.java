@@ -13,20 +13,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.NumberUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.order.*;
 
 @Slf4j
@@ -40,19 +39,22 @@ public class OrderController {
   private final PaymentRepository paymentRepository;
   private final DeliveryRepository deliveryRepository;
   private final OrderInquiryRepository orderInquiryRepository;
+  private final MemberCouponRepository memberCouponRepository;
 
   public OrderController(MemberService memberService,
                          OrderService orderService,
                          OrderRepository orderRepository,
                          PaymentRepository paymentRepository,
                          DeliveryRepository deliveryRepository,
-                         OrderInquiryRepository orderInquiryRepository) {
+                         OrderInquiryRepository orderInquiryRepository,
+                         MemberCouponRepository memberCouponRepository) {
     this.memberService = memberService;
     this.orderService = orderService;
     this.orderRepository = orderRepository;
     this.paymentRepository = paymentRepository;
     this.deliveryRepository = deliveryRepository;
     this.orderInquiryRepository = orderInquiryRepository;
+    this.memberCouponRepository = memberCouponRepository;
   }
 
   @PostMapping("/orders")
@@ -218,6 +220,7 @@ public class OrderController {
     @NotNull
     private String method;
     private Long videoId;
+    private Long couponId;
     @NotNull
     private CreateDeliveryRequest delivery;
     @NotNull
