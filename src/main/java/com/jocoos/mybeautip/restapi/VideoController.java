@@ -497,7 +497,7 @@ public class VideoController {
    * Views
    */
   @Transactional
-  @PostMapping("/{id:.+}/views")
+  @PostMapping("/{id:.+}/view_count")
   public ResponseEntity<VideoInfo> addView(@PathVariable Long id) {
     Member me = memberService.currentMember();
 
