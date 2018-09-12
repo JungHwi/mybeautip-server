@@ -288,7 +288,7 @@ public class MemberController {
 
     Slice<Video> list = videoService.findMyVideos(memberService.currentMember(), type, state, cursor, count);
     List<VideoController.VideoInfo> videos = Lists.newArrayList();
-    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+    list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
     if (videos.size() > 0) {
@@ -313,7 +313,7 @@ public class MemberController {
 
     Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
     List<VideoController.VideoInfo> videos = Lists.newArrayList();
-    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+    list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
     if (videos.size() > 0) {

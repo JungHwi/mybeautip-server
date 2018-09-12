@@ -45,12 +45,6 @@ public class VideoService {
     this.videoWatchRepository = videoWatchRepository;
   }
 
-  public VideoController.VideoInfo getVideoInfo(Video video) {
-    Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), video.getMember().getId());
-    Long likeId = optional.map(VideoLike::getId).orElse(null);
-    return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId);
-  }
-
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));

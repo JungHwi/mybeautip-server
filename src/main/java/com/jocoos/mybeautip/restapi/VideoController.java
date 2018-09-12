@@ -99,7 +99,7 @@ public class VideoController {
                                   @RequestParam(required = false) String state) {
     Slice<Video> list = videoService.findVideos(type, state, cursor, count);
     List<VideoInfo> videos = Lists.newArrayList();
-    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+    list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
     if (videos.size() > 0) {
@@ -119,7 +119,7 @@ public class VideoController {
                                   @RequestParam String keyword) {
     Slice<Video> list = videoService.findVideosWithKeyword(keyword, cursor, count);
     List<VideoInfo> videos = Lists.newArrayList();
-    list.stream().forEach(v -> videos.add(videoService.getVideoInfo(v)));
+    list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
     if (videos.size() > 0) {
