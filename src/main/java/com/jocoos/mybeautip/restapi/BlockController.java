@@ -23,6 +23,7 @@ import org.apache.logging.log4j.util.Strings;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
@@ -61,13 +62,16 @@ public class BlockController {
       throw new BadRequestException("Can't block myself");
     }
     log.debug("Block " + me + " : " + you);
-    
+
+    Member member = memberRepository.findById(you)
+      .orElseThrow(() -> new MemberNotFoundException(you));
+
     Optional<Block> optional = blockRepository.findByMeAndMemberYouId(me, you);
 
     if (optional.isPresent()) {
       return new BlockResponse(optional.get().getId());
     } else {
-      Block block = blockRepository.save(new Block(me, memberRepository.getOne(you)));
+      Block block = blockRepository.save(new Block(me, member));
       return new BlockResponse(block.getId());
     }
   }
