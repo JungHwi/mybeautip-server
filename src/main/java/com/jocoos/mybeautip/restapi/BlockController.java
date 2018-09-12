@@ -55,7 +55,10 @@ public class BlockController {
       throw new BadRequestException("invalid blocks request");
     }
 
-    long me = memberService.currentMemberId();
+    Long me = memberService.currentMemberId();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
     long you = blockMemberRequest.getMemberId();
     
     if (me == you) {

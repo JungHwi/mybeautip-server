@@ -56,7 +56,10 @@ public class FollowingController {
       throw new BadRequestException("invalid followings request");
     }
 
-    long me = memberService.currentMemberId();
+    Long me = memberService.currentMemberId();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
     long you = followingMemberRequest.getMemberId();
     
     if (me == you) {
