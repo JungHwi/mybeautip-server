@@ -55,7 +55,7 @@ public class VideoService {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
 
-    return videoRepository.findByTitleContainingOrContentContainingAndCreatedAtBeforeAndDeletedAtIsNull(keyword, keyword, startCursor, page);
+    return videoRepository.searchVideos(keyword, startCursor, page);
   }
 
 

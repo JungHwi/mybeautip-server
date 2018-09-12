@@ -8,6 +8,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import com.jocoos.mybeautip.member.Member;
 
@@ -70,7 +71,10 @@ public interface VideoRepository extends CrudRepository<Video, Long> {
   @Query("select v from Video v where v.member = ?1 and v.visibility = 'PUBLIC' and v.state = 'VOD' and v.createdAt < ?2 and v.deletedAt is null order by v.createdAt desc")
   Slice<Video> getUserVodAndMotdVideos(Member member, Date cursor, Pageable pageable);
 
-  Slice<Video> findByTitleContainingOrContentContainingAndCreatedAtBeforeAndDeletedAtIsNull(String title, String content, Date createdAt, Pageable pageable);
+  @Query("select v from Video v where v.visibility = 'PUBLIC' and v.deletedAt is null " +
+    "and (v.title like concat('%',:keyword,'%') or v.content like concat('%',:keyword,'%')) " +
+    "and v.createdAt < :cursor order by v.createdAt desc")
+  Slice<Video> searchVideos(@Param("keyword") String keyword, @Param("cursor") Date cursor, Pageable pageable);
 
   Optional<Video> findByIdAndDeletedAtIsNull(Long id);
 
