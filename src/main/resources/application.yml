@@ -98,6 +98,8 @@ mybeautip:
     minimum: 1000
     earn-ratio: 1 # %
     earn-after-days: 7
+    scheduler-prefix: member-gift-task-pool-
+    scheduler-pool-size: 10
 
 cloud:
   aws:

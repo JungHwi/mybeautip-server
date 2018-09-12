@@ -14,4 +14,8 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
   Slice<MemberPoint> findByMemberAndCreatedAtBefore(Member member, Date createdAt, Pageable page);
 
   List<MemberPoint> findByMemberAndState(Member member, int state);
+
+  List<MemberPoint> findByStateAndCreatedAtBeforeAndEarnedAtIsNull(int state, Date createdAt);
+
+  List<MemberPoint> findByStateAndEarnedAtBeforeAndExpiredAtIsNull(int state, Date earnedAt);
 }

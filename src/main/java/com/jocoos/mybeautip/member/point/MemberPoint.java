@@ -41,14 +41,20 @@ public class MemberPoint extends CreatedDateAuditable {
   @Column
   private Date earnedAt;
 
+  @Column
+  private Date expiredAt;
+
   public MemberPoint(Member member, int point) {
     this(member, point, STATE_WILL_BE_EARNED);
-    this.earnedAt = new Date();
   }
 
   public MemberPoint(Member member, int point, int state) {
     this.member = member;
     this.point = point;
     this.state = state;
+  }
+
+  public void setCreatedAt(Date date) {
+    super.createdAt = date;
   }
 }

@@ -133,14 +133,14 @@ public class OrderService {
             return getErrorHtml(id, message);
           }
 
-//          Payment payment = checkPaymentAndUpdate(order.getId(), uid);
-//          if ((payment.getState() & Payment.STATE_PAID) != 0) {
+          Payment payment = checkPaymentAndUpdate(order.getId(), uid);
+          if ((payment.getState() & Payment.STATE_PAID) != 0) {
             if (Order.PAID != order.getStatus()) {
               completeOrder(order);
             }
-//          } else {
-//            return getErrorHtml(id, message);
-//          }
+          } else {
+            return getErrorHtml(id, message);
+          }
           return getSuccessHtml(id);
        }).orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
   }
