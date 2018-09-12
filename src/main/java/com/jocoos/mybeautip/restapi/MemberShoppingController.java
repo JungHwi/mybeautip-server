@@ -277,6 +277,8 @@ public class MemberShoppingController {
     private int state;
     private int point;
     private Date createdAt;
+    private Date earnedAt;
+    private Date expiredAt;
 
     public PointDetailInfo(MemberPoint memberPoint) {
       BeanUtils.copyProperties(memberPoint, this);
