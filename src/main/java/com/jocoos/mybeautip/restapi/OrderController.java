@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
@@ -65,7 +66,8 @@ public class OrderController {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
-    Order order = orderService.create(request);
+    Member member = memberService.currentMember();
+    Order order = orderService.create(request, member);
     log.debug("order: {}", order);
 
     return new ResponseEntity<>(new OrderInfo(order), HttpStatus.OK);

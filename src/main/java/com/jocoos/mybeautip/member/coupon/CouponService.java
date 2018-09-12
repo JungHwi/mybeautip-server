@@ -20,4 +20,9 @@ public class CouponService {
     Date now = new Date();
     return memberCouponRepository.findByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfterAndUsedAtIsNull(member, now, now);
   }
+
+  public int countByCoupons(Member member) {
+    Date now = new Date();
+    return memberCouponRepository.countByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfterAndUsedAtIsNull(member, now, now);
+  }
 }

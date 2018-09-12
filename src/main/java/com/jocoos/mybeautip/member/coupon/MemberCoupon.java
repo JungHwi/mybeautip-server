@@ -25,7 +25,6 @@ public class MemberCoupon extends CreatedDateAuditable {
   @JoinColumn(name = "coupon_id")
   private Coupon coupon;
 
-
   @ManyToOne
   @JoinColumn(name = "member_id")
   private Member member;

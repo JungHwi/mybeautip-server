@@ -94,6 +94,12 @@ mybeautip:
     secret: Ge5fy5b7SXOyoqDTua9MQ6OyjiSpFkblyhA7mLefJ2O7tr1XBaKrhz0ARSZwcbRKssRPe64X9T5Ck6AW
   video:
     watch-duration: 10000
+  point:
+    minimum: 1000
+    earn-ratio: 1 # %
+    earn-after-days: 7
+    scheduler-prefix: member-gift-task-pool-
+    scheduler-pool-size: 10
 
 cloud:
   aws:

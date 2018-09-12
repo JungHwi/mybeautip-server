@@ -8,16 +8,20 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.parameters.P;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
+import com.jocoos.mybeautip.member.point.PointService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentResponse;
@@ -26,41 +30,64 @@ import com.jocoos.mybeautip.support.payment.PaymentResponse;
 @Service
 public class OrderService {
 
+  @Value("${mybeautip.point.minimum}")
+  private int minimumPoint;
+
   private final SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmssSSS");
   private final OrderRepository orderRepository;
+  private final MemberRepository memberRepository;
   private final DeliveryRepository deliveryRepository;
   private final PaymentRepository paymentRepository;
   private final OrderInquiryRepository orderInquiryRepository;
   private final MemberCouponRepository memberCouponRepository;
+  private final PointService pointService;
   private final IamportService iamportService;
 
   public OrderService(OrderRepository orderRepository,
+                      MemberRepository memberRepository,
                       DeliveryRepository deliveryRepository,
                       PaymentRepository paymentRepository,
                       OrderInquiryRepository orderInquiryRepository,
                       MemberCouponRepository memberCouponRepository,
+                      PointService pointService,
                       IamportService iamportService) {
     this.orderRepository = orderRepository;
+    this.memberRepository = memberRepository;
     this.deliveryRepository = deliveryRepository;
     this.paymentRepository = paymentRepository;
     this.orderInquiryRepository = orderInquiryRepository;
     this.memberCouponRepository = memberCouponRepository;
+    this.pointService = pointService;
     this.iamportService = iamportService;
   }
 
   @Transactional
-  public Order create(OrderController.CreateOrderRequest request) {
+  public Order create(OrderController.CreateOrderRequest request, Member member) {
+    if (member == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
     Order order = new Order();
     BeanUtils.copyProperties(request, order);
     order.setGoodsCount(Optional.of(request.getPurchases()).map(List::size).orElse(0));
     order.setNumber(orderNumber());
+
+    if (request.getPoint() > 0) {
+      if (request.getPoint() < minimumPoint) {
+        throw new BadRequestException("invalid_point", "minimum point - " + minimumPoint);
+      }
+
+      if (member.getPoint() < request.getPoint()) {
+        throw new BadRequestException("invalid_point", "member point not enough");
+      }
+    }
 
     if (request.getCouponId() != null) {
       MemberCoupon memberCoupon = memberCouponRepository.findById(request.getCouponId()).orElseThrow(() -> new BadRequestException("coupon_not_found", "invalid member coupon id"));
       order.setMemberCoupon(memberCoupon);
       memberCoupon.setUsedAt(new Date());
       memberCouponRepository.save(memberCoupon);
-  }
+    }
 
     // remove PurchaseRequest
     order.setPurchases(null);
@@ -248,7 +275,18 @@ public class OrderService {
     order.setStatus(Order.PAID);
     orderRepository.save(order);
 
-    // TODO: Update Coin use ?
+    if (order.getPoint() >= minimumPoint) {
+      Member member = order.getCreatedBy();
+      member.setPoint(member.getPoint() - order.getPoint());
+      memberRepository.save(member);
+
+      pointService.usePoints(member, order.getPoint());
+    }
+
+    if (order.getMemberCoupon() == null) {
+      pointService.earnPoints(order.getCreatedBy(), order.getPrice());
+    }
+
     // TODO: Notify ?
     // TODO: Send email ?
     // TODO: Send To Slack Message?

@@ -10,4 +10,8 @@ import com.jocoos.mybeautip.member.Member;
 public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long> {
 
   List<MemberCoupon> findByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfterAndUsedAtIsNull(Member member, Date statedAt, Date endedAt);
+
+  int countByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfterAndUsedAtIsNull(Member member, Date statedAt, Date endedAt);
+
+  List<MemberCoupon> findByUsedAtIsNullAndCouponEndedAtBefore(Date date);
 }
