@@ -94,7 +94,7 @@ public class DeviceController {
       BeanUtils.copyProperties(device, this);
       this.deviceId = device.getId();
       this.deviceOs = device.getOs();
-      this.deviceOsVersion = device.getOs();
+      this.deviceOsVersion = device.getOsVersion();
       this.deviceName = device.getName();
       this.deviceLanguage = device.getLanguage();
       this.deviceTimezone = device.getTimezone();

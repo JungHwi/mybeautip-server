@@ -45,7 +45,7 @@ public class NoticeController {
   @AllArgsConstructor
   @Data
   public static class NoticeInfo {
-    private String key;
+    private String type;
     private String message;
   }
 
