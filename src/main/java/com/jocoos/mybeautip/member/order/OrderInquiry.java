@@ -25,12 +25,16 @@ public class OrderInquiry extends MemberAuditable {
   public static Byte STATE_REQUEST_RETURN = 2;
 
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @MapsId
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id")
+  @OneToOne
+  @JoinColumn(name = "order_id")
   private Order order;
+
+  @OneToOne
+  @JoinColumn(name = "purchase_id")
+  private Purchase purchase;
 
   @Column(nullable = false)
   private Byte state;
@@ -51,5 +55,10 @@ public class OrderInquiry extends MemberAuditable {
     this.order = order;
     this.state = state;
     this.reason = reason;
+  }
+
+  public OrderInquiry(Order order, Byte state, String reason, Purchase purchase) {
+    this(order, state, reason);
+    this.purchase = purchase;
   }
 }

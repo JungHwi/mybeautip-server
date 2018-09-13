@@ -7,7 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.jocoos.mybeautip.member.Member;
+
 public interface OrderInquiryRepository extends JpaRepository<OrderInquiry, Long> {
+
+  Optional<OrderInquiry> findByOrderAndCreatedBy(Order order, Member member);
 
   Optional<OrderInquiry> findByIdAndCreatedById(Long id, Long createdBy);
 

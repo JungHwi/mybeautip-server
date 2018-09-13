@@ -19,6 +19,9 @@ import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 @Table(name = "orders")
 public class Order extends MemberAuditable {
 
+  /**
+   * Sharing status value with Purchase status
+   */
   public static final String ORDER = "ordered";
   public static final String PAID = "paid";
   public static final String PREPARING = "preparing";
@@ -85,5 +88,13 @@ public class Order extends MemberAuditable {
 
   public Order() {
     status = ORDER;
+  }
+
+  public void setPurchaseStatus(Long purchaseId, String status) {
+    getPurchases().stream().forEach(p -> {
+      if (purchaseId.equals(p.getId())) {
+        p.setStatus(status);
+      }
+    });
   }
 }
