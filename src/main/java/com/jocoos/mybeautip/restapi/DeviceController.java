@@ -3,9 +3,8 @@ package com.jocoos.mybeautip.restapi;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.List;
-import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.devices.Device;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.devices.NoticeService;
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -40,7 +37,7 @@ public class DeviceController {
   }
 
   @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<NoticeResponse> register(@Valid @RequestBody DeviceController.DeviceInfo request,
+  public ResponseEntity<DeviceInfo> register(@Valid @RequestBody DeviceController.UpdateDeviceRequest request,
                                                  BindingResult bindingResult) {
 
     if (bindingResult.hasErrors()) {
@@ -48,17 +45,14 @@ public class DeviceController {
     }
 
     log.debug("request: {}", request);
-    deviceService.saveOrUpdate(request);
+    Device device = deviceService.saveOrUpdate(request);
+    log.debug("saved device: {}", device);
 
-    List<NoticeInfo> noticeInfos = noticeService.findByOs(request.getDeviceOs(), request.getAppVersion())
-       .stream().map(input -> new NoticeInfo(input.getType(), input.getMessage()))
-       .collect(Collectors.toList());
-
-    return new ResponseEntity<>(new NoticeResponse(noticeInfos), HttpStatus.OK);
+    return new ResponseEntity<>(new DeviceInfo(device), HttpStatus.OK);
   }
 
   @Data
-  public static class DeviceInfo {
+  public static class UpdateDeviceRequest {
 
     @NotNull @Size(max = 500)
     private String deviceId;
@@ -85,19 +79,25 @@ public class DeviceController {
   }
 
   @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class NoticeResponse {
-    private List<NoticeInfo> notices = Lists.newArrayList();
+  public static class DeviceInfo {
 
-    public void add(String type, String message) {
-      notices.add(new NoticeInfo(type, message));
+    private String deviceId;
+    private String deviceOs;
+    private String deviceOsVersion;
+    private String deviceName;
+    private String deviceLanguage;
+    private String appVersion;
+    private String deviceTimezone;
+    private boolean pushable;
+
+    public DeviceInfo(Device device) {
+      BeanUtils.copyProperties(device, this);
+      this.deviceId = device.getId();
+      this.deviceOs = device.getOs();
+      this.deviceOsVersion = device.getOs();
+      this.deviceName = device.getName();
+      this.deviceLanguage = device.getLanguage();
+      this.deviceTimezone = device.getTimezone();
     }
-  }
-
-  @AllArgsConstructor
-  public static class NoticeInfo {
-    private String key;
-    private String message;
   }
 }

@@ -16,7 +16,6 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
@@ -54,7 +53,7 @@ public class DeviceService {
   }
 
   @Transactional
-  public Device saveOrUpdate(DeviceController.DeviceInfo info) {
+  public Device saveOrUpdate(DeviceController.UpdateDeviceRequest info) {
     return deviceRepository.findById(info.getDeviceId())
        .map(device -> {
          copyDevice(info, device);
@@ -67,7 +66,7 @@ public class DeviceService {
        .orElseGet(() -> deviceRepository.save(register(info)));
   }
 
-  public Device register(DeviceController.DeviceInfo info) {
+  public Device register(DeviceController.UpdateDeviceRequest info) {
     Device device = new Device(info.getDeviceId());
     copyDevice(info, device);
     device.setArn(createARN(info.getDeviceId(), info.getDeviceOs()));
@@ -182,7 +181,7 @@ public class DeviceService {
         throw new IllegalArgumentException("Not supported os type - " + os);
     }
   }
-  private Device copyDevice(DeviceController.DeviceInfo request, Device device) {
+  private Device copyDevice(DeviceController.UpdateDeviceRequest request, Device device) {
     if (device == null) {
       throw new NotFoundException("device not found", "Device is null or not found");
     }
