@@ -16,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,6 +41,8 @@ public class GodoService {
   private final StoreRepository storeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
+  private final DeliveryChargeRepository deliveryChargeRepository;
+  private final ObjectMapper mapper;
 
   @Value("${godomall.base-url}")
   private String baseUrl;
@@ -77,7 +80,9 @@ public class GodoService {
                      GoodsOptionRepository goodsOptionRepository,
                      StoreRepository storeRepository,
                      GoodsLikeRepository goodsLikeRepository,
-                     GoodsRecommendationRepository goodsRecommendationRepository) {
+                     GoodsRecommendationRepository goodsRecommendationRepository,
+                     DeliveryChargeRepository deliveryChargeRepository,
+                     ObjectMapper mapper) {
     this.restTemplate = restTemplate;
     this.categoryRepository = categoryRepository;
     this.goodsRepository = goodsRepository;
@@ -85,6 +90,15 @@ public class GodoService {
     this.storeRepository = storeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
+    this.deliveryChargeRepository = deliveryChargeRepository;
+    this.mapper = mapper;
+  }
+
+  @Scheduled(initialDelay = 5000, fixedRate = 86400000) // 5 sec, 1 day
+  public void gatheringDeliveryInfoFromGodomall() throws IOException {
+    log.debug("GatheringDeliveryFromGodomall task started...");
+    getDeliveryInfoFromGodo();
+    log.debug("GatheringDeliveryFromGodomall task ended");
   }
 
   @Scheduled(initialDelay = 30000, fixedRate = 86400000)  // 30 sec, 1 day
@@ -241,7 +255,6 @@ public class GodoService {
         }
 
         List<MustInfo> list = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
         for (GodoGoodsResponse.GoodsMustInfoData mustInfo : goodsData.getGoodsMustInfoData()) {
           list.add(new MustInfo(mustInfo.getStepData().getInfoTitle(), mustInfo.getStepData().getInfoValue()));
         }
@@ -317,6 +330,60 @@ public class GodoService {
             (System.currentTimeMillis() - start), newCount, updatedCount));
   }
 
+  /**
+   * Retrieve All delivery data using GodoMall Open API
+   */
+  private synchronized void getDeliveryInfoFromGodo() throws JsonProcessingException {
+    long start = System.currentTimeMillis();
+    int newCount = 0;
+    int updatedCount = 0;
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+
+    String requestUrl = baseUrl + commonCodeUrl + "partner_key=" + partnerKey + "&key=" + key;
+
+    MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+    body.add("code_type", "delivery");
+
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+    ResponseEntity<GodoDeliveryResponse> response = restTemplate.exchange(
+      requestUrl, HttpMethod.POST, request, GodoDeliveryResponse.class);
+
+    if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
+      List<GodoDeliveryResponse.CodeData> dataList = response.getBody().getBody();
+
+      for (GodoDeliveryResponse.CodeData deliverydata : dataList) {
+        Optional<DeliveryCharge> optional = deliveryChargeRepository.findById(deliverydata.getSno());
+        DeliveryCharge deliveryCharge;
+        if (optional.isPresent()) {
+          deliveryCharge = optional.get();
+          updatedCount++;
+        } else {
+          deliveryCharge = new DeliveryCharge(deliverydata.getSno());
+          newCount++;
+        }
+        BeanUtils.copyProperties(deliverydata, deliveryCharge);
+
+        if (deliverydata.getChargeData() != null) {
+          List<ChargeData> list = new ArrayList<>();
+          for (GodoDeliveryResponse.ChargeData chargeData : deliverydata.getChargeData()) {
+            list.add(new ChargeData(chargeData));
+          }
+          deliveryCharge.setChargeData(mapper.writeValueAsString(list));
+        }
+
+        deliveryChargeRepository.save(deliveryCharge);
+      }
+    }
+
+    log.debug(String.format("GatheringDeliveryFromGodomall elapsed: %d miliseconds, " +
+        "new delivery items: %d, updated delivery items: %d",
+      (System.currentTimeMillis() - start), newCount, updatedCount));
+  }
+
   private String generateCategoryStr(String src) {
     String result = "";
     String[] strArray = StringUtils.split(src, "|");
@@ -343,5 +410,19 @@ public class GodoService {
   public static class MustInfo {
     String key;
     String value;
+  }
+
+  @Data
+  @NoArgsConstructor
+  public static class ChargeData {
+    private Integer unitStart;
+    private Integer unitEnd;
+    private Integer price;
+
+    public ChargeData(GodoDeliveryResponse.ChargeData data) {
+      this.unitStart = data.getUnitStart().intValue();
+      this.unitEnd = data.getUnitEnd().intValue();
+      this.price = data.getPrice().intValue();
+    }
   }
 }
