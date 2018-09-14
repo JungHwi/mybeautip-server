@@ -26,6 +26,12 @@ public class Purchase extends CreatedDateAuditable {
   @Column(nullable = false)
   private String goodsNo;
 
+  /**
+   * @see Order#status
+   */
+  @Column(nullable = false)
+  private String status;
+
   @Column(nullable = false)
   private int goodsPrice;
 
@@ -50,7 +56,8 @@ public class Purchase extends CreatedDateAuditable {
   @Column
   private Date deletedAt;
 
-  public Purchase(Long orderId) {
+  public Purchase(Long orderId, String status) {
     this.orderId = orderId;
+    this.status = status;
   }
 }

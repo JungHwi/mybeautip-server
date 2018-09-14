@@ -47,6 +47,7 @@ public class OrderService {
                       MemberRepository memberRepository,
                       DeliveryRepository deliveryRepository,
                       PaymentRepository paymentRepository,
+                      PurchaseRepository purchaseRepository,
                       OrderInquiryRepository orderInquiryRepository,
                       MemberCouponRepository memberCouponRepository,
                       PointService pointService,
@@ -112,7 +113,7 @@ public class OrderService {
 
     List<Purchase> purchases = Lists.newArrayList();
     request.getPurchases().forEach(p -> {
-      Purchase purchase = new Purchase(order.getId());
+      Purchase purchase = new Purchase(order.getId(), Order.ORDER);
       BeanUtils.copyProperties(p, purchase);
       purchases.add(purchase);
     });
@@ -146,23 +147,24 @@ public class OrderService {
   }
 
   @Transactional
-  public OrderInquiry inquireOrder(Order order, Byte state, String reason) {
+  public OrderInquiry inquireOrder(Order order, Byte state, String reason, Purchase purchase) {
     if (Order.ORDER_CANCELLED.equals(order.getStatus()) || Order.ORDER_CANCELLING.equals(order.getStatus())) {
       throw new BadRequestException("order_cancel_duplicated", "Already requested order canceling");
     }
 
+    String status = null;
     switch (state) {
       case 0: {
         if (Order.PAID.equals(order.getStatus()) || Order.PREPARING.equals(order.getStatus())) {
-          order.setStatus(Order.ORDER_CANCELLING);
+          status = Order.ORDER_CANCELLING;
         } else {
-          throw new BadRequestException("Can not cancel payment -" + order.getStatus());
+          throw new BadRequestException("Can not cancel payment - " + order.getStatus());
         }
         break;
       }
       case 1: {
         if (Order.DELIVERED.equals(order.getStatus()) || Order.DELIVERING.equals(order.getStatus())) {
-          order.setStatus(Order.ORDER_EXCHANGING);
+          status = Order.ORDER_EXCHANGING;
         } else {
           throw new BadRequestException("invalid order exchange inquire - " + order.getStatus());
         }
@@ -170,7 +172,7 @@ public class OrderService {
       }
       case 2: {
         if (Order.DELIVERED.equals(order.getStatus()) || Order.DELIVERING.equals(order.getStatus())) {
-          order.setStatus(Order.ORDER_RETURNING);
+          status = Order.ORDER_RETURNING;
         } else {
           throw new BadRequestException("invalid order return inquire - " + order.getStatus());
         }
@@ -181,10 +183,21 @@ public class OrderService {
       }
     }
 
+    order.setStatus(status);
+
     // TODO: send message order cancel message to slack?
 
+
+    OrderInquiry orderInquiry = null;
+    if (purchase != null) {
+      order.setPurchaseStatus(purchase.getId(), status);
+      orderInquiry = orderInquiryRepository.save(new OrderInquiry(order, state, reason, purchase));
+    } else {
+      orderInquiry = orderInquiryRepository.save(new OrderInquiry(order, state, reason));
+    }
+
     orderRepository.save(order);
-    return orderInquiryRepository.save(new OrderInquiry(order, state, reason));
+    return orderInquiry;
   }
 
   @Transactional
@@ -193,18 +206,18 @@ public class OrderService {
       throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
     }
 
-    String token = iamportService.getToken();
-
     Payment payment = paymentRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
+
+    String token = iamportService.getToken();
     iamportService.cancelPayment(token, payment.getPaymentId());
 
-    order.setStatus(Order.ORDER_CANCELLED);
-    orderRepository.save(order);
+    log.debug("cancel order: {}", order);
+    saveOrderAndPurchasesStatus(order, Order.ORDER_CANCELLED);
 
     payment.setState(Payment.STATE_CANCELLED);
     paymentRepository.save(payment);
 
-    OrderInquiry orderInquiry = orderInquiryRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("inquire_not_found", "invalid inquire id"));
+    OrderInquiry orderInquiry = orderInquiryRepository.findByOrderAndCreatedBy(order, order.getCreatedBy()).orElseThrow(() -> new NotFoundException("inquire_not_found", "invalid inquire id"));
     orderInquiry.setCompleted(true);
     orderInquiryRepository.save(orderInquiry);
   }
@@ -240,6 +253,15 @@ public class OrderService {
     .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid order id or payment id"));
   }
 
+  private void saveOrderAndPurchasesStatus(Order order, String status) {
+    order.setStatus(status);
+    order.getPurchases().stream().forEach(p -> {
+      p.setStatus(status);
+    });
+
+    orderRepository.save(order);
+  }
+
   private int stateValue(String state) {
     switch (state) {
       case "paid": {
@@ -272,8 +294,7 @@ public class OrderService {
 
   @Transactional
   private void completeOrder(Order order) {
-    order.setStatus(Order.PAID);
-    orderRepository.save(order);
+    saveOrderAndPurchasesStatus(order, Order.PAID);
 
     if (order.getPoint() >= minimumPoint) {
       Member member = order.getCreatedBy();

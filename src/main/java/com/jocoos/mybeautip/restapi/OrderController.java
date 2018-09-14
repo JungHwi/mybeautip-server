@@ -40,22 +40,19 @@ public class OrderController {
   private final PaymentRepository paymentRepository;
   private final DeliveryRepository deliveryRepository;
   private final OrderInquiryRepository orderInquiryRepository;
-  private final MemberCouponRepository memberCouponRepository;
 
   public OrderController(MemberService memberService,
                          OrderService orderService,
                          OrderRepository orderRepository,
                          PaymentRepository paymentRepository,
                          DeliveryRepository deliveryRepository,
-                         OrderInquiryRepository orderInquiryRepository,
-                         MemberCouponRepository memberCouponRepository) {
+                         OrderInquiryRepository orderInquiryRepository) {
     this.memberService = memberService;
     this.orderService = orderService;
     this.orderRepository = orderRepository;
     this.paymentRepository = paymentRepository;
     this.deliveryRepository = deliveryRepository;
     this.orderInquiryRepository = orderInquiryRepository;
-    this.memberCouponRepository = memberCouponRepository;
   }
 
   @PostMapping("/orders")
@@ -140,7 +137,14 @@ public class OrderController {
     Long me = memberService.currentMemberId();
     OrderInquiry inquiry = orderRepository.findByIdAndCreatedById(id, me)
        .map(order -> {
-         OrderInquiry orderInquiry = orderService.inquireOrder(order, Byte.parseByte(request.getState()), request.getReason());
+         OrderInquiry orderInquiry = null;
+         if (request.getPurchaseId() != null) {
+           Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
+           orderInquiry = orderService.inquireOrder(order, Byte.parseByte(request.getState()), request.getReason(), purchase);
+         } else {
+           orderInquiry = orderService.inquireOrder(order, Byte.parseByte(request.getState()), request.getReason(), null);
+         }
+
          if (Byte.parseByte(request.getState()) == OrderInquiry.STATE_CANCEL_ORDER) {
            orderService.cancelPayment(order);
          }
@@ -212,6 +216,8 @@ public class OrderController {
     private String state;
     @NotNull
     private String reason;
+
+    private Long purchaseId;
   }
 
   @Data
@@ -285,7 +291,6 @@ public class OrderController {
     private MemberInfo createdBy;
     private int point;
     private String method;
-    private String status;
     private Long videoId;
     private DeliveryInfo delivery;
     private PaymentInfo payment;
@@ -355,6 +360,8 @@ public class OrderController {
   @Data
   public static class PurchaseInfo {
     private Long id;
+    private Long orderId;
+    private String status;
     private String goodsNo;
     private int goodsPrice;
     private Long optionId;
@@ -377,14 +384,18 @@ public class OrderController {
     private Byte state;
     private String reason;
     private String comment;
-    private OrderInfo orderInfo;
+    private OrderInfo order;
+    private PurchaseInfo purchase;
     private boolean completed;
     private Date createdAt;
     private Date modifiedAt;
 
     public OrderInquiryInfo(OrderInquiry orderInquiry) {
       BeanUtils.copyProperties(orderInquiry, this);
-      this.orderInfo = new OrderInfo(orderInquiry.getOrder());
+      this.order = new OrderInfo(orderInquiry.getOrder());
+      if (orderInquiry.getPurchase() != null) {
+        this.purchase = new PurchaseInfo(orderInquiry.getPurchase());
+      }
     }
   }
 }
