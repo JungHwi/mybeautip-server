@@ -208,8 +208,8 @@ public class OrderService {
 
     Payment payment = paymentRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
 
-//    String token = iamportService.getToken();
-//    iamportService.cancelPayment(token, payment.getPaymentId());
+    String token = iamportService.getToken();
+    iamportService.cancelPayment(token, payment.getPaymentId());
 
     log.debug("cancel order: {}", order);
     saveOrderAndPurchasesStatus(order, Order.ORDER_CANCELLED);
