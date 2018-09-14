@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
+import com.jocoos.mybeautip.notification.NotificationRepository;
 import com.jocoos.mybeautip.restapi.DeviceController;
 
 @Slf4j
@@ -30,8 +31,9 @@ public class DeviceService {
   private static final String KEY_DATA = "data";
 
   private final MemberService memberService;
-  private final DeviceRepository deviceRepository;
   private final MessageService messageService;
+  private final DeviceRepository deviceRepository;
+  private final NotificationRepository notificationRepository;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.aws.sns.application.gcm-arn}")
@@ -43,11 +45,13 @@ public class DeviceService {
   public DeviceService(MemberService memberService,
                        DeviceRepository deviceRepository,
                        MessageService messageService,
+                       NotificationRepository notificationRepository,
                        ObjectMapper objectMapper,
                        AmazonSNS amazonSNS) {
     this.memberService = memberService;
     this.deviceRepository = deviceRepository;
     this.messageService = messageService;
+    this.notificationRepository = notificationRepository;
     this.objectMapper = objectMapper;
     this.amazonSNS = amazonSNS;
   }
@@ -131,12 +135,15 @@ public class DeviceService {
       data.put("image", notification.getImageUrl());
     }
 
+
+    int badge = notificationRepository.countByTargetMemberAndReadIsFalse(notification.getTargetMember());
+    log.debug("target_member: {}, badge: {}", notification.getTargetMember().getId(), badge);
     switch (os) {
       case "android": {
-        return createPushMessage(data);
+        return createPushMessage(data, badge);
       }
       case "ios": {
-        return createPushMessage(data);
+        return createPushMessage(data, badge);
       }
       default: {
         throw new IllegalArgumentException("unknown os type");
@@ -144,13 +151,14 @@ public class DeviceService {
     }
   }
 
-  private String createPushMessage(Map<String, String> message) {
+  private String createPushMessage(Map<String, String> message, int badge) {
     Map<String, String> map = Maps.newHashMap();
     Map<String, Map<String, String>> data = Maps.newHashMap();
     Map<String, String> notification = Maps.newHashMap();
 
     notification.put("title", messageService.getNotificationMessage("title", null));
     notification.put("body", message.get("body"));
+    notification.put("badge", String.valueOf(badge));
 
     data.put(KEY_NOTIFICATION, notification);
     data.put(KEY_DATA, message);
