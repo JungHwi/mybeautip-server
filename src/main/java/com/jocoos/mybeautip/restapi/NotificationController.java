@@ -70,6 +70,8 @@ public class NotificationController {
          } else {
            result.add(new NotificationInfo(n, message));
          }
+
+         readNotification(n);
        });
 
     String nextCursor = null;
@@ -80,6 +82,17 @@ public class NotificationController {
     return new CursorResponse.Builder<>("/api/1/members/me/notifications", result)
        .withCount(count)
        .withCursor(nextCursor).toBuild();
+  }
+
+  private void readNotification(Notification notification) {
+    if (notification == null) {
+      return;
+    }
+
+    if (!notification.isRead()) {
+      notification.setRead(true);
+      notificationRepository.save(notification);
+    }
   }
 
   @PatchMapping("/{id:.+}")
