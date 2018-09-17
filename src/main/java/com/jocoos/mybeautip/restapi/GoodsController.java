@@ -116,7 +116,7 @@ public class GoodsController {
   @GetMapping("/{goodsNo}/details")
   public ResponseEntity<String> getGoodsDetail(@PathVariable String goodsNo,
                                                @RequestParam(defaultValue = "false") boolean includeVideo) {
-    return new ResponseEntity<>(goodsDetailService.getGoodsDetailPage(goodsNo, includeVideo), HttpStatus.OK);
+    return new ResponseEntity<>(goodsDetailService.getGoodsDetail(goodsNo, includeVideo), HttpStatus.OK);
   }
 
   @GetMapping("/{goodsNo}/related-goods")

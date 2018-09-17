@@ -1,18 +1,14 @@
 package com.jocoos.mybeautip.godo;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -21,6 +17,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.GoodsRepository;
 
 @Slf4j
 @Service
@@ -30,16 +27,46 @@ public class GoodsDetailService {
   private static final String VIDEO_ELEMENT_FORMAT = "<div><video preload=\"auto\" controls=\"true\" x-webkit-ariplay=\"allow\" webkit-playsinline=\"allow\" playsinline=\"\" src=\"%s\"></video></div>";
   private static final String TEXT_ELEMENT_FORMAT = "<p style=\"%s\">%s</p>";
 
+  private final GoodsRepository goodsRepository;
+
   @Value("${godomall.goods-view-url}")
   private String goodsViewUrl;
 
+  public GoodsDetailService(GoodsRepository goodsRepository) {
+    this.goodsRepository = goodsRepository;
+  }
+
+  public String getGoodsDetail(String goodsNo, boolean includeVideo)  {
+    return goodsRepository.findById(goodsNo)
+       .map(goods -> {
+          String goodsDescription = goods.getGoodsDescription();
+          log.debug("goods description: {}", goodsDescription);
+
+          Element root = null;
+          if (!Strings.isNullOrEmpty(goodsDescription) && !hasComplicatedStyle(goodsDescription)) {
+            root = createDocumentFromString(goodsDescription);
+          } else {
+            root = createDocumentFromUri(goodsNo);
+          }
+
+          return getGoodsDetailPage(root, includeVideo);
+        })
+       .orElseGet(() -> "");
+  }
+
+  private boolean hasComplicatedStyle(String document) {
+    if (!Strings.isNullOrEmpty(document) && document.contains("background-image: url(")) {
+      return true;
+    }
+    return false;
+  }
+
   @Cacheable("goods_detail")
-  public String getGoodsDetailPage(String goodsNo, boolean includeVideo)  {
+  private Element createDocumentFromUri(String goodsNo) {
     UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(goodsViewUrl);
     builder.queryParam("goodsNo", goodsNo);
     String uri = builder.toUriString();
     log.debug("connect uri: {}", uri);
-
     try {
       Document document = Jsoup.connect(uri).get();
       Elements descriptions = document.getElementsByClass("js_goods_description");
@@ -49,32 +76,7 @@ public class GoodsDetailService {
         return null;
       }
 
-      Element root = descriptions.get(0);
-      Elements children = root.children();
-
-      log.debug("root children size: {}", children.size());
-      Elements elements = new Elements();
-
-      children.forEach(element -> {
-        if (element.hasClass("openblock")) {
-          return;
-        }
-
-        String text = element.text();
-        String style = element.attr("style");
-
-        if (!Strings.isNullOrEmpty(text)) {
-          log.debug("tag: {}, style: {}, text: {}", element.tag(), style, element.text());
-          elements.add(element);
-        }
-
-        element.select("[src]").forEach(src -> {
-          log.debug("tag: {}, src: {}", src.tag().getName(), src.attr("src"));
-          elements.add(src);
-        });
-      });
-
-      return createDocument(elements, includeVideo);
+      return descriptions.get(0);
     } catch (HttpStatusException e) {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
         log.error("not found page - " + uri, e);
@@ -86,7 +88,37 @@ public class GoodsDetailService {
     }
   }
 
-  private String createDocument(Elements elements, boolean includeVideo) {
+  private Element createDocumentFromString(String goodsDescription) {
+    return Jsoup.parse(goodsDescription).body();
+  }
+
+  private String getGoodsDetailPage(Element root, boolean includeVideo)  {
+    Elements children = root.children();
+    Elements elements = new Elements();
+
+    children.forEach(element -> {
+      if (element.hasClass("openblock")) {
+        return;
+      }
+
+      String text = element.text();
+      String style = element.attr("style");
+
+      if (!Strings.isNullOrEmpty(text)) {
+        log.debug("tag: {}, style: {}, text: {}", element.tag(), style, element.text());
+        elements.add(element);
+      }
+
+      element.select("[src]").forEach(src -> {
+        log.debug("tag: {}, src: {}", src.tag().getName(), src.attr("src"));
+        elements.add(src);
+      });
+    });
+
+    return createResultDocument(elements, includeVideo);
+  }
+
+  private String createResultDocument(Elements elements, boolean includeVideo) {
     StringBuilder builder = new StringBuilder();
     builder.append("<html>");
     builder.append("<head><meta name=\"viewport\" content=\"user-scalable=yes, width=device-width\">");
@@ -100,7 +132,7 @@ public class GoodsDetailService {
 
       switch (element.tag().getName().toLowerCase()) {
         case "img": {
-          builder.append(String.format(IMAGE_ELEMENT_FORMAT, element.attr("src")));
+          builder.append(String.format(IMAGE_ELEMENT_FORMAT, element.attr("src").replaceAll("\\\\\"","")));
           break;
         }
         case "video": {
