@@ -31,6 +31,7 @@ public class GoodsInfo {
   private Integer scmNo;
   private Integer likeCount;
   private Long likeId;
+  private Integer deliverySno;
   private List<GodoService.MustInfo> goodsMustInfo;
   private Integer relatedVideoTotalCount; // 관련 방송(동영상 리뷰) 전체 개수
   private String deliveryInfo;
