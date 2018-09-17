@@ -11,8 +11,10 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostComment;
+import com.jocoos.mybeautip.post.PostCommentLike;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoComment;
+import com.jocoos.mybeautip.video.VideoCommentLike;
 import com.jocoos.mybeautip.video.VideoLike;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -165,5 +167,27 @@ public class Notification {
     this.resourceOwner = source;
     this.imageUrl = thumbnail;
     this.args = Lists.newArrayList(source.getUsername());
+  }
+
+  public Notification(PostCommentLike postCommentLike, String thumbnail) {
+    this.type = POST_COMMENT_LIKE;
+    this.targetMember = postCommentLike.getComment().getCreatedBy();
+    this.read = false;
+    this.resourceType = "post_comment_like";
+    this.resourceId = postCommentLike.getId();
+    this.resourceOwner = postCommentLike.getCreatedBy();
+    this.imageUrl = thumbnail;
+    this.args = Lists.newArrayList(postCommentLike.getCreatedBy().getUsername(), postCommentLike.getComment().getComment());
+  }
+
+  public Notification(VideoCommentLike videoCommentLike, String thumbnail) {
+    this.type = VIDEO_COMMENT_LIKE;
+    this.targetMember = videoCommentLike.getComment().getCreatedBy();
+    this.read = false;
+    this.resourceType = "video_comment_like";
+    this.resourceId = videoCommentLike.getId();
+    this.resourceOwner = videoCommentLike.getCreatedBy();
+    this.imageUrl = thumbnail;
+    this.args = Lists.newArrayList(videoCommentLike.getCreatedBy().getUsername(), videoCommentLike.getComment().getComment());
   }
 }

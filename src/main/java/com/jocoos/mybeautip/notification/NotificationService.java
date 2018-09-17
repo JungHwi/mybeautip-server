@@ -8,14 +8,9 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
-import com.jocoos.mybeautip.post.PostComment;
-import com.jocoos.mybeautip.post.PostCommentRepository;
-import com.jocoos.mybeautip.post.PostRepository;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoComment;
-import com.jocoos.mybeautip.video.VideoCommentRepository;
-import com.jocoos.mybeautip.video.VideoLike;
-import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.post.*;
+import com.jocoos.mybeautip.video.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -127,6 +122,22 @@ public class NotificationService {
   public void notifyAddVideoLike(VideoLike videoLike) {
     Notification n = notificationRepository.save(new Notification(videoLike,
       getVideoThumbnail(videoLike.getVideo().getVideoKey()), videoLike.getCreatedBy()));
+    deviceService.push(n);
+  }
+
+  public void notifyAddPostCommentLike(PostCommentLike postCommentLike) {
+    String thumbnail = postRepository.findById(postCommentLike.getComment().getPostId())
+       .map(Post::getThumbnailUrl).orElseGet(null);
+
+    Notification n = notificationRepository.save(new Notification(postCommentLike, thumbnail));
+    deviceService.push(n);
+  }
+
+  public void notifyAddVideoCommentLike(VideoCommentLike videoCommentLike) {
+    String thumbnail = videoRepository.findById(videoCommentLike.getComment().getVideoId())
+       .map(Video::getThumbnailUrl).orElseGet(null);
+
+    Notification n = notificationRepository.save(new Notification(videoCommentLike, thumbnail));
     deviceService.push(n);
   }
 }

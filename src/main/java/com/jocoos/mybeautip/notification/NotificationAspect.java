@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.notification;
 
 import org.springframework.stereotype.Component;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -11,8 +12,10 @@ import org.aspectj.lang.annotation.Before;
 
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.post.PostComment;
+import com.jocoos.mybeautip.post.PostCommentLike;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoComment;
+import com.jocoos.mybeautip.video.VideoCommentLike;
 import com.jocoos.mybeautip.video.VideoLike;
 
 @Slf4j
@@ -79,10 +82,6 @@ public class NotificationAspect {
     }
   }
 
-
-  // TODO : Not implement video comment like
-  // TODO : Not implement post comment like
-
   @After(value = "execution(* com.jocoos.mybeautip.video.VideoLikeRepository.save(..))")
   public void onAfterSaveVideoLike(JoinPoint joinPoint) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -91,6 +90,28 @@ public class NotificationAspect {
       VideoLike videoLike = (VideoLike) o;
       log.debug("video like: {}", videoLike);
       notificationService.notifyAddVideoLike(videoLike);
+    }
+  }
+
+  @After(value = "execution(* com.jocoos.mybeautip.post.PostCommentLikeRepository.save(..))")
+  public void onAfterSavePostCommentLike(JoinPoint joinPoint) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+    Object o = joinPoint.getArgs()[0];
+    if (o instanceof PostCommentLike) {
+      PostCommentLike postCommentLike = (PostCommentLike) o;
+      log.debug("post comment like: {}", postCommentLike);
+      notificationService.notifyAddPostCommentLike(postCommentLike);
+    }
+  }
+
+  @After(value = "execution(* com.jocoos.mybeautip.video.VideoCommentLikeRepository.save(..))")
+  public void onAfterSaveVideoCommentLike(JoinPoint joinPoint) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+    Object o = joinPoint.getArgs()[0];
+    if (o instanceof VideoCommentLike) {
+      VideoCommentLike videoCommentLike = (VideoCommentLike) o;
+      log.debug("video comment like: {}", videoCommentLike);
+      notificationService.notifyAddVideoCommentLike(videoCommentLike);
     }
   }
 }
