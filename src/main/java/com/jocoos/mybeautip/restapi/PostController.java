@@ -83,8 +83,7 @@ public class PostController {
     List<PostInfo> result = Lists.newArrayList();
 
     posts.stream().forEach(post -> {
-      PostInfo info = new PostInfo();
-      BeanUtils.copyProperties(post, info);
+      PostInfo info = new PostInfo(post);
       log.debug("post info: {}", info);
 
       postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
@@ -141,8 +140,7 @@ public class PostController {
     Long memberId = memberService.currentMemberId();
     return postRepository.findById(id)
        .map(post -> {
-         PostInfo info = new PostInfo();
-         BeanUtils.copyProperties(post, info);
+         PostInfo info = new PostInfo(post);
          log.debug("post info: {}", info);
 
          postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
@@ -417,12 +415,16 @@ public class PostController {
     private Set<PostContent> contents;
     private List<String> goods;
     private Set<Long> winners;
-    private Integer likeCount;
-    private Long commentCount;
-    private Long viewCount;
+    private int likeCount;
+    private int commentCount;
+    private int viewCount;
     private Date createdAt;
     private Member createdBy;
     private Long likeId;
+
+    public PostInfo(Post post) {
+      BeanUtils.copyProperties(post, this);
+    }
   }
 
   @Data
@@ -448,7 +450,7 @@ public class PostController {
     private String thumbnailUrl;
     private Date createdAt;
     private Member createdBy;
-    private Integer likeCount;
+    private int likeCount;
     private Long likeId;
 
     public PostBasicInfo(Post post) {
