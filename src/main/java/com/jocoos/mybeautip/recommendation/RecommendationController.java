@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.recommendation;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.goods.GoodsInfo;
@@ -21,6 +23,7 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
@@ -37,6 +40,7 @@ public class RecommendationController {
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
+  private final KeywordRecommendationRepository keywordRecommendationRepository;
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberServie,
@@ -44,7 +48,8 @@ public class RecommendationController {
                                   VideoRepository videoRepository,
                                   MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository,
-                                  MotdRecommendationRepository motdRecommendationRepository) {
+                                  MotdRecommendationRepository motdRecommendationRepository,
+                                  KeywordRecommendationRepository keywordRecommendationRepository) {
     this.goodsService = goodsService;
     this.memberServie = memberServie;
     this.videoService = videoService;
@@ -52,6 +57,7 @@ public class RecommendationController {
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
+    this.keywordRecommendationRepository = keywordRecommendationRepository;
   }
 
   @GetMapping("/members")
@@ -102,5 +108,55 @@ public class RecommendationController {
         result.add(videoService.generateVideoInfo(video)));
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+
+  @GetMapping("/keywords")
+  public ResponseEntity<List<KeywordInfo>> getRecommendedKeywords(
+    @RequestParam(defaultValue = "100") int count) {
+    Slice<KeywordRecommendation> keywords = keywordRecommendationRepository.findAll(
+      PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+
+    List<KeywordInfo> result = Lists.newArrayList();
+    for (KeywordRecommendation keyword : keywords) {
+      result.add(new KeywordInfo(keyword));
+    }
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+
+  @Data
+  class KeywordInfo {
+    Integer category;
+    MemberInfo member;
+    TagInfo tag;
+    Integer seq;
+    Date startedAt;
+    Date endedAt;
+    Date createdAt;
+
+    KeywordInfo(KeywordRecommendation keyword) {
+      BeanUtils.copyProperties(keyword, this);
+      switch (category) {
+        case 1:
+          member = memberServie.getMemberInfo(keyword.getMember());
+          break;
+
+        case 2:
+          tag = new TagInfo(keyword.getTag());
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+
+  @Data
+  class TagInfo {
+    String name;
+    Integer refCount;
+
+    TagInfo(Tag tag) {
+      BeanUtils.copyProperties(tag, this);
+    }
   }
 }
