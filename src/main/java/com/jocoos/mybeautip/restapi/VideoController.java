@@ -163,7 +163,7 @@ public class VideoController {
       VideoCommentInfo commentInfo = new VideoCommentInfo(comment, createMemberInfo(comment
           .getCreatedBy()));
       videoCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-          .ifPresent(liked -> commentInfo.setLikedId(liked.getId()));
+          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
       result.add(commentInfo);
     });
 
@@ -603,7 +603,8 @@ public class VideoController {
     private MemberInfo createdBy;
     private Date createdAt;
     private String commentRef;
-    private Long likedId;
+    private Long likeId;
+    private Integer likeCount;
 
     VideoCommentInfo(VideoComment comment) {
       BeanUtils.copyProperties(comment, this);

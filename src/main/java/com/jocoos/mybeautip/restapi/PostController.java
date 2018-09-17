@@ -262,7 +262,7 @@ public class PostController {
     comments.stream().forEach(comment -> {
       PostCommentInfo commentInfo = new PostCommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
       postCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-        .ifPresent(liked -> commentInfo.setLikedId(liked.getId()));
+        .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
       result.add(commentInfo);
     });
 
@@ -482,7 +482,8 @@ public class PostController {
     private MemberInfo createdBy;
     private Date createdAt;
     private String commentRef;
-    private Long likedId;
+    private Long likeId;
+    private Integer likeCount;
 
     public PostCommentInfo(PostComment comment) {
       BeanUtils.copyProperties(comment, this);
