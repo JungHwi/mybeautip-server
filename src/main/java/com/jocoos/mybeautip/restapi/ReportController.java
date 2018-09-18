@@ -51,7 +51,7 @@ public class ReportController {
   }
 
   @GetMapping("/{id:.+}")
-  public ReportResponse isReport(@PathVariable Integer id) {
+  public ReportResponse didReport(@PathVariable Integer id) {
     Long me = memberService.currentMemberId();
     if (me == null) {
       throw new MemberNotFoundException("Login required");
