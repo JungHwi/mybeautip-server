@@ -314,14 +314,14 @@ public class VideoController {
                                            @RequestParam(defaultValue = "100") int count,
                                            @RequestParam(required = false) String cursor) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<VideoLike> list = videoLikeRepository.findByVideoIdAndCreatedAtBefore(id, startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
     list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
     String nextCursor = null;
     if (members.size() > 0) {
-      nextCursor = String.valueOf(members.get(members.size() - 1).getModifiedAt().getTime());
+      nextCursor = String.valueOf(list.getContent().get(list.getContent().size() - 1).getCreatedAt().getTime());
     }
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/likes", members)
@@ -535,7 +535,7 @@ public class VideoController {
 
     String nextCursor = null;
     if (members.size() > 0) {
-      nextCursor = String.valueOf(members.get(members.size() - 1).getModifiedAt().getTime());
+      nextCursor = String.valueOf(list.getContent().get(list.getContent().size() - 1).getModifiedAt().getTime());
     }
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/views", members)
