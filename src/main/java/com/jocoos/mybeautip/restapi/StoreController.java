@@ -2,13 +2,13 @@ package com.jocoos.mybeautip.restapi;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -46,15 +46,6 @@ public class StoreController {
   private final StoreLikeRepository storeLikeRepository;
   private final GoodsRepository goodsRepository;
 
-  @Value("${mybeautip.store.image-path.prefix}")
-  private String storeImagePrefix;
-
-  @Value("${mybeautip.store.image-path.cover-suffix}")
-  private String storeImageSuffix;
-
-  @Value("${mybeautip.store.image-path.thumbnail-suffix}")
-  private String storeImageThumbnailSuffix;
-
   public StoreController(MemberService memberService,
                          GoodsService goodsService,
                          StoreRepository storeRepository,
@@ -82,9 +73,7 @@ public class StoreController {
         likeId = optionalStoreLike.map(StoreLike::getId).orElse(null);
       }
 
-      String imageUrl = String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageSuffix);
-      String thumbnailUrl = String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageThumbnailSuffix);
-      storeInfo = new StoreInfo(store, likeId, imageUrl, thumbnailUrl);
+      storeInfo = new StoreInfo(store, likeId);
       return new ResponseEntity<>(storeInfo, HttpStatus.OK);
     } else {
       throw new NotFoundException("store_not_found", "invalid store id");
@@ -132,22 +121,19 @@ public class StoreController {
     }
 
     return storeRepository.findById(id)
-            .map(store -> {
-              Integer storeId = store.getId();
-              if (storeLikeRepository.findByStoreIdAndCreatedById(storeId, memberId).isPresent()) {
-                throw new BadRequestException("duplicated_store_like", "Already store liked");
-              }
+      .map(store -> {
+        Integer storeId = store.getId();
+        if (storeLikeRepository.findByStoreIdAndCreatedById(storeId, memberId).isPresent()) {
+          throw new BadRequestException("duplicated_store_like", "Already store liked");
+        }
 
-              storeRepository.updateLikeCount(id, 1);
-              store.setLikeCount(store.getLikeCount() + 1);
+        storeRepository.updateLikeCount(id, 1);
+        store.setLikeCount(store.getLikeCount() + 1);
 
-              String imageUrl = String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageSuffix);
-              String thumbnailUrl = String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageThumbnailSuffix);
-
-              StoreLike storeLike = storeLikeRepository.save(new StoreLike(store));
-              return new ResponseEntity<>(new StoreLikeInfo(storeLike, imageUrl, thumbnailUrl), HttpStatus.OK);
-            })
-            .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
+        StoreLike storeLike = storeLikeRepository.save(new StoreLike(store));
+        return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
+      })
+      .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
   }
 
   @Transactional
@@ -160,17 +146,39 @@ public class StoreController {
     }
 
     return storeLikeRepository.findByIdAndStoreIdAndCreatedById(likeId, id, memberId)
-            .map(store -> {
-              Optional<StoreLike> liked = storeLikeRepository.findById(likeId);
-              if (!liked.isPresent()) {
-                throw new NotFoundException("like_not_found", "invalid store like id");
-              }
+      .map(store -> {
+        Optional<StoreLike> liked = storeLikeRepository.findById(likeId);
+        if (!liked.isPresent()) {
+          throw new NotFoundException("like_not_found", "invalid store like id");
+        }
 
-              storeLikeRepository.delete(liked.get());
-              storeRepository.updateLikeCount(id, -1);
-              return new ResponseEntity(HttpStatus.OK);
-            })
-            .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id or like id"));
+        storeLikeRepository.delete(liked.get());
+        storeRepository.updateLikeCount(id, -1);
+        return new ResponseEntity(HttpStatus.OK);
+      })
+      .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id or like id"));
+  }
+
+  @PatchMapping("/{id:.+}")
+  public Store updateStore(@PathVariable Integer id,
+                           @RequestBody UpdateStoreRequest request) {
+    return storeRepository.findById(id)
+      .map(store -> {
+        if (request.getImageUrl() != null) {
+          store.setImageUrl(request.getImageUrl());
+        }
+        if (request.getThumbnailUrl() != null) {
+          store.setThumbnailUrl(request.getThumbnailUrl());
+        }
+        if (request.getRefundUrl() != null) {
+          store.setRefundUrl(request.getRefundUrl());
+        }
+        if (request.getAsUrl() != null) {
+          store.setAsUrl(request.getAsUrl());
+        }
+        return storeRepository.save(store);
+      })
+      .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
   }
 
   /**
@@ -187,13 +195,9 @@ public class StoreController {
     private Integer likeCount;
     private Long likeId;
 
-    public StoreInfo(Store store, Long likeId, String imageUrl, String thumbnailUrl) {
-      this.id = store.getId();
-      this.name = store.getName();
+    public StoreInfo(Store store, Long likeId) {
+      BeanUtils.copyProperties(store, this);
       this.description = Strings.isNullOrEmpty(store.getDescription()) ? "" : store.getDescription();
-      this.imageUrl = imageUrl;
-      this.thumbnailUrl = thumbnailUrl;
-      this.likeCount = store.getLikeCount();
       this.likeId = likeId;
     }
   }
@@ -205,9 +209,24 @@ public class StoreController {
     private Date createdAt;
     private StoreInfo store;
 
-    StoreLikeInfo(StoreLike storeLike, String imageUrl, String thumbnailUrl) {
+    StoreLikeInfo(StoreLike storeLike) {
       BeanUtils.copyProperties(storeLike, this);
-      store = new StoreInfo(storeLike.getStore(), storeLike.getId(), imageUrl, thumbnailUrl);
+      store = new StoreInfo(storeLike.getStore(), storeLike.getId());
     }
+  }
+
+  @Data
+  static class UpdateStoreRequest {
+    @Size(max=255)
+    private String imageUrl;
+
+    @Size(max=255)
+    private String thumbnailUrl;
+
+    @Size(max=255)
+    private String refundUrl;
+
+    @Size(max=255)
+    private String asUrl;
   }
 }

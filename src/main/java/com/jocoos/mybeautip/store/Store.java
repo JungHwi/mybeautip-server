@@ -1,20 +1,23 @@
 package com.jocoos.mybeautip.store;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import javax.persistence.*;
 import java.util.Date;
 
-@NoArgsConstructor
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
+
 @Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "stores")
-public class Store {
+public class Store extends ModifiedDateAuditable {
   @Id
   private Integer id;
 
@@ -24,16 +27,20 @@ public class Store {
   @Column
   private String description;
 
-  @Column(nullable = false)
-  private int likeCount;
-
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
+  @Column
+  private String imageUrl;
 
   @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+  private String thumbnailUrl;
+
+  @Column
+  private String refundUrl;
+
+  @Column
+  private String asUrl;
+
+  @Column(nullable = false)
+  private int likeCount;
 
   @Column
   private Date deletedAt;

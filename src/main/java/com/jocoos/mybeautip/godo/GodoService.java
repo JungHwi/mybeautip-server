@@ -68,6 +68,21 @@ public class GodoService {
   @Value("${mybeautip.category.image-path.suffix}")
   private String categoryImageSuffix;
 
+  @Value("${mybeautip.store.image-path.prefix}")
+  private String storeImagePrefix;
+
+  @Value("${mybeautip.store.image-path.cover-suffix}")
+  private String storeImageSuffix;
+
+  @Value("${mybeautip.store.image-path.thumbnail-suffix}")
+  private String storeImageThumbnailSuffix;
+
+  @Value("${mybeautip.store.image-path.refund-suffix}")
+  private String storeImageRefundSuffix;
+
+  @Value("${mybeautip.store.image-path.as-suffix}")
+  private String storeImageAsSuffix;
+
   private static final String GODOMALL_RESPONSE_OK = "000";
   private static final String GOODS_CATEGORY_TOP = "0";
 
@@ -318,6 +333,10 @@ public class GodoService {
           updatedCount++;
         } else {
           store = new Store(scm.getScmNo());
+          store.setImageUrl(String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageSuffix));
+          store.setThumbnailUrl(String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageThumbnailSuffix));
+          store.setRefundUrl(String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageRefundSuffix));
+          store.setAsUrl(String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageAsSuffix));
           newCount++;
         }
         store.setName(scm.getCompanyNm());

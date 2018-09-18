@@ -415,9 +415,7 @@ public class MemberController {
       if (me != null) {
         likeId = me.equals(like.getCreatedBy().getId()) ? like.getId() : null;
       }
-      String imageUrl = String.format("%s%d%s", storeImagePrefix, like.getStore().getId(), storeImageSuffix);
-      String thumbnailUrl = String.format("%s%d%s", storeImagePrefix, like.getStore().getId(), storeImageThumbnailSuffix);
-      result.add(new StoreController.StoreInfo(like.getStore(), likeId, imageUrl, thumbnailUrl));
+      result.add(new StoreController.StoreInfo(like.getStore(), likeId));
     }
 
     String nextCursor = null;
