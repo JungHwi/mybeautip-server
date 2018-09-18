@@ -350,6 +350,7 @@ public class VideoController {
 
 
           videoCommentRepository.updateLikeCount(comment.getId(), 1);
+          comment.setLikeCount(comment.getLikeCount() + 1);
           VideoCommentLike commentLikeLike = videoCommentLikeRepository.save(new VideoCommentLike(comment));
           return new ResponseEntity<>(new VideoCommentLikeInfo(commentLikeLike), HttpStatus.OK);
         })

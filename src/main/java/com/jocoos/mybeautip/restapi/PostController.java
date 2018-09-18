@@ -367,6 +367,7 @@ public class PostController {
 
 
          postCommentRepository.updateLikeCount(comment.getId(), 1);
+         comment.setLikeCount(comment.getLikeCount() + 1);
          PostCommentLike commentLikeLike = postCommentLikeRepository.save(new PostCommentLike(comment));
          return new ResponseEntity<>(new PostCommentLikeInfo(commentLikeLike), HttpStatus.OK);
        })
