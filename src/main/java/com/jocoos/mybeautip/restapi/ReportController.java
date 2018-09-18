@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Optional;
 
 import org.springframework.http.MediaType;
@@ -16,7 +18,6 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
-import com.jocoos.mybeautip.member.report.ReportRequest;
 
 @Slf4j
 @RestController
@@ -35,7 +36,7 @@ public class ReportController {
                            BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid followings request");
+      throw new BadRequestException("invalid report request");
     }
 
     long me = memberService.currentMemberId();
@@ -61,6 +62,16 @@ public class ReportController {
       .ifPresent(report -> response.setReport(true));
 
     return response;
+  }
+
+  @Data
+  static class ReportRequest {
+    @NotNull
+    private Long memberId;
+
+    @NotNull
+    @Size(min = 1, max = 400)
+    private String reason = "";
   }
 
   @Data
