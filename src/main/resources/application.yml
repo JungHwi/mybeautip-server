@@ -80,7 +80,7 @@ mybeautip:
   store:
     image-path:
       prefix: "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/"
-      cover-suffix: ".png"
+      cover-suffix: "_cover.png"
       thumbnail-suffix: "_thumbnail.png"
       refund-suffix: "_refund.png"
       as-suffix: "_as.png"
