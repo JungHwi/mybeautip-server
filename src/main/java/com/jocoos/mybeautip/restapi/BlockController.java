@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,6 @@ import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
-import com.jocoos.mybeautip.member.block.BlockMemberRequest;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 
 @RestController
@@ -149,6 +147,11 @@ public class BlockController {
       this.createdAt = block.getCreatedAt();
       this.member = member;
     }
+  }
+
+  @Data
+  static class BlockMemberRequest {
+    private Long memberId;
   }
 
   @Data
