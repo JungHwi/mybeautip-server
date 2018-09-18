@@ -98,14 +98,15 @@ public class BlockController {
     return getBlockMembers(httpServletRequest.getRequestURI(), cursor, count);
   }
 
-  @GetMapping("/{id:.+}/blocks/me")
-  public BlockResponse isBlocked(@PathVariable Integer id) {
+  @GetMapping("/me/blocked")
+  public BlockResponse isBlocked(@RequestParam(name="member_id") Long memberId) {
     Long me = memberService.currentMemberId();
     if (me == null) {
       throw new MemberNotFoundException("Login required");
     }
+
     BlockResponse response = new BlockResponse(false);
-    blockRepository.findByMeAndMemberYouId(id, me)
+    blockRepository.findByMeAndMemberYouId(memberId, me)
       .ifPresent(block -> response.setBlocked(true));
     return response;
   }

@@ -59,7 +59,7 @@ public class ReportController {
 
     ReportResponse response = new ReportResponse(false);
     reportRepository.findByMeAndYou(me, id)
-      .ifPresent(report -> response.setReport(true));
+      .ifPresent(report -> response.setReported(true));
 
     return response;
   }
@@ -77,6 +77,6 @@ public class ReportController {
   @Data
   @AllArgsConstructor
   class ReportResponse {
-    Boolean report;
+    Boolean reported;
   }
 }
