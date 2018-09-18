@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +27,10 @@ import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
-import com.jocoos.mybeautip.member.block.BlockMemberRequest;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 
 @RestController
-@RequestMapping(value = "/api/1/members/me/blocks", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class BlockController {
   private final MemberService memberService;
@@ -47,7 +45,7 @@ public class BlockController {
     this.blockRepository = blockRepository;
   }
   
-  @PostMapping
+  @PostMapping("/me/blocks")
   public BlockResponse blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest,
                               BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
@@ -79,7 +77,7 @@ public class BlockController {
     }
   }
   
-  @DeleteMapping("{id}")
+  @DeleteMapping("/me/blocks/{id:.+}")
   public void unblockMember(@PathVariable("id") String id) {
     Optional<Block> optional = blockRepository.findById(Long.parseLong(id));
     if (!optional.isPresent()) {
@@ -89,7 +87,7 @@ public class BlockController {
     }
   }
   
-  @GetMapping
+  @GetMapping("/me/blocks")
   public CursorResponse getMyBlockMembers(@RequestParam(defaultValue = "50") int count,
                                           @RequestParam(required = false) String cursor,
                                           HttpServletRequest httpServletRequest) {
@@ -99,6 +97,20 @@ public class BlockController {
     }
     return getBlockMembers(httpServletRequest.getRequestURI(), cursor, count);
   }
+
+  @GetMapping("/me/blocked")
+  public BlockResponse isBlocked(@RequestParam(name="member_id") Long memberId) {
+    Long me = memberService.currentMemberId();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    BlockResponse response = new BlockResponse(false);
+    blockRepository.findByMeAndMemberYouId(memberId, me)
+      .ifPresent(block -> response.setBlocked(true));
+    return response;
+  }
+
 
   private CursorResponse getBlockMembers(String requestUri, String cursor, int count) {
     Date startCursor = (Strings.isBlank(cursor)) ?
@@ -139,8 +151,22 @@ public class BlockController {
   }
 
   @Data
-  @AllArgsConstructor
+  static class BlockMemberRequest {
+    private Long memberId;
+  }
+
+  @Data
+  @NoArgsConstructor
   class BlockResponse {
     Long id;
+    Boolean blocked;
+
+    BlockResponse(Long id) {
+      this.id = id;
+    }
+
+    BlockResponse(Boolean blocked) {
+      this.blocked = blocked;
+    }
   }
 }

@@ -1,22 +1,23 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Optional;
 
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
-import com.jocoos.mybeautip.member.report.ReportRequest;
 
 @Slf4j
 @RestController
@@ -30,12 +31,12 @@ public class ReportController {
     this.reportRepository = reportRepository;
   }
   
-  @PutMapping()
+  @PutMapping
   public void reportMember(@Valid @RequestBody ReportRequest reportRequest,
                            BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid followings request");
+      throw new BadRequestException("invalid report request");
     }
 
     long me = memberService.currentMemberId();
@@ -47,5 +48,35 @@ public class ReportController {
     }
 
     reportRepository.save(report);
+  }
+
+  @GetMapping("/{id:.+}")
+  public ReportResponse didReport(@PathVariable Integer id) {
+    Long me = memberService.currentMemberId();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    ReportResponse response = new ReportResponse(false);
+    reportRepository.findByMeAndYou(me, id)
+      .ifPresent(report -> response.setReported(true));
+
+    return response;
+  }
+
+  @Data
+  static class ReportRequest {
+    @NotNull
+    private Long memberId;
+
+    @NotNull
+    @Size(min = 1, max = 400)
+    private String reason = "";
+  }
+
+  @Data
+  @AllArgsConstructor
+  class ReportResponse {
+    Boolean reported;
   }
 }
