@@ -5,14 +5,14 @@ import java.util.Optional;
 
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
@@ -30,7 +30,7 @@ public class ReportController {
     this.reportRepository = reportRepository;
   }
   
-  @PutMapping()
+  @PutMapping
   public void reportMember(@Valid @RequestBody ReportRequest reportRequest,
                            BindingResult bindingResult) {
     if (bindingResult.hasErrors()) {
@@ -47,5 +47,25 @@ public class ReportController {
     }
 
     reportRepository.save(report);
+  }
+
+  @GetMapping("/{id:.+}")
+  public ReportResponse isReport(@PathVariable Integer id) {
+    Long me = memberService.currentMemberId();
+    if (me == null) {
+      throw new MemberNotFoundException("Login required");
+    }
+
+    ReportResponse response = new ReportResponse(false);
+    reportRepository.findByMeAndYou(me, id)
+      .ifPresent(report -> response.setReport(true));
+
+    return response;
+  }
+
+  @Data
+  @AllArgsConstructor
+  class ReportResponse {
+    Boolean report;
   }
 }
