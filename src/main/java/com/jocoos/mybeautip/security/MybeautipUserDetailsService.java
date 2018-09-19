@@ -41,6 +41,6 @@ public class MybeautipUserDetailsService implements UserDetailsService {
   }
 
   private MyBeautipUserDetails createGuestUserDetails() {
-    return new MyBeautipUserDetails("guest", "ROLE_USER");
+    return new MyBeautipUserDetails("guest", "ROLE_GUEST");
   }
 }

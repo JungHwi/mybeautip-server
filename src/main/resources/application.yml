@@ -80,7 +80,7 @@ mybeautip:
   store:
     image-path:
       prefix: "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/"
-      cover-suffix: ".png"
+      cover-suffix: "_cover.png"
       thumbnail-suffix: "_thumbnail.png"
       refund-suffix: "_refund.png"
       as-suffix: "_as.png"
@@ -110,12 +110,13 @@ cloud:
       static: ap-northeast-2
 
 godomall:
-  base-url: https://openhub.godo.co.kr/godomall5
-  partner-key: JUY0JUUwciVEMyVBQUxESg==
-  key: aSU4QmwlMTklRjQ0JTNCJUZEJTA0JTg2JThGRnElQzQlRUElRDJQJUYycCVDMyUxQyUwQSVDQiVDNU1DSTglQzFuJUQyJUY4JTgxJUI2JTBEJUU4
-  category-search-url: /goods/Category_Search.php?
-  goods-search-url: /goods/Goods_Search.php?
-  common-code-url: /common/Code_Search.php?
+  scheme: 'https'
+  base-url: 'openhub.godo.co.kr/godomall5'
+  partner-key: 'JUY0JUUwciVEMyVBQUxESg=='
+  key: 'aSU4QmwlMTklRjQ0JTNCJUZEJTA0JTg2JThGRnElQzQlRUElRDJQJUYycCVDMyUxQyUwQSVDQiVDNU1DSTglQzFuJUQyJUY4JTgxJUI2JTBEJUU4'
+  category-search-url: '/goods/Category_Search.php'
+  goods-search-url: '/goods/Goods_Search.php'
+  common-code-url: '/common/Code_Search.php'
   goods-view-url: http://m.mybeautip.tv/goods/goods_view.php
 
 management:

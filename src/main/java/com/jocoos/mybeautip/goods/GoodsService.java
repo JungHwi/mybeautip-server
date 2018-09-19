@@ -19,6 +19,8 @@ import static org.springframework.data.domain.PageRequest.of;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.CursorResponse;
+import com.jocoos.mybeautip.store.Store;
+import com.jocoos.mybeautip.store.StoreRepository;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 
 @Service
@@ -29,6 +31,7 @@ public class GoodsService {
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
+  private final StoreRepository storeRepository;
   private static final String BEST_CATEGORY = "001";
 
   @Value("${mybeautip.store.image-path.prefix}")
@@ -57,12 +60,14 @@ public class GoodsService {
                       MessageService messageService,
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
-                      GoodsLikeRepository goodsLikeRepository) {
+                      GoodsLikeRepository goodsLikeRepository,
+                      StoreRepository storeRepository) {
     this.memberService = memberService;
     this.messageService = messageService;
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsLikeRepository = goodsLikeRepository;
+    this.storeRepository = storeRepository;
   }
   
   public CursorResponse getGoodsList(GoodsListRequest request) {
@@ -146,8 +151,13 @@ public class GoodsService {
     // Set total count of related videos
     int relatedVideoTotalCount = videoGoodsRepository.countByGoodsGoodsNo(goods.getGoodsNo());
     String deliveryInfo = messageService.getGoodsDeliveryMessage();
-    String refundInfo = String.format("%s%d%s", storeImagePrefix, goods.getScmNo(), storeImageRefundSuffix);
-    String asInfo = String.format("%s%d%s", storeImagePrefix, goods.getScmNo(), storeImageAsSuffix);
+    String refundInfo = "";
+    String asInfo = "";
+    Optional<Store> optional = storeRepository.findById(goods.getScmNo());
+    if (optional.isPresent()) {
+      refundInfo = optional.get().getRefundUrl();
+      asInfo = optional.get().getAsUrl();
+    }
 
     return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, asInfo);
   }

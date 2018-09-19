@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,8 +46,11 @@ public class GodoService {
   private final DeliveryChargeRepository deliveryChargeRepository;
   private final ObjectMapper mapper;
 
+  @Value("${godomall.scheme}")
+  private String scheme;
+
   @Value("${godomall.base-url}")
-  private String baseUrl;
+  private String godoBaseUrl;
 
   @Value("${godomall.partner-key}")
   private String partnerKey;
@@ -68,11 +73,26 @@ public class GodoService {
   @Value("${mybeautip.category.image-path.suffix}")
   private String categoryImageSuffix;
 
+  @Value("${mybeautip.store.image-path.prefix}")
+  private String storeImagePrefix;
+
+  @Value("${mybeautip.store.image-path.cover-suffix}")
+  private String storeImageSuffix;
+
+  @Value("${mybeautip.store.image-path.thumbnail-suffix}")
+  private String storeImageThumbnailSuffix;
+
+  @Value("${mybeautip.store.image-path.refund-suffix}")
+  private String storeImageRefundSuffix;
+
+  @Value("${mybeautip.store.image-path.as-suffix}")
+  private String storeImageAsSuffix;
+
   private static final String GODOMALL_RESPONSE_OK = "000";
   private static final String GOODS_CATEGORY_TOP = "0";
 
-  private static int newCount;
-  private static int updatedCount;
+  private static int refreshCount;
+  private static int deletedCount;
 
   public GodoService(RestTemplate restTemplate,
                      CategoryRepository categoryRepository,
@@ -142,13 +162,13 @@ public class GodoService {
   }
 
   private List<GodoCategoryResponse.CategoryData> getCategoriesWithCode(String code) {
-    String requestUrl = baseUrl.concat(categorySearchUrl)
-            .concat("partner_key=").concat(partnerKey)
-            .concat("&key=").concat(key)
-            .concat("&cateCd=").concat(code);
+    UriComponents uriComponents = UriComponentsBuilder.newInstance()
+      .scheme(scheme).host(godoBaseUrl).path(categorySearchUrl)
+      .query("partner_key={value}").query("key={value}").query("cateCd={value}")
+      .buildAndExpand(partnerKey, key, code);
 
     ResponseEntity<GodoCategoryResponse> response
-            = restTemplate.getForEntity(requestUrl, GodoCategoryResponse.class);
+            = restTemplate.getForEntity(uriComponents.toString(), GodoCategoryResponse.class);
 
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoCategoryResponse.CategoryData> dataList = response.getBody().getBody();
@@ -163,11 +183,14 @@ public class GodoService {
           } else {  // update
             category = copyPropertiesFrom(data);
             category.setCode(optional.get().getCode());
+            category.setThumbnailUrl(optional.get().getThumbnailUrl());
             categoryRepository.save(category);
           }
         } else {  // insert
           if (!hidden) {
-            categoryRepository.save(copyPropertiesFrom(data));
+            category = copyPropertiesFrom(data);
+            category.setThumbnailUrl(String.format("%s%s%s", categoryImagePrefix, data.getCateCd(), categoryImageSuffix));
+            categoryRepository.save(category);
           }
         }
       }
@@ -189,7 +212,6 @@ public class GodoService {
 
     target.setCode(source.getCateCd());
     target.setName(source.getCateNm());
-    target.setThumbnailUrl(String.format("%s%s%s", categoryImagePrefix, source.getCateCd(), categoryImageSuffix));
 
     return target;
   }
@@ -213,20 +235,18 @@ public class GodoService {
     } while (maxPage > nowPage);
 
     log.debug(String.format("GatheringGoodsFromGodomall elapsed: %d miliseconds, " +
-                    "new goods items: %d, updated goods items: %d",
-            (System.currentTimeMillis() - start), newCount, updatedCount));
-    newCount = updatedCount = 0;
+        "refresh goods items: %d", (System.currentTimeMillis() - start), refreshCount));
+    refreshCount = 0;
   }
 
   private GodoGoodsResponse.Header getGoodsFromGodo(int nextPage) throws IOException {
-    String requestUrl = baseUrl.concat(goodsSearchUrl)
-      .concat("partner_key=").concat(partnerKey)
-      .concat("&key=").concat(key)
-      .concat("&page=").concat(String.valueOf(nextPage))
-      .concat("&size=15");
+    UriComponents uriComponents = UriComponentsBuilder.newInstance()
+      .scheme(scheme).host(godoBaseUrl).path(goodsSearchUrl)
+      .query("partner_key={value}").query("key={value}").query("page={value}").query("size={value}")
+      .buildAndExpand(partnerKey, key, nextPage, 15);
 
     ResponseEntity<GodoGoodsResponse> response
-      = restTemplate.getForEntity(requestUrl, GodoGoodsResponse.class);
+      = restTemplate.getForEntity(uriComponents.toString(), GodoGoodsResponse.class);
 
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoGoodsResponse.GoodsData> dataList = response.getBody().getBody();
@@ -243,6 +263,7 @@ public class GodoService {
         if ("n".equalsIgnoreCase(goodsData.getGoodsDisplayFl())
           || "n".equalsIgnoreCase(goodsData.getGoodsSellFl())) {
           deleteGoods(goods);
+          log.debug("Delete Goods: " + goods.getGoodsNo());
           continue;
         }
 
@@ -260,6 +281,7 @@ public class GodoService {
         }
         goods.setGoodsMustInfo(mapper.writeValueAsString(list));
         goodsRepository.save(goods);
+        refreshCount++;
 
         if (goodsData.getOptionData() != null) {
           Optional<GoodsOption> optionalGoodsOption;
@@ -297,7 +319,10 @@ public class GodoService {
     headers.add(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
 
-    String requestUrl = baseUrl + commonCodeUrl + "partner_key=" + partnerKey + "&key=" + key;
+    UriComponents uriComponents = UriComponentsBuilder.newInstance()
+      .scheme(scheme).host(godoBaseUrl).path(commonCodeUrl)
+      .query("partner_key={value}").query("key={value}")
+      .buildAndExpand(partnerKey, key);
 
     MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
     body.add("code_type", "scm");
@@ -305,7 +330,7 @@ public class GodoService {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
     ResponseEntity<GodoScmResponse> response = restTemplate.exchange(
-            requestUrl, HttpMethod.POST, request, GodoScmResponse.class);
+            uriComponents.toString(), HttpMethod.POST, request, GodoScmResponse.class);
 
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoScmResponse.CodeData> dataList = response.getBody().getBody();
@@ -318,6 +343,10 @@ public class GodoService {
           updatedCount++;
         } else {
           store = new Store(scm.getScmNo());
+          store.setImageUrl(String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageSuffix));
+          store.setThumbnailUrl(String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageThumbnailSuffix));
+          store.setRefundUrl(String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageRefundSuffix));
+          store.setAsUrl(String.format("%s%d%s", storeImagePrefix, store.getId(), storeImageAsSuffix));
           newCount++;
         }
         store.setName(scm.getCompanyNm());
@@ -342,7 +371,10 @@ public class GodoService {
     headers.add(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
 
-    String requestUrl = baseUrl + commonCodeUrl + "partner_key=" + partnerKey + "&key=" + key;
+    UriComponents uriComponents = UriComponentsBuilder.newInstance()
+      .scheme(scheme).host(godoBaseUrl).path(commonCodeUrl)
+      .query("partner_key={value}").query("key={value}")
+      .buildAndExpand(partnerKey, key);
 
     MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
     body.add("code_type", "delivery");
@@ -350,7 +382,7 @@ public class GodoService {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
     ResponseEntity<GodoDeliveryResponse> response = restTemplate.exchange(
-      requestUrl, HttpMethod.POST, request, GodoDeliveryResponse.class);
+      uriComponents.toString(), HttpMethod.POST, request, GodoDeliveryResponse.class);
 
     if (GODOMALL_RESPONSE_OK.equals(response.getBody().getHeader().getCode())) {
       List<GodoDeliveryResponse.CodeData> dataList = response.getBody().getBody();
