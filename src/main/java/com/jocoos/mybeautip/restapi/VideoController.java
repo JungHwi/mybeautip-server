@@ -162,8 +162,10 @@ public class VideoController {
     comments.stream().forEach(comment -> {
       VideoCommentInfo commentInfo = new VideoCommentInfo(comment, createMemberInfo(comment
           .getCreatedBy()));
-      videoCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+      if (me != null) {
+        videoCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
           .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+      }
       result.add(commentInfo);
     });
 

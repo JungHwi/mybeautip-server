@@ -255,14 +255,13 @@ public class PostController {
 
     List<PostCommentInfo> result = Lists.newArrayList();
     Long me = memberService.currentMemberId();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
 
     comments.stream().forEach(comment -> {
       PostCommentInfo commentInfo = new PostCommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
-      postCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-        .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+      if (me != null) {
+        postCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+      }
       result.add(commentInfo);
     });
 
