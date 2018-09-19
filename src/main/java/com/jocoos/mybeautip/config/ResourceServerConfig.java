@@ -57,6 +57,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         .antMatchers(POST, "/api/**").access("#oauth2.hasScope('write')")
         .antMatchers(PATCH, "/api/**").access("#oauth2.hasScope('write')")
         .antMatchers(PUT, "/api/**").access("#oauth2.hasScope('write')")
-        .antMatchers(DELETE, "/api/**").access("#oauth2.hasScope('write')");
+        .antMatchers(DELETE, "/api/**").access("#oauth2.hasScope('write')")
+        .antMatchers(PATCH, "/api/1/categories/**").access("#oauth2.hasScope('admin')")
+        .antMatchers(PATCH, "/api/1/stores/**").access("#oauth2.hasScope('admin')");
   }
 }
