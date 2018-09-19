@@ -72,7 +72,8 @@ public interface VideoRepository extends CrudRepository<Video, Long> {
   Slice<Video> getUserVodAndMotdVideos(Member member, Date cursor, Pageable pageable);
 
   @Query("select v from Video v where v.visibility = 'PUBLIC' and v.deletedAt is null " +
-    "and (v.title like concat('%',:keyword,'%') or v.content like concat('%',:keyword,'%')) " +
+    "and (v.title like concat('%',:keyword,'%') or v.content like concat('%',:keyword,'%') " +
+    "or v.member.username like concat('%',:keyword,'%') or v.member.intro like concat('%',:keyword,'%')) " +
     "and v.createdAt < :cursor order by v.createdAt desc")
   Slice<Video> searchVideos(@Param("keyword") String keyword, @Param("cursor") Date cursor, Pageable pageable);
 
