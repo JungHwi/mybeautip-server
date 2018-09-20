@@ -30,6 +30,14 @@ public class VideoWatch extends MemberAuditable {
   @JoinColumn(name = "video_id")
   private Video video;
 
+  // username is used for guest
+  // createdBy is used for member
+  @Column
+  private String username;
+
+  @Column
+  private Boolean isGuest = false;
+
   @Column
   @LastModifiedDate
   private Date modifiedAt;
@@ -37,5 +45,11 @@ public class VideoWatch extends MemberAuditable {
   public VideoWatch(Video video, Member member) {
     this.video = video;
     this.createdBy = member;
+  }
+
+  public VideoWatch(Video video, String guestUsername) {
+    this.video = video;
+    this.username = guestUsername;
+    this.isGuest = true;
   }
 }

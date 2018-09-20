@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.security;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,13 +26,13 @@ public class MybeautipUserDetailsService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     log.debug("load user by username: {}", username);
+    if (StringUtils.startsWith(username, "guest:")) {
+      return createGuestUserDetails(username);
+    }
 
     switch (username) {
       case "0": {
         return new User("admin", "", AuthorityUtils.createAuthorityList("ROLE_ADMIN"));
-      }
-      case "guest": {
-        return createGuestUserDetails();
       }
       default: {
         return memberRepository.findById(Long.parseLong(username))
@@ -40,7 +42,7 @@ public class MybeautipUserDetailsService implements UserDetailsService {
     }
   }
 
-  private MyBeautipUserDetails createGuestUserDetails() {
-    return new MyBeautipUserDetails("guest", "ROLE_GUEST");
+  private MyBeautipUserDetails createGuestUserDetails(String username) {
+    return new MyBeautipUserDetails(username, "ROLE_GUEST");
   }
 }

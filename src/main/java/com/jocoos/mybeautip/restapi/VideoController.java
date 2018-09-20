@@ -392,28 +392,32 @@ public class VideoController {
   @Transactional
   @RequestMapping(value = "/{id:.+}/watches", method = { RequestMethod.POST, RequestMethod.PATCH })
   public ResponseEntity<VideoInfo> joinWatch(@PathVariable Long id) {
-    // Guest can not be inserted into watching list
+    VideoInfo video;
     Member me = memberService.currentMember();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
+    if (me == null) { // Guest
+      video = videoService.setWatcherWithGuest(id, memberService.getGuestUserName());
+    } else {
+      video = videoService.setWatcher(id, me);
     }
 
-    return new ResponseEntity<>(videoService.setWatcher(id, me), HttpStatus.OK);
+    return new ResponseEntity<>(video, HttpStatus.OK);
   }
 
   @Transactional
   @DeleteMapping("/{id:.+}/watches")
   public ResponseEntity<?> leaveWatch(@PathVariable Long id) {
-    Member me = memberService.currentMember();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
 
-    videoWatchRepository.findByVideoIdAndCreatedById(id, me.getId())
-      .ifPresent(videoWatchRepository::delete);
+    Member me = memberService.currentMember();
+
+    if (me == null) { // Guest
+      videoWatchRepository.findByVideoIdAndUsername(id, memberService.getGuestUserName())
+        .ifPresent(videoWatchRepository::delete);
+    } else {
+      videoWatchRepository.findByVideoIdAndCreatedById(id, me.getId())
+        .ifPresent(videoWatchRepository::delete);
+    }
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -425,7 +429,7 @@ public class VideoController {
     Long startCursor = StringUtils.isBlank(cursor) ? 0 : Long.parseLong(cursor);  // "createdBy" is used for cursor
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
     long duration = new Date().getTime() - watchDuration;
-    Slice<VideoWatch> list = videoWatchRepository.findByVideoIdAndModifiedAtAfterAndCreatedByIdAfter(id, new Date(duration), startCursor, pageable);
+    Slice<VideoWatch> list = videoWatchRepository.findByVideoIdAndIsGuestIsFalseAndModifiedAtAfterAndCreatedByIdAfter(id, new Date(duration), startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
     list.stream().forEach(watch -> members.add(memberService.getMemberInfo(watch.getCreatedBy())));
 

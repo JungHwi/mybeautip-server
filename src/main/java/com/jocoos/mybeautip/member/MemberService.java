@@ -35,6 +35,21 @@ public class MemberService {
     return Optional.ofNullable(currentMember()).map(Member::getId).orElse(null);
   }
 
+  public String getGuestUserName() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return null;
+    }
+
+    Object principal = authentication.getPrincipal();
+    if (principal instanceof MyBeautipUserDetails) {
+      return ((MyBeautipUserDetails) principal).getUsername();
+    } else {
+      log.warn("Unknown principal type");
+    }
+    return null;
+  }
+
   public Member currentMember() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null || !authentication.isAuthenticated()) {

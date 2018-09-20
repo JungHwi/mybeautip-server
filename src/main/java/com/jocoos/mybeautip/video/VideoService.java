@@ -198,12 +198,36 @@ public class VideoService {
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .map(v -> {
         if ("live".equalsIgnoreCase(v.getState())) {
-          Optional<VideoWatch> optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());
+          Optional<VideoWatch> optional;
+          if (me == null) {
+            optional = videoWatchRepository.findByVideoIdAndUsername(v.getId(), me.getUsername());
+          } else {
+            optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());
+          }
           if (optional.isPresent()) {
             optional.get().setModifiedAt(new Date());
             videoWatchRepository.save(optional.get());
           } else {
             videoWatchRepository.save(new VideoWatch(v, me));
+          }
+        }
+        return v;
+      })
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+    return generateVideoInfo(video);
+  }
+
+  public VideoController.VideoInfo setWatcherWithGuest(Long id, String guestUsername) {
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+      .map(v -> {
+        if ("live".equalsIgnoreCase(v.getState())) {
+          Optional<VideoWatch> optional = videoWatchRepository.findByVideoIdAndUsername(v.getId(), guestUsername);
+
+          if (optional.isPresent()) {
+            optional.get().setModifiedAt(new Date());
+            videoWatchRepository.save(optional.get());
+          } else {
+            videoWatchRepository.save(new VideoWatch(v, guestUsername));
           }
         }
         return v;
