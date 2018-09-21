@@ -390,8 +390,22 @@ public class VideoController {
    * Watches
    */
   @Transactional
-  @RequestMapping(value = "/{id:.+}/watches", method = { RequestMethod.POST, RequestMethod.PATCH })
+  @PostMapping(value = "/{id:.+}/watches")
   public ResponseEntity<VideoInfo> joinWatch(@PathVariable Long id) {
+    VideoInfo video;
+    Member me = memberService.currentMember();
+    if (me == null) { // Guest
+      video = videoService.setWatcherWithGuest(id, memberService.getGuestUserName());
+    } else {
+      video = videoService.setWatcher(id, me);
+    }
+
+    return new ResponseEntity<>(video, HttpStatus.OK);
+  }
+
+  @Transactional
+  @PatchMapping(value = "/{id:.+}/watches")
+  public ResponseEntity<VideoInfo> keepWatch(@PathVariable Long id) {
     VideoInfo video;
     Member me = memberService.currentMember();
     if (me == null) { // Guest
@@ -565,10 +579,12 @@ public class VideoController {
     private Integer duration;
     private String data;
     private Integer watchCount;
+    private Integer totalWatchCount;
     private Integer viewCount;
     private Integer heartCount;
     private Integer likeCount;
     private Integer commentCount;
+    private Integer orderCount;
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
     private Long likeId;

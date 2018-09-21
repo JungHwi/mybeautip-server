@@ -98,4 +98,8 @@ public interface VideoRepository extends CrudRepository<Video, Long> {
   @Modifying
   @Query("update Video v set v.viewCount = v.viewCount + ?2, v.modifiedAt = now() where v.id = ?1")
   void updateViewCount(Long id, int i);
+
+  @Modifying
+  @Query("update Video v set v.totalWatchCount = v.totalWatchCount + ?2, v.modifiedAt = now() where v.id = ?1")
+  void updateTotalWatchCount(Long id, int i);
 }
