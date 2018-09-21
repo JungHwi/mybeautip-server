@@ -38,6 +38,8 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.mention.MentionTagsRequest;
 import com.jocoos.mybeautip.post.*;
 
 @Slf4j
@@ -54,6 +56,7 @@ public class PostController {
   private final GoodsRepository goodsRepository;
   private final MemberService memberService;
   private final MemberRepository memberRepository;
+  private final MentionService mentionService;
 
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -63,7 +66,8 @@ public class PostController {
                         GoodsService goodsService,
                         GoodsRepository goodsRepository,
                         MemberService memberService,
-                        MemberRepository memberRepository) {
+                        MemberRepository memberRepository,
+                        MentionService mentionService) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -73,6 +77,7 @@ public class PostController {
     this.goodsRepository = goodsRepository;
     this.memberService = memberService;
     this.memberRepository = memberRepository;
+    this.mentionService = mentionService;
   }
 
   @GetMapping
@@ -307,6 +312,11 @@ public class PostController {
     BeanUtils.copyProperties(request, comment);
     postRepository.updateCommentCount(id, 1);
 
+    MentionTagsRequest mentionTags = request.getMentionTags();
+    if (mentionTags != null && mentionTags.size() > 0) {
+      comment = mentionService.getCommentWithMention(comment, request.getMentionTags());
+    }
+
     return new ResponseEntity<>(
        new CommentInfo(commentRepository.save(comment), createMemberInfo(comment.getCreatedBy())),
        HttpStatus.OK
@@ -469,6 +479,8 @@ public class PostController {
     private String comment;
 
     private Long parentId;
+
+    private MentionTagsRequest mentionTags;
   }
 
   @Data

@@ -38,6 +38,8 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.mention.MentionTagsRequest;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
@@ -61,6 +63,7 @@ public class VideoController {
   private final VideoWatchRepository videoWatchRepository;
   private final VideoReportRepository videoReportRepository;
   private final VideoViewRepository videoViewRepository;
+  private final MentionService mentionService;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -75,7 +78,8 @@ public class VideoController {
                          CommentLikeRepository commentLikeRepository,
                          VideoWatchRepository videoWatchRepository,
                          VideoReportRepository videoReportRepository,
-                         VideoViewRepository videoViewRepository) {
+                         VideoViewRepository videoViewRepository,
+                         MentionService mentionService) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.videoGoodsRepository = videoGoodsRepository;
@@ -87,6 +91,7 @@ public class VideoController {
     this.videoWatchRepository = videoWatchRepository;
     this.videoReportRepository = videoReportRepository;
     this.videoViewRepository = videoViewRepository;
+    this.mentionService = mentionService;
   }
 
   @GetMapping("{id}")
@@ -217,6 +222,11 @@ public class VideoController {
     comment.setVideoId(id);
     BeanUtils.copyProperties(request, comment);
     videoRepository.updateCommentCount(id, 1);
+
+    MentionTagsRequest mentionTags = request.getMentionTags();
+    if (mentionTags != null && mentionTags.size() > 0) {
+      comment = mentionService.getCommentWithMention(comment, request.getMentionTags());
+    }
 
     return new ResponseEntity<>(
       new VideoController.CommentInfo(commentRepository.save(comment)),
@@ -612,6 +622,8 @@ public class VideoController {
     private String comment;
 
     private Long parentId;
+
+    private MentionTagsRequest mentionTags;
   }
 
   @Data

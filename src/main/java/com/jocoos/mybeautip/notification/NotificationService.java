@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.notification;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 
@@ -140,4 +141,38 @@ public class NotificationService {
       deviceService.push(n);
     }
   }
+
+  public void notifyAddPostComment(Comment postComment, Member... mentioned) {
+    // TODO : Handle add post comment notification and post comment reply
+    postRepository.findById(postComment.getPostId())
+       .ifPresent(post -> {
+         if (mentioned != null) {
+           Arrays.stream(mentioned).forEach(m -> {
+             Notification n = notificationRepository.save(new Notification(post, postComment, m));
+             deviceService.push(n);
+           });
+         } else {
+           Notification n = notificationRepository.save(new Notification(post, postComment));
+           deviceService.push(n);
+         }
+       });
+  }
+
+  public void notifyAddVideoComment(Comment videoComment, Member... mentioned) {
+    // TODO : Handle add video comment notification and video comment reply
+    videoRepository.findById(videoComment.getVideoId())
+       .ifPresent(v -> {
+         v.setThumbnailUrl(v.getThumbnailUrl());
+         if (mentioned != null) {
+           Arrays.stream(mentioned).forEach(m -> {
+             Notification n = notificationRepository.save(new Notification(v, videoComment, m));
+             deviceService.push(n);
+           });
+         } else {
+           Notification n = notificationRepository.save(new Notification(v, videoComment));
+           deviceService.push(n);
+         }
+       });
+  }
+
 }

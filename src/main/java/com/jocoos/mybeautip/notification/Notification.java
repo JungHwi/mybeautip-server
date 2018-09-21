@@ -17,6 +17,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 
@@ -152,5 +153,27 @@ public class Notification {
     this.resourceOwner = source;
     this.imageUrl = videoLike.getVideo().getThumbnailUrl();
     this.args = Lists.newArrayList(source.getUsername());
+  }
+
+  public Notification(Post post, Comment postComment, Member mentioned) {
+    this.type = MENTION;
+    this.targetMember = mentioned;
+    this.read = false;
+    this.resourceType = "post_comment";
+    this.resourceId = postComment.getId();
+    this.resourceOwner = postComment.getCreatedBy();
+    this.imageUrl = post.getThumbnailUrl();
+    this.args = Lists.newArrayList(postComment.getCreatedBy().getUsername(), postComment.getComment());
+  }
+
+  public Notification(Video video, Comment videoComment, Member mentioned) {
+    this.type = MENTION;
+    this.targetMember = mentioned;
+    this.read = false;
+    this.resourceType = "video_comment";
+    this.resourceId = videoComment.getId();
+    this.resourceOwner = videoComment.getCreatedBy();
+    this.imageUrl = video.getThumbnailUrl();
+    this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
   }
 }
