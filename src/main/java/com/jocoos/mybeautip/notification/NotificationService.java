@@ -78,9 +78,11 @@ public class NotificationService {
   public void notifyAddVideoComment(VideoComment videoComment) {
     videoRepository.findById(videoComment.getVideoId())
       .ifPresent(v -> {
-         v.setThumbnailUrl(getVideoThumbnail(v.getVideoKey()));
-         Notification n = notificationRepository.save(new Notification(v, videoComment));
-         deviceService.push(n);
+        if (!(videoComment.getCreatedBy().getId().equals(v.getMember().getId()))) {
+          v.setThumbnailUrl(getVideoThumbnail(v.getVideoKey()));
+          Notification n = notificationRepository.save(new Notification(v, videoComment));
+          deviceService.push(n);
+        }
       });
   }
 
@@ -92,16 +94,20 @@ public class NotificationService {
 
     videoRepository.findById(videoComment.getVideoId())
        .ifPresent(v -> {
-         Notification n = notificationRepository.save(new Notification(getVideoThumbnail(v.getVideoKey()), videoComment, parentMember));
-         deviceService.push(n);
+         if (parentMember != null && !(videoComment.getCreatedBy().getId().equals(parentMember.getId()))) {
+           Notification n = notificationRepository.save(new Notification(getVideoThumbnail(v.getVideoKey()), videoComment, parentMember));
+           deviceService.push(n);
+         }
       });
   }
 
   public void notifyAddPostComment(PostComment postComment) {
     postRepository.findById(postComment.getPostId())
        .ifPresent(post -> {
-         Notification n = notificationRepository.save(new Notification(post, postComment));
-         deviceService.push(n);
+         if (!(postComment.getCreatedBy().getId().equals(post.getCreatedBy().getId()))) {
+           Notification n = notificationRepository.save(new Notification(post, postComment));
+           deviceService.push(n);
+         }
        });
   }
 
@@ -114,30 +120,38 @@ public class NotificationService {
 
     postRepository.findById(postComment.getPostId())
        .ifPresent(post -> {
-         Notification n = notificationRepository.save(new Notification(post.getThumbnailUrl(), postComment, parentMember));
-         deviceService.push(n);
+         if (parentMember != null && !(postComment.getCreatedBy().getId().equals(parentMember.getId()))) {
+           Notification n = notificationRepository.save(new Notification(post.getThumbnailUrl(), postComment, parentMember));
+           deviceService.push(n);
+         }
        });
   }
 
   public void notifyAddVideoLike(VideoLike videoLike) {
-    Notification n = notificationRepository.save(new Notification(videoLike,
-      getVideoThumbnail(videoLike.getVideo().getVideoKey()), videoLike.getCreatedBy()));
-    deviceService.push(n);
+    if (!(videoLike.getCreatedBy().getId().equals(videoLike.getVideo().getMember().getId()))) {
+      Notification n = notificationRepository.save(new Notification(videoLike,
+        getVideoThumbnail(videoLike.getVideo().getVideoKey()), videoLike.getCreatedBy()));
+      deviceService.push(n);
+    }
   }
 
   public void notifyAddPostCommentLike(PostCommentLike postCommentLike) {
-    String thumbnail = postRepository.findById(postCommentLike.getComment().getPostId())
-       .map(Post::getThumbnailUrl).orElseGet(null);
+    if (!(postCommentLike.getCreatedBy().getId().equals(postCommentLike.getComment().getCreatedBy().getId()))) {
+      String thumbnail = postRepository.findById(postCommentLike.getComment().getPostId())
+        .map(Post::getThumbnailUrl).orElseGet(null);
 
-    Notification n = notificationRepository.save(new Notification(postCommentLike, thumbnail));
-    deviceService.push(n);
+      Notification n = notificationRepository.save(new Notification(postCommentLike, thumbnail));
+      deviceService.push(n);
+    }
   }
 
   public void notifyAddVideoCommentLike(VideoCommentLike videoCommentLike) {
-    String thumbnail = videoRepository.findById(videoCommentLike.getComment().getVideoId())
-       .map(Video::getThumbnailUrl).orElseGet(null);
+    if (!(videoCommentLike.getCreatedBy().getId().equals(videoCommentLike.getComment().getCreatedBy().getId()))) {
+      String thumbnail = videoRepository.findById(videoCommentLike.getComment().getVideoId())
+        .map(Video::getThumbnailUrl).orElseGet(null);
 
-    Notification n = notificationRepository.save(new Notification(videoCommentLike, thumbnail));
-    deviceService.push(n);
+      Notification n = notificationRepository.save(new Notification(videoCommentLike, thumbnail));
+      deviceService.push(n);
+    }
   }
 }
