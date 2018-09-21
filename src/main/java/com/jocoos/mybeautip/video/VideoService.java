@@ -199,16 +199,13 @@ public class VideoService {
       .map(v -> {
         if ("live".equalsIgnoreCase(v.getState())) {
           Optional<VideoWatch> optional;
-          if (me == null) {
-            optional = videoWatchRepository.findByVideoIdAndUsername(v.getId(), me.getUsername());
-          } else {
-            optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());
-          }
+          optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());
           if (optional.isPresent()) {
             optional.get().setModifiedAt(new Date());
             videoWatchRepository.save(optional.get());
           } else {
             videoWatchRepository.save(new VideoWatch(v, me));
+            videoRepository.updateTotalWatchCount(v.getId(), 1);
           }
         }
         return v;
@@ -228,6 +225,7 @@ public class VideoService {
             videoWatchRepository.save(optional.get());
           } else {
             videoWatchRepository.save(new VideoWatch(v, guestUsername));
+            videoRepository.updateTotalWatchCount(v.getId(), 1);
           }
         }
         return v;

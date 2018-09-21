@@ -59,6 +59,9 @@ public class Video {
   private Integer watchCount;
 
   @Column(nullable = false)
+  private Integer totalWatchCount;
+
+  @Column(nullable = false)
   private Integer heartCount;
 
   @Column(nullable = false)
@@ -69,6 +72,9 @@ public class Video {
 
   @Column(nullable = false)
   private Integer commentCount;
+
+  @Column(nullable = false)
+  private Integer orderCount;
 
   @Column(nullable = false)
   private Integer relatedGoodsCount;
