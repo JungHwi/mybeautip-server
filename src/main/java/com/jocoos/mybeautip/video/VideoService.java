@@ -206,6 +206,7 @@ public class VideoService {
           } else {
             videoWatchRepository.save(new VideoWatch(v, me));
             videoRepository.updateTotalWatchCount(v.getId(), 1);
+            v.setTotalWatchCount(v.getTotalWatchCount() + 1);
           }
         }
         return v;
@@ -226,6 +227,7 @@ public class VideoService {
           } else {
             videoWatchRepository.save(new VideoWatch(v, guestUsername));
             videoRepository.updateTotalWatchCount(v.getId(), 1);
+            v.setTotalWatchCount(v.getTotalWatchCount() + 1);
           }
         }
         return v;
