@@ -39,7 +39,7 @@ import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.mention.MentionTagsRequest;
+import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.post.*;
 
 @Slf4j
@@ -312,13 +312,15 @@ public class PostController {
     BeanUtils.copyProperties(request, comment);
     postRepository.updateCommentCount(id, 1);
 
-    MentionTagsRequest mentionTags = request.getMentionTags();
+    postService.saveComment(comment);
+
+    List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {
-      comment = mentionService.getCommentWithMention(comment, request.getMentionTags());
+      mentionService.updatePostCommentWithMention(comment, mentionTags);
     }
 
     return new ResponseEntity<>(
-       new CommentInfo(commentRepository.save(comment), createMemberInfo(comment.getCreatedBy())),
+       new PostCommentInfo(comment, createMemberInfo(comment.getCreatedBy())),
        HttpStatus.OK
     );
   }
@@ -480,7 +482,7 @@ public class PostController {
 
     private Long parentId;
 
-    private MentionTagsRequest mentionTags;
+    private List<MentionTag> mentionTags;
   }
 
   @Data

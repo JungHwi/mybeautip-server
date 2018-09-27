@@ -39,7 +39,7 @@ import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.mention.MentionTagsRequest;
+import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
@@ -167,7 +167,7 @@ public class VideoController {
       comments = videoService.findCommentsByVideoId(id, cursor, page);
     }
 
-    List<VideoController.CommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = Lists.newArrayList();
     comments.stream().forEach(comment -> {
       CommentInfo commentInfo = new CommentInfo(comment, createMemberInfo(comment
           .getCreatedBy()));
@@ -195,7 +195,7 @@ public class VideoController {
   @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
-                                        @RequestBody VideoController.CreateCommentRequest request,
+                                        @RequestBody CreateCommentRequest request,
                                         BindingResult bindingResult) {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
@@ -223,13 +223,15 @@ public class VideoController {
     BeanUtils.copyProperties(request, comment);
     videoRepository.updateCommentCount(id, 1);
 
-    MentionTagsRequest mentionTags = request.getMentionTags();
+    comment = videoService.saveComment(comment);
+
+    List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {
-      comment = mentionService.getCommentWithMention(comment, request.getMentionTags());
+      mentionService.updateVideoCommentWithMention(comment, mentionTags);
     }
 
     return new ResponseEntity<>(
-      new VideoController.CommentInfo(commentRepository.save(comment)),
+      new CommentInfo(comment),
       HttpStatus.OK
     );
   }
@@ -623,7 +625,7 @@ public class VideoController {
 
     private Long parentId;
 
-    private MentionTagsRequest mentionTags;
+    private List<MentionTag> mentionTags;
   }
 
   @Data

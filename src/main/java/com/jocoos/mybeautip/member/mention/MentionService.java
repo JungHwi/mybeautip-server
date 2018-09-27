@@ -2,8 +2,7 @@ package com.jocoos.mybeautip.member.mention;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Async;
@@ -11,11 +10,15 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.post.PostComment;
+import com.jocoos.mybeautip.post.PostCommentRepository;
 import com.jocoos.mybeautip.video.VideoComment;
+import com.jocoos.mybeautip.video.VideoCommentRepository;
 
 @Slf4j
 @Service
@@ -23,37 +26,39 @@ public class MentionService {
 
   private final MemberRepository memberRepository;
   private final NotificationService notificationService;
+  private final CommentRepository commentRepository;
 
   public MentionService(MemberRepository memberRepository,
-                        NotificationService notificationService) {
+                        NotificationService notificationService,
+                        CommentRepository commentRepository) {
     this.memberRepository = memberRepository;
     this.notificationService = notificationService;
+    this.commentRepository = commentRepository;
   }
 
   @Async
-  public Comment getCommentWithMention(Comment postComment, MentionTagsRequest mentionTags) {
-    if (mentionTags != null && mentionTags.size() > 0) {
-      return postComment;
+  public void updatePostCommentWithMention(Comment postComment, List<MentionTag> mentionTags) {
+    if (mentionTags == null || mentionTags.size() == 0) {
+      return;
     }
 
     String comment = postComment.getComment();
     log.debug("post comment originals: {}", comment);
 
-//    String mentionedComment = notificationMention(comment, mentionTags);
-    for (MentionTagsRequest.MentionTag tag : mentionTags) {
+    for (MentionTag tag : mentionTags) {
       log.debug("comment: {}", comment);
 
       List<String> mentions = findMentionTags(comment);
       for (String mentioned : mentions) {
         if (mentioned.equals(tag.getUsername())) {
-          memberRepository.findById(tag.getMemberId()).ifPresent(
-             m -> {
-               // TODO: Move to notificationAspect
-               notificationService.notifyAddPostComment(postComment, m);
+          // FIXME: Uncheck my username and username in following list
 
-               comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
-             }
-          );
+          Optional<Member> member = memberRepository.findById(tag.getMemberId());
+          if (member.isPresent()) {
+            notificationService.notifyAddComment(postComment, member.get());
+            comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
+            log.debug("mentioned comment: {}", comment);
+          }
         }
       }
     }
@@ -61,41 +66,40 @@ public class MentionService {
     log.debug("post comment with mention: {}", comment);
     postComment.setComment(comment);
 
-    return postComment;
+    commentRepository.save(postComment);
   }
 
   @Async
-  public Comment getCommentWithMention(Comment videoComment, MentionTagsRequest mentionTags) {
-    if (mentionTags != null && mentionTags.size() > 0) {
-      return videoComment;
+  public void updateVideoCommentWithMention(Comment videoComment, List<MentionTag> mentionTags) {
+    if (mentionTags == null || mentionTags.size() == 0) {
+      return;
     }
 
     String comment = videoComment.getComment();
     log.debug("video comment originals: {}", comment);
 
-//    String mentionedComment = notificationMention(comment, mentionTags);
-    for (MentionTagsRequest.MentionTag tag : mentionTags) {
+    for (MentionTag tag : mentionTags) {
       log.debug("comment: {}", comment);
 
       List<String> mentions = findMentionTags(comment);
       for (String mentioned : mentions) {
         if (mentioned.equals(tag.getUsername())) {
-          memberRepository.findById(tag.getMemberId()).ifPresent(
-             m -> {
-               // TODO: Move to notificationAspect
-               notificationService.notifyAddVideoComment(videoComment, m);
+          // FIXME: Uncheck my username and username in following list
 
-               comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
-             }
-          );
+          Optional<Member> member = memberRepository.findById(tag.getMemberId());
+          if (member.isPresent()) {
+            notificationService.notifyAddVideoComment(videoComment, member.get());
+            comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
+            log.debug("mentioned comment: {}", comment);
+          }
         }
       }
     }
 
     log.debug("video comment with mention: {}", comment);
-
     videoComment.setComment(comment);
-    return videoComment;
+
+    commentRepository.save(videoComment);
   }
 
   private String createMentionTag(Object username) {
@@ -108,25 +112,5 @@ public class MentionService {
        .filter(c -> c.startsWith("@"))
        .map(c -> c.substring(1))
        .collect(Collectors.toList());
-  }
-
-  public static void main(String[] args) {
-    String comment = "@tekhun @eunyoung_kim @tekhun @eunyoung_kim 안녕하세요";
-    // U+AC00-U+D7A3
-    String[] split = comment.split(" ");
-    System.out.println(split.length);
-    List<String> mentions = Arrays.stream(split)
-       .filter(s -> s.startsWith("@"))
-       .map(s -> s.substring(1))
-       .collect(Collectors.toList());
-    for (String s : mentions) {
-      System.out.println(s);
-    }
-
-
-    String pattern = "@[:word:]";
-    Pattern p = Pattern.compile(pattern);
-    Matcher matcher = p.matcher(comment);
-    matcher.find();
   }
 }

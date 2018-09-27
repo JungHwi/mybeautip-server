@@ -68,52 +68,52 @@ public class NotificationService {
     deviceService.push(n);
   }
 
-  public void notifyAddComment(Comment comment) {
-    if (comment.getPostId() != null) {
-      postRepository.findById(comment.getPostId())
-        .ifPresent(post -> {
-          if (!(comment.getCreatedBy().getId().equals(post.getCreatedBy().getId()))) {
-            Notification n = notificationRepository.save(new Notification(comment, post.getCreatedBy(), post.getThumbnailUrl()));
-            deviceService.push(n);
-          }
-        });
-    }
+  public void notifyAddCommentReply(Comment comment) {
+    Member parentMember = Optional.ofNullable(comment.getParentId())
+       .flatMap(parent -> commentRepository.findById(parent))
+       .map(Comment::getCreatedBy)
+       .orElse(null);
 
     if (comment.getVideoId() != null) {
       videoRepository.findById(comment.getVideoId())
-        .ifPresent(v -> {
-          if (!(comment.getCreatedBy().getId().equals(v.getMember().getId()))) {
-            Notification n = notificationRepository.save(new Notification(comment, v.getMember(), v.getThumbnailUrl()));
-            deviceService.push(n);
-          }
-        });
+         .ifPresent(v -> {
+           if (parentMember != null && !(comment.getCreatedBy().getId().equals(parentMember.getId()))) {
+             Notification n = notificationRepository.save(new Notification(comment, comment.getParentId(), parentMember, v.getThumbnailUrl()));
+             deviceService.push(n);
+           }
+         });
+    }
+
+    if (comment.getPostId() != null) {
+      postRepository.findById(comment.getPostId())
+         .ifPresent(post -> {
+           if (parentMember != null && !(comment.getCreatedBy().getId().equals(parentMember.getId()))) {
+             Notification n = notificationRepository.save(new Notification(comment, comment.getParentId(), parentMember, post.getThumbnailUrl()));
+             deviceService.push(n);
+           }
+         });
     }
   }
 
-  public void notifyAddCommentReply(Comment comment) {
-    Member parentMember = Optional.ofNullable(comment.getParentId())
-      .flatMap(parent -> commentRepository.findById(parent))
-      .map(Comment::getCreatedBy)
-      .orElse(null);
+  public void notifyAddComment(Comment comment) {
+    if (comment.getPostId() != null) {
+      postRepository.findById(comment.getPostId())
+         .ifPresent(post -> {
+           if (!(comment.getCreatedBy().getId().equals(post.getCreatedBy().getId()))) {
+             Notification n = notificationRepository.save(new Notification(comment, post.getCreatedBy(), post.getThumbnailUrl()));
+             deviceService.push(n);
+           }
+         });
+    }
 
     if (comment.getVideoId() != null) {
       videoRepository.findById(comment.getVideoId())
-        .ifPresent(v -> {
-          if (parentMember != null && !(comment.getCreatedBy().getId().equals(parentMember.getId()))) {
-            Notification n = notificationRepository.save(new Notification(comment, comment.getParentId(), parentMember, v.getThumbnailUrl()));
-            deviceService.push(n);
-          }
-        });
-    }
-
-    if (comment.getPostId() != null) {
-      postRepository.findById(comment.getPostId())
-        .ifPresent(post -> {
-          if (parentMember != null && !(comment.getCreatedBy().getId().equals(parentMember.getId()))) {
-            Notification n = notificationRepository.save(new Notification(comment, comment.getParentId(), parentMember, post.getThumbnailUrl()));
-            deviceService.push(n);
-          }
-        });
+         .ifPresent(v -> {
+           if (!(comment.getCreatedBy().getId().equals(v.getMember().getId()))) {
+             Notification n = notificationRepository.save(new Notification(comment, v.getMember(), v.getThumbnailUrl()));
+             deviceService.push(n);
+           }
+         });
     }
   }
 
@@ -122,22 +122,15 @@ public class NotificationService {
       String thumbnail = null;
       if (commentLike.getComment().getVideoId() != null) {
         thumbnail = videoRepository.findById(commentLike.getComment().getVideoId())
-          .map(Video::getThumbnailUrl).orElseGet(null);
+           .map(Video::getThumbnailUrl).orElseGet(null);
       }
 
       if (commentLike.getComment().getPostId() != null) {
         thumbnail = postRepository.findById(commentLike.getComment().getPostId())
-          .map(Post::getThumbnailUrl).orElseGet(null);
+           .map(Post::getThumbnailUrl).orElseGet(null);
       }
 
       Notification n = notificationRepository.save(new Notification(commentLike, thumbnail));
-      deviceService.push(n);
-    }
-  }
-
-  public void notifyAddVideoLike(VideoLike videoLike) {
-    if (!(videoLike.getCreatedBy().getId().equals(videoLike.getVideo().getMember().getId()))) {
-      Notification n = notificationRepository.save(new Notification(videoLike, videoLike.getCreatedBy()));
       deviceService.push(n);
     }
   }
@@ -149,11 +142,11 @@ public class NotificationService {
          if (mentioned != null) {
            Arrays.stream(mentioned).forEach(m -> {
              Notification n = notificationRepository.save(new Notification(post, postComment, m));
+             log.debug("mentioned post comment: {}", n);
              deviceService.push(n);
            });
          } else {
-           Notification n = notificationRepository.save(new Notification(post, postComment));
-           deviceService.push(n);
+           notifyAddComment(postComment);
          }
        });
   }
@@ -166,13 +159,12 @@ public class NotificationService {
          if (mentioned != null) {
            Arrays.stream(mentioned).forEach(m -> {
              Notification n = notificationRepository.save(new Notification(v, videoComment, m));
+             log.debug("mentioned video comment: {}", n);
              deviceService.push(n);
            });
          } else {
-           Notification n = notificationRepository.save(new Notification(v, videoComment));
-           deviceService.push(n);
+           notifyAddComment(videoComment);
          }
        });
   }
-
 }
