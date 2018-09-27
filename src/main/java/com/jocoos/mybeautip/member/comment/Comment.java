@@ -24,6 +24,12 @@ public class Comment extends MemberAuditable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  /**
+   * 1: post, 2: video
+   */
+  @Column(nullable = false)
+  private int category;
+
   @Column
   private Long postId;
 
