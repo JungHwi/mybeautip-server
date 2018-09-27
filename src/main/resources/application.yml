@@ -126,8 +126,6 @@ management:
 
 flipflop:
   app-key: testapp3
-  video:
-    thumbnail-format: https://s3.ap-northeast-2.amazonaws.com/flipflop-dev/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 redis:
   host: localhost

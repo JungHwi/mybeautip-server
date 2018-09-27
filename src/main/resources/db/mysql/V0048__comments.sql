@@ -31,3 +31,11 @@ CREATE TABLE `comment_likes` (
   CONSTRAINT `fk_comment_likes_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
   CONSTRAINT `fk_comment_likes_comment` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Drop unused tables
+--
+DROP TABLE IF EXISTS post_comment_likes;
+DROP TABLE IF EXISTS post_comments;
+DROP TABLE IF EXISTS video_comment_likes;
+DROP TABLE IF EXISTS video_comments;
