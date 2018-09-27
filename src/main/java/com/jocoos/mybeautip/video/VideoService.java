@@ -16,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
@@ -26,7 +28,7 @@ public class VideoService {
 
   private final MemberService memberService;
   private final VideoRepository videoRepository;
-  private final VideoCommentRepository videoCommentRepository;
+  private final CommentRepository commentRepository;
   private final VideoLikeRepository videoLikeRepository;
   private final VideoWatchRepository videoWatchRepository;
 
@@ -35,12 +37,12 @@ public class VideoService {
   
   public VideoService(MemberService memberService,
                       VideoRepository videoRepository,
-                      VideoCommentRepository videoCommentRepository,
+                      CommentRepository commentRepository,
                       VideoLikeRepository videoLikeRepository,
                       VideoWatchRepository videoWatchRepository) {
     this.memberService = memberService;
     this.videoRepository = videoRepository;
-    this.videoCommentRepository = videoCommentRepository;
+    this.commentRepository = commentRepository;
     this.videoLikeRepository = videoLikeRepository;
     this.videoWatchRepository = videoWatchRepository;
   }
@@ -156,24 +158,24 @@ public class VideoService {
     return "all";
   }
 
-  public Slice<VideoComment> findCommentsByVideoId(Long id, String cursor, Pageable pageable) {
-    Slice<VideoComment> comments;
+  public Slice<Comment> findCommentsByVideoId(Long id, String cursor, Pageable pageable) {
+    Slice<Comment> comments;
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
-      comments = videoCommentRepository.findByVideoIdAndCreatedAtAfterAndParentIdIsNull(id, createdAt, pageable);
+      comments = commentRepository.findByVideoIdAndCreatedAtAfterAndParentIdIsNull(id, createdAt, pageable);
     } else {
-      comments = videoCommentRepository.findByVideoIdAndParentIdIsNull(id, pageable);
+      comments = commentRepository.findByVideoIdAndParentIdIsNull(id, pageable);
     }
     return comments;
   }
 
-  public Slice<VideoComment> findCommentsByParentId(Long parentId, String cursor, Pageable pageable) {
-    Slice<VideoComment> comments;
+  public Slice<Comment> findCommentsByParentId(Long parentId, String cursor, Pageable pageable) {
+    Slice<Comment> comments;
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
-      comments = videoCommentRepository.findByParentIdAndCreatedAtAfter(parentId, createdAt, pageable);
+      comments = commentRepository.findByParentIdAndCreatedAtAfter(parentId, createdAt, pageable);
     } else {
-      comments = videoCommentRepository.findByParentId(parentId, pageable);
+      comments = commentRepository.findByParentId(parentId, pageable);
     }
     return comments;
   }

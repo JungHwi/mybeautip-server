@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
@@ -30,10 +31,10 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoLike;
-import com.jocoos.mybeautip.video.VideoLikeRepository;
-import com.jocoos.mybeautip.video.VideoService;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.word.BannedWordService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
@@ -58,6 +59,8 @@ public class MemberController {
   private final StoreLikeRepository storeLikeRepository;
   private final VideoLikeRepository videoLikeRepository;
   private final BannedWordService bannedWordService;
+  private final CommentRepository commentRepository;
+  private final CommentLikeRepository commentLikeRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
   private String storeImagePrefix;
@@ -76,7 +79,9 @@ public class MemberController {
                           GoodsLikeRepository goodsLikeRepository,
                           StoreLikeRepository storeLikeRepository,
                           VideoLikeRepository videoLikeRepository,
-                          BannedWordService bannedWordService) {
+                          BannedWordService bannedWordService,
+                          CommentRepository commentRepository,
+                          CommentLikeRepository commentLikeRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -86,6 +91,8 @@ public class MemberController {
     this.storeLikeRepository = storeLikeRepository;
     this.videoLikeRepository = videoLikeRepository;
     this.bannedWordService = bannedWordService;
+    this.commentRepository = commentRepository;
+    this.commentLikeRepository = commentLikeRepository;
   }
 
   @GetMapping("/me")
@@ -323,6 +330,40 @@ public class MemberController {
     return new CursorResponse.Builder<>("/api/1/members/" + id + "/videos", videos)
       .withType(type)
       .withState(state)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
+  }
+
+  @GetMapping(value = "/me/comments")
+  public CursorResponse getMyComments(@RequestParam(defaultValue = "100") int count,
+                                      @RequestParam(required = false) String cursor) {
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    Long me = memberService.currentMemberId();
+    Slice<Comment> comments;
+    if (StringUtils.isNumeric(cursor)) {
+      Date createdAt = new Date(Long.parseLong(cursor));
+      comments = commentRepository.findByCreatedByIdAndCreatedAtBeforeAndParentIdIsNull(me, createdAt, pageable);
+    } else {
+      comments = commentRepository.findByCreatedByIdAndParentIdIsNull(me, pageable);
+    }
+
+    List<VideoController.CommentInfo> result = Lists.newArrayList();
+    comments.stream().forEach(comment -> {
+      VideoController.CommentInfo commentInfo = new VideoController.CommentInfo(
+        comment, new MemberInfo(comment.getCreatedBy(), null));
+      if (me != null) {
+        commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+      }
+      result.add(commentInfo);
+    });
+
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/members/me/comments", result)
       .withCount(count)
       .withCursor(nextCursor).toBuild();
   }
