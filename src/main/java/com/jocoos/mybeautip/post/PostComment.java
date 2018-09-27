@@ -50,4 +50,3 @@ public class PostComment extends MemberAuditable {
     this.postId = postId;
   }
 }
-
