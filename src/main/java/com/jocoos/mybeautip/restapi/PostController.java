@@ -34,6 +34,10 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.post.*;
 
 @Slf4j
@@ -44,8 +48,8 @@ public class PostController {
   private final PostService postService;
   private final PostRepository postRepository;
   private final PostLikeRepository postLikeRepository;
-  private final PostCommentRepository postCommentRepository;
-  private final PostCommentLikeRepository postCommentLikeRepository;
+  private final CommentRepository commentRepository;
+  private final CommentLikeRepository commentLikeRepository;
   private final GoodsService goodsService;
   private final GoodsRepository goodsRepository;
   private final MemberService memberService;
@@ -54,8 +58,8 @@ public class PostController {
   public PostController(PostService postService,
                         PostRepository postRepository,
                         PostLikeRepository postLikeRepository,
-                        PostCommentRepository postCommentRepository,
-                        PostCommentLikeRepository postCommentLikeRepository,
+                        CommentRepository commentRepository,
+                        CommentLikeRepository commentLikeRepository,
                         GoodsService goodsService,
                         GoodsRepository goodsRepository,
                         MemberService memberService,
@@ -63,8 +67,8 @@ public class PostController {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
-    this.postCommentRepository = postCommentRepository;
-    this.postCommentLikeRepository = postCommentLikeRepository;
+    this.commentRepository = commentRepository;
+    this.commentLikeRepository = commentLikeRepository;
     this.goodsService = goodsService;
     this.goodsRepository = goodsRepository;
     this.memberService = memberService;
@@ -240,12 +244,12 @@ public class PostController {
   }
 
   @GetMapping("/{id:.+}/comments")
-  public CursorResponse getPostComments(@PathVariable Long id,
+  public CursorResponse getComments(@PathVariable Long id,
                                         @RequestParam(defaultValue = "20") int count,
                                         @RequestParam(required = false) String cursor,
                                         @RequestParam(required = false) Long parentId) {
     PageRequest page = PageRequest.of(0, count);
-    Slice<PostComment> comments = null;
+    Slice<Comment> comments = null;
 
     if (parentId != null) {
       comments = postService.findCommentsByParentId(parentId, cursor, page);
@@ -253,13 +257,13 @@ public class PostController {
       comments = postService.findCommentsByPostId(id, cursor, page);
     }
 
-    List<PostCommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = Lists.newArrayList();
     Long me = memberService.currentMemberId();
 
     comments.stream().forEach(comment -> {
-      PostCommentInfo commentInfo = new PostCommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
+      CommentInfo commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
       if (me != null) {
-        postCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+        commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
           .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
       }
       result.add(commentInfo);
@@ -270,10 +274,10 @@ public class PostController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    int totalCount = postRepository.findById(id).map(Post::getLikeCount).orElse(0);
+    int totalCount = postRepository.findById(id).map(Post::getCommentCount).orElse(0);
 
     return new CursorResponse
-      .Builder<PostCommentInfo>("/api/1/posts/" + id + "/comments", result)
+      .Builder<CommentInfo>("/api/1/posts/" + id + "/comments", result)
       .withCount(count)
       .withCursor(nextCursor)
       .withTotalCount(totalCount).toBuild();
@@ -281,7 +285,7 @@ public class PostController {
 
   @Transactional
   @PostMapping("/{id:.+}/comments")
-  public ResponseEntity addPostComment(@PathVariable Long id,
+  public ResponseEntity addComment(@PathVariable Long id,
                                        @RequestBody CreateCommentRequest request,
                                        BindingResult bindingResult) {
 
@@ -290,26 +294,28 @@ public class PostController {
     }
 
     if (request.getParentId() != null) {
-      postCommentRepository.findById(request.getParentId())
+      commentRepository.findById(request.getParentId())
          .map(parent -> {
-            postCommentRepository.updateCommentCount(parent.getId(), 1);
+            commentRepository.updateCommentCount(parent.getId(), 1);
             return Optional.empty();
          })
          .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
     }
 
-    PostComment postComment = new PostComment(id);
-    BeanUtils.copyProperties(request, postComment);
+    Comment comment = new Comment();
+    comment.setCategory(1);
+    comment.setPostId(id);
+    BeanUtils.copyProperties(request, comment);
     postRepository.updateCommentCount(id, 1);
 
     return new ResponseEntity<>(
-       new PostCommentInfo(postCommentRepository.save(postComment), createMemberInfo(postComment.getCreatedBy())),
+       new CommentInfo(commentRepository.save(comment), createMemberInfo(comment.getCreatedBy())),
        HttpStatus.OK
     );
   }
 
   @PatchMapping("/{postId:.+}/comments/{id:.+}")
-  public ResponseEntity updatePostComment(@PathVariable Long postId,
+  public ResponseEntity updateComment(@PathVariable Long postId,
                                           @PathVariable Long id,
                                           @RequestBody UpdateCommentRequest request,
                                           BindingResult bindingResult) {
@@ -319,11 +325,11 @@ public class PostController {
     }
 
     Long memberId = memberService.currentMemberId();
-    return postCommentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
+    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
        .map(comment -> {
          comment.setComment(request.getComment());
          return new ResponseEntity<>(
-            new PostCommentInfo(postCommentRepository.save(comment), createMemberInfo(comment.getCreatedBy())),
+            new CommentInfo(commentRepository.save(comment), createMemberInfo(comment.getCreatedBy())),
             HttpStatus.OK
          );
        })
@@ -332,18 +338,18 @@ public class PostController {
 
   @Transactional
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
-  public ResponseEntity<?> removePostComment(@PathVariable Long postId,
+  public ResponseEntity<?> removeComment(@PathVariable Long postId,
                                              @PathVariable Long id) {
     postRepository.updateCommentCount(postId, -1);
 
     Long memberId = memberService.currentMemberId();
-    return postCommentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
+    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
        .map(comment -> {
          if (comment.getParentId() != null) {
-           postCommentRepository.updateCommentCount(comment.getParentId(), -1);
+           commentRepository.updateCommentCount(comment.getParentId(), -1);
          }
          // FIXME: need to delete comment_likes relevant to comment
-         postCommentRepository.delete(comment);
+         commentRepository.delete(comment);
          return new ResponseEntity<>(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post id or comment id"));
@@ -351,31 +357,31 @@ public class PostController {
 
   @Transactional
   @PostMapping("/{postId:.+}/comments/{commentId:.+}/likes")
-  public ResponseEntity<PostCommentLikeInfo> addPostCommentLike(@PathVariable Long postId,
+  public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long postId,
                                                                 @PathVariable Long commentId) {
     Member member = memberService.currentMember();
     if (member == null) {
       throw new MemberNotFoundException("Login required");
     }
 
-    return postCommentRepository.findByIdAndPostId(commentId, postId)
+    return commentRepository.findByIdAndPostId(commentId, postId)
        .map(comment -> {
-         if (postCommentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
+         if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
            throw new BadRequestException("duplicated_post_like", "Already post liked");
          }
 
 
-         postCommentRepository.updateLikeCount(comment.getId(), 1);
+         commentRepository.updateLikeCount(comment.getId(), 1);
          comment.setLikeCount(comment.getLikeCount() + 1);
-         PostCommentLike commentLikeLike = postCommentLikeRepository.save(new PostCommentLike(comment));
-         return new ResponseEntity<>(new PostCommentLikeInfo(commentLikeLike), HttpStatus.OK);
+         CommentLike commentLikeLike = commentLikeRepository.save(new CommentLike(comment));
+         return new ResponseEntity<>(new CommentLikeInfo(commentLikeLike), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post or comment id"));
   }
 
   @Transactional
   @DeleteMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
-  public ResponseEntity<?> removePostCommentLike(@PathVariable Long postId,
+  public ResponseEntity<?> removeCommentLike(@PathVariable Long postId,
                                                  @PathVariable Long commentId,
                                                  @PathVariable Long likeId){
     Member me = memberService.currentMember();
@@ -383,13 +389,13 @@ public class PostController {
       throw new MemberNotFoundException("Login required");
     }
 
-    PostComment postComment = postCommentRepository.findByIdAndPostId(commentId, postId)
+    Comment comment = commentRepository.findByIdAndPostId(commentId, postId)
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or comment id"));
 
-    return postCommentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, postComment.getId(), me.getId())
+    return commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
        .map(liked -> {
-         postCommentLikeRepository.delete(liked);
-         postCommentRepository.updateLikeCount(liked.getComment().getId(), -1);
+         commentLikeRepository.delete(liked);
+         commentRepository.updateLikeCount(liked.getComment().getId(), -1);
 
          return new ResponseEntity(HttpStatus.OK);
        })
@@ -473,7 +479,7 @@ public class PostController {
   }
 
   @Data
-  public static class PostCommentInfo {
+  public static class CommentInfo {
     private Long id;
     private Long postId;
     private String comment;
@@ -485,17 +491,17 @@ public class PostController {
     private Long likeId;
     private Integer likeCount;
 
-    public PostCommentInfo(PostComment comment) {
+    public CommentInfo(Comment comment) {
       BeanUtils.copyProperties(comment, this);
       setCommentRef(comment);
     }
 
-    public PostCommentInfo(PostComment comment, MemberInfo createdBy) {
+    public CommentInfo(Comment comment, MemberInfo createdBy) {
       this(comment);
       this.createdBy = createdBy;
     }
 
-    private void setCommentRef(PostComment comment) {
+    private void setCommentRef(Comment comment) {
       if (comment != null && comment.getCommentCount() > 0) {
         this.commentRef = String.format("/api/1/posts/%d/comments?parentId=%d", comment.getPostId(), comment.getId());
       }
@@ -503,15 +509,15 @@ public class PostController {
   }
 
   @Data
-  public static class PostCommentLikeInfo {
+  public static class CommentLikeInfo {
     private Long id;
     private MemberInfo createdBy;
     private Date createdAt;
-    private PostCommentInfo comment;
+    private CommentInfo comment;
 
-    public PostCommentLikeInfo(PostCommentLike commentLike) {
+    public CommentLikeInfo(CommentLike commentLike) {
       BeanUtils.copyProperties(commentLike, this);
-      comment = new PostCommentInfo(commentLike.getComment());
+      comment = new CommentInfo(commentLike.getComment());
     }
   }
 }

@@ -1,10 +1,8 @@
-package com.jocoos.mybeautip.post;
+package com.jocoos.mybeautip.member.comment;
 
 import javax.persistence.*;
 import java.util.Date;
 
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -13,22 +11,30 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
-import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "post_comments")
-public class PostComment extends MemberAuditable {
+@Table(name = "comments")
+public class Comment extends MemberAuditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  /**
+   * 1: post, 2: video
+   */
   @Column(nullable = false)
+  private int category;
+
+  @Column
   private Long postId;
+
+  @Column
+  private Long videoId;
 
   @Column(nullable = false)
   private String comment;
@@ -45,8 +51,4 @@ public class PostComment extends MemberAuditable {
   @Column(nullable = false)
   @LastModifiedDate
   private Date modifiedAt;
-
-  public PostComment(Long postId) {
-    this.postId = postId;
-  }
 }

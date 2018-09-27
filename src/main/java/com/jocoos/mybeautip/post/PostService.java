@@ -8,34 +8,37 @@ import org.springframework.stereotype.Service;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+
 
 @Service
 public class PostService {
 
-  private final PostCommentRepository postCommentRepository;
+  private final CommentRepository commentRepository;
 
-  public PostService(PostCommentRepository postCommentRepository) {
-    this.postCommentRepository = postCommentRepository;
+  public PostService(CommentRepository commentRepository) {
+    this.commentRepository = commentRepository;
   }
 
-  public Slice<PostComment> findCommentsByPostId(Long postId, String cursor, Pageable pageable) {
-    Slice<PostComment> comments = null;
+  public Slice<Comment> findCommentsByPostId(Long postId, String cursor, Pageable pageable) {
+    Slice<Comment> comments = null;
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
-      comments = postCommentRepository.findByPostIdAndCreatedAtAfterAndParentIdIsNull(postId, createdAt, pageable);
+      comments = commentRepository.findByPostIdAndCreatedAtAfterAndParentIdIsNull(postId, createdAt, pageable);
     } else {
-      comments = postCommentRepository.findByPostIdAndParentIdIsNull(postId, pageable);
+      comments = commentRepository.findByPostIdAndParentIdIsNull(postId, pageable);
     }
     return comments;
   }
 
-  public Slice<PostComment> findCommentsByParentId(Long parentId, String cursor, Pageable pageable) {
-    Slice<PostComment> comments = null;
+  public Slice<Comment> findCommentsByParentId(Long parentId, String cursor, Pageable pageable) {
+    Slice<Comment> comments = null;
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
-      comments = postCommentRepository.findByParentIdAndCreatedAtAfter(parentId, createdAt, pageable);
+      comments = commentRepository.findByParentIdAndCreatedAtAfter(parentId, createdAt, pageable);
     } else {
-      comments = postCommentRepository.findByParentId(parentId, pageable);
+      comments = commentRepository.findByParentId(parentId, pageable);
     }
     return comments;
   }
