@@ -38,6 +38,7 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.post.*;
@@ -266,10 +267,23 @@ public class PostController {
     Long me = memberService.currentMemberId();
 
     comments.stream().forEach(comment -> {
-      CommentInfo commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
+        CommentInfo commentInfo = null;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          comment.setComment(mentionResult.getComment());
+          commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+        }
+      } else {
+        commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
+      }
+
       if (me != null) {
-        commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+           .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
       }
       result.add(commentInfo);
     });
@@ -282,7 +296,7 @@ public class PostController {
     int totalCount = postRepository.findById(id).map(Post::getCommentCount).orElse(0);
 
     return new CursorResponse
-      .Builder<CommentInfo>("/api/1/posts/" + id + "/comments", result)
+      .Builder<>("/api/1/posts/" + id + "/comments", result)
       .withCount(count)
       .withCursor(nextCursor)
       .withTotalCount(totalCount).toBuild();
@@ -320,7 +334,7 @@ public class PostController {
     }
 
     return new ResponseEntity<>(
-       new PostCommentInfo(comment, createMemberInfo(comment.getCreatedBy())),
+       new CommentInfo(comment, createMemberInfo(comment.getCreatedBy())),
        HttpStatus.OK
     );
   }
@@ -503,15 +517,22 @@ public class PostController {
     private String commentRef;
     private Long likeId;
     private Integer likeCount;
+    private List<MentionTag> mentionInfo;
 
     public CommentInfo(Comment comment) {
       BeanUtils.copyProperties(comment, this);
       setCommentRef(comment);
+      this.createdBy = new MemberInfo(comment.getCreatedBy(), null);
     }
 
     public CommentInfo(Comment comment, MemberInfo createdBy) {
       this(comment);
       this.createdBy = createdBy;
+    }
+
+    public CommentInfo(Comment comment, MemberInfo createdBy, List<MentionTag> mentionInfo) {
+      this(comment, createdBy);
+      this.mentionInfo = mentionInfo;
     }
 
     private void setCommentRef(Comment comment) {

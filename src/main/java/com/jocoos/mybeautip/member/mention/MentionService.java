@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -24,6 +25,8 @@ import com.jocoos.mybeautip.video.VideoCommentRepository;
 @Service
 public class MentionService {
 
+  private static final String MENTION_TAG = "@";
+  
   private final MemberRepository memberRepository;
   private final NotificationService notificationService;
   private final CommentRepository commentRepository;
@@ -103,14 +106,37 @@ public class MentionService {
   }
 
   private String createMentionTag(Object username) {
-    StringBuilder sb = new StringBuilder("@");
+    StringBuilder sb = new StringBuilder(MENTION_TAG);
     return sb.append(username).toString();
   }
 
   private List<String> findMentionTags(String comment) {
     return Arrays.stream(comment.split(" "))
-       .filter(c -> c.startsWith("@"))
+       .filter(c -> c.startsWith(MENTION_TAG))
        .map(c -> c.substring(1))
        .collect(Collectors.toList());
+  }
+
+  public MentionResult createMentionComment(String original) {
+    MentionResult mentionResult = new MentionResult();
+
+    String comment = original;
+    List<String> mentions = findMentionTags(original);
+    for (String memberId : mentions) {
+      log.debug("member: {}", memberId);
+
+      if (StringUtils.isNumeric(memberId)) {
+        Optional<Member> member = memberRepository.findById(Long.parseLong(memberId));
+        if (member.isPresent()) {
+          Member m = member.get();
+          mentionResult.add(new MentionTag(m));
+          comment = comment.replaceAll(createMentionTag(m.getId()), createMentionTag(m.getUsername()));
+        }
+      }
+    }
+
+    log.debug("original comment: {}", comment);
+    mentionResult.setComment(comment);
+    return mentionResult;
   }
 }

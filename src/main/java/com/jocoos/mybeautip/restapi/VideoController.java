@@ -38,6 +38,7 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.video.*;
@@ -169,12 +170,25 @@ public class VideoController {
 
     List<CommentInfo> result = Lists.newArrayList();
     comments.stream().forEach(comment -> {
-      CommentInfo commentInfo = new CommentInfo(comment, createMemberInfo(comment
-          .getCreatedBy()));
-      if (me != null) {
-        commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+      CommentInfo commentInfo = null;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          comment.setComment(mentionResult.getComment());
+          commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+        }
+      } else {
+        commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
       }
+
+      if (me != null) {
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+           .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
+      }
+
       result.add(commentInfo);
     });
 
@@ -648,6 +662,7 @@ public class VideoController {
     private String commentRef;
     private Long likeId;
     private Integer likeCount;
+    private List<MentionTag> mentionInfo;
 
     CommentInfo(Comment comment) {
       BeanUtils.copyProperties(comment, this);
@@ -657,6 +672,11 @@ public class VideoController {
     CommentInfo(Comment comment, MemberInfo createdBy) {
       this(comment);
       this.createdBy = createdBy;
+    }
+
+    CommentInfo(Comment comment, MemberInfo createdBy, List<MentionTag> mentionInfo) {
+      this(comment, createdBy);
+      this.mentionInfo = mentionInfo;
     }
 
     private void setCommentRef(Comment comment) {

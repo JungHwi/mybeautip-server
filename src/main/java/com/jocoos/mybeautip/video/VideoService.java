@@ -238,11 +238,11 @@ public class VideoService {
     return generateVideoInfo(video);
   }
 
-  public VideoComment saveComment(VideoComment videoComment) {
-    return videoCommentRepository.save(videoComment);
+  public Comment saveComment(Comment videoComment) {
+    return commentRepository.save(videoComment);
   }
 
-  public VideoComment updateComment(VideoComment videoComment) {
-    return videoCommentRepository.save(videoComment);
+  public Comment updateComment(Comment videoComment) {
+    return commentRepository.save(videoComment);
   }
 }

@@ -43,12 +43,12 @@ public class PostService {
     return comments;
   }
 
-  public PostComment saveComment(PostComment postComment) {
-    return postCommentRepository.save(postComment);
+  public Comment saveComment(Comment postComment) {
+    return commentRepository.save(postComment);
   }
 
-  public PostComment updateComment(PostComment postComment) {
-    return postCommentRepository.save(postComment);
+  public Comment updateComment(Comment postComment) {
+    return commentRepository.save(postComment);
   }
 
 }
