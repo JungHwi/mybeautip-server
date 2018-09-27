@@ -5,21 +5,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.following.Following;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.PostComment;
-import com.jocoos.mybeautip.post.PostCommentLike;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoComment;
-import com.jocoos.mybeautip.video.VideoCommentLike;
-import com.jocoos.mybeautip.video.VideoLike;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoLike;
 
 @NoArgsConstructor
 @Data
@@ -31,12 +30,9 @@ public class Notification {
   public static final String VIDEO_STARTED = "video_started";
   public static final String VIDEO_UPLOADED = "video_uploaded";
   public static final String MENTION = "mention";
-  public static final String VIDEO_COMMENT = "video_comment";
-  public static final String VIDEO_COMMENT_REPLY = "video_comment_reply";
-  public static final String VIDEO_COMMENT_LIKE = "video_comment_like";
-  public static final String POST_COMMENT = "post_comment";
-  public static final String POST_COMMENT_REPLY = "post_comment_reply";
-  public static final String POST_COMMENT_LIKE = "post_comment_like";
+  public static final String COMMENT = "comment";
+  public static final String COMMENT_REPLY = "comment_reply";
+  public static final String COMMENT_LIKE = "comment_like";
   public static final String FOLLOWING = "following";
   public static final String VIDEO_LIKE = "video_like";
 
@@ -114,80 +110,47 @@ public class Notification {
     }
   }
 
-  public Notification(Video video, VideoComment videoComment) {
-    this.type = VIDEO_COMMENT;
-    this.targetMember = video.getMember();
-    this.read = false;
-    this.resourceType = "video_comment";
-    this.resourceId = videoComment.getId();
-    this.resourceOwner = videoComment.getCreatedBy();
-    this.imageUrl = video.getThumbnailUrl();
-    this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
-  }
-
-  public Notification(String thumbnail, VideoComment videoComment, Member target) {
-    this.type = VIDEO_COMMENT_REPLY;
+  public Notification(Comment comment, Member target, String thumbnail) {
+    this.type = COMMENT;
     this.targetMember = target;
     this.read = false;
-    this.resourceType = "video_comment";
-    this.resourceId = videoComment.getId();
-    this.resourceOwner = videoComment.getCreatedBy();
+    this.resourceType = "comment";
+    this.resourceId = comment.getId();
+    this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
+    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
 
-  public Notification(Post post, PostComment postComment) {
-    this.type = POST_COMMENT;
-    this.targetMember = post.getCreatedBy();
-    this.read = false;
-    this.resourceType = "post_comment";
-    this.resourceId = postComment.getId();
-    this.resourceOwner = postComment.getCreatedBy();
-    this.imageUrl = post.getThumbnailUrl();
-    this.args = Lists.newArrayList(postComment.getCreatedBy().getUsername(), postComment.getComment());
-  }
-
-  public Notification(String thumbnail, PostComment postComment, Member target) {
-    this.type = POST_COMMENT_REPLY;
+  public Notification(Comment comment, Long parentId, Member target, String thumbnail) {
+    this.type = COMMENT_REPLY;
     this.targetMember = target;
     this.read = false;
-    this.resourceType = "post_comment";
-    this.resourceId = postComment.getId();
-    this.resourceOwner = postComment.getCreatedBy();
+    this.resourceType = "comment_reply";
+    this.resourceId = comment.getId();
+    this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(postComment.getCreatedBy().getUsername(), postComment.getComment());
+    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
 
-  public Notification(VideoLike videoLike, String thumbnail, Member source) {
+  public Notification(CommentLike commentLike, String thumbnail) {
+    this.type = COMMENT_LIKE;
+    this.targetMember = commentLike.getComment().getCreatedBy();
+    this.read = false;
+    this.resourceType = "comment_like";
+    this.resourceId = commentLike.getId();
+    this.resourceOwner = commentLike.getCreatedBy();
+    this.imageUrl = thumbnail;
+    this.args = Lists.newArrayList(commentLike.getCreatedBy().getUsername(), commentLike.getComment().getComment());
+  }
+
+  public Notification(VideoLike videoLike, Member source) {
     this.type = VIDEO_LIKE;
     this.targetMember = videoLike.getVideo().getMember();
     this.read = false;
     this.resourceType = "video_like";
     this.resourceId = videoLike.getId();
     this.resourceOwner = source;
-    this.imageUrl = thumbnail;
+    this.imageUrl = videoLike.getVideo().getThumbnailUrl();
     this.args = Lists.newArrayList(source.getUsername());
-  }
-
-  public Notification(PostCommentLike postCommentLike, String thumbnail) {
-    this.type = POST_COMMENT_LIKE;
-    this.targetMember = postCommentLike.getComment().getCreatedBy();
-    this.read = false;
-    this.resourceType = "post_comment_like";
-    this.resourceId = postCommentLike.getId();
-    this.resourceOwner = postCommentLike.getCreatedBy();
-    this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(postCommentLike.getCreatedBy().getUsername(), postCommentLike.getComment().getComment());
-  }
-
-  public Notification(VideoCommentLike videoCommentLike, String thumbnail) {
-    this.type = VIDEO_COMMENT_LIKE;
-    this.targetMember = videoCommentLike.getComment().getCreatedBy();
-    this.read = false;
-    this.resourceType = "video_comment_like";
-    this.resourceId = videoCommentLike.getId();
-    this.resourceOwner = videoCommentLike.getCreatedBy();
-    this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(videoCommentLike.getCreatedBy().getUsername(), videoCommentLike.getComment().getComment());
   }
 }
