@@ -48,7 +48,7 @@ public class CallbackController {
   @Transactional
   @PostMapping
   public Video createVideo(@Valid @RequestBody CallbackCreateVideoRequest request) {
-    log.debug("callback createVideo: {}", request.toString());
+    log.info("callback createVideo: {}", request.toString());
     videoRepository.findByVideoKey(request.getVideoKey())
       .ifPresent(v -> { throw new BadRequestException("already_exist", "Already exist, videoKey: " + request.getVideoKey()); });
 
@@ -101,7 +101,7 @@ public class CallbackController {
 
   @PatchMapping
   public Video updateVideo(@Valid @RequestBody CallbackUpdateVideoRequest request) {
-    log.debug("callback updateVideo: {}", request.toString());
+    log.info("callback updateVideo: {}", request.toString());
     Video video = videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey())
       .map(v -> {
         if (v.getMember().getId() != request.getUserId().longValue()) {
@@ -116,7 +116,7 @@ public class CallbackController {
   @Transactional
   @DeleteMapping
   public Video deleteVideo(@Valid @RequestBody CallbackDeleteVideoRequest request) {
-    log.debug("deleteVideo {}", request.toString());
+    log.info("deleteVideo {}", request.toString());
     return videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey())
       .map(v -> {
         if (v.getMember().getId() != request.getUserId().longValue()) {
