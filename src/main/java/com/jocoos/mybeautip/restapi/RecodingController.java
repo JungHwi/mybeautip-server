@@ -72,7 +72,7 @@ public class RecodingController {
 
     return new CursorResponse.Builder<RecodingInfo>("/api/1/members/me/recodings", result)
        .withCount(count)
-       .withCategory(category != null ? String.valueOf(category) : null)
+       .withCategory(category)
        .withCursor(nextCursor).toBuild();
   }
 
