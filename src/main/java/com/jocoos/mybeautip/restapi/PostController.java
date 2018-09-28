@@ -506,43 +506,6 @@ public class PostController {
   }
 
   @Data
-  public static class CommentInfo {
-    private Long id;
-    private Long postId;
-    private String comment;
-    private Long parentId;
-    private int commentCount;
-    private MemberInfo createdBy;
-    private Date createdAt;
-    private String commentRef;
-    private Long likeId;
-    private Integer likeCount;
-    private List<MentionTag> mentionInfo;
-
-    public CommentInfo(Comment comment) {
-      BeanUtils.copyProperties(comment, this);
-      setCommentRef(comment);
-      this.createdBy = new MemberInfo(comment.getCreatedBy(), null);
-    }
-
-    public CommentInfo(Comment comment, MemberInfo createdBy) {
-      this(comment);
-      this.createdBy = createdBy;
-    }
-
-    public CommentInfo(Comment comment, MemberInfo createdBy, List<MentionTag> mentionInfo) {
-      this(comment, createdBy);
-      this.mentionInfo = mentionInfo;
-    }
-
-    private void setCommentRef(Comment comment) {
-      if (comment != null && comment.getCommentCount() > 0) {
-        this.commentRef = String.format("/api/1/posts/%d/comments?parentId=%d", comment.getPostId(), comment.getId());
-      }
-    }
-  }
-
-  @Data
   public static class CommentLikeInfo {
     private Long id;
     private MemberInfo createdBy;

@@ -31,19 +31,23 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.video.*;
-import com.jocoos.mybeautip.word.BannedWordService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentInfo;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoLike;
+import com.jocoos.mybeautip.video.VideoLikeRepository;
+import com.jocoos.mybeautip.video.VideoService;
+import com.jocoos.mybeautip.word.BannedWordService;
 
 @Slf4j
 @RestController
@@ -347,9 +351,9 @@ public class MemberController {
       comments = commentRepository.findByCreatedByIdAndParentIdIsNull(me, pageable);
     }
 
-    List<VideoController.CommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = Lists.newArrayList();
     comments.stream().forEach(comment -> {
-      VideoController.CommentInfo commentInfo = new VideoController.CommentInfo(
+      CommentInfo commentInfo = new CommentInfo(
         comment, new MemberInfo(comment.getCreatedBy(), null));
       if (me != null) {
         commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
