@@ -77,13 +77,13 @@ public class CartController {
 
   @PatchMapping("{id}")
   public ResponseEntity<CartInfo> updateCart(@PathVariable Long id,
-                         @Valid @RequestBody UpdateCartRequest request) {
+                                             @Valid @RequestBody UpdateCartRequest request) {
     Long memberId = memberService.currentMemberId();
     if (memberId == null) {
       throw new MemberNotFoundException("Login required");
     }
 
-    Optional<Cart> optional = cartRepository.findByIdAndCreatedBy(id, memberId);
+    Optional<Cart> optional = cartRepository.findByIdAndCreatedById(id, memberId);
     Cart cart;
 
     if (optional.isPresent()) {
@@ -104,7 +104,7 @@ public class CartController {
       throw new MemberNotFoundException("Login required");
     }
 
-    Optional<Cart> optional = cartRepository.findByIdAndCreatedBy(id, memberId);
+    Optional<Cart> optional = cartRepository.findByIdAndCreatedById(id, memberId);
 
     if (optional.isPresent()) {
       cartRepository.deleteById(id);
@@ -119,17 +119,13 @@ public class CartController {
     if (memberId == null) {
       throw new MemberNotFoundException("Login required");
     }
-    return new CartCountResponse(cartRepository.countByCreatedBy(memberId));
+    return new CartCountResponse(cartRepository.countByCreatedById(memberId));
   }
 
   @GetMapping
   public List<CartItemGroup> getCartItems() {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
-    List<Cart> allCartItems = cartRepository.getCartItems(memberId);
+    List<Cart> allCartItems = cartRepository.findAllByCreatedByIdOrderByModifiedAtDesc(memberId);
 
     Map<Integer, List<CartInfo>> map = new HashMap<>();
     List<Integer> orderedScmNo = new ArrayList<>();
