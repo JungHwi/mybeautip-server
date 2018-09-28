@@ -104,10 +104,10 @@ public class NotificationService {
          if (comment.getParentId() != null) {
            Member parent = findCommentMemberByParentId(comment.getParentId());
            n = notificationRepository.save(new Notification(comment, comment.getParentId(), parent, v.getThumbnailUrl()));
-
-         }
-         if (!(comment.getCreatedBy().getId().equals(v.getMember().getId()))) {
-           n = notificationRepository.save(new Notification(comment, v.getMember(), v.getThumbnailUrl()));
+         } else {
+           if (!(comment.getCreatedBy().getId().equals(v.getMember().getId()))) {
+             n = notificationRepository.save(new Notification(comment, v.getMember(), v.getThumbnailUrl()));
+           }
          }
 
          if (n != null) {
