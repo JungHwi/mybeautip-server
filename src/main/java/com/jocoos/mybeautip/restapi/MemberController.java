@@ -31,14 +31,14 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentInfo;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.revenue.Revenue;
+import com.jocoos.mybeautip.member.revenue.RevenueInfo;
+import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
 import com.jocoos.mybeautip.store.StoreLike;
@@ -65,6 +65,7 @@ public class MemberController {
   private final BannedWordService bannedWordService;
   private final CommentRepository commentRepository;
   private final CommentLikeRepository commentLikeRepository;
+  private final RevenueRepository revenueRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
   private String storeImagePrefix;
@@ -85,7 +86,8 @@ public class MemberController {
                           VideoLikeRepository videoLikeRepository,
                           BannedWordService bannedWordService,
                           CommentRepository commentRepository,
-                          CommentLikeRepository commentLikeRepository) {
+                          CommentLikeRepository commentLikeRepository,
+                          RevenueRepository revenueRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -97,13 +99,14 @@ public class MemberController {
     this.bannedWordService = bannedWordService;
     this.commentRepository = commentRepository;
     this.commentLikeRepository = commentLikeRepository;
+    this.revenueRepository = revenueRepository;
   }
 
   @GetMapping("/me")
-  public Resource<MemberInfo> getMe(Principal principal) {
+  public Resource<MemberMeInfo> getMe(Principal principal) {
     log.debug("member id: {}", principal.getName());
     return memberRepository.findById(Long.parseLong(principal.getName()))
-              .map(m -> new Resource<>(new MemberInfo(m, null)))
+              .map(m -> new Resource<>(new MemberMeInfo(m)))
               .orElseThrow(() -> new MemberNotFoundException("member_not_found"));
   }
 
@@ -371,6 +374,37 @@ public class MemberController {
       .withCount(count)
       .withCursor(nextCursor).toBuild();
   }
+
+  @GetMapping("/me/revenues")
+  public CursorResponse getRevenues(@RequestParam(defaultValue = "20") int count,
+                                    @RequestParam(required = false) String cursor) {
+    Member member = memberService.currentMember();
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
+    Slice<Revenue>  list = null;
+
+    if (StringUtils.isNumeric(cursor)) {
+      Date createdAt = new Date(Long.parseLong(cursor));
+      list = revenueRepository.findByVideoMemberIdAndCreatedAtBefore(member.getId(), createdAt, pageable);
+    } else {
+      list = revenueRepository.findByVideoMemberId(member.getId(), pageable);
+    }
+
+    List<RevenueInfo> revenues = Lists.newArrayList();
+
+    list.forEach(r -> {
+      revenues.add(new RevenueInfo(r));
+    });
+
+    String nextCursor = null;
+    if (revenues.size() > 0) {
+      nextCursor = String.valueOf(revenues.get(revenues.size() - 1).getCreatedAt());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/members/me/revenues", revenues)
+       .withCount(count)
+       .withCursor(nextCursor).toBuild();
+  }
+
 
   private CursorResponse createLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
     switch (category) {

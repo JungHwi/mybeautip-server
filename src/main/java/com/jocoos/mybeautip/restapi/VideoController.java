@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,7 @@ import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
+import com.jocoos.mybeautip.member.revenue.*;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
@@ -63,6 +65,8 @@ public class VideoController {
   private final VideoViewRepository videoViewRepository;
   private final CommentService commentService;
   private final MentionService mentionService;
+  private final RevenueService revenueService;
+  private final RevenueRepository revenueRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -79,7 +83,9 @@ public class VideoController {
                          VideoReportRepository videoReportRepository,
                          VideoViewRepository videoViewRepository,
                          CommentService commentService,
-                         MentionService mentionService) {
+                         MentionService mentionService,
+                         RevenueService revenueService,
+                         RevenueRepository revenueRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.videoGoodsRepository = videoGoodsRepository;
@@ -93,6 +99,8 @@ public class VideoController {
     this.videoViewRepository = videoViewRepository;
     this.commentService = commentService;
     this.mentionService = mentionService;
+    this.revenueService = revenueService;
+    this.revenueRepository = revenueRepository;
   }
 
   @GetMapping("{id}")
@@ -489,6 +497,55 @@ public class VideoController {
   }
 
   /**
+   * Using owner of the Video
+   */
+  @GetMapping("/{id:.+}/sales")
+  public ResponseEntity<RevenueOverview> getRevenueOverview(@PathVariable Long id) {
+    Member member = memberService.currentMember();
+    RevenueOverview overview = revenueService.getOverview(id, member);
+
+    return new ResponseEntity<>(overview, HttpStatus.OK);
+  }
+
+  /**
+   * Using owner of the Video
+   */
+  @GetMapping("/{id:.+}/revenues")
+  public CursorResponse getRevenues(@PathVariable Long id,
+                                     @RequestParam(defaultValue = "20") int count,
+                                     @RequestParam(required = false) String cursor) {
+
+    Long memberId = memberService.currentMemberId();
+    Video video = videoRepository.findByIdAndMemberId(id, memberId)
+       .orElseThrow(() -> new NotFoundException("video_not_fount", "invalid video id or member id"));
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
+    Slice<Revenue>  list = null;
+
+    if (StringUtils.isNumeric(cursor)) {
+      Date createdAt = new Date(Long.parseLong(cursor));
+      list = revenueRepository.findByVideoMemberIdAndCreatedAtBefore(video.getMember().getId(), createdAt, pageable);
+    } else {
+      list = revenueRepository.findByVideoMemberId(video.getMember().getId(), pageable);
+    }
+
+    List<RevenueInfo> revenues = Lists.newArrayList();
+
+    list.forEach(r -> {
+      revenues.add(new RevenueInfo(r));
+    });
+
+    String nextCursor = null;
+    if (revenues.size() > 0) {
+      nextCursor = String.valueOf(revenues.get(revenues.size() - 1).getCreatedAt());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/videos/" + id + "/revenues", revenues)
+       .withCount(count)
+       .withCursor(nextCursor).toBuild();
+  }
+
+  /**
    * Report
    */
   @Transactional
@@ -543,7 +600,6 @@ public class VideoController {
 
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
-
 
   /**
    * Views

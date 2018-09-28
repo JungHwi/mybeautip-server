@@ -33,13 +33,6 @@ public class Revenue extends MemberAuditable {
   @JoinColumn(name = "purchase_id")
   private Purchase purchase;
 
-  /**
-   * The member who created the video
-   */
-  @ManyToOne
-  @JoinColumn(name = "member_id")
-  private Member member;
-
   @Column
   @LastModifiedDate
   private Date modifiedAt;
