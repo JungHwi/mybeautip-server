@@ -25,7 +25,7 @@ public class ViewRecodingService {
     this.viewRecodingRepository = viewRecodingRepository;
   }
 
-  public Slice<ViewRecoding> findByWeekAgo(int count, String cursor) {
+  public Slice<ViewRecoding> findByWeekAgo(Long memberId, int count, String cursor, Integer category) {
     if (count > MAX_COUNT) {
       throw new BadRequestException("The count must be less or equals to 200");
     }
@@ -40,7 +40,10 @@ public class ViewRecodingService {
     }
 
     Date weekAgo = new Date(now.getTime() - 7 * DAY_IN_MS);
-    return viewRecodingRepository.findByCreatedAtBeforeAndCreatedAtAfter(now, weekAgo, page);
+    if (category == null) {
+      return viewRecodingRepository.findByCreatedByIdAndCreatedAtBeforeAndCreatedAtAfter(memberId, now, weekAgo, page);
+    } else {
+      return viewRecodingRepository.findByCategoryAndCreatedByIdAndCreatedAtBeforeAndCreatedAtAfter(category, memberId, now, weekAgo, page);
+    }
   }
-
 }

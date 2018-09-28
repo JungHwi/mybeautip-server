@@ -52,6 +52,13 @@ public class CursorResponse<E> {
       return this;
     }
 
+    public Builder withCategory(Integer category) {
+      if (category != null) {
+        this.properties.add("category", String.valueOf(category));
+      }
+      return this;
+    }
+
     public Builder withKeyword(String keyword) {
       if (!Strings.isNullOrEmpty(keyword)) {
         this.properties.add("keyword", keyword);

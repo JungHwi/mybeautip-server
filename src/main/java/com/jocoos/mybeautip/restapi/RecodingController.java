@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
@@ -29,15 +30,18 @@ public class RecodingController {
   private final int DAY_IN_MS = 1000 * 60 * 60 * 24;
 
   private final ViewRecodingService viewRecodingService;
+  private final MemberService memberService;
   private final PostRepository postRepository;
   private final GoodsRepository goodsRepository;
   private final VideoRepository videoRepository;
 
   public RecodingController(ViewRecodingService viewRecodingService,
+                            MemberService memberService,
                             PostRepository postRepository,
                             GoodsRepository goodsRepository,
                             VideoRepository videoRepository) {
     this.viewRecodingService = viewRecodingService;
+    this.memberService = memberService;
     this.postRepository = postRepository;
     this.goodsRepository = goodsRepository;
     this.videoRepository = videoRepository;
@@ -50,9 +54,12 @@ public class RecodingController {
    */
   @GetMapping
   @ResponseBody
-  public CursorResponse  findAllViewedPosts(@RequestParam(defaultValue = "20") int count,
-                                            @RequestParam(required = false) String cursor) {
-    Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(count, cursor);
+  public CursorResponse findAllMyViews(@RequestParam(defaultValue = "20") int count,
+                                       @RequestParam(required = false) String cursor,
+                                       @RequestParam(required = false) Integer category) {
+    Long memberId = memberService.currentMemberId();
+
+    Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(memberId, count, cursor, category);
     List<RecodingInfo> result = Lists.newArrayList();
 
     recodings.stream().forEach(recoding -> result.add(getBasicInfo(recoding)));
@@ -65,6 +72,7 @@ public class RecodingController {
 
     return new CursorResponse.Builder<RecodingInfo>("/api/1/members/me/recodings", result)
        .withCount(count)
+       .withCategory(category)
        .withCursor(nextCursor).toBuild();
   }
 

@@ -8,5 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ViewRecodingRepository extends JpaRepository<ViewRecoding, Long> {
 
-  Slice<ViewRecoding> findByCreatedAtBeforeAndCreatedAtAfter(Date now, Date weekAgo, Pageable pageable);
+  Slice<ViewRecoding> findByCreatedByIdAndCreatedAtBeforeAndCreatedAtAfter(Long memberId, Date now, Date weekAgo, Pageable pageable);
+
+  Slice<ViewRecoding> findByCategoryAndCreatedByIdAndCreatedAtBeforeAndCreatedAtAfter(Integer category, Long memberId, Date now, Date weekAgo, Pageable pageable);
 }
