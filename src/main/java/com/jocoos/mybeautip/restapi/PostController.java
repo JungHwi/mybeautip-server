@@ -34,10 +34,10 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.post.*;
 
 @Slf4j
@@ -54,6 +54,8 @@ public class PostController {
   private final GoodsRepository goodsRepository;
   private final MemberService memberService;
   private final MemberRepository memberRepository;
+  private final CommentService commentService;
+  private final MentionService mentionService;
 
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -63,7 +65,9 @@ public class PostController {
                         GoodsService goodsService,
                         GoodsRepository goodsRepository,
                         MemberService memberService,
-                        MemberRepository memberRepository) {
+                        MemberRepository memberRepository,
+                        CommentService commentService,
+                        MentionService mentionService) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -73,6 +77,8 @@ public class PostController {
     this.goodsRepository = goodsRepository;
     this.memberService = memberService;
     this.memberRepository = memberRepository;
+    this.commentService = commentService;
+    this.mentionService = mentionService;
   }
 
   @GetMapping
@@ -261,10 +267,23 @@ public class PostController {
     Long me = memberService.currentMemberId();
 
     comments.stream().forEach(comment -> {
-      CommentInfo commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
+        CommentInfo commentInfo = null;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          comment.setComment(mentionResult.getComment());
+          commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+        }
+      } else {
+        commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
+      }
+
       if (me != null) {
-        commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+           .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
       }
       result.add(commentInfo);
     });
@@ -277,7 +296,7 @@ public class PostController {
     int totalCount = postRepository.findById(id).map(Post::getCommentCount).orElse(0);
 
     return new CursorResponse
-      .Builder<CommentInfo>("/api/1/posts/" + id + "/comments", result)
+      .Builder<>("/api/1/posts/" + id + "/comments", result)
       .withCount(count)
       .withCursor(nextCursor)
       .withTotalCount(totalCount).toBuild();
@@ -307,8 +326,15 @@ public class PostController {
     BeanUtils.copyProperties(request, comment);
     postRepository.updateCommentCount(id, 1);
 
+    commentService.save(comment);
+
+    List<MentionTag> mentionTags = request.getMentionTags();
+    if (mentionTags != null && mentionTags.size() > 0) {
+      mentionService.updatePostCommentWithMention(comment, mentionTags);
+    }
+
     return new ResponseEntity<>(
-       new CommentInfo(commentRepository.save(comment), createMemberInfo(comment.getCreatedBy())),
+       new CommentInfo(comment, createMemberInfo(comment.getCreatedBy())),
        HttpStatus.OK
     );
   }
@@ -469,42 +495,14 @@ public class PostController {
     private String comment;
 
     private Long parentId;
+
+    private List<MentionTag> mentionTags;
   }
 
   @Data
   public static class UpdateCommentRequest {
     @NotNull @Size(max = 500)
     private String comment;
-  }
-
-  @Data
-  public static class CommentInfo {
-    private Long id;
-    private Long postId;
-    private String comment;
-    private Long parentId;
-    private int commentCount;
-    private MemberInfo createdBy;
-    private Date createdAt;
-    private String commentRef;
-    private Long likeId;
-    private Integer likeCount;
-
-    public CommentInfo(Comment comment) {
-      BeanUtils.copyProperties(comment, this);
-      setCommentRef(comment);
-    }
-
-    public CommentInfo(Comment comment, MemberInfo createdBy) {
-      this(comment);
-      this.createdBy = createdBy;
-    }
-
-    private void setCommentRef(Comment comment) {
-      if (comment != null && comment.getCommentCount() > 0) {
-        this.commentRef = String.format("/api/1/posts/%d/comments?parentId=%d", comment.getPostId(), comment.getId());
-      }
-    }
   }
 
   @Data

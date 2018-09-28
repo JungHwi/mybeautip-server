@@ -34,10 +34,10 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
@@ -61,6 +61,8 @@ public class VideoController {
   private final VideoWatchRepository videoWatchRepository;
   private final VideoReportRepository videoReportRepository;
   private final VideoViewRepository videoViewRepository;
+  private final CommentService commentService;
+  private final MentionService mentionService;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -75,7 +77,9 @@ public class VideoController {
                          CommentLikeRepository commentLikeRepository,
                          VideoWatchRepository videoWatchRepository,
                          VideoReportRepository videoReportRepository,
-                         VideoViewRepository videoViewRepository) {
+                         VideoViewRepository videoViewRepository,
+                         CommentService commentService,
+                         MentionService mentionService) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.videoGoodsRepository = videoGoodsRepository;
@@ -87,6 +91,8 @@ public class VideoController {
     this.videoWatchRepository = videoWatchRepository;
     this.videoReportRepository = videoReportRepository;
     this.videoViewRepository = videoViewRepository;
+    this.commentService = commentService;
+    this.mentionService = mentionService;
   }
 
   @GetMapping("{id}")
@@ -162,14 +168,27 @@ public class VideoController {
       comments = videoService.findCommentsByVideoId(id, cursor, page);
     }
 
-    List<VideoController.CommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = Lists.newArrayList();
     comments.stream().forEach(comment -> {
-      CommentInfo commentInfo = new CommentInfo(comment, createMemberInfo(comment
-          .getCreatedBy()));
-      if (me != null) {
-        commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+      CommentInfo commentInfo = null;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          comment.setComment(mentionResult.getComment());
+          commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+        }
+      } else {
+        commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
       }
+
+      if (me != null) {
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+           .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
+      }
+
       result.add(commentInfo);
     });
 
@@ -190,7 +209,7 @@ public class VideoController {
   @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
-                                        @RequestBody VideoController.CreateCommentRequest request,
+                                        @RequestBody CreateCommentRequest request,
                                         BindingResult bindingResult) {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
@@ -218,8 +237,15 @@ public class VideoController {
     BeanUtils.copyProperties(request, comment);
     videoRepository.updateCommentCount(id, 1);
 
+    commentService.save(comment);
+
+    List<MentionTag> mentionTags = request.getMentionTags();
+    if (mentionTags != null && mentionTags.size() > 0) {
+      mentionService.updateVideoCommentWithMention(comment, mentionTags);
+    }
+
     return new ResponseEntity<>(
-      new VideoController.CommentInfo(commentRepository.save(comment)),
+      new CommentInfo(comment),
       HttpStatus.OK
     );
   }
@@ -239,7 +265,7 @@ public class VideoController {
       .map(comment -> {
         comment.setComment(request.getComment());
         return new ResponseEntity<>(
-          new VideoController.CommentInfo(commentRepository.save(comment)),
+          new CommentInfo(commentRepository.save(comment)),
           HttpStatus.OK
         );
       })
@@ -612,6 +638,8 @@ public class VideoController {
     private String comment;
 
     private Long parentId;
+
+    private List<MentionTag> mentionTags;
   }
 
   @Data
@@ -619,37 +647,6 @@ public class VideoController {
     @NotNull
     @Size(max = 500)
     private String comment;
-  }
-
-  @Data
-  static class CommentInfo {
-    private Long id;
-    private Long postId;
-    private Long videoId;
-    private String comment;
-    private Long parentId;
-    private int commentCount;
-    private MemberInfo createdBy;
-    private Date createdAt;
-    private String commentRef;
-    private Long likeId;
-    private Integer likeCount;
-
-    CommentInfo(Comment comment) {
-      BeanUtils.copyProperties(comment, this);
-      setCommentRef(comment);
-    }
-
-    CommentInfo(Comment comment, MemberInfo createdBy) {
-      this(comment);
-      this.createdBy = createdBy;
-    }
-
-    private void setCommentRef(Comment comment) {
-      if (comment != null && comment.getCommentCount() > 0) {
-        this.commentRef = String.format("/api/1/videos/%d/comments?parentId=%d", comment.getVideoId(), comment.getId());
-      }
-    }
   }
 
   private MemberInfo createMemberInfo(Member member) {

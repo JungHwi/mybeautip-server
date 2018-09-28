@@ -49,18 +49,14 @@ public class NotificationAspect {
     }
   }
 
-  @After(value = "execution(* com.jocoos.mybeautip.member.comment.CommentRepository.save(..))")
+  @After(value = "execution(* com.jocoos.mybeautip.member.comment.CommentService.save(..))")
   public void onAfterSaveComment(JoinPoint joinPoint) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
     Object o = joinPoint.getArgs()[0];
     if (o instanceof Comment) {
       Comment comment = (Comment) o;
       log.debug("comment: {}", comment);
-      if (comment.getParentId() != null) {
-        notificationService.notifyAddCommentReply(comment);
-      } else {
-        notificationService.notifyAddComment(comment);
-      }
+      notificationService.notifyAddComment(comment);
     }
   }
 
