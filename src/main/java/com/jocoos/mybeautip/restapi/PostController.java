@@ -34,10 +34,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
@@ -57,6 +54,7 @@ public class PostController {
   private final GoodsRepository goodsRepository;
   private final MemberService memberService;
   private final MemberRepository memberRepository;
+  private final CommentService commentService;
   private final MentionService mentionService;
 
   public PostController(PostService postService,
@@ -68,6 +66,7 @@ public class PostController {
                         GoodsRepository goodsRepository,
                         MemberService memberService,
                         MemberRepository memberRepository,
+                        CommentService commentService,
                         MentionService mentionService) {
     this.postService = postService;
     this.postRepository = postRepository;
@@ -78,6 +77,7 @@ public class PostController {
     this.goodsRepository = goodsRepository;
     this.memberService = memberService;
     this.memberRepository = memberRepository;
+    this.commentService = commentService;
     this.mentionService = mentionService;
   }
 
@@ -326,7 +326,7 @@ public class PostController {
     BeanUtils.copyProperties(request, comment);
     postRepository.updateCommentCount(id, 1);
 
-    postService.saveComment(comment);
+    commentService.save(comment);
 
     List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {

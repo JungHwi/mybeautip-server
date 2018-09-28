@@ -16,10 +16,6 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.notification.NotificationService;
-import com.jocoos.mybeautip.post.PostComment;
-import com.jocoos.mybeautip.post.PostCommentRepository;
-import com.jocoos.mybeautip.video.VideoComment;
-import com.jocoos.mybeautip.video.VideoCommentRepository;
 
 @Slf4j
 @Service
@@ -91,7 +87,7 @@ public class MentionService {
 
           Optional<Member> member = memberRepository.findById(tag.getMemberId());
           if (member.isPresent()) {
-            notificationService.notifyAddVideoComment(videoComment, member.get());
+            notificationService.notifyAddComment(videoComment, member.get());
             comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
             log.debug("mentioned comment: {}", comment);
           }

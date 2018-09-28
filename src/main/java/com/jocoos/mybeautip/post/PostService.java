@@ -42,13 +42,4 @@ public class PostService {
     }
     return comments;
   }
-
-  public Comment saveComment(Comment postComment) {
-    return commentRepository.save(postComment);
-  }
-
-  public Comment updateComment(Comment postComment) {
-    return commentRepository.save(postComment);
-  }
-
 }

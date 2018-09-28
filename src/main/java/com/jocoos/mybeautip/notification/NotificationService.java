@@ -68,53 +68,58 @@ public class NotificationService {
     deviceService.push(n);
   }
 
-  public void notifyAddCommentReply(Comment comment) {
-    Member parentMember = Optional.ofNullable(comment.getParentId())
-       .flatMap(parent -> commentRepository.findById(parent))
-       .map(Comment::getCreatedBy)
-       .orElse(null);
-
-    if (comment.getVideoId() != null) {
-      videoRepository.findById(comment.getVideoId())
-         .ifPresent(v -> {
-           if (parentMember != null && !(comment.getCreatedBy().getId().equals(parentMember.getId()))) {
-             Notification n = notificationRepository.save(new Notification(comment, comment.getParentId(), parentMember, v.getThumbnailUrl()));
-             deviceService.push(n);
-           }
-         });
+  public void notifyAddComment(Comment comment) {
+    if (comment.getPostId() != null) {
+      notifyAddPostComment(comment);
     }
 
-    if (comment.getPostId() != null) {
-      postRepository.findById(comment.getPostId())
-         .ifPresent(post -> {
-           if (parentMember != null && !(comment.getCreatedBy().getId().equals(parentMember.getId()))) {
-             Notification n = notificationRepository.save(new Notification(comment, comment.getParentId(), parentMember, post.getThumbnailUrl()));
-             deviceService.push(n);
-           }
-         });
+    if (comment.getVideoId() != null) {
+      notifyAddVideoComment(comment);
     }
   }
 
-  public void notifyAddComment(Comment comment) {
-    if (comment.getPostId() != null) {
-      postRepository.findById(comment.getPostId())
-         .ifPresent(post -> {
+  private void notifyAddPostComment(Comment comment) {
+    postRepository.findById(comment.getPostId())
+       .ifPresent(post -> {
+         Notification n = null;
+         if (comment.getParentId() != null) {
+           Member parent = findCommentMemberByParentId(comment.getParentId());
+           n = notificationRepository.save(new Notification(comment, comment.getParentId(), parent, post.getThumbnailUrl()));
+         } else {
            if (!(comment.getCreatedBy().getId().equals(post.getCreatedBy().getId()))) {
-             Notification n = notificationRepository.save(new Notification(comment, post.getCreatedBy(), post.getThumbnailUrl()));
-             deviceService.push(n);
+             n = notificationRepository.save(new Notification(comment, post.getCreatedBy(), post.getThumbnailUrl()));
            }
-         });
-    }
+         }
 
-    if (comment.getVideoId() != null) {
-      videoRepository.findById(comment.getVideoId())
-         .ifPresent(v -> {
-           if (!(comment.getCreatedBy().getId().equals(v.getMember().getId()))) {
-             Notification n = notificationRepository.save(new Notification(comment, v.getMember(), v.getThumbnailUrl()));
-             deviceService.push(n);
-           }
-         });
-    }
+         if (n != null) {
+           deviceService.push(n);
+         }
+       });
+  }
+
+  private void notifyAddVideoComment(Comment comment) {
+    videoRepository.findById(comment.getVideoId())
+       .ifPresent(v -> {
+         Notification n = null;
+         if (comment.getParentId() != null) {
+           Member parent = findCommentMemberByParentId(comment.getParentId());
+           n = notificationRepository.save(new Notification(comment, comment.getParentId(), parent, v.getThumbnailUrl()));
+
+         }
+         if (!(comment.getCreatedBy().getId().equals(v.getMember().getId()))) {
+           n = notificationRepository.save(new Notification(comment, v.getMember(), v.getThumbnailUrl()));
+         }
+
+         if (n != null) {
+           deviceService.push(n);
+         }
+       });
+  }
+
+  private Member findCommentMemberByParentId(Long parentId) {
+    return commentRepository.findById(parentId)
+       .map(Comment::getCreatedBy)
+       .orElse(null);
   }
 
   public void notifyAddCommentLike(CommentLike commentLike) {
@@ -135,35 +140,54 @@ public class NotificationService {
     }
   }
 
-  public void notifyAddPostComment(Comment postComment, Member... mentioned) {
-    // TODO : Handle add post comment notification and post comment reply
-    postRepository.findById(postComment.getPostId())
+  public void notifyAddVideoLike(VideoLike videoLike) {
+    if (!(videoLike.getCreatedBy().getId().equals(videoLike.getVideo().getMember().getId()))) {
+      Notification n = notificationRepository.save(new Notification(videoLike, videoLike.getCreatedBy()));
+      deviceService.push(n);
+    }
+  }
+
+  public void notifyAddComment(Comment comment, Member... mentioned) {
+    if (comment.getPostId() == null && comment.getVideoId() == null) {
+      log.error("A comment has any post or video id. {}", comment);
+    }
+
+    if (comment.getPostId() != null) {
+      notifyAddMentionPostComment(comment, mentioned);
+    }
+
+    if (comment.getVideoId() != null) {
+      notifyAddMentionVideoComment(comment, mentioned);
+    }
+  }
+
+  private void notifyAddMentionPostComment(Comment comment, Member[] mentioned) {
+    postRepository.findById(comment.getPostId())
        .ifPresent(post -> {
          if (mentioned != null) {
            Arrays.stream(mentioned).forEach(m -> {
-             Notification n = notificationRepository.save(new Notification(post, postComment, m));
+             Notification n = notificationRepository.save(new Notification(post, comment, m));
              log.debug("mentioned post comment: {}", n);
              deviceService.push(n);
            });
          } else {
-           notifyAddComment(postComment);
+           notifyAddPostComment(comment);
          }
        });
   }
 
-  public void notifyAddVideoComment(Comment videoComment, Member... mentioned) {
-    // TODO : Handle add video comment notification and video comment reply
-    videoRepository.findById(videoComment.getVideoId())
+  private void notifyAddMentionVideoComment(Comment comment, Member[] mentioned) {
+    videoRepository.findById(comment.getVideoId())
        .ifPresent(v -> {
          v.setThumbnailUrl(v.getThumbnailUrl());
          if (mentioned != null) {
            Arrays.stream(mentioned).forEach(m -> {
-             Notification n = notificationRepository.save(new Notification(v, videoComment, m));
+             Notification n = notificationRepository.save(new Notification(v, comment, m));
              log.debug("mentioned video comment: {}", n);
              deviceService.push(n);
            });
          } else {
-           notifyAddComment(videoComment);
+           notifyAddVideoComment(comment);
          }
        });
   }

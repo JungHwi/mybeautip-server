@@ -34,10 +34,7 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
@@ -64,6 +61,7 @@ public class VideoController {
   private final VideoWatchRepository videoWatchRepository;
   private final VideoReportRepository videoReportRepository;
   private final VideoViewRepository videoViewRepository;
+  private final CommentService commentService;
   private final MentionService mentionService;
 
   @Value("${mybeautip.video.watch-duration}")
@@ -80,6 +78,7 @@ public class VideoController {
                          VideoWatchRepository videoWatchRepository,
                          VideoReportRepository videoReportRepository,
                          VideoViewRepository videoViewRepository,
+                         CommentService commentService,
                          MentionService mentionService) {
     this.memberService = memberService;
     this.videoService = videoService;
@@ -92,6 +91,7 @@ public class VideoController {
     this.videoWatchRepository = videoWatchRepository;
     this.videoReportRepository = videoReportRepository;
     this.videoViewRepository = videoViewRepository;
+    this.commentService = commentService;
     this.mentionService = mentionService;
   }
 
@@ -237,7 +237,7 @@ public class VideoController {
     BeanUtils.copyProperties(request, comment);
     videoRepository.updateCommentCount(id, 1);
 
-    comment = videoService.saveComment(comment);
+    commentService.save(comment);
 
     List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {

@@ -237,12 +237,4 @@ public class VideoService {
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
     return generateVideoInfo(video);
   }
-
-  public Comment saveComment(Comment videoComment) {
-    return commentRepository.save(videoComment);
-  }
-
-  public Comment updateComment(Comment videoComment) {
-    return commentRepository.save(videoComment);
-  }
 }
