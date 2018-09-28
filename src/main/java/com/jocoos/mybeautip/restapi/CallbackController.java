@@ -21,10 +21,7 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoGoods;
-import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.*;
 
 @Slf4j
 @RestController
@@ -34,15 +31,18 @@ public class CallbackController {
   private final VideoRepository videoRepository;
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
+  private final VideoLikeRepository videoLikeRepository;
 
   public CallbackController(VideoRepository videoRepository,
                             MemberRepository memberRepository,
                             GoodsRepository goodsRepository,
-                            VideoGoodsRepository videoGoodsRepository) {
+                            VideoGoodsRepository videoGoodsRepository,
+                            VideoLikeRepository videoLikeRepository) {
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
+    this.videoLikeRepository = videoLikeRepository;
   }
 
   @Transactional
@@ -126,6 +126,7 @@ public class CallbackController {
         }
         v.setDeletedAt(new Date());
         videoRepository.save(v);
+        videoLikeRepository.deleteByVideoId(v.getId());
         memberRepository.updateVideoCount(v.getMember().getId(), -1);
         return v;
       })
