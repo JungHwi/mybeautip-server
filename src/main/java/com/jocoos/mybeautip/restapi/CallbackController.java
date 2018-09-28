@@ -60,6 +60,8 @@ public class CallbackController {
     video.setViewCount(0);
     video.setHeartCount(0);
     video.setWatchCount(0);
+    video.setTotalWatchCount(0);
+    video.setOrderCount(0);
 
     memberRepository.findById((request.getUserId()))
       .map(m -> {
