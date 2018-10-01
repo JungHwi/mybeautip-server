@@ -524,9 +524,9 @@ public class VideoController {
 
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
-      list = revenueRepository.findByVideoMemberIdAndCreatedAtBefore(video.getMember().getId(), createdAt, pageable);
+      list = revenueRepository.findByVideoAndCreatedAtBefore(video, createdAt, pageable);
     } else {
-      list = revenueRepository.findByVideoMemberId(video.getMember().getId(), pageable);
+      list = revenueRepository.findByVideo(video, pageable);
     }
 
     List<RevenueInfo> revenues = Lists.newArrayList();

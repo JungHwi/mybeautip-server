@@ -1,17 +1,13 @@
 package com.jocoos.mybeautip.member;
 
-import java.util.Date;
-import java.util.List;
-
 import org.springframework.beans.BeanUtils;
 
-import com.google.common.base.Strings;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.restapi.VideoController;
-
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Data
 public class MemberMeInfo extends MemberInfo {
   private int revenue;

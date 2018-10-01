@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.order.Purchase;
 import com.jocoos.mybeautip.video.Video;
@@ -19,7 +19,7 @@ import com.jocoos.mybeautip.video.Video;
 @Data
 @Entity
 @Table(name = "member_revenues")
-public class Revenue extends MemberAuditable {
+public class Revenue extends CreatedDateAuditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +34,11 @@ public class Revenue extends MemberAuditable {
   private Purchase purchase;
 
   @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+  private int revenue;
 
+  public Revenue(Video video, Purchase purchase, int revenue) {
+    this.video = video;
+    this.purchase = purchase;
+    this.revenue = revenue;
+  }
 }

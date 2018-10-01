@@ -379,14 +379,14 @@ public class MemberController {
   public CursorResponse getRevenues(@RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
     Slice<Revenue>  list = null;
 
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
-      list = revenueRepository.findByVideoMemberIdAndCreatedAtBefore(member.getId(), createdAt, pageable);
+      list = revenueRepository.findByVideoMemberAndCreatedAtBefore(member, createdAt, pageable);
     } else {
-      list = revenueRepository.findByVideoMemberId(member.getId(), pageable);
+      list = revenueRepository.findByVideoMember(member, pageable);
     }
 
     List<RevenueInfo> revenues = Lists.newArrayList();

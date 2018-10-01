@@ -101,7 +101,7 @@ mybeautip:
     scheduler-prefix: member-gift-task-pool-
     scheduler-pool-size: 10
   revenue:
-    revenue-ratio: 1    # %
+    revenue-ratio: 3    # %
     platform-ratio: 10  # %
 
 cloud:
