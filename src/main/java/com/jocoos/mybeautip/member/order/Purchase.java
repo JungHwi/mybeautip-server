@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.goods.Goods;
 
 @NoArgsConstructor
 @Data
@@ -23,8 +24,9 @@ public class Purchase extends CreatedDateAuditable {
   @Column(nullable = false)
   private Long orderId;
 
-  @Column(nullable = false)
-  private String goodsNo;
+  @ManyToOne
+  @JoinColumn(name = "goods_no")
+  private Goods goods;
 
   /**
    * @see Order#status

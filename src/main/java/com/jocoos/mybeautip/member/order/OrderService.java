@@ -2,10 +2,9 @@ package com.jocoos.mybeautip.member.order;
 
 import javax.transaction.Transactional;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,14 +16,21 @@ import lombok.extern.slf4j.Slf4j;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.point.PointService;
+import com.jocoos.mybeautip.member.revenue.Revenue;
+import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentResponse;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @Service
@@ -40,6 +46,9 @@ public class OrderService {
   private final PaymentRepository paymentRepository;
   private final OrderInquiryRepository orderInquiryRepository;
   private final MemberCouponRepository memberCouponRepository;
+  private final VideoRepository videoRepository;
+  private final VideoGoodsRepository videoGoodsRepository;
+  private final RevenueService revenueService;
   private final PointService pointService;
   private final IamportService iamportService;
 
@@ -47,10 +56,11 @@ public class OrderService {
                       MemberRepository memberRepository,
                       DeliveryRepository deliveryRepository,
                       PaymentRepository paymentRepository,
-                      PurchaseRepository purchaseRepository,
                       OrderInquiryRepository orderInquiryRepository,
                       MemberCouponRepository memberCouponRepository,
-                      PointService pointService,
+                      VideoRepository videoRepository,
+                      VideoGoodsRepository videoGoodsRepository,
+                      RevenueService revenueService, PointService pointService,
                       IamportService iamportService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
@@ -58,6 +68,9 @@ public class OrderService {
     this.paymentRepository = paymentRepository;
     this.orderInquiryRepository = orderInquiryRepository;
     this.memberCouponRepository = memberCouponRepository;
+    this.videoRepository = videoRepository;
+    this.videoGoodsRepository = videoGoodsRepository;
+    this.revenueService = revenueService;
     this.pointService = pointService;
     this.iamportService = iamportService;
   }
@@ -115,6 +128,8 @@ public class OrderService {
     request.getPurchases().forEach(p -> {
       Purchase purchase = new Purchase(order.getId(), Order.ORDER);
       BeanUtils.copyProperties(p, purchase);
+
+      purchase.setTotalPrice(Long.valueOf(p.getQuantity() * p.getGoodsPrice()));
       purchases.add(purchase);
     });
 
@@ -260,6 +275,7 @@ public class OrderService {
     });
 
     orderRepository.save(order);
+    log.debug("order: {}", order);
   }
 
   private int stateValue(String state) {
@@ -308,9 +324,30 @@ public class OrderService {
       pointService.earnPoints(order.getCreatedBy(), order.getPrice());
     }
 
+    if (order.getVideoId() != null) {
+      saveRevenuesForSeller(order);
+    }
+
     // TODO: Notify ?
     // TODO: Send email ?
     // TODO: Send To Slack Message?
+  }
+
+  /**
+   * Save revenues for seller
+   */
+  private void saveRevenuesForSeller(Order order) {
+    Map<Goods, Video> videoGoods = videoGoodsRepository.findAllByVideoId(order.getVideoId())
+       .stream().collect(Collectors.toMap(VideoGoods::getGoods, VideoGoods::getVideo));
+
+    log.debug("video goods: {}", videoGoods);
+    order.getPurchases().forEach(
+       p -> {
+         if (videoGoods.containsKey(p.getGoods())) {
+           revenueService.save(videoGoods.get(p.getGoods()), p);
+         }
+       }
+    );
   }
 
   private String getSuccessHtml(Long id) {

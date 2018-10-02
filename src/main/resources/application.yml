@@ -100,6 +100,9 @@ mybeautip:
     earn-after-days: 7
     scheduler-prefix: member-gift-task-pool-
     scheduler-pool-size: 10
+  revenue:
+    revenue-ratio: 3    # %
+    platform-ratio: 10  # %
 
 cloud:
   aws:
