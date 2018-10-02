@@ -34,4 +34,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   @Modifying
   @Query("update Member m set m.videoCount = m.videoCount + ?2, m.modifiedAt = now() where m.id = ?1")
   void updateVideoCount(Long id, Integer count);
+
+  @Modifying
+  @Query("update Member m set m.revenue = m.revenue + ?2, m.modifiedAt = now() where m.id = ?1")
+  void updateRevenue(Long id, Integer revenue);
+
 }

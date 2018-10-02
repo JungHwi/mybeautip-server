@@ -83,6 +83,8 @@ public interface VideoRepository extends CrudRepository<Video, Long> {
 
   Optional<Video> findByVideoKey(String videoKey);
 
+  Optional<Video> findByIdAndMemberId(Long id, Long memberId);
+
   @Modifying
   @Query("update Video v set v.commentCount = v.commentCount + ?2, v.modifiedAt = now() where v.id = ?1")
   void updateCommentCount(Long id, int count);

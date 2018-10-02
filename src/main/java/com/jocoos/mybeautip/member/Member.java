@@ -59,6 +59,9 @@ public class Member {
   private int videoCount;
 
   @Column
+  private int revenue;
+
+  @Column
   @CreatedDate
   private Date createdAt;
 
