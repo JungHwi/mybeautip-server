@@ -519,7 +519,7 @@ public class VideoController {
     Video video = videoRepository.findByIdAndMemberId(id, memberId)
        .orElseThrow(() -> new NotFoundException("video_not_fount", "invalid video id or member id"));
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
     Slice<Revenue>  list = null;
 
     if (StringUtils.isNumeric(cursor)) {
