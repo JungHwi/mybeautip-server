@@ -22,7 +22,7 @@ public class FeedAspect {
     this.feedService = feedService;
   }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.createVideo(..))",
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.save(..))",
      returning = "result")
   public void onAfterReturningCreateVideo(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -34,7 +34,26 @@ public class FeedAspect {
     }
   }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.deleteVideo(..))",
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.update(..))",
+    returning = "result")
+  public void onAfterReturningUpdateVideo(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof Video) {
+      Video video = (Video) result;
+      if ("private".equalsIgnoreCase(video.getVisibility())) {
+        log.debug("video: {}", video);
+        feedService.feedDeletedVideo(video.getId());
+      }
+      if ("public".equalsIgnoreCase(video.getVisibility())) {
+        log.debug("video: {}", video);
+        feedService.feedVideo(video);
+      }
+
+    }
+  }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.saveWithDeletedAt(..))",
     returning = "result")
   public void onAfterReturningDeleteVideo(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());

@@ -27,17 +27,20 @@ import com.jocoos.mybeautip.video.*;
 @RestController
 @RequestMapping(value = "/api/1/callbacks/video", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CallbackController {
+  private final VideoService videoService;
   private final MemberRepository memberRepository;
   private final VideoRepository videoRepository;
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final VideoLikeRepository videoLikeRepository;
 
-  public CallbackController(VideoRepository videoRepository,
+  public CallbackController(VideoService videoService,
+                            VideoRepository videoRepository,
                             MemberRepository memberRepository,
                             GoodsRepository goodsRepository,
                             VideoGoodsRepository videoGoodsRepository,
                             VideoLikeRepository videoLikeRepository) {
+    this.videoService = videoService;
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
@@ -70,7 +73,7 @@ public class CallbackController {
       })
       .orElseThrow(() -> new MemberNotFoundException(request.getUserId()));
 
-    Video createdVideo = videoRepository.save(video);
+    Video createdVideo = videoService.save(video);
 
     // Set related goods info
     if (StringUtils.isNotEmpty(request.getData())) {
@@ -93,7 +96,7 @@ public class CallbackController {
         String url = videoGoods.get(0).getGoods().getListImageData().toString();
         createdVideo.setRelatedGoodsThumbnailUrl(url);
         createdVideo.setRelatedGoodsCount(videoGoods.size());
-        videoRepository.save(createdVideo);
+        videoService.save(createdVideo);
       }
     }
 
@@ -112,7 +115,7 @@ public class CallbackController {
         return updateVideoProperties(request, v);})
       .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
 
-    return videoRepository.save(video);
+    return videoService.update(video);
   }
 
   @Transactional
@@ -125,7 +128,7 @@ public class CallbackController {
           throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
         }
         v.setDeletedAt(new Date());
-        videoRepository.save(v);
+        videoService.saveWithDeletedAt(v);
         videoLikeRepository.deleteByVideoId(v.getId());
         memberRepository.updateVideoCount(v.getMember().getId(), -1);
         return v;

@@ -237,4 +237,31 @@ public class VideoService {
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
     return generateVideoInfo(video);
   }
+
+  /**
+   * Wrap method to avoid duplication for feed aspect
+   * @param video
+   * @return
+   */
+  public Video save(Video video) {
+    return videoRepository.save(video);
+  }
+
+  /**
+   * Wrap method to avoid duplication for feed aspect
+   * @param video
+   * @return
+   */
+  public Video update(Video video) {
+    return videoRepository.save(video);
+  }
+
+  /**
+   * Wrap method to avoid duplication for feed aspect
+   * @param video
+   * @return
+   */
+  public Video saveWithDeletedAt(Video video) {
+    return videoRepository.save(video);
+  }
 }
