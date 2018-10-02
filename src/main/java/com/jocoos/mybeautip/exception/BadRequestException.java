@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import lombok.Getter;
 
+import com.jocoos.mybeautip.restapi.WordController;
+
 @Getter
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class BadRequestException extends MybeautipRuntimeException {
@@ -18,6 +20,10 @@ public class BadRequestException extends MybeautipRuntimeException {
 
   public BadRequestException(String message, String description) {
     super(message, description);
+  }
+
+  public BadRequestException(WordController.UsernameErrorCode code) {
+    super(code.getError(), code.getErrorDescription());
   }
 
   public BadRequestException(FieldError error) {
