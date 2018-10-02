@@ -29,8 +29,7 @@ public class BannedWordService {
     String lowerCase = word.toLowerCase();
     getDictionary(BannedWord.CATEGORY_USERNAME).forEach((key, value) -> {
       if (lowerCase.contains(value.getWord().toLowerCase())) {
-        throw new BadRequestException(WordController.UsernameErrorCode.BANNED_WORD.getError(),
-          WordController.UsernameErrorCode.BANNED_WORD.getErrorDescription());
+        throw new BadRequestException(WordController.UsernameErrorCode.BANNED_WORD);
       }
     });
 

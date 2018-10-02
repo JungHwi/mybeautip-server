@@ -32,20 +32,20 @@ public class WordController {
   @GetMapping
   public void checkUsernameValidation(@RequestParam String username) {
     if (username.length() < 2 || username.length() > 25) {
-      throw new BadRequestException(UsernameErrorCode.INVALID_LENGTH.error, UsernameErrorCode.INVALID_LENGTH.errorDescription);
+      throw new BadRequestException(UsernameErrorCode.INVALID_LENGTH);
     }
 
     if (StringUtils.isNumeric(username)) {
-      throw new BadRequestException(UsernameErrorCode.INVALID_NUMBER.error, UsernameErrorCode.INVALID_NUMBER.errorDescription);
+      throw new BadRequestException(UsernameErrorCode.INVALID_NUMBER);
     }
 
     String regex = "^[\\w가-힣!_~]+$";
     if (!(username.matches(regex))) {
-      throw new BadRequestException(UsernameErrorCode.INVALID_CHAR.error, UsernameErrorCode.INVALID_CHAR.errorDescription);
+      throw new BadRequestException(UsernameErrorCode.INVALID_CHAR);
     }
 
     if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
-      throw new BadRequestException(UsernameErrorCode.ALREADY_USED.error, UsernameErrorCode.ALREADY_USED.errorDescription);
+      throw new BadRequestException(UsernameErrorCode.ALREADY_USED);
     }
 
     bannedWordService.findWordAndThrowException(username);
