@@ -125,17 +125,17 @@ public class PostController {
 
     // FIXME: How to make a code gracefully
     if (category > 0 && !Strings.isNullOrEmpty(keyword) && dateCursor != null) {
-      posts = postRepository.findByCategoryAndTitleContainingOrDescriptionContainingAndCreatedAtBeforeAndDeletedAtIsNull(category, keyword, keyword, dateCursor, page);
+      posts = postRepository.findByCategoryAndCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(category, dateCursor, keyword, keyword, page);
     } else if (!Strings.isNullOrEmpty(keyword) && dateCursor != null) {
-      posts = postRepository.findByTitleContainingOrDescriptionContainingAndCreatedAtBeforeAndDeletedAtIsNull(keyword, keyword, dateCursor, page);
+      posts = postRepository.findByCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, keyword, keyword, page);
     } else if (category > 0 && !Strings.isNullOrEmpty(keyword)) {
-      posts = postRepository.findByCategoryAndTitleContainingOrDescriptionContainingAndDeletedAtIsNull(category, keyword, keyword, page);
+      posts = postRepository.findByCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(category, keyword, keyword, page);
     } else if (category > 0 && dateCursor != null) {
       posts = postRepository.findByCategoryAndCreatedAtBeforeAndDeletedAtIsNull(category, dateCursor, page);
     } else if (dateCursor != null) {
       posts = postRepository.findByCreatedAtBeforeAndDeletedAtIsNull(dateCursor, page);
     } else if (!Strings.isNullOrEmpty(keyword)) {
-      posts = postRepository.findByTitleContainingOrDescriptionContainingAndDeletedAtIsNull(keyword, keyword, page);
+      posts = postRepository.findByDeletedAtIsNullAndTitleContainingOrDescriptionContaining(keyword, keyword, page);
     } else if (category > 0){
       posts = postRepository.findByCategoryAndDeletedAtIsNull(category, page);
     } else {

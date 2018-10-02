@@ -227,11 +227,11 @@ public class MemberController {
     PageRequest page = PageRequest.of(0, cursor.getCount(), new Sort(Sort.Direction.DESC, "createdAt"));
 
     if (cursor.hasCursor() && cursor.hasKeyword()) {
-      list = memberRepository.findByUsernameContainingOrIntroContainingAndCreatedAtBeforeAndDeletedAtIsNull(cursor.getKeyword(), cursor.getKeyword(), cursor.getCursor(), page);
+      list = memberRepository.findByCreatedAtBeforeAndDeletedAtIsNullAndUsernameContainingOrIntroContaining(cursor.getCursor(), cursor.getKeyword(), cursor.getKeyword(), page);
     } else if (cursor.hasCursor()) {
       list = memberRepository.findByCreatedAtBeforeAndDeletedAtIsNull(cursor.getCursor(), page);
     } else if (cursor.hasKeyword()) {
-      list = memberRepository.findByUsernameContainingOrIntroContainingAndDeletedAtIsNull(cursor.getKeyword(), cursor.getKeyword(), page);
+      list = memberRepository.findByDeletedAtIsNullAndUsernameContainingOrIntroContaining(cursor.getKeyword(), cursor.getKeyword(), page);
     } else {
       list = memberRepository.findByDeletedAtIsNull(page);
     }

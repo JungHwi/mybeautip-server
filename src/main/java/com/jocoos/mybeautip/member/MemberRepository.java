@@ -17,9 +17,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNull(Date createdAt, Pageable pageable);
 
-  Slice<Member> findByUsernameContainingOrIntroContainingAndDeletedAtIsNull(String username, String intro, Pageable pageable);
+  Slice<Member> findByDeletedAtIsNullAndUsernameContainingOrIntroContaining(String username, String intro, Pageable pageable);
 
-  Slice<Member> findByUsernameContainingOrIntroContainingAndCreatedAtBeforeAndDeletedAtIsNull(String username, String intro, Date createdAt, Pageable pageable);
+  Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNullAndUsernameContainingOrIntroContaining(Date createdAt, String username, String intro, Pageable pageable);
 
   @Modifying
   @Query("update Member m set m.followingCount = m.followingCount + ?2, m.modifiedAt = now() where m.id = ?1")

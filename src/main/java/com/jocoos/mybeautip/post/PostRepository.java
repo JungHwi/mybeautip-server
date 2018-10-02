@@ -29,13 +29,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNull(Date createdAt, Pageable pageable);
 
-  Slice<Post> findByTitleContainingOrDescriptionContainingAndDeletedAtIsNull(String title, String description, Pageable pageable);
+  Slice<Post> findByDeletedAtIsNullAndTitleContainingOrDescriptionContaining(String title, String description, Pageable pageable);
 
   Slice<Post> findByCategoryAndCreatedAtBeforeAndDeletedAtIsNull(int category, Date createdAt, Pageable pageable);
 
-  Slice<Post> findByCategoryAndTitleContainingOrDescriptionContainingAndDeletedAtIsNull(int category, String title, String description, Pageable pageable);
+  Slice<Post> findByCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(int category, String title, String description, Pageable pageable);
 
-  Slice<Post> findByCategoryAndTitleContainingOrDescriptionContainingAndCreatedAtBeforeAndDeletedAtIsNull(int category, String title, String description, Date createdAt, Pageable pageable);
+  Slice<Post> findByCategoryAndCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(int category, Date createdAt, String title, String description, Pageable pageable);
 
-  Slice<Post> findByTitleContainingOrDescriptionContainingAndCreatedAtBeforeAndDeletedAtIsNull(String title, String description, Date createdAt, Pageable pageable);
+  Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date createdAt, String title, String description, Pageable pageable);
 }
