@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 @Data
 public class MemberMeInfo extends MemberInfo {
+  private int point;
   private int revenue;
 
   public MemberMeInfo(Member member) {
