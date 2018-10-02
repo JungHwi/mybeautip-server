@@ -9,6 +9,7 @@ import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.restapi.WordController;
 
 @Slf4j
 @Service
@@ -28,7 +29,8 @@ public class BannedWordService {
     String lowerCase = word.toLowerCase();
     getDictionary(BannedWord.CATEGORY_USERNAME).forEach((key, value) -> {
       if (lowerCase.contains(value.getWord().toLowerCase())) {
-        throw new BadRequestException("invalid_username", "Your username is not available");
+        throw new BadRequestException(WordController.UsernameErrorCode.BANNED_WORD.getError(),
+          WordController.UsernameErrorCode.BANNED_WORD.getErrorDescription());
       }
     });
 
