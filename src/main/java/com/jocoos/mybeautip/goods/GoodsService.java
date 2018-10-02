@@ -111,16 +111,16 @@ public class GoodsService {
       }
     }
 
+    String nextCursor = null;
     if (result.size() > 0) {
-      String nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
-      return new CursorResponse.Builder<>("/api/1/goods", result)
-        .withCount(request.getCount())
-        .withCursor(nextCursor)
-        .withCategory(request.getCategory())
-        .withKeyword(request.getKeyword()).toBuild();
-    } else {
-      return new CursorResponse.Builder<>("/api/1/goods", result).toBuild();
+      nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
     }
+
+    return new CursorResponse.Builder<>("/api/1/goods", result)
+      .withCount(request.getCount())
+      .withCursor(nextCursor)
+      .withCategory(request.getCategory())
+      .withKeyword(request.getKeyword()).toBuild();
   }
 
   private FILTER getRequestFilter(GoodsListRequest request) {

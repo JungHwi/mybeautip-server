@@ -101,15 +101,14 @@ public class StoreController {
       }
     }
 
+    String nextCursor = null;
     if (result.size() > 0) {
-      String nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
-      return new CursorResponse.Builder<>(httpServletRequest.getRequestURI(), result)
-        .withCount(count)
-        .withCursor(nextCursor)
-        .toBuild();
-    } else {
-      return new CursorResponse.Builder<>(httpServletRequest.getRequestURI(), result).toBuild();
+      nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
     }
+    return new CursorResponse.Builder<>(httpServletRequest.getRequestURI(), result)
+      .withCount(count)
+      .withCursor(nextCursor)
+      .toBuild();
   }
 
   @Transactional

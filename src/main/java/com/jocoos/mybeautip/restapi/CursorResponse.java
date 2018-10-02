@@ -99,8 +99,19 @@ public class CursorResponse<E> {
     }
 
     public CursorResponse<E> toBuild() {
-      createRef();
-      log.debug("created nextRef: {}", nextRef);
+      String countValue = null;
+      if (this.properties.containsKey("count")) {
+        countValue = this.properties.getFirst("count");
+      }
+      int count = (countValue == null) ? 0 : Integer.parseInt(countValue);
+
+      if (this.content.size() >= count) {
+        createRef();
+        log.debug("created nextRef: {}", nextRef);
+      } else {
+        this.nextCursor = null;
+        this.nextRef = null;
+      }
       return new CursorResponse<>(this);
     }
   }

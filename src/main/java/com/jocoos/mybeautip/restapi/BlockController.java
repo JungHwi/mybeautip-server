@@ -126,14 +126,13 @@ public class BlockController {
       result.add(blockInfo);
     }
 
+    String nextCursor = null;
     if (result.size() > 0) {
-      String nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
-      return new CursorResponse.Builder<>(requestUri, result)
-        .withCount(count)
-        .withCursor(nextCursor).toBuild();
-    } else {
-      return new CursorResponse.Builder<>(requestUri, result).toBuild();
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
+    return new CursorResponse.Builder<>(requestUri, result)
+      .withCount(count)
+      .withCursor(nextCursor).toBuild();
   }
 
   @Data
