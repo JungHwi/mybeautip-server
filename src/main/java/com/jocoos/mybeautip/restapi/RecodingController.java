@@ -13,13 +13,19 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsLike;
+import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.post.Post;
+import com.jocoos.mybeautip.post.PostLike;
+import com.jocoos.mybeautip.post.PostLikeRepository;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
 import com.jocoos.mybeautip.recoding.ViewRecodingService;
 import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoLike;
+import com.jocoos.mybeautip.video.VideoLikeRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
@@ -34,17 +40,26 @@ public class RecodingController {
   private final PostRepository postRepository;
   private final GoodsRepository goodsRepository;
   private final VideoRepository videoRepository;
+  private final PostLikeRepository postLikeRepository;
+  private final GoodsLikeRepository goodsLikeRepository;
+  private final VideoLikeRepository videoLikeRepository;
 
   public RecodingController(ViewRecodingService viewRecodingService,
                             MemberService memberService,
                             PostRepository postRepository,
                             GoodsRepository goodsRepository,
-                            VideoRepository videoRepository) {
+                            VideoRepository videoRepository,
+                            PostLikeRepository postLikeRepository,
+                            GoodsLikeRepository goodsLikeRepository,
+                            VideoLikeRepository videoLikeRepository) {
     this.viewRecodingService = viewRecodingService;
     this.memberService = memberService;
     this.postRepository = postRepository;
     this.goodsRepository = goodsRepository;
     this.videoRepository = videoRepository;
+    this.postLikeRepository = postLikeRepository;
+    this.goodsLikeRepository = goodsLikeRepository;
+    this.videoLikeRepository = videoLikeRepository;
   }
 
   /**
@@ -77,19 +92,32 @@ public class RecodingController {
   }
 
   private RecodingInfo getBasicInfo(ViewRecoding recoding) {
+    Long me = memberService.currentMemberId();
     switch (recoding.getCategory()) {
       case 1:
         return postRepository.findById(Long.parseLong(recoding.getItemId()))
-                .map(post -> new RecodingInfo(recoding, post))
+                .map(post -> {
+                  Long likeId = postLikeRepository.findByPostIdAndCreatedById(post.getId(), me)
+                    .map(PostLike::getId).orElse(null);
+                  return new RecodingInfo(recoding, post, likeId);
+                })
                 .orElseGet(() -> new RecodingInfo(recoding));
       case 2:
         return goodsRepository.findById(recoding.getItemId())
-           .map(goods -> new RecodingInfo(recoding, goods))
+           .map(goods -> {
+             Long likeId = goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goods.getGoodsNo(), me)
+               .map(GoodsLike::getId).orElse(null);
+             return new RecodingInfo(recoding, goods, likeId);
+           })
            .orElseGet(() -> new RecodingInfo(recoding));
 
       case 3:
         return videoRepository.findById(Long.parseLong(recoding.getItemId()))
-          .map(video -> new RecodingInfo(recoding, video))
+          .map(video -> {
+            Long likeId = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me)
+              .map(VideoLike::getId).orElse(null);
+            return new RecodingInfo(recoding, video, likeId);
+          })
           .orElseGet(() -> new RecodingInfo(recoding));
 
       default:
@@ -110,24 +138,24 @@ public class RecodingController {
       BeanUtils.copyProperties(viewRecoding, this);
     }
 
-    public RecodingInfo(ViewRecoding viewRecoding, Post src) {
+    public RecodingInfo(ViewRecoding viewRecoding, Post src, Long likeId) {
       BeanUtils.copyProperties(viewRecoding, this);
       if (src != null) {
-        detail = new BasicInfo(src);
+        detail = new BasicInfo(src, likeId);
       }
     }
 
-    public RecodingInfo(ViewRecoding viewRecoding, Goods src) {
+    public RecodingInfo(ViewRecoding viewRecoding, Goods src, Long likeId) {
       BeanUtils.copyProperties(viewRecoding, this);
       if (src != null) {
-        detail = new BasicInfo(src);
+        detail = new BasicInfo(src, likeId);
       }
     }
 
-    public RecodingInfo(ViewRecoding viewRecoding, Video src) {
+    public RecodingInfo(ViewRecoding viewRecoding, Video src, Long likeId) {
       BeanUtils.copyProperties(viewRecoding, this);
       if (src != null) {
-        detail = new BasicInfo(src);
+        detail = new BasicInfo(src, likeId);
       }
     }
   }
@@ -139,24 +167,34 @@ public class RecodingController {
     private String title;
     private Integer category;
     private String thumbnailUrl;
+    private String goodsDiscountFl;  // 상품 할인 설정 ( y=사용함, n=사용안함)
+    private Integer goodsDiscount;  // 상품 할인 값
+    private String goodsDiscountUnit;  // 상품 할인 단위 ( percent=%, price=원)
+    private Integer goodsPrice;  // 판매가
+    private Integer fixedPrice;  // 정가
+    private Integer likeCount;
+    private Long likeId;
     private String type;
     private String state;
     private Date createdAt;
 
-    public BasicInfo(Post post) {
+    public BasicInfo(Post post, Long likeId) {
       BeanUtils.copyProperties(post, this);
+      this.likeId = likeId;
     }
 
-    public BasicInfo(Goods goods) {
+    public BasicInfo(Goods goods, Long likeId) {
       BeanUtils.copyProperties(goods, this);
       this.title = goods.getGoodsNm();
       this.thumbnailUrl = goods.getMainImageData().toString();
       this.category = null;
+      this.likeId = likeId;
     }
 
-    public BasicInfo(Video video) {
+    public BasicInfo(Video video, Long likeId) {
       BeanUtils.copyProperties(video, this);
       this.category = null;
+      this.likeId = likeId;
     }
   }
 }
