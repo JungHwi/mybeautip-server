@@ -170,6 +170,12 @@ public class CallbackController {
       }
     }
 
+    if (source.getThumbnailPath() != null) {
+      if (StringUtils.strip(source.getThumbnailPath()).length() > 0) {
+        target.setThumbnailPath(source.getThumbnailPath());
+      }
+    }
+
     if (source.getThumbnailUrl() != null) {
       if (StringUtils.strip(source.getThumbnailUrl()).length() > 0) {
         target.setThumbnailUrl(source.getThumbnailUrl());
@@ -207,6 +213,7 @@ public class CallbackController {
     String title ="";
     String content = "";
     String url ="";
+    String thumbnailPath = "";
     String thumbnailUrl = "";
     String chatRoomId ="";
     String data = "";
@@ -225,6 +232,7 @@ public class CallbackController {
     String title;
     String content;
     String url;
+    String thumbnailPath;
     String thumbnailUrl;
     String chatRoomId;
     Integer duration;
