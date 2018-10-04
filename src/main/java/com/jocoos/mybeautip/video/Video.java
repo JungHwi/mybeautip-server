@@ -44,6 +44,9 @@ public class Video {
   private String url;
 
   @Column
+  private String thumbnailPath;
+
+  @Column
   private String thumbnailUrl;
 
   @Column
