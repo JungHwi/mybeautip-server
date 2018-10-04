@@ -167,6 +167,7 @@ public class RecodingController {
     private String title;
     private Integer category;
     private String thumbnailUrl;
+    private String soldOutFl;  // 품절상태 (n= 정상, y=품절(수동))
     private String goodsDiscountFl;  // 상품 할인 설정 ( y=사용함, n=사용안함)
     private Integer goodsDiscount;  // 상품 할인 값
     private String goodsDiscountUnit;  // 상품 할인 단위 ( percent=%, price=원)
