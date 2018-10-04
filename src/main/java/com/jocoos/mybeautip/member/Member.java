@@ -8,10 +8,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 
 @Data
@@ -26,6 +28,10 @@ public class Member {
   static final int LINK_FACEBOOK = 1;
   static final int LINK_NAVER = 2;
   static final int LINK_KAKAO = 4;
+
+  @Transient
+  @JsonIgnore
+  private final String deaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,9 +97,10 @@ public class Member {
 
   public Member(Map<String, String> params) {
     this.link = parseLink(params.get("grant_type"));
-    this.username = params.get("username");
-    this.email = params.get("email");
-    this.avatarUrl = params.get("avatar_url");
+    this.username = (StringUtils.isBlank(params.get("username"))) ? "" : params.get("username");
+    this.email = (StringUtils.isBlank(params.get("email"))) ? "" : params.get("email");
+    this.intro = (StringUtils.isBlank(params.get("intro"))) ? "" : params.get("intro");
+    this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? deaultAvatarUrl : params.get("avatar_url");
     this.point = 0;
   }
 }
