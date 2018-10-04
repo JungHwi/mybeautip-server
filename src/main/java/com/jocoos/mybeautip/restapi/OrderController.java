@@ -364,6 +364,7 @@ public class OrderController {
     private String status;
     private String goodsNo;
     private int goodsPrice;
+    private String thumbnail;
     private Long optionId;
     private String optionValue;
     private String optionPrice;
@@ -371,10 +372,11 @@ public class OrderController {
     private Long totalPrice;
     private Long videoId;
     private Date createdAt;
-    // TODO: Add goods info for thumbnail?
+
 
     public PurchaseInfo(Purchase purchase) {
       BeanUtils.copyProperties(purchase, this);
+      this.thumbnail = purchase.getGoods().getListImageData().toString();
     }
   }
 
