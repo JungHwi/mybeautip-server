@@ -161,10 +161,12 @@ public class StoreController {
 
   @PatchMapping("/cover/{id:.+}")
   public Store updateStoreCoverImageUrl(@PathVariable Integer id) {
+    log.info("updateStoreCoverImageUrl called: " + id);
     return storeRepository.findById(id)
       .map(store -> {
         String url = StringUtils.substringBefore(store.getImageUrl(), "?");
         store.setImageUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
+        log.info("updateStoreCoverImageUrl changed: " + store.getImageUrl());
         return storeRepository.save(store);
       })
       .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
@@ -172,10 +174,12 @@ public class StoreController {
 
   @PatchMapping("/thumbnail/{id:.+}")
   public Store updateStoreThumbnailImageUrl(@PathVariable Integer id) {
+    log.info("updateStoreThumbnailImageUrl called: " + id);
     return storeRepository.findById(id)
       .map(store -> {
         String url = StringUtils.substringBefore(store.getThumbnailUrl(), "?");
         store.setThumbnailUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
+        log.info("updateStoreThumbnailImageUrl changed: " + store.getThumbnailUrl());
         return storeRepository.save(store);
       })
       .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
@@ -183,10 +187,12 @@ public class StoreController {
 
   @PatchMapping("/refund/{id:.+}")
   public Store updateStoreRefundImageUrl(@PathVariable Integer id) {
+    log.info("updateStoreRefundImageUrl called: " + id);
     return storeRepository.findById(id)
       .map(store -> {
         String url = StringUtils.substringBefore(store.getRefundUrl(), "?");
         store.setRefundUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
+        log.info("updateStoreRefundImageUrl changed: " + store.getRefundUrl());
         return storeRepository.save(store);
       })
       .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
@@ -194,10 +200,12 @@ public class StoreController {
 
   @PatchMapping("/as/{id:.+}")
   public Store updateStoreAsImageUrl(@PathVariable Integer id) {
+    log.info("updateStoreAsImageUrl called: " + id);
     return storeRepository.findById(id)
       .map(store -> {
         String url = StringUtils.substringBefore(store.getAsUrl(), "?");
         store.setAsUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
+        log.info("updateStoreAsImageUrl changed: " + store.getAsUrl());
         return storeRepository.save(store);
       })
       .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
