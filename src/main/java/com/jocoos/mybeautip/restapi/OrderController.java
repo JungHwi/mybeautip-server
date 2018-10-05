@@ -386,6 +386,7 @@ public class OrderController {
   @NoArgsConstructor
   @Data
   public static class OrderInquiryInfo {
+    private Long id;
     private Byte state;
     private String reason;
     private String comment;
