@@ -21,6 +21,7 @@ import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
@@ -158,23 +159,45 @@ public class StoreController {
       .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id or like id"));
   }
 
-  @PatchMapping("/{id:.+}")
-  public Store updateStore(@PathVariable Integer id,
-                           @RequestBody UpdateStoreRequest request) {
+  @PatchMapping("/cover/{id:.+}")
+  public Store updateStoreCoverImageUrl(@PathVariable Integer id) {
     return storeRepository.findById(id)
       .map(store -> {
-        if (request.getImageUrl() != null) {
-          store.setImageUrl(request.getImageUrl());
-        }
-        if (request.getThumbnailUrl() != null) {
-          store.setThumbnailUrl(request.getThumbnailUrl());
-        }
-        if (request.getRefundUrl() != null) {
-          store.setRefundUrl(request.getRefundUrl());
-        }
-        if (request.getAsUrl() != null) {
-          store.setAsUrl(request.getAsUrl());
-        }
+        String url = StringUtils.substringBefore(store.getImageUrl(), "?");
+        store.setImageUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
+        return storeRepository.save(store);
+      })
+      .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
+  }
+
+  @PatchMapping("/thumbnail/{id:.+}")
+  public Store updateStoreThumbnailImageUrl(@PathVariable Integer id) {
+    return storeRepository.findById(id)
+      .map(store -> {
+        String url = StringUtils.substringBefore(store.getThumbnailUrl(), "?");
+        store.setThumbnailUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
+        return storeRepository.save(store);
+      })
+      .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
+  }
+
+  @PatchMapping("/refund/{id:.+}")
+  public Store updateStoreRefundImageUrl(@PathVariable Integer id) {
+    return storeRepository.findById(id)
+      .map(store -> {
+        String url = StringUtils.substringBefore(store.getRefundUrl(), "?");
+        store.setRefundUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
+        return storeRepository.save(store);
+      })
+      .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
+  }
+
+  @PatchMapping("/as/{id:.+}")
+  public Store updateStoreAsImageUrl(@PathVariable Integer id) {
+    return storeRepository.findById(id)
+      .map(store -> {
+        String url = StringUtils.substringBefore(store.getAsUrl(), "?");
+        store.setAsUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
         return storeRepository.save(store);
       })
       .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));

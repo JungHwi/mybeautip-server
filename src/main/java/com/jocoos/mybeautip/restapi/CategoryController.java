@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Category;
@@ -51,11 +52,11 @@ public class CategoryController {
   }
 
   @PatchMapping("/{id:.+}")
-  public Category updateCategory(@PathVariable String id,
-                                 @RequestBody UpdateCategoryRequest request) {
+  public Category updateCategoryThumbnailImage(@PathVariable String id) {
     return categoryRepository.findById(id)
       .map(category -> {
-        category.setThumbnailUrl(request.getThumbnailUrl());
+        String url = StringUtils.substringBefore(category.getThumbnailUrl(), "?");
+        category.setThumbnailUrl(String.format("%s?time=%s", url, System.currentTimeMillis()));
         return categoryRepository.save(category);
       })
       .orElseThrow(() -> new NotFoundException("category_not_found", "category not found:" + id));

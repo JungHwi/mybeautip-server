@@ -17,6 +17,8 @@ bin/
 gen/
 out/
 build/
+tools/update-s3-image-path/node_modules
+tools/*.zip
 
 # files for gradle
 .gradle/
