@@ -129,6 +129,10 @@ public class MemberController {
       throw new BadRequestException("invalid member request - username");
     }
 
+    if (StringUtils.isNotEmpty(updateMemberRequest.getUsername())) {
+      memberService.checkUsernameValidation(updateMemberRequest.getUsername());
+    }
+
     // Validation check: email cannot be empty
     if ("".equals(updateMemberRequest.getEmail())) {
       log.debug("bindingResult: {}", bindingResult);
