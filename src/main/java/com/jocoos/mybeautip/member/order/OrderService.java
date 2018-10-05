@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.member.order;
 import javax.transaction.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
@@ -17,12 +16,12 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.point.PointService;
-import com.jocoos.mybeautip.member.revenue.Revenue;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
@@ -30,7 +29,6 @@ import com.jocoos.mybeautip.support.payment.PaymentResponse;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @Service
@@ -46,7 +44,7 @@ public class OrderService {
   private final PaymentRepository paymentRepository;
   private final OrderInquiryRepository orderInquiryRepository;
   private final MemberCouponRepository memberCouponRepository;
-  private final VideoRepository videoRepository;
+  private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final RevenueService revenueService;
   private final PointService pointService;
@@ -58,7 +56,7 @@ public class OrderService {
                       PaymentRepository paymentRepository,
                       OrderInquiryRepository orderInquiryRepository,
                       MemberCouponRepository memberCouponRepository,
-                      VideoRepository videoRepository,
+                      GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
                       RevenueService revenueService, PointService pointService,
                       IamportService iamportService) {
@@ -68,7 +66,7 @@ public class OrderService {
     this.paymentRepository = paymentRepository;
     this.orderInquiryRepository = orderInquiryRepository;
     this.memberCouponRepository = memberCouponRepository;
-    this.videoRepository = videoRepository;
+    this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.revenueService = revenueService;
     this.pointService = pointService;
@@ -126,11 +124,16 @@ public class OrderService {
 
     List<Purchase> purchases = Lists.newArrayList();
     request.getPurchases().forEach(p -> {
-      Purchase purchase = new Purchase(order.getId(), Order.ORDER);
-      BeanUtils.copyProperties(p, purchase);
+      goodsRepository.findByGoodsNo(p.getGoodsNo())
+        .map(goods -> {
+          Purchase purchase = new Purchase(order.getId(), Order.ORDER, goods);
+          BeanUtils.copyProperties(p, purchase);
 
-      purchase.setTotalPrice(Long.valueOf(p.getQuantity() * p.getGoodsPrice()));
-      purchases.add(purchase);
+          purchase.setTotalPrice(Long.valueOf(p.getQuantity() * p.getGoodsPrice()));
+          purchases.add(purchase);
+          return Optional.empty();
+        })
+        .orElseThrow(() -> new NotFoundException("goods_not_found", "Goods not found:" + p.getGoodsNo()));
     });
 
     log.debug("purchases: {}", purchases);

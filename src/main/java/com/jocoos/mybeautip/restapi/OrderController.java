@@ -363,6 +363,7 @@ public class OrderController {
     private Long orderId;
     private String status;
     private String goodsNo;
+    private String goodsNm;  // 상품명
     private int goodsPrice;
     private String thumbnail;
     private Long optionId;
@@ -377,12 +378,15 @@ public class OrderController {
     public PurchaseInfo(Purchase purchase) {
       BeanUtils.copyProperties(purchase, this);
       this.thumbnail = purchase.getGoods().getListImageData().toString();
+      this.goodsNo = purchase.getGoods().getGoodsNo();
+      this.goodsNm = purchase.getGoods().getGoodsNm();
     }
   }
 
   @NoArgsConstructor
   @Data
   public static class OrderInquiryInfo {
+    private Long id;
     private Byte state;
     private String reason;
     private String comment;
