@@ -121,8 +121,7 @@ public class BlockController {
     List<BlockInfo> result = new ArrayList<>();
     BlockInfo blockInfo;
     for (Block block : slice.getContent()) {
-      blockInfo = new BlockInfo(block,
-        new MemberInfo(block.getMemberYou(), memberService.getFollowingId(block.getMemberYou())));
+      blockInfo = new BlockInfo(block, memberService.getMemberInfo(block.getMemberYou()));
       result.add(blockInfo);
     }
 

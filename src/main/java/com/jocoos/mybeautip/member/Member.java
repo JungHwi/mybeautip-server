@@ -37,6 +37,10 @@ public class Member {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @JsonIgnore
+  @Column(nullable = false)
+  private boolean visible;
+
   @Column(length = 50, nullable = false)
   private String username;
 
@@ -62,7 +66,11 @@ public class Member {
   private int followingCount;
 
   @Column(nullable = false)
-  private int videoCount;
+  private int videoCount; // public video count
+
+  @JsonIgnore
+  @Column(nullable = false)
+  private int totalVideoCount;
 
   @Column
   private int revenue;
@@ -102,5 +110,6 @@ public class Member {
     this.intro = (StringUtils.isBlank(params.get("intro"))) ? "" : params.get("intro");
     this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? deaultAvatarUrl : params.get("avatar_url");
     this.point = 0;
+    this.visible = (StringUtils.isNotBlank(params.get("username")));
   }
 }

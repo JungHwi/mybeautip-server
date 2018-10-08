@@ -143,6 +143,7 @@ public class MemberController {
         .map(m -> {
           if (updateMemberRequest.getUsername() != null) {
             m.setUsername(validateUsername(updateMemberRequest.getUsername()));
+            m.setVisible(true);
           }
           if (updateMemberRequest.getEmail() != null) {
             m.setEmail(updateMemberRequest.getEmail());
@@ -155,7 +156,7 @@ public class MemberController {
           }
           memberRepository.save(m);
 
-          return new ResponseEntity<>(new MemberInfo(m, null), HttpStatus.OK);
+          return new ResponseEntity<>(memberService.getMemberInfo(m), HttpStatus.OK);
         })
         .orElseThrow(() -> new MemberNotFoundException(principal.getName()));
   }
@@ -173,13 +174,16 @@ public class MemberController {
   public CursorResponse getMembers(@RequestParam(defaultValue = "20") int count,
                                                @RequestParam(required = false) String cursor,
                                                @RequestParam(required = false) String keyword) {
-    Slice<Member> list = findMembers(keyword, cursor, count);
     List<MemberInfo> members = Lists.newArrayList();
-    list.stream().forEach(m -> members.add(new MemberInfo(m, memberService.getFollowingId(m.getId()))));
-
     String nextCursor = null;
-    if (members != null && members.size() > 0) {
-      nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
+
+    if (keyword == null || (!StringUtils.containsWhitespace(keyword) && StringUtils.isNotEmpty(keyword))) {
+      Slice<Member> list = findMembers(keyword, cursor, count);
+      list.stream().forEach(m -> members.add(memberService.getMemberInfo(m)));
+
+      if (members.size() > 0) {
+        nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
+      }
     }
 
     return new CursorResponse.Builder<>("/api/1/members", members)
@@ -231,13 +235,13 @@ public class MemberController {
     PageRequest page = PageRequest.of(0, cursor.getCount(), new Sort(Sort.Direction.DESC, "createdAt"));
 
     if (cursor.hasCursor() && cursor.hasKeyword()) {
-      list = memberRepository.findByCreatedAtBeforeAndDeletedAtIsNullAndUsernameContainingOrIntroContaining(cursor.getCursor(), cursor.getKeyword(), cursor.getKeyword(), page);
+      list = memberRepository.findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(cursor.getCursor(), cursor.getKeyword(), cursor.getKeyword(), page);
     } else if (cursor.hasCursor()) {
       list = memberRepository.findByCreatedAtBeforeAndDeletedAtIsNull(cursor.getCursor(), page);
     } else if (cursor.hasKeyword()) {
-      list = memberRepository.findByDeletedAtIsNullAndUsernameContainingOrIntroContaining(cursor.getKeyword(), cursor.getKeyword(), page);
+      list = memberRepository.findByDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(cursor.getKeyword(), cursor.getKeyword(), page);
     } else {
-      list = memberRepository.findByDeletedAtIsNull(page);
+      list = memberRepository.findByDeletedAtIsNullAndVisibleIsTrue(page);
     }
 
     return list;
@@ -245,7 +249,7 @@ public class MemberController {
 
   @GetMapping("/{id:.+}")
   public MemberInfo getMember(@PathVariable Long id) {
-    return memberRepository.findById(id).map(m -> new MemberInfo(m, memberService.getFollowingId(m)))
+    return memberRepository.findById(id).map(memberService::getMemberInfo)
         .orElseThrow(() -> new MemberNotFoundException(id));
   }
 
@@ -361,7 +365,7 @@ public class MemberController {
     List<CommentInfo> result = Lists.newArrayList();
     comments.stream().forEach(comment -> {
       CommentInfo commentInfo = new CommentInfo(
-        comment, new MemberInfo(comment.getCreatedBy(), null));
+        comment, memberService.getMemberInfo(comment.getCreatedBy()));
       if (me != null) {
         commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
           .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));

@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import lombok.Data;
 
 import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberMeInfo;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 
 @Data
@@ -27,7 +28,7 @@ public class CommentInfo {
   public CommentInfo(Comment comment) {
     BeanUtils.copyProperties(comment, this);
     setCommentRef(comment);
-    this.createdBy = new MemberInfo(comment.getCreatedBy(), null);
+    this.createdBy = new MemberMeInfo(comment.getCreatedBy());
   }
 
   public CommentInfo(Comment comment, MemberInfo createdBy) {

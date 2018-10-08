@@ -101,9 +101,11 @@ public class CallbackController {
     }
 
     memberRepository.updateVideoCount(video.getMember().getId(), 1);
+    memberRepository.updateTotalVideoCount(video.getMember().getId(), 1);
     return createdVideo;
   }
 
+  @Transactional
   @PatchMapping
   public Video updateVideo(@Valid @RequestBody CallbackUpdateVideoRequest request) {
     log.info("callback updateVideo: {}", request.toString());
@@ -131,6 +133,7 @@ public class CallbackController {
         videoService.saveWithDeletedAt(v);
         videoLikeRepository.deleteByVideoId(v.getId());
         memberRepository.updateVideoCount(v.getMember().getId(), -1);
+        memberRepository.updateTotalVideoCount(v.getMember().getId(), -1);
         return v;
       })
       .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
@@ -190,6 +193,13 @@ public class CallbackController {
 
     if (source.getVisibility() != null) {
       if (StringUtils.containsAny(source.getVisibility(), "PUBLIC", "PRIVATE")) {
+        if ("PUBLIC".equalsIgnoreCase(target.getVisibility()) && "PRIVATE".equalsIgnoreCase(source.getVisibility())) {
+          memberRepository.updateVideoCount(target.getMember().getId(), -1);
+        }
+
+        if ("PRIVATE".equalsIgnoreCase(target.getVisibility()) && "PUBLIC".equalsIgnoreCase(source.getVisibility())) {
+          memberRepository.updateVideoCount(target.getMember().getId(), 1);
+        }
         target.setVisibility(source.getVisibility());
       }
     }

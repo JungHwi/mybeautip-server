@@ -13,13 +13,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   Optional<Member> findByUsername(String username);
 
-  Slice<Member> findByDeletedAtIsNull(Pageable pageable);
+  Slice<Member> findByDeletedAtIsNullAndVisibleIsTrue(Pageable pageable);
 
   Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNull(Date createdAt, Pageable pageable);
 
-  Slice<Member> findByDeletedAtIsNullAndUsernameContainingOrIntroContaining(String username, String intro, Pageable pageable);
+  Slice<Member> findByDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(String username, String intro, Pageable pageable);
 
-  Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNullAndUsernameContainingOrIntroContaining(Date createdAt, String username, String intro, Pageable pageable);
+  Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(Date createdAt, String username, String intro, Pageable pageable);
 
   @Modifying
   @Query("update Member m set m.followingCount = m.followingCount + ?2, m.modifiedAt = now() where m.id = ?1")
@@ -34,6 +34,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   @Modifying
   @Query("update Member m set m.videoCount = m.videoCount + ?2, m.modifiedAt = now() where m.id = ?1")
   void updateVideoCount(Long id, Integer count);
+
+  @Modifying
+  @Query("update Member m set m.totalVideoCount = m.totalVideoCount + ?2, m.modifiedAt = now() where m.id = ?1")
+  void updateTotalVideoCount(Long id, Integer count);
 
   @Modifying
   @Query("update Member m set m.revenue = m.revenue + ?2, m.modifiedAt = now() where m.id = ?1")
