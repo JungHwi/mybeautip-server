@@ -44,6 +44,7 @@ public class GodoService {
   private final GoodsLikeRepository goodsLikeRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final DeliveryChargeRepository deliveryChargeRepository;
+  private final DeliveryChargeDetailRepository deliveryChargeDetailRepository;
   private final ObjectMapper mapper;
 
   @Value("${godomall.scheme}")
@@ -102,6 +103,7 @@ public class GodoService {
                      GoodsLikeRepository goodsLikeRepository,
                      GoodsRecommendationRepository goodsRecommendationRepository,
                      DeliveryChargeRepository deliveryChargeRepository,
+                     DeliveryChargeDetailRepository deliveryChargeDetailRepository,
                      ObjectMapper mapper) {
     this.restTemplate = restTemplate;
     this.categoryRepository = categoryRepository;
@@ -111,6 +113,7 @@ public class GodoService {
     this.goodsLikeRepository = goodsLikeRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.deliveryChargeRepository = deliveryChargeRepository;
+    this.deliveryChargeDetailRepository = deliveryChargeDetailRepository;
     this.mapper = mapper;
   }
 
@@ -392,22 +395,23 @@ public class GodoService {
         DeliveryCharge deliveryCharge;
         if (optional.isPresent()) {
           deliveryCharge = optional.get();
+          BeanUtils.copyProperties(deliverydata, deliveryCharge);
+          deliveryChargeRepository.save(deliveryCharge);
           updatedCount++;
         } else {
           deliveryCharge = new DeliveryCharge(deliverydata.getSno());
+          BeanUtils.copyProperties(deliverydata, deliveryCharge);
+          deliveryCharge = deliveryChargeRepository.save(deliveryCharge);
+          if (deliverydata.getChargeData() != null) {
+            List<ChargeData> list = new ArrayList<>();
+            for (GodoDeliveryResponse.ChargeData chargeData : deliverydata.getChargeData()) {
+              list.add(new ChargeData(chargeData));
+              deliveryChargeDetailRepository.save(new DeliveryChargeDetail(deliveryCharge, chargeData));
+            }
+            deliveryCharge.setChargeData(mapper.writeValueAsString(list));
+          }
           newCount++;
         }
-        BeanUtils.copyProperties(deliverydata, deliveryCharge);
-
-        if (deliverydata.getChargeData() != null) {
-          List<ChargeData> list = new ArrayList<>();
-          for (GodoDeliveryResponse.ChargeData chargeData : deliverydata.getChargeData()) {
-            list.add(new ChargeData(chargeData));
-          }
-          deliveryCharge.setChargeData(mapper.writeValueAsString(list));
-        }
-
-        deliveryChargeRepository.save(deliveryCharge);
       }
     }
 
