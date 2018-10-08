@@ -88,7 +88,7 @@ public class MemberService {
   }
 
   public MemberInfo getMemberInfo(Member member) {
-    if (member == currentMember()) {
+    if (member.getId().equals(currentMember().getId())) {
       member.setVideoCount(member.getTotalVideoCount());
       return new MemberInfo(member, null);
     } else {
