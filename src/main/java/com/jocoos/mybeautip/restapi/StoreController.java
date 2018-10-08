@@ -84,6 +84,7 @@ public class StoreController {
   @GetMapping("/{id:.+}/goods")
   public CursorResponse getStoreGoods(@PathVariable Integer id,
                                       @RequestParam(defaultValue = "50") int count,
+                                      @RequestParam(required = false) String category,
                                       @RequestParam(required = false) String cursor,
                                       HttpServletRequest httpServletRequest) {
     storeRepository.findById(id)
@@ -92,8 +93,14 @@ public class StoreController {
     Date startCursor = (org.apache.logging.log4j.util.Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<Goods> slice = goodsRepository.findByScmNo(startCursor, id, pageable);
+
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    Slice<Goods> slice;
+    if (StringUtils.isEmpty(category)) {
+      slice = goodsRepository.findByCreatedAtBeforeAndScmNo(startCursor, id, pageable);
+    } else {
+      slice = goodsRepository.findByCreatedAtBeforeAndScmNoAndCateCd(startCursor, id, category, pageable);
+    }
 
     List<GoodsInfo> result = new ArrayList<>();
     if (slice != null && slice.hasContent()) {
@@ -104,7 +111,7 @@ public class StoreController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
     return new CursorResponse.Builder<>(httpServletRequest.getRequestURI(), result)
       .withCount(count)

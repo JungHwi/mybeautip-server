@@ -113,7 +113,7 @@ public class GoodsService {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
     return new CursorResponse.Builder<>("/api/1/goods", result)
