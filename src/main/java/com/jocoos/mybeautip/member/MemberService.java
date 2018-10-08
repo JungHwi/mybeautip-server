@@ -88,7 +88,12 @@ public class MemberService {
   }
 
   public MemberInfo getMemberInfo(Member member) {
-    return new MemberInfo(member, getFollowingId(member));
+    if (member == currentMember()) {
+      member.setVideoCount(member.getTotalVideoCount());
+      return new MemberInfo(member, null);
+    } else {
+      return new MemberInfo(member, getFollowingId(member));
+    }
   }
 
   public void checkUsernameValidation(@RequestParam String username) {

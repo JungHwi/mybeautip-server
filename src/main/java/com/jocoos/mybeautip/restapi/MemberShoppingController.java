@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberMeInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.coupon.Coupon;
 import com.jocoos.mybeautip.member.coupon.CouponService;
@@ -191,7 +192,7 @@ public class MemberShoppingController {
     private OrderCountInfo orderCounts;
 
     public ShoppingInfo(Member member, int couponCount, PointInfo point) {
-      this.member = new MemberInfo(member, null);
+      this.member = new MemberMeInfo(member);
       this.couponCount = couponCount;
       this.point = point;
     }

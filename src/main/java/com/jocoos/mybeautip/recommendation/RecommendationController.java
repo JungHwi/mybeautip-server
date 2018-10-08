@@ -68,7 +68,7 @@ public class RecommendationController {
     List<MemberInfo> result = Lists.newArrayList();
 
     members.stream().forEach(r -> {
-      MemberInfo memberInfo = new MemberInfo(r.getMember(), memberServie.getFollowingId(r.getMember()));
+      MemberInfo memberInfo = memberServie.getMemberInfo(r.getMember());
       List<VideoController.VideoInfo> videoList = Lists.newArrayList();
       Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
       if (slice.hasContent()) {

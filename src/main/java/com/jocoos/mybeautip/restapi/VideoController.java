@@ -183,12 +183,12 @@ public class VideoController {
         MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
         if (mentionResult != null) {
           comment.setComment(mentionResult.getComment());
-          commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
         } else {
           log.warn("mention result not found - {}", comment);
         }
       } else {
-        commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
+        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
 
       if (me != null) {
@@ -704,10 +704,6 @@ public class VideoController {
     @NotNull
     @Size(max = 500)
     private String comment;
-  }
-
-  private MemberInfo createMemberInfo(Member member) {
-    return new MemberInfo(member, memberService.getFollowingId(member));
   }
 
   @Data

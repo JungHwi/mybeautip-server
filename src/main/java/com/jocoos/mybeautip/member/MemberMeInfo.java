@@ -15,5 +15,6 @@ public class MemberMeInfo extends MemberInfo {
 
   public MemberMeInfo(Member member) {
     BeanUtils.copyProperties(member, this);
+    this.setVideoCount(member.getTotalVideoCount());
   }
 }

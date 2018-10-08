@@ -151,7 +151,7 @@ public class FollowingController {
 
     for (Following following : slice.getContent()) {
       // Add following id when I follow you
-      result.add(new MemberInfo(following.getMemberYou(), memberService.getFollowingId(following.getMemberYou())));
+      result.add(memberService.getMemberInfo(following.getMemberYou()));
     }
 
     String nextCursor = null;
@@ -174,7 +174,7 @@ public class FollowingController {
 
     for (Following follower : slice.getContent()) {
       // Add following id when I follow
-      result.add(new MemberInfo(follower.getMemberMe(), memberService.getFollowingId(follower.getMemberMe())));
+      result.add(memberService.getMemberInfo(follower.getMemberMe()));
     }
 
     String nextCursor = null;

@@ -182,7 +182,7 @@ public class PostController {
          List<MemberInfo> result = Lists.newArrayList();
          post.getWinners().stream().forEach(mid -> {
            memberRepository.findById(mid).ifPresent(m -> {
-             result.add(new MemberInfo(m, memberService.getFollowingId(id)));
+             result.add(memberService.getMemberInfo(m));
            });
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
@@ -272,12 +272,12 @@ public class PostController {
         MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
         if (mentionResult != null) {
           comment.setComment(mentionResult.getComment());
-          commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
         } else {
           log.warn("mention result not found - {}", comment);
         }
       } else {
-        commentInfo = new CommentInfo(comment, createMemberInfo(comment.getCreatedBy()));
+        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
 
       if (me != null) {
@@ -334,7 +334,7 @@ public class PostController {
     }
 
     return new ResponseEntity<>(
-       new CommentInfo(comment, createMemberInfo(comment.getCreatedBy())),
+       new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy())),
        HttpStatus.OK
     );
   }
@@ -354,7 +354,7 @@ public class PostController {
        .map(comment -> {
          comment.setComment(request.getComment());
          return new ResponseEntity<>(
-            new CommentInfo(commentRepository.save(comment), createMemberInfo(comment.getCreatedBy())),
+            new CommentInfo(commentRepository.save(comment), memberService.getMemberInfo(comment.getCreatedBy())),
             HttpStatus.OK
          );
        })
@@ -425,10 +425,6 @@ public class PostController {
          return new ResponseEntity(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_comment_like_not_found", "invalid post comment like id"));
-  }
-
-  private MemberInfo createMemberInfo(Member member) {
-    return new MemberInfo(member, memberService.getFollowingId(member));
   }
 
   /**
