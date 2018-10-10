@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.godo.GodoService;
 
@@ -37,6 +38,7 @@ public class GoodsInfo {
   private String deliveryInfo;
   private String refundInfo;
   private String asInfo;
+  private String companyInfo;
   private String optionFl;    // 옵션 사용여부
   private String optionName;  // 옵션 이름
   private String detailRef;   // 상품 상세 페이지를 볼 수 있는 Html 주소
@@ -50,7 +52,7 @@ public class GoodsInfo {
   private Date modifiedAt;
 
   public GoodsInfo(Goods goods, Long likeId, Integer relatedVideoTotalCount,
-                   String deliveryInfo, String refundInfo, String asInfo) {
+                   String deliveryInfo, String refundInfo, String companyInfo) {
     BeanUtils.copyProperties(goods, this);
     this.likeId = likeId;
     this.relatedVideoTotalCount = relatedVideoTotalCount;
@@ -70,8 +72,9 @@ public class GoodsInfo {
       this.goodsMustInfo = info;
     }
 
-    this.deliveryInfo = deliveryInfo;
-    this.refundInfo = refundInfo;
-    this.asInfo = asInfo;
+    this.deliveryInfo = StringUtils.isBlank(deliveryInfo) ? "" : deliveryInfo;
+    this.refundInfo = StringUtils.isBlank(refundInfo) ? "" : refundInfo;
+    this.asInfo = ""; // deprecated
+    this.companyInfo = StringUtils.isBlank(companyInfo) ? "" : companyInfo;
   }
 }
