@@ -153,6 +153,7 @@ public class GoodsService {
     String deliveryInfo = "";
     String refundInfo = "";
     String asInfo = "";
+    String companyInfo = messageService.getGoodsCompanyMessage();
 
     Optional<Store> optional = storeRepository.findById(goods.getScmNo());
     if (optional.isPresent()) {
@@ -160,7 +161,7 @@ public class GoodsService {
       refundInfo = optional.get().getCancelInfo();
     }
 
-    return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, asInfo);
+    return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, companyInfo);
   }
 
   private String generateSearchableCategory(String category) {

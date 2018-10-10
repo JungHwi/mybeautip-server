@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class MessageService {
   private static final String NOTIFICATION_NAME_FORMAT = "notification.%s";
-  private static final String GOODS_DELIVERY_TEXT = "goods.delevery_text";
+  private static final String GOODS_COMPANY_TEXT = "goods.company_text";
 
   private final MessageSource messageSource;
 
@@ -30,7 +30,7 @@ public class MessageService {
     return message;
   }
 
-  public String getGoodsDeliveryMessage() {
-    return messageSource.getMessage(GOODS_DELIVERY_TEXT, null, Locale.KOREAN);
+  public String getGoodsCompanyMessage() {
+    return messageSource.getMessage(GOODS_COMPANY_TEXT, null, Locale.KOREAN);
   }
 }
