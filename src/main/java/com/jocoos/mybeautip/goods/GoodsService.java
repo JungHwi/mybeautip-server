@@ -150,13 +150,14 @@ public class GoodsService {
     }
     // Set total count of related videos
     int relatedVideoTotalCount = videoGoodsRepository.countByGoodsGoodsNo(goods.getGoodsNo());
-    String deliveryInfo = messageService.getGoodsDeliveryMessage();
+    String deliveryInfo = "";
     String refundInfo = "";
     String asInfo = "";
+
     Optional<Store> optional = storeRepository.findById(goods.getScmNo());
     if (optional.isPresent()) {
-      refundInfo = optional.get().getRefundUrl();
-      asInfo = optional.get().getAsUrl();
+      deliveryInfo = optional.get().getDeliveryInfo();
+      refundInfo = optional.get().getCancelInfo();
     }
 
     return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, asInfo);

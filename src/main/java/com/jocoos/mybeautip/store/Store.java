@@ -39,6 +39,12 @@ public class Store extends ModifiedDateAuditable {
   @Column
   private String asUrl;
 
+  @Column
+  private String deliveryInfo;
+
+  @Column
+  private String cancelInfo;
+
   @Column(nullable = false)
   private int likeCount;
 
