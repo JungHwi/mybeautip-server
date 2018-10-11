@@ -55,6 +55,7 @@ public class GodoGoodsResponse {
     private String effectiveStartYmd;  // 유효일자 시작일
     private String effectiveEndYmd;  // 유효일자 종료
     private String goodsWeight;  // 상품 무게
+    private Integer totalStock; // 재고량
     private String stockFl;  // 판매재고 (n=무한정판매, y=재고량에 따름)
     private String soldOutFl;  // 품절상태 (n= 정상, y=품절(수동))
     private Integer salesUnit;  // 묶음주문 단위

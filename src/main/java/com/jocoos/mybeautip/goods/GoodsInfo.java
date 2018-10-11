@@ -22,6 +22,8 @@ public class GoodsInfo {
   private String goodsNo;  // 상품번호
   private String goodsNm;  // 상품명
   private String cateCd;  //  대표 카테고리
+  private String totalStock;  // 상품 재고
+  private String stockFl;  // 판매재고 (n=무한정판매, y=재고량에 따름)
   private String soldOutFl;  // 품절상태 (n= 정상, y=품절(수동))
   private String goodsDiscountFl;  // 상품 할인 설정 ( y=사용함, n=사용안함)
   private int goodsDiscount;  // 상품 할인 값
