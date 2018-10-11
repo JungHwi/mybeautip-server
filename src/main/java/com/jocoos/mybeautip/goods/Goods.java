@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.goods;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Date;
 
@@ -53,6 +52,7 @@ public class Goods {
   private String effectiveStartYmd;  // 유효일자 시작일
   private String effectiveEndYmd;  // 유효일자 종료
   private String goodsWeight;  // 상품 무게
+  private Integer totalStock;  // 상품 재고
   private String stockFl;  // 판매재고 (n=무한정판매, y=재고량에 따름)
   private Integer salesUnit;  // 묶음주문 단위
   private Integer minOrderCnt;  // 최소 구매수량

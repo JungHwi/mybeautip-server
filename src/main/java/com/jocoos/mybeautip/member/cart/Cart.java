@@ -3,8 +3,6 @@ package com.jocoos.mybeautip.member.cart;
 import javax.persistence.*;
 import java.util.Date;
 
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -14,6 +12,8 @@ import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsOption;
+import com.jocoos.mybeautip.store.Store;
 
 @NoArgsConstructor
 @Data
@@ -26,15 +26,20 @@ public class Cart extends MemberAuditable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false)
+  private Boolean checked;
+
   @ManyToOne
   @JoinColumn(name = "goods_no")
   private Goods goods;
 
-  @Column(nullable = false)
-  private Integer optionNo;
+  @ManyToOne
+  @JoinColumn(name = "option_id")
+  private GoodsOption option;
 
-  @Column(nullable = false)
-  private Integer scmNo;
+  @ManyToOne
+  @JoinColumn(name = "store_id")
+  private Store store;
 
   @Column(nullable = false)
   private Integer quantity;
@@ -43,11 +48,11 @@ public class Cart extends MemberAuditable {
   @LastModifiedDate
   private Date modifiedAt;
 
-
-  public Cart(Goods goods, int optionNo, int quantity) {
+  public Cart(Goods goods, GoodsOption option, Store store, int quantity) {
+    this.checked = true;
     this.goods = goods;
-    this.optionNo = optionNo;
-    this.scmNo = goods.getScmNo();
+    this.option = option;
+    this.store = store;
     this.quantity = quantity;
   }
 }
