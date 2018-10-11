@@ -103,6 +103,8 @@ mybeautip:
   revenue:
     revenue-ratio: 3    # %
     platform-ratio: 10  # %
+  shipping:
+    fixed: 2500 # 원(₩)
 
 cloud:
   aws:
