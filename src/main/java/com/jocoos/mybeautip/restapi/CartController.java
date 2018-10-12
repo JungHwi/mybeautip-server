@@ -106,6 +106,15 @@ public class CartController {
   }
 
   @Transactional
+  @PatchMapping("/all")
+  public CartService.CartInfo updateAllCart(@Valid @RequestBody UpdateCartRequest request) {
+    boolean checked = (request.getChecked() == null) ? true : request.getChecked();
+    cartRepository.updateAllChecked(checked, memberService.currentMember());
+
+    return cartService.getCartItemList();
+  }
+
+  @Transactional
   @PatchMapping("{id}")
   public CartService.CartInfo updateCart(@PathVariable Long id,
                                          @Valid @RequestBody UpdateCartRequest request) {

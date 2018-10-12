@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+
+import com.jocoos.mybeautip.member.Member;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
   Optional<Cart> findByGoodsGoodsNo(String goodsNo);
@@ -15,4 +19,8 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
   Integer countByCreatedById(Long createdBy);
 
   List<Cart> findAllByCreatedByIdOrderByModifiedAtDesc(Long id);
+
+  @Modifying
+  @Query("update Cart c set c.checked = ?1 where c.createdBy = ?2")
+  void updateAllChecked(Boolean checked, Member me);
 }
