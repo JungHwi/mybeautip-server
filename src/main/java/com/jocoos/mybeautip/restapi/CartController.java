@@ -85,8 +85,13 @@ public class CartController {
     Store store = storeRepository.findById(goods.getScmNo())
       .orElseThrow(() -> new NotFoundException("store_not_found", "store not found: " + goods.getScmNo()));
 
-    Optional<Cart> optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNo(
-      request.getGoodsNo(), request.getOptionNo());
+    Optional<Cart> optionalCart;
+    if (request.getOptionNo() == 0) {
+      optionalCart = cartRepository.findByGoodsGoodsNo(request.getGoodsNo());
+    } else {
+      optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNo(
+        request.getGoodsNo(), request.getOptionNo());
+    }
     Cart cart;
     if (optionalCart.isPresent()) { // Update quantity
       cart = optionalCart.get();
