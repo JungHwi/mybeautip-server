@@ -104,27 +104,31 @@ public class CartService {
         delivery.setFixedPrice(fixedPrice);
         delivery.setPrice(price);
 
-        DeliveryCharge deliveryCharge = deliveryChargeRepository.getOne(delivery.getDeliverySno());
-        BeanUtils.copyProperties(deliveryCharge, delivery);
-        switch (delivery.getFixFl()) {
-          case "free":
-            delivery.setShipping(0);
-            break;
+        if (checkedCount > 0) {
+          DeliveryCharge deliveryCharge = deliveryChargeRepository.getOne(delivery.getDeliverySno());
+          BeanUtils.copyProperties(deliveryCharge, delivery);
+          switch (delivery.getFixFl()) {
+            case "free":
+              delivery.setShipping(0);
+              break;
 
-          case "count":
-            delivery.setShipping(deliveryChargeDetailRepository.findByDeliveryChargeIdAndUnitStartLessThanEqualAndUnitEndGreaterThan(
-              deliveryCharge.getId(), count, count).map(DeliveryChargeDetail::getPrice).orElse(0));
-            break;
+            case "count":
+              delivery.setShipping(deliveryChargeDetailRepository.findByDeliveryChargeIdAndUnitStartLessThanEqualAndUnitEndGreaterThan(
+                deliveryCharge.getId(), checkedCount, checkedCount).map(DeliveryChargeDetail::getPrice).orElse(0));
+              break;
 
-          case "price":
-            delivery.setShipping(deliveryChargeDetailRepository.findByDeliveryChargeIdAndUnitStartLessThanEqualAndUnitEndGreaterThan(
-              deliveryCharge.getId(), price, price).map(DeliveryChargeDetail::getPrice).orElse(0));
-            break;
+            case "price":
+              delivery.setShipping(deliveryChargeDetailRepository.findByDeliveryChargeIdAndUnitStartLessThanEqualAndUnitEndGreaterThan(
+                deliveryCharge.getId(), price, price).map(DeliveryChargeDetail::getPrice).orElse(0));
+              break;
 
-          case "fixed":
-          default:
-            delivery.setShipping(fixedShipping);
-            break;
+            case "fixed":
+            default:
+              delivery.setShipping(fixedShipping);
+              break;
+          }
+        } else {
+          delivery.setShipping(0);
         }
         storeCount += delivery.getCount();
         storeCheckedCount += delivery.getCheckedCount();
