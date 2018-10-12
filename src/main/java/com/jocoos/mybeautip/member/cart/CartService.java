@@ -104,9 +104,10 @@ public class CartService {
         delivery.setFixedPrice(fixedPrice);
         delivery.setPrice(price);
 
+        DeliveryCharge deliveryCharge = deliveryChargeRepository.getOne(delivery.getDeliverySno());
+        BeanUtils.copyProperties(deliveryCharge, delivery);
+
         if (checkedCount > 0) {
-          DeliveryCharge deliveryCharge = deliveryChargeRepository.getOne(delivery.getDeliverySno());
-          BeanUtils.copyProperties(deliveryCharge, delivery);
           switch (delivery.getFixFl()) {
             case "free":
               delivery.setShipping(0);
