@@ -409,6 +409,7 @@ public class GodoService {
               deliveryChargeDetailRepository.save(new DeliveryChargeDetail(deliveryCharge, chargeData));
             }
             deliveryCharge.setChargeData(mapper.writeValueAsString(list));
+            deliveryChargeRepository.save(deliveryCharge);
           }
           newCount++;
         }
