@@ -271,4 +271,20 @@ public class CartService {
       this.stockCnt = option.getStockCnt();
     }
   }
+
+  /**
+   * Wrap method to manipulate modifiedAt manually
+   */
+  public Cart save(Cart cart) {
+    cart.setModifiedAt(new Date());
+    return cartRepository.save(cart);
+  }
+
+  /**
+   * Wrap method to manipulate modifiedAt manually
+   * This is used when update without modifiedAt change
+   */
+  public Cart update(Cart cart) {
+    return cartRepository.save(cart);
+  }
 }

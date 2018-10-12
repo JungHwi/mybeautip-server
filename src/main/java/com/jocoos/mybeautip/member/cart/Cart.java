@@ -45,7 +45,6 @@ public class Cart extends MemberAuditable {
   private Integer quantity;
 
   @Column
-  @LastModifiedDate
   private Date modifiedAt;
 
   public Cart(Goods goods, GoodsOption option, Store store, int quantity) {

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
@@ -62,6 +63,7 @@ public class CartController {
     return cartService.getCartItemList();
   }
 
+  @Transactional
   @PostMapping
   public CartService.CartInfo addCart(@Valid @RequestBody AddCartRequest request) {
     Goods goods = goodsRepository.findById(request.getGoodsNo())
@@ -96,13 +98,14 @@ public class CartController {
     if (optionalCart.isPresent()) { // Update quantity
       cart = optionalCart.get();
       cart.setQuantity(request.getQuantity());
+      cartService.update(cart);
     } else {  // Insert new item
-      cart = new Cart(goods, option, store, request.getQuantity());
+      cartService.save(new Cart(goods, option, store, request.getQuantity()));
     }
-    cartRepository.save(cart);
     return cartService.getCartItemList();
   }
 
+  @Transactional
   @PatchMapping("{id}")
   public CartService.CartInfo updateCart(@PathVariable Long id,
                                          @Valid @RequestBody UpdateCartRequest request) {
@@ -126,11 +129,11 @@ public class CartController {
       throw new NotFoundException("cart_item_not_found", "cart item not found, id: " + id);
     }
 
-    cart.setModifiedAt(cart.getModifiedAt()); // Not change modifiedAt
-    cartRepository.save(cart);
+    cartService.update(cart);
     return cartService.getCartItemList();
   }
 
+  @Transactional
   @DeleteMapping("{id}")
   public CartService.CartInfo removeCart(@PathVariable Long id) {
     Optional<Cart> optional = cartRepository.findByIdAndCreatedById(id, memberService.currentMemberId());
