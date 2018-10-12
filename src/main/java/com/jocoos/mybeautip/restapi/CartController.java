@@ -118,12 +118,7 @@ public class CartController {
   @PatchMapping("{id}")
   public CartService.CartInfo updateCart(@PathVariable Long id,
                                          @Valid @RequestBody UpdateCartRequest request) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
-    Optional<Cart> optional = cartRepository.findByIdAndCreatedById(id, memberId);
+    Optional<Cart> optional = cartRepository.findByIdAndCreatedById(id, memberService.currentMemberId());
     Cart cart;
 
     if (optional.isPresent()) {
