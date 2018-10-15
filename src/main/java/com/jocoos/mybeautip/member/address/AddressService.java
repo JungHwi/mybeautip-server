@@ -67,7 +67,7 @@ public class AddressService {
          if (a.getDeletedAt() != null) {
            throw new AccessDeniedException("Can't access an address");
          }
-         if (!a.getCreatedBy().equals(createdBy)) {
+         if (!a.getCreatedBy().getId().equals(createdBy)) {
            throw new AccessDeniedException("Can't access an address");
          }
 
