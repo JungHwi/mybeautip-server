@@ -10,9 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import com.jocoos.mybeautip.member.Member;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
-  Optional<Cart> findByGoodsGoodsNo(String goodsNo);
+  Optional<Cart> findByGoodsGoodsNoAndCreatedById(String goodsNo, Long memberId);
 
-  Optional<Cart> findByGoodsGoodsNoAndOptionOptionNo(String goodsNo, Integer optionNo);
+  Optional<Cart> findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(String goodsNo, Integer optionNo, Long memberId);
 
   Optional<Cart> findByIdAndCreatedById(Long id, Long memberId);
 

@@ -89,10 +89,10 @@ public class CartController {
 
     Optional<Cart> optionalCart;
     if (request.getOptionNo() == 0) {
-      optionalCart = cartRepository.findByGoodsGoodsNo(request.getGoodsNo());
+      optionalCart = cartRepository.findByGoodsGoodsNoAndCreatedById(request.getGoodsNo(), memberService.currentMemberId());
     } else {
-      optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNo(
-        request.getGoodsNo(), request.getOptionNo());
+      optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
+        request.getGoodsNo(), request.getOptionNo(), memberService.currentMemberId());
     }
     Cart cart;
     if (optionalCart.isPresent()) { // Update quantity
