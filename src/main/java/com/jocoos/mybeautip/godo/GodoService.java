@@ -279,10 +279,13 @@ public class GodoService {
         }
 
         List<MustInfo> list = new ArrayList<>();
-        for (GodoGoodsResponse.GoodsMustInfoData mustInfo : goodsData.getGoodsMustInfoData()) {
-          list.add(new MustInfo(mustInfo.getStepData().getInfoTitle(), mustInfo.getStepData().getInfoValue()));
+
+        if (goodsData.getGoodsMustInfoData() != null) {
+          for (GodoGoodsResponse.GoodsMustInfoData mustInfo : goodsData.getGoodsMustInfoData()) {
+            list.add(new MustInfo(mustInfo.getStepData().getInfoTitle(), mustInfo.getStepData().getInfoValue()));
+          }
+          goods.setGoodsMustInfo(mapper.writeValueAsString(list));
         }
-        goods.setGoodsMustInfo(mapper.writeValueAsString(list));
         goodsRepository.save(goods);
         refreshCount++;
 
