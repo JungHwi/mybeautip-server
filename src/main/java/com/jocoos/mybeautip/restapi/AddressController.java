@@ -3,21 +3,21 @@ package com.jocoos.mybeautip.restapi;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.address.Address;
+import com.jocoos.mybeautip.member.address.AddressRepository;
 import com.jocoos.mybeautip.member.address.AddressService;
 
 @Slf4j
@@ -26,40 +26,61 @@ import com.jocoos.mybeautip.member.address.AddressService;
 public class AddressController {
 
   private final AddressService addressService;
+  private final MemberService memberService;
+  private final AddressRepository addressRepository;
 
-  public AddressController(AddressService addressService) {
+  public AddressController(AddressService addressService,
+                           MemberService memberService,
+                           AddressRepository addressRepository) {
     this.addressService = addressService;
+    this.memberService = memberService;
+    this.addressRepository = addressRepository;
   }
 
   @GetMapping
-  public ResponseEntity<List<AddressInfo>> getAddresses(@RequestParam(defaultValue = "10") int count) {
-    List<Address> addresses = addressService.getAddresses(PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id")));
-
-    ImmutableList<AddressInfo> addressInfos = FluentIterable.from(addresses)
-       .transform(addresse -> new AddressInfo(addresse))
-       .toList();
+  public ResponseEntity<List<AddressInfo>> getAddresses() {
+    List<Address> addresses = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(memberService.currentMemberId());
+    List<AddressInfo> addressInfos = addresses.stream().map(AddressInfo::new).collect(Collectors.toList());
 
     return new ResponseEntity<>(addressInfos, HttpStatus.OK);
   }
 
   @PostMapping
   public ResponseEntity<AddressInfo> createAddress(@RequestBody CreateAddressRequest request) {
+    if (addressRepository.countByCreatedByIdAndDeletedAtIsNull(memberService.currentMemberId()) >= 10) {
+      throw new BadRequestException("too_many_addresses", "Cannot add any more addresses, max count is 10");
+    }
+
+    if (request.isBase()) {
+      addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
+        .ifPresent(prevBaseAddress -> {
+          prevBaseAddress.setBase(false);
+          addressRepository.save(prevBaseAddress);
+        });
+    }
+
     Address address = new Address();
     log.debug("CreateAddressRequest: {}", request);
 
     BeanUtils.copyProperties(request, address);
     log.debug("address: {}", address);
 
-    return new ResponseEntity<>(new AddressInfo(addressService.save(address)), HttpStatus.OK);
+    return new ResponseEntity<>(new AddressInfo(addressRepository.save(address)), HttpStatus.OK);
   }
 
   @PatchMapping("/{id:.+}")
   public ResponseEntity<AddressInfo> updateAddress(@PathVariable Long id,
                                                    @RequestBody UpdateAddressRequest request) {
     log.debug("UpdateAddressRequest: {}", request);
-    Address update = addressService.update(id, request);
+    if (request.isBase()) {
+      addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
+        .ifPresent(prevBaseAddress -> {
+          prevBaseAddress.setBase(false);
+          addressRepository.save(prevBaseAddress);
+        });
+    }
 
-    return new ResponseEntity<>(new AddressInfo(update), HttpStatus.OK);
+    return new ResponseEntity<>(new AddressInfo(addressService.update(id, request)), HttpStatus.OK);
   }
 
   @DeleteMapping("/{id:.+}")

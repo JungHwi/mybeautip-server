@@ -2,14 +2,11 @@ package com.jocoos.mybeautip.member.address;
 
 import javax.transaction.Transactional;
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.jocoos.mybeautip.exception.AccessDeniedException;
-import com.jocoos.mybeautip.exception.ConflictException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.AddressController;
@@ -27,52 +24,26 @@ public class AddressService {
   }
 
   @Transactional
-  public Address save(Address address) {
-    Long createdBy = memberService.currentMemberId();
-
-    if (address.isBase() &&
-        addressRepository.countByBaseAndCreatedByIdAndDeletedAtIsNull(true, createdBy) > 0) {
-      throw new ConflictException("Already base address exists");
-    }
-    return addressRepository.save(address);
-  }
-
-
-  @Transactional
   public Address update(Long id, AddressController.UpdateAddressRequest update) {
-    Long createdBy = memberService.currentMemberId();
-    Address address = get(id, createdBy);
-
-    BeanUtils.copyProperties(update, address);
-    return addressRepository.save(address);
+    Optional<Address> optional = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId());
+    if (optional.isPresent()) {
+      Address address = optional.get();
+      BeanUtils.copyProperties(update, address);
+      return addressRepository.save(address);
+    } else {
+      throw new NotFoundException("address not found", "address not found");
+    }
   }
 
   @Transactional
   public void delete(Long id) {
-    Long createdBy = memberService.currentMemberId();
-    Address address = get(id, createdBy);
-    address.setDeletedAt(new Date());
-
-    addressRepository.save(address);
-  }
-
-  public List<Address> getAddresses(Pageable pageable) {
-    Long createdBy = memberService.currentMemberId();
-    return addressRepository.findByCreatedByIdAndDeletedAtIsNull(createdBy, pageable);
-  }
-
-  public Address get(Long id, Long createdBy) {
-    return addressRepository.findById(id)
-       .map(a -> {
-         if (a.getDeletedAt() != null) {
-           throw new AccessDeniedException("Can't access an address");
-         }
-         if (!a.getCreatedBy().getId().equals(createdBy)) {
-           throw new AccessDeniedException("Can't access an address");
-         }
-
-         return a;
-       })
-       .orElseThrow(() -> new NotFoundException("address not found", "address not found"));
+    Optional<Address> optional = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId());
+    if (optional.isPresent()) {
+      Address address = optional.get();
+      address.setDeletedAt(new Date());
+      addressRepository.save(address);
+    } else {
+      throw new NotFoundException("address not found", "address not found");
+    }
   }
 }
