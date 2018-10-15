@@ -29,6 +29,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
   @Override
   public void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
+      .antMatchers("/api/admin/**").hasRole("ADMIN")
+      .antMatchers("/api/1/callbacks/video").hasRole("ADMIN")
       .antMatchers(GET, "/api/1/orders/complete").permitAll()
       .antMatchers(GET, "/api/1/members/me/**").hasAnyRole("USER", "ADMIN")
       .antMatchers(GET, "/api/1/keys/**").hasAnyRole("USER", "ADMIN")
@@ -38,14 +40,13 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
       .antMatchers(POST, "/api/1/videos/**/watches").hasAnyRole("GUEST", "USER", "ADMIN")
       .antMatchers(POST, "/api/**").hasAnyRole("USER", "ADMIN")
       .antMatchers(PATCH, "/api/1/videos/**/watches").hasAnyRole("GUEST", "USER", "ADMIN")
-      .antMatchers(PATCH, "/api/**").hasAnyRole("USER", "ADMIN")
       .antMatchers(PATCH, "/api/1/categories/**").hasRole("ADMIN")
       .antMatchers(PATCH, "/api/1/stores/**").hasRole("ADMIN")
+      .antMatchers(PATCH, "/api/**").hasAnyRole("USER", "ADMIN")
       .antMatchers(PUT, "/api/1/devices").hasAnyRole("GUEST", "USER", "ADMIN")
       .antMatchers(PUT, "/api/**").hasAnyRole("USER", "ADMIN")
       .antMatchers(DELETE, "/api/1/videos/**/watches").hasAnyRole("GUEST", "USER", "ADMIN")
       .antMatchers(DELETE, "/api/**").hasAnyRole("USER", "ADMIN")
-      .antMatchers("/api/admin/**").hasRole("ADMIN")
-      .antMatchers("/api/1/callbacks/video").hasRole("ADMIN");
+      ;
   }
 }
