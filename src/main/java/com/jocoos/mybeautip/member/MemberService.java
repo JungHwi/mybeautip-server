@@ -39,12 +39,7 @@ public class MemberService {
   }
 
   public String getGuestUserName() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || !authentication.isAuthenticated()) {
-      return null;
-    }
-
-    Object principal = authentication.getPrincipal();
+    Object principal = currentPrincipal();
     if (principal instanceof MyBeautipUserDetails) {
       return ((MyBeautipUserDetails) principal).getUsername();
     } else {
@@ -54,15 +49,29 @@ public class MemberService {
   }
 
   public Member currentMember() {
+    Object principal = currentPrincipal();
+    if (principal instanceof MyBeautipUserDetails) {
+      return ((MyBeautipUserDetails) principal).getMember();
+    } else {
+      log.warn("Unknown principal type");
+    }
+    return null;
+  }
+
+  private Object currentPrincipal() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null || !authentication.isAuthenticated()) {
       return null;
     }
 
     log.debug("authentication: {}", authentication);
-    Object principal = authentication.getPrincipal();
+    return authentication.getPrincipal();
+  }
+
+  public MyBeautipUserDetails currentUserDetails() {
+    Object principal = currentPrincipal();
     if (principal instanceof MyBeautipUserDetails) {
-      return ((MyBeautipUserDetails) principal).getMember();
+      return (MyBeautipUserDetails) principal;
     } else {
       log.warn("Unknown principal type");
     }
