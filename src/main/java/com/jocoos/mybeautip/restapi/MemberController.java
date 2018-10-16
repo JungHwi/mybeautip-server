@@ -76,6 +76,12 @@ public class MemberController {
   @Value("${mybeautip.store.image-path.thumbnail-suffix}")
   private String storeImageThumbnailSuffix;
 
+  @Value("${mybeautip.point.earn-ratio}")
+  private int pointRatio;
+
+  @Value("${mybeautip.revenue.revenue-ratio}")
+  private int revenueRatio;
+
   public MemberController(MemberService memberService,
                           GoodsService goodsService,
                           VideoService videoService,
@@ -106,7 +112,7 @@ public class MemberController {
   public Resource<MemberMeInfo> getMe(Principal principal) {
     log.debug("member id: {}", principal.getName());
     return memberRepository.findById(Long.parseLong(principal.getName()))
-              .map(m -> new Resource<>(new MemberMeInfo(m)))
+              .map(m -> new Resource<>(new MemberMeInfo(m, pointRatio, revenueRatio)))
               .orElseThrow(() -> new MemberNotFoundException("member_not_found"));
   }
 
