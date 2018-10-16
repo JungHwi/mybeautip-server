@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -117,10 +118,10 @@ public class BlockController {
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<Block> slice = blockRepository.findByCreatedAtBeforeAndMe(startCursor, memberService.currentMemberId(), pageable);
+    Page<Block> page = blockRepository.findByCreatedAtBeforeAndMe(startCursor, memberService.currentMemberId(), pageable);
     List<BlockInfo> result = new ArrayList<>();
     BlockInfo blockInfo;
-    for (Block block : slice.getContent()) {
+    for (Block block : page.getContent()) {
       blockInfo = new BlockInfo(block, memberService.getMemberInfo(block.getMemberYou()));
       result.add(blockInfo);
     }
@@ -131,6 +132,7 @@ public class BlockController {
     }
     return new CursorResponse.Builder<>(requestUri, result)
       .withCount(count)
+      .withTotalCount(Math.toIntExact(page.getTotalElements()))
       .withCursor(nextCursor).toBuild();
   }
 
