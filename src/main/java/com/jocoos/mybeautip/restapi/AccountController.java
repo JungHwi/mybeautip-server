@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.account.Account;
 import com.jocoos.mybeautip.member.account.AccountRepository;
@@ -49,7 +50,7 @@ public class AccountController {
          log.debug("accountInfo: {}", accountInfo);
 
          return new ResponseEntity<>(accountInfo, HttpStatus.OK);
-       }).orElseGet(() -> new ResponseEntity<>(new AccountInfo(), HttpStatus.OK));
+       }).orElseThrow(() -> new NotFoundException("not_found_account", "Account not found"));
   }
 
   @PatchMapping
