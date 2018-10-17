@@ -62,7 +62,7 @@ public class AddressService {
 
   private int getAreaShipping(String roadAddress1) {
     if (roadAddress1.startsWith("제주")) {
-      return deliveryChargeAreaRepository.findByArea("제주시특자치도").map(DeliveryChargeArea::getPrice).orElse(0);
+      return deliveryChargeAreaRepository.findByArea("제주시특별자치도").map(DeliveryChargeArea::getPrice).orElse(0);
     }
 
     if (StringUtils.startsWith(roadAddress1, "인천")) {
