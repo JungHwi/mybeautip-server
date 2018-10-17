@@ -46,10 +46,14 @@ public class CartService {
   }
 
   public CartInfo getCartItemList() {
+    List<Cart> list = cartRepository.findAllByCreatedByIdOrderByModifiedAtDesc(memberService.currentMemberId());
+    return getCartItemList(list);
+  }
+
+  public CartInfo getCartItemList(List<Cart> list) {
     Map<Integer, List<CartDelivery>> storeMap = new LinkedHashMap<>();  // key: storeId
     Map<Integer, List<CartItem>> deliveryMap = new LinkedHashMap<>();   // key: deliverySno
 
-    List<Cart> list = cartRepository.findAllByCreatedByIdOrderByModifiedAtDesc(memberService.currentMemberId());
     List<CartItem> items;
 
     for (Cart c : list) {

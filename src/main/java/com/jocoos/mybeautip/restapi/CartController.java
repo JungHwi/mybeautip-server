@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.restapi;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.MediaType;
@@ -14,7 +16,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsOption;
@@ -66,26 +67,7 @@ public class CartController {
   @Transactional
   @PostMapping
   public CartService.CartInfo addCart(@Valid @RequestBody AddCartRequest request) {
-    Goods goods = goodsRepository.findById(request.getGoodsNo())
-      .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + request.getGoodsNo()));
-
-    if ("y".equals(goods.getSoldOutFl())) {
-      throw new BadRequestException("goods_sold_out", "sold out: " + request.getGoodsNo());
-    }
-
-    GoodsOption option = null;
-    if ("y".equals(goods.getOptionFl())) {
-      option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goods.getGoodsNo()), request.getOptionNo())
-        .orElseThrow(() -> new NotFoundException("goods_option_not_found", "goods option not found: " + request.getGoodsNo()));
-      if ("y".equals(goods.getStockFl()) && option.getStockCnt() < request.getQuantity()) { // 재고량에 따름
-        throw new BadRequestException("invalid_quantity", "goods option stock count is lower than quantity: " + request.getGoodsNo());
-      }
-    } else if (request.getOptionNo() != 0) {
-      throw new BadRequestException("goods_option_not_exist", "goods option not exist:" + request.getGoodsNo());
-    }
-
-    Store store = storeRepository.findById(goods.getScmNo())
-      .orElseThrow(() -> new NotFoundException("store_not_found", "store not found: " + goods.getScmNo()));
+    Cart item = getValidCartItem(request.getGoodsNo(), request.getOptionNo(), request.getQuantity());
 
     Optional<Cart> optionalCart;
     if (request.getOptionNo() == 0) {
@@ -94,13 +76,13 @@ public class CartController {
       optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
         request.getGoodsNo(), request.getOptionNo(), memberService.currentMemberId());
     }
-    Cart cart;
+
     if (optionalCart.isPresent()) { // Update quantity
-      cart = optionalCart.get();
+      Cart cart = optionalCart.get();
       cart.setQuantity(request.getQuantity());
       cartService.update(cart);
     } else {  // Insert new item
-      cartService.save(new Cart(goods, option, store, request.getQuantity()));
+      cartService.save(item);
     }
     return cartService.getCartItemList();
   }
@@ -150,6 +132,45 @@ public class CartController {
     return cartService.getCartItemList();
   }
 
+  @PostMapping("/now")
+  public CartService.CartInfo calculateInstantCartInfo(@Valid @RequestBody InstantCartRequest request) {
+    List<Cart> list = new ArrayList<>();
+    for (AddCartRequest item : request.getItems()) {
+      list.add(getValidCartItem(item.getGoodsNo(), item.getOptionNo(), item.getQuantity()));
+    }
+    return cartService.getCartItemList(list);
+  }
+
+  private Cart getValidCartItem(String goodsNo, int optionNo, int quantity) {
+    Goods goods = goodsRepository.findById(goodsNo)
+      .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
+
+    if ("y".equals(goods.getSoldOutFl())) {
+      throw new BadRequestException("goods_sold_out", "sold out: " + goodsNo);
+    }
+
+    GoodsOption option = null;
+    if ("y".equals(goods.getOptionFl())) {
+      option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goodsNo), optionNo)
+        .orElseThrow(() -> new NotFoundException("goods_option_not_found", "goods option not found: " + goodsNo));
+      if ("y".equals(goods.getStockFl()) && option.getStockCnt() < quantity) { // 재고량에 따름
+        throw new BadRequestException("invalid_quantity", "goods option stock count is lower than quantity: " + goodsNo);
+      }
+    } else if (optionNo != 0) {
+      throw new BadRequestException("goods_option_not_exist", "goods option not exist:" + goodsNo);
+    }
+
+    Store store = storeRepository.findById(goods.getScmNo())
+      .orElseThrow(() -> new NotFoundException("store_not_found", "store not found: " + goods.getScmNo()));
+
+    return new Cart(goods, option, store, quantity);
+  }
+
+  @Data
+  @NoArgsConstructor
+  private static class InstantCartRequest {
+    List<AddCartRequest> items;
+  }
 
   @Data
   @NoArgsConstructor
