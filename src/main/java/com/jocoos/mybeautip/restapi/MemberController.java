@@ -58,6 +58,9 @@ public class MemberController {
   private final GoodsService goodsService;
   private final VideoService videoService;
   private final MemberRepository memberRepository;
+  private final FacebookMemberRepository facebookMemberRepository;
+  private final NaverMemberRepository naverMemberRepository;
+  private final KakaoMemberRepository kakaoMemberRepository;
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
@@ -86,6 +89,9 @@ public class MemberController {
                           GoodsService goodsService,
                           VideoService videoService,
                           MemberRepository memberRepository,
+                          FacebookMemberRepository facebookMemberRepository,
+                          NaverMemberRepository naverMemberRepository,
+                          KakaoMemberRepository kakaoMemberRepository,
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
                           StoreLikeRepository storeLikeRepository,
@@ -98,6 +104,9 @@ public class MemberController {
     this.goodsService = goodsService;
     this.videoService = videoService;
     this.memberRepository = memberRepository;
+    this.facebookMemberRepository = facebookMemberRepository;
+    this.naverMemberRepository = naverMemberRepository;
+    this.kakaoMemberRepository = kakaoMemberRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeLikeRepository = storeLikeRepository;
@@ -353,6 +362,36 @@ public class MemberController {
       .withState(state)
       .withCount(count)
       .withCursor(nextCursor).toBuild();
+  }
+
+  @DeleteMapping("/me")
+  public void deleteMe() {
+    memberRepository.findById(memberService.currentMemberId())
+      .ifPresent(member -> {
+        member.setDeletedAt(new Date());
+        memberRepository.save(member);
+
+        int link = member.getLink();
+        switch (link) {
+          case 1:
+            facebookMemberRepository.findByMemberId(member.getId())
+              .ifPresent(facebookMemberRepository::delete);
+            break;
+
+          case 2:
+            naverMemberRepository.findByMemberId(member.getId())
+              .ifPresent(naverMemberRepository::delete);
+            break;
+
+          case 4:
+            kakaoMemberRepository.findByMemberId(member.getId())
+              .ifPresent(kakaoMemberRepository::delete);
+            break;
+
+          default:
+            throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
+        }
+      });
   }
 
   @GetMapping(value = "/me/comments")
