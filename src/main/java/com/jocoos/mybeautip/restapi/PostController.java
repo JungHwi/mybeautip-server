@@ -181,7 +181,7 @@ public class PostController {
        .map(post -> {
          List<MemberInfo> result = Lists.newArrayList();
          post.getWinners().stream().forEach(mid -> {
-           memberRepository.findById(mid).ifPresent(m -> {
+           memberRepository.findByIdAndDeletedAtIsNull(mid).ifPresent(m -> {
              result.add(memberService.getMemberInfo(m));
            });
          });

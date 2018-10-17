@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-  Optional<Member> findByUsername(String username);
+  Optional<Member> findByIdAndDeletedAtIsNull(Long id);
 
   Slice<Member> findByDeletedAtIsNullAndVisibleIsTrue(Pageable pageable);
 

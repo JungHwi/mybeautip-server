@@ -65,7 +65,7 @@ public class BlockController {
     }
     log.debug("Block " + me + " : " + you);
 
-    Member member = memberRepository.findById(you)
+    Member member = memberRepository.findByIdAndDeletedAtIsNull(you)
       .orElseThrow(() -> new MemberNotFoundException(you));
 
     Optional<Block> optional = blockRepository.findByMeAndMemberYouId(me, you);

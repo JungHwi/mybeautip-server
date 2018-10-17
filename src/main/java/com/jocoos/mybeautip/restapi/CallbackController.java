@@ -66,7 +66,7 @@ public class CallbackController {
     video.setTotalWatchCount(0);
     video.setOrderCount(0);
 
-    memberRepository.findById((request.getUserId()))
+    memberRepository.findByIdAndDeletedAtIsNull((request.getUserId()))
       .map(m -> {
         video.setMember(m);
         return Optional.empty();

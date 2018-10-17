@@ -120,7 +120,7 @@ public class MemberController {
   @GetMapping("/me")
   public Resource<MemberMeInfo> getMe(Principal principal) {
     log.debug("member id: {}", principal.getName());
-    return memberRepository.findById(Long.parseLong(principal.getName()))
+    return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
               .map(m -> new Resource<>(new MemberMeInfo(m, pointRatio, revenueRatio)))
               .orElseThrow(() -> new MemberNotFoundException("member_not_found"));
   }
@@ -154,7 +154,7 @@ public class MemberController {
       throw new BadRequestException("invalid member request - email");
     }
 
-    return memberRepository.findById(Long.parseLong(principal.getName()))
+    return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
         .map(m -> {
           if (updateMemberRequest.getUsername() != null) {
             m.setUsername(validateUsername(updateMemberRequest.getUsername()));
@@ -264,7 +264,7 @@ public class MemberController {
 
   @GetMapping("/{id:.+}")
   public MemberInfo getMember(@PathVariable Long id) {
-    return memberRepository.findById(id).map(memberService::getMemberInfo)
+    return memberRepository.findByIdAndDeletedAtIsNull(id).map(memberService::getMemberInfo)
         .orElseThrow(() -> new MemberNotFoundException(id));
   }
 
@@ -345,7 +345,7 @@ public class MemberController {
                                         @RequestParam(required = false) String cursor,
                                         @RequestParam(required = false) String type,
                                         @RequestParam(required = false) String state) {
-    Member member = memberRepository.findById(id)
+    Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new MemberNotFoundException(id));
 
     Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
@@ -366,7 +366,7 @@ public class MemberController {
 
   @DeleteMapping("/me")
   public void deleteMe() {
-    memberRepository.findById(memberService.currentMemberId())
+    memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
       .ifPresent(member -> {
         member.setDeletedAt(new Date());
         memberRepository.save(member);

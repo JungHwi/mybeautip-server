@@ -29,7 +29,7 @@ public class MybeautipUserDetailsService implements UserDetailsService {
       return createGuestUserDetails(username);
     }
 
-    return memberRepository.findById(Long.parseLong(username))
+    return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(username))
         .map(m -> {
           switch (m.getLink()) {
             case 0: {

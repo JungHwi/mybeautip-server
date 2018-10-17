@@ -52,7 +52,7 @@ public class MentionService {
         if (mentioned.equals(tag.getUsername())) {
           // FIXME: Uncheck my username and username in following list
 
-          Optional<Member> member = memberRepository.findById(tag.getMemberId());
+          Optional<Member> member = memberRepository.findByIdAndDeletedAtIsNull(tag.getMemberId());
           if (member.isPresent()) {
             notificationService.notifyAddComment(postComment, member.get());
             comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
@@ -85,7 +85,7 @@ public class MentionService {
         if (mentioned.equals(tag.getUsername())) {
           // FIXME: Uncheck my username and username in following list
 
-          Optional<Member> member = memberRepository.findById(tag.getMemberId());
+          Optional<Member> member = memberRepository.findByIdAndDeletedAtIsNull(tag.getMemberId());
           if (member.isPresent()) {
             notificationService.notifyAddComment(videoComment, member.get());
             comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
@@ -122,7 +122,7 @@ public class MentionService {
       log.debug("member: {}", memberId);
 
       if (StringUtils.isNumeric(memberId)) {
-        Optional<Member> member = memberRepository.findById(Long.parseLong(memberId));
+        Optional<Member> member = memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(memberId));
         if (member.isPresent()) {
           Member m = member.get();
           mentionResult.add(new MentionTag(m));

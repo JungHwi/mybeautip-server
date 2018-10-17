@@ -114,7 +114,7 @@ public class AdminController {
     BeanUtils.copyProperties(request, recommendation);
     log.debug("recommended member: {}", recommendation);
 
-    return memberRepository.findById(request.getMemberId()).map(m -> {
+    return memberRepository.findByIdAndDeletedAtIsNull(request.getMemberId()).map(m -> {
       recommendation.setMember(m);
 
       try {
