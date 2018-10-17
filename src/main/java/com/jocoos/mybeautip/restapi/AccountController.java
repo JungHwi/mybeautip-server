@@ -49,7 +49,7 @@ public class AccountController {
          log.debug("accountInfo: {}", accountInfo);
 
          return new ResponseEntity<>(accountInfo, HttpStatus.OK);
-       }).orElseGet(() -> new ResponseEntity<>(HttpStatus.OK));
+       }).orElseGet(() -> new ResponseEntity<>(new AccountInfo(), HttpStatus.OK));
   }
 
   @PatchMapping
@@ -111,7 +111,7 @@ public class AccountController {
     private String bankName;
     private String bankAccount;
     private String bankDepositor;
-    private boolean validity;
+    private Boolean validity;
     private Date createdAt;
   }
 }
