@@ -51,6 +51,9 @@ public class Address extends MemberAuditable {
   @Column(nullable = false)
   private String detailAddress;
 
+  @Column(nullable = false)
+  private Integer areaShipping;
+
   @Column
   @LastModifiedDate
   private Date modifiedAt;
