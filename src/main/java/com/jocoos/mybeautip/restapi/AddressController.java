@@ -65,7 +65,7 @@ public class AddressController {
     BeanUtils.copyProperties(request, address);
     log.debug("address: {}", address);
 
-    return new ResponseEntity<>(new AddressInfo(addressRepository.save(address)), HttpStatus.OK);
+    return new ResponseEntity<>(new AddressInfo(addressService.insert(address)), HttpStatus.OK);
   }
 
   @PatchMapping("/{id:.+}")
@@ -181,6 +181,7 @@ public class AddressController {
     private String roadAddrPart2;
     private String jibunAddr;
     private String detailAddress;
+    private Integer areaShipping;
 
     public AddressInfo(Address address) {
       BeanUtils.copyProperties(address, this);
