@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.point.PointService;
@@ -46,6 +47,7 @@ public class OrderService {
   private final MemberCouponRepository memberCouponRepository;
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
+  private final CartRepository cartRepository;
   private final RevenueService revenueService;
   private final PointService pointService;
   private final IamportService iamportService;
@@ -58,7 +60,9 @@ public class OrderService {
                       MemberCouponRepository memberCouponRepository,
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
-                      RevenueService revenueService, PointService pointService,
+                      CartRepository cartRepository,
+                      RevenueService revenueService,
+                      PointService pointService,
                       IamportService iamportService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
@@ -68,6 +72,7 @@ public class OrderService {
     this.memberCouponRepository = memberCouponRepository;
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
+    this.cartRepository = cartRepository;
     this.revenueService = revenueService;
     this.pointService = pointService;
     this.iamportService = iamportService;
@@ -150,6 +155,13 @@ public class OrderService {
           if (!isSuccess) {
             updatePaymentState(order.getId(), uid, Payment.STATE_STOPPED, message);
             return getErrorHtml(id, message);
+          }
+
+          long memberId = order.getCreatedBy().getId();
+          for (Purchase p: order.getPurchases()) {
+            cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
+              p.getGoods().getGoodsNo(), p.getOptionId().intValue(), memberId)
+              .ifPresent(cartRepository::delete);
           }
 
           Payment payment = checkPaymentAndUpdate(order.getId(), uid);
