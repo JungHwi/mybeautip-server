@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.security.Principal;
 import java.util.Date;
@@ -31,6 +33,8 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.log.MemberLeaveLog;
+import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentInfo;
@@ -69,6 +73,7 @@ public class MemberController {
   private final CommentRepository commentRepository;
   private final CommentLikeRepository commentLikeRepository;
   private final RevenueRepository revenueRepository;
+  private final MemberLeaveLogRepository memberLeaveLogRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
   private String storeImagePrefix;
@@ -99,7 +104,8 @@ public class MemberController {
                           BannedWordService bannedWordService,
                           CommentRepository commentRepository,
                           CommentLikeRepository commentLikeRepository,
-                          RevenueRepository revenueRepository) {
+                          RevenueRepository revenueRepository,
+                          MemberLeaveLogRepository memberLeaveLogRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -115,6 +121,7 @@ public class MemberController {
     this.commentRepository = commentRepository;
     this.commentLikeRepository = commentLikeRepository;
     this.revenueRepository = revenueRepository;
+    this.memberLeaveLogRepository = memberLeaveLogRepository;
   }
 
   @GetMapping("/me")
@@ -364,13 +371,11 @@ public class MemberController {
       .withCursor(nextCursor).toBuild();
   }
 
+  @Transactional
   @DeleteMapping("/me")
-  public void deleteMe() {
+  public void deleteMe(@Valid @RequestBody DeleteMemberRequest request) {
     memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
       .ifPresent(member -> {
-        member.setDeletedAt(new Date());
-        memberRepository.save(member);
-
         int link = member.getLink();
         switch (link) {
           case 1:
@@ -391,6 +396,10 @@ public class MemberController {
           default:
             throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
         }
+        member.setDeletedAt(new Date());
+        memberRepository.save(member);
+
+        memberLeaveLogRepository.save(new MemberLeaveLog(member.getId(), request.getReason()));
       });
   }
 
@@ -611,5 +620,14 @@ public class MemberController {
     private Integer goods = 0;
     private Integer store = 0;
     private Integer post = 0;
+  }
+
+  @NoArgsConstructor
+  @Data
+  public static class DeleteMemberRequest {
+
+    @NotNull
+    @Size(max = 255)
+    private String reason;
   }
 }
