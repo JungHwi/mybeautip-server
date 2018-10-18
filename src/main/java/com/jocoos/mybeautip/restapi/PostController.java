@@ -309,7 +309,7 @@ public class PostController {
                                        BindingResult bindingResult) {
 
     if (bindingResult != null && bindingResult.hasErrors()) {
-      new BadRequestException(bindingResult.getFieldError());
+      throw new BadRequestException(bindingResult.getFieldError());
     }
 
     if (request.getParentId() != null) {
