@@ -166,7 +166,7 @@ public class OrderService {
 
           Payment payment = checkPaymentAndUpdate(order.getId(), uid);
           if ((payment.getState() & Payment.STATE_PAID) != 0) {
-            if (Order.PAID != order.getStatus()) {
+            if (Order.PAID.equals(order.getStatus())) {
               completeOrder(order);
             }
           } else {
@@ -232,7 +232,7 @@ public class OrderService {
 
   @Transactional
   public void cancelPayment(Order order) {
-    if (Order.ORDER_CANCELLING != order.getStatus()) {
+    if (Order.ORDER_CANCELLING.equals(order.getStatus())) {
       throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
     }
 
