@@ -42,17 +42,17 @@ public class AdminTokenGranter extends AbstractTokenGranter {
   @Override
   protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
     Map<String, String> requestParameters = tokenRequest.getRequestParameters();
-    String adminId = requestParameters.get("admin_id");
+    String adminId = requestParameters.get("email");
     String password = requestParameters.get("password");
 
-    log.debug("admin id: {}, password: {}", adminId, password);
+    log.debug("email: {}, password: {}", adminId, password);
 
     if (Strings.isNullOrEmpty(adminId)) {
-      throw new AuthenticationException("admin ID is required");
+      throw new AuthenticationException("email is required");
     }
 
-    if (adminId.length() > 30) {
-      throw new AuthenticationException("The admin ID must be less or equals to 30");
+    if (adminId.length() > 50) {
+      throw new AuthenticationException("The email must be less or equals to 50");
     }
 
     if (Strings.isNullOrEmpty(password)) {
@@ -61,8 +61,8 @@ public class AdminTokenGranter extends AbstractTokenGranter {
 
     return adminMemberRepository.findById(adminId)
        .filter(m -> passwordEncoder.matches(password, m.getPassword()))
-       .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
-       .orElseThrow(() -> new AuthenticationException("admin ID or password Invalid."));
+       .map(m -> generateToken(memberRepository.getOne(m.getMember().getId()), client, tokenRequest))
+       .orElseThrow(() -> new AuthenticationException("email or password Invalid."));
   }
 
   private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {

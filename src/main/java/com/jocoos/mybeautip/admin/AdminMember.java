@@ -9,6 +9,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.store.Store;
+
 @Data
 @NoArgsConstructor
 @Entity
@@ -17,13 +20,18 @@ import lombok.NoArgsConstructor;
 public class AdminMember {
 
   @Id
-  private String adminId;
+  private String email;
 
   @Column(nullable = false)
   private String password;
 
-  @Column(nullable = false)
-  private Long memberId;
+  @ManyToOne
+  @JoinColumn(name = "member_id")
+  private Member member;
+
+  @ManyToOne
+  @JoinColumn(name = "store_id")
+  private Store store;
 
   @Column(nullable = false)
   @CreatedDate
