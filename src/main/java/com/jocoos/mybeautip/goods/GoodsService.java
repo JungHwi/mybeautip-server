@@ -86,7 +86,7 @@ public class GoodsService {
         break;
       case CATEGORY:
         slice = goodsRepository.findAllByCategory(
-          generateSearchableCategory(request.getCategory()),
+          request.getCategory(),
           startCursor, of(0, request.getCount()));
         break;
         

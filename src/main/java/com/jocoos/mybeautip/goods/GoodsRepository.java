@@ -16,7 +16,9 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
   @Query("select g from Goods g where g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> getGoodsList(@Param("cursor")Date cursor, Pageable pageable);
 
-  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
+//  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
+//    "and g.createdAt < :cursor order by g.createdAt desc")
+  @Query("select g from Goods g where g.cateCd = :category " +
     "and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> findAllByCategory(@Param("category")String category,
                                  @Param("cursor")Date cursor,
