@@ -88,6 +88,9 @@ public class Video {
   @ManyToOne
   @JoinColumn(name = "owner")
   private Member member;
+  
+  @Column
+  private String tagInfo;
 
   @Column
   @CreatedDate

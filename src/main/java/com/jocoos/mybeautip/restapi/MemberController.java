@@ -47,6 +47,7 @@ import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
+import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
@@ -57,10 +58,11 @@ import com.jocoos.mybeautip.word.BannedWordService;
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MemberController {
-
+  
   private final MemberService memberService;
   private final GoodsService goodsService;
   private final VideoService videoService;
+  private final TagService tagService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -93,6 +95,7 @@ public class MemberController {
   public MemberController(MemberService memberService,
                           GoodsService goodsService,
                           VideoService videoService,
+                          TagService tagService,
                           MemberRepository memberRepository,
                           FacebookMemberRepository facebookMemberRepository,
                           NaverMemberRepository naverMemberRepository,
@@ -109,6 +112,7 @@ public class MemberController {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
+    this.tagService = tagService;
     this.memberRepository = memberRepository;
     this.facebookMemberRepository = facebookMemberRepository;
     this.naverMemberRepository = naverMemberRepository;
@@ -174,6 +178,7 @@ public class MemberController {
             m.setAvatarUrl(updateMemberRequest.getAvatarUrl());
           }
           if (updateMemberRequest.getIntro() != null) {
+            tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro());
             m.setIntro(updateMemberRequest.getIntro());
           }
           memberRepository.save(m);

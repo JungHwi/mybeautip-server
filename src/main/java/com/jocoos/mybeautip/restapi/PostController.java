@@ -39,12 +39,13 @@ import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.post.*;
+import com.jocoos.mybeautip.tag.TagService;
 
 @Slf4j
 @RestController
 @RequestMapping(path = "/api/1/posts", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PostController {
-
+  
   private final PostService postService;
   private final PostRepository postRepository;
   private final PostLikeRepository postLikeRepository;
@@ -56,7 +57,8 @@ public class PostController {
   private final MemberRepository memberRepository;
   private final CommentService commentService;
   private final MentionService mentionService;
-
+  private final TagService tagService;
+  
   public PostController(PostService postService,
                         PostRepository postRepository,
                         PostLikeRepository postLikeRepository,
@@ -67,7 +69,8 @@ public class PostController {
                         MemberService memberService,
                         MemberRepository memberRepository,
                         CommentService commentService,
-                        MentionService mentionService) {
+                        MentionService mentionService,
+                        TagService tagService) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -79,6 +82,7 @@ public class PostController {
     this.memberRepository = memberRepository;
     this.commentService = commentService;
     this.mentionService = mentionService;
+    this.tagService = tagService;
   }
 
   @GetMapping
@@ -324,6 +328,8 @@ public class PostController {
     Comment comment = new Comment();
     comment.setPostId(id);
     BeanUtils.copyProperties(request, comment);
+    
+    tagService.parseHashTagsAndToucheRefCount(comment.getComment());
     postRepository.updateCommentCount(id, 1);
 
     commentService.save(comment);
@@ -346,7 +352,7 @@ public class PostController {
                                           BindingResult bindingResult) {
 
     if (bindingResult != null && bindingResult.hasErrors()) {
-      new BadRequestException(bindingResult.getFieldError());
+      throw new BadRequestException(bindingResult.getFieldError());
     }
 
     Long memberId = memberService.currentMemberId();
@@ -394,8 +400,7 @@ public class PostController {
          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
            throw new BadRequestException("duplicated_post_like", "Already post liked");
          }
-
-
+         
          commentRepository.updateLikeCount(comment.getId(), 1);
          comment.setLikeCount(comment.getLikeCount() + 1);
          CommentLike commentLikeLike = commentLikeRepository.save(new CommentLike(comment));

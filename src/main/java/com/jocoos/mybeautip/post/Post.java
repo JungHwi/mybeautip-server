@@ -85,6 +85,9 @@ public class Post extends MemberAuditable {
   @OrderColumn(name = "seq")
   @Column(name = "goods_no")
   private List<String> goods;
+  
+  @Column
+  private String tagInfo;
 
   @Column
   @LastModifiedDate
