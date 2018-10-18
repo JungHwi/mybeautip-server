@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +39,7 @@ import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.member.revenue.*;
+import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
@@ -66,11 +66,12 @@ public class VideoController {
   private final CommentService commentService;
   private final MentionService mentionService;
   private final RevenueService revenueService;
+  private final TagService tagService;
   private final RevenueRepository revenueRepository;
-
+  
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
-
+  
   public VideoController(MemberService memberService,
                          VideoService videoService,
                          VideoGoodsRepository videoGoodsRepository,
@@ -85,6 +86,7 @@ public class VideoController {
                          CommentService commentService,
                          MentionService mentionService,
                          RevenueService revenueService,
+                         TagService tagService,
                          RevenueRepository revenueRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
@@ -100,6 +102,7 @@ public class VideoController {
     this.commentService = commentService;
     this.mentionService = mentionService;
     this.revenueService = revenueService;
+    this.tagService = tagService;
     this.revenueRepository = revenueRepository;
   }
 
@@ -222,12 +225,7 @@ public class VideoController {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
-
-    Member me = memberService.currentMember();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
+    
     videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
 
@@ -243,6 +241,8 @@ public class VideoController {
     Comment comment = new Comment();
     comment.setVideoId(id);
     BeanUtils.copyProperties(request, comment);
+    
+    tagService.parseHashTagsAndToucheRefCount(comment.getComment());
     videoRepository.updateCommentCount(id, 1);
 
     commentService.save(comment);
@@ -272,6 +272,7 @@ public class VideoController {
     return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberId)
       .map(comment -> {
         comment.setComment(request.getComment());
+        tagService.parseHashTagsAndToucheRefCount(comment.getComment());
         return new ResponseEntity<>(
           new CommentInfo(commentRepository.save(comment)),
           HttpStatus.OK

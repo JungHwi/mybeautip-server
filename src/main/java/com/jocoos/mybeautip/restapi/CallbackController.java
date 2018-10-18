@@ -12,6 +12,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.*;
 
 @Slf4j
@@ -28,26 +31,32 @@ import com.jocoos.mybeautip.video.*;
 @RequestMapping(value = "/api/1/callbacks/video", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CallbackController {
   private final VideoService videoService;
+  private final TagService tagService;
   private final MemberRepository memberRepository;
   private final VideoRepository videoRepository;
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final VideoLikeRepository videoLikeRepository;
-
+  private final ObjectMapper objectMapper;
+  
   public CallbackController(VideoService videoService,
+                            TagService tagService,
                             VideoRepository videoRepository,
                             MemberRepository memberRepository,
                             GoodsRepository goodsRepository,
                             VideoGoodsRepository videoGoodsRepository,
-                            VideoLikeRepository videoLikeRepository) {
+                            VideoLikeRepository videoLikeRepository,
+                            ObjectMapper objectMapper) {
     this.videoService = videoService;
+    this.tagService = tagService;
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.videoLikeRepository = videoLikeRepository;
+    this.objectMapper = objectMapper;
   }
-
+  
   @Transactional
   @PostMapping
   public Video createVideo(@Valid @RequestBody CallbackCreateVideoRequest request) {
@@ -72,7 +81,15 @@ public class CallbackController {
         return Optional.empty();
       })
       .orElseThrow(() -> new MemberNotFoundException(request.getUserId()));
-
+    
+    if (StringUtils.isNotEmpty(video.getContent())) {
+      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
+      try {
+        video.setTagInfo(objectMapper.writeValueAsString(tags));
+      } catch (JsonProcessingException e) {
+        log.warn("tag parsing failed, tags: ", tags.toString());
+      }
+    }
     Video createdVideo = videoService.save(video);
 
     // Set related goods info
@@ -145,6 +162,12 @@ public class CallbackController {
 
     // Can be modified with empty string
     if (source.getContent() != null) {
+      List<String> tags = tagService.getHashTagsAndUpdateRefCount(target.getTagInfo(), source.getContent());
+      try {
+        target.setTagInfo(objectMapper.writeValueAsString(tags));
+      } catch (JsonProcessingException e) {
+        log.warn("tag parsing failed, tags: ", tags.toString());
+      }
       target.setContent(source.getContent());
     }
 
