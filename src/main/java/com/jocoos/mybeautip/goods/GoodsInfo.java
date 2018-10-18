@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.goods;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -66,15 +67,15 @@ public class GoodsInfo {
     this.relatedVideoRef = (relatedVideoTotalCount > 0) ? String.format("/api/1/goods/%s/videos", goodsNo) : "";
     this.optionRef = ("y".equalsIgnoreCase(goods.getOptionFl())) ? String.format("/api/1/goods/%s/options", goodsNo) : "";
 
-    if (goods.getGoodsMustInfo() != null) {
+    if (goods.getGoodsMustInfo() == null) {
+      this.goodsMustInfo = new ArrayList<>();
+    } else {
       ObjectMapper mapper = new ObjectMapper();
-      List<GodoService.MustInfo> info = null;
       try {
-        info = Arrays.asList(mapper.readValue(goods.getGoodsMustInfo(), GodoService.MustInfo[].class));
+        this.goodsMustInfo = Arrays.asList(mapper.readValue(goods.getGoodsMustInfo(), GodoService.MustInfo[].class));
       } catch (IOException e) {
-        this.goodsMustInfo = null;
+        this.goodsMustInfo = new ArrayList<>();
       }
-      this.goodsMustInfo = info;
     }
 
     this.deliveryInfo = StringUtils.isBlank(deliveryInfo) ? "" : deliveryInfo;
