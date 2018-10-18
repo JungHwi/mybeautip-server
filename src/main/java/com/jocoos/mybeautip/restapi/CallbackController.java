@@ -146,6 +146,7 @@ public class CallbackController {
         if (v.getMember().getId() != request.getUserId().longValue()) {
           throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
         }
+        tagService.decreaseRefCount(v.getTagInfo());
         v.setDeletedAt(new Date());
         videoService.saveWithDeletedAt(v);
         videoLikeRepository.deleteByVideoId(v.getId());
