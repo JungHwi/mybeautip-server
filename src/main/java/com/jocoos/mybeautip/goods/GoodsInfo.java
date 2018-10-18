@@ -33,7 +33,7 @@ public class GoodsInfo {
   private String goodsDiscountUnit;  // 상품 할인 단위 ( percent=%, price=원)
   private Integer goodsPrice;  // 판매가
   private Integer fixedPrice;  // 정가
-  private String listImageData;  // 썸네일 이미지 정보
+  private URL listImageData;  // 썸네일 이미지 정보
   private Integer scmNo;
   private Integer likeCount;
   private Long likeId;
