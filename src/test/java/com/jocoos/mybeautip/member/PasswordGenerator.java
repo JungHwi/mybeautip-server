@@ -10,5 +10,6 @@ public class PasswordGenerator {
     System.out.println(passwordEncoder.encode("akdlqbxlq#1@Jocoos"));
     System.out.println(passwordEncoder.encode("Qkdrn!Ehdrn?"));
     System.out.println(passwordEncoder.encode("anrWlQk@@524"));
+    System.out.println(passwordEncoder.encode("akdlqbxlq@@123"));
   }
 }

@@ -61,7 +61,7 @@ public class AdminTokenGranter extends AbstractTokenGranter {
 
     return adminMemberRepository.findById(adminId)
        .filter(m -> passwordEncoder.matches(password, m.getPassword()))
-       .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
+       .map(m -> generateToken(memberRepository.getOne(m.getMember().getId()), client, tokenRequest))
        .orElseThrow(() -> new AuthenticationException("email or password Invalid."));
   }
 
