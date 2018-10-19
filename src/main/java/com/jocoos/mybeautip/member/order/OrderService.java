@@ -9,6 +9,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
@@ -250,6 +251,27 @@ public class OrderService {
     OrderInquiry orderInquiry = orderInquiryRepository.findByOrderAndCreatedBy(order, order.getCreatedBy()).orElseThrow(() -> new NotFoundException("inquire_not_found", "invalid inquire id"));
     orderInquiry.setCompleted(true);
     orderInquiryRepository.save(orderInquiry);
+  }
+
+  @Transactional
+  public void notifyPayment(Order order, String status, String impUid) {
+    int state = 0;
+    if (!Strings.isNullOrEmpty(status)) {
+      state = stateValue(status);
+    }
+
+    state = state | Payment.STATE_NOTIFIED;
+    updatePaymentState(order.getId(), impUid, state, status);
+
+    if ((state & Payment.STATE_CANCELLED) != 0) {
+      order.setStatus(Order.PAYMENT_CANCELLED);
+      orderRepository.save(order);
+    } else if ((state & Payment.STATE_PAID) != 0) {
+      completeOrder(order);
+    } else if ((state & Payment.STATE_FAILED) != 0) {
+      order.setStatus(Order.PAYMENT_FAILED);
+      orderRepository.save(order);
+    }
   }
 
   private Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
