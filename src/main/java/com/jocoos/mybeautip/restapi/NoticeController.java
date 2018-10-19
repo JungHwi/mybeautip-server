@@ -1,8 +1,13 @@
 package com.jocoos.mybeautip.restapi;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.jocoos.mybeautip.app.AppInfo;
+import com.jocoos.mybeautip.app.AppInfoRepository;
+import com.jocoos.mybeautip.devices.NoticeService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.app.AppInfo;
-import com.jocoos.mybeautip.app.AppInfoRepository;
-import com.jocoos.mybeautip.devices.NoticeService;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -42,7 +42,9 @@ public class NoticeController {
        .collect(Collectors.toList());
 
     NoticeResponse response = new NoticeResponse();
-    response.setLatestVersion(appInfoRepository.findByOs(deviceOs).map(AppInfo::getVersion).orElse(""));
+    PageRequest pageable = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "createdAt"));
+    List<AppInfo> list = appInfoRepository.findByOs(deviceOs, pageable);
+    response.setLatestVersion((list.size() > 0) ? list.get(0).getVersion() : "");
     response.setContent(notices);
     return new ResponseEntity<>(response, HttpStatus.OK);
 
