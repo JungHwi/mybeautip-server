@@ -160,7 +160,9 @@ public class OrderService {
 
           long memberId = order.getCreatedBy().getId();
           // Delete cart item when order is completed
+          log.debug("order complete: purchase count is " + order.getPurchases().size());
           for (Purchase p: order.getPurchases()) {
+            log.debug(String.format("purchase::%s%d%d", p.getGoods().getGoodsNo(), p.getOptionId().intValue(), p.getQuantity()));
             if (p.getOptionId() == 0) {
               cartRepository.findByGoodsGoodsNoAndOptionIsNullAndCreatedById(
                   p.getGoods().getGoodsNo(), memberId)
