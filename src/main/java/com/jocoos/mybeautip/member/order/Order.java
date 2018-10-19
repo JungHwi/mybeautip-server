@@ -63,6 +63,18 @@ public class Order extends MemberAuditable {
    */
   @Column(nullable = false)
   private String method;
+  
+  @Column
+  private int priceAmount;
+  
+  @Column
+  private int deductionAmount;
+  
+  @Column
+  private int shippingAmount;
+  
+  @Column
+  private int expectedPoint;
 
   @Column(nullable = false)
   private String status;

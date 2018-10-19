@@ -227,6 +227,10 @@ public class OrderController {
     private int point;
     @NotNull
     private String method;
+    private int priceAmount;
+    private int deductionAmount;
+    private int shippingAmount;
+    private int expectedPoint;
     private Long videoId;
     private Long couponId;
     @NotNull
@@ -291,6 +295,10 @@ public class OrderController {
     private MemberInfo createdBy;
     private int point;
     private String method;
+    private int priceAmount;
+    private int deductionAmount;
+    private int shippingAmount;
+    private int expectedPoint;
     private Long videoId;
     private DeliveryInfo delivery;
     private PaymentInfo payment;
