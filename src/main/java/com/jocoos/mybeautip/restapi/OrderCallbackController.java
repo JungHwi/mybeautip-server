@@ -28,7 +28,9 @@ public class OrderCallbackController {
                                               @RequestParam Boolean impSuccess,
                                               @RequestParam(required = false) String errorMsg) {
 
+    log.debug(String.format("OrderCallbackComplete called. impUid=%s, merchantUid=%d, impSuccess=%s", impUid, merchantUid, impSuccess));
     String html = orderService.complete(impUid, merchantUid, impSuccess, errorMsg);
+    log.debug("OrderCallbackComplete response: " + html);
     return new ResponseEntity<>(html, HttpStatus.OK);
   }
 }
