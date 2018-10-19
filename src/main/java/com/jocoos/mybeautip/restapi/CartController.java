@@ -67,22 +67,29 @@ public class CartController {
   @Transactional
   @PostMapping
   public CartService.CartInfo addCart(@Valid @RequestBody AddCartRequest request) {
-    Cart item = getValidCartItem(request.getGoodsNo(), request.getOptionNo(), request.getQuantity());
-
-    Optional<Cart> optionalCart;
-    if (request.getOptionNo() == 0) {
-      optionalCart = cartRepository.findByGoodsGoodsNoAndCreatedById(request.getGoodsNo(), memberService.currentMemberId());
-    } else {
-      optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
-        request.getGoodsNo(), request.getOptionNo(), memberService.currentMemberId());
+    List<Cart> list = new ArrayList<>();
+    if (request.getItems().size() + cartRepository.countByCreatedById(memberService.currentMemberId()) > 100) {
+      throw new BadRequestException("too_many_items", "Cart items cannot be added more than 100.");
     }
-
-    if (optionalCart.isPresent()) { // Update quantity
-      Cart cart = optionalCart.get();
-      cart.setQuantity(request.getQuantity());
-      cartService.update(cart);
-    } else {  // Insert new item
-      cartService.save(item);
+    
+    for (CartItemRequest requestItem : request.getItems()) {
+      Cart item = getValidCartItem(requestItem.getGoodsNo(), requestItem.getOptionNo(), requestItem.getQuantity());
+      
+      Optional<Cart> optionalCart;
+      if (item.getOption() == null) {
+        optionalCart = cartRepository.findByGoodsGoodsNoAndCreatedById(item.getGoods().getGoodsNo(), memberService.currentMemberId());
+      } else {
+        optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
+            item.getGoods().getGoodsNo(), item.getOption().getOptionNo(), memberService.currentMemberId());
+      }
+  
+      if (optionalCart.isPresent()) { // Update quantity
+        Cart cart = optionalCart.get();
+        cart.setQuantity(item.getQuantity());
+        cartService.update(cart);
+      } else {  // Insert new item
+        cartService.save(item);
+      }
     }
     return cartService.getCartItemList();
   }
@@ -133,9 +140,9 @@ public class CartController {
   }
 
   @PostMapping("/now")
-  public CartService.CartInfo calculateInstantCartInfo(@Valid @RequestBody InstantCartRequest request) {
+  public CartService.CartInfo calculateInstantCartInfo(@Valid @RequestBody AddCartRequest request) {
     List<Cart> list = new ArrayList<>();
-    for (AddCartRequest item : request.getItems()) {
+    for (CartItemRequest item : request.getItems()) {
       list.add(getValidCartItem(item.getGoodsNo(), item.getOptionNo(), item.getQuantity()));
     }
     return cartService.getCartItemList(list);
@@ -180,13 +187,13 @@ public class CartController {
 
   @Data
   @NoArgsConstructor
-  private static class InstantCartRequest {
-    List<AddCartRequest> items;
+  private static class AddCartRequest {
+    List<CartItemRequest> items;
   }
 
   @Data
   @NoArgsConstructor
-  private static class AddCartRequest {
+  private static class CartItemRequest {
     @NotNull
     private String goodsNo;
 
