@@ -1,22 +1,20 @@
 package com.jocoos.mybeautip.member.cart;
 
-import java.net.URL;
-import java.util.*;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.store.StoreRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import com.jocoos.mybeautip.goods.*;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.store.StoreRepository;
+import java.net.URL;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -97,7 +95,7 @@ public class CartService {
         count = checkedCount = fixedPrice = price = 0;
         for (CartItem item : delivery.getItems()) {
           count += 1;
-          if (item.getChecked()) {
+          if (item.getChecked() && item.getValid()) {
             checkedCount += 1;
             fixedPrice += item.getFixedPrice();
             price += item.getPrice();
@@ -218,6 +216,7 @@ public class CartService {
   static class CartItem {
     private Long id;
     private Boolean checked;
+    private Boolean valid = true;
     private CartGoodsInfo goods;
     private CartOptionInfo option;
     private Integer quantity;
@@ -239,6 +238,14 @@ public class CartService {
 
       this.fixedPrice = perItemFixedPrice * cart.getQuantity();
       this.price = perItemPrice * cart.getQuantity();
+      
+      if ("y".equals(goods.getSoldOutFl())
+          || ("y".equals(goods.getStockFl()) && this.quantity > goods.getTotalStock())
+          || (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && this.quantity < goods.getMinOrderCnt())
+          || (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && this.quantity > goods.getMaxOrderCnt())
+          || (option != null && "y".equals(goods.getStockFl()) && this.quantity > option.getStockCnt())) {
+        this.valid = false;
+      }
     }
   }
 
@@ -256,6 +263,9 @@ public class CartService {
     private Integer fixedPrice;  // 정가
     @JsonIgnore private Integer deliverySno;  // 배송비 정책 번호
     @JsonIgnore private Integer scmNo;  // 공급사 번호
+    @JsonIgnore private Integer totalStock; // 총 재고
+    @JsonIgnore private Integer minOrderCnt;  // 최소구매수량
+    @JsonIgnore private Integer maxOrderCnt;  // 쵀대구매수량
 
     CartGoodsInfo(Goods goods) {
       BeanUtils.copyProperties(goods, this);

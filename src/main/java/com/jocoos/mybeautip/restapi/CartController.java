@@ -149,7 +149,7 @@ public class CartController {
       throw new BadRequestException("goods_sold_out", "sold out: " + goodsNo);
     }
   
-    if ("y".equals(goods.getStockFl()) && goods.getTotalStock() < quantity) { // 재고량에 따름, 총 재고량 추가
+    if ("y".equals(goods.getStockFl()) && quantity > goods.getTotalStock()) { // 재고량에 따름, 총 재고량 추가
       throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
     }
   
@@ -165,7 +165,7 @@ public class CartController {
     if ("y".equals(goods.getOptionFl())) {
       option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goodsNo), optionNo)
         .orElseThrow(() -> new NotFoundException("goods_option_not_found", "goods option not found: " + goodsNo));
-      if ("y".equals(goods.getStockFl()) && option.getStockCnt() < quantity) { // 재고량에 따름
+      if ("y".equals(goods.getStockFl()) && quantity > option.getStockCnt()) { // 재고량에 따름
         throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
       }
     } else if (optionNo != 0) {
