@@ -35,10 +35,11 @@ public class GoodsInfo {
   private Integer goodsPrice;  // 판매가
   private Integer fixedPrice;  // 정가
   private URL listImageData;  // 썸네일 이미지 정보
-  private Integer scmNo;
+  private Integer scmNo;  // 공급자 번호
   private Integer likeCount;
   private Long likeId;
-  private Integer deliverySno;
+  private Integer deliverySno;  // 배송비 정책 번호
+  private String goodsSearchWord; // 검색 키워드
   private List<GodoService.MustInfo> goodsMustInfo;
   private Integer relatedVideoTotalCount; // 관련 방송(동영상 리뷰) 전체 개수
   private String deliveryInfo;
