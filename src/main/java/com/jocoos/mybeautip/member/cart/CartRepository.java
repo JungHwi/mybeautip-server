@@ -14,6 +14,8 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
   Optional<Cart> findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(String goodsNo, Integer optionNo, Long memberId);
 
+  Optional<Cart> findByGoodsGoodsNoAndOptionIsNullAndCreatedById(String goodsNo, Long memberId);
+  
   Optional<Cart> findByIdAndCreatedById(Long id, Long memberId);
 
   Integer countByCreatedById(Long createdBy);

@@ -159,10 +159,17 @@ public class OrderService {
           }
 
           long memberId = order.getCreatedBy().getId();
+          // Delete cart item when order is completed
           for (Purchase p: order.getPurchases()) {
-            cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
-              p.getGoods().getGoodsNo(), p.getOptionId().intValue(), memberId)
-              .ifPresent(cartRepository::delete);
+            if (p.getOptionId() == 0) {
+              cartRepository.findByGoodsGoodsNoAndOptionIsNullAndCreatedById(
+                  p.getGoods().getGoodsNo(), memberId)
+                  .ifPresent(cartRepository::delete);
+            } else {
+              cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
+                  p.getGoods().getGoodsNo(), p.getOptionId().intValue(), memberId)
+                  .ifPresent(cartRepository::delete);
+            }
           }
 
           Payment payment = checkPaymentAndUpdate(order.getId(), uid);
