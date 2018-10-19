@@ -145,16 +145,28 @@ public class CartController {
     Goods goods = goodsRepository.findById(goodsNo)
       .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
 
-    if ("y".equals(goods.getSoldOutFl())) {
+    if ("y".equals(goods.getSoldOutFl())) { // 품절 플래그
       throw new BadRequestException("goods_sold_out", "sold out: " + goodsNo);
     }
-
+  
+    if ("y".equals(goods.getStockFl()) && goods.getTotalStock() < quantity) { // 재고량에 따름, 총 재고량 추가
+      throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+    }
+  
+    if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity < goods.getMinOrderCnt()) { // 최소구매수량 미만
+      throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+    }
+  
+    if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity > goods.getMaxOrderCnt()) { // 최대구매수량 초과
+      throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+    }
+    
     GoodsOption option = null;
     if ("y".equals(goods.getOptionFl())) {
       option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goodsNo), optionNo)
         .orElseThrow(() -> new NotFoundException("goods_option_not_found", "goods option not found: " + goodsNo));
       if ("y".equals(goods.getStockFl()) && option.getStockCnt() < quantity) { // 재고량에 따름
-        throw new BadRequestException("invalid_quantity", "goods option stock count is lower than quantity: " + goodsNo);
+        throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
       }
     } else if (optionNo != 0) {
       throw new BadRequestException("goods_option_not_exist", "goods option not exist:" + goodsNo);
