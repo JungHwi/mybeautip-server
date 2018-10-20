@@ -404,7 +404,7 @@ public class MemberController {
         member.setDeletedAt(new Date());
         memberRepository.save(member);
 
-        memberLeaveLogRepository.save(new MemberLeaveLog(member.getId(), request.getReason()));
+        memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
       });
   }
 

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.log;
 
 import javax.persistence.*;
 
+import com.jocoos.mybeautip.member.Member;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
@@ -23,14 +24,15 @@ public class MemberLeaveLog extends CreatedDateAuditable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
-  private Long memberId;
+  @ManyToOne
+  @JoinColumn(name = "member_id")
+  private Member member;
 
   @Column(nullable = false)
   private String reason;
 
-  public MemberLeaveLog(Long memberId, String reason) {
-    this.memberId = memberId;
+  public MemberLeaveLog(Member member, String reason) {
+    this.member = member;
     this.reason = reason;
   }
 }
