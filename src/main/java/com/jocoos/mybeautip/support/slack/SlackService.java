@@ -41,14 +41,12 @@ public class SlackService {
     String message = String.format("*%s*" +
             "```Id: %d\n" +
             "User: %s/%d\n" +
-            "Title: %s\n" +
-            "State:%s```",
+            "Title: %s```",
         videoType,
         video.getId(),
         video.getMember().getUsername(),
         video.getMember().getId(),
-        video.getTitle(),
-        video.getState());
+        video.getTitle());
     send(message);
   }
 
