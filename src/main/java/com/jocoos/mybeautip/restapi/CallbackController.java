@@ -150,7 +150,9 @@ public class CallbackController {
         v.setDeletedAt(new Date());
         videoService.saveWithDeletedAt(v);
         videoLikeRepository.deleteByVideoId(v.getId());
-        memberRepository.updateVideoCount(v.getMember().getId(), -1);
+        if ("PUBLIC".equals(v.getVisibility())) {
+          memberRepository.updateVideoCount(v.getMember().getId(), -1);
+        }
         memberRepository.updateTotalVideoCount(v.getMember().getId(), -1);
         return v;
       })
