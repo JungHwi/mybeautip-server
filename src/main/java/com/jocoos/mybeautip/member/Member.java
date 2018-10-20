@@ -76,6 +76,9 @@ public class Member {
   private int revenue;
 
   @Column
+  private Date revenueModifiedAt;
+
+  @Column
   @CreatedDate
   private Date createdAt;
 
@@ -111,5 +114,6 @@ public class Member {
     this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? deaultAvatarUrl : params.get("avatar_url");
     this.point = 0;
     this.visible = (StringUtils.isNotBlank(params.get("username")));
+    this.revenueModifiedAt = new Date();
   }
 }

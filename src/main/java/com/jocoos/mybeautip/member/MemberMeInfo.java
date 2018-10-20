@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.member;
 
+import java.util.Date;
+
 import org.springframework.beans.BeanUtils;
 
 import lombok.Data;
@@ -15,6 +17,8 @@ public class MemberMeInfo extends MemberInfo {
 
   private int pointRatio;
   private int revenueRatio;
+
+  private Date revenueModifiedAt;
 
   public MemberMeInfo(Member member) {
     BeanUtils.copyProperties(member, this);

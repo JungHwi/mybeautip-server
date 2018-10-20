@@ -1,0 +1,1 @@
+ALTER TABLE `members` ADD COLUMN `revenue_modified_at` DATETIME(3) AFTER revenue;

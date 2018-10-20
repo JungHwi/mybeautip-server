@@ -105,6 +105,9 @@ mybeautip:
     platform-ratio: 10  # %
   shipping:
     fixed: 2500 # 원(₩)
+  slack:
+    key:
+    channel:
 
 cloud:
   aws:
