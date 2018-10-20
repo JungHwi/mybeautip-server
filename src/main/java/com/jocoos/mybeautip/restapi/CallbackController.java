@@ -216,16 +216,19 @@ public class CallbackController {
     }
 
     if (source.getVisibility() != null) {
-      if (StringUtils.containsAny(source.getVisibility(), "PUBLIC", "PRIVATE")) {
-        if ("PUBLIC".equalsIgnoreCase(target.getVisibility()) && "PRIVATE".equalsIgnoreCase(source.getVisibility())) {
-          memberRepository.updateVideoCount(target.getMember().getId(), -1);
-        }
+      String prevState = target.getVisibility();
+      String newState = source.getVisibility();
 
-        if ("PRIVATE".equalsIgnoreCase(target.getVisibility()) && "PUBLIC".equalsIgnoreCase(source.getVisibility())) {
-          memberRepository.updateVideoCount(target.getMember().getId(), 1);
-        }
-        target.setVisibility(source.getVisibility());
+      if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
+        memberRepository.updateVideoCount(target.getMember().getId(), -1);
       }
+
+      if ("PRIVATE".equalsIgnoreCase(prevState) && "PUBLIC".equalsIgnoreCase(newState)) {
+        memberRepository.updateVideoCount(target.getMember().getId(), 1);
+      }
+
+      log.debug(String.format("Video state will be changed %s to %s, id:%d", prevState, newState, target.getId()));
+      target.setVisibility(newState);
     }
 
     return target;
