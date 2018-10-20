@@ -1,5 +1,11 @@
 package com.jocoos.mybeautip.notification;
 
+import com.jocoos.mybeautip.log.MemberLeaveLog;
+import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.order.OrderInquiry;
+import com.jocoos.mybeautip.member.report.Report;
+import com.jocoos.mybeautip.support.slack.SlackService;
+import com.jocoos.mybeautip.video.report.VideoReport;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +27,12 @@ import com.jocoos.mybeautip.video.VideoLike;
 public class NotificationAspect {
 
   private final NotificationService notificationService;
+  private final SlackService slackService;
 
-  public NotificationAspect(NotificationService notificationService) {
+  public NotificationAspect(NotificationService notificationService,
+                            SlackService slackService) {
     this.notificationService = notificationService;
+    this.slackService = slackService;
   }
 
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.createVideo(..))",
@@ -35,6 +44,7 @@ public class NotificationAspect {
       Video video = (Video) result;
       log.debug("video: {}", video);
       notificationService.notifyCreateVideo(video);
+      slackService.sendForVideo(video);
     }
   }
 
@@ -79,6 +89,67 @@ public class NotificationAspect {
       CommentLike commentLike = (CommentLike) o;
       log.debug("comment like: {}", commentLike);
       notificationService.notifyAddCommentLike(commentLike);
+    }
+  }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.report.VideoReportRepository.save(..))",
+      returning = "result")
+  public void onAfterReturningReportVideo(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof VideoReport) {
+      VideoReport videoReport = (VideoReport) result;
+      log.debug("videoReport: {}", videoReport);
+      slackService.sendForReportVideo(videoReport);
+    }
+  }
+
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.report.ReportRepository.save(..))",
+      returning = "result")
+  public void onAfterReturningReportMember(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof Report) {
+      Report memberReport = (Report) result;
+      log.debug("memberReport: {}", memberReport);
+      slackService.sendForReportMember(memberReport);
+    }
+  }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.create(..))",
+      returning = "result")
+  public void onAfterReturningOrder(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof Order) {
+      Order order = (Order) result;
+      log.debug("order: {}", order);
+      slackService.sendForOrder(order);
+    }
+  }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.inquireOrder(..))",
+      returning = "result")
+  public void onAfterReturningOrderInquire(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof OrderInquiry) {
+      OrderInquiry orderInquiry = (OrderInquiry) result;
+      log.debug("orderInquiry: {}", orderInquiry);
+      slackService.sendForOrderInquiry(orderInquiry);
+    }
+  }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.log.MemberLeaveLogRepository.save(..))",
+      returning = "result")
+  public void onAfterReturningAddDeleteMemberLog(JoinPoint joinPoint, Object result) {
+    log.info("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof MemberLeaveLog) {
+      MemberLeaveLog memberLeaveLog = (MemberLeaveLog) result;
+      log.info("video: {}", memberLeaveLog);
+      slackService.sendForDeleteMember(memberLeaveLog);
     }
   }
 }
