@@ -248,7 +248,7 @@ public class MemberShoppingController {
 
   @Data
   public static class CouponInfo {
-    private int category;
+    private byte category;
     private String title;
     private String description;
     private String condition;
