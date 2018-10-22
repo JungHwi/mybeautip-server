@@ -58,8 +58,13 @@ public class Coupon extends MemberAuditable {
    */
   @Column
   private int conditionPrice;
-
-
+  
+  /**
+   * Upper bound of discount. ex) 5만원 이상 구매시 사용 (최대 1만원까지)
+   */
+  @Column
+  private int usePriceLimit;
+  
   @Column(nullable = false)
   private Date startedAt;
 

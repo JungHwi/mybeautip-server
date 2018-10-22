@@ -255,6 +255,7 @@ public class MemberShoppingController {
     private int discountPrice;
     private int discountRate;
     private int conditionPrice;
+    private int usePriceLimit;
     private Date startedAt;
     private Date endedAt;
 
