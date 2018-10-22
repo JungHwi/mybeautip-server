@@ -39,6 +39,8 @@ public class GoodsInfo {
   private Integer likeCount;
   private Long likeId;
   private Integer deliverySno;  // 배송비 정책 번호
+  private String deliveryFixFl;  // 배송비 정책 방식 (fixed=고정, free=무료, price=금액별, count=수량별, weight=무게별)
+  private String deliveryMethod;  // 배송비 정책 문구
   private String goodsSearchWord; // 검색 키워드
   private List<GodoService.MustInfo> goodsMustInfo;
   private Integer relatedVideoTotalCount; // 관련 방송(동영상 리뷰) 전체 개수

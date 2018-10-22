@@ -277,6 +277,16 @@ public class GodoService {
         if (Strings.isNotEmpty(goodsData.getAllCateCd())) {
           goods.setAllCd(generateCategoryStr(goodsData.getAllCateCd()));
         }
+        
+        Optional<DeliveryCharge> optionalDeliveryCharge = deliveryChargeRepository.findById(goodsData.getDeliverySno());
+        if (optionalDeliveryCharge.isPresent()) {
+          goods.setDeliveryFixFl(optionalDeliveryCharge.get().getFixFl());
+          goods.setDeliveryMethod(optionalDeliveryCharge.get().getMethod());
+        } else {
+          log.warn("DeliveryCharge is null, delivery_sno:" + goodsData.getDeliverySno());
+          goods.setDeliveryFixFl("");
+          goods.setDeliveryMethod("");
+        }
 
         List<MustInfo> list = new ArrayList<>();
 

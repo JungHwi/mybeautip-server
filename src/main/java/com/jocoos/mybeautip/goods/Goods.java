@@ -62,6 +62,8 @@ public class Goods {
   private String salesEndYmd;  // 판매 종료일
   private String goodsPriceString;  // 가격대체문구 (최대 30자)
   private Integer deliverySno;  // 배송비 코드
+  private String deliveryFixFl;  // 배송비 정책 방식 (fixed=고정, free=무료, price=금액별, count=수량별, weight=무게별)
+  private String deliveryMethod;  // 배송비 정책 문구
   private Integer orderCnt;  // 주문수
   private Integer hitCnt;  // 조회수
   private URL add1ImageData;
