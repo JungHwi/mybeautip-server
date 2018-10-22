@@ -1,12 +1,17 @@
 package com.jocoos.mybeautip.godo;
 
-import javax.transaction.Transactional;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.recommendation.GoodsRecommendationRepository;
+import com.jocoos.mybeautip.store.Store;
+import com.jocoos.mybeautip.store.StoreRepository;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -18,20 +23,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-
-import com.jocoos.mybeautip.goods.*;
-import com.jocoos.mybeautip.recommendation.GoodsRecommendation;
-import com.jocoos.mybeautip.recommendation.GoodsRecommendationRepository;
-import com.jocoos.mybeautip.store.Store;
-import com.jocoos.mybeautip.store.StoreRepository;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -262,11 +258,11 @@ public class GodoService {
         goods.setFixedPrice(goodsData.getFixedPrice().intValue());
         goods.setGoodsPrice(goodsData.getGoodsPrice().intValue());
         goods.setGoodsDiscount(goodsData.getGoodsDiscount().intValue());
-
+        
         if ("n".equalsIgnoreCase(goodsData.getGoodsDisplayFl())
           || "n".equalsIgnoreCase(goodsData.getGoodsSellFl())) {
-          deleteGoods(goods);
-          log.debug("Delete Goods: " + goods.getGoodsNo());
+          // FIXME: delete goods
+          log.debug("Goods not available: " + goods.getGoodsNo());
           continue;
         }
 
@@ -441,17 +437,6 @@ public class GodoService {
       result = result.concat("|").concat(str).concat("|");
     }
     return result;
-  }
-
-  @Transactional
-  public void deleteGoods(Goods goods) {
-    List<GoodsRecommendation> recommendations = goodsRecommendationRepository.findAllByGoodsGoodsNo(goods.getGoodsNo());
-    goodsRecommendationRepository.deleteAll(recommendations);
-
-    List<GoodsLike> goodsLikes = goodsLikeRepository.findAllByGoodsGoodsNo(goods.getGoodsNo());
-    goodsLikeRepository.deleteAll(goodsLikes);
-
-    goodsRepository.delete(goods);
   }
 
   @Data

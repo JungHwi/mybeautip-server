@@ -83,4 +83,8 @@ public class Goods {
   @Column
   @LastModifiedDate
   private Date modifiedAt;
+  
+  @Column
+  @LastModifiedDate
+  private Date deletedAt;
 }
