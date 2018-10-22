@@ -26,7 +26,8 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
 
   @Query("select g from Goods g where " +
     "(g.goodsNm like concat('%',:keyword,'%') " +
-    "or g.goodsDescription like concat('%',:keyword,'%')) " +
+    "or g.goodsDescription like concat('%',:keyword,'%') " +
+    "or g.goodsSearchWord like concat('%',:keyword,'%')) " +
     "and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> findAllByKeyword(@Param("keyword")String keyword,
                                 @Param("cursor")Date cursor,
@@ -34,7 +35,8 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
 
   @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
     "and (g.goodsNm like concat('%',:keyword,'%') " +
-    "or g.goodsDescription like concat('%',:keyword,'%')) " +
+    "or g.goodsDescription like concat('%',:keyword,'%') " +
+    "or g.goodsSearchWord like concat('%',:keyword,'%')) " +
     "and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> findAllByCategoryAndKeyword(@Param("category")String category,
                                            @Param("keyword")String keyword,
