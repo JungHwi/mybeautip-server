@@ -187,62 +187,60 @@ public class OrderService {
   }
 
   @Transactional
-  public OrderInquiry inquireOrder(Order order, Byte state, String reason, Purchase purchase) {
-    if (Order.ORDER_CANCELLED.equals(order.getStatus()) || Order.ORDER_CANCELLING.equals(order.getStatus())) {
-      throw new BadRequestException("order_cancel_duplicated", "Already requested order canceling");
+  public OrderInquiry inquiryExchangeOrReturn(Order order, Byte state, String reason, Purchase purchase) {
+    if (purchase == null) {
+      throw new BadRequestException("purchase_not_found", "invalid purchase id");
     }
 
-    String status = null;
-    switch (state) {
-      case 0: {
-        if (Order.PAID.equals(order.getStatus()) || Order.PREPARING.equals(order.getStatus())) {
-          status = Order.ORDER_CANCELLING;
-        } else {
-          throw new BadRequestException("Can not cancel payment - " + order.getStatus());
-        }
-        break;
-      }
-      case 1: {
-        if (Order.DELIVERED.equals(order.getStatus()) || Order.DELIVERING.equals(order.getStatus())) {
+    String status = purchase.getStatus();
+    if (status.equals(Order.DELIVERED) || status.equals(Order.DELIVERING)) {
+      switch (state) {
+        case 1:
           status = Order.ORDER_EXCHANGING;
-        } else {
-          throw new BadRequestException("invalid order exchange inquire - " + order.getStatus());
-        }
-        break;
-      }
-      case 2: {
-        if (Order.DELIVERED.equals(order.getStatus()) || Order.DELIVERING.equals(order.getStatus())) {
+          break;
+        case 2:
           status = Order.ORDER_RETURNING;
-        } else {
-          throw new BadRequestException("invalid order return inquire - " + order.getStatus());
-        }
-        break;
+          break;
+        default:
+          throw new IllegalArgumentException("Unknown state type");
       }
-      default: {
-        throw new IllegalArgumentException("Unknown state type");
-      }
-    }
 
-    order.setStatus(status);
+      // TODO: send message order cancel message to slack?
 
-    // TODO: send message order cancel message to slack?
-
-
-    OrderInquiry orderInquiry = null;
-    if (purchase != null) {
-      order.setPurchaseStatus(purchase.getId(), status);
-      orderInquiry = orderInquiryRepository.save(new OrderInquiry(order, state, reason, purchase));
+      log.debug("status changed: {}", status);
+      orderRepository.updatePurchaseStatus(purchase.getId(), status);
+      return orderInquiryRepository.save(new OrderInquiry(order, state, reason, purchase));
     } else {
-      orderInquiry = orderInquiryRepository.save(new OrderInquiry(order, state, reason));
+      throw new BadRequestException("required purchase status delivered or delivering - " + purchase.getStatus());
+    }
+  }
+
+  @Transactional
+  public OrderInquiry cancelOrderInquire(Order order, Byte state, String reason) {
+    if (order == null) {
+      throw new BadRequestException("purchase_not_found", "invalid purchase id");
     }
 
+    switch (order.getStatus()) {
+      case Order.ORDER_CANCELLED:
+      case Order.ORDER_CANCELLING:
+        throw new BadRequestException("order_cancel_duplicated", "Already requested order canceling");
+      case Order.DELIVERING:
+      case Order.DELIVERED:
+        throw new BadRequestException("order_cancel_failed", "Invalid order status. need to paid or preparing");
+    }
+
+    order.setStatus(Order.ORDER_CANCELLING);
     orderRepository.save(order);
+
+    OrderInquiry orderInquiry = orderInquiryRepository.save(new OrderInquiry(order, state, reason));
+    cancelPayment(order);
     return orderInquiry;
   }
 
   @Transactional
   public void cancelPayment(Order order) {
-    if (Order.ORDER_CANCELLING.equals(order.getStatus())) {
+    if (Order.ORDER_CANCELLED.equals(order.getStatus())) {
       throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
     }
 

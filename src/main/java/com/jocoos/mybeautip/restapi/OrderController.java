@@ -143,23 +143,26 @@ public class OrderController {
     }
 
     Long me = memberService.currentMemberId();
-    OrderInquiry inquiry = orderRepository.findByIdAndCreatedById(id, me)
-       .map(order -> {
-         OrderInquiry orderInquiry = null;
-         if (request.getPurchaseId() != null) {
-           Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
-           orderInquiry = orderService.inquireOrder(order, Byte.parseByte(request.getState()), request.getReason(), purchase);
-         } else {
-           orderInquiry = orderService.inquireOrder(order, Byte.parseByte(request.getState()), request.getReason(), null);
-         }
+    Order order = orderRepository.findByIdAndCreatedById(id, me).orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
+    OrderInquiry inquiry = null;
 
-         if (Byte.parseByte(request.getState()) == OrderInquiry.STATE_CANCEL_ORDER) {
-           orderService.cancelPayment(order);
-         }
-
-         return orderInquiry;
-       })
-       .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
+    Byte state = Byte.parseByte(request.getState());
+    switch (state) {
+     case 0:
+       inquiry = orderService.cancelOrderInquire(order, state, request.getReason());
+       break;
+     case 1:
+     case 2: {
+       if (request.getPurchaseId() == null) {
+         throw new BadRequestException("purchase_id_not_found", "purchase id required");
+       }
+       Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
+       inquiry = orderService.inquiryExchangeOrReturn(order, Byte.parseByte(request.getState()), request.getReason(), purchase);
+       break;
+     }
+     default:
+       throw new IllegalArgumentException("Unknown state type");
+    }
 
     return new ResponseEntity<>(new OrderInquiryInfo(inquiry), HttpStatus.OK);
   }
