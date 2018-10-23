@@ -22,4 +22,6 @@ public interface OrderInquiryRepository extends JpaRepository<OrderInquiry, Long
   Slice<OrderInquiry> findByCreatedByIdAndStateGreaterThanEqual(Long createdBy, Byte state, Pageable pageable);
 
   Slice<OrderInquiry> findByStateGreaterThanEqualAndCreatedAtBeforeAndCreatedById(Byte state, Date createdAt, Long createdBy, Pageable pageable);
+
+  Optional<OrderInquiry> findByPurchaseId(Long purchaseId);
 }

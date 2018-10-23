@@ -26,7 +26,6 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.order.*;
 
 @Slf4j
@@ -78,7 +77,16 @@ public class OrderController {
          Payment payment = paymentRepository.findById(order.getId())
             .orElse(null);
          Delivery delivery = deliveryRepository.findById(order.getId()).orElse(null);
-         return new ResponseEntity<>(new OrderInfo(order, delivery, payment), HttpStatus.OK);
+
+         List<PurchaseInfo> purchaseInfos = Lists.newArrayList();
+         order.getPurchases().stream().forEach(p -> {
+           PurchaseInfo purchaseInfo = orderInquiryRepository.findByPurchaseId(p.getId()).map(inquiry ->
+              new PurchaseInfo(p, inquiry.getId())
+           ).orElseGet(() -> new PurchaseInfo(p));
+           purchaseInfos.add(purchaseInfo);
+         });
+
+         return new ResponseEntity<>(new OrderInfo(order, delivery, payment, purchaseInfos), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
   }
@@ -318,10 +326,11 @@ public class OrderController {
       }
     }
 
-    public OrderInfo(Order order, Delivery delivery, Payment payment) {
-      this(order);
+    public OrderInfo(Order order, Delivery delivery, Payment payment, List<PurchaseInfo> purchases) {
+      BeanUtils.copyProperties(order, this);
       this.delivery = new DeliveryInfo(delivery);
       this.payment = new PaymentInfo(payment);
+      this.purchases = purchases;
     }
   }
 
@@ -380,6 +389,7 @@ public class OrderController {
     private int quantity;
     private Long totalPrice;
     private Long videoId;
+    private Long inquireId;
     private Date createdAt;
 
 
@@ -388,6 +398,11 @@ public class OrderController {
       this.thumbnail = purchase.getGoods().getListImageData().toString();
       this.goodsNo = purchase.getGoods().getGoodsNo();
       this.goodsNm = purchase.getGoods().getGoodsNm();
+    }
+
+    public PurchaseInfo(Purchase purchase, Long inquireId) {
+      this(purchase);
+      this.inquireId = inquireId;
     }
   }
 
