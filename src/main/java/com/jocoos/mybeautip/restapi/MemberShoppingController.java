@@ -146,28 +146,30 @@ public class MemberShoppingController {
     }
 
     orders.stream().forEach(o -> {
-      switch (o.getStatus()) {
-        case Order.ORDER: {
-          countInfo.addOrderedCount();
-          break;
+      o.getPurchases().stream().forEach(p -> {
+        switch (p.getStatus()) {
+          case Order.ORDER: {
+            countInfo.addOrderedCount();
+            break;
+          }
+          case Order.DELIVERED: {
+            countInfo.addDeliveredCount();
+            break;
+          }
+          case Order.DELIVERING: {
+            countInfo.addDeliveringCount();
+            break;
+          }
+          case Order.PAID: {
+            countInfo.addPaidCount();
+            break;
+          }
+          case Order.PREPARING: {
+            countInfo.addPreparingCount();
+            break;
+          }
         }
-        case Order.DELIVERED: {
-          countInfo.addDeliveredCount();
-          break;
-        }
-        case Order.DELIVERING: {
-          countInfo.addDeliveringCount();
-          break;
-        }
-        case Order.PAID: {
-          countInfo.addPaidCount();
-          break;
-        }
-        case Order.PREPARING: {
-          countInfo.addPreparingCount();
-          break;
-        }
-      }
+      });
     });
 
     return countInfo;
