@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +19,7 @@ import com.jocoos.mybeautip.member.order.OrderService;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/1/payments")
+@RequestMapping(path = "/api/1/payments", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PublicPaymentController {
 
   private final OrderService orderService;
@@ -30,15 +31,15 @@ public class PublicPaymentController {
     this.orderRepository = orderRepository;
   }
 
-  @PostMapping(name = "/notification")
-  public ResponseEntity notification(@RequestBody CreateNotificationReqeust reqeust) {
-    log.debug("request: {}", reqeust);
+  @PostMapping(value = "/notification", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity notification(@RequestBody CreateNotificationReqeust request) {
+    log.debug("request: {}", request);
 
-    if (StringUtils.isNumeric(reqeust.getImpUid())) {
-      Long id = Long.parseLong(reqeust.getImpUid());
+    if (StringUtils.isNumeric(request.getMerchantUid())) {
+      Long id = Long.parseLong(request.getMerchantUid());
       return orderRepository.findById(id)
          .map(order -> {
-           orderService.notifyPayment(order, reqeust.getStatus(), reqeust.getImpUid());
+           orderService.notifyPayment(order, request.getStatus(), request.getImpUid());
            return new ResponseEntity(HttpStatus.NO_CONTENT);
          })
          .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
