@@ -311,6 +311,7 @@ public class OrderController {
     private int deductionAmount;
     private int shippingAmount;
     private int expectedPoint;
+    private int state;
     private Long videoId;
     private DeliveryInfo delivery;
     private PaymentInfo payment;

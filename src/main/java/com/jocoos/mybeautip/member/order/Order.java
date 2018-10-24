@@ -31,12 +31,30 @@ public class Order extends MemberAuditable {
   public static final String PAYMENT_CANCELLED = "payment_cancelled";
   public static final String ORDER_CANCELLING = "order_cancelling";
   public static final String ORDER_CANCELLED = "order_cancelled";
+
+  /**
+   * Don't use in Order. Use only purchase status.
+   */
   public static final String ORDER_EXCHANGING = "order_exchanging";
   public static final String ORDER_EXCHANGED = "order_exchanged";
   public static final String ORDER_RETURNING = "order_returning";
   public static final String ORDER_RETURNED = "order_returned";
 
   public static final String PAYMENT_FAILED = "payment_failed";
+
+
+  public static final int STATE_ORDER = 1;
+  public static final int STATE_PAID = 2;
+  public static final int STATE_PREPARING = 3;
+  public static final int STATE_DELIVERING = 4;
+  public static final int STATE_DELIVERED = 5;
+
+  public static final int STATE_ORDER_CANCELLING = 11;
+  public static final int STATE_ORDER_CANCELLED = 12;
+
+  public static final int STATE_PAYMENT_CANCELLING = 21;
+  public static final int STATE_PAYMENT_CANCELLED = 22;
+
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,8 +93,12 @@ public class Order extends MemberAuditable {
   @Column
   private int expectedPoint;
 
+  @Deprecated
   @Column(nullable = false)
   private String status;
+
+  @Column(nullable = false)
+  private int state;
 
   @Column
   private Long videoId;
