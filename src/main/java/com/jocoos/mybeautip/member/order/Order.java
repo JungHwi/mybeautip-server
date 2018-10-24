@@ -8,7 +8,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
@@ -86,6 +85,8 @@ public class Order extends MemberAuditable {
   @JoinColumn(name = "coupon_id")
   private MemberCoupon memberCoupon;
 
+  @OneToOne(mappedBy = "order")
+  private Payment payment;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "orderId")

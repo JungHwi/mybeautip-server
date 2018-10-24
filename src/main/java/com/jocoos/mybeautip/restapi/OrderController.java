@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -322,10 +323,13 @@ public class OrderController {
       log.debug("purchases: {}", purchases);
 
       purchases = Lists.newArrayList();
-
       List<Purchase> orderPurchases = order.getPurchases();
       if (!CollectionUtils.isEmpty(orderPurchases)) {
         orderPurchases.forEach(p -> purchases.add(new PurchaseInfo(p)));
+      }
+
+      if (order.getPayment() != null) {
+        this.payment = new PaymentInfo(order.getPayment());
       }
     }
 
