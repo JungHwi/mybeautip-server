@@ -114,7 +114,7 @@ public class OrderController {
         break;
       }
       default: {
-        orders = orderRepository.findByCreatedByIdAndCreatedAtBefore(memberId, createdAt, page);
+        orders = orderRepository.findByCreatedByIdAndStateLessThanEqualAndCreatedAtBefore(memberId, 5, createdAt, page);
       }
     }
 

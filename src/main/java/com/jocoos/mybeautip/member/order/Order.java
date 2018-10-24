@@ -93,7 +93,6 @@ public class Order extends MemberAuditable {
   @Column
   private int expectedPoint;
 
-  @Deprecated
   @Column(nullable = false)
   private String status;
 

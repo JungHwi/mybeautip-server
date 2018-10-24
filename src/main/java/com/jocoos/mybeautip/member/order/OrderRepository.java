@@ -16,11 +16,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   Optional<Order> findByIdAndCreatedById(Long id, Long createdBy);
 
-  Slice<Order> findByCreatedByIdAndCreatedAtBefore(Long createdBy, Date createdAt, Pageable pageable);
+  Slice<Order> findByCreatedByIdAndStateLessThanEqualAndCreatedAtBefore(Long createdBy, int state, Date createdAt, Pageable pageable);
 
   Slice<Order> findByCreatedByIdAndCreatedAtBeforeAndStatusContains(Long createdBy, Date createdAt, String status, Pageable pageable);
 
-  List<Order> findByCreatedByIdAndCreatedAtBetween(Long createdBy, Date createdAtStart, Date createdAtEnd);
+  List<Order> findByCreatedByIdAndStateLessThanEqualAndCreatedAtBetween(Long createdBy, int state, Date createdAtStart, Date createdAtEnd);
 
   @Modifying
   @Query("update Purchase p set p.status = ?2 where p.id = ?1")

@@ -1,9 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.comparator.ComparableComparator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -95,14 +94,26 @@ public class MemberShoppingController {
     PointInfo pointInfo = new PointInfo(member.getPoint(), expectedPoint);
     log.debug("point into: {}", pointInfo);
 
-    List<Order> orders = orderRepository.findByCreatedByIdAndCreatedAtBetween(member.getId(), weekAgo, now);
-    if (CollectionUtils.isEmpty(orders)) {
+    List<Order> list = orderRepository.findByCreatedByIdAndStateLessThanEqualAndCreatedAtBetween(member.getId(), 5, weekAgo, now);
+    if (CollectionUtils.isEmpty(list)) {
       return new ResponseEntity<>(new ShoppingInfo(member, couponCount, pointInfo), HttpStatus.OK);
     }
 
-    OrderCountInfo countInfo = createOrderCountByStatus(orders);
+    List<OrderController.OrderInfo> orders = Lists.newArrayList();
+    list.forEach(o -> orders.add(new OrderController.OrderInfo(o)));
+
+    Collections.sort(orders, new OrderCreatedAtDesc());
+
+    OrderCountInfo countInfo = createOrderCountByStatus(list);
     log.debug("count info: {}", countInfo);
-    return new ResponseEntity<>(new ShoppingInfo(member, couponCount, pointInfo, countInfo), HttpStatus.OK);
+    return new ResponseEntity<>(new ShoppingInfo(member, couponCount, pointInfo, countInfo, orders), HttpStatus.OK);
+  }
+
+  static class OrderCreatedAtDesc implements Comparator<OrderController.OrderInfo> {
+    @Override
+    public int compare(OrderController.OrderInfo o1, OrderController.OrderInfo o2) {
+      return o2.getCreatedAt().compareTo(o1.getCreatedAt());
+    }
   }
 
   @GetMapping("/points")
@@ -192,6 +203,7 @@ public class MemberShoppingController {
     private int couponCount;
     private PointInfo point;
     private OrderCountInfo orderCounts;
+    private List<OrderController.OrderInfo> orders;
 
     public ShoppingInfo(Member member, int couponCount, PointInfo point) {
       this.member = new MemberMeInfo(member);
@@ -199,9 +211,10 @@ public class MemberShoppingController {
       this.point = point;
     }
 
-    public ShoppingInfo(Member member, int couponCount, PointInfo point, OrderCountInfo orderCounts) {
+    public ShoppingInfo(Member member, int couponCount, PointInfo point, OrderCountInfo orderCounts, List<OrderController.OrderInfo> orders) {
       this(member, couponCount, point);
       this.orderCounts = orderCounts;
+      this.orders = orders;
     }
   }
 
