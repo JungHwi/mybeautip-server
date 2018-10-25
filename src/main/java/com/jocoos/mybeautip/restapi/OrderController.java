@@ -234,17 +234,14 @@ public class OrderController {
 
   @Data
   public static class CreateOrderRequest {
-    @NotNull
-    private Long price;
-    private int point;
-    @NotNull
-    private String method;
     private int priceAmount;
     private int deductionAmount;
     private int shippingAmount;
     private int expectedPoint;
     private Long videoId;
     private Long couponId;
+    private int point;
+    
     @NotNull
     private CreateDeliveryRequest delivery;
     @NotNull

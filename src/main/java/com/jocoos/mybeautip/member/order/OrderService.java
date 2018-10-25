@@ -89,11 +89,13 @@ public class OrderService {
     }
 
     Order order = new Order();
-    if ("bank".equals(request.getMethod())) {
+    if ("bank".equals(request.getPayment().getMethod())) {
       order.setState(Order.State.ORDERED);
     }
 
     BeanUtils.copyProperties(request, order);
+    order.setMethod(request.getPayment().getMethod());
+    order.setPrice(request.getPayment().getPrice());
     order.setGoodsCount(Optional.of(request.getPurchases()).map(List::size).orElse(0));
     order.setNumber(orderNumber());
 
