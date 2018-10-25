@@ -44,6 +44,7 @@ public class OrderService {
   private final MemberRepository memberRepository;
   private final DeliveryRepository deliveryRepository;
   private final PaymentRepository paymentRepository;
+  private final PurchaseRepository purchaseRepository;
   private final OrderInquiryRepository orderInquiryRepository;
   private final MemberCouponRepository memberCouponRepository;
   private final GoodsRepository goodsRepository;
@@ -57,6 +58,7 @@ public class OrderService {
                       MemberRepository memberRepository,
                       DeliveryRepository deliveryRepository,
                       PaymentRepository paymentRepository,
+                      PurchaseRepository purchaseRepository,
                       OrderInquiryRepository orderInquiryRepository,
                       MemberCouponRepository memberCouponRepository,
                       GoodsRepository goodsRepository,
@@ -69,6 +71,7 @@ public class OrderService {
     this.memberRepository = memberRepository;
     this.deliveryRepository = deliveryRepository;
     this.paymentRepository = paymentRepository;
+    this.purchaseRepository = purchaseRepository;
     this.orderInquiryRepository = orderInquiryRepository;
     this.memberCouponRepository = memberCouponRepository;
     this.goodsRepository = goodsRepository;
@@ -86,6 +89,10 @@ public class OrderService {
     }
 
     Order order = new Order();
+    if ("bnak".equals(request.getMethod())) {
+      order.setState(Order.State.ORDERED);
+    }
+
     BeanUtils.copyProperties(request, order);
     order.setGoodsCount(Optional.of(request.getPurchases()).map(List::size).orElse(0));
     order.setNumber(orderNumber());
@@ -132,7 +139,7 @@ public class OrderService {
     request.getPurchases().forEach(p -> {
       goodsRepository.findByGoodsNo(p.getGoodsNo())
         .map(goods -> {
-          Purchase purchase = new Purchase(order.getId(), Order.ORDER, goods);
+          Purchase purchase = new Purchase(order.getId(), goods);
           BeanUtils.copyProperties(p, purchase);
 
           purchase.setTotalPrice(Long.valueOf(p.getQuantity() * p.getGoodsPrice()));
@@ -178,7 +185,7 @@ public class OrderService {
 
           Payment payment = checkPaymentAndUpdate(order.getId(), uid);
           if ((payment.getState() & Payment.STATE_PAID) != 0) {
-            if (Order.PAID.equals(order.getStatus())) {
+            if (Order.State.PAID.getValue() != order.getState()) {
               completeOrder(order);
             }
           } else {
@@ -195,13 +202,13 @@ public class OrderService {
     }
 
     String status = purchase.getStatus();
-    if (status.equals(Order.DELIVERED) || status.equals(Order.DELIVERING)) {
+    if (purchase.isDevlivering() || purchase.isDevlivered()) {
       switch (state) {
         case 1:
-          status = Order.ORDER_EXCHANGING;
+          status = Order.Status.ORDER_EXCHANGING;
           break;
         case 2:
-          status = Order.ORDER_RETURNING;
+          status = Order.Status.ORDER_RETURNING;
           break;
         default:
           throw new IllegalArgumentException("Unknown state type");
@@ -210,7 +217,10 @@ public class OrderService {
       // TODO: send message order cancel message to slack?
 
       log.debug("status changed: {}", status);
-      orderRepository.updatePurchaseStatus(purchase.getId(), status);
+
+      purchase.setStatus(status);
+      purchaseRepository.save(purchase);
+
       return orderInquiryRepository.save(new OrderInquiry(order, state, reason, purchase));
     } else {
       throw new BadRequestException("required purchase status delivered or delivering - " + purchase.getStatus());
@@ -223,16 +233,15 @@ public class OrderService {
       throw new BadRequestException("purchase_not_found", "invalid purchase id");
     }
 
-    switch (order.getStatus()) {
-      case Order.ORDER_CANCELLED:
-      case Order.ORDER_CANCELLING:
-        throw new BadRequestException("order_cancel_duplicated", "Already requested order canceling");
-      case Order.DELIVERING:
-      case Order.DELIVERED:
-        throw new BadRequestException("order_cancel_failed", "Invalid order status. need to paid or preparing");
+    if (Order.State.ORDER_CANCELLING.getValue() <= order.getState()) {
+      throw new BadRequestException("order_cancel_duplicated", "Already requested order canceling");
     }
 
-    order.setStatus(Order.ORDER_CANCELLING);
+    if (Order.State.DELIVERING.getValue() <= order.getState()) {
+      throw new BadRequestException("order_cancel_failed", "Invalid order status. need to paid or preparing");
+    }
+
+    order.setStatus(Order.Status.ORDER_CANCELLING);
     orderRepository.save(order);
 
     OrderInquiry orderInquiry = orderInquiryRepository.save(new OrderInquiry(order, state, reason));
@@ -242,7 +251,7 @@ public class OrderService {
 
   @Transactional
   public void cancelPayment(Order order) {
-    if (Order.ORDER_CANCELLED.equals(order.getStatus())) {
+    if (order.getState() >= Order.State.ORDER_CANCELLING.getValue()) {
       throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
     }
 
@@ -252,7 +261,7 @@ public class OrderService {
     iamportService.cancelPayment(token, payment.getPaymentId());
 
     log.debug("cancel order: {}", order);
-    saveOrderAndPurchasesStatus(order, Order.ORDER_CANCELLED);
+    saveOrderAndPurchasesStatus(order, Order.Status.ORDER_CANCELLED);
 
     payment.setState(Payment.STATE_CANCELLED);
     paymentRepository.save(payment);
@@ -273,12 +282,12 @@ public class OrderService {
     updatePaymentState(order.getId(), impUid, state, status);
 
     if ((state & Payment.STATE_CANCELLED) != 0) {
-      order.setStatus(Order.PAYMENT_CANCELLED);
+      order.setStatus(Order.Status.PAYMENT_CANCELLED);
       orderRepository.save(order);
     } else if ((state & Payment.STATE_PAID) != 0) {
       completeOrder(order);
     } else if ((state & Payment.STATE_FAILED) != 0) {
-      order.setStatus(Order.PAYMENT_FAILED);
+      order.setStatus(Order.Status.PAYMENT_FAILED);
       orderRepository.save(order);
     }
     return order;
@@ -359,7 +368,7 @@ public class OrderService {
 //  @Transactional
   private void completeOrder(Order order) {
     log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
-    saveOrderAndPurchasesStatus(order, Order.PAID);
+    saveOrderAndPurchasesStatus(order, Order.Status.PAID);
 
     log.debug("completeOrder point: %d" + order.getPoint());
     if (order.getPoint() >= minimumPoint) {

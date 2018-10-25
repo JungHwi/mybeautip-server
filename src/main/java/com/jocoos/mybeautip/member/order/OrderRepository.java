@@ -21,8 +21,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   Slice<Order> findByCreatedByIdAndCreatedAtBeforeAndStatusContains(Long createdBy, Date createdAt, String status, Pageable pageable);
 
   List<Order> findByCreatedByIdAndStateLessThanEqualAndCreatedAtBetween(Long createdBy, int state, Date createdAtStart, Date createdAtEnd);
-
-  @Modifying
-  @Query("update Purchase p set p.status = ?2 where p.id = ?1")
-  void updatePurchaseStatus(Long id, String status);
 }

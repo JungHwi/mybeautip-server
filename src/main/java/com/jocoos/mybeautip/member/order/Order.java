@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -21,40 +22,77 @@ public class Order extends MemberAuditable {
   /**
    * Sharing status value with Purchase status
    */
-  public static final String ORDER = "ordered";
-  public static final String PAID = "paid";
-  public static final String PREPARING = "preparing";
-  public static final String DELIVERING = "delivering";
-  public static final String DELIVERED = "delivered";
 
-  public static final String PAYMENT_CANCELLING = "payment_cancelling";
-  public static final String PAYMENT_CANCELLED = "payment_cancelled";
-  public static final String ORDER_CANCELLING = "order_cancelling";
-  public static final String ORDER_CANCELLED = "order_cancelled";
+  @Deprecated
+  public static class Status {
+    public static final String ORDERED = "ordered";
+    public static final String PAID = "paid";
+    public static final String PREPARING = "preparing";
+    public static final String DELIVERING = "delivering";
+    public static final String DELIVERED = "delivered";
 
-  /**
-   * Don't use in Order. Use only purchase status.
-   */
-  public static final String ORDER_EXCHANGING = "order_exchanging";
-  public static final String ORDER_EXCHANGED = "order_exchanged";
-  public static final String ORDER_RETURNING = "order_returning";
-  public static final String ORDER_RETURNED = "order_returned";
+    public static final String PAYMENT_CANCELLING = "payment_cancelling";
+    public static final String PAYMENT_CANCELLED = "payment_cancelled";
+    public static final String PAYMENT_FAILED = "payment_failed";
 
-  public static final String PAYMENT_FAILED = "payment_failed";
+    public static final String ORDER_CANCELLING = "order_cancelling";
+    public static final String ORDER_CANCELLED = "order_cancelled";
 
+    /**
+     * Don't use in Order. Use only purchase status.
+     */
+    public static final String ORDER_EXCHANGING = "order_exchanging";
+    public static final String ORDER_EXCHANGED = "order_exchanged";
+    public static final String ORDER_RETURNING = "order_returning";
+    public static final String ORDER_RETURNED = "order_returned";
+  }
 
-  public static final int STATE_ORDER = 1;
-  public static final int STATE_PAID = 2;
-  public static final int STATE_PREPARING = 3;
-  public static final int STATE_DELIVERING = 4;
-  public static final int STATE_DELIVERED = 5;
+  public enum State {
+    ORDERED(1),
+    PAID(2),
+    PREPARING(3),
+    DELIVERING(4),
+    DELIVERED(5),
+    ORDER_CANCELLING(11),
+    ORDER_CANCELLED(12),
+    PAYMENT_CANCELLING(21),
+    PAYMENT_CANCELLED(22),
+    PAYMENT_FAIILED(23),
+    PURCHASE_EXCHANGING(41),
+    PURCHASE_EXCHANGED(42),
+    PURCHASE_RETURNING(43),
+    PURCHASE_RETURNED(44),
+    READY(99);
 
-  public static final int STATE_ORDER_CANCELLING = 11;
-  public static final int STATE_ORDER_CANCELLED = 12;
+    private int value;
 
-  public static final int STATE_PAYMENT_CANCELLING = 21;
-  public static final int STATE_PAYMENT_CANCELLED = 22;
+    State(int value) {
+      this.value = value;
+    }
 
+    public int getValue() {
+      return value;
+    }
+
+    public static State getState(String name) {
+      if (Strings.isNullOrEmpty(name)) {
+        throw new IllegalArgumentException("name is required");
+      }
+
+      switch (name) {
+        case Status.ORDER_EXCHANGING:
+          return PURCHASE_EXCHANGING;
+        case Status.ORDER_EXCHANGED:
+          return PURCHASE_EXCHANGED;
+        case Status.ORDER_RETURNING:
+          return PURCHASE_RETURNING;
+        case Status.ORDER_RETURNED:
+          return PURCHASE_RETURNED;
+        default:
+          return State.valueOf(name.toUpperCase());
+      }
+    }
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -130,14 +168,20 @@ public class Order extends MemberAuditable {
   private Date deliveredAt;
 
   public Order() {
-    status = ORDER;
+    setState(State.READY);
   }
 
-  public void setPurchaseStatus(Long purchaseId, String status) {
-    getPurchases().stream().forEach(p -> {
-      if (purchaseId.equals(p.getId())) {
-        p.setStatus(status);
-      }
-    });
+
+  public void setStatus(String status) {
+    State state = State.getState(status);
+    if (state == null) {
+      throw new IllegalArgumentException("unknown state name - " + status);
+    }
+    setState(state);
+  }
+
+  public void setState(State state) {
+    this.status = state.name().toLowerCase();
+    this.state = state.getValue();
   }
 }

@@ -34,6 +34,9 @@ public class Purchase extends CreatedDateAuditable {
    * @see Order#status
    */
   @Column(nullable = false)
+  private int state;
+
+  @Column(nullable = false)
   private String status;
 
   @Column(nullable = false)
@@ -72,9 +75,30 @@ public class Purchase extends CreatedDateAuditable {
   @Column
   private Date deliveredAt;
 
-  public Purchase(Long orderId, String status, Goods goods) {
+  public Purchase(Long orderId, Goods goods) {
     this.orderId = orderId;
-    this.status = status;
     this.goods = goods;
+    setState(Order.State.ORDERED);
+  }
+
+  public void setStatus(String status) {
+    Order.State state = Order.State.getState(status);
+    if (state == null) {
+      throw new IllegalArgumentException("unknown state name - " + status);
+    }
+    setState(state);
+  }
+
+  public void setState(Order.State state) {
+    this.status = state.name().toLowerCase();
+    this.state = state.getValue();
+  }
+
+  public boolean isDevlivering() {
+    return Order.State.DELIVERING.getValue() == this.state;
+  }
+
+  public boolean isDevlivered() {
+    return Order.State.DELIVERED.getValue() == this.state;
   }
 }
