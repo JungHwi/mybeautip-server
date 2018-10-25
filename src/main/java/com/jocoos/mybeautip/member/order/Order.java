@@ -150,9 +150,6 @@ public class Order extends MemberAuditable {
   @OneToOne(mappedBy = "order")
   private Delivery delivery;
 
-  @OneToOne(mappedBy = "order")
-  private Delivery delivery;
-
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "orderId")
   private List<Purchase> purchases;
@@ -170,7 +167,6 @@ public class Order extends MemberAuditable {
   public Order() {
     setState(State.READY);
   }
-
 
   public void setStatus(String status) {
     State state = State.getState(status);
