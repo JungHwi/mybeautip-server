@@ -253,7 +253,7 @@ public class OrderService {
 
   @Transactional
   public void cancelPayment(Order order) {
-    if (order.getState() >= Order.State.ORDER_CANCELLING.getValue()) {
+    if (order.getState() >= Order.State.ORDER_CANCELLED.getValue()) {
       throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
     }
 
