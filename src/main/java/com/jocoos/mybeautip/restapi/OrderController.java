@@ -331,6 +331,10 @@ public class OrderController {
       if (order.getPayment() != null) {
         this.payment = new PaymentInfo(order.getPayment());
       }
+  
+      if (order.getDelivery() != null) {
+        this.delivery = new DeliveryInfo(order.getDelivery());
+      }
     }
 
     public OrderInfo(Order order, Delivery delivery, Payment payment, List<PurchaseInfo> purchases) {

@@ -87,6 +87,9 @@ public class Order extends MemberAuditable {
 
   @OneToOne(mappedBy = "order")
   private Payment payment;
+  
+  @OneToOne(mappedBy = "order")
+  private Delivery delivery;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "orderId")
