@@ -89,7 +89,7 @@ public class OrderService {
     }
 
     Order order = new Order();
-    if ("bnak".equals(request.getMethod())) {
+    if ("bank".equals(request.getMethod())) {
       order.setState(Order.State.ORDERED);
     }
 
