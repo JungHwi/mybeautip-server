@@ -46,12 +46,6 @@ public class Delivery extends CreatedDateAuditable {
   private String detailAddress;
 
   @Column
-  private String carrier;
-
-  @Column
-  private String invoice;
-
-  @Column
   private String carrierMessage;
 
   public Delivery(Order order) {

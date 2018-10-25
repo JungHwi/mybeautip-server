@@ -114,7 +114,7 @@ public class OrderController {
         break;
       }
       default: {
-        orders = orderRepository.findByCreatedByIdAndCreatedAtBefore(memberId, createdAt, page);
+        orders = orderRepository.findByCreatedByIdAndStateLessThanEqualAndCreatedAtBefore(memberId, 5, createdAt, page);
       }
     }
 
@@ -311,6 +311,7 @@ public class OrderController {
     private int deductionAmount;
     private int shippingAmount;
     private int expectedPoint;
+    private int state;
     private Long videoId;
     private DeliveryInfo delivery;
     private PaymentInfo payment;
@@ -331,7 +332,7 @@ public class OrderController {
       if (order.getPayment() != null) {
         this.payment = new PaymentInfo(order.getPayment());
       }
-  
+
       if (order.getDelivery() != null) {
         this.delivery = new DeliveryInfo(order.getDelivery());
       }
