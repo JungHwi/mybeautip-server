@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.member.order;
 import javax.persistence.*;
 import java.util.Date;
 
+import org.springframework.data.annotation.LastModifiedDate;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -56,7 +58,19 @@ public class Purchase extends CreatedDateAuditable {
   private Long videoId;
 
   @Column
+  private String carrier;
+
+  @Column
+  private String invoice;
+
+  @Column
   private Date deletedAt;
+
+  @LastModifiedDate
+  private Date modifiedAt;
+
+  @Column
+  private Date deliveredAt;
 
   public Purchase(Long orderId, String status, Goods goods) {
     this.orderId = orderId;
