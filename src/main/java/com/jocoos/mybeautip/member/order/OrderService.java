@@ -305,8 +305,8 @@ public class OrderService {
          log.debug("response: {}", response);
          if (response.getCode() == 0) {
            state = stateValue(response.getResponse().getStatus());
-           log.debug("state: {}", state);
-           log.debug("response amount: %d, payment price: %d", response.getResponse().getAmount(), payment.getPrice());
+           log.debug("payment state: {}", state);
+           log.debug(String.format("response amount: %d, payment price: %d", response.getResponse().getAmount(), payment.getPrice()));
            if (state == Payment.STATE_PAID && response.getResponse().getAmount().equals(payment.getPrice())) {
              payment.setMessage(response.getResponse().getStatus());
              payment.setReceipt(response.getResponse().getReceiptUrl());
