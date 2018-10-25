@@ -126,6 +126,9 @@ public class Order extends MemberAuditable {
   @Column
   private Date deletedAt;
 
+  @Column
+  private Date deliveredAt;
+
   public Order() {
     status = ORDER;
   }
