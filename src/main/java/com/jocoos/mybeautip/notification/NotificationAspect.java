@@ -117,7 +117,7 @@ public class NotificationAspect {
     }
   }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.create(..))",
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.notifyPayment(..))",
       returning = "result")
   public void onAfterReturningOrder(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());

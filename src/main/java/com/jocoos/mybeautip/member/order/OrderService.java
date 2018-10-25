@@ -162,7 +162,9 @@ public class OrderService {
           // Delete cart item when order is completed
           log.debug("order complete: purchase count is " + order.getPurchases().size());
           for (Purchase p: order.getPurchases()) {
-            log.debug(String.format("purchase::%s%d%d", p.getGoods().getGoodsNo(), p.getOptionId().intValue(), p.getQuantity()));
+            log.debug(String.format("purchase::%s, option: %d, quantity: %d", p.getGoods().getGoodsNo(), p.getOptionId().intValue(), p.getQuantity()));
+            
+            // delete purchases from cart when order completed
             if (p.getOptionId() == 0) {
               cartRepository.findByGoodsGoodsNoAndOptionIsNullAndCreatedById(
                   p.getGoods().getGoodsNo(), memberId)
@@ -261,7 +263,7 @@ public class OrderService {
   }
 
   @Transactional
-  public void notifyPayment(Order order, String status, String impUid) {
+  public Order notifyPayment(Order order, String status, String impUid) {
     int state = 0;
     if (!Strings.isNullOrEmpty(status)) {
       state = stateValue(status);
@@ -279,6 +281,7 @@ public class OrderService {
       order.setStatus(Order.PAYMENT_FAILED);
       orderRepository.save(order);
     }
+    return order;
   }
 
   private Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
@@ -292,6 +295,7 @@ public class OrderService {
          if (response.getCode() == 0) {
            state = stateValue(response.getResponse().getStatus());
            log.debug("state: {}", state);
+           log.debug("response amount: %d, payment price: %d", response.getResponse().getAmount(), payment.getPrice());
            if (state == Payment.STATE_PAID && response.getResponse().getAmount().equals(payment.getPrice())) {
              payment.setMessage(response.getResponse().getStatus());
              payment.setReceipt(response.getResponse().getReceiptUrl());
@@ -352,10 +356,12 @@ public class OrderService {
        .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
   }
 
-  @Transactional
+//  @Transactional
   private void completeOrder(Order order) {
+    log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.PAID);
 
+    log.debug("completeOrder point: %d" + order.getPoint());
     if (order.getPoint() >= minimumPoint) {
       Member member = order.getCreatedBy();
       member.setPoint(member.getPoint() - order.getPoint());
