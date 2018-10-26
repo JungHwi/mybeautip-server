@@ -18,6 +18,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class SlackService {
@@ -49,14 +51,6 @@ public class SlackService {
   }
 
   public void sendForOrder(Order order) {
-    StringBuilder sb = new StringBuilder();
-    for (Purchase purchase : order.getPurchases()) {
-      sb.append(String.format("\nGoods: %s, Option: %s, Quantity: %d, Price: %d",
-          purchase.getGoods().getGoodsNm(),
-          purchase.getOptionValue(),
-          purchase.getQuantity(),
-          purchase.getTotalPrice()));
-    }
     String message = String.format("*Order*" +
             "```Id: %d\n" +
             "User: %s/%d\n" +
@@ -71,23 +65,14 @@ public class SlackService {
         order.getVideoId(),
         order.getMethod(),
         order.getPrice(),
-        sb.toString());
+        getPurchaseInfo(order.getPurchases()));
     send(message);
   }
-
-  public void sendForOrderInquiry(OrderInquiry orderInquiry) {
-    StringBuilder sb = new StringBuilder();
-    for (Purchase purchase : orderInquiry.getOrder().getPurchases()) {
-      sb.append(String.format("\nGoods: %s, Option: %s, Quantity: %d, Price: %d",
-          purchase.getGoods().getGoodsNm(),
-          purchase.getOptionValue(),
-          purchase.getQuantity(),
-          purchase.getTotalPrice()));
-    }
-
+  
+  public void sendForOrderCancel(OrderInquiry orderInquiry) {
     String message = String.format("*Order Inquiry*```" +
             "Id: %d\n" +
-            "State: %d (0: CANCEL, 1: EXCHANGE, 2: REFUND)\n" +
+            "State: %d (0: CANCEL)\n" +
             "User: %s/%d\n" +
             "Reason: %s\n" +
             "Price: %d" +
@@ -98,7 +83,25 @@ public class SlackService {
         orderInquiry.getCreatedBy().getId(),
         orderInquiry.getReason(),
         orderInquiry.getOrder().getPrice(),
-        sb.toString());
+        getPurchaseInfo(orderInquiry.getOrder().getPurchases()));
+    send(message);
+  }
+  
+  public void SendForOrderExchangeOrReturn(OrderInquiry orderInquiry) {
+    String message = String.format("*Order Inquiry*```" +
+            "Id: %d\n" +
+            "State: %d (1: EXCHANGE, 2: REFUND)\n" +
+            "User: %s/%d\n" +
+            "Reason: %s\n" +
+            "Price: %d" +
+            "%s```",
+        orderInquiry.getId(),
+        orderInquiry.getState(),
+        orderInquiry.getCreatedBy().getUsername(),
+        orderInquiry.getCreatedBy().getId(),
+        orderInquiry.getReason(),
+        orderInquiry.getOrder().getPrice(),
+        getPurchaseInfo(orderInquiry.getOrder().getPurchases()));
     send(message);
   }
 
@@ -138,6 +141,18 @@ public class SlackService {
         report.getYou().getId(),
         report.getReason());
     send(message);
+  }
+  
+  private String getPurchaseInfo(List<Purchase> purchases) {
+    StringBuilder sb = new StringBuilder();
+    for (Purchase purchase : purchases) {
+      sb.append(String.format("\n * Goods: %s, Option: %s, Quantity: %d, Price: %d",
+          purchase.getGoods().getGoodsNm(),
+          purchase.getOptionValue() == null ? "없음" : purchase.getOptionValue(),
+          purchase.getQuantity(),
+          purchase.getTotalPrice()));
+    }
+    return sb.toString();
   }
 
   private void send(String message) {
