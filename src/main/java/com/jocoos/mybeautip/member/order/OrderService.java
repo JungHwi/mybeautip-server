@@ -372,7 +372,7 @@ public class OrderService {
     log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.Status.PAID);
 
-    log.debug("completeOrder point: %d" + order.getPoint());
+    log.debug(String.format("completeOrder point: %d", order.getPoint()));
     if (order.getPoint() >= minimumPoint) {
       Member member = order.getCreatedBy();
       member.setPoint(member.getPoint() - order.getPoint());
