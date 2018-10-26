@@ -159,6 +159,7 @@ public class CartService {
       .discountAmount(totalFixedPrice - totalPrice)
       .priceAmount(totalPrice)
       .shippingAmount(totalShipping)
+      .pointRatio(pointRatio)
       .build();
   }
 
@@ -173,6 +174,7 @@ public class CartService {
     private Integer discountAmount; // 상품할인 합계
     private Integer priceAmount;  // 판매가(상품 판매가 + 옵션가)의 합계
     private Integer shippingAmount; // 배송비 합계
+    private Integer pointRatio; // 포인트 적립률
     private List<CartStore> stores; // 스토어 리스트
   }
 
