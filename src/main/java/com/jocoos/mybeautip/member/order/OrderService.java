@@ -160,6 +160,7 @@ public class OrderService {
 
   @Transactional
   public String complete(String uid, Long id, boolean isSuccess, String message) {
+    log.debug(String.format("complete called, id: %d, isSuccess: %s, impUid: %s ", id, isSuccess, uid));
     return orderRepository.findByIdAndDeletedAtIsNull(id)
         .map(order -> {
           if (!isSuccess) {
@@ -169,11 +170,10 @@ public class OrderService {
 
           long memberId = order.getCreatedBy().getId();
           // Delete cart item when order is completed
-          log.debug("order complete: purchase count is " + order.getPurchases().size());
+          log.debug("delete cart items: purchase count is " + order.getPurchases().size());
           for (Purchase p: order.getPurchases()) {
-            log.debug(String.format("purchase::%s, option: %d, quantity: %d", p.getGoods().getGoodsNo(), p.getOptionId().intValue(), p.getQuantity()));
+            log.debug(String.format("- item: %s, %d, %d", p.getGoods().getGoodsNo(), p.getOptionId().intValue(), p.getQuantity()));
             
-            // delete purchases from cart when order completed
             if (p.getOptionId() == 0) {
               cartRepository.findByGoodsGoodsNoAndOptionIsNullAndCreatedById(
                   p.getGoods().getGoodsNo(), memberId)
@@ -275,6 +275,8 @@ public class OrderService {
 
   @Transactional
   public Order notifyPayment(Order order, String status, String impUid) {
+    log.debug(String.format("notifyPayment called, id: %d, state: %s, impUid: %s ",
+        order.getId(), order.getStatus(), impUid));
     int state = 0;
     if (!Strings.isNullOrEmpty(status)) {
       state = stateValue(status);
