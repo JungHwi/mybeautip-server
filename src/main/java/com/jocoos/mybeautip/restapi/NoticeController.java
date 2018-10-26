@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.devices.NoticeService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/api/1/notices", produces = MediaType.APPLICATION_JSON_VALUE)
 public class NoticeController {
-
+  
+  @Value("${mybeautip.revenue.revenue-ratio}")
+  private int revenueRatio;
+  
   private final NoticeService noticeService;
   private final AppInfoRepository appInfoRepository;
 
@@ -45,6 +49,7 @@ public class NoticeController {
     PageRequest pageable = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "createdAt"));
     List<AppInfo> list = appInfoRepository.findByOs(deviceOs, pageable);
     response.setLatestVersion((list.size() > 0) ? list.get(0).getVersion() : "");
+    response.setRevenueRatio(revenueRatio);
     response.setContent(notices);
     return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -53,8 +58,10 @@ public class NoticeController {
   @Data
   public static class NoticeResponse {
     private String latestVersion;
+    private Integer revenueRatio;
     private List<NoticeInfo> content;
   }
+  
   @AllArgsConstructor
   @Data
   public static class NoticeInfo {
