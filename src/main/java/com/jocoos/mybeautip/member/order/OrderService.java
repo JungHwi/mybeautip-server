@@ -259,8 +259,7 @@ public class OrderService {
 
   @Transactional
   public Order notifyPayment(Order order, String status, String impUid) {
-    log.debug(String.format("notifyPayment called, id: %d, state: %s, impUid: %s ",
-        order.getId(), order.getStatus(), impUid));
+    log.debug(String.format("notifyPayment called, id: %d, status: %s, impUid: %s ", order.getId(), status, impUid));
     int state = 0;
     if (!Strings.isNullOrEmpty(status)) {
       state = stateValue(status);
@@ -357,9 +356,8 @@ public class OrderService {
        })
        .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
   }
-
-  @Transactional
-  private void completeOrder(Order order) {
+  
+  synchronized private void completeOrder(Order order) {
     log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.Status.PAID);
 
