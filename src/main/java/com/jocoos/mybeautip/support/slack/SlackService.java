@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -57,7 +58,8 @@ public class SlackService {
             "Email: %s\n" +
             "From video: %d\n" +
             "Payment method: %s\n" +
-            "Price: %d%s```",
+            "Payment Price: %d (배송비: %d원 포함)" +
+            "%s```",
         order.getId(),
         order.getCreatedBy().getUsername(),
         order.getCreatedBy().getId(),
@@ -65,6 +67,7 @@ public class SlackService {
         order.getVideoId(),
         order.getMethod(),
         order.getPrice(),
+        order.getShippingAmount(),
         getPurchaseInfo(order.getPurchases()));
     send(message);
   }
@@ -146,9 +149,9 @@ public class SlackService {
   private String getPurchaseInfo(List<Purchase> purchases) {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {
-      sb.append(String.format("\n * Goods: %s, Option: %s, Quantity: %d, Price: %d",
+      sb.append(String.format("\n * Goods: %s, Option: %s, Quantity: %d, Price: %d원 ((상품 판매가 + 옵션가) * 수량)",
           purchase.getGoods().getGoodsNm(),
-          purchase.getOptionValue() == null ? "없음" : purchase.getOptionValue(),
+          StringUtils.isEmpty(purchase.getOptionValue()) ? "없음" : purchase.getOptionValue(),
           purchase.getQuantity(),
           purchase.getTotalPrice()));
     }
