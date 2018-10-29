@@ -28,6 +28,9 @@ public class Store extends ModifiedDateAuditable {
   private String description;
 
   @Column
+  private String centerPhone;
+  
+  @Column
   private String imageUrl;
 
   @Column

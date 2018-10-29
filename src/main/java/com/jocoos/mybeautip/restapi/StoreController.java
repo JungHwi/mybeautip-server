@@ -227,6 +227,7 @@ public class StoreController {
     private Integer id;
     private String name;
     private String description;
+    private String centerPhone;
     private String imageUrl;
     private String thumbnailUrl;
     private Integer likeCount;
