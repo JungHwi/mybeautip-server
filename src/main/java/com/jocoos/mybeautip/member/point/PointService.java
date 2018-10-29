@@ -32,12 +32,11 @@ public class PointService {
     return sum.get();
   }
 
-  public void earnPoints(Member member, Long price) {
+  public void earnPoints(Member member, Integer point) {
     if (member == null) {
       return;
     }
 
-    int point = Math.toIntExact(((price * pointRatio) / 100));
     log.debug("member id: {}, earned point: {}", member.getId(), point);
 
     MemberPoint memberPoint = new MemberPoint(member, point);

@@ -159,41 +159,25 @@ public class OrderService {
   }
 
   @Transactional
-  public String complete(String uid, Long id, boolean isSuccess, String message) {
-    log.debug(String.format("complete called, id: %d, isSuccess: %s, impUid: %s ", id, isSuccess, uid));
-    return orderRepository.findByIdAndDeletedAtIsNull(id)
+  public String complete(String paymentId, Long orderId, String message) {  // impUid, merchantId, errorMessage
+    log.debug(String.format("complete called: paymentId=%s, orderId=%d, errorMessage=%s ", paymentId, orderId, message));
+    
+    if (paymentId == null) {
+      log.debug("OrderComplete fail: impUid is null");
+      return getErrorHtml(orderId, message);
+    }
+    
+    return orderRepository.findByIdAndDeletedAtIsNull(orderId)
         .map(order -> {
-          if (!isSuccess) {
-            updatePaymentState(order.getId(), uid, Payment.STATE_STOPPED, message);
-            return getErrorHtml(id, message);
-          }
-
-          long memberId = order.getCreatedBy().getId();
-          // Delete cart item when order is completed
-          log.debug("delete cart items: purchase count is " + order.getPurchases().size());
-          for (Purchase p: order.getPurchases()) {
-            log.debug(String.format("- item: %s, %d, %d", p.getGoods().getGoodsNo(), p.getOptionId().intValue(), p.getQuantity()));
-            
-            if (p.getOptionId() == 0) {
-              cartRepository.findByGoodsGoodsNoAndOptionIsNullAndCreatedById(
-                  p.getGoods().getGoodsNo(), memberId)
-                  .ifPresent(cartRepository::delete);
-            } else {
-              cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
-                  p.getGoods().getGoodsNo(), p.getOptionId().intValue(), memberId)
-                  .ifPresent(cartRepository::delete);
-            }
-          }
-
-          Payment payment = checkPaymentAndUpdate(order.getId(), uid);
+          Payment payment = checkPaymentAndUpdate(order.getId(), paymentId);
           if ((payment.getState() & Payment.STATE_PAID) != 0) {
             if (Order.State.PAID.getValue() != order.getState()) {
               completeOrder(order);
             }
           } else {
-            return getErrorHtml(id, message);
+            return getErrorHtml(orderId, message);
           }
-          return getSuccessHtml(id);
+          return getSuccessHtml(orderId);
        }).orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
   }
 
@@ -289,7 +273,10 @@ public class OrderService {
       order.setStatus(Order.Status.PAYMENT_CANCELLED);
       orderRepository.save(order);
     } else if ((state & Payment.STATE_PAID) != 0) {
-      completeOrder(order);
+      int paymentState = getPaymentState(order.getPayment().getId(), order.getPayment().getPaymentId());
+      if (paymentState != Payment.STATE_PAID && paymentState != Payment.STATE_NOTIFIED) {
+        completeOrder(order);
+      }
     } else if ((state & Payment.STATE_FAILED) != 0) {
       order.setStatus(Order.Status.PAYMENT_FAILED);
       orderRepository.save(order);
@@ -321,6 +308,8 @@ public class OrderService {
            }
          } else {
            payment.setMessage(response.getMessage());
+           payment.setPaymentId(paymentId);
+           payment.setState(Payment.STATE_STOPPED);
          }
 
          payment.setPaymentId(paymentId);
@@ -369,7 +358,7 @@ public class OrderService {
        .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
   }
 
-//  @Transactional
+  @Transactional
   private void completeOrder(Order order) {
     log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.Status.PAID);
@@ -384,16 +373,17 @@ public class OrderService {
     }
 
     if (order.getMemberCoupon() == null) {
-      pointService.earnPoints(order.getCreatedBy(), order.getPrice());
+      pointService.earnPoints(order.getCreatedBy(), order.getExpectedPoint());
     }
 
     if (order.getVideoId() != null) {
       saveRevenuesForSeller(order);
     }
+    
+    deleteCartItems(order);
 
     // TODO: Notify ?
     // TODO: Send email ?
-    // TODO: Send To Slack Message?
   }
 
   /**
@@ -432,5 +422,29 @@ public class OrderService {
 
   private String orderNumber() {
     return df.format(new Date()) + new Random().nextInt(10);
+  }
+  
+  // Delete cart items when order is completed(paid)
+  private void deleteCartItems(Order order) {
+    log.debug("delete cart items: purchase count is " + order.getPurchases().size());
+    for (Purchase p: order.getPurchases()) {
+      log.debug(String.format("- item: %s, %d, %d", p.getGoods().getGoodsNo(), p.getOptionId().intValue(), p.getQuantity()));
+    
+      if (p.getOptionId() == 0) {
+        cartRepository.findByGoodsGoodsNoAndOptionIsNullAndCreatedById(
+            p.getGoods().getGoodsNo(), order.getCreatedBy().getId())
+            .ifPresent(cartRepository::delete);
+      } else {
+        cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
+            p.getGoods().getGoodsNo(), p.getOptionId().intValue(), order.getCreatedBy().getId())
+            .ifPresent(cartRepository::delete);
+      }
+    }
+  }
+  
+  private int getPaymentState(Long orderId, String paymentId) {
+    return paymentRepository.findByIdAndPaymentId(orderId, paymentId)
+        .map(Payment::getState)
+        .orElseThrow(() -> new NotFoundException("payment_not_found", "payment not found"));
   }
 }

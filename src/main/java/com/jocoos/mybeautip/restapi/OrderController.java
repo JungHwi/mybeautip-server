@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
@@ -56,7 +57,7 @@ public class OrderController {
   }
 
   @PostMapping("/orders")
-  public ResponseEntity<OrderInfo> createOrder(@RequestBody CreateOrderRequest request,
+  public ResponseEntity<OrderInfo> createOrder(@Valid @RequestBody CreateOrderRequest request,
                                                BindingResult bindingResult) {
 
     if (bindingResult.hasErrors()) {
@@ -234,12 +235,17 @@ public class OrderController {
 
   @Data
   public static class CreateOrderRequest {
+    @Min(0)
     private int priceAmount;
+    @Min(0)
     private int deductionAmount;
+    @Min(0)
     private int shippingAmount;
+    @Min(0)
     private int expectedPoint;
     private Long videoId;
     private Long couponId;
+    @Min(0)
     private int point;
     
     @NotNull
@@ -282,13 +288,11 @@ public class OrderController {
     @NotNull
     private String goodsNo;
     @NotNull
-    private int goodsPrice;
+    private Integer goodsPrice;
     @NotNull
     private Long optionId;
     @NotNull
     private String optionValue;
-    @NotNull
-    private String optionPrice;
     @NotNull
     private int quantity;
     private Long videoId;
@@ -394,7 +398,6 @@ public class OrderController {
     private String thumbnail;
     private Long optionId;
     private String optionValue;
-    private String optionPrice;
     private int quantity;
     private Long totalPrice;
     private Long videoId;
