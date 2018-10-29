@@ -36,7 +36,7 @@ spring:
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hibernate.jdbc.batch_versioned_data: false
       hibernate.format_sql: true
-    show-sql: true
+    show-sql: false
 
 security:
   oauth2:
