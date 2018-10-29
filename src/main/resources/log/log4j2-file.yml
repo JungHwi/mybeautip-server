@@ -28,6 +28,6 @@ Configutation:
       - name: org.springframework.web.filter.CommonsRequestLoggingFilter
         level: info
       - name: org.hibernate
-        level: error
+        level: trace
       - name: org.hibernate.SQL
-        level: info
+        level: trace
