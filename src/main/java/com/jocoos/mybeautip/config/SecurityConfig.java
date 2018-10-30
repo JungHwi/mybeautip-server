@@ -54,10 +54,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .httpBasic()
         .and()
         .requestMatchers()
-        .antMatchers(OPTIONS,"/api/1/token")
+        .antMatchers(OPTIONS,"/api/**")
         .and()
         .authorizeRequests()
-        .antMatchers(OPTIONS,"/api/1/token").permitAll()
+        .antMatchers(OPTIONS,"/api/**").permitAll()
         .and()
         .csrf().disable();
   }
@@ -71,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     configuration.setAllowCredentials(true);
     configuration.setMaxAge(3600L);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/api/1/token", configuration);
+    source.registerCorsConfiguration("/api/**", configuration);
 
     return source;
   }
