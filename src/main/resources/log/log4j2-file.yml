@@ -30,4 +30,4 @@ Configutation:
       - name: org.hibernate
         level: info
       - name: org.hibernate.SQL
-        level: trace
+        level: info
