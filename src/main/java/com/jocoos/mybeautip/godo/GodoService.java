@@ -299,8 +299,17 @@ public class GodoService {
           Optional<GoodsOption> optionalGoodsOption;
           GoodsOption goodsOption;
           for (GodoGoodsResponse.OptionData optionData : goodsData.getOptionData()) {
-            optionalGoodsOption = goodsOptionRepository.findById(optionData.getSno());
-            goodsOption = optionalGoodsOption.orElseGet(GoodsOption::new);
+            optionalGoodsOption = goodsOptionRepository.findByGoodsNoAndOptionNo(optionData.getGoodsNo(), optionData.getOptionNo());
+            if (optionalGoodsOption.isPresent()) {
+              if (optionalGoodsOption.get().getSno() != optionData.getSno()) {
+                goodsOptionRepository.delete(optionalGoodsOption.get());
+              } else {
+                continue; // Already exist, nothing to do
+              }
+            }
+            
+            // Insert new optionData
+            goodsOption = new GoodsOption();
             BeanUtils.copyProperties(optionData, goodsOption);
             goodsOption.setOptionPrice(optionData.getOptionPrice().intValue());
             goodsOption.setOptionCostPrice(optionData.getOptionCostPrice().intValue());
