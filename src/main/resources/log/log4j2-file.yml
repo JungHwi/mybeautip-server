@@ -22,7 +22,7 @@ Configutation:
       - name: com.jocoos.mybeautip
         level: debug
       - name: jdbc
-        level: error
+        level: info
       - name: org.springframework.web
         level: info
       - name: org.springframework.web.filter.CommonsRequestLoggingFilter
