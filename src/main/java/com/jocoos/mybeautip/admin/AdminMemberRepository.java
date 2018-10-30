@@ -8,5 +8,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource(excerptProjection = AdminMemberExcerpt.class)
 public interface AdminMemberRepository extends JpaRepository<AdminMember, String> {
 
-  Page<AdminMember> findByMemberLink(int link, Pageable pageable);
+  Page<AdminMember> findByMemberLinkOrderByCreatedAtDesc(int link, Pageable pageable);
+
+  boolean existsByEmail(String email);
 }
