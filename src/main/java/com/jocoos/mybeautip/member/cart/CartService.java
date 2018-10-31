@@ -231,7 +231,7 @@ public class CartService {
       BeanUtils.copyProperties(cart, this);
       this.goods = new CartGoodsInfo(cart.getGoods());
       if (cart.getOption() != null) {
-        this.option = new CartOptionInfo(cart.getOption());
+        this.option = new CartOptionInfo(cart.getOption(), isSoldOut(goods, cart.getOption()));
       }
 
       int goodsFixedPrice = (cart.getGoods().getFixedPrice() > 0) ? cart.getGoods().getFixedPrice() : cart.getGoods().getGoodsPrice();
@@ -245,7 +245,8 @@ public class CartService {
           || ("y".equals(goods.getStockFl()) && this.quantity > goods.getTotalStock())
           || (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && this.quantity < goods.getMinOrderCnt())
           || (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && this.quantity > goods.getMaxOrderCnt())
-          || (option != null && "y".equals(goods.getStockFl()) && this.quantity > option.getStockCnt())) {
+          || (option != null && "y".equals(goods.getStockFl()) && this.quantity > option.getStockCnt())
+          || ("n".equals(option.getOptionSellFl()))) {
         this.valid = false;
       }
     }
@@ -278,14 +279,17 @@ public class CartService {
   static class CartOptionInfo {
     private Integer optionNo;
     private String optionValue;
+    private String optionValue1;
+    private String optionValue2;
     private Integer optionPrice;
     private Integer stockCnt;
+    @JsonIgnore private String optionSellFl;
+    private Boolean soldOut;
 
-    CartOptionInfo(GoodsOption option) {
-      this.optionNo = option.getOptionNo();
+    CartOptionInfo(GoodsOption option, boolean soldOut) {
+      BeanUtils.copyProperties(option, this);
       this.optionValue = option.getOptionValue1();
-      this.optionPrice = option.getOptionPrice();
-      this.stockCnt = option.getStockCnt();
+      this.soldOut = soldOut;
     }
   }
 
@@ -303,5 +307,26 @@ public class CartService {
    */
   public Cart update(Cart cart) {
     return cartRepository.save(cart);
+  }
+  
+  
+  private static boolean isSoldOut(CartGoodsInfo goods, GoodsOption option) {
+    if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
+      return true;
+    }
+    
+    if ("y".equals(goods.getSoldOutFl())) { // 상품 품절 플래그
+      return true;
+    }
+    
+    if ("y".equals(goods.getStockFl()) && goods.getTotalStock() <= 0) { // 재고량에 따름, 총 재고량 부족
+      return true;
+    }
+    
+    if ("y".equals(goods.getStockFl()) && option.getStockCnt() <= 0) { // 재고량에 따름, 옵션 재고량 부족
+      return true;
+    }
+    
+    return false;
   }
 }

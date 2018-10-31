@@ -1,27 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -33,6 +11,26 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
@@ -131,12 +129,36 @@ public class GoodsController {
 
   @GetMapping("/{goodsNo}/options")
   public ResponseEntity<List<GoodsOptionInfo>> getGoodsOptions(@PathVariable Integer goodsNo) {
+    Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
+        .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
+    
     List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
     List<GoodsOptionInfo> result = new ArrayList<>();
+    
     for (GoodsOption option : options) {
-      result.add(new GoodsOptionInfo(option));
+      result.add(new GoodsOptionInfo(option, isSoldOut(goods, option)));
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+  
+  private boolean isSoldOut(Goods goods, GoodsOption option) {
+    if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
+      return true;
+    }
+    
+    if ("y".equals(goods.getSoldOutFl())) { // 상품 품절 플래그
+      return true;
+    }
+    
+    if ("y".equals(goods.getStockFl()) && goods.getTotalStock() <= 0) { // 재고량에 따름, 총 재고량 부족
+      return true;
+    }
+  
+    if ("y".equals(goods.getStockFl()) && option.getStockCnt() <= 0) { // 재고량에 따름, 옵션 재고량 부족
+      return true;
+    }
+  
+    return false;
   }
 
   @Transactional
@@ -202,14 +224,16 @@ public class GoodsController {
   public static class GoodsOptionInfo {
     private Integer optionNo;
     private String optionValue;
+    private String optionValue1;
+    private String optionValue2;
     private Integer optionPrice;
     private Integer stockCnt;
+    private Boolean soldOut;
 
-    GoodsOptionInfo(GoodsOption option) {
-      this.optionNo = option.getOptionNo();
+    GoodsOptionInfo(GoodsOption option, boolean soldOut) {
+      BeanUtils.copyProperties(option, this);
       this.optionValue = option.getOptionValue1();
-      this.optionPrice = option.getOptionPrice();
-      this.stockCnt = option.getStockCnt();
+      this.soldOut = soldOut;
     }
   }
 
