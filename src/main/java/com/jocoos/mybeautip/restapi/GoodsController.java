@@ -223,17 +223,16 @@ public class GoodsController {
   @Data
   public static class GoodsOptionInfo {
     private Integer optionNo;
+    private String optionValue;
     private String optionValue1;
     private String optionValue2;
-    private String optionValue3;
-    private String optionValue4;
-    private String optionValue5;
     private Integer optionPrice;
     private Integer stockCnt;
     private Boolean soldOut;
 
     GoodsOptionInfo(GoodsOption option, boolean soldOut) {
       BeanUtils.copyProperties(option, this);
+      this.optionValue = option.getOptionValue1();
       this.soldOut = soldOut;
     }
   }
