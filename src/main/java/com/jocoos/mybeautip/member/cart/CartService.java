@@ -246,7 +246,7 @@ public class CartService {
           || (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && this.quantity < goods.getMinOrderCnt())
           || (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && this.quantity > goods.getMaxOrderCnt())
           || (option != null && "y".equals(goods.getStockFl()) && this.quantity > option.getStockCnt())
-          || ("n".equals(option.getOptionSellFl()))) {
+          || (option != null && "y".equals(goods.getStockFl()) && "n".equals(option.getOptionSellFl()))) {
         this.valid = false;
       }
     }
