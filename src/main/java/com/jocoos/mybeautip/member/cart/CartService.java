@@ -245,7 +245,8 @@ public class CartService {
           || ("y".equals(goods.getStockFl()) && this.quantity > goods.getTotalStock())
           || (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && this.quantity < goods.getMinOrderCnt())
           || (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && this.quantity > goods.getMaxOrderCnt())
-          || (option != null && "y".equals(goods.getStockFl()) && this.quantity > option.getStockCnt())) {
+          || (option != null && "y".equals(goods.getStockFl()) && this.quantity > option.getStockCnt())
+          || ("n".equals(option.getOptionSellFl()))) {
         this.valid = false;
       }
     }
@@ -280,12 +281,11 @@ public class CartService {
     private String optionValue;
     private Integer optionPrice;
     private Integer stockCnt;
+    @JsonIgnore private String optionSellFl;
+    private Boolean soldOut;
 
     CartOptionInfo(GoodsOption option) {
-      this.optionNo = option.getOptionNo();
-      this.optionValue = option.getOptionValue1();
-      this.optionPrice = option.getOptionPrice();
-      this.stockCnt = option.getStockCnt();
+      BeanUtils.copyProperties(option, this);
     }
   }
 

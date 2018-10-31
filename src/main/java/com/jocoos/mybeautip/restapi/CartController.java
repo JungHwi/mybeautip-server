@@ -172,6 +172,9 @@ public class CartController {
     if ("y".equals(goods.getOptionFl())) {
       option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goodsNo), optionNo)
         .orElseThrow(() -> new NotFoundException("goods_option_not_found", "goods option not found: " + goodsNo));
+      if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
+        throw new BadRequestException("option_soldout", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+      }
       if ("y".equals(goods.getStockFl()) && quantity > option.getStockCnt()) { // 재고량에 따름
         throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
       }
