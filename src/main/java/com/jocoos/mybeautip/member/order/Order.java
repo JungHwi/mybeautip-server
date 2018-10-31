@@ -1,11 +1,14 @@
 package com.jocoos.mybeautip.member.order;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -179,5 +182,27 @@ public class Order extends MemberAuditable {
   public void setState(State state) {
     this.status = state.name().toLowerCase();
     this.state = state.getValue();
+  }
+
+
+  public String getOrderTitle() {
+    if (!CollectionUtils.isEmpty(purchases)) {
+      if (purchases.size() == 1) {
+        return purchases.get(0).getGoods().getGoodsNm();
+      }
+
+      if (purchases.size() > 1) {
+        return String.format("%s 외 %d 건", purchases.get(0).getGoods().getGoodsNm(), purchases.size() - 1);
+      }
+    }
+    return "";
+  }
+
+  public int getTotalGoodsAmount() {
+    return priceAmount - deductionAmount;
+  }
+
+  public int getTotalShippingAmount() {
+    return shippingAmount;
   }
 }

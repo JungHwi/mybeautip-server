@@ -7,6 +7,7 @@ import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapt
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.coupon.Coupon;
+import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.post.Post;
 
 @Configuration
@@ -14,6 +15,6 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
 
   @Override
   public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-    config.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class);
+    config.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class, Order.class);
   }
 }
