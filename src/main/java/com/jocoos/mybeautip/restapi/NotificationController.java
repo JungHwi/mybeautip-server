@@ -70,9 +70,9 @@ public class NotificationController {
          } else {
            result.add(new NotificationInfo(n, message));
          }
-
-         readNotification(n);
        });
+    
+    readAllNotification(memberId);
 
     String nextCursor = null;
     if (result.size() > 0) {
@@ -84,18 +84,15 @@ public class NotificationController {
        .withCursor(nextCursor).toBuild();
   }
 
-  private void readNotification(Notification notification) {
-    if (notification == null) {
-      return;
-    }
-
-    if (!notification.isRead()) {
-      notification.setRead(true);
-      notificationRepository.save(notification);
-    }
+  private void readAllNotification(Long memberId) {
+    notificationRepository.findByTargetMemberIdAndReadIsFalse(memberId)
+        .forEach(notification -> {
+          notification.setRead(true);
+          notificationRepository.save(notification);
+        });
   }
 
-  @PatchMapping("/{id:.+}")
+  @PatchMapping("/{id:.+}") // Deprecated
   public ResponseEntity readNotification(@PathVariable Long id) {
     Long memberId = memberService.currentMemberId();
     return notificationRepository.findByIdAndTargetMemberId(id, memberId)

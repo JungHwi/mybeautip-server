@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.notification;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -18,4 +19,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   Slice<Notification> findByTargetMemberIdAndCreatedAtBefore(Long targetMember, Date createdAt, Pageable pageable);
 
   int countByTargetMemberAndReadIsFalse(Member member);
+  
+  List<Notification> findByTargetMemberIdAndReadIsFalse(Long targetMember);
 }
