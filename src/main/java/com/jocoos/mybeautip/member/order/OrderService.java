@@ -370,10 +370,4 @@ public class OrderService {
       }
     }
   }
-  
-  private int getPaymentState(Long orderId, String paymentId) {
-    return paymentRepository.findByIdAndPaymentId(orderId, paymentId)
-        .map(Payment::getState)
-        .orElseThrow(() -> new NotFoundException("payment_not_found", "payment not found"));
-  }
 }
