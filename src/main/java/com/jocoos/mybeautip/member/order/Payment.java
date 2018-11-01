@@ -20,7 +20,7 @@ public class Payment extends ModifiedDateAuditable {
   public static int STATE_STARTED = 0;
   public static int STATE_STOPPED = 1;
   public static int STATE_FAILED = 2;
-  public static int STATE_PURCHASED = 4;
+  public static int STATE_READY = 4;
   public static int STATE_PAID = 8;
   public static int STATE_NOTIFIED = 16;
   public static int STATE_CANCELLED = 32;

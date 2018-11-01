@@ -1,20 +1,9 @@
 package com.jocoos.mybeautip.member.order;
 
-import javax.transaction.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -27,10 +16,20 @@ import com.jocoos.mybeautip.member.point.PointService;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
+import com.jocoos.mybeautip.support.payment.PaymentData;
 import com.jocoos.mybeautip.support.payment.PaymentResponse;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -157,30 +156,7 @@ public class OrderService {
 
     return order;
   }
-
-  @Transactional
-  public String complete(String paymentId, Long orderId, String message) {  // impUid, merchantId, errorMessage
-    log.debug(String.format("complete called: paymentId=%s, orderId=%d, errorMessage=%s ", paymentId, orderId, message));
-    
-    if (paymentId == null) {
-      log.debug("OrderComplete fail: impUid is null");
-      return getErrorHtml(orderId, message);
-    }
-    
-    return orderRepository.findByIdAndDeletedAtIsNull(orderId)
-        .map(order -> {
-          Payment payment = checkPaymentAndUpdate(order.getId(), paymentId);
-          if ((payment.getState() & Payment.STATE_PAID) != 0) {
-            if (Order.State.PAID.getValue() != order.getState()) {
-              completeOrder(order);
-            }
-          } else {
-            return getErrorHtml(orderId, message);
-          }
-          return getSuccessHtml(orderId);
-       }).orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
-  }
-
+  
   @Transactional
   public OrderInquiry inquiryExchangeOrReturn(Order order, Byte state, String reason, Purchase purchase) {
     if (purchase == null) {
@@ -260,23 +236,21 @@ public class OrderService {
   @Transactional
   public Order notifyPayment(Order order, String status, String impUid) {
     log.debug(String.format("notifyPayment called, id: %d, status: %s, impUid: %s ", order.getId(), status, impUid));
-    int state = 0;
-    if (!Strings.isNullOrEmpty(status)) {
-      state = stateValue(status);
+    PaymentResponse response = iamportService.getPayment(iamportService.getToken(), impUid);
+    
+    if (response.getCode() != 0 || response.getResponse() == null) {
+      log.warn("notifyPayment response is not success: " + response.getMessage());
+      throw new MybeautipRuntimeException("invalid_import_response", "notifyPayment response is not success");
     }
-
-    state = state | Payment.STATE_NOTIFIED;
-    updatePaymentState(order.getId(), impUid, state, status);
-
-    if ((state & Payment.STATE_CANCELLED) != 0) {
+    
+    Payment payment = checkPaymentAndUpdate(order.getId(), impUid);
+    
+    if ((payment.getState() & Payment.STATE_CANCELLED) == Payment.STATE_CANCELLED) {
       order.setStatus(Order.Status.PAYMENT_CANCELLED);
       orderRepository.save(order);
-    } else if ((state & Payment.STATE_PAID) != 0) {
-      int paymentState = getPaymentState(order.getPayment().getId(), order.getPayment().getPaymentId());
-      if (paymentState != Payment.STATE_PAID && paymentState != Payment.STATE_NOTIFIED) {
-        completeOrder(order);
-      }
-    } else if ((state & Payment.STATE_FAILED) != 0) {
+    } else if ((payment.getState() & Payment.STATE_PAID) == Payment.STATE_PAID) {
+      completeOrder(order);
+    } else if ((payment.getState() & Payment.STATE_FAILED) == Payment.STATE_FAILED) {
       order.setStatus(Order.Status.PAYMENT_FAILED);
       orderRepository.save(order);
     }
@@ -286,29 +260,28 @@ public class OrderService {
   private Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
     return paymentRepository.findById(orderId)
        .map(payment -> {
-         int state = 0;
          String token = iamportService.getToken();
-         log.debug("access token: {}", token);
          PaymentResponse response = iamportService.getPayment(token, paymentId);
          log.debug("response: {}", response);
-         if (response.getCode() == 0) {
-           state = stateValue(response.getResponse().getStatus());
-           log.debug("payment state: {}", state);
-           log.debug(String.format("response amount: %d, payment price: %d", response.getResponse().getAmount(), payment.getPrice()));
-           if (state == Payment.STATE_PAID && response.getResponse().getAmount().equals(payment.getPrice())) {
-             payment.setMessage(response.getResponse().getStatus());
-             payment.setReceipt(response.getResponse().getReceiptUrl());
-             payment.setState(state | Payment.STATE_PURCHASED);
+         int state = Payment.STATE_NOTIFIED;
+         if (response.getCode() == 0 || response.getResponse() != null) {
+           PaymentData importData = response.getResponse();
+           log.debug("paymentData: {}", importData.toString());
+           log.debug("payment amount: expected: {}, actual: {}", payment.getPrice(), importData.getAmount());
+           if ("paid".equals(importData.getStatus()) && importData.getAmount().equals(payment.getPrice())) {
+             payment.setMessage(importData.getStatus());
+             payment.setReceipt(importData.getReceiptUrl());
+             payment.setState(state | Payment.STATE_READY | Payment.STATE_PAID);
            } else {
-             String failReason = response.getResponse().getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
+             String failReason = importData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
              log.warn("fail reason: {}", failReason);
-             payment.setState(Payment.STATE_FAILED);
+             payment.setState(state | Payment.STATE_FAILED);
              payment.setMessage(failReason);
            }
          } else {
            payment.setMessage(response.getMessage());
            payment.setPaymentId(paymentId);
-           payment.setState(Payment.STATE_STOPPED);
+           payment.setState(state | Payment.STATE_STOPPED);
          }
 
          payment.setPaymentId(paymentId);
@@ -319,45 +292,15 @@ public class OrderService {
 
   private void saveOrderAndPurchasesStatus(Order order, String status) {
     order.setStatus(status);
-    order.getPurchases().stream().forEach(p -> {
+    order.getPurchases().forEach(p -> {
       p.setStatus(status);
     });
 
     orderRepository.save(order);
     log.debug("order: {}", order);
   }
-
-  private int stateValue(String state) {
-    switch (state) {
-      case "paid": {
-        return Payment.STATE_PAID;
-      }
-      case "cancelled": {
-        return Payment.STATE_CANCELLED;
-      }
-      case "failed": {
-        return Payment.STATE_FAILED;
-      }
-      default:
-        throw new IllegalArgumentException("Unknown state type");
-    }
-  }
-
-  @Transactional
-  private Payment updatePaymentState(Long id, String paymentId, int state, String message) {
-    return paymentRepository.findById(id)
-       .map(payment -> {
-         payment.setPaymentId(paymentId);
-         payment.setState(state);
-         if (message != null) {
-           payment.setMessage(message);
-         }
-         return paymentRepository.save(payment);
-       })
-       .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
-  }
   
-  synchronized private void completeOrder(Order order) {
+  private void completeOrder(Order order) {
     log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.Status.PAID);
 
@@ -404,18 +347,6 @@ public class OrderService {
          }
        }
     );
-  }
-
-  private String getSuccessHtml(Long id) {
-    return new StringBuilder("<script language=\"javascript\">")
-       .append("mybeautip.success(" + id + ");")
-       .append("</script>").toString();
-  }
-
-  private String getErrorHtml(Long id, String message) {
-    return new StringBuilder("<script language=\"javascript\">")
-       .append("mybeautip.fail(" + id + ", \"" + message + "\");")
-       .append("</script>").toString();
   }
 
   private String orderNumber() {
