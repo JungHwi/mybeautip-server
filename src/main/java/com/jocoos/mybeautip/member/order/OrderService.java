@@ -240,7 +240,7 @@ public class OrderService {
     
     if (response.getCode() != 0 || response.getResponse() == null) {
       log.warn("notifyPayment response is not success: " + response.getMessage());
-      throw new MybeautipRuntimeException("invalid_import_response", "notifyPayment response is not success");
+      throw new MybeautipRuntimeException("invalid_iamport_response", "notifyPayment response is not success");
     }
     
     Payment payment = checkPaymentAndUpdate(order.getId(), impUid);
@@ -265,15 +265,15 @@ public class OrderService {
          log.debug("response: {}", response);
          int state = Payment.STATE_NOTIFIED;
          if (response.getCode() == 0 || response.getResponse() != null) {
-           PaymentData importData = response.getResponse();
-           log.debug("paymentData: {}", importData.toString());
-           log.debug("payment amount: expected: {}, actual: {}", payment.getPrice(), importData.getAmount());
-           if ("paid".equals(importData.getStatus()) && importData.getAmount().equals(payment.getPrice())) {
-             payment.setMessage(importData.getStatus());
-             payment.setReceipt(importData.getReceiptUrl());
+           PaymentData iamportData = response.getResponse();
+           log.debug("paymentData: {}", iamportData.toString());
+           log.debug("payment amount: expected: {}, actual: {}", payment.getPrice(), iamportData.getAmount());
+           if ("paid".equals(iamportData.getStatus()) && iamportData.getAmount().equals(payment.getPrice())) {
+             payment.setMessage(iamportData.getStatus());
+             payment.setReceipt(iamportData.getReceiptUrl());
              payment.setState(state | Payment.STATE_READY | Payment.STATE_PAID);
            } else {
-             String failReason = importData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
+             String failReason = iamportData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
              log.warn("fail reason: {}", failReason);
              payment.setState(state | Payment.STATE_FAILED);
              payment.setMessage(failReason);
