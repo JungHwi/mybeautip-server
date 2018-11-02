@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member.order;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,4 +25,14 @@ public interface OrderInquiryRepository extends JpaRepository<OrderInquiry, Long
   Slice<OrderInquiry> findByStateGreaterThanEqualAndCreatedAtBeforeAndCreatedById(Byte state, Date createdAt, Long createdBy, Pageable pageable);
 
   Optional<OrderInquiry> findByPurchaseId(Long purchaseId);
+
+
+  Page<OrderInquiry> findByState(Byte state, Pageable page);
+
+  Page<OrderInquiry> findByStateAndCompletedIsTrue(Byte state, Pageable page);
+
+  Page<OrderInquiry> findByStateAndCompletedIsFalse(Byte state, Pageable page);
+
+  Page<OrderInquiry> findByStateAndPurchaseGoodsScmNo(Byte state, int scmNo, Pageable page);
+
 }

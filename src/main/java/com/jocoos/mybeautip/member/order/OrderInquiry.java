@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.member.order;
 
 import javax.persistence.*;
-
 import java.util.Date;
 
 import org.springframework.data.annotation.LastModifiedDate;
@@ -11,7 +10,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
-import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
 
 @NoArgsConstructor
 @Data
