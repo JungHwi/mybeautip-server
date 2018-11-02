@@ -41,6 +41,7 @@ public class GoodsController {
   private final MemberService memberService;
   private final GoodsService goodsService;
   private final VideoService videoService;
+  private final GoodsOptionService goodsOptionService;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
   private final GoodsLikeRepository goodsLikeRepository;
@@ -50,6 +51,7 @@ public class GoodsController {
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
                          VideoService videoService,
+                         GoodsOptionService goodsOptionService,
                          GoodsRepository goodsRepository,
                          GoodsOptionRepository goodsOptionRepository,
                          GoodsLikeRepository goodsLikeRepository,
@@ -58,6 +60,7 @@ public class GoodsController {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
+    this.goodsOptionService = goodsOptionService;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
     this.goodsLikeRepository = goodsLikeRepository;
@@ -127,6 +130,7 @@ public class GoodsController {
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
+  // Will be deprecated
   @GetMapping("/{goodsNo}/options")
   public ResponseEntity<List<GoodsOptionInfo>> getGoodsOptions(@PathVariable Integer goodsNo) {
     Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
@@ -139,6 +143,11 @@ public class GoodsController {
       result.add(new GoodsOptionInfo(option, isSoldOut(goods, option)));
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+  
+  @GetMapping("/{goodsNo}/option-data")
+  public GoodsOptionService.GoodsOptionInfo getGoodsOptionData(@PathVariable Integer goodsNo) {
+    return goodsOptionService.getGoodsOptionData(goodsNo);
   }
   
   private boolean isSoldOut(Goods goods, GoodsOption option) {
@@ -154,11 +163,8 @@ public class GoodsController {
       return true;
     }
   
-    if ("y".equals(goods.getStockFl()) && option.getStockCnt() <= 0) { // 재고량에 따름, 옵션 재고량 부족
-      return true;
-    }
-  
-    return false;
+    // 재고량에 따름, 옵션 재고량 부족
+    return "y".equals(goods.getStockFl()) && option.getStockCnt() <= 0;
   }
 
   @Transactional
