@@ -1,8 +1,16 @@
 package com.jocoos.mybeautip.video;
 
-import java.util.Date;
-import java.util.Optional;
-
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.block.BlockRepository;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.video.watches.VideoWatch;
+import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,17 +18,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.restapi.VideoController;
-import com.jocoos.mybeautip.video.watches.VideoWatch;
-import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -31,6 +30,7 @@ public class VideoService {
   private final CommentRepository commentRepository;
   private final VideoLikeRepository videoLikeRepository;
   private final VideoWatchRepository videoWatchRepository;
+  private final BlockRepository blockRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -39,12 +39,14 @@ public class VideoService {
                       VideoRepository videoRepository,
                       CommentRepository commentRepository,
                       VideoLikeRepository videoLikeRepository,
-                      VideoWatchRepository videoWatchRepository) {
+                      VideoWatchRepository videoWatchRepository,
+                      BlockRepository blockRepository) {
     this.memberService = memberService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
     this.videoLikeRepository = videoLikeRepository;
     this.videoWatchRepository = videoWatchRepository;
+    this.blockRepository = blockRepository;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -182,18 +184,22 @@ public class VideoService {
 
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
+    boolean blocked = false;
+    
     Long me = memberService.currentMemberId();
     // Set likeID
     if (me != null) {
       Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me);
       likeId = optional.map(VideoLike::getId).orElse(null);
+      
+      blocked = blockRepository.findByMeAndMemberYouId(video.getMember().getId(), me).isPresent();
     }
     // Set Watch count
     if ("live".equalsIgnoreCase(video.getState())) {
       long duration = new Date().getTime() - watchDuration;
       video.setWatchCount(videoWatchRepository.countByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration)));
     }
-    return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId);
+    return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
   }
 
   public VideoController.VideoInfo setWatcher(Long id, Member me) {

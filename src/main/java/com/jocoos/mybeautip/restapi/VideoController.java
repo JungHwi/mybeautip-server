@@ -678,12 +678,14 @@ public class VideoController {
     private String relatedGoodsThumbnailUrl;
     private Long likeId;
     private MemberInfo owner;
+    private Boolean blocked;
     private Date createdAt;
 
-    public VideoInfo(Video video, MemberInfo owner, Long likeId) {
+    public VideoInfo(Video video, MemberInfo owner, Long likeId, Boolean blocked) {
       BeanUtils.copyProperties(video, this);
       this.owner = owner;
       this.likeId = likeId;
+      this.blocked = blocked;
       if (this.relatedGoodsCount == null) { this.relatedGoodsCount = 0;}  // FIXME: check policy
       if (this.relatedGoodsThumbnailUrl == null) { this.relatedGoodsThumbnailUrl = "";} // FIXME: check policy
     }
