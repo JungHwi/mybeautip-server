@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.app.AppInfo;
 import com.jocoos.mybeautip.app.AppInfoRepository;
 import com.jocoos.mybeautip.devices.NoticeService;
+import com.jocoos.mybeautip.notification.MessageService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,20 +31,36 @@ public class NoticeController {
   private int revenueRatio;
   
   private final NoticeService noticeService;
+  private final MessageService messageService;
   private final AppInfoRepository appInfoRepository;
 
   public NoticeController(NoticeService noticeService,
+                          MessageService messageService,
                           AppInfoRepository appInfoRepository) {
     this.noticeService = noticeService;
+    this.messageService = messageService;
     this.appInfoRepository = appInfoRepository;
   }
 
   @GetMapping
   public ResponseEntity<NoticeResponse> getNotices(@RequestParam("device_os") String deviceOs,
-                                            @RequestParam("app_version") String appVersion) {
+                                                   @RequestParam("app_version") String appVersion,
+                                                   @RequestParam(defaultValue = "ko") String lang) {
 
+    Locale locale;
+    switch (lang) {
+      case "ko":
+        locale = Locale.KOREAN;
+        break;
+      case "en":
+      case "ja":
+      default:
+        locale = Locale.ENGLISH;
+        break;
+    }
     List<NoticeInfo> notices = noticeService.findByOs(deviceOs, appVersion)
-       .stream().map(input -> new NoticeInfo(input.getType(), input.getMessage()))
+       .stream().map(input -> new NoticeInfo(input.getType(),
+            messageService.getMessage(input.getMessage(), locale)))
        .collect(Collectors.toList());
 
     NoticeResponse response = new NoticeResponse();

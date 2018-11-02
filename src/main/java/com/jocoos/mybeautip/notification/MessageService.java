@@ -33,4 +33,8 @@ public class MessageService {
   public String getGoodsCompanyMessage() {
     return messageSource.getMessage(GOODS_COMPANY_TEXT, null, Locale.KOREAN);
   }
+  
+  public String getMessage(String code, Locale locale) {
+    return messageSource.getMessage(code, null, locale);
+  }
 }
