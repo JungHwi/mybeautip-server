@@ -17,5 +17,5 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
   Slice<PostLike> findByCreatedById(Long createdBy, Pageable pageable);
 
-  Integer countByCreatedById(Long createdBy);
+  Integer countByCreatedByIdAndPostDeletedAtIsNull(Long createdBy);
 }

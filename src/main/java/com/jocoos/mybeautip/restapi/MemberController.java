@@ -288,20 +288,20 @@ public class MemberController {
     }
 
     LikeCountResponse response = new LikeCountResponse();
-    response.setGoods(goodsLikeRepository.countByCreatedById(memberId));
+    response.setGoods(goodsLikeRepository.countByCreatedByIdAndGoodsDeletedAtIsNull(memberId));
     response.setStore(storeLikeRepository.countByCreatedById(memberId));
-    response.setPost(postLikeRepository.countByCreatedById(memberId));
-    response.setVideo(videoLikeRepository.countByCreatedById(memberId));
+    response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(memberId));
+    response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNull(memberId, "PUBLIC"));
     return response;
   }
 
   @GetMapping(value = "/{id:.+}/like_count")
   public LikeCountResponse getMemberLikesCount(@PathVariable Long id) {
     LikeCountResponse response = new LikeCountResponse();
-    response.setGoods(goodsLikeRepository.countByCreatedById(id));
+    response.setGoods(goodsLikeRepository.countByCreatedByIdAndGoodsDeletedAtIsNull(id));
     response.setStore(storeLikeRepository.countByCreatedById(id));
-    response.setPost(postLikeRepository.countByCreatedById(id));
-    response.setVideo(videoLikeRepository.countByCreatedById(id));
+    response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(id));
+    response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNull(id, "PUBLIC"));
     return response;
   }
 

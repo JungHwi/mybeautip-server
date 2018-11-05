@@ -17,7 +17,7 @@ public interface GoodsLikeRepository extends JpaRepository<GoodsLike, Long> {
 
   Slice<GoodsLike> findByCreatedById(Long createdBy, Pageable pageable);
 
-  Integer countByCreatedById(Long createdBy);
+  Integer countByCreatedByIdAndGoodsDeletedAtIsNull(Long createdBy);
 
   List<GoodsLike> findAllByGoodsGoodsNo(String goodsNo);
 }
