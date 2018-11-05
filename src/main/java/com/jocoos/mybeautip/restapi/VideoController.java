@@ -357,7 +357,7 @@ public class VideoController {
                                            @RequestParam(required = false) String cursor) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
-    Slice<VideoLike> list = videoLikeRepository.findByVideoIdAndCreatedAtBefore(id, startCursor, pageable);
+    Slice<VideoLike> list = videoLikeRepository.findByVideoIdAndCreatedAtBeforeAndVideoDeletedAtIsNull(id, startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
     list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
