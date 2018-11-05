@@ -149,7 +149,8 @@ public class GoodsService {
       likeId = optional.map(GoodsLike::getId).orElse(null);
     }
     // Set total count of related videos
-    int relatedVideoTotalCount = videoGoodsRepository.countByGoodsGoodsNo(goods.getGoodsNo());
+    int relatedVideoTotalCount = videoGoodsRepository
+        .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(goods.getGoodsNo(), "PUBLIC");
     String deliveryInfo = "";
     String refundInfo = "";
     String asInfo = "";
