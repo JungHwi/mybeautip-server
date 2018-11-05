@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.admin;
 
-import javax.persistence.Column;
 import java.util.Date;
 import java.util.List;
 
