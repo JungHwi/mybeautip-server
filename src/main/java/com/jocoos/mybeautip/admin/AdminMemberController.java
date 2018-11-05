@@ -58,6 +58,12 @@ public class AdminMemberController {
       }
       case "ROLE_STORE": {
         memberRoleInfo = new MemberRoleInfo(myBeautipUserDetails.getMember(), 1);
+        AdminMember adminMember = adminMemberRepository.findByMemberId(memberRoleInfo.getId())
+           .orElseThrow(() -> new MemberNotFoundException("member_not_found", "invalid member id"));
+
+        if (adminMember.getStore() != null) {
+          memberRoleInfo.setStoreId(adminMember.getStore().getId());
+        }
         break;
       }
       default:

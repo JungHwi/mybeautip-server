@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class MemberRoleInfo extends MemberInfo {
   private int role;
+  private int storeId;
 
   public MemberRoleInfo(Member member, int role) {
     super(member, null);
