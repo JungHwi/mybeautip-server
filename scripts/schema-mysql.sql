@@ -3,15 +3,19 @@
 --
 CREATE TABLE `members` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `visible` TINYINT DEFAULT 0,
   `username` VARCHAR(50) DEFAULT NULL,
   `avatar_url` VARCHAR(200) DEFAULT NULL,
   `email` VARCHAR(50) DEFAULT NULL,
-  `coin` INT DEFAULT 0,
+  `point` INT DEFAULT 0,
   `intro` VARCHAR(200) DEFAULT NULL,
   `link` TINYINT UNSIGNED DEFAULT '0' COMMENT 'or flag, 1:facebook 2:naver 4:kakao',
   `follower_count` INT UNSIGNED NOT NULL DEFAULT 0,
   `following_count` INT UNSIGNED NOT NULL DEFAULT 0,
   `video_count` INT UNSIGNED NOT NULL DEFAULT 0,
+  `total_video_count` INT UNSIGNED NOT NULL DEFAULT 0,
+  `revenue` INT DEFAULT 0,
+  `revenue_modified_at` DATETIME(3),
   `created_at` DATETIME(3) NOT NULL,
   `modified_at` DATETIME(3) DEFAULT NULL,
   `deleted_at` DATETIME(3) DEFAULT NULL,
@@ -56,9 +60,10 @@ CREATE TABLE `naver_members` (
 -- admin members
 --
 CREATE TABLE `admin_members` (
-  `admin_id` VARCHAR(20) NOT NULL,
+  `email` VARCHAR(50) NOT NULL,
   `password` VARCHAR(60) NOT NULL,
   `member_id` BIGINT NOT NULL,
+  `store_id` BIGINT DEFAULT NULL,
   `created_at` DATETIME(3) NOT NULL,
   PRIMARY KEY(`admin_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -122,8 +127,6 @@ CREATE TABLE `goods_categories` (
   `code` VARCHAR(6) NOT NULL,
   `parent_code` VARCHAR(3) NOT NULL,
   `category_name` VARCHAR(100) NOT NULL,
-  `display_on_pc` enum('y', 'n') NOT NULL COMMENT 'or flag, 1:yes 2:no',
-  `display_on_mobile` enum('y', 'n') NOT NULL COMMENT 'or flag, 1:yes 2:no',
   `thumbnail_url` VARCHAR(255),
   PRIMARY KEY(`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -148,6 +151,7 @@ CREATE TABLE `goods` (
   `effective_start_ymd` VARCHAR(20),
   `effective_end_ymd` VARCHAR(20),
   `goods_weight` DECIMAL(7,2),
+  `total_stock` INT NOT NULL DEFAULT 0,
   `stock_fl` VARCHAR(1) NOT NULL,
   `sold_out_fl` VARCHAR(1) NOT NULL,
   `sales_unit` INT(10),
@@ -161,7 +165,10 @@ CREATE TABLE `goods` (
   `goods_price_string` VARCHAR(60),
   `goods_price` INT NOT NULL DEFAULT 0,
   `fixed_price` INT NOT NULL DEFAULT 0,
-  `delivery_sno` INT(10),
+  `delivery_sno` INT(10) NOT NULL DEFAULT 0,
+  `delivery_fix_fl` VARCHAR(6) NOT NULL DEFAULT '',
+  `delivery_method` VARCHAR(40) NOT NULL DEFAULT '',
+  `goods_search_word` VARCHAR(255) DEFAULT '',
   `short_description` VARCHAR(255),
   `goods_description` MEDIUMTEXT,
   `goods_description_mobile` MEDIUMTEXT,
@@ -181,7 +188,8 @@ CREATE TABLE `goods` (
   `reg_dt` VARCHAR(20),
   `mod_dt` VARCHAR(20),
   `created_at` DATETIME(3) NOT NULL,
-  `modified_at` DATETIME(3) DEFAULT NULL ,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  `deleted_at` DATETIME(3),
   `like_count` INT NOT NULL DEFAULT 0,
   PRIMARY KEY(`goods_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -215,6 +223,7 @@ CREATE TABLE `addresses` (
   `road_addr_part2` VARCHAR(255) NOT NULL,
   `jibun_addr` VARCHAR(255) NOT NULL,
   `detail_address` VARCHAR(100) NOT NULL,
+  `area_shipping` INT NOT NULL DEFAULT 0,
   `created_at` DATETIME(3) NOT NULL,
   `modified_at` DATETIME(3) DEFAULT NULL,
   `deleted_at` DATETIME(3) DEFAULT NULL,
@@ -281,11 +290,30 @@ CREATE TABLE `videos` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `video_key` VARCHAR(10) NOT NULL,
   `type` VARCHAR(11) NOT NULL,
+  `state` VARCHAR(20) NOT NULL,
+  `visibility` VARCHAR(10) NOT NULL,
+  `title` VARCHAR(100),
+  `content` VARCHAR(400),
+  `url` VARCHAR(400),
+  `thumbnail_path` VARCHAR(50) DEFAULT NULL,
   `thumbnail_url` VARCHAR(200) NOT NULL,
+  `chat_room_id` VARCHAR(200),
+  `duration` INT NOT NULL DEFAULT 0,
+  `data` VARCHAR(2000),
+  `watch_count` INT NOT NULL DEFAULT 0,
+  `heart_count` INT NOT NULL DEFAULT 0,
+  `view_count` INT NOT NULL DEFAULT 0,
+  `type` VARCHAR(11) NOT NULL,
+
+
   `comment_count` INT NOT NULL DEFAULT 0,
+  `like_count` INT NOT NULL DEFAULT 0,
+  `total_watch_count` INT NOT NULL DEFAULT 0,
+  `order_count` INT NOT NULL DEFAULT 0,
   `related_goods_count` TINYINT DEFAULT 0,
   `related_goods_thumbnail_url` VARCHAR(255),
   `owner` BIGINT NOT NULL,
+  `tag_info` TEXT,
   `created_at` DATETIME(3) NOT NULL,
   `modified_at` DATETIME(3) DEFAULT NULL,
   `deleted_at` DATETIME(3) DEFAULT NULL,
@@ -295,30 +323,13 @@ CREATE TABLE `videos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Video Comments
---
-CREATE TABLE `video_comments` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `video_id` BIGINT NOT NULL,
-  `comment` VARCHAR(500) DEFAULT NULL,
-  `parent_id` BIGINT DEFAULT NULL,
-  `like_count` INT NOT NULL DEFAULT 0,
-  `comment_count` INT NOT NULL DEFAULT 0,
-  `created_by` BIGINT NOT NULL,
-  `created_at` DATETIME(3) NOT NULL,
-  `modified_at` DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY(`id`),
-  CONSTRAINT `fk_video_comments_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
-  CONSTRAINT `fk_video_comments_videos` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
 -- Video with Goods
 --
 CREATE TABLE `video_goods` (
   id BIGINT NOT NULL AUTO_INCREMENT,
   video_id BIGINT NOT NULL,
   goods_no VARCHAR(10) NOT NULL,
+  `member_id` BIGINT NOT NULL,
   created_at DATETIME(3) NOT NULL,
   PRIMARY KEY (id),
   CONSTRAINT `fk_video_goods_videos` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`),
@@ -332,8 +343,13 @@ CREATE TABLE `stores` (
   `id` INT NOT NULL,
   `name` VARCHAR(50) NOT NULL,
   `description` VARCHAR(255),
+  `center_phone` VARCHAR(20) DEFAULT '',
   `image_url` VARCHAR(255),
   `thumbnail_url` VARCHAR(255),
+  `refund_url` VARCHAR(255) NOT NULL
+  `as_url` VARCHAR(255) NOT NULL,
+  `cancel_info` TEXT,
+  `delivery_info` TEXT,
   `like_count` INT NOT NULL DEFAULT 0,
   `created_at` DATETIME(3) NOT NULL,
   `modified_at` DATETIME(3) DEFAULT NULL,
@@ -416,6 +432,7 @@ CREATE TABLE `posts` (
   `comment_count` INT NOT NULL DEFAULT 0,
   `goods` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no goods, 1: exist goods',
   `created_by` BIGINT NOT NULL,
+  `tag_info` TEXT,
   `created_at` DATETIME(3) NOT NULL,
   `modified_at` DATETIME(3) DEFAULT NULL,
   `deleted_at` DATETIME(3) DEFAULT NULL,
@@ -474,23 +491,6 @@ CREATE TABLE `post_likes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Post comments
---
-CREATE TABLE `post_comments` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `post_id` BIGINT NOT NULL,
-  `comment` VARCHAR(500) DEFAULT NULL,
-  `parent_id` BIGINT DEFAULT NULL,
-  `comment_count` INT NOT NULL DEFAULT 0,
-  `created_by` BIGINT NOT NULL,
-  `created_at` DATETIME(3) NOT NULL,
-  `modified_at` DATETIME(3) NULL,
-  PRIMARY KEY(`id`),
-  CONSTRAINT `fk_post_comments_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
-  CONSTRAINT `fk_post_comments_post` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
 -- Post winners
 --
 CREATE TABLE `post_winners` (
@@ -521,24 +521,6 @@ CREATE TABLE `banners` (
   `deleted_at` DATETIME(3) DEFAULT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_banners_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Carts
---
-CREATE TABLE `carts` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `goods_no` VARCHAR(10) NOT NULL,
-  `option_no` INT NOT NULL DEFAULT 0,
-  `scm_no` INT NOT NULL,
-  `quantity` INT NOT NULL DEFAULT 0,
-  `created_by` BIGINT NOT NULL,
-  `created_at` DATETIME(3) NOT NULL,
-  `modified_at` DATETIME(3) DEFAULT NULL,
-  PRIMARY KEY(`id`),
-  UNIQUE KEY `uk_carts_goods_option` (`goods_no`, `option_no`),
-  CONSTRAINT `fk_carts_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
-  CONSTRAINT `fk_carts_goods` FOREIGN KEY (`goods_no`) REFERENCES `goods` (`goods_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -582,8 +564,17 @@ CREATE TABLE `goods_options` (
   `goods_no` INT NOT NULL,
   `option_no` TINYINT UNSIGNED NOT NULL,
   `option_value1` VARCHAR(40) DEFAULT NULL,
+  `option_value2` VARCHAR(40) DEFAULT NULL,
+  `option_value3` VARCHAR(40) DEFAULT NULL,
+  `option_value4` VARCHAR(40) DEFAULT NULL,
+  `option_value5` VARCHAR(40) DEFAULT NULL,
   `option_price` INT NOT NULL DEFAULT 0,
   `option_cost_price` INT NOT NULL DEFAULT 0,
+  `option_view_fl` VARCHAR(1) NOT NULL,
+  `option_sell_fl` VARCHAR(1) NOT NULL,
+  `option_code` VARCHAR(64) NOT NULL,
+  `option_memo` VARCHAR(255) NOT NULL,
+  `option_image` VARCHAR(255) NOT NULL,
   `stock_cnt` INT NOT NULL DEFAULT 0,
   `created_at` DATETIME(3) NOT NULL,
   `modified_at` DATETIME(3) DEFAULT NULL,
@@ -596,19 +587,27 @@ CREATE TABLE `goods_options` (
 --
 CREATE TABLE `orders` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `number` BIGINT NOT NULL,
+  `number` VARCHAR(16) NOT NULL,
   `goods_count` INT NOT NULL,
   `price` BIGINT NOT NULL,
   `point` INT DEFAULT 0,
   `method` VARCHAR(20) DEFAULT "card",
+  `price_amount` INT DEFAULT 0,
+  `deduction_amount` INT DEFAULT 0,
+  `shipping_amount` INT DEFAULT 0,
+  `expected_point` INT DEFAULT 0,
   `status` VARCHAR(20) DEFAULT NULL COMMENT 'ordered, paid, ...',
+  `coupon_id` BIGINT DEFAULT NULL,
+  `state` TINYINT DEFAULT 0,
   `video_id` BIGINT DEFAULT NULL,
   `created_by` BIGINT NOT NULL,
-  `created_at` DATETIME NOT NULL,
-  `modified_at` DATETIME DEFAULT NULL,
-  `deleted_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  `deleted_at` DATETIME(3) DEFAULT NULL,
+  `delivered_at` DATETIME(3) DEFAULT NULL,
   PRIMARY KEY(`id`),
-  CONSTRAINT `fk_orders_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
+  CONSTRAINT `fk_orders_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_orders_member_coupons` FOREIGN KEY (`coupon_id`) REFERENCES `member_coupons` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -624,10 +623,8 @@ CREATE TABLE `order_deliveries` (
   `road_addr_part2` VARCHAR(255) NOT NULL,
   `jibun_addr` VARCHAR(255) NOT NULL,
   `detail_address` VARCHAR(100) NOT NULL,
-  `carrier` VARCHAR(20) DEFAULT NULL,
-  `invoice` VARCHAR(30) DEFAULT NULL,
   `carrier_message` VARCHAR(50) DEFAULT "",
-  `created_at` DATETIME NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_deliveries_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -644,9 +641,9 @@ CREATE TABLE `order_payments` (
   `state` TINYINT NOT NULL DEFAULT 0 COMMENT '0:created, 1: stopped, 2: failed, ...',
   `message` VARCHAR(255) DEFAULT NULL,
   `receipt` VARCHAR(255) DEFAULT NULL,
-  `created_at` DATETIME NOT NULL,
-  `modified_at` DATETIME DEFAULT NULL,
-  `deleted_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  `deleted_at` DATETIME(3) DEFAULT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_payments_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -657,19 +654,45 @@ CREATE TABLE `order_payments` (
 CREATE TABLE `order_purchases` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `order_id` BIGINT NOT NULL,
+  `status` VARCHAR(20) DEFAULT NULL,
   `goods_no` VARCHAR(10) NOT NULL,
+  `state` TINYINT DEFAULT 0,
   `goods_price` BIGINT NOT NULL,
   `option_id` VARCHAR(10) NOT NULL,
   `option_value` VARCHAR(40) NOT NULL,
   `option_price` BIGINT DEFAULT NULL,
   `quantity` BIGINT NOT NULL,
   `total_price` BIGINT DEFAULT NULL,
+  `carrier` VARCHAR(20) DEFAULT NULL,
+  `invoice` VARCHAR(30) DEFAULT NULL,
   `video_id` BIGINT DEFAULT NULL,
-  `created_at` DATETIME NOT NULL,
-  `deleted_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  `delivered_at` DATETIME(3) DEFAULT NULL
+  `deleted_at` DATETIME(3) DEFAULT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_purchases_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
   CONSTRAINT `fk_purchases_goods` FOREIGN KEY (`goods_no`) REFERENCES `goods` (`goods_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- cancel order
+--
+CREATE TABLE `order_inquiries` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `state` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: cancel payment, 1: request exchange, 2: request return',
+  `reason` VARCHAR(500) DEFAULT NULL,
+  `order_id` BIGINT NOT NULL,
+  `purchase_id` BIGINT DEFAULT NULL,
+  `comment` VARCHAR(500) DEFAULT NULL,
+  `completed` TINYINT NOT NULL DEFAULT 0 COMMENT '0:not yet, 1: completed',
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_order_inquiries_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
+  CONSTRAINT  `fk_order_inquiries_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
+  CONSTRAINT `fk_order_inquiries_purchase` FOREIGN KEY (`purchase_id`) REFERENCES `order_purchases` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -684,12 +707,13 @@ CREATE TABLE `coupons` (
   `discount_price` INT UNSIGNED DEFAULT NULL,
   `discount_rate` TINYINT DEFAULT NULL,
   `condition_price` INT UNSIGNED DEFAULT NULL,
-  `started_at` DATETIME NOT NULL,
-  `ended_at` DATETIME NOT NULL,
+  `use_price_limit` INT UNSIGNED DEFAULT NULL,
+  `started_at` DATETIME(3) NOT NULL,
+  `ended_at` DATETIME(3) NOT NULL,
   `created_by` BIGINT NOT NULL,
-  `created_at` DATETIME NOT NULL,
-  `modified_at` DATETIME DEFAULT NULL,
-  `deleted_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  `deleted_at` DATETIME(3) DEFAULT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_coupons_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -701,10 +725,278 @@ CREATE TABLE `member_coupons` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `coupon_id` BIGINT NOT NULL,
   `member_id` BIGINT NOT NULL,
-  `created_at` DATETIME NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `used_at` DATETIME(3) DEFAULT NULL,
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_member_coupons_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`),
   CONSTRAINT `fk_member_coupons_member` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Video reports
+--
+CREATE TABLE `video_reports` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `video_id` BIGINT NOT NULL,
+  `created_by` BIGINT NOT NULL,
+  `reason` VARCHAR(80) NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_video_reports_video` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`),
+  CONSTRAINT `fk_video_reports_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Video ViewLog
+--
+CREATE TABLE `video_views` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `video_id` BIGINT NOT NULL,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) NOT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_video_views_video` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`),
+  CONSTRAINT `fk_video_views_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- member points
+--
+CREATE TABLE `member_points` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `state` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0: Will be earned, 1: Earned points, 2: Use points, 3: Expired points',
+  `point` INT NOT NULL DEFAULT 0,
+  `member_id` BIGINT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `earned_at` DATETIME(3) DEFAULT NULL,
+  `expired_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_member_points_member` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Delivery Charge
+--
+CREATE TABLE `delivery_charge` (
+  `id` INT NOT NULL,
+  `scm_no` INT NOT NULL,
+  `method` VARCHAR(40) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `collect_fl` VARCHAR(5) NOT NULL COMMENT '배송비 결제방법: pre = 선불, later = 착불, both = 선착불',
+  `fix_fl` VARCHAR(6) NOT NULL COMMENT '배송비 유형 fixed = 고정, free = 무료, price = 금액별, count = 수량별, weight = 무게별',
+  `charge_data` TEXT DEFAULT NULL,
+  PRIMARY KEY(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Tags
+--
+CREATE TABLE `tags` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL UNIQUE,
+  `ref_count` INT DEFAULT 0,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Keyword Recommendations
+--
+CREATE TABLE `keyword_recommendations` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `category` TINYINT NOT NULL DEFAULT 1 COMMENT '1: member, 2: tag',
+  `member_id` BIGINT DEFAULT NULL,
+  `tag_id` BIGINT DEFAULT NULL,
+  `seq` INT NOT NULL,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  `started_at` DATETIME(3) DEFAULT NULL,
+  `ended_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_keyword_recommendations_members` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_keyword_recommendations_tags` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Video watches
+--
+CREATE TABLE `video_watches` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `video_id` BIGINT NOT NULL,
+  `username` VARCHAR(50) DEFAULT NULL,
+  `is_guest` TINYINT(1) NOT NULL,
+  `created_by` BIGINT DEFAULT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_video_watches_video` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`),
+  CONSTRAINT `fk_video_watches_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- notifications
+--
+CREATE TABLE `notifications` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `target_member` BIGINT NOT NULL,
+  `source_member` BIGINT DEFAULT NULL,
+  `type` VARCHAR(50) NOT NULL,
+  `read` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `resource_type` VARCHAR(50) DEFAULT NULL,
+  `resource_id` BIGINT DEFAULT NULL,
+  `resource_owner` BIGINT DEFAULT NULL,
+  `image_url` VARCHAR(250) DEFAULT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_notification_target_member` FOREIGN KEY (`target_member`) REFERENCES `members` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- notification message arguments
+--
+
+CREATE TABLE `notification_args` (
+  `notification_id` BIGINT NOT NULL,
+  `seq` INT NOT NULL,
+  `arg` VARCHAR(255) NOT NULL,
+  PRIMARY KEY(`notification_id`, `seq`),
+  CONSTRAINT `fk_notification_args` FOREIGN KEY (`notification_id`) REFERENCES `notifications` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- notification custom arguments
+--
+CREATE TABLE `notification_customs` (
+  `notification_id` BIGINT NOT NULL,
+  `key` VARCHAR(100) NOT NULL,
+  `value` VARCHAR(100) NOT NULL,
+  PRIMARY KEY(`notification_id`, `key`),
+  CONSTRAINT `fk_notification_customs` FOREIGN KEY (`notification_id`) REFERENCES `notifications` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Comments
+--
+CREATE TABLE `comments` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `post_id` BIGINT DEFAULT NULL,
+  `video_id` BIGINT DEFAULT NULL,
+  `comment` VARCHAR(500) NOT NULL,
+  `parent_id` BIGINT DEFAULT NULL,
+  `like_count` INT NOT NULL DEFAULT 0,
+  `comment_count` INT NOT NULL DEFAULT 0,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_comments_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_comments_posts` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`),
+  CONSTRAINT `fk_comments_videos` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Comment Likes
+--
+CREATE TABLE `comment_likes` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `comment_id` BIGINT NOT NULL,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME NOT NULL,
+  PRIMARY KEY(`id`),
+  UNIQUE KEY `uk_comment_likes` (`created_by`, `comment_id`),
+  CONSTRAINT `fk_comment_likes_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_comment_likes_comment` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Member Revenues
+--
+CREATE TABLE `member_revenues` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `purchase_id` BIGINT NOT NULL,
+  `video_id` BIGINT NOT NULL,
+  `revenue` INT DEFAULT 0,
+  `created_at` DATETIME(3) NOT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_member_revenues_videos` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`),
+  CONSTRAINT `fk_member_revenues_purchases` FOREIGN KEY (`purchase_id`) REFERENCES `order_purchases` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Delivery Charge
+--
+CREATE TABLE `delivery_charge_details` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `delivery_charge_id` INT NOT NULL,
+  `unit_start` INT NOT NULL DEFAULT 0,
+  `unit_end` INT NOT NULL DEFAULT 0,
+  `price` INT NOT NULL DEFAULT 0,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_details_delivery_charge` FOREIGN KEY (`delivery_charge_id`) REFERENCES `delivery_charge` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Carts
+--
+CREATE TABLE `carts` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `checked` TINYINT NOT NULL DEFAULT 1,
+  `goods_no` VARCHAR(10) NOT NULL,
+  `option_id` BIGINT DEFAULT NULL,
+  `store_id` INT NOT NULL,
+  `quantity` INT NOT NULL DEFAULT 0,
+  `created_by` BIGINT NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  `modified_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_carts_created_by` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`),
+  CONSTRAINT `fk_carts_goods` FOREIGN KEY (`goods_no`) REFERENCES `goods` (`goods_no`),
+  CONSTRAINT `fk_carts_options` FOREIGN KEY (`option_id`) REFERENCES `goods_options` (`sno`),
+  CONSTRAINT `fk_carts_stores` FOREIGN KEY (`store_id`) REFERENCES `stores` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Delivery Charge
+--
+CREATE TABLE `delivery_charge_area` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `area` VARCHAR(255) NOT NULL UNIQUE,
+  `part1` VARCHAR(20) NOT NULL,
+  `part2` VARCHAR(20) NOT NULL,
+  `part3` VARCHAR(20) NOT NULL,
+  `part4` VARCHAR(20) NOT NULL,
+  `price` INT NOT NULL DEFAULT 0,
+  PRIMARY KEY(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- App Info
+--
+CREATE TABLE `app_info` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `os` VARCHAR(255) NOT NULL, -- android, ios, web
+  `version` VARCHAR(20) NOT NULL,
+  `data` VARCHAR(255), -- reserved
+  `message` VARCHAR(255),  -- reserved
+  `created_at` DATETIME(3) NOT NULL,
+  PRIMARY KEY(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Member Leave Log
+--
+CREATE TABLE `member_leave_log` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `member_id` BIGINT NOT NULL,
+  `reason` VARCHAR(255) NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
+  PRIMARY KEY(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
 
 

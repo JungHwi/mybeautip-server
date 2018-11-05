@@ -1,4 +1,50 @@
 --
+-- Insert Admin members
+--
+INSERT INTO `members` (username, created_at, modified_at) values ('mybeautip.tv', now(), now());
+-- Password is encoed by BCryptPasswordEncoder
+INSERT INTO `admin_members` (admin_id, password, member_id, created_at)
+values ('mybeautip.tv', '$2a$10$1aIM4MHeFu.LTi0yDOIbPOoMgnwp8RK7fzYyxHJ0httG2m17BDSwO', (select id from members where username='mybeautip.tv'), now());
+UPDATE `members` set avatar_url='https://s3-ap-northeast-2.amazonaws.com/mybeautip-dev/avatar/153515114023812.jpg', email='mybeautip@mybeatip.tv', intro='예뻐지는 TV - 마이뷰팁' where username='mybeautip.tv';
+
+
+INSERT INTO `members` (username, created_at, modified_at) values ('mybeautip.flipflop', now(), now());
+-- Password is encoed by BCryptPasswordEncoder
+INSERT INTO `admin_members` (admin_id, password, member_id, created_at)
+values ('mybeautip.flipflop', '$2a$10$1aIM4MHeFu.LTi0yDOIbPOoMgnwp8RK7fzYyxHJ0httG2m17BDSwO', (select id from members where username='mybeautip.flipflop'), now());
+
+
+INSERT INTO `members` (username, created_at, modified_at) values ('mybeautip.s3', now(), now());
+-- Password is encoed by BCryptPasswordEncoder
+INSERT INTO `admin_members` (admin_id, password, member_id, created_at)
+values ('mybeautip.s3', '$2a$10$1aIM4MHeFu.LTi0yDOIbPOoMgnwp8RK7fzYyxHJ0httG2m17BDSwO', (select id from members where username='mybeautip.s3'), now());
+
+--
+-- Insert Banned Words
+--
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('뷰팁', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('어드민', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('관리자', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('관리인', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('매니져', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('매니저', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('테스트', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('태스트', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('체험단', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('공지사항', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('오쿠스', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('요쿠스', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('조쿠스', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('죠쿠스', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('beautip', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('admin', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('dev', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('manager', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('jocoos', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('yocoos', 1, now());
+INSERT INTO `banned_words`(`word`, `category`, `created_at`) VALUES('test', 1, now());
+
+--
 -- 인기 검색어
 --
 insert into tags(name, ref_count, created_at) values ('틴트', 0, now());
@@ -1064,3 +1110,15 @@ insert into delivery_charge_area(area, part1, part2, part3, part4, price) values
 insert into delivery_charge_area(area, part1, part2, part3, part4, price) values ('전라남도 여수시 삼산면 죽촌3길', '전라남도',  '여수시',  '삼산면',  '죽촌3길', 5000);
 insert into delivery_charge_area(area, part1, part2, part3, part4, price) values ('전라남도 여수시 삼산면 하늘담길', '전라남도',  '여수시',  '삼산면',  '하늘담길', 5000);
 insert into delivery_charge_area(area, part1, part2, part3, part4, price) values ('제주시특별자치도', '제주시특별자치도',  '',  '',  '', 3000);
+
+--
+-- Migration store to store members
+--
+insert into members (username, avatar_url, link, created_at)
+select name, thumbnail_url, 8, now() from stores;
+
+-- Default password is akdlqbxlq@@123
+insert into admin_members (email, password, member_id, store_id, created_at)
+select name, '$2a$10$qRBfbYVAnTR3irx9Vv9fA.wD6kAjO4ANfdt6loNM/ypy3AsGP6Kvm', m.id, s.id, now() from stores s, members m where s.name = m.username;
+
+
