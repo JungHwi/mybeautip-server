@@ -145,7 +145,7 @@ public class GoodsController {
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
   
-  @GetMapping("/{goodsNo}/option-data")
+  @GetMapping("/{goodsNo}/option_data")
   public GoodsOptionService.GoodsOptionInfo getGoodsOptionData(@PathVariable Integer goodsNo) {
     return goodsOptionService.getGoodsOptionData(goodsNo);
   }
