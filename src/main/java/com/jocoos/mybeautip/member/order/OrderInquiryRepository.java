@@ -35,4 +35,14 @@ public interface OrderInquiryRepository extends JpaRepository<OrderInquiry, Long
 
   Page<OrderInquiry> findByStateAndPurchaseGoodsScmNo(Byte state, int scmNo, Pageable page);
 
+  Page<OrderInquiry> findByStateAndCompletedIsFalseAndPurchaseGoodsScmNo(Byte state, int scmNo, Pageable page);
+
+  Page<OrderInquiry> findByStateAndCompletedIsTrueAndPurchaseGoodsScmNo(Byte state, int scmNo, Pageable page);
+
+  Page<OrderInquiry> findByStateAndOrderPurchasesGoodsScmNo(Byte state, int scmNo, Pageable page);
+
+  Page<OrderInquiry> findByStateAndCompletedIsFalseAndOrderPurchasesGoodsScmNo(Byte state, int scmNo, Pageable page);
+
+  Page<OrderInquiry> findByStateAndCompletedIsTrueAndOrderPurchasesGoodsScmNo(Byte state, int scmNo, Pageable page);
+
 }

@@ -30,7 +30,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
   public void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
       .antMatchers(OPTIONS, "/api/admin/**").permitAll()
-      .antMatchers("/api/admin/**").hasRole("ADMIN")
+      .antMatchers("/api/admin/**").hasAnyRole("STORE", "ADMIN")
       .antMatchers(GET, "/api/1/notices").permitAll()
       .antMatchers(POST, "/api/1/payments/notification").permitAll()
       .antMatchers(POST, "/api/1/members/me/carts/now").hasAnyRole("GUEST", "USER", "ADMIN")

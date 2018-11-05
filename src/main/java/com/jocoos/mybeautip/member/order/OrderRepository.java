@@ -25,4 +25,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
    * Apis for admin
    */
   Page<Order> findByStateOrderByCreatedAtDesc(int state, Pageable page);
+
+  Page<Order> findByPurchasesGoodsScmNoAndState(int scmNo, int state, Pageable page);
+
+  Page<Order> findByPurchasesGoodsScmNo(int scmNo, Pageable page);
+
 }
