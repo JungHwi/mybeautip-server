@@ -248,7 +248,8 @@ public class GoodsController {
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNo(startCursor, goodsNo, pageable);
+    Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(
+        startCursor, goodsNo, "PUBLIC", pageable);
     List<VideoController.VideoInfo> result = new ArrayList<>();
 
     for (VideoGoods videoGoods : slice.getContent()) {

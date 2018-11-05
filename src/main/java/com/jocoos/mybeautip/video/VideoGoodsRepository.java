@@ -14,8 +14,8 @@ import com.jocoos.mybeautip.member.Member;
 
 public interface VideoGoodsRepository extends JpaRepository<VideoGoods, Long> {
 
-  Slice<VideoGoods> findByCreatedAtBeforeAndGoodsGoodsNo(Date cursor, String goodsNo, Pageable pageable);
-
+ Slice<VideoGoods> findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(Date cursor, String goodsNo, String vidisibity, Pageable pageable);
+  
   List<VideoGoods> findAllByVideoId(Long id);
 
   int countByGoodsGoodsNo(String goodsNo);
