@@ -1,32 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.security.Principal;
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
@@ -53,6 +28,29 @@ import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
 import com.jocoos.mybeautip.video.VideoService;
 import com.jocoos.mybeautip.word.BannedWordService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.security.Principal;
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -137,38 +135,23 @@ public class MemberController {
   }
 
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MemberInfo> updateMember(Principal principal,
-                                             @Valid @RequestBody UpdateMemberRequest updateMemberRequest,
-                                             BindingResult bindingResult) {
-
-    log.debug("member id: {}", principal.getName());
-    log.debug("binding result: {}", bindingResult);
-
-    if (bindingResult.hasErrors()) {
-      log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid member request");
-    }
-
-    // Validation check: username cannot be empty
-    if ("".equals(updateMemberRequest.getUsername())) {
-      log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid member request - username");
-    }
-
-    if (StringUtils.isNotEmpty(updateMemberRequest.getUsername())) {
+  public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest) {
+    log.debug("member id: {}", memberService.currentMemberId());
+    
+    if (updateMemberRequest.getUsername() != null) {
       memberService.checkUsernameValidation(updateMemberRequest.getUsername());
     }
 
-    // Validation check: email cannot be empty
-    if ("".equals(updateMemberRequest.getEmail())) {
-      log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid member request - email");
+    if (updateMemberRequest.getEmail() != null) {
+      if (!EmailValidator.getInstance().isValid(updateMemberRequest.getEmail())) {
+        throw new BadRequestException(MemberService.UsernameErrorCode.INVALID_EMAIL);
+      }
     }
 
-    return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
+    return memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
         .map(m -> {
           if (updateMemberRequest.getUsername() != null) {
-            m.setUsername(validateUsername(updateMemberRequest.getUsername()));
+            m.setUsername(updateMemberRequest.getUsername());
             m.setVisible(true);
           }
           if (updateMemberRequest.getEmail() != null) {
@@ -185,15 +168,7 @@ public class MemberController {
 
           return new ResponseEntity<>(memberService.getMemberInfo(m), HttpStatus.OK);
         })
-        .orElseThrow(() -> new MemberNotFoundException(principal.getName()));
-  }
-
-  private String validateUsername(String username) {
-    if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
-      throw new BadRequestException("duplicated_username", "Your username is already in use");
-    }
-
-    return bannedWordService.findWordAndThrowException(username);
+        .orElseThrow(() -> new MemberNotFoundException(memberService.currentMemberId()));
   }
 
   @GetMapping

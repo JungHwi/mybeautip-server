@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +24,20 @@ public class WordController {
   }
 
   @GetMapping
-  public void isValidUsername(@RequestParam String username) {
-    memberService.checkUsernameValidation(username);
+  public void isValidParams(@RequestParam(required = false) String username,
+                              @RequestParam(required = false) String email) {
+    if (username == null && email == null) {
+      throw new BadRequestException("invalid_query_string");
+    }
+    
+    if (email != null) {
+      if (!EmailValidator.getInstance().isValid(email)) {
+        throw new BadRequestException(MemberService.UsernameErrorCode.INVALID_EMAIL);
+      }
+    }
+  
+    if (username != null) {
+      memberService.checkUsernameValidation(username);
+    }
   }
 }

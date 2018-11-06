@@ -119,8 +119,10 @@ public class MemberService {
       throw new BadRequestException(UsernameErrorCode.INVALID_CHAR);
     }
 
-    if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
-      throw new BadRequestException(UsernameErrorCode.ALREADY_USED);
+    if (!currentMember().getUsername().equals(username)) {
+      if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
+        throw new BadRequestException(UsernameErrorCode.ALREADY_USED);
+      }
     }
 
     bannedWordService.findWordAndThrowException(username);
@@ -133,7 +135,8 @@ public class MemberService {
     INVALID_NUMBER("invalid_number", "Username should contain at least one character."),
     INVALID_CHAR("invalid_char", "Username contains illegal characters."),
     BANNED_WORD("banned_word", "Username contains banned words."),
-    ALREADY_USED("already_used", "Username is already used.");
+    ALREADY_USED("already_used", "Username is already used."),
+    INVALID_EMAIL("invalid_email", "Must be a well-formed email address.");
 
     private final String error;
     private final String errorDescription;
