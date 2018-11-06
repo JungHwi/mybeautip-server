@@ -113,7 +113,7 @@ public class Member {
     this.intro = (StringUtils.isBlank(params.get("intro"))) ? "" : params.get("intro");
     this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? deaultAvatarUrl : params.get("avatar_url");
     this.point = 0;
-    this.visible = (StringUtils.isNotBlank(params.get("username")));
+    this.visible = false;
     this.revenueModifiedAt = new Date();
   }
 }
