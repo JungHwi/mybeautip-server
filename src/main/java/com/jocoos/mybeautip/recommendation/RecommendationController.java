@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.recommendation;
 import java.util.Date;
 import java.util.List;
 
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -37,15 +39,19 @@ public class RecommendationController {
   private final MemberService memberServie;
   private final VideoService videoService;
   private final VideoRepository videoRepository;
+  private final MemberRepository memberRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
   private final KeywordRecommendationRepository keywordRecommendationRepository;
+  
+  private final int SEQ_START = 1;
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberServie,
                                   VideoService videoService,
                                   VideoRepository videoRepository,
+                                  MemberRepository memberRepository,
                                   MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository,
                                   MotdRecommendationRepository motdRecommendationRepository,
@@ -54,6 +60,7 @@ public class RecommendationController {
     this.memberServie = memberServie;
     this.videoService = videoService;
     this.videoRepository = videoRepository;
+    this.memberRepository = memberRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
@@ -93,6 +100,23 @@ public class RecommendationController {
     goods.stream().forEach(recommendation
         -> result.add(goodsService.generateGoodsInfo(recommendation.getGoods())));
 
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+  
+  @GetMapping("/live")
+  public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedLiveVideos(
+      @RequestParam(defaultValue = "100") int count) {
+  
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq"));
+    List<Member> memberList = memberRepository.findByDeletedAtIsNullAndVisibleIsTrueAndSeqGreaterThanEqual(SEQ_START, page);
+    List<VideoController.VideoInfo> result = Lists.newArrayList();
+    
+    for (Member member : memberList) {
+      Slice<Video> memberVideos = videoService.findMemberVideos(member, "BROADCASTED", "LIVE", null, 1);  // live count assumes always 1
+      if (memberVideos.hasContent()) {
+        result.add(videoService.generateVideoInfo(memberVideos.getContent().get(0)));
+      }
+    }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 

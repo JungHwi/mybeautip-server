@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -22,7 +23,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Slice<Member> findByDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(String username, String intro, Pageable pageable);
 
   Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(Date createdAt, String username, String intro, Pageable pageable);
-
+  
+  List<Member> findByDeletedAtIsNullAndVisibleIsTrueAndSeqGreaterThanEqual(int seq, Pageable pageable);
+  
   @Modifying
   @Query("update Member m set m.followingCount = m.followingCount + ?2, m.modifiedAt = now() where m.id = ?1")
   void updateFollowingCount(Long id, Integer count);
