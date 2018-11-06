@@ -46,6 +46,7 @@ public class RecommendationController {
   private final KeywordRecommendationRepository keywordRecommendationRepository;
   
   private final int SEQ_START = 1;
+  private final int MAX_RECOMMENDED_BJ_COUNT = 100;
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberServie,
@@ -104,10 +105,9 @@ public class RecommendationController {
   }
   
   @GetMapping("/live")
-  public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedLiveVideos(
-      @RequestParam(defaultValue = "100") int count) {
+  public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedLiveVideos() {
   
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq"));
+    PageRequest page = PageRequest.of(0, MAX_RECOMMENDED_BJ_COUNT, new Sort(Sort.Direction.ASC, "seq"));
     List<Member> memberList = memberRepository.findByDeletedAtIsNullAndVisibleIsTrueAndSeqGreaterThanEqual(SEQ_START, page);
     List<VideoController.VideoInfo> result = Lists.newArrayList();
     
