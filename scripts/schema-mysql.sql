@@ -346,7 +346,7 @@ CREATE TABLE `stores` (
   `center_phone` VARCHAR(20) DEFAULT '',
   `image_url` VARCHAR(255),
   `thumbnail_url` VARCHAR(255),
-  `refund_url` VARCHAR(255) NOT NULL
+  `refund_url` VARCHAR(255) NOT NULL,
   `as_url` VARCHAR(255) NOT NULL,
   `cancel_info` TEXT,
   `delivery_info` TEXT,
