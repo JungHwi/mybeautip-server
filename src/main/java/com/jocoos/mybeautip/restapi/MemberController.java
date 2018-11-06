@@ -376,6 +376,7 @@ public class MemberController {
           default:
             throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
         }
+        member.setVisible(false);
         member.setDeletedAt(new Date());
         memberRepository.save(member);
 
