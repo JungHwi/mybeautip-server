@@ -8,7 +8,7 @@ import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.recommendation.GoodsRecommendation;
 
-@Projection(name = "recommendation_goods", types = GoodsRecommendation.class)
+@Projection(name = "recommended_goods", types = GoodsRecommendation.class)
 public interface GoodsRecommendationExcerpt {
 
   Goods getGoods();
