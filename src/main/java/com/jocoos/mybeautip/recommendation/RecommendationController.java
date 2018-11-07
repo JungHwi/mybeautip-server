@@ -106,13 +106,13 @@ public class RecommendationController {
   
   @GetMapping("/live")
   public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedLiveVideos() {
-  
     PageRequest page = PageRequest.of(0, MAX_RECOMMENDED_BJ_COUNT, new Sort(Sort.Direction.ASC, "seq"));
-    List<Member> memberList = memberRepository.findByDeletedAtIsNullAndVisibleIsTrueAndSeqGreaterThanEqual(SEQ_START, page);
+    Date now = new Date();
+    List<MemberRecommendation> memberList = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfter(now, now, page);
     List<VideoController.VideoInfo> result = Lists.newArrayList();
     
-    for (Member member : memberList) {
-      Slice<Video> memberVideos = videoService.findMemberVideos(member, "BROADCASTED", "LIVE", null, 1);  // live count assumes always 1
+    for (MemberRecommendation member : memberList) {
+      Slice<Video> memberVideos = videoService.findMemberVideos(member.getMember(), "BROADCASTED", "LIVE", null, 1);  // live count assumes always 1
       if (memberVideos.hasContent()) {
         result.add(videoService.generateVideoInfo(memberVideos.getContent().get(0)));
       }

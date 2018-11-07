@@ -40,9 +40,6 @@ public class Member {
   @JsonIgnore
   @Column(nullable = false)
   private boolean visible;
-  
-  @Column(nullable = false)
-  private int seq;
 
   @Column(length = 50, nullable = false)
   private String username;
