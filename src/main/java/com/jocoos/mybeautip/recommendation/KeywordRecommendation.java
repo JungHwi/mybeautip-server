@@ -19,7 +19,7 @@ import com.jocoos.mybeautip.tag.Tag;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "keyword_recommendations")
+@Table(name = "recommended_keywords")
 public class KeywordRecommendation extends MemberAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -22,7 +22,7 @@ import com.jocoos.mybeautip.video.Video;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "motd_recommendations")
+@Table(name = "recommended_motds")
 public class MotdRecommendation extends MemberAuditable {
   @Id
   @Column(name = "video_id")

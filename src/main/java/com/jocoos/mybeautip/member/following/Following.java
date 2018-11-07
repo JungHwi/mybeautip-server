@@ -15,7 +15,7 @@ import com.jocoos.mybeautip.member.Member;
 @Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "members_followings")
+@Table(name = "member_followings")
 public class Following {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "members_reports")
+@Table(name = "member_reports")
 public class Report extends CreatedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

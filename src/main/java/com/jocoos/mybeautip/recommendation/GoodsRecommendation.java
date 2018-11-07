@@ -22,7 +22,7 @@ import com.jocoos.mybeautip.goods.Goods;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "goods_recommendations")
+@Table(name = "recommended_goods")
 public class GoodsRecommendation extends MemberAuditable {
 
   @Id
