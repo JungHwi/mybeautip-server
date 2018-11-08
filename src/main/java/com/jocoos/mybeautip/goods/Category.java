@@ -17,7 +17,6 @@ public class Category {
   @Id
   private String code;
   
-  @JsonIgnore
   @Column(name = "parent_code")
   private String group;
   
