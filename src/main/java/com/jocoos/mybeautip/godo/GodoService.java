@@ -424,7 +424,7 @@ public class GodoService {
             List<ChargeData> list = new ArrayList<>();
             for (GodoDeliveryResponse.ChargeData chargeData : deliverydata.getChargeData()) {
               list.add(new ChargeData(chargeData));
-              deliveryChargeDetailRepository.save(new DeliveryChargeDetail(deliveryCharge, chargeData));
+              deliveryChargeDetailRepository.save(new DeliveryChargeDetail(deliveryCharge.getId(), chargeData));
             }
             deliveryCharge.setChargeData(mapper.writeValueAsString(list));
             deliveryChargeRepository.save(deliveryCharge);

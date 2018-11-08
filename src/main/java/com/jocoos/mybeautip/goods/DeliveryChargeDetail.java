@@ -19,9 +19,8 @@ public class DeliveryChargeDetail {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @ManyToOne
-  @JoinColumn(name = "delivery_charge_id")
-  private DeliveryCharge deliveryCharge;
+  @Column(nullable = false)
+  private Integer deliveryChargeId;
 
   @Column(nullable = false)
   private Integer unitStart;
@@ -32,8 +31,8 @@ public class DeliveryChargeDetail {
   @Column(nullable = false)
   private Integer price;
 
-  public DeliveryChargeDetail(DeliveryCharge deliveryCharge, GodoDeliveryResponse.ChargeData data) {
-    this.deliveryCharge = deliveryCharge;
+  public DeliveryChargeDetail(int deliveryChargeId, GodoDeliveryResponse.ChargeData data) {
+    this.deliveryChargeId = deliveryChargeId;
     this.unitStart = data.getUnitStart().intValue();
     this.unitEnd = data.getUnitEnd().intValue();
     this.price = data.getPrice().intValue();
