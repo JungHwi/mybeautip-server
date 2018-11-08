@@ -56,6 +56,7 @@ public class Order extends MemberAuditable {
     PREPARING(3),
     DELIVERING(4),
     DELIVERED(5),
+    CONFIRMED(6), // TODO: implement order confirmed
     ORDER_CANCELLING(11),
     ORDER_CANCELLED(12),
     PAYMENT_CANCELLING(21),
