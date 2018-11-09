@@ -71,4 +71,11 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
   Page<Goods> findByOrderByOrderCntDesc(Pageable pageable);
 
   Page<Goods> findByOrderByLikeCountDesc(Pageable pageable);
+
+  Page<Goods> findByScmNoOrderByHitCntDesc(Integer scmNo, Pageable pageable);
+
+  Page<Goods> findByScmNoOrderByOrderCntDesc(Integer scmNo, Pageable pageable);
+
+  Page<Goods> findByScmNoOrderByLikeCountDesc(Integer scmNo, Pageable pageable);
+
 }
