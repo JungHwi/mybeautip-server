@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
@@ -18,6 +19,7 @@ import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.revenue.Revenue;
 import com.jocoos.mybeautip.member.revenue.RevenueInfo;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
+import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
 import com.jocoos.mybeautip.store.StoreLike;
@@ -61,6 +63,8 @@ public class MemberController {
   private final GoodsService goodsService;
   private final VideoService videoService;
   private final TagService tagService;
+  private final NotificationService notificationService;
+  private final DeviceService deviceService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -106,7 +110,9 @@ public class MemberController {
                           CommentRepository commentRepository,
                           CommentLikeRepository commentLikeRepository,
                           RevenueRepository revenueRepository,
-                          MemberLeaveLogRepository memberLeaveLogRepository) {
+                          MemberLeaveLogRepository memberLeaveLogRepository,
+                          NotificationService notificationService,
+                          DeviceService deviceService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -124,6 +130,8 @@ public class MemberController {
     this.commentLikeRepository = commentLikeRepository;
     this.revenueRepository = revenueRepository;
     this.memberLeaveLogRepository = memberLeaveLogRepository;
+    this.notificationService = notificationService;
+    this.deviceService = deviceService;
   }
 
   @GetMapping("/me")
@@ -379,6 +387,9 @@ public class MemberController {
         member.setVisible(false);
         member.setDeletedAt(new Date());
         memberRepository.save(member);
+  
+        notificationService.readAllNotification(member.getId());
+        deviceService.setPushable(member.getId(), false);
 
         memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
       });

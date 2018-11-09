@@ -69,6 +69,13 @@ public class DeviceService {
        })
        .orElseGet(() -> deviceRepository.save(register(info)));
   }
+  
+  public void setPushable(Long memberId, boolean pushable) {
+    deviceRepository.findByCreatedById(memberId).forEach(device -> {
+      device.setPushable(pushable);
+      deviceRepository.save(device);
+    });
+  }
 
   public Device register(DeviceController.UpdateDeviceRequest info) {
     Device device = new Device(info.getDeviceId());

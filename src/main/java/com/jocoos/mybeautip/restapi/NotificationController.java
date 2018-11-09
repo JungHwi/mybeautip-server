@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.notification.NotificationService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -35,15 +36,19 @@ public class NotificationController {
   private final FollowingRepository followingRepository;
   private final MemberService memberService;
   private final MessageService messageService;
+  private final NotificationService notificationService;
+  
 
   public NotificationController(NotificationRepository notificationRepository,
                                 FollowingRepository followingRepository,
                                 MemberService memberService,
-                                MessageService messageService) {
+                                MessageService messageService,
+                                NotificationService notificationService) {
     this.notificationRepository = notificationRepository;
     this.followingRepository = followingRepository;
     this.memberService = memberService;
     this.messageService = messageService;
+    this.notificationService = notificationService;
   }
 
   @GetMapping
@@ -72,7 +77,7 @@ public class NotificationController {
          }
        });
     
-    readAllNotification(memberId);
+    notificationService.readAllNotification(memberId);
 
     String nextCursor = null;
     if (result.size() > 0) {
@@ -82,14 +87,6 @@ public class NotificationController {
     return new CursorResponse.Builder<>("/api/1/members/me/notifications", result)
        .withCount(count)
        .withCursor(nextCursor).toBuild();
-  }
-
-  private void readAllNotification(Long memberId) {
-    notificationRepository.findByTargetMemberIdAndReadIsFalse(memberId)
-        .forEach(notification -> {
-          notification.setRead(true);
-          notificationRepository.save(notification);
-        });
   }
 
   @PatchMapping("/{id:.+}") // Deprecated

@@ -191,4 +191,12 @@ public class NotificationService {
          }
        });
   }
+  
+  public void readAllNotification(Long memberId) {
+    notificationRepository.findByTargetMemberIdAndReadIsFalse(memberId)
+        .forEach(notification -> {
+          notification.setRead(true);
+          notificationRepository.save(notification);
+        });
+  }
 }
