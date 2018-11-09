@@ -32,9 +32,6 @@ public class DeliveryCharge {
   @Column(nullable = false)
   private String fixFl;
 
-  @Column
-  private String chargeData;
-
   public DeliveryCharge(int id) {
     this.id = id;
   }

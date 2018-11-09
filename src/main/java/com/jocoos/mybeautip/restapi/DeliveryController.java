@@ -56,11 +56,8 @@ public class DeliveryController {
     String fixFl;
     List<GodoService.ChargeData> chargeData;
 
-    public DeliveryChargeInfo(DeliveryCharge info) throws IOException {
+    public DeliveryChargeInfo(DeliveryCharge info) {
       BeanUtils.copyProperties(info, this);
-      if (info.getChargeData() != null) {
-        this.chargeData = Arrays.asList(mapper.readValue(info.getChargeData(), GodoService.ChargeData[].class));
-      }
     }
   }
 }

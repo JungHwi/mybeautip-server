@@ -20,3 +20,5 @@ ALTER TABLE `goods` ADD COLUMN `goods_display_fl` VARCHAR(255) DEFAULT NULL AFTE
 ALTER TABLE `goods_options` DROP COLUMN `created_at`;
 ALTER TABLE `goods_options` DROP COLUMN `modified_at`;
 
+ALTER TABLE `delivery_charge` DROP COLUMN `charge_data`;
+
