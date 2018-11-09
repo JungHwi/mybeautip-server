@@ -37,8 +37,14 @@ public class Goods {
   private String shortDescription;  // 짧은 설명 (250자 이내)
   private String goodsDescriptionMobile;  // 모바일 쇼핑몰 상세설명
   private String goodsSearchWord; // 검색 키워드
-  private String regDt;  // 상품등록일
-  private String modDt;  // 상품수정일
+  private String goodsDisplayFl;  // 노출여부
+  private String goodsSellFl; // 판매여부
+  private String goodsOpenDt;
+  private String onlyAdultFl;
+  private String goodsIconStartYmd;
+  private String goodsIconEndYmd;
+  private String goodsIconCdPeriod;
+  private String goodsIconCd;
   private URL mainImageData;  // 리스트 이미지 정보
   private URL magnifyImageData;  // 확대이미지 정보
   private URL detailImageData;  // 상세 이미지 정보

@@ -106,6 +106,12 @@ public class GodoGoodsResponse {
     private String detailInfoExchangeDirectInput;
     private String goodsSellFl;
     private String goodsDisplayFl;
+    private String goodsOpenDt;
+    private String onlyAdultFl;
+    private String goodsIconStartYmd;
+    private String goodsIconEndYmd;
+    private String goodsIconCdPeriod;
+    private String goodsIconCd;
 
 
     @JacksonXmlElementWrapper(useWrapping = false)
