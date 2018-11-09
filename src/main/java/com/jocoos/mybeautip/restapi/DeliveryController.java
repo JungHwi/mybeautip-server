@@ -1,8 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
@@ -19,7 +17,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.godo.GodoService;
 import com.jocoos.mybeautip.goods.DeliveryCharge;
 import com.jocoos.mybeautip.goods.DeliveryChargeRepository;
 
@@ -54,7 +51,6 @@ public class DeliveryController {
     String description;
     String collectFl;
     String fixFl;
-    List<GodoService.ChargeData> chargeData;
 
     public DeliveryChargeInfo(DeliveryCharge info) {
       BeanUtils.copyProperties(info, this);

@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.godo.GodoDeliveryResponse;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,11 +28,4 @@ public class DeliveryChargeDetail {
 
   @Column(nullable = false)
   private Integer price;
-
-  public DeliveryChargeDetail(int deliveryChargeId, GodoDeliveryResponse.ChargeData data) {
-    this.deliveryChargeId = deliveryChargeId;
-    this.unitStart = data.getUnitStart().intValue();
-    this.unitEnd = data.getUnitEnd().intValue();
-    this.price = data.getPrice().intValue();
-  }
 }

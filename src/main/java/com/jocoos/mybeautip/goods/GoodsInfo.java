@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,8 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.godo.GodoService;
 
 @Data
 @NoArgsConstructor
@@ -44,7 +43,7 @@ public class GoodsInfo {
   private String goodsSearchWord; // 검색 키워드
   private String goodsSellFl; // 판매여부
   private String goodsIconCd;
-  private List<GodoService.MustInfo> goodsMustInfo;
+  private List<MustInfo> goodsMustInfo;
   private Integer relatedVideoTotalCount; // 관련 방송(동영상 리뷰) 전체 개수
   private String deliveryInfo;
   private String refundInfo;
@@ -77,7 +76,7 @@ public class GoodsInfo {
     } else {
       ObjectMapper mapper = new ObjectMapper();
       try {
-        this.goodsMustInfo = Arrays.asList(mapper.readValue(goods.getGoodsMustInfo(), GodoService.MustInfo[].class));
+        this.goodsMustInfo = Arrays.asList(mapper.readValue(goods.getGoodsMustInfo(), MustInfo[].class));
       } catch (IOException e) {
         this.goodsMustInfo = new ArrayList<>();
       }
@@ -87,5 +86,13 @@ public class GoodsInfo {
     this.refundInfo = StringUtils.isBlank(refundInfo) ? "" : refundInfo;
     this.asInfo = ""; // deprecated
     this.companyInfo = StringUtils.isBlank(companyInfo) ? "" : companyInfo;
+  }
+  
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class MustInfo {
+    String key;
+    String value;
   }
 }
