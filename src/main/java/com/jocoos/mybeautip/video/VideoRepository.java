@@ -3,8 +3,10 @@ package com.jocoos.mybeautip.video;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -12,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.jocoos.mybeautip.member.Member;
 
-public interface VideoRepository extends CrudRepository<Video, Long> {
+public interface VideoRepository extends JpaRepository<Video, Long> {
 
   // Get public videos
   @Query("select v from Video v where v.visibility = 'PUBLIC' and v.createdAt < ?1 and v.deletedAt is null order by v.createdAt desc")
@@ -104,4 +106,6 @@ public interface VideoRepository extends CrudRepository<Video, Long> {
   @Modifying
   @Query("update Video v set v.totalWatchCount = v.totalWatchCount + ?2, v.modifiedAt = now() where v.id = ?1")
   void updateTotalWatchCount(Long id, int i);
+
+  Page<Video> findByTypeAndState(String type, String state, Pageable pageable);
 }

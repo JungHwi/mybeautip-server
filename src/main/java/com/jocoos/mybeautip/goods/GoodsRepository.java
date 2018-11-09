@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -64,4 +65,22 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
   List<Goods> findRelatedGoods(@Param("category")String category,
                                @Param("itself")String itself,
                                Pageable pageable);
+
+
+  Page<Goods> findByScmNo(Integer scmNo, Pageable pageable);
+
+  Page<Goods> findByScmNoAndCateCd(Integer scmNo, String code, Pageable pageable);
+
+  Page<Goods> findByOrderByHitCntDesc(Pageable pageable);
+
+  Page<Goods> findByOrderByOrderCntDesc(Pageable pageable);
+
+  Page<Goods> findByOrderByLikeCountDesc(Pageable pageable);
+
+  Page<Goods> findByScmNoOrderByHitCntDesc(Integer scmNo, Pageable pageable);
+
+  Page<Goods> findByScmNoOrderByOrderCntDesc(Integer scmNo, Pageable pageable);
+
+  Page<Goods> findByScmNoOrderByLikeCountDesc(Integer scmNo, Pageable pageable);
+
 }
