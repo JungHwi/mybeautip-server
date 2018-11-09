@@ -75,7 +75,7 @@ public class GoodsController {
 
   @GetMapping("/{goodsNo}")
   public GoodsInfo getGoods(@PathVariable("goodsNo") String goodsNo) {
-    Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
+    Optional<Goods> optional = goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(goodsNo, "y");
     if (optional.isPresent()) {
       return goodsService.generateGoodsInfo(optional.get());
     } else {
@@ -98,7 +98,7 @@ public class GoodsController {
   @GetMapping("/{goods_no}/reviewers")
   public GoodsRelatedVideoInfoResponse getReviewers(@PathVariable("goods_no") String goodsNo) {
     GoodsRelatedVideoInfoResponse response = new GoodsRelatedVideoInfoResponse();
-    return goodsRepository.findByGoodsNo(goodsNo)
+    return goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(goodsNo, "y")
       .map(goods -> {
         Page<Member> page = videoGoodsRepository.getDistinctMembers(goods, PageRequest.of(0, 6));
         if (page.hasContent()) {
@@ -133,7 +133,7 @@ public class GoodsController {
   // Will be deprecated
   @GetMapping("/{goodsNo}/options")
   public ResponseEntity<List<GoodsOptionInfo>> getGoodsOptions(@PathVariable Integer goodsNo) {
-    Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
+    Goods goods = goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(String.valueOf(goodsNo), "y")
         .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
     
     List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
@@ -175,9 +175,9 @@ public class GoodsController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return goodsRepository.findByGoodsNo(goodsNo)
+    return goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(goodsNo, "y")
         .map(goods -> {
-          if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goodsNo, memberId).isPresent()) {
+          if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(goodsNo, memberId, "y").isPresent()) {
             throw new BadRequestException("duplicated_goods_like", "Already goods liked");
           }
 
@@ -199,7 +199,7 @@ public class GoodsController {
       throw new MemberNotFoundException("Login required");
     }
 
-    return goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberId)
+    return goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(likeId, goodsNo, memberId, "y")
         .map(goods -> {
           Optional<GoodsLike> liked = goodsLikeRepository.findById(likeId);
           if (!liked.isPresent()) {
@@ -248,8 +248,8 @@ public class GoodsController {
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(
-        startCursor, goodsNo, "PUBLIC", pageable);
+    Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(
+        startCursor, goodsNo, "PUBLIC", "y", pageable);
     List<VideoController.VideoInfo> result = new ArrayList<>();
 
     for (VideoGoods videoGoods : slice.getContent()) {

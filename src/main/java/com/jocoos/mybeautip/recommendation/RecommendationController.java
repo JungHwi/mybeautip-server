@@ -94,7 +94,7 @@ public class RecommendationController {
   @GetMapping("/goods")
   public ResponseEntity<List<GoodsInfo>> getRecommendedGoods(
       @RequestParam(defaultValue = "100") int count) {
-    Slice<GoodsRecommendation> goods = goodsRecommendationRepository.findAll(
+    Slice<GoodsRecommendation> goods = goodsRecommendationRepository.findAllByGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull("y",
         PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
     List<GoodsInfo> result = Lists.newArrayList();

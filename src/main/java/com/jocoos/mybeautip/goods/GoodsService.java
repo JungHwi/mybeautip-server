@@ -45,7 +45,7 @@ public class GoodsService {
 
 
   public List<Goods> getRelatedGoods(String goodsNo) {
-    Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
+    Optional<Goods> optional = goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(goodsNo, "y");
     String category = BEST_CATEGORY;
     if (optional.isPresent()) {
       category = optional.get().getCateCd();
@@ -145,12 +145,12 @@ public class GoodsService {
     Long likeId = null;
     Long me = memberService.currentMemberId();
     if (me != null) {
-      Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goods.getGoodsNo(), me);
+      Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(goods.getGoodsNo(), me, "y");
       likeId = optional.map(GoodsLike::getId).orElse(null);
     }
     // Set total count of related videos
     int relatedVideoTotalCount = videoGoodsRepository
-        .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(goods.getGoodsNo(), "PUBLIC");
+        .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(goods.getGoodsNo(), "PUBLIC", "y");
     String deliveryInfo = "";
     String refundInfo = "";
     String asInfo = "";

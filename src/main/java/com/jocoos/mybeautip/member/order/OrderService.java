@@ -331,7 +331,7 @@ public class OrderService {
    * Save revenues for seller
    */
   private void saveRevenuesForSeller(Order order) {
-    Map<Goods, Video> videoGoods = videoGoodsRepository.findAllByVideoId(order.getVideoId())
+    Map<Goods, Video> videoGoods = videoGoodsRepository.findAllByVideoIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(order.getVideoId(), "y")
        .stream().collect(Collectors.toMap(VideoGoods::getGoods, VideoGoods::getVideo));
 
     log.debug("video goods: {}", videoGoods);

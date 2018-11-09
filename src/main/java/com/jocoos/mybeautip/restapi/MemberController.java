@@ -263,7 +263,7 @@ public class MemberController {
     }
 
     LikeCountResponse response = new LikeCountResponse();
-    response.setGoods(goodsLikeRepository.countByCreatedByIdAndGoodsDeletedAtIsNull(memberId));
+    response.setGoods(goodsLikeRepository.countByCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(memberId, "y"));
     response.setStore(storeLikeRepository.countByCreatedById(memberId));
     response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(memberId));
     response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(memberId));
@@ -273,7 +273,7 @@ public class MemberController {
   @GetMapping(value = "/{id:.+}/like_count")
   public LikeCountResponse getMemberLikesCount(@PathVariable Long id) {
     LikeCountResponse response = new LikeCountResponse();
-    response.setGoods(goodsLikeRepository.countByCreatedByIdAndGoodsDeletedAtIsNull(id));
+    response.setGoods(goodsLikeRepository.countByCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(id, "y"));
     response.setStore(storeLikeRepository.countByCreatedById(id));
     response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(id));
     response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(id));
@@ -499,10 +499,10 @@ public class MemberController {
     List<GoodsInfo> result = Lists.newArrayList();
 
     if (cursor != null) {
-      goodsLikes = goodsLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndGoodsDeletedAtIsNull(
-        new Date(cursor), memberId, pageable);
+      goodsLikes = goodsLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(
+        new Date(cursor), memberId, "y", pageable);
     } else {
-      goodsLikes = goodsLikeRepository.findByCreatedByIdAndGoodsDeletedAtIsNull(memberId, pageable);
+      goodsLikes = goodsLikeRepository.findByCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(memberId, "y", pageable);
     }
 
     for (GoodsLike like : goodsLikes) {

@@ -170,7 +170,7 @@ public class PostController {
        .map(post -> {
          List<GoodsInfo> result = Lists.newArrayList();
          post.getGoods().stream().forEach(gno -> {
-           goodsRepository.findById(gno).ifPresent(g -> {
+           goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(gno, "y").ifPresent(g -> {
              result.add(goodsService.generateGoodsInfo(g));
            });
          });

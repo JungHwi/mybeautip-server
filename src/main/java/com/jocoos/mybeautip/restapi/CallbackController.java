@@ -100,7 +100,7 @@ public class CallbackController {
         if (goods.length() != 10) { // invalid goodsNo
           continue;
         }
-        goodsRepository.findByGoodsNo(goods).map(g -> {
+        goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(goods, "y").map(g -> {
           videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
           return Optional.empty();
         });

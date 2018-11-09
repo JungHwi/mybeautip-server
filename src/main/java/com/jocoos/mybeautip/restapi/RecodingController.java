@@ -103,9 +103,9 @@ public class RecodingController {
                 })
                 .orElseGet(() -> new RecodingInfo(recoding));
       case 2:
-        return goodsRepository.findById(recoding.getItemId())
+        return goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(recoding.getItemId(), "y")
            .map(goods -> {
-             Long likeId = goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goods.getGoodsNo(), me)
+             Long likeId = goodsLikeRepository.findByGoodsGoodsNoAndCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(goods.getGoodsNo(), me, "y")
                .map(GoodsLike::getId).orElse(null);
              return new RecodingInfo(recoding, goods, likeId);
            })

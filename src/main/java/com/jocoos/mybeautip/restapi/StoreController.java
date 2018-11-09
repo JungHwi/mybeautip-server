@@ -97,9 +97,9 @@ public class StoreController {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<Goods> slice;
     if (StringUtils.isEmpty(category)) {
-      slice = goodsRepository.findByCreatedAtBeforeAndScmNo(startCursor, id, pageable);
+      slice = goodsRepository.findByCreatedAtBeforeAndScmNoAndGoodsDisplayFlAndDeletedAtIsNull(startCursor, id, "y", pageable);
     } else {
-      slice = goodsRepository.findByCreatedAtBeforeAndScmNoAndCateCd(startCursor, id, category, pageable);
+      slice = goodsRepository.findByCreatedAtBeforeAndScmNoAndCateCdAndGoodsDisplayFlAndDeletedAtIsNull(startCursor, id, category, "y", pageable);
     }
 
     List<GoodsInfo> result = new ArrayList<>();

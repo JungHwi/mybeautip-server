@@ -27,7 +27,7 @@ public class GoodsOptionService {
   }
   
   public GoodsOptionInfo getGoodsOptionData(int goodsNo) {
-    Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
+    Goods goods = goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(String.valueOf(goodsNo), "y")
         .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
   
     List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
