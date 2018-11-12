@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.video;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 
@@ -108,4 +109,11 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   void updateTotalWatchCount(Long id, int i);
 
   Page<Video> findByTypeAndState(String type, String state, Pageable pageable);
+
+  Page<Video> findByType(String type, Pageable pageable);
+
+  Page<Video> findByState(String state, Pageable pageable);
+
+  Page<Video> findByStateAndMemberIdIn(String state, Collection<Long> owners, Pageable pageable);
+
 }
