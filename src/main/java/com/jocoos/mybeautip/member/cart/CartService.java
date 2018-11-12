@@ -255,6 +255,7 @@ public class CartService {
   @Data
   static class CartGoodsInfo {
     private String goodsNo;
+    private Integer state;  // 상태 (1: 구매가능, 2:품절, 3: 구매불가(판매 안함), 4: 노출안함, 5: 삭제됨)
     private String goodsNm;
     private URL listImageData;  // 썸네일 이미지 정보
     private String soldOutFl;  // 품절상태 (n= 정상, y=품절(수동))
