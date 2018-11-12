@@ -176,7 +176,7 @@ public class RecodingController {
     private Integer likeCount;
     private Long likeId;
     private String type;
-    private String state;
+    private Object state;
     private Date createdAt;
 
     public BasicInfo(Post post, Long likeId) {
@@ -186,6 +186,7 @@ public class RecodingController {
 
     public BasicInfo(Goods goods, Long likeId) {
       BeanUtils.copyProperties(goods, this);
+      this.state = goods.getState();
       this.title = goods.getGoodsNm();
       this.thumbnailUrl = goods.getMainImageData().toString();
       this.category = null;
@@ -195,6 +196,7 @@ public class RecodingController {
     public BasicInfo(Video video, Long likeId) {
       BeanUtils.copyProperties(video, this);
       this.category = null;
+      this.state = video.getState();
       this.likeId = likeId;
     }
   }
