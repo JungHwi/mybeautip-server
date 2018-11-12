@@ -71,8 +71,9 @@ public class RecommendationController {
   @GetMapping("/members")
   public ResponseEntity<List<MemberInfo>> getRecommendedMembers(
       @RequestParam(defaultValue = "100") int count) {
-    Slice<MemberRecommendation> members = memberRecommendationRepository.findAll(
-        PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    Date now = new Date();
+    List<MemberRecommendation> members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(
+        now, now, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
 
     members.stream().forEach(r -> {
@@ -108,7 +109,7 @@ public class RecommendationController {
   public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedLiveVideos() {
     PageRequest page = PageRequest.of(0, MAX_RECOMMENDED_BJ_COUNT, new Sort(Sort.Direction.ASC, "seq"));
     Date now = new Date();
-    List<MemberRecommendation> memberList = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfter(now, now, page);
+    List<MemberRecommendation> memberList = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(now, now, page);
     List<VideoController.VideoInfo> result = Lists.newArrayList();
     
     for (MemberRecommendation member : memberList) {

@@ -7,5 +7,5 @@ import java.util.Date;
 import java.util.List;
 
 public interface MemberRecommendationRepository extends JpaRepository<MemberRecommendation, Long> {
-  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfter(Date statedAt, Date endedAt, Pageable pageable);
+  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(Date statedAt, Date endedAt, Pageable pageable);
 }
