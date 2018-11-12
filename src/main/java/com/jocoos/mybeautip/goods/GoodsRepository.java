@@ -15,12 +15,12 @@ import org.springframework.data.repository.query.Param;
 public interface GoodsRepository extends JpaRepository<Goods, String> {
 
   @Query("select g from Goods g " +
-      "where g.goodsDisplayFl='y' and g.deletedAt is null " +
+      "where g.state <=2 " +
       "and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> getGoodsList(@Param("cursor")Date cursor, Pageable pageable);
 
   @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
-      "and g.goodsDisplayFl='y' and g.deletedAt is null " +
+      "and g.state <=2 " +
       "and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> findAllByCategory(@Param("category")String category,
                                  @Param("cursor")Date cursor,
@@ -30,7 +30,7 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
     "(g.goodsNm like concat('%',:keyword,'%') " +
     "or g.goodsDescription like concat('%',:keyword,'%') " +
     "or g.goodsSearchWord like concat('%',:keyword,'%')) " +
-    "and g.goodsDisplayFl='y' and g.deletedAt is null " +
+    "and g.state <=2 " +
     "and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> findAllByKeyword(@Param("keyword")String keyword,
                                 @Param("cursor")Date cursor,
@@ -40,7 +40,7 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
     "and (g.goodsNm like concat('%',:keyword,'%') " +
     "or g.goodsDescription like concat('%',:keyword,'%') " +
     "or g.goodsSearchWord like concat('%',:keyword,'%')) " +
-    "and g.goodsDisplayFl='y' and g.deletedAt is null " +
+      "and g.state <=2 " +
     "and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> findAllByCategoryAndKeyword(@Param("category")String category,
                                            @Param("keyword")String keyword,
@@ -62,7 +62,7 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
   void updateLikeCount(String goodsNo, Integer count);
 
   @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
-    "and g.goodsNo != :itself and g.goodsDisplayFl='y' and g.deletedAt is null order by g.hitCnt desc")
+    "and g.goodsNo != :itself and g.state <=2 order by g.hitCnt desc")
   List<Goods> findRelatedGoods(@Param("category")String category,
                                @Param("itself")String itself,
                                Pageable pageable);
