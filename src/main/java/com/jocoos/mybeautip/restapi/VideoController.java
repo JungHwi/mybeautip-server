@@ -155,7 +155,7 @@ public class VideoController {
 
   @GetMapping("/{id}/goods")
   public List<GoodsInfo> getRelatedGoods(@PathVariable("id") Long id) {
-    List<VideoGoods> list = videoGoodsRepository.findAllByVideoIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(id, "y");
+    List<VideoGoods> list = videoGoodsRepository.findAllByVideoId(id);
 
     List<GoodsInfo> relatedGoods = new ArrayList<>();
     for (VideoGoods video : list) {

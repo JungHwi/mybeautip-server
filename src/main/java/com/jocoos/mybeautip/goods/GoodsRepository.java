@@ -47,13 +47,14 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
                                            @Param("cursor")Date cursor,
                                            Pageable of);
 
-  Slice<Goods> findByCreatedAtBeforeAndScmNoAndGoodsDisplayFlAndDeletedAtIsNull(Date createdAt, Integer scmNo, String goodsDisplayFl, Pageable pageable);
+  Slice<Goods> findByCreatedAtBeforeAndScmNoAndStateLessThanEqual(Date createdAt, Integer scmNo, int state, Pageable pageable);
 
-  Slice<Goods> findByCreatedAtBeforeAndScmNoAndCateCdAndGoodsDisplayFlAndDeletedAtIsNull(Date createdAt, Integer scmNo, String code, String goodsDisplayFl, Pageable pageable);
+  Slice<Goods> findByCreatedAtBeforeAndScmNoAndCateCdAndStateLessThanEqual(Date createdAt, Integer scmNo, String code, int state, Pageable pageable);
 
-  Optional<Goods> findByGoodsNo(String goodsNo);  // Used for purchase (order history)
+  Optional<Goods> findByGoodsNo(String goodsNo);
   
-  Optional<Goods> findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(String goodsNo, String goodsDisplayFl);
+  Optional<Goods> findByGoodsNoAndStateLessThanEqual(String goodsNo, int state);
+  
 
   @Modifying
   @Query("update Goods g set g.likeCount = g.likeCount + ?2, g.modifiedAt = now() " +

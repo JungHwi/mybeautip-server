@@ -139,12 +139,12 @@ public class AdminController {
 
 
     Optional<GoodsRecommendation> optional
-        = goodsRecommendationRepository.findByGoodsNoAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(request.getGoodsNo(), "y");
+        = goodsRecommendationRepository.findByGoodsNo(request.getGoodsNo());
     GoodsRecommendation recommendation = optional.orElseGet(GoodsRecommendation::new);
     BeanUtils.copyProperties(request, recommendation);
     log.debug("recommended goods: {}", recommendation);
 
-    return goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(request.getGoodsNo(), "y").map(g -> {
+    return goodsRepository.findByGoodsNo(request.getGoodsNo()).map(g -> {
       recommendation.setGoods(g);
 
       try {

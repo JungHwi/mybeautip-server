@@ -19,6 +19,11 @@ import lombok.NoArgsConstructor;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "goods")
 public class Goods {
+  
+  public enum GoodsState {
+    AVAILABLE, SOLDOUT, NO_SALE, NO_DISPLAY, DELETED
+  }
+  
   @Id
   private String goodsNo;  // 상품번호
   private Integer state;  // 상태 (1: 구매가능, 2:품절, 3: 구매불가(판매 안함), 4: 노출안함, 5: 삭제됨)

@@ -149,7 +149,7 @@ public class CartController {
   }
 
   private Cart getValidCartItem(String goodsNo, int optionNo, int quantity) {
-    Goods goods = goodsRepository.findByGoodsNoAndGoodsDisplayFlAndDeletedAtIsNull(goodsNo, "y")
+    Goods goods = goodsRepository.findByGoodsNoAndStateLessThanEqual(goodsNo, Goods.GoodsState.NO_SALE.ordinal())
       .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
 
     if ("y".equals(goods.getSoldOutFl())) { // 품절 플래그

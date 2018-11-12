@@ -14,12 +14,12 @@ import com.jocoos.mybeautip.member.Member;
 
 public interface VideoGoodsRepository extends JpaRepository<VideoGoods, Long> {
 
- Slice<VideoGoods> findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(
-     Date cursor, String goodsNo, String visibility, String goodsDisplayFl, Pageable pageable);
+ Slice<VideoGoods> findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(
+     Date cursor, String goodsNo, String visibility, Pageable pageable);
   
-  List<VideoGoods> findAllByVideoIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(Long id, String goodsDisplayFl);
+  List<VideoGoods> findAllByVideoId(Long id);
 
-  int countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(String goodsNo, String visibility, String goodsDisplayFl);
+  int countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(String goodsNo, String visibility);
 
   @Query("select distinct v.member from VideoGoods v where v.member in (select v2.member from VideoGoods v2 where v2.goods=?1)")
   Page<Member> getDistinctMembers(Goods goods, Pageable pageable);

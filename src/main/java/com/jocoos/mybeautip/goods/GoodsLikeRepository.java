@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface GoodsLikeRepository extends JpaRepository<GoodsLike, Long> {
   
-  Optional<GoodsLike> findByGoodsGoodsNoAndCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(String goodsNo, Long createdBy, String goodsDisplayFl);
+  Optional<GoodsLike> findByGoodsGoodsNoAndCreatedById(String goodsNo, Long createdBy);
 
-  Optional<GoodsLike> findByIdAndGoodsGoodsNoAndCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(Long id, String goodsNo, Long createdBy, String goodsDisplayFl);
+  Optional<GoodsLike> findByIdAndGoodsGoodsNoAndCreatedById(Long id, String goodsNo, Long createdBy);
 
-  Slice<GoodsLike> findByCreatedAtBeforeAndCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(Date createdAt, Long createdBy, String goodsDisplayFl, Pageable pageable);
+  Slice<GoodsLike> findByCreatedAtBeforeAndCreatedById(Date createdAt, Long createdBy, Pageable pageable);
 
-  Slice<GoodsLike> findByCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(Long createdBy, String goodsDisplayFl, Pageable pageable);
+  Slice<GoodsLike> findByCreatedById(Long createdBy, Pageable pageable);
 
-  Integer countByCreatedByIdAndGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull(Long createdBy, String goodsDisplayFl);
+  Integer countByCreatedById(Long createdBy);
 }

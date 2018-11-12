@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.recommendation;
 import java.util.Date;
 import java.util.List;
 
+import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import org.springframework.beans.BeanUtils;
@@ -93,10 +94,11 @@ public class RecommendationController {
   }
 
   @GetMapping("/goods")
-  public ResponseEntity<List<GoodsInfo>> getRecommendedGoods(
-      @RequestParam(defaultValue = "100") int count) {
-    Slice<GoodsRecommendation> goods = goodsRecommendationRepository.findAllByGoodsGoodsDisplayFlAndGoodsDeletedAtIsNull("y",
-        PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+  public ResponseEntity<List<GoodsInfo>> getRecommendedGoods(@RequestParam(defaultValue = "100") int count) {
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq"));
+    Date now = new Date();
+    Slice<GoodsRecommendation> goods = goodsRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndGoodsStateLessThanEqual(
+        now, now, Goods.GoodsState.NO_SALE.ordinal(), page);
 
     List<GoodsInfo> result = Lists.newArrayList();
     goods.stream().forEach(recommendation
