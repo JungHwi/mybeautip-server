@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface VideoReportRepository extends JpaRepository<VideoReport, Long> {
   Optional<VideoReport> findByVideoIdAndCreatedById(Long videoId, Long createdById);
 
-  Page<VideoReport> findByVideoTypeAndVideoState(String type, String state, Pageable pageable);
+  Page<VideoReport> findByVideoState(String state, Pageable pageable);
 }
