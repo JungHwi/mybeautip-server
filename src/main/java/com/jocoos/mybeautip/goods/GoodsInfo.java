@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 @NoArgsConstructor
 public class GoodsInfo {
   private String goodsNo;  // 상품번호
+  private Integer state;  // 상태 (1: 구매가능, 2:품절, 3: 구매불가(판매 안함), 4: 노출안함, 5: 삭제됨)
   private String goodsNm;  // 상품명
   private String cateCd;  //  대표 카테고리
   private String soldOutFl;  // 품절상태 (n= 정상, y=품절(수동))
@@ -41,7 +42,6 @@ public class GoodsInfo {
   private String deliveryFixFl;  // 배송비 정책 방식 (fixed=고정, free=무료, price=금액별, count=수량별, weight=무게별)
   private String deliveryMethod;  // 배송비 정책 문구
   private String goodsSearchWord; // 검색 키워드
-  private String goodsSellFl; // 판매여부
   private String goodsIconCd;
   private List<MustInfo> goodsMustInfo;
   private Integer relatedVideoTotalCount; // 관련 방송(동영상 리뷰) 전체 개수

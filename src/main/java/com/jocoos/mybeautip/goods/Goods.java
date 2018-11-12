@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 public class Goods {
   @Id
   private String goodsNo;  // 상품번호
+  private Integer state;  // 상태 (1: 구매가능, 2:품절, 3: 구매불가(판매 안함), 4: 노출안함, 5: 삭제됨)
   private String goodsNm;  // 상품명
   private String cateCd;  // 대표 카테고리
   private String allCd;  // 대표 카테고리
