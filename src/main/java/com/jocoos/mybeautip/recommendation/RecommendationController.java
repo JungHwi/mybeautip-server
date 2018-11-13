@@ -1,11 +1,19 @@
 package com.jocoos.mybeautip.recommendation;
 
-import java.util.Date;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.tag.Tag;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -17,19 +25,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.restapi.VideoController;
-import com.jocoos.mybeautip.tag.Tag;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -123,16 +121,29 @@ public class RecommendationController {
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
-  @GetMapping("/motd")
-  public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedMotds(
+  @GetMapping("/motds")
+  public ResponseEntity<List<RecommendedMotdInfo>> getRecommendedMotds(
     @RequestParam(defaultValue = "100") int count) {
     Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
       PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
+    List<RecommendedMotdInfo> info = new ArrayList<>();
+    for (MotdRecommendation recommendation : videos) {
+      info.add(new RecommendedMotdInfo(recommendation, videoService.generateVideoInfo(recommendation.getVideo())));
+    }
+    return new ResponseEntity<>(info, HttpStatus.OK);
+  }
+  
+  @GetMapping("/motd")  // Will be deprecated, use getRecommendedMotds
+  public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedMotd(
+      @RequestParam(defaultValue = "100") int count) {
+    Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
+        PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+
     List<VideoController.VideoInfo> result = Lists.newArrayList();
     for (MotdRecommendation recommendation : videos) {
       videoRepository.findById(recommendation.getVideoId()).map(video ->
-        result.add(videoService.generateVideoInfo(video)));
+          result.add(videoService.generateVideoInfo(video)));
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
@@ -178,12 +189,24 @@ public class RecommendationController {
   }
 
   @Data
-  class TagInfo {
-    String name;
-    Integer refCount;
+  private static class TagInfo {
+    private String name;
+    private Integer refCount;
 
     TagInfo(Tag tag) {
       BeanUtils.copyProperties(tag, this);
+    }
+  }
+  
+  @Data
+  private static class RecommendedMotdInfo {
+    private Integer seq;
+    private Date createdAt;
+    private VideoController.VideoInfo content;
+  
+    RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo video) {
+      BeanUtils.copyProperties(recommendation, this);
+      this.content = video;
     }
   }
 }
