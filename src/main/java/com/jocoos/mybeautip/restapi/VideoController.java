@@ -167,8 +167,8 @@ public class VideoController {
   @GetMapping("/{id}/comments")
   public CursorResponse getComments(@PathVariable Long id,
                                     @RequestParam(defaultValue = "20") int count,
-                                    @RequestParam(required = false) String cursor,
-                                    @RequestParam(required = false) Long parentId) {
+                                    @RequestParam(required = false) Long cursor,
+                                    @RequestParam(name = "parent_id", required = false) Long parentId) {
     PageRequest page = PageRequest.of(0, count);
     Slice<Comment> comments;
     Long me = memberService.currentMemberId();
@@ -205,7 +205,7 @@ public class VideoController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      nextCursor = String.valueOf(result.get(result.size() - 1).getId() + 1);
     }
 
     int totalCount = videoRepository.findById(id).map(Video::getCommentCount).orElse(0);

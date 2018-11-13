@@ -25,19 +25,19 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
   Slice<Comment> findByPostIdAndParentIdIsNull(Long postId, Pageable pageable);
 
-  Slice<Comment> findByPostIdAndCreatedAtAfterAndParentIdIsNull(Long postId, Date createdAt, Pageable pageable);
+  Slice<Comment> findByPostIdAndIdGreaterThanEqualAndParentIdIsNull(Long postId, Long cursor, Pageable pageable);
 
   Optional<Comment> findByIdAndVideoId(Long id, Long videoId);
 
   Optional<Comment> findByIdAndVideoIdAndCreatedById(Long id, Long videoId, Long createdBy);
 
-  Slice<Comment> findByVideoIdAndCreatedAtAfterAndParentIdIsNull(Long id, Date createdAt, Pageable pageable);
+  Slice<Comment> findByVideoIdAndIdGreaterThanEqualAndParentIdIsNull(Long id, Long cursor, Pageable pageable);
 
   Slice<Comment> findByVideoIdAndParentIdIsNull(Long id, Pageable pageable);
 
   Slice<Comment> findByParentId(Long parentId, Pageable pageable);
 
-  Slice<Comment> findByParentIdAndCreatedAtAfter(Long parentId, Date createdAt, Pageable pageable);
+  Slice<Comment> findByParentIdAndIdGreaterThanEqual(Long parentId, Long cursor, Pageable pageable);
 
   Slice<Comment> findByCreatedByIdAndCreatedAtBeforeAndParentIdIsNull(Long id, Date createdAt, Pageable pageable);
 

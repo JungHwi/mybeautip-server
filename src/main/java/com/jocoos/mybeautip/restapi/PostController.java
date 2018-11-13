@@ -256,7 +256,7 @@ public class PostController {
   @GetMapping("/{id:.+}/comments")
   public CursorResponse getComments(@PathVariable Long id,
                                         @RequestParam(defaultValue = "20") int count,
-                                        @RequestParam(required = false) String cursor,
+                                        @RequestParam(required = false) Long cursor,
                                         @RequestParam(required = false) Long parentId) {
     PageRequest page = PageRequest.of(0, count);
     Slice<Comment> comments = null;
@@ -294,7 +294,7 @@ public class PostController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      nextCursor = String.valueOf(result.get(result.size() - 1).getId() + 1);
     }
 
     int totalCount = postRepository.findById(id).map(Post::getCommentCount).orElse(0);
