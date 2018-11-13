@@ -46,5 +46,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   @Query("update Member m set m.revenue = m.revenue + ?2, m.modifiedAt = now() where m.id = ?1")
   void updateRevenue(Long id, Integer revenue);
 
-  Page<Member> findByLinkIn(Collection<Integer> links, Pageable pageable);
+  Page<Member> findByLinkInAndDeletedAtIsNull(Collection<Integer> links, Pageable pageable);
+
+  Page<Member> findByDeletedAtIsNotNull(Pageable pageable);
+
+  Page<Member> findByLinkInAndDeletedAtIsNotNull(Collection<Integer> links, Pageable pageable);
 }
