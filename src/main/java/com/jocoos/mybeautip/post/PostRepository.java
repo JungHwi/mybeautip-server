@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.post;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,4 +39,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   Slice<Post> findByCategoryAndCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(int category, Date createdAt, String title, String description, Pageable pageable);
 
   Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date createdAt, String title, String description, Pageable pageable);
+
+  Page<Post> findByCategory(int category, Pageable pageable);
 }
