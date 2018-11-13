@@ -15,6 +15,7 @@ import com.jocoos.mybeautip.member.mention.MentionTag;
 public class CommentInfo {
   private Long id;
   private Long postId;
+  private Long videoId;
   private String comment;
   private Long parentId;
   private int commentCount;
@@ -44,11 +45,11 @@ public class CommentInfo {
   private void setCommentRef(Comment comment) {
     if (comment != null && comment.getCommentCount() > 0) {
       if (comment.getPostId() != null) {
-        this.commentRef = String.format("/api/1/posts/%d/comments?parentId=%d", comment.getPostId(), comment.getId());
+        this.commentRef = String.format("/api/1/posts/%d/comments?parent_id=%d", comment.getPostId(), comment.getId());
       }
 
       if (comment.getVideoId() != null) {
-        this.commentRef = String.format("/api/1/videos/%d/comments?parentId=%d", comment.getVideoId(), comment.getId());
+        this.commentRef = String.format("/api/1/videos/%d/comments?parent_id=%d", comment.getVideoId(), comment.getId());
       }
     }
   }
