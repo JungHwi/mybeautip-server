@@ -1,14 +1,7 @@
 package com.jocoos.mybeautip.notification;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.jocoos.mybeautip.devices.DeviceService;
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
@@ -20,6 +13,11 @@ import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.Date;
 
 @Slf4j
 @Service
@@ -84,10 +82,10 @@ public class NotificationService {
          Notification n = null;
          if (comment.getParentId() != null) {
            Member parent = findCommentMemberByParentId(comment.getParentId());
-           n = notificationRepository.save(new Notification(comment, comment.getParentId(), parent, post.getThumbnailUrl()));
+           n = notificationRepository.save(new Notification(post, comment, comment.getParentId(), parent, post.getThumbnailUrl()));
          } else {
            if (!(comment.getCreatedBy().getId().equals(post.getCreatedBy().getId()))) {
-             n = notificationRepository.save(new Notification(comment, post.getCreatedBy(), post.getThumbnailUrl()));
+             n = notificationRepository.save(new Notification(post, comment, post.getCreatedBy(), post.getThumbnailUrl()));
            }
          }
 
@@ -103,10 +101,10 @@ public class NotificationService {
          Notification n = null;
          if (comment.getParentId() != null) {
            Member parent = findCommentMemberByParentId(comment.getParentId());
-           n = notificationRepository.save(new Notification(comment, comment.getParentId(), parent, v.getThumbnailUrl()));
+           n = notificationRepository.save(new Notification(v, comment, comment.getParentId(), parent, v.getThumbnailUrl()));
          } else {
            if (!(comment.getCreatedBy().getId().equals(v.getMember().getId()))) {
-             n = notificationRepository.save(new Notification(comment, v.getMember(), v.getThumbnailUrl()));
+             n = notificationRepository.save(new Notification(v, comment, v.getMember(), v.getThumbnailUrl()));
            }
          }
 
@@ -124,18 +122,19 @@ public class NotificationService {
 
   public void notifyAddCommentLike(CommentLike commentLike) {
     if (!(commentLike.getCreatedBy().getId().equals(commentLike.getComment().getCreatedBy().getId()))) {
-      String thumbnail = null;
+      Notification n = null;
       if (commentLike.getComment().getVideoId() != null) {
-        thumbnail = videoRepository.findById(commentLike.getComment().getVideoId())
-           .map(Video::getThumbnailUrl).orElseGet(null);
+        Video video = videoRepository.findById(commentLike.getComment().getVideoId())
+            .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + commentLike.getComment().getVideoId()));
+        n = notificationRepository.save(new Notification(video, commentLike));
       }
 
       if (commentLike.getComment().getPostId() != null) {
-        thumbnail = postRepository.findById(commentLike.getComment().getPostId())
-           .map(Post::getThumbnailUrl).orElseGet(null);
+        Post post = postRepository.findById(commentLike.getComment().getPostId())
+            .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + commentLike.getComment().getPostId()));
+        n = notificationRepository.save(new Notification(post, commentLike));
       }
 
-      Notification n = notificationRepository.save(new Notification(commentLike, thumbnail));
       deviceService.push(n);
     }
   }
