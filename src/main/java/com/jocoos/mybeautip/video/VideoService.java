@@ -160,22 +160,20 @@ public class VideoService {
     return "all";
   }
 
-  public Slice<Comment> findCommentsByVideoId(Long id, String cursor, Pageable pageable) {
+  public Slice<Comment> findCommentsByVideoId(Long id, Long cursor, Pageable pageable) {
     Slice<Comment> comments;
-    if (StringUtils.isNumeric(cursor)) {
-      Date createdAt = new Date(Long.parseLong(cursor));
-      comments = commentRepository.findByVideoIdAndCreatedAtAfterAndParentIdIsNull(id, createdAt, pageable);
+    if (cursor != null) {
+      comments = commentRepository.findByVideoIdAndIdGreaterThanEqualAndParentIdIsNull(id, cursor, pageable);
     } else {
       comments = commentRepository.findByVideoIdAndParentIdIsNull(id, pageable);
     }
     return comments;
   }
 
-  public Slice<Comment> findCommentsByParentId(Long parentId, String cursor, Pageable pageable) {
+  public Slice<Comment> findCommentsByParentId(Long parentId, Long cursor, Pageable pageable) {
     Slice<Comment> comments;
-    if (StringUtils.isNumeric(cursor)) {
-      Date createdAt = new Date(Long.parseLong(cursor));
-      comments = commentRepository.findByParentIdAndCreatedAtAfter(parentId, createdAt, pageable);
+    if (cursor != null) {
+      comments = commentRepository.findByParentIdAndIdGreaterThanEqual(parentId, cursor, pageable);
     } else {
       comments = commentRepository.findByParentId(parentId, pageable);
     }
