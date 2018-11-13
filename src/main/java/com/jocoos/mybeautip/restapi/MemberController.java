@@ -35,7 +35,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -151,9 +150,7 @@ public class MemberController {
     }
 
     if (updateMemberRequest.getEmail() != null) {
-      if (!EmailValidator.getInstance().isValid(updateMemberRequest.getEmail())) {
-        throw new BadRequestException(MemberService.UsernameErrorCode.INVALID_EMAIL);
-      }
+      memberService.checkEmailValidation(updateMemberRequest.getEmail());
     }
 
     return memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())

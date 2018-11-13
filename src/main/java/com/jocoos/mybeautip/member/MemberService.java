@@ -25,6 +25,8 @@ public class MemberService {
   private final BannedWordService bannedWordService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
+  
+  private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
 
   public MemberService(BannedWordService bannedWordService,
                        MemberRepository memberRepository,
@@ -126,6 +128,12 @@ public class MemberService {
     }
 
     bannedWordService.findWordAndThrowException(username);
+  }
+  
+  public void checkEmailValidation(String email) {
+    if (email.length() > 50 || !email.matches(emailRegex)) {
+      throw new BadRequestException(MemberService.UsernameErrorCode.INVALID_EMAIL);
+    }
   }
 
   @Getter

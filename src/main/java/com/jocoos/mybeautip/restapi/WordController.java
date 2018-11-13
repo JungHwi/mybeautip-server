@@ -1,22 +1,22 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import org.apache.commons.validator.routines.EmailValidator;
+import com.jocoos.mybeautip.member.MemberService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.member.MemberService;
+import java.util.regex.Pattern;
 
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/words", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WordController {
 
+  
   private final MemberService memberService;
 
   public WordController(MemberService memberService) {
@@ -31,9 +31,7 @@ public class WordController {
     }
     
     if (email != null) {
-      if (!EmailValidator.getInstance().isValid(email)) {
-        throw new BadRequestException(MemberService.UsernameErrorCode.INVALID_EMAIL);
-      }
+      memberService.checkEmailValidation(email);
     }
   
     if (username != null) {
