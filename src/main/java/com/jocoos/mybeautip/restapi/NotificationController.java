@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.jocoos.mybeautip.notification.NotificationService;
 import org.springframework.beans.BeanUtils;
@@ -109,6 +109,7 @@ public class NotificationController {
     private boolean read;
     private String resourceType;
     private Long resourceId;
+    private List<Long> resourceIds;
     private Member resourceOwner;
     private String imageUrl;
     private String message;
@@ -117,11 +118,15 @@ public class NotificationController {
 
     public NotificationInfo(Notification notification, String message) {
       BeanUtils.copyProperties(notification, this);
+      this.resourceIds = Stream.of(notification.getResourceIds().split(","))
+          .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
       this.message = message;
     }
 
     public NotificationInfo(Notification notification, String message, Long followId) {
       this(notification, message);
+      this.resourceIds = Stream.of(notification.getResourceIds().split(","))
+          .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
       this.followId = followId;
     }
   }

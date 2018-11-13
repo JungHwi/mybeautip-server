@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.devices;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -137,6 +139,8 @@ public class DeviceService {
     data.put("body", message);
     data.put("resource_type", notification.getResourceType());
     data.put("resource_id", String.valueOf(notification.getResourceId()));
+    data.put("resource_ids", String.valueOf(Stream.of(notification.getResourceIds().split(","))
+        .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList())));
     data.put("member_id", String.valueOf(notification.getResourceOwner().getId()));
     if (!Strings.isNullOrEmpty(notification.getImageUrl())) {
       data.put("image", notification.getImageUrl());
@@ -146,19 +150,16 @@ public class DeviceService {
     int badge = notificationRepository.countByTargetMemberAndReadIsFalse(notification.getTargetMember());
     log.debug("target_member: {}, badge: {}", notification.getTargetMember().getId(), badge);
     switch (os) {
-      case "android": {
-        return createPushMessage(data, badge);
-      }
-      case "ios": {
-        return createPushMessage(data, badge);
-      }
+      case "android":
+      case "ios":
+        return createPushMessage(data, badge, os);
       default: {
         throw new IllegalArgumentException("unknown os type");
       }
     }
   }
 
-  private String createPushMessage(Map<String, String> message, int badge) {
+  private String createPushMessage(Map<String, String> message, int badge, String os) {
     Map<String, String> map = Maps.newHashMap();
     Map<String, Map<String, String>> data = Maps.newHashMap();
     Map<String, String> notification = Maps.newHashMap();
@@ -166,10 +167,14 @@ public class DeviceService {
     notification.put("title", messageService.getNotificationMessage("title", null));
     notification.put("body", message.get("body"));
     notification.put("badge", String.valueOf(badge));
-
-    data.put(KEY_NOTIFICATION, notification);
-    data.put(KEY_DATA, message);
-
+    
+    if ("android".equals(os)) {
+      data.put(KEY_DATA, notification);
+    } else {
+      data.put(KEY_NOTIFICATION, notification);
+      data.put(KEY_DATA, message);
+    }
+    
     try {
       map.put("GCM", objectMapper.writeValueAsString(data));
       return objectMapper.writeValueAsString(map);
