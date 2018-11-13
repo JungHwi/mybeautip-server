@@ -21,6 +21,6 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
   public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
     config.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class, Order.class,
         Category.class, DeliveryCharge.class, DeliveryChargeDetail.class, Store.class,
-        Goods.class, GoodsOption.class, VideoReport.class, Report.class);
+        Goods.class, GoodsOption.class, VideoReport.class, Report.class, Post.class);
   }
 }
