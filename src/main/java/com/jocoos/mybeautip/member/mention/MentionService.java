@@ -35,7 +35,7 @@ public class MentionService {
     this.commentRepository = commentRepository;
   }
 
-  @Async
+//  @Async
   public void updatePostCommentWithMention(Comment postComment, List<MentionTag> mentionTags) {
     if (mentionTags == null || mentionTags.size() == 0) {
       return;
@@ -68,7 +68,7 @@ public class MentionService {
     commentRepository.save(postComment);
   }
 
-  @Async
+//  @Async
   public void updateVideoCommentWithMention(Comment videoComment, List<MentionTag> mentionTags) {
     if (mentionTags == null || mentionTags.size() == 0) {
       return;
