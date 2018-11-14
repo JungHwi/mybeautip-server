@@ -117,8 +117,8 @@ public class CallbackController {
       }
     }
 
-    memberRepository.updateVideoCount(video.getMember().getId(), 1);
-    memberRepository.updateTotalVideoCount(video.getMember().getId(), 1);
+    memberRepository.updateVideoCount(video.getMember().getId(), video.getMember().getVideoCount() + 1);
+    memberRepository.updateTotalVideoCount(video.getMember().getId(), video.getMember().getTotalVideoCount() + 1);
     return createdVideo;
   }
 
@@ -151,9 +151,9 @@ public class CallbackController {
         videoService.saveWithDeletedAt(v);
         videoLikeRepository.deleteByVideoId(v.getId());
         if ("PUBLIC".equals(v.getVisibility())) {
-          memberRepository.updateVideoCount(v.getMember().getId(), -1);
+          memberRepository.updateVideoCount(v.getMember().getId(), v.getMember().getVideoCount() - 1);
         }
-        memberRepository.updateTotalVideoCount(v.getMember().getId(), -1);
+        memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
         return v;
       })
       .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
@@ -222,15 +222,16 @@ public class CallbackController {
       String newState = source.getVisibility();
 
       if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
-        memberRepository.updateVideoCount(target.getMember().getId(), -1);
+        memberRepository.updateVideoCount(target.getMember().getId(), target.getMember().getVideoCount() - 1);
+        log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
+        target.setVisibility(newState);
       }
 
       if ("PRIVATE".equalsIgnoreCase(prevState) && "PUBLIC".equalsIgnoreCase(newState)) {
-        memberRepository.updateVideoCount(target.getMember().getId(), 1);
+        memberRepository.updateVideoCount(target.getMember().getId(), target.getMember().getVideoCount() + 1);
+        log.debug("Video state will be changed PRIVATE to PUBLIC: {}", target.getId());
+        target.setVisibility(newState);
       }
-
-      log.debug(String.format("Video state will be changed %s to %s, id:%d", prevState, newState, target.getId()));
-      target.setVisibility(newState);
     }
 
     return target;
