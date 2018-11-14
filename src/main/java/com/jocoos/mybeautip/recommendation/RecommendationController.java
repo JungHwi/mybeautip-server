@@ -75,17 +75,19 @@ public class RecommendationController {
         now, now, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
 
-    members.stream().forEach(r -> {
+    members.forEach(r -> {
       MemberInfo memberInfo = memberServie.getMemberInfo(r.getMember());
-      List<VideoController.VideoInfo> videoList = Lists.newArrayList();
-      Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
-      if (slice.hasContent()) {
-        for (Video video : slice) {
-          videoList.add(videoService.generateVideoInfo(video));
+      if (memberInfo.getVideoCount() > 0) {
+        List<VideoController.VideoInfo> videoList = Lists.newArrayList();
+        Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
+        if (slice.hasContent()) {
+          for (Video video : slice) {
+            videoList.add(videoService.generateVideoInfo(video));
+          }
+          memberInfo.setVideos(videoList);
         }
-        memberInfo.setVideos(videoList);
+        result.add(memberInfo);
       }
-      result.add(memberInfo);
     });
 
     return new ResponseEntity<>(result, HttpStatus.OK);
