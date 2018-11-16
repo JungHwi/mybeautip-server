@@ -100,8 +100,7 @@ public class MemberService {
 
   public MemberInfo getMemberInfo(Member member) {
     if (currentMember() != null && member.getId().equals(currentMember().getId())) {
-      member.setVideoCount(member.getTotalVideoCount());
-      return new MemberInfo(member, null);
+      return new MemberMeInfo(member);
     } else {
       return new MemberInfo(member, getFollowingId(member));
     }
