@@ -1,16 +1,12 @@
 package com.jocoos.mybeautip.store;
 
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.util.Date;
-
-import com.jocoos.mybeautip.audit.MemberAuditable;
 
 @NoArgsConstructor
 @Data

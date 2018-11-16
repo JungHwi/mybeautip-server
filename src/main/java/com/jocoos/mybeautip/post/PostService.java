@@ -1,15 +1,10 @@
 package com.jocoos.mybeautip.post;
 
-import java.util.Date;
-
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
 
 
 @Service

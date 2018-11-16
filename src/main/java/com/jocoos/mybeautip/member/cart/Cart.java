@@ -1,19 +1,16 @@
 package com.jocoos.mybeautip.member.cart;
 
-import javax.persistence.*;
-import java.util.Date;
-
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsOption;
 import com.jocoos.mybeautip.store.Store;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data

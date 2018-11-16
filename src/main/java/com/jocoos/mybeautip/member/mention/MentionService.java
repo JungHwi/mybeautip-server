@@ -1,21 +1,18 @@
 package com.jocoos.mybeautip.member.mention;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.notification.NotificationService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,7 +32,6 @@ public class MentionService {
     this.commentRepository = commentRepository;
   }
 
-//  @Async
   public void updatePostCommentWithMention(Comment postComment, List<MentionTag> mentionTags) {
     if (mentionTags == null || mentionTags.size() == 0) {
       return;
@@ -68,7 +64,6 @@ public class MentionService {
     commentRepository.save(postComment);
   }
 
-//  @Async
   public void updateVideoCommentWithMention(Comment videoComment, List<MentionTag> mentionTags) {
     if (mentionTags == null || mentionTags.size() == 0) {
       return;

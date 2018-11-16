@@ -1,23 +1,20 @@
 package com.jocoos.mybeautip.member;
 
-import javax.transaction.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.beans.BeanUtils;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
+import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.point.MemberPointRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
-import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.point.MemberPointRepository;
+import javax.transaction.Transactional;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component

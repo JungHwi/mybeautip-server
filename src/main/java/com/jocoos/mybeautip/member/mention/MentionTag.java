@@ -1,10 +1,8 @@
 package com.jocoos.mybeautip.member.mention;
 
-import lombok.AllArgsConstructor;
+import com.jocoos.mybeautip.member.Member;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
 @Data

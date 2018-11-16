@@ -1,17 +1,18 @@
 package com.jocoos.mybeautip.security;
 
-import java.util.Map;
-
 import com.google.common.base.Strings;
-
 import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.*;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.NaverMember;
+import com.jocoos.mybeautip.member.NaverMemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+
+import java.util.Map;
 
 @Slf4j
 public class NaverTokenGranter extends AbstractTokenGranter {
