@@ -165,9 +165,11 @@ public class NotificationService {
        .ifPresent(post -> {
          if (mentioned != null) {
            Arrays.stream(mentioned).forEach(m -> {
-             Notification n = notificationRepository.save(new Notification(post, comment, m));
-             log.debug("mentioned post comment: {}", n);
-             deviceService.push(n);
+             if (!(comment.getCreatedBy().getId().equals(m.getId()))) {
+               Notification n = notificationRepository.save(new Notification(post, comment, m));
+               log.debug("mentioned post comment: {}", n);
+               deviceService.push(n);
+             }
            });
          } else {
            notifyAddPostComment(comment);
@@ -181,9 +183,11 @@ public class NotificationService {
          v.setThumbnailUrl(v.getThumbnailUrl());
          if (mentioned != null) {
            Arrays.stream(mentioned).forEach(m -> {
-             Notification n = notificationRepository.save(new Notification(v, comment, m));
-             log.debug("mentioned video comment: {}", n);
-             deviceService.push(n);
+             if (!(comment.getCreatedBy().getId().equals(m.getId()))) {
+               Notification n = notificationRepository.save(new Notification(v, comment, m));
+               log.debug("mentioned video comment: {}", n);
+               deviceService.push(n);
+             }
            });
          } else {
            notifyAddVideoComment(comment);
