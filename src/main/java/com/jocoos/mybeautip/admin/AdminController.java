@@ -68,7 +68,7 @@ public class AdminController {
   }
 
   @PostMapping("/banners")
-  public ResponseEntity<BannerInfo> createTrend(@RequestBody CreateBannerRequest request) throws ParseException {
+  public ResponseEntity<BannerInfo> createTrend(@RequestBody CreateBannerRequest request) {
     log.debug("request: {}", request);
 
     Banner banner = new Banner();
