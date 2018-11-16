@@ -118,7 +118,7 @@ public class MemberShoppingController {
     Member me = memberService.currentMember();
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
 
-    Date createdAt = null;
+    Date createdAt;
     if (cursor != null) {
       createdAt = new Date(cursor);
     } else {

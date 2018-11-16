@@ -53,7 +53,7 @@ public class VideoRelationController {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     List<VideoGoods> videoGoods = videoGoodsRepository.findAllByVideoId(video.getId());
 
-    Date dateCursor = null;
+    Date dateCursor;
     if (cursor != null) {
       dateCursor = new Date(Long.parseLong(cursor));
     } else {

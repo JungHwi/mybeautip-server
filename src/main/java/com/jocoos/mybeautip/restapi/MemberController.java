@@ -217,12 +217,12 @@ public class MemberController {
 
   // TODO: Refactor find member to MemberService
   private Slice<Member> findMembers(String keyword, String cursor, int count) {
-    Cursor<Date> dateCursor = null;
+    Cursor<Date> dateCursor;
 
     if (Strings.isNullOrEmpty(cursor)) {
       dateCursor = new Cursor<Date>(keyword, null, count);
     } else {
-      Date toDate = null;
+      Date toDate;
       try {
         toDate = new Date(Long.parseLong(cursor));
         dateCursor = new Cursor<Date>(keyword, toDate, count);
@@ -236,7 +236,7 @@ public class MemberController {
   }
 
   private Slice<Member> findMembers(Cursor<Date> cursor) {
-    Slice<Member> list = null;
+    Slice<Member> list;
     log.debug("Cursor: {}", cursor);
 
     PageRequest page = PageRequest.of(0, cursor.getCount(), new Sort(Sort.Direction.DESC, "createdAt"));
@@ -431,7 +431,7 @@ public class MemberController {
                                     @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
-    Slice<Revenue>  list = null;
+    Slice<Revenue>  list;
 
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
@@ -474,7 +474,7 @@ public class MemberController {
 
   private CursorResponse createPostLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<PostLike> postLikes = null;
+    Slice<PostLike> postLikes;
     List<PostController.PostLikeInfo> result = Lists.newArrayList();
 
     if (cursor != null) {

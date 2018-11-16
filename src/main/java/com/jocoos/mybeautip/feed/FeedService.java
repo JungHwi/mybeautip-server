@@ -47,7 +47,7 @@ public class FeedService {
 
     try {
       jedis = jedisPool.getResource();
-      Set<Tuple> tuples = null;
+      Set<Tuple> tuples;
       if (Strings.isNullOrEmpty(cursor)) {
         tuples = jedis.zrevrangeByScoreWithScores(key, "+inf", "-inf", 0, count);
       } else {

@@ -41,7 +41,7 @@ public class Banner extends MemberAuditable {
   private int seq;
 
   @Column(nullable = false)
-  private Long viewCount = 0l;
+  private Long viewCount = 0L;
 
   @Column(nullable = false)
   private String link;

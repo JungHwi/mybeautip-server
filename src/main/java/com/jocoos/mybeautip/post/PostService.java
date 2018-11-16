@@ -17,7 +17,7 @@ public class PostService {
   }
 
   public Slice<Comment> findCommentsByPostId(Long postId, Long cursor, Pageable pageable) {
-    Slice<Comment> comments = null;
+    Slice<Comment> comments;
     if (cursor != null) {
       comments = commentRepository.findByPostIdAndIdGreaterThanEqualAndParentIdIsNull(postId, cursor, pageable);
     } else {

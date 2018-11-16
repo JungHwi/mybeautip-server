@@ -163,7 +163,7 @@ public class OrderService {
       throw new BadRequestException("purchase_not_found", "invalid purchase id");
     }
 
-    String status = purchase.getStatus();
+    String status;
     if (purchase.isDevlivering() || purchase.isDevlivered()) {
       switch (state) {
         case 1:

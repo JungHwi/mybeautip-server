@@ -42,7 +42,7 @@ public class GoodsDetailService {
           String goodsDescription = goods.getGoodsDescription();
           log.debug("goods description: {}", goodsDescription);
 
-          Element root = null;
+          Element root;
           if (!Strings.isNullOrEmpty(goodsDescription) && !hasComplicatedStyle(goodsDescription)) {
             root = createDocumentFromString(goodsDescription);
           } else {
@@ -51,7 +51,7 @@ public class GoodsDetailService {
 
           return getGoodsDetailPage(root, includeVideo);
         })
-       .orElseGet(() -> "");
+       .orElse("");
   }
 
   private boolean hasComplicatedStyle(String document) {

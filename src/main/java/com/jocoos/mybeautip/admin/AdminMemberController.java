@@ -50,7 +50,7 @@ public class AdminMemberController {
     GrantedAuthority authority = myBeautipUserDetails.getAuthorities().stream().findAny().orElseThrow(() ->
        new MemberNotFoundException("role not found"));
 
-    MemberRoleInfo memberRoleInfo = null;
+    MemberRoleInfo memberRoleInfo;
     switch (authority.getAuthority()) {
       case "ROLE_ADMIN": {
         memberRoleInfo = new MemberRoleInfo(myBeautipUserDetails.getMember(), 0);
