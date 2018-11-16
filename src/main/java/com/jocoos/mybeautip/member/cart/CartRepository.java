@@ -21,6 +21,8 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
   Integer countByCreatedById(Long createdBy);
 
   List<Cart> findAllByCreatedByIdOrderByModifiedAtDesc(Long id);
+  
+  List<Cart> findByCreatedById(Long id);
 
   @Modifying
   @Query("update Cart c set c.checked = ?1 where c.createdBy = ?2")

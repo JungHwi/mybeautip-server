@@ -1,12 +1,15 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -26,27 +29,33 @@ import java.util.Optional;
 public class VideoService {
 
   private final MemberService memberService;
+  private final TagService tagService;
   private final VideoRepository videoRepository;
   private final CommentRepository commentRepository;
   private final VideoLikeRepository videoLikeRepository;
   private final VideoWatchRepository videoWatchRepository;
   private final BlockRepository blockRepository;
+  private final MemberRepository memberRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
   
   public VideoService(MemberService memberService,
+                      TagService tagService,
                       VideoRepository videoRepository,
                       CommentRepository commentRepository,
                       VideoLikeRepository videoLikeRepository,
                       VideoWatchRepository videoWatchRepository,
-                      BlockRepository blockRepository) {
+                      BlockRepository blockRepository,
+                      MemberRepository memberRepository) {
     this.memberService = memberService;
+    this.tagService = tagService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
     this.videoLikeRepository = videoLikeRepository;
     this.videoWatchRepository = videoWatchRepository;
     this.blockRepository = blockRepository;
+    this.memberRepository = memberRepository;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -240,6 +249,25 @@ public class VideoService {
       })
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
     return generateVideoInfo(video);
+  }
+  
+  public Video deleteVideo(long memberId, String videoKey) {
+    return videoRepository.findByVideoKeyAndDeletedAtIsNull(videoKey)
+        .map(v -> {
+          if (v.getMember().getId() != memberId) {
+            throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
+          }
+          tagService.decreaseRefCount(v.getTagInfo());
+          v.setDeletedAt(new Date());
+          saveWithDeletedAt(v);
+          videoLikeRepository.deleteByVideoId(v.getId());
+          if ("PUBLIC".equals(v.getVisibility())) {
+            memberRepository.updateVideoCount(v.getMember().getId(), v.getMember().getVideoCount() - 1);
+          }
+          memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
+          return v;
+        })
+        .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + videoKey));
   }
 
   /**
