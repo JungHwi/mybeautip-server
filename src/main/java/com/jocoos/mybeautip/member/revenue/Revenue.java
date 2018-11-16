@@ -1,18 +1,13 @@
 package com.jocoos.mybeautip.member.revenue;
 
-import javax.persistence.*;
-import java.util.Date;
-
-import org.springframework.data.annotation.LastModifiedDate;
-
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.member.order.Purchase;
+import com.jocoos.mybeautip.video.Video;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.order.Purchase;
-import com.jocoos.mybeautip.video.Video;
+import javax.persistence.*;
 
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor

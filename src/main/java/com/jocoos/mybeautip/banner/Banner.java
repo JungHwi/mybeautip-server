@@ -1,25 +1,17 @@
 package com.jocoos.mybeautip.banner;
 
-import javax.persistence.*;
-
-import java.util.Date;
-
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
-import com.jocoos.mybeautip.member.Member;
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "banners")
 @EqualsAndHashCode(callSuper = false)
 public class Banner extends MemberAuditable {
@@ -47,7 +39,7 @@ public class Banner extends MemberAuditable {
   private int seq;
 
   @Column(nullable = false)
-  private Long viewCount = 0l;
+  private Long viewCount = 0L;
 
   @Column(nullable = false)
   private String link;

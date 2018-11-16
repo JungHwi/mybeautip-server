@@ -1,22 +1,18 @@
 package com.jocoos.mybeautip.video.report;
 
-import javax.persistence.*;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.video.Video;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.video.Video;
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "video_reports")
 public class VideoReport extends MemberAuditable {
   @Id

@@ -1,24 +1,20 @@
 package com.jocoos.mybeautip.post;
 
+import com.jocoos.mybeautip.audit.MemberAuditable;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
-import com.jocoos.mybeautip.audit.MemberAuditable;
-
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "posts")
 public class Post extends MemberAuditable {
 

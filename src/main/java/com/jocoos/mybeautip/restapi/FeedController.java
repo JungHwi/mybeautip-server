@@ -40,9 +40,7 @@ public class FeedController {
 
     List<String> videoKeys = Lists.newArrayList();
     if (videos != null && videos.size() > 0) {
-      videos.forEach(v -> {
-        videoKeys.add(v.getVideoKey());
-      });
+      videos.forEach(v -> videoKeys.add(v.getVideoKey()));
     }
 
     List<VideoController.VideoInfo> result = Lists.newArrayList();

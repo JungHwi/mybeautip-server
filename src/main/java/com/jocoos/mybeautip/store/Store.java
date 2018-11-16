@@ -1,21 +1,20 @@
 package com.jocoos.mybeautip.store;
 
-import javax.persistence.*;
-import java.util.Date;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "stores")
 public class Store extends ModifiedDateAuditable {
   @Id

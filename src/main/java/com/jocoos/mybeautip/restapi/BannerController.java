@@ -35,9 +35,7 @@ public class BannerController {
     Slice<Banner> banners = bannerRepository.findAll(PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<BannerInfo> result = Lists.newArrayList();
 
-    banners.stream().forEach(b -> {
-      result.add(new BannerInfo(b));
-    });
+    banners.stream().forEach(b -> result.add(new BannerInfo(b)));
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }

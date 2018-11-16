@@ -1,20 +1,16 @@
 package com.jocoos.mybeautip.member.comment;
 
-import javax.persistence.*;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import javax.persistence.*;
 
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "comment_likes")
 public class CommentLike extends MemberAuditable {
 

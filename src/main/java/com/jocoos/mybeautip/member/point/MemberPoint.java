@@ -1,16 +1,13 @@
 package com.jocoos.mybeautip.member.point;
 
-import javax.persistence.*;
-
-import java.util.Date;
-
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.member.Member;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.order.Order;
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data

@@ -1,12 +1,15 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.google.common.collect.Lists;
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.order.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -18,17 +21,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.order.*;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -99,10 +96,10 @@ public class OrderController {
                                   @RequestParam(required = false) Long cursor) {
     Long memberId = memberService.currentMemberId();
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<Order> orders = null;
+    Slice<Order> orders;
     List<OrderInfo> result = Lists.newArrayList();
 
-    Date createdAt = null;
+    Date createdAt;
     if (cursor != null) {
       createdAt = new Date(cursor);
     } else {
@@ -146,7 +143,7 @@ public class OrderController {
 
     Long me = memberService.currentMemberId();
     Order order = orderRepository.findByIdAndCreatedById(id, me).orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
-    OrderInquiry inquiry = null;
+    OrderInquiry inquiry;
 
     Byte state = Byte.parseByte(request.getState());
     switch (state) {
@@ -176,7 +173,7 @@ public class OrderController {
 
     Long me = memberService.currentMemberId();
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<OrderInquiry> inquiries = null;
+    Slice<OrderInquiry> inquiries;
     switch (category) {
       case "cancel": {
         if (cursor != null) {

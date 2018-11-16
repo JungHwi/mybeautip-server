@@ -1,24 +1,19 @@
 package com.jocoos.mybeautip.member.report;
 
-import javax.persistence.*;
-import java.util.Date;
-
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.member.Member;
-import lombok.EqualsAndHashCode;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
 @Slf4j
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "member_reports")
 public class Report extends CreatedDateAuditable {
   @Id

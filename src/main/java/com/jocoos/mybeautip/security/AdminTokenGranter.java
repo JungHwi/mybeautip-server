@@ -1,23 +1,18 @@
 package com.jocoos.mybeautip.security;
 
-import java.util.Map;
-
+import com.google.common.base.Strings;
+import com.jocoos.mybeautip.admin.AdminMemberRepository;
+import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
-import com.google.common.base.Strings;
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.admin.AdminMemberRepository;
-import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.KakaoMember;
-import com.jocoos.mybeautip.member.KakaoMemberRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
+import java.util.Map;
 
 @Slf4j
 public class AdminTokenGranter extends AbstractTokenGranter {

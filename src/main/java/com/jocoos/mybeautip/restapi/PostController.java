@@ -120,7 +120,7 @@ public class PostController {
 
   private Slice<Post> findPosts(int count, int category, String keyword, String cursor) {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<Post> posts = null;
+    Slice<Post> posts;
     Date dateCursor = null;
 
     if (StringUtils.isNumeric(cursor)) {
@@ -259,7 +259,7 @@ public class PostController {
                                         @RequestParam(required = false) Long cursor,
                                         @RequestParam(required = false) Long parentId) {
     PageRequest page = PageRequest.of(0, count);
-    Slice<Comment> comments = null;
+    Slice<Comment> comments;
 
     if (parentId != null) {
       comments = postService.findCommentsByParentId(parentId, cursor, page);

@@ -31,7 +31,7 @@ public class Purchase extends CreatedDateAuditable {
   private Goods goods;
 
   /**
-   * @see Order#status
+   * @see Order status
    */
   @Column(nullable = false)
   private int state;

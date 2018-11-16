@@ -1,20 +1,16 @@
 package com.jocoos.mybeautip.member.order;
 
-import javax.persistence.*;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
+import com.google.common.base.Strings;
+import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Strings;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import com.jocoos.mybeautip.audit.MemberAuditable;
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)

@@ -323,11 +323,9 @@ public class CartService {
     if ("y".equals(goods.getStockFl()) && goods.getTotalStock() <= 0) { // 재고량에 따름, 총 재고량 부족
       return true;
     }
-    
-    if ("y".equals(goods.getStockFl()) && option.getStockCnt() <= 0) { // 재고량에 따름, 옵션 재고량 부족
-      return true;
-    }
-    
-    return false;
+  
+    // 재고량에 따름, 옵션 재고량 부족
+    return "y".equals(goods.getStockFl()) && option.getStockCnt() <= 0;
+  
   }
 }

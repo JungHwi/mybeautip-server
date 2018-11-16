@@ -53,14 +53,14 @@ public class VideoRelationController {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     List<VideoGoods> videoGoods = videoGoodsRepository.findAllByVideoId(video.getId());
 
-    Date dateCursor = null;
+    Date dateCursor;
     if (cursor != null) {
       dateCursor = new Date(Long.parseLong(cursor));
     } else {
       dateCursor = new Date();
     }
 
-    List<Goods> goodses = videoGoods.stream().map(g -> g.getGoods()).collect(Collectors.toList());
+    List<Goods> goodses = videoGoods.stream().map(VideoGoods::getGoods).collect(Collectors.toList());
     Set<Video> combines = Sets.newConcurrentHashSet();
     for (Goods g: goodses) {
       log.debug("goods: {}", g.getGoodsNo());

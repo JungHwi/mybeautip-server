@@ -88,7 +88,7 @@ public class CursorResponse<E> {
     public Builder withCursor(String cursor) {
       if (!Strings.isNullOrEmpty(cursor)) {
         this.nextCursor = cursor;
-        this.properties.add("cursor", String.valueOf(cursor));
+        this.properties.add("cursor", cursor);
       }
       return this;
     }

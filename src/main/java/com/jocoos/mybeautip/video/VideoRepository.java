@@ -1,19 +1,17 @@
 package com.jocoos.mybeautip.video;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Optional;
-
+import com.jocoos.mybeautip.member.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.jocoos.mybeautip.member.Member;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Optional;
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
 

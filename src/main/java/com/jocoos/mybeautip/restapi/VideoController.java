@@ -521,7 +521,7 @@ public class VideoController {
        .orElseThrow(() -> new NotFoundException("video_not_fount", "invalid video id or member id"));
 
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
-    Slice<Revenue>  list = null;
+    Slice<Revenue>  list;
 
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
@@ -532,9 +532,7 @@ public class VideoController {
 
     List<RevenueInfo> revenues = Lists.newArrayList();
 
-    list.forEach(r -> {
-      revenues.add(new RevenueInfo(r));
-    });
+    list.forEach(r -> revenues.add(new RevenueInfo(r)));
 
     String nextCursor = null;
     if (revenues.size() > 0) {

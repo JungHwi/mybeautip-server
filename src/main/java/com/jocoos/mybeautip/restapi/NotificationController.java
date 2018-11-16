@@ -58,7 +58,7 @@ public class NotificationController {
     Long memberId = memberService.currentMemberId();
     List<NotificationInfo> result = Lists.newArrayList();
 
-    Slice<Notification> notifications = null;
+    Slice<Notification> notifications;
 
     if (StringUtils.isNumeric(cursor)) {
       notifications = notificationRepository.findByTargetMemberIdAndCreatedAtBefore(memberId, new Date(Long.parseLong(cursor)), page);

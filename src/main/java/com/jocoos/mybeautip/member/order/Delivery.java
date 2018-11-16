@@ -1,13 +1,11 @@
 package com.jocoos.mybeautip.member.order;
 
-import javax.persistence.*;
-
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import javax.persistence.*;
 
 @NoArgsConstructor
 @Data

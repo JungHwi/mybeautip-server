@@ -9,7 +9,7 @@ import redis.clients.jedis.Tuple;
 
 public class JedisTest {
 
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String[] args) {
     JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
     JedisPool jedisPool = new JedisPool(jedisPoolConfig, "localhost", 6379, 2000, "akdlqbxlq#1@Jocoos");
     Jedis jedis = jedisPool.getResource();

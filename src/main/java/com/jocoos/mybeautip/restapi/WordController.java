@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.regex.Pattern;
-
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/words", produces = MediaType.APPLICATION_JSON_VALUE)

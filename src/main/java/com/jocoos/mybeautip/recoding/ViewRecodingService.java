@@ -32,7 +32,7 @@ public class ViewRecodingService {
 
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
 
-    Date now = null;
+    Date now;
     if (!Strings.isNullOrEmpty(cursor)) {
       now = new Date(Long.parseLong(cursor));
     } else  {

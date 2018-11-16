@@ -118,7 +118,7 @@ public class DeviceService {
     } catch (EndpointDisabledException e) {
       log.error("EndpointDisabledException", e);
 
-      /**
+      /*
        * FIXME: Change pushable false or delete device info?
        * deviceRepository.delete(device);
        */

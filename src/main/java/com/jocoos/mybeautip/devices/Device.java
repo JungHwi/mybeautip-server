@@ -1,26 +1,22 @@
 package com.jocoos.mybeautip.devices;
 
-import javax.persistence.*;
-
-import java.util.Date;
-
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.member.Member;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
-import com.jocoos.mybeautip.member.Member;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "devices")
 public class Device extends MemberAuditable {
 

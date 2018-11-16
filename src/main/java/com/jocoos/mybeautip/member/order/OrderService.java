@@ -137,18 +137,16 @@ public class OrderService {
 
 
     List<Purchase> purchases = Lists.newArrayList();
-    request.getPurchases().forEach(p -> {
-      goodsRepository.findByGoodsNo(p.getGoodsNo())
-        .map(goods -> {
-          Purchase purchase = new Purchase(order.getId(), goods);
-          BeanUtils.copyProperties(p, purchase);
+    request.getPurchases().forEach(p -> goodsRepository.findByGoodsNo(p.getGoodsNo())
+      .map(goods -> {
+        Purchase purchase = new Purchase(order.getId(), goods);
+        BeanUtils.copyProperties(p, purchase);
 
-          purchase.setTotalPrice(Long.valueOf(p.getQuantity() * p.getGoodsPrice()));
-          purchases.add(purchase);
-          return Optional.empty();
-        })
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "Goods not found:" + p.getGoodsNo()));
-    });
+        purchase.setTotalPrice((long) (p.getQuantity() * p.getGoodsPrice()));
+        purchases.add(purchase);
+        return Optional.empty();
+      })
+      .orElseThrow(() -> new NotFoundException("goods_not_found", "Goods not found:" + p.getGoodsNo())));
 
     log.debug("purchases: {}", purchases);
     order.setPurchases(purchases);
@@ -163,7 +161,7 @@ public class OrderService {
       throw new BadRequestException("purchase_not_found", "invalid purchase id");
     }
 
-    String status = purchase.getStatus();
+    String status;
     if (purchase.isDevlivering() || purchase.isDevlivered()) {
       switch (state) {
         case 1:
@@ -292,9 +290,7 @@ public class OrderService {
 
   private void saveOrderAndPurchasesStatus(Order order, String status) {
     order.setStatus(status);
-    order.getPurchases().forEach(p -> {
-      p.setStatus(status);
-    });
+    order.getPurchases().forEach(p -> p.setStatus(status));
 
     orderRepository.save(order);
     log.debug("order: {}", order);

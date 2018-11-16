@@ -217,15 +217,15 @@ public class MemberController {
 
   // TODO: Refactor find member to MemberService
   private Slice<Member> findMembers(String keyword, String cursor, int count) {
-    Cursor<Date> dateCursor = null;
+    Cursor<Date> dateCursor;
 
     if (Strings.isNullOrEmpty(cursor)) {
-      dateCursor = new Cursor<Date>(keyword, null, count);
+      dateCursor = new Cursor<>(keyword, null, count);
     } else {
-      Date toDate = null;
+      Date toDate;
       try {
         toDate = new Date(Long.parseLong(cursor));
-        dateCursor = new Cursor<Date>(keyword, toDate, count);
+        dateCursor = new Cursor<>(keyword, toDate, count);
       } catch (NumberFormatException e) {
         log.error("Cannot convert cursor to Date", e);
         throw new BadRequestException("invalid cursor type");
@@ -236,7 +236,7 @@ public class MemberController {
   }
 
   private Slice<Member> findMembers(Cursor<Date> cursor) {
-    Slice<Member> list = null;
+    Slice<Member> list;
     log.debug("Cursor: {}", cursor);
 
     PageRequest page = PageRequest.of(0, cursor.getCount(), new Sort(Sort.Direction.DESC, "createdAt"));
@@ -431,7 +431,7 @@ public class MemberController {
                                     @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
-    Slice<Revenue>  list = null;
+    Slice<Revenue>  list;
 
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
@@ -442,9 +442,7 @@ public class MemberController {
 
     List<RevenueInfo> revenues = Lists.newArrayList();
 
-    list.forEach(r -> {
-      revenues.add(new RevenueInfo(r));
-    });
+    list.forEach(r -> revenues.add(new RevenueInfo(r)));
 
     String nextCursor = null;
     if (revenues.size() > 0) {
@@ -474,7 +472,7 @@ public class MemberController {
 
   private CursorResponse createPostLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
-    Slice<PostLike> postLikes = null;
+    Slice<PostLike> postLikes;
     List<PostController.PostLikeInfo> result = Lists.newArrayList();
 
     if (cursor != null) {
@@ -495,7 +493,7 @@ public class MemberController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder<PostController.PostLikeInfo>(uri, result)
+    return new CursorResponse.Builder<>(uri, result)
        .withCategory(category)
        .withCursor(nextCursor)
        .withCount(count).toBuild();

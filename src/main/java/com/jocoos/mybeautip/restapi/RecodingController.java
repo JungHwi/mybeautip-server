@@ -85,7 +85,7 @@ public class RecodingController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder<RecodingInfo>("/api/1/members/me/recodings", result)
+    return new CursorResponse.Builder<>("/api/1/members/me/recodings", result)
        .withCount(count)
        .withCategory(category)
        .withCursor(nextCursor).toBuild();
