@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
@@ -105,6 +106,8 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   @Modifying
   @Query("update Video v set v.totalWatchCount = v.totalWatchCount + ?2, v.modifiedAt = now() where v.id = ?1")
   void updateTotalWatchCount(Long id, int i);
+  
+  List<Video> findByMemberAndDeletedAtIsNull(Member member);
 
   Page<Video> findByTypeAndState(String type, String state, Pageable pageable);
 

@@ -101,4 +101,8 @@ public class Purchase extends CreatedDateAuditable {
   public boolean isDevlivered() {
     return Order.State.DELIVERED.getValue() == this.state;
   }
+
+  public String getGoodsName() {
+    return goods.getGoodsNm();
+  }
 }
