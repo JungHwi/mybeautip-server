@@ -235,7 +235,7 @@ public class VideoController {
           commentRepository.updateCommentCount(parent.getId(), 1);
           return Optional.empty();
         })
-        .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
+        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid comment parent id"));
     }
 
     Comment comment = new Comment();
@@ -278,7 +278,7 @@ public class VideoController {
           HttpStatus.OK
         );
       })
-      .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video key id or comment id"));
+      .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key id or comment id"));
   }
 
   @Transactional
@@ -299,7 +299,7 @@ public class VideoController {
         commentRepository.delete(comment);
         return new ResponseEntity<>(HttpStatus.OK);
       })
-      .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video key or comment id"));
+      .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));
   }
 
   /**
@@ -396,7 +396,7 @@ public class VideoController {
           CommentLike commentLikeLike = commentLikeRepository.save(new CommentLike(comment));
           return new ResponseEntity<>(new CommentLikeInfo(commentLikeLike), HttpStatus.OK);
         })
-        .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video or " +
+        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or " +
             "comment id"));
   }
 
@@ -411,7 +411,7 @@ public class VideoController {
     }
 
     Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
-        .orElseThrow(() -> new NotFoundException("video_comment_not_found", "invalid video id or comment " +
+        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video id or comment " +
             "id"));
 
     return commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment
@@ -422,7 +422,7 @@ public class VideoController {
 
           return new ResponseEntity(HttpStatus.OK);
         })
-        .orElseThrow(() -> new NotFoundException("video_comment_like_not_found", "invalid video " +
+        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid video " +
             "comment like id"));
   }
 

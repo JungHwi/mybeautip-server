@@ -44,7 +44,7 @@ public class AccountController {
          log.debug("accountInfo: {}", accountInfo);
 
          return new ResponseEntity<>(accountInfo, HttpStatus.OK);
-       }).orElseThrow(() -> new NotFoundException("not_found_account", "Account not found"));
+       }).orElseThrow(() -> new NotFoundException("account_not_found", "Account not found"));
   }
 
   @PatchMapping

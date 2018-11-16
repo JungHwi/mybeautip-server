@@ -71,7 +71,7 @@ public class IamportService implements IamportApi {
     } catch (HttpClientErrorException e) {
       log.error("Get payment error", e);
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        throw new NotFoundException("payment_id_not_found", "invalid payment id");
+        throw new NotFoundException("payment_not_found", "invalid payment id");
       }
       // TODO: Catch more error cases
     }

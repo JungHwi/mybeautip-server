@@ -322,7 +322,7 @@ public class PostController {
             commentRepository.updateCommentCount(parent.getId(), 1);
             return Optional.empty();
          })
-         .orElseThrow(() -> new NotFoundException("comment_id_not_found", "invalid comment parent id"));
+         .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid comment parent id"));
     }
 
     Comment comment = new Comment();
@@ -364,7 +364,7 @@ public class PostController {
             HttpStatus.OK
          );
        })
-       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post id or comment id"));
+       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
   }
 
   @Transactional
@@ -383,7 +383,7 @@ public class PostController {
          commentRepository.delete(comment);
          return new ResponseEntity<>(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post id or comment id"));
+       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
   }
 
   @Transactional
@@ -406,7 +406,7 @@ public class PostController {
          CommentLike commentLikeLike = commentLikeRepository.save(new CommentLike(comment));
          return new ResponseEntity<>(new CommentLikeInfo(commentLikeLike), HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_comment_not_found", "invalid post or comment id"));
+       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post or comment id"));
   }
 
   @Transactional
@@ -429,7 +429,7 @@ public class PostController {
 
          return new ResponseEntity(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_comment_like_not_found", "invalid post comment like id"));
+       .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post comment like id"));
   }
 
   /**

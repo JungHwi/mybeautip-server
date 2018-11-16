@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -129,7 +130,7 @@ public class AdminController {
       RecommendedMemberInfo info = new RecommendedMemberInfo();
       BeanUtils.copyProperties(recommendation, info);
       return new ResponseEntity<>(info, HttpStatus.OK);
-    }).orElseThrow(() -> new NotFoundException("member_not_found", "invalid member id"));
+    }).orElseThrow(() -> new MemberNotFoundException(request.getMemberId()));
   }
 
   @PostMapping("/goods")

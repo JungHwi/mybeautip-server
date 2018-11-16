@@ -44,7 +44,7 @@ public class AddressService {
       address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
       return addressRepository.save(address);
     } else {
-      throw new NotFoundException("address not found", "address not found");
+      throw new NotFoundException("address_not_found", "address not found");
     }
   }
 
@@ -56,7 +56,7 @@ public class AddressService {
       address.setDeletedAt(new Date());
       addressRepository.save(address);
     } else {
-      throw new NotFoundException("address not found", "address not found");
+      throw new NotFoundException("address_not_found", "address not found");
     }
   }
   

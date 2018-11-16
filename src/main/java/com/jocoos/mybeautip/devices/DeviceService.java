@@ -203,7 +203,7 @@ public class DeviceService {
   }
   private Device copyDevice(DeviceController.UpdateDeviceRequest request, Device device) {
     if (device == null) {
-      throw new NotFoundException("device not found", "Device is null or not found");
+      throw new NotFoundException("device_not_found", "Device is null or not found");
     }
 
     device.setId(request.getDeviceId());

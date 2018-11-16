@@ -132,7 +132,7 @@ public class CallbackController {
           throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
         }
         return updateVideoProperties(request, v);})
-      .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey()));
 
     return videoService.update(video);
   }
@@ -156,7 +156,7 @@ public class CallbackController {
         memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
         return v;
       })
-      .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey()));
   }
 
   private Video updateVideoProperties(CallbackUpdateVideoRequest source, Video target) {

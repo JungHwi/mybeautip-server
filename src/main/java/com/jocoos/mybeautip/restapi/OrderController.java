@@ -153,7 +153,7 @@ public class OrderController {
      case 1:
      case 2: {
        if (request.getPurchaseId() == null) {
-         throw new BadRequestException("purchase_id_not_found", "purchase id required");
+         throw new NotFoundException("purchase_not_found", "purchase id required");
        }
        Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
        inquiry = orderService.inquiryExchangeOrReturn(order, Byte.parseByte(request.getState()), request.getReason(), purchase);
@@ -192,7 +192,7 @@ public class OrderController {
         break;
       }
       default: {
-        throw new BadRequestException("category_not_found", "invalid category name");
+        throw new NotFoundException("category_not_found", "invalid category name");
       }
     }
 
