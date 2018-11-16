@@ -211,10 +211,6 @@ public class PostController {
   @PostMapping("/{id:.+}/likes")
   public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     return postRepository.findById(id)
        .map(post -> {
          Long postId = post.getId();
@@ -235,10 +231,6 @@ public class PostController {
   public ResponseEntity<?> removePostLike(@PathVariable Long id,
                                           @PathVariable Long likeId){
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     return postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
        .map(post -> {
          Optional<PostLike> liked = postLikeRepository.findById(likeId);
@@ -391,10 +383,6 @@ public class PostController {
   public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long postId,
                                                                 @PathVariable Long commentId) {
     Member member = memberService.currentMember();
-    if (member == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     return commentRepository.findByIdAndPostId(commentId, postId)
        .map(comment -> {
          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
@@ -415,10 +403,6 @@ public class PostController {
                                                  @PathVariable Long commentId,
                                                  @PathVariable Long likeId){
     Member me = memberService.currentMember();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     Comment comment = commentRepository.findByIdAndPostId(commentId, postId)
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or comment id"));
 

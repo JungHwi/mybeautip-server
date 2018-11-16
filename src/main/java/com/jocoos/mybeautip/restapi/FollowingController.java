@@ -56,10 +56,7 @@ public class FollowingController {
       throw new BadRequestException("invalid followings request");
     }
 
-    Long me = memberService.currentMemberId();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
+    long me = memberService.currentMemberId();
     long you = followingMemberRequest.getMemberId();
     
     if (me == you) {
@@ -106,9 +103,6 @@ public class FollowingController {
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
     return getFollowings(httpServletRequest.getRequestURI(), memberId, cursor, count);
   }
 
@@ -117,9 +111,6 @@ public class FollowingController {
                                      @RequestParam(required = false) String cursor,
                                      HttpServletRequest httpServletRequest) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
     return getFollowers(httpServletRequest.getRequestURI(), memberId, cursor, count);
   }
 

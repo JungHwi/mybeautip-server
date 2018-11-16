@@ -171,10 +171,6 @@ public class GoodsController {
   @PostMapping("/{goodsNo:.+}/likes")
   public ResponseEntity<GoodsLikeInfo> addGoodsLike(@PathVariable String goodsNo) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     return goodsRepository.findByGoodsNo(goodsNo)
         .map(goods -> {
           if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goodsNo, memberId).isPresent()) {
@@ -195,10 +191,6 @@ public class GoodsController {
   public ResponseEntity<?> removeGoodsLike(@PathVariable String goodsNo,
                                            @PathVariable Long likeId) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     return goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberId)
         .map(goods -> {
           Optional<GoodsLike> liked = goodsLikeRepository.findById(likeId);

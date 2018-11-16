@@ -52,9 +52,6 @@ public class BlockController {
     }
 
     Long me = memberService.currentMemberId();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
     long you = blockMemberRequest.getMemberId();
     
     if (me == you) {
@@ -89,20 +86,12 @@ public class BlockController {
   public CursorResponse getMyBlockMembers(@RequestParam(defaultValue = "50") int count,
                                           @RequestParam(required = false) String cursor,
                                           HttpServletRequest httpServletRequest) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
     return getBlockMembers(httpServletRequest.getRequestURI(), cursor, count);
   }
 
   @GetMapping("/me/blocked")
   public BlockResponse isBlocked(@RequestParam(name="member_id") Long memberId) {
     Long me = memberService.currentMemberId();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     BlockResponse response = new BlockResponse(false);
     blockRepository.findByMeAndMemberYouId(memberId, me)
       .ifPresent(block -> response.setBlocked(true));

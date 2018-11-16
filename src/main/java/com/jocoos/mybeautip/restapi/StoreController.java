@@ -123,10 +123,6 @@ public class StoreController {
   @PostMapping("/{id:.+}/likes")
   public ResponseEntity<StoreController.StoreLikeInfo> addStoreLike(@PathVariable Integer id) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     return storeRepository.findById(id)
       .map(store -> {
         Integer storeId = store.getId();
@@ -148,10 +144,6 @@ public class StoreController {
   public ResponseEntity<?> removeStoreLike(@PathVariable Integer id,
                                            @PathVariable Long likeId){
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     return storeLikeRepository.findByIdAndStoreIdAndCreatedById(likeId, id, memberId)
       .map(store -> {
         Optional<StoreLike> liked = storeLikeRepository.findById(likeId);

@@ -309,10 +309,7 @@ public class VideoController {
   @PostMapping("/{videoId:.+}/likes")
   public ResponseEntity<VideoLikeInfo> addVideoLike(@PathVariable Long videoId) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
+    
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
       .map(video -> {
         if (videoLikeRepository.findByVideoIdAndCreatedById(videoId, memberId).isPresent()) {
@@ -333,10 +330,7 @@ public class VideoController {
   public ResponseEntity<?> removeVideoLike(@PathVariable Long videoId,
                                            @PathVariable Long likeId) {
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
+    
     return videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
       .map(video -> {
         Optional<VideoLike> liked = videoLikeRepository.findById(likeId);
@@ -379,10 +373,7 @@ public class VideoController {
   public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long videoId,
                                                                   @PathVariable Long commentId) {
     Member member = memberService.currentMember();
-    if (member == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
+    
     return commentRepository.findByIdAndVideoId(commentId, videoId)
         .map(comment -> {
           if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId
@@ -406,10 +397,7 @@ public class VideoController {
                                                  @PathVariable Long commentId,
                                                  @PathVariable Long likeId){
     Member me = memberService.currentMember();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
+    
     Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
         .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video id or comment " +
             "id"));
@@ -555,12 +543,8 @@ public class VideoController {
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
-
+    
     Member me = memberService.currentMember();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
 
