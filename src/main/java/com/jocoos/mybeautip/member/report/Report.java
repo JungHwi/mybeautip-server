@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 
@@ -15,7 +14,6 @@ import javax.persistence.*;
 @Slf4j
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "member_reports")
 public class Report extends CreatedDateAuditable {
   @Id

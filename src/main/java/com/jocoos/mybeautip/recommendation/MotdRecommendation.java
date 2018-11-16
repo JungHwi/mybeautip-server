@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -17,7 +16,6 @@ import java.util.Date;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "recommended_motds")
 public class MotdRecommendation extends MemberAuditable {
   @Id

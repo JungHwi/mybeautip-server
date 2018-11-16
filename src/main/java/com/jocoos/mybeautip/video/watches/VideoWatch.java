@@ -1,25 +1,20 @@
 package com.jocoos.mybeautip.video.watches;
 
-import javax.persistence.*;
-
-import java.util.Date;
-
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.Video;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import javax.persistence.*;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "video_watches")
 public class VideoWatch extends MemberAuditable {
   @Id

@@ -7,7 +7,6 @@ import com.jocoos.mybeautip.store.Store;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -16,7 +15,6 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "carts")
 public class Cart extends MemberAuditable {
   @Id

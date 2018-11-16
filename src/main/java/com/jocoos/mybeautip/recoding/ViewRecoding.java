@@ -4,7 +4,6 @@ import com.jocoos.mybeautip.audit.MemberAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 
@@ -12,7 +11,6 @@ import javax.persistence.*;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "view_recodings")
 public class ViewRecoding extends MemberAuditable {
 

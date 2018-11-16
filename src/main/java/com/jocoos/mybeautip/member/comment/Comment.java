@@ -1,22 +1,18 @@
 package com.jocoos.mybeautip.member.comment;
 
-import javax.persistence.*;
-import java.util.Date;
-
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "comments")
 public class Comment extends MemberAuditable {
 

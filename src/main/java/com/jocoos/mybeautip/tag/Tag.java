@@ -1,21 +1,17 @@
 package com.jocoos.mybeautip.tag;
 
-import javax.persistence.*;
-import java.util.Date;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import javax.persistence.*;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "tags")
 public class Tag extends CreatedDateAuditable {
   @Id

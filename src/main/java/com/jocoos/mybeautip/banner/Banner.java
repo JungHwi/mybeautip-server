@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -13,7 +12,6 @@ import java.util.Date;
 @NoArgsConstructor
 @Data
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "banners")
 @EqualsAndHashCode(callSuper = false)
 public class Banner extends MemberAuditable {
