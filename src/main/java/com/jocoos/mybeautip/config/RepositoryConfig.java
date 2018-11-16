@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.config;
 
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.order.Purchase;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.store.Store;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,6 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
   public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
     config.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class, Order.class,
         Category.class, DeliveryCharge.class, DeliveryChargeDetail.class, Store.class,
-        Goods.class, GoodsOption.class, VideoReport.class, Report.class, Post.class);
+        Goods.class, GoodsOption.class, VideoReport.class, Report.class, Post.class, Purchase.class);
   }
 }
