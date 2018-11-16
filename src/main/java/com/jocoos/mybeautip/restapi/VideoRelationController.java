@@ -60,7 +60,7 @@ public class VideoRelationController {
       dateCursor = new Date();
     }
 
-    List<Goods> goodses = videoGoods.stream().map(g -> g.getGoods()).collect(Collectors.toList());
+    List<Goods> goodses = videoGoods.stream().map(VideoGoods::getGoods).collect(Collectors.toList());
     Set<Video> combines = Sets.newConcurrentHashSet();
     for (Goods g: goodses) {
       log.debug("goods: {}", g.getGoodsNo());

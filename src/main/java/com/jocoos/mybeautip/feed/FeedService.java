@@ -56,7 +56,7 @@ public class FeedService {
 
       for (Tuple t: tuples) {
         videoRepository.findByVideoKeyAndDeletedAtIsNull(t.getElement())
-           .ifPresent(v -> videos.add(v));
+           .ifPresent(videos::add);
       }
     } finally {
       if (jedis != null) {

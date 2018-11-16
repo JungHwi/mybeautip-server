@@ -26,11 +26,7 @@ public class NoticeService {
          }
 
          Version max = Version.parse(input.getMaxVersion());
-         if (!max.isGreaterThanOrEqualTo(request)) {
-           return false;
-         }
-
-         return true;
+         return max.isGreaterThanOrEqualTo(request);
        }).collect(Collectors.toList());
   }
 }

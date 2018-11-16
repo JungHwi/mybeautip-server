@@ -129,9 +129,7 @@ public class MemberShoppingController {
     List<PointDetailInfo> details = Lists.newArrayList();
 
     if (points != null) {
-      points.stream().forEach(point -> {
-        details.add(new PointDetailInfo(point));
-      });
+      points.stream().forEach(point -> details.add(new PointDetailInfo(point)));
     }
 
     String nextCursor = null;

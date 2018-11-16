@@ -532,9 +532,7 @@ public class VideoController {
 
     List<RevenueInfo> revenues = Lists.newArrayList();
 
-    list.forEach(r -> {
-      revenues.add(new RevenueInfo(r));
-    });
+    list.forEach(r -> revenues.add(new RevenueInfo(r)));
 
     String nextCursor = null;
     if (revenues.size() > 0) {

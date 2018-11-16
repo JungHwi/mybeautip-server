@@ -78,7 +78,7 @@ public class AccountController {
     BeanUtils.copyProperties(account, accountInfo);
     log.debug("accountInfo: {}", accountInfo);
 
-    return new ResponseEntity<AccountInfo>(accountInfo, HttpStatus.OK);
+    return new ResponseEntity<>(accountInfo, HttpStatus.OK);
   }
 
   @Data

@@ -46,9 +46,7 @@ public class BannedWordService {
   private Hashtable<String, BannedWord> getDictionary(int category) {
     Hashtable<String, BannedWord> dictionary = new Hashtable<>();
     bannedWordRepository.findByCategory(category).stream().forEach(
-       word -> {
-         dictionary.put(word.getWord(), word);
-       }
+       word -> dictionary.put(word.getWord(), word)
     );
     return dictionary;
   }

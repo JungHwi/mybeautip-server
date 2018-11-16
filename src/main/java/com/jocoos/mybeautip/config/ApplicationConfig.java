@@ -36,7 +36,7 @@ public class ApplicationConfig {
 
   @Bean
   public ServletRegistrationBean h2servletRegistration(){
-    return new ServletRegistrationBean<WebServlet>(new WebServlet(), "/console/*");
+    return new ServletRegistrationBean<>(new WebServlet(), "/console/*");
   }
 
   @Bean

@@ -55,10 +55,7 @@ public class GoodsDetailService {
   }
 
   private boolean hasComplicatedStyle(String document) {
-    if (!Strings.isNullOrEmpty(document) && document.contains("background-image: url(")) {
-      return true;
-    }
-    return false;
+    return !Strings.isNullOrEmpty(document) && document.contains("background-image: url(");
   }
 
   @Cacheable("goods_detail")

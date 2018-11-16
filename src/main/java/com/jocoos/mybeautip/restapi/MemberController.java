@@ -220,12 +220,12 @@ public class MemberController {
     Cursor<Date> dateCursor;
 
     if (Strings.isNullOrEmpty(cursor)) {
-      dateCursor = new Cursor<Date>(keyword, null, count);
+      dateCursor = new Cursor<>(keyword, null, count);
     } else {
       Date toDate;
       try {
         toDate = new Date(Long.parseLong(cursor));
-        dateCursor = new Cursor<Date>(keyword, toDate, count);
+        dateCursor = new Cursor<>(keyword, toDate, count);
       } catch (NumberFormatException e) {
         log.error("Cannot convert cursor to Date", e);
         throw new BadRequestException("invalid cursor type");
@@ -442,9 +442,7 @@ public class MemberController {
 
     List<RevenueInfo> revenues = Lists.newArrayList();
 
-    list.forEach(r -> {
-      revenues.add(new RevenueInfo(r));
-    });
+    list.forEach(r -> revenues.add(new RevenueInfo(r)));
 
     String nextCursor = null;
     if (revenues.size() > 0) {
@@ -495,7 +493,7 @@ public class MemberController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder<PostController.PostLikeInfo>(uri, result)
+    return new CursorResponse.Builder<>(uri, result)
        .withCategory(category)
        .withCursor(nextCursor)
        .withCount(count).toBuild();
