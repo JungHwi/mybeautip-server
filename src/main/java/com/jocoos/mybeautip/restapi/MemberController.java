@@ -64,6 +64,7 @@ public class MemberController {
   private final TagService tagService;
   private final NotificationService notificationService;
   private final DeviceService deviceService;
+  private final PostProcessService postProcessService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -72,7 +73,6 @@ public class MemberController {
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
   private final VideoLikeRepository videoLikeRepository;
-  private final BannedWordService bannedWordService;
   private final CommentRepository commentRepository;
   private final CommentLikeRepository commentLikeRepository;
   private final RevenueRepository revenueRepository;
@@ -105,13 +105,13 @@ public class MemberController {
                           GoodsLikeRepository goodsLikeRepository,
                           StoreLikeRepository storeLikeRepository,
                           VideoLikeRepository videoLikeRepository,
-                          BannedWordService bannedWordService,
                           CommentRepository commentRepository,
                           CommentLikeRepository commentLikeRepository,
                           RevenueRepository revenueRepository,
                           MemberLeaveLogRepository memberLeaveLogRepository,
                           NotificationService notificationService,
-                          DeviceService deviceService) {
+                          DeviceService deviceService,
+                          PostProcessService postProcessService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -124,13 +124,13 @@ public class MemberController {
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeLikeRepository = storeLikeRepository;
     this.videoLikeRepository = videoLikeRepository;
-    this.bannedWordService = bannedWordService;
     this.commentRepository = commentRepository;
     this.commentLikeRepository = commentLikeRepository;
     this.revenueRepository = revenueRepository;
     this.memberLeaveLogRepository = memberLeaveLogRepository;
     this.notificationService = notificationService;
     this.deviceService = deviceService;
+    this.postProcessService = postProcessService;
   }
 
   @GetMapping("/me")
@@ -381,14 +381,18 @@ public class MemberController {
           default:
             throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
         }
+        member.setAvatarUrl("https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_deleted.png");
         member.setVisible(false);
         member.setDeletedAt(new Date());
         memberRepository.save(member);
   
+        // Sync processing before response
         notificationService.readAllNotification(member.getId());
         deviceService.setPushable(member.getId(), false);
-
         memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
+        
+        // Async processing after response
+        postProcessService.deleteMember(member);
       });
   }
 

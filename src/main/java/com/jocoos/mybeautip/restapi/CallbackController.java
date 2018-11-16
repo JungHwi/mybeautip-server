@@ -141,22 +141,7 @@ public class CallbackController {
   @DeleteMapping
   public Video deleteVideo(@Valid @RequestBody CallbackDeleteVideoRequest request) {
     log.info("deleteVideo {}", request.toString());
-    return videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey())
-      .map(v -> {
-        if (v.getMember().getId() != request.getUserId().longValue()) {
-          throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
-        }
-        tagService.decreaseRefCount(v.getTagInfo());
-        v.setDeletedAt(new Date());
-        videoService.saveWithDeletedAt(v);
-        videoLikeRepository.deleteByVideoId(v.getId());
-        if ("PUBLIC".equals(v.getVisibility())) {
-          memberRepository.updateVideoCount(v.getMember().getId(), v.getMember().getVideoCount() - 1);
-        }
-        memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
-        return v;
-      })
-      .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
+    return videoService.deleteVideo(request.getUserId(), request.getVideoKey());
   }
 
   private Video updateVideoProperties(CallbackUpdateVideoRequest source, Video target) {
