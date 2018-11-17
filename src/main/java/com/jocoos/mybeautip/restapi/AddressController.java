@@ -5,6 +5,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,15 +26,20 @@ import com.jocoos.mybeautip.member.address.AddressService;
 @RequestMapping("/api/1/members/me/addresses")
 public class AddressController {
 
+  private static final String ADDRESS_TOO_MANY_ADDRESS = "address.too_many_addresses";
+
   private final AddressService addressService;
   private final MemberService memberService;
+  private final MessageService messageService;
   private final AddressRepository addressRepository;
 
   public AddressController(AddressService addressService,
                            MemberService memberService,
+                           MessageService messageService,
                            AddressRepository addressRepository) {
     this.addressService = addressService;
     this.memberService = memberService;
+    this.messageService = messageService;
     this.addressRepository = addressRepository;
   }
 
@@ -46,9 +52,10 @@ public class AddressController {
   }
 
   @PostMapping
-  public ResponseEntity<AddressInfo> createAddress(@RequestBody CreateAddressRequest request) {
+  public ResponseEntity<AddressInfo> createAddress(@RequestBody CreateAddressRequest request,
+                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     if (addressRepository.countByCreatedByIdAndDeletedAtIsNull(memberService.currentMemberId()) >= 10) {
-      throw new BadRequestException("too_many_addresses", "Cannot add any more addresses, max count is 10");
+      throw new BadRequestException("too_many_addresses", messageService.getMessage(ADDRESS_TOO_MANY_ADDRESS, lang));
     }
 
     if (request.isBase()) {

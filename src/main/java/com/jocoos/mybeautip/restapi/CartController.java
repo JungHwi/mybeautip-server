@@ -34,6 +34,11 @@ import com.jocoos.mybeautip.store.StoreRepository;
 @RequestMapping(value = "/api/1/members/me/carts", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CartController {
 
+  private static final String CART_TOO_MANY_ITEMS = "cart.too_many_items";
+  private static final String CART_GOODS_SOLD_OUT = "cart.goods_sold_out";
+  private static final String CART_OPTION_SOLD_OUT = "cart.option_sold_out";
+  private static final String CART_INVALID_QUANTITY = "cart.invalid_quantity";
+
   private final MemberService memberService;
   private final CartService cartService;
   private final MessageService messageService;
@@ -74,7 +79,7 @@ public class CartController {
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     List<Cart> list = new ArrayList<>();
     if (request.getItems().size() + cartRepository.countByCreatedById(memberService.currentMemberId()) > 100) {
-      throw new BadRequestException("too_many_items", "Cart items cannot be added more than 100.");
+      throw new BadRequestException("too_many_items", messageService.getMessage(CART_TOO_MANY_ITEMS, lang));
     }
     
     for (CartItemRequest requestItem : request.getItems()) {
@@ -157,19 +162,19 @@ public class CartController {
       .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang)));
 
     if ("y".equals(goods.getSoldOutFl())) { // 품절 플래그
-      throw new BadRequestException("goods_sold_out", "sold out: " + goodsNo);
+      throw new BadRequestException("goods_sold_out", messageService.getMessage(CART_GOODS_SOLD_OUT, lang));
     }
   
     if ("y".equals(goods.getStockFl()) && quantity > goods.getTotalStock()) { // 재고량에 따름, 총 재고량 추가
-      throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
     }
   
     if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity < goods.getMinOrderCnt()) { // 최소구매수량 미만
-      throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
     }
-  
+
     if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity > goods.getMaxOrderCnt()) { // 최대구매수량 초과
-      throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
     }
     
     GoodsOption option = null;
@@ -177,10 +182,10 @@ public class CartController {
       option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goodsNo), optionNo)
         .orElseThrow(() -> new NotFoundException("option_not_found", messageService.getOptionNotFoundMessage(lang)));
       if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
-        throw new BadRequestException("option_sold_out", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+        throw new BadRequestException("option_sold_out", messageService.getMessage(CART_OPTION_SOLD_OUT, lang));
       }
       if ("y".equals(goods.getStockFl()) && quantity > option.getStockCnt()) { // 재고량에 따름
-        throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
+        throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
       }
     } else if (optionNo != 0) {
       throw new NotFoundException("option_not_found", messageService.getOptionNotFoundMessage(lang));

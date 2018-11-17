@@ -98,6 +98,10 @@ public class MessageService {
     return messageSource.getMessage(code, null, locale);
   }
 
+  public String getMessage(String code, String lang) {
+    return messageSource.getMessage(code, null, getLocale(lang));
+  }
+
   private Locale getLocale(String lang) {
     switch (lang) {
       case "ko":

@@ -92,10 +92,6 @@ public class GoodsController {
                                          @RequestParam(defaultValue = "50") int count,
                                          @RequestParam(required = false) String cursor,
                                          HttpServletRequest httpServletRequest) {
-    if (goodsNo.length() != 10) {
-      throw new BadRequestException("invalid goods_no: " + goodsNo);
-    }
-
    return getVideos(goodsNo, count, cursor, httpServletRequest.getRequestURI());
   }
 
