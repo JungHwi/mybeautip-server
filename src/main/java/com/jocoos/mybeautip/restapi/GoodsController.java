@@ -1,13 +1,13 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.godo.GoodsDetailService;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoService;
@@ -42,6 +42,7 @@ public class GoodsController {
   private final GoodsService goodsService;
   private final VideoService videoService;
   private final GoodsOptionService goodsOptionService;
+  private final MessageService messageService;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
   private final GoodsLikeRepository goodsLikeRepository;
@@ -52,6 +53,7 @@ public class GoodsController {
                          GoodsService goodsService,
                          VideoService videoService,
                          GoodsOptionService goodsOptionService,
+                         MessageService messageService,
                          GoodsRepository goodsRepository,
                          GoodsOptionRepository goodsOptionRepository,
                          GoodsLikeRepository goodsLikeRepository,
@@ -61,6 +63,7 @@ public class GoodsController {
     this.goodsService = goodsService;
     this.videoService = videoService;
     this.goodsOptionService = goodsOptionService;
+    this.messageService = messageService;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
     this.goodsLikeRepository = goodsLikeRepository;
@@ -74,12 +77,13 @@ public class GoodsController {
   }
 
   @GetMapping("/{goodsNo}")
-  public GoodsInfo getGoods(@PathVariable("goodsNo") String goodsNo) {
+  public GoodsInfo getGoods(@PathVariable("goodsNo") String goodsNo,
+                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
     if (optional.isPresent()) {
       return goodsService.generateGoodsInfo(optional.get());
     } else {
-      throw new NotFoundException("goods_not_found", "goods not found: " + goodsNo);
+      throw new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang));
     }
   }
 
@@ -96,7 +100,8 @@ public class GoodsController {
   }
 
   @GetMapping("/{goods_no}/reviewers")
-  public GoodsRelatedVideoInfoResponse getReviewers(@PathVariable("goods_no") String goodsNo) {
+  public GoodsRelatedVideoInfoResponse getReviewers(@PathVariable("goods_no") String goodsNo,
+                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     GoodsRelatedVideoInfoResponse response = new GoodsRelatedVideoInfoResponse();
     return goodsRepository.findByGoodsNo(goodsNo)
       .map(goods -> {
@@ -111,7 +116,7 @@ public class GoodsController {
         }
         return response;
       })
-      .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
+      .orElseThrow(()-> new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang)));
   }
 
   @GetMapping("/{goodsNo}/details")
@@ -146,8 +151,9 @@ public class GoodsController {
   }
   
   @GetMapping("/{goodsNo}/option_data")
-  public GoodsOptionService.GoodsOptionInfo getGoodsOptionData(@PathVariable Integer goodsNo) {
-    return goodsOptionService.getGoodsOptionData(goodsNo);
+  public GoodsOptionService.GoodsOptionInfo getGoodsOptionData(@PathVariable Integer goodsNo,
+                                                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    return goodsOptionService.getGoodsOptionData(goodsNo, lang);
   }
   
   private boolean isSoldOut(Goods goods, GoodsOption option) {
@@ -169,7 +175,8 @@ public class GoodsController {
 
   @Transactional
   @PostMapping("/{goodsNo:.+}/likes")
-  public ResponseEntity<GoodsLikeInfo> addGoodsLike(@PathVariable String goodsNo) {
+  public ResponseEntity<GoodsLikeInfo> addGoodsLike(@PathVariable String goodsNo,
+                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     return goodsRepository.findByGoodsNo(goodsNo)
         .map(goods -> {
@@ -183,7 +190,7 @@ public class GoodsController {
           GoodsLikeInfo info = new GoodsLikeInfo(goodsLike, goodsService.generateGoodsInfo(goods));
           return new ResponseEntity<>(info, HttpStatus.OK);
         })
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
+        .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang)));
   }
 
   @Transactional

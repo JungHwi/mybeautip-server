@@ -16,6 +16,7 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.store.Store;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
@@ -40,24 +41,28 @@ public class StoreController {
 
   private final MemberService memberService;
   private final GoodsService goodsService;
+  private final MessageService messageService;
   private final StoreRepository storeRepository;
   private final StoreLikeRepository storeLikeRepository;
   private final GoodsRepository goodsRepository;
 
   public StoreController(MemberService memberService,
                          GoodsService goodsService,
+                         MessageService messageService,
                          StoreRepository storeRepository,
                          StoreLikeRepository storeLikeRepository,
                          GoodsRepository goodsRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
+    this.messageService = messageService;
     this.storeRepository = storeRepository;
     this.storeLikeRepository = storeLikeRepository;
     this.goodsRepository = goodsRepository;
   }
 
   @GetMapping("/{id:.+}")
-  public ResponseEntity<StoreController.StoreInfo> getStore(@PathVariable Integer id) {
+  public ResponseEntity<StoreController.StoreInfo> getStore(@PathVariable Integer id,
+                                                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     Optional<Store> optional = storeRepository.findById(id);
     StoreInfo storeInfo;
@@ -74,7 +79,7 @@ public class StoreController {
       storeInfo = new StoreInfo(store, likeId);
       return new ResponseEntity<>(storeInfo, HttpStatus.OK);
     } else {
-      throw new NotFoundException("store_not_found", "invalid store id");
+      throw new NotFoundException("store_not_found", messageService.getStoreNotFoundMessage(lang));
     }
   }
 
@@ -83,9 +88,10 @@ public class StoreController {
                                       @RequestParam(defaultValue = "50") int count,
                                       @RequestParam(required = false) String category,
                                       @RequestParam(required = false) String cursor,
-                                      HttpServletRequest httpServletRequest) {
+                                      HttpServletRequest httpServletRequest,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     storeRepository.findById(id)
-      .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
+      .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getStoreNotFoundMessage(lang)));
 
     Date startCursor = (org.apache.logging.log4j.util.Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
@@ -118,7 +124,8 @@ public class StoreController {
 
   @Transactional
   @PostMapping("/{id:.+}/likes")
-  public ResponseEntity<StoreController.StoreLikeInfo> addStoreLike(@PathVariable Integer id) {
+  public ResponseEntity<StoreController.StoreLikeInfo> addStoreLike(@PathVariable Integer id,
+                                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     return storeRepository.findById(id)
       .map(store -> {
@@ -133,7 +140,7 @@ public class StoreController {
         StoreLike storeLike = storeLikeRepository.save(new StoreLike(store));
         return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
       })
-      .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id"));
+      .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getStoreNotFoundMessage(lang)));
   }
 
   @Transactional

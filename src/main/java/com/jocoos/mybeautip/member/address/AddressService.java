@@ -4,6 +4,7 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -14,19 +15,23 @@ import com.jocoos.mybeautip.goods.DeliveryChargeArea;
 import com.jocoos.mybeautip.goods.DeliveryChargeAreaRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.AddressController;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Service
 public class AddressService {
 
   private final MemberService memberService;
+  private final MessageService messageService;
   private final AddressRepository addressRepository;
   private final DeliveryChargeAreaRepository deliveryChargeAreaRepository;
 
   public AddressService(AddressRepository addressRepository,
                         MemberService memberService,
+                        MessageService messageService,
                         DeliveryChargeAreaRepository deliveryChargeAreaRepository) {
     this.addressRepository = addressRepository;
     this.memberService = memberService;
+    this.messageService = messageService;
     this.deliveryChargeAreaRepository = deliveryChargeAreaRepository;
   }
 
@@ -36,7 +41,7 @@ public class AddressService {
   }
 
   @Transactional
-  public Address update(Long id, AddressController.UpdateAddressRequest update) {
+  public Address update(Long id, AddressController.UpdateAddressRequest update, String lang) {
     Optional<Address> optional = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId());
     if (optional.isPresent()) {
       Address address = optional.get();
@@ -44,19 +49,19 @@ public class AddressService {
       address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
       return addressRepository.save(address);
     } else {
-      throw new NotFoundException("address_not_found", "address not found");
+      throw new NotFoundException("address_not_found", messageService.getAddressNotFoundMessage(lang));
     }
   }
 
   @Transactional
-  public void delete(Long id) {
+  public void delete(Long id, String lang) {
     Optional<Address> optional = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId());
     if (optional.isPresent()) {
       Address address = optional.get();
       address.setDeletedAt(new Date());
       addressRepository.save(address);
     } else {
-      throw new NotFoundException("address_not_found", "address not found");
+      throw new NotFoundException("address_not_found", messageService.getAddressNotFoundMessage(lang));
     }
   }
   

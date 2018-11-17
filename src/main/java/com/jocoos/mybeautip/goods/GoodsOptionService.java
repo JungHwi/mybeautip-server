@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.goods;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.notification.MessageService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,19 +17,22 @@ import java.util.Map;
 @Slf4j
 @Service
 public class GoodsOptionService {
-  
+
+  private final MessageService messageService;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
   
-  public GoodsOptionService(GoodsRepository goodsRepository,
+  public GoodsOptionService(MessageService messageService,
+                            GoodsRepository goodsRepository,
                             GoodsOptionRepository goodsOptionRepository) {
+    this.messageService = messageService;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
   }
   
-  public GoodsOptionInfo getGoodsOptionData(int goodsNo) {
+  public GoodsOptionInfo getGoodsOptionData(int goodsNo, String lang) {
     Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
+        .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang)));
   
     List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
     if (options.size() == 0) {

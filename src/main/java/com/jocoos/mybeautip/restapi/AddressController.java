@@ -70,7 +70,8 @@ public class AddressController {
 
   @PatchMapping("/{id:.+}")
   public ResponseEntity<AddressInfo> updateAddress(@PathVariable Long id,
-                                                   @RequestBody UpdateAddressRequest request) {
+                                                   @RequestBody UpdateAddressRequest request,
+                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("UpdateAddressRequest: {}", request);
     if (request.isBase()) {
       addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
@@ -80,13 +81,14 @@ public class AddressController {
         });
     }
 
-    return new ResponseEntity<>(new AddressInfo(addressService.update(id, request)), HttpStatus.OK);
+    return new ResponseEntity<>(new AddressInfo(addressService.update(id, request, lang)), HttpStatus.OK);
   }
 
   @DeleteMapping("/{id:.+}")
-  public ResponseEntity<?> deleteAddress(@PathVariable Long id) {
+  public ResponseEntity<?> deleteAddress(@PathVariable Long id,
+                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("id to delete: {}", id);
-    addressService.delete(id);
+    addressService.delete(id, lang);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }

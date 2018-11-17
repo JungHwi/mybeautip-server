@@ -23,6 +23,7 @@ import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.*;
 import com.jocoos.mybeautip.tag.TagService;
 import lombok.Data;
@@ -55,6 +56,7 @@ public class PostController {
   private final CommentService commentService;
   private final MentionService mentionService;
   private final TagService tagService;
+  private final MessageService messageService;
   
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -67,7 +69,8 @@ public class PostController {
                         MemberRepository memberRepository,
                         CommentService commentService,
                         MentionService mentionService,
-                        TagService tagService) {
+                        TagService tagService,
+                        MessageService messageService) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -80,6 +83,7 @@ public class PostController {
     this.commentService = commentService;
     this.mentionService = mentionService;
     this.tagService = tagService;
+    this.messageService = messageService;
   }
 
   @GetMapping
@@ -147,7 +151,8 @@ public class PostController {
   }
 
   @GetMapping("/{id:.+}")
-  public ResponseEntity<PostInfo> getPost(@PathVariable Long id) {
+  public ResponseEntity<PostInfo> getPost(@PathVariable Long id,
+                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     return postRepository.findById(id)
        .map(post -> {
@@ -158,11 +163,12 @@ public class PostController {
             .ifPresent(like -> info.setLikeId(like.getId()));
          return new ResponseEntity<>(info, HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
   }
 
   @GetMapping("/{id:.+}/goods")
-  public ResponseEntity<List<GoodsInfo>> getGoods(@PathVariable Long id) {
+  public ResponseEntity<List<GoodsInfo>> getGoods(@PathVariable Long id,
+                                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return postRepository.findById(id)
        .map(post -> {
          List<GoodsInfo> result = Lists.newArrayList();
@@ -173,11 +179,12 @@ public class PostController {
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
   }
 
   @GetMapping("/{id:.+}/winners")
-  public ResponseEntity<List<MemberInfo>> getWinners(@PathVariable Long id) {
+  public ResponseEntity<List<MemberInfo>> getWinners(@PathVariable Long id,
+                                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return postRepository.findById(id)
        .map(post -> {
          List<MemberInfo> result = Lists.newArrayList();
@@ -188,12 +195,13 @@ public class PostController {
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
   }
 
   @Transactional
   @PostMapping("/{id:.+}/view_count")
-  public ResponseEntity<?> addViewCount(@PathVariable Long id) {
+  public ResponseEntity<?> addViewCount(@PathVariable Long id,
+                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     // TODO: Add history using spring AOP!!
     return postRepository.findById(id)
@@ -201,12 +209,13 @@ public class PostController {
          postRepository.updateViewCount(post.getId(), 1);
          return new ResponseEntity(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
   }
 
   @Transactional
   @PostMapping("/{id:.+}/likes")
-  public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id) {
+  public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id,
+                                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     return postRepository.findById(id)
        .map(post -> {
@@ -220,7 +229,7 @@ public class PostController {
          PostLike postLike = postLikeRepository.save(new PostLike(post));
          return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
   }
 
   @Transactional

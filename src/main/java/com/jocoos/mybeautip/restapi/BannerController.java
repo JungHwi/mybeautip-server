@@ -4,6 +4,7 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
+import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -24,9 +25,12 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 @RequestMapping(value = "/api/1/banners", produces = MediaType.APPLICATION_JSON_VALUE)
 public class BannerController {
 
+  private final MessageService messageService;
   private final BannerRepository bannerRepository;
 
-  public BannerController(BannerRepository bannerRepository) {
+  public BannerController(MessageService messageService,
+                          BannerRepository bannerRepository) {
+    this.messageService = messageService;
     this.bannerRepository = bannerRepository;
   }
 
@@ -42,13 +46,14 @@ public class BannerController {
 
   @Transactional
   @PostMapping("/{id:.+}/view_count")
-  public ResponseEntity<?> addBannerViewCount(@PathVariable Long id) {
+  public ResponseEntity<?> addBannerViewCount(@PathVariable Long id,
+                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return bannerRepository.findById(id)
        .map(banner -> {
          bannerRepository.updateViewCount(id, 1L);
          return new ResponseEntity<>(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("banner_not_found", "invalid banner id"));
+       .orElseThrow(() -> new NotFoundException("banner_not_found", messageService.getBannerNotFoundMessage(lang)));
   }
 
 

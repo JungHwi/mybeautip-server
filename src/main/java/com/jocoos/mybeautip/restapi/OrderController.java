@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.order.*;
+import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class OrderController {
 
   private final MemberService memberService;
   private final OrderService orderService;
+  private final MessageService messageService;
   private final OrderRepository orderRepository;
   private final PaymentRepository paymentRepository;
   private final DeliveryRepository deliveryRepository;
@@ -41,12 +43,14 @@ public class OrderController {
 
   public OrderController(MemberService memberService,
                          OrderService orderService,
+                         MessageService messageService,
                          OrderRepository orderRepository,
                          PaymentRepository paymentRepository,
                          DeliveryRepository deliveryRepository,
                          OrderInquiryRepository orderInquiryRepository) {
     this.memberService = memberService;
     this.orderService = orderService;
+    this.messageService = messageService;
     this.orderRepository = orderRepository;
     this.paymentRepository = paymentRepository;
     this.deliveryRepository = deliveryRepository;
@@ -69,7 +73,8 @@ public class OrderController {
   }
 
   @GetMapping("/orders/{id:.+}")
-  public ResponseEntity<OrderInfo> getOrder(@PathVariable Long id) {
+  public ResponseEntity<OrderInfo> getOrder(@PathVariable Long id,
+                                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     return orderRepository.findByIdAndCreatedById(id, memberId)
        .map(order -> {
@@ -87,7 +92,7 @@ public class OrderController {
 
          return new ResponseEntity<>(new OrderInfo(order, delivery, payment, purchaseInfos), HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
+       .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getOrderNotFoundMessage(lang)));
   }
 
   @GetMapping("/orders")
@@ -135,14 +140,16 @@ public class OrderController {
   @PostMapping("/orders/{id:.+}/inquiries")
   public ResponseEntity<OrderInquiryInfo> createInquiry(@PathVariable Long id,
                                                         @Valid @RequestBody CreateOrderInquiry request,
-                                                        BindingResult bindingResult) {
+                                                        BindingResult bindingResult,
+                                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("inquiry request: {}", request);
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
     Long me = memberService.currentMemberId();
-    Order order = orderRepository.findByIdAndCreatedById(id, me).orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
+    Order order = orderRepository.findByIdAndCreatedById(id, me)
+        .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getOrderNotFoundMessage(lang)));
     OrderInquiry inquiry;
 
     Byte state = Byte.parseByte(request.getState());
@@ -214,10 +221,11 @@ public class OrderController {
   }
 
   @GetMapping("/inquiries/{id:.+}")
-  public ResponseEntity<OrderInquiryInfo> getInquiry(@PathVariable Long id) {
+  public ResponseEntity<OrderInquiryInfo> getInquiry(@PathVariable Long id,
+                                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return orderInquiryRepository.findByIdAndCreatedById(id, memberService.currentMemberId())
        .map(orderInquiry -> new ResponseEntity<>(new OrderInquiryInfo(orderInquiry), HttpStatus.OK))
-       .orElseThrow(() -> new NotFoundException("inquiry_not_found", "invalid inquiry id"));
+       .orElseThrow(() -> new NotFoundException("inquiry_not_found", messageService.getOrderInquiryNotFoundMessage(lang)));
   }
 
   @Data

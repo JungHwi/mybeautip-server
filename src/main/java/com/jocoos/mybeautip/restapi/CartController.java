@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,7 @@ public class CartController {
 
   private final MemberService memberService;
   private final CartService cartService;
+  private final MessageService messageService;
   private final CartRepository cartRepository;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
@@ -42,12 +44,14 @@ public class CartController {
 
   public CartController(MemberService memberService,
                         CartService cartService,
+                        MessageService messageService,
                         CartRepository cartRepository,
                         GoodsRepository goodsRepository,
                         GoodsOptionRepository goodsOptionRepository,
                         StoreRepository storeRepository) {
     this.memberService = memberService;
     this.cartService = cartService;
+    this.messageService = messageService;
     this.cartRepository = cartRepository;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
@@ -66,14 +70,15 @@ public class CartController {
 
   @Transactional
   @PostMapping
-  public CartService.CartInfo addCart(@Valid @RequestBody AddCartRequest request) {
+  public CartService.CartInfo addCart(@Valid @RequestBody AddCartRequest request,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     List<Cart> list = new ArrayList<>();
     if (request.getItems().size() + cartRepository.countByCreatedById(memberService.currentMemberId()) > 100) {
       throw new BadRequestException("too_many_items", "Cart items cannot be added more than 100.");
     }
     
     for (CartItemRequest requestItem : request.getItems()) {
-      Cart item = getValidCartItem(requestItem.getGoodsNo(), requestItem.getOptionNo(), requestItem.getQuantity());
+      Cart item = getValidCartItem(requestItem.getGoodsNo(), requestItem.getOptionNo(), requestItem.getQuantity(), lang);
       
       Optional<Cart> optionalCart;
       if (item.getOption() == null) {
@@ -106,51 +111,50 @@ public class CartController {
   @Transactional
   @PatchMapping("{id}")
   public CartService.CartInfo updateCart(@PathVariable Long id,
-                                         @Valid @RequestBody UpdateCartRequest request) {
-    Optional<Cart> optional = cartRepository.findByIdAndCreatedById(id, memberService.currentMemberId());
-    Cart cart;
+                                         @Valid @RequestBody UpdateCartRequest request,
+                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    Cart item = cartRepository.findByIdAndCreatedById(id, memberService.currentMemberId())
+        .map(cart -> {
+          if (request.getQuantity() != null && request.getQuantity() > 0) {
+            cart.setQuantity(request.getQuantity());
+          }
+          if (request.getChecked() != null) {
+            cart.setChecked(request.getChecked());
+          }
+          return cart;
+        })
+        .orElseThrow(() -> new NotFoundException("cart_item_not_found", messageService.getCartItemNotFoundMessage(lang)));
 
-    if (optional.isPresent()) {
-      cart = optional.get();
-      if (request.getQuantity() != null && request.getQuantity() > 0) {
-        cart.setQuantity(request.getQuantity());
-      }
-      if (request.getChecked() != null) {
-        cart.setChecked(request.getChecked());
-      }
-    } else {
-      throw new NotFoundException("cart_item_not_found", "cart item not found, id: " + id);
-    }
-
-    cartService.update(cart);
+    cartService.update(item);
     return cartService.getCartItemList();
   }
 
   @Transactional
   @DeleteMapping("{id}")
-  public CartService.CartInfo removeCart(@PathVariable Long id) {
+  public CartService.CartInfo removeCart(@PathVariable Long id,
+                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Optional<Cart> optional = cartRepository.findByIdAndCreatedById(id, memberService.currentMemberId());
     if (optional.isPresent()) {
       cartRepository.deleteById(id);
     } else {
-      throw new NotFoundException("cart_item_not_found", "cart item not found, id: " + id);
+      throw new NotFoundException("cart_item_not_found", messageService.getCartItemNotFoundMessage(lang));
     }
-
     return cartService.getCartItemList();
   }
 
   @PostMapping("/now")
-  public CartService.CartInfo calculateInstantCartInfo(@Valid @RequestBody AddCartRequest request) {
+  public CartService.CartInfo calculateInstantCartInfo(@Valid @RequestBody AddCartRequest request,
+                                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     List<Cart> list = new ArrayList<>();
     for (CartItemRequest item : request.getItems()) {
-      list.add(getValidCartItem(item.getGoodsNo(), item.getOptionNo(), item.getQuantity()));
+      list.add(getValidCartItem(item.getGoodsNo(), item.getOptionNo(), item.getQuantity(), lang));
     }
     return cartService.getCartItemList(list);
   }
 
-  private Cart getValidCartItem(String goodsNo, int optionNo, int quantity) {
+  private Cart getValidCartItem(String goodsNo, int optionNo, int quantity, String lang) {
     Goods goods = goodsRepository.findByGoodsNoAndStateLessThanEqual(goodsNo, Goods.GoodsState.NO_SALE.ordinal())
-      .orElseThrow(() -> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
+      .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang)));
 
     if ("y".equals(goods.getSoldOutFl())) { // 품절 플래그
       throw new BadRequestException("goods_sold_out", "sold out: " + goodsNo);
@@ -171,7 +175,7 @@ public class CartController {
     GoodsOption option = null;
     if ("y".equals(goods.getOptionFl())) {
       option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goodsNo), optionNo)
-        .orElseThrow(() -> new NotFoundException("option_not_found", "goods option not found: " + goodsNo));
+        .orElseThrow(() -> new NotFoundException("option_not_found", messageService.getOptionNotFoundMessage(lang)));
       if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
         throw new BadRequestException("option_sold_out", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
       }
@@ -179,7 +183,7 @@ public class CartController {
         throw new BadRequestException("invalid_quantity", String.format("goodsNo:%s, option:%d, quantity:%d", goodsNo, optionNo, quantity));
       }
     } else if (optionNo != 0) {
-      throw new NotFoundException("option_not_found", "goods option not exist:" + goodsNo);
+      throw new NotFoundException("option_not_found", messageService.getOptionNotFoundMessage(lang));
     }
 
     Store store = storeRepository.findById(goods.getScmNo())

@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.account.Account;
 import com.jocoos.mybeautip.member.account.AccountRepository;
+import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,16 +26,19 @@ import java.util.Date;
 public class AccountController {
 
   private final MemberService memberService;
+  private final MessageService messageService;
   private final AccountRepository accountRepository;
 
   public AccountController(MemberService memberService,
+                           MessageService messageService,
                            AccountRepository accountRepository) {
     this.memberService = memberService;
+    this.messageService = messageService;
     this.accountRepository = accountRepository;
   }
 
   @GetMapping
-  public ResponseEntity<AccountInfo> getAccount() {
+  public ResponseEntity<AccountInfo> getAccount(@RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     return accountRepository.findById(memberId)
        .map(account -> {
@@ -44,7 +48,7 @@ public class AccountController {
          log.debug("accountInfo: {}", accountInfo);
 
          return new ResponseEntity<>(accountInfo, HttpStatus.OK);
-       }).orElseThrow(() -> new NotFoundException("account_not_found", "Account not found"));
+       }).orElseThrow(() -> new NotFoundException("account_not_found", messageService.getAccountNotFoundMessage(lang)));
   }
 
   @PatchMapping
