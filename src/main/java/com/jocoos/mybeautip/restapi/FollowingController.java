@@ -69,9 +69,8 @@ public class FollowingController {
       throw new BadRequestException("Can't follow myself");
     }
 
-    if (!memberRepository.existsById(you)) {
-      throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
-    }
+    memberRepository.findByIdAndDeletedAtIsNull(you)
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
     Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(me, you);
     
