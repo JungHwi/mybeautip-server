@@ -77,9 +77,6 @@ public class MemberShoppingController {
   @GetMapping("/shoppings")
   public ResponseEntity<ShoppingInfo> getShopping() {
     Member member = memberService.currentMember();
-    if (member == null) {
-      throw new MemberNotFoundException("Login required");
-    }
 
     Date now = new Date();
     Date weekAgo = getWeekAgo(now);

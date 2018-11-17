@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -36,13 +37,16 @@ import com.jocoos.mybeautip.member.following.FollowingRepository;
 public class FollowingController {
 
   private final MemberService memberService;
+  private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
   
   public FollowingController(MemberService memberService,
+                             MessageService messageService,
                              MemberRepository memberRepository,
                              FollowingRepository followingRepository) {
     this.memberService = memberService;
+    this.messageService = messageService;
     this.memberRepository = memberRepository;
     this.followingRepository = followingRepository;
   }
@@ -50,7 +54,8 @@ public class FollowingController {
   @Transactional
   @PostMapping("/me/followings")
   public FollowingResponse followMember(@Valid @RequestBody FollowingMemberRequest followingMemberRequest,
-                               BindingResult bindingResult) {
+                                        BindingResult bindingResult,
+                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
       throw new BadRequestException("invalid followings request");
@@ -64,7 +69,7 @@ public class FollowingController {
     }
 
     if (!memberRepository.existsById(you)) {
-      throw new MemberNotFoundException(you);
+      throw new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang));
     }
     
     Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(me, you);

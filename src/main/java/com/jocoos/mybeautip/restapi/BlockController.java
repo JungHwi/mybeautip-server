@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
+import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,20 +33,24 @@ import java.util.Optional;
 @Slf4j
 public class BlockController {
   private final MemberService memberService;
+  private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final BlockRepository blockRepository;
   
   public BlockController(MemberService memberService,
+                         MessageService messageService,
                          MemberRepository memberRepository,
                          BlockRepository blockRepository) {
     this.memberService = memberService;
+    this.messageService = messageService;
     this.memberRepository = memberRepository;
     this.blockRepository = blockRepository;
   }
   
   @PostMapping("/me/blocks")
   public BlockResponse blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest,
-                              BindingResult bindingResult) {
+                                   BindingResult bindingResult,
+                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
       throw new BadRequestException("invalid blocks request");
@@ -60,7 +65,7 @@ public class BlockController {
     log.debug("Block " + me + " : " + you);
 
     Member member = memberRepository.findByIdAndDeletedAtIsNull(you)
-      .orElseThrow(() -> new MemberNotFoundException(you));
+      .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
 
     Optional<Block> optional = blockRepository.findByMeAndMemberYouId(me, you);
 

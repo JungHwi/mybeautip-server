@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.revenue.Revenue;
 import com.jocoos.mybeautip.member.revenue.RevenueInfo;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
@@ -29,7 +30,6 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
 import com.jocoos.mybeautip.video.VideoService;
-import com.jocoos.mybeautip.word.BannedWordService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -65,6 +65,7 @@ public class MemberController {
   private final NotificationService notificationService;
   private final DeviceService deviceService;
   private final PostProcessService postProcessService;
+  private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -111,7 +112,8 @@ public class MemberController {
                           MemberLeaveLogRepository memberLeaveLogRepository,
                           NotificationService notificationService,
                           DeviceService deviceService,
-                          PostProcessService postProcessService) {
+                          PostProcessService postProcessService,
+                          MessageService messageService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -131,18 +133,21 @@ public class MemberController {
     this.notificationService = notificationService;
     this.deviceService = deviceService;
     this.postProcessService = postProcessService;
+    this.messageService = messageService;
   }
 
   @GetMapping("/me")
-  public Resource<MemberMeInfo> getMe(Principal principal) {
+  public Resource<MemberMeInfo> getMe(Principal principal,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("member id: {}", principal.getName());
     return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
               .map(m -> new Resource<>(new MemberMeInfo(m, pointRatio, revenueRatio)))
-              .orElseThrow(() -> new MemberNotFoundException("member_not_found"));
+              .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
   }
 
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest) {
+  public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
+                                                 @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("member id: {}", memberService.currentMemberId());
     
     if (updateMemberRequest.getUsername() != null) {
@@ -173,14 +178,15 @@ public class MemberController {
 
           return new ResponseEntity<>(memberService.getMemberInfo(m), HttpStatus.OK);
         })
-        .orElseThrow(() -> new MemberNotFoundException(memberService.currentMemberId()));
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
   }
 
   @GetMapping
   @ResponseBody
   public CursorResponse getMembers(@RequestParam(defaultValue = "20") int count,
-                                               @RequestParam(required = false) String cursor,
-                                               @RequestParam(required = false) String keyword) {
+                                   @RequestParam(required = false) String cursor,
+                                   @RequestParam(required = false) String keyword,
+                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     List<MemberInfo> members = Lists.newArrayList();
     String nextCursor = null;
 
@@ -255,28 +261,26 @@ public class MemberController {
   }
 
   @GetMapping("/{id:.+}")
-  public MemberInfo getMember(@PathVariable Long id) {
+  public MemberInfo getMember(@PathVariable Long id,
+                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return memberRepository.findByIdAndDeletedAtIsNull(id).map(memberService::getMemberInfo)
-        .orElseThrow(() -> new MemberNotFoundException(id));
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
   }
 
   @GetMapping(value = "/me/like_count")
   public LikeCountResponse getMyLikesCount() {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     LikeCountResponse response = new LikeCountResponse();
-    response.setGoods(goodsLikeRepository.countByCreatedById(memberId));
-    response.setStore(storeLikeRepository.countByCreatedById(memberId));
-    response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(memberId));
-    response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(memberId));
+    response.setGoods(goodsLikeRepository.countByCreatedById(memberService.currentMemberId()));
+    response.setStore(storeLikeRepository.countByCreatedById(memberService.currentMemberId()));
+    response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(memberService.currentMemberId()));
+    response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(memberService.currentMemberId()));
     return response;
   }
 
   @GetMapping(value = "/{id:.+}/like_count")
-  public LikeCountResponse getMemberLikesCount(@PathVariable Long id) {
+  public LikeCountResponse getMemberLikesCount(@PathVariable Long id,
+                                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
     LikeCountResponse response = new LikeCountResponse();
     response.setGoods(goodsLikeRepository.countByCreatedById(id));
     response.setStore(storeLikeRepository.countByCreatedById(id));
@@ -289,19 +293,16 @@ public class MemberController {
   public CursorResponse getMyLikes(@RequestParam String category,
                                    @RequestParam(defaultValue = "20") int count,
                                    @RequestParam(required = false) Long cursor) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-    return createLikeResponse(memberId, category, count, cursor, "/api/1/members/me/likes");
+    return createLikeResponse(memberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes");
   }
 
   @GetMapping(value = "/{id:.+}/likes")
   public CursorResponse getMemberLikes(@PathVariable Long id,
                                        @RequestParam String category,
                                        @RequestParam(defaultValue = "20") int count,
-                                       @RequestParam(required = false) Long cursor) {
-    log.debug("id:{}, category:{}", id, category);
+                                       @RequestParam(required = false) Long cursor,
+                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
     return createLikeResponse(id, category, count, cursor, String.format("/api/1/members/%d/likes", id));
   }
 
@@ -310,11 +311,6 @@ public class MemberController {
                                     @RequestParam(required = false) String cursor,
                                     @RequestParam(required = false) String type,
                                     @RequestParam(required = false) String state) {
-    Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     Slice<Video> list = videoService.findMyVideos(memberService.currentMember(), type, state, cursor, count);
     List<VideoController.VideoInfo> videos = Lists.newArrayList();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
@@ -336,9 +332,10 @@ public class MemberController {
                                         @RequestParam(defaultValue = "20") int count,
                                         @RequestParam(required = false) String cursor,
                                         @RequestParam(required = false) String type,
-                                        @RequestParam(required = false) String state) {
+                                        @RequestParam(required = false) String state,
+                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
-      .orElseThrow(() -> new MemberNotFoundException(id));
+      .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
 
     Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
     List<VideoController.VideoInfo> videos = Lists.newArrayList();

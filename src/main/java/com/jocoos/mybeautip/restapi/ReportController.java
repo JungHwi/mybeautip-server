@@ -11,6 +11,7 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.notification.MessageService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -23,20 +24,24 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/1/members/me/reports", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ReportController {
   private final MemberService memberService;
+  private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final ReportRepository reportRepository;
 
   public ReportController(MemberService memberService,
+                          MessageService messageService,
                           MemberRepository memberRepository,
                           ReportRepository reportRepository) {
     this.memberService = memberService;
+    this.messageService = messageService;
     this.memberRepository = memberRepository;
     this.reportRepository = reportRepository;
   }
   
   @PutMapping
   public void reportMember(@Valid @RequestBody ReportRequest request,
-                           BindingResult bindingResult) {
+                           BindingResult bindingResult,
+                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     if (bindingResult.hasErrors()) {
       log.debug("bindingResult: {}", bindingResult);
       throw new BadRequestException("invalid report request");
@@ -46,22 +51,16 @@ public class ReportController {
         .ifPresent(report -> { throw new BadRequestException("Already reported.");});
 
     Member you = memberRepository.findByIdAndDeletedAtIsNull(request.getMemberId())
-        .orElseThrow(() ->new MemberNotFoundException(request.getMemberId()));
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
 
     reportRepository.save(new Report(memberService.currentMember(), you, request.getReason()));
   }
 
   @GetMapping("/{id:.+}")
   public ReportResponse didReport(@PathVariable Integer id) {
-    Long me = memberService.currentMemberId();
-    if (me == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
     ReportResponse response = new ReportResponse(false);
-    reportRepository.findByMeIdAndYouId(me, id)
+    reportRepository.findByMeIdAndYouId(memberService.currentMemberId(), id)
       .ifPresent(report -> response.setReported(true));
-
     return response;
   }
 

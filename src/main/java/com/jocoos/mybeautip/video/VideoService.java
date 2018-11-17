@@ -267,7 +267,7 @@ public class VideoService {
           memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
           return v;
         })
-        .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + videoKey));
+        .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
   }
 
   /**

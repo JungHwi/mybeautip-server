@@ -10,8 +10,8 @@ public class MemberNotFoundException extends MybeautipRuntimeException {
     super("member_not_found", "member not found");
   }
 
-  public MemberNotFoundException(String requestId) {
-    super("member_not_found", "member not found - " + requestId);
+  public MemberNotFoundException(String description) {
+    super("member_not_found", description);
   }
 
   public MemberNotFoundException(Long requestId) {

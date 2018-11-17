@@ -8,23 +8,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.google.common.base.Strings;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
@@ -35,6 +20,18 @@ import com.jocoos.mybeautip.store.Store;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.store.StoreRepository;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController

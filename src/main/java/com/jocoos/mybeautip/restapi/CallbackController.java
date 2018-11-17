@@ -4,10 +4,10 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +32,7 @@ import com.jocoos.mybeautip.video.*;
 public class CallbackController {
   private final VideoService videoService;
   private final TagService tagService;
+  private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final VideoRepository videoRepository;
   private final GoodsRepository goodsRepository;
@@ -41,6 +42,7 @@ public class CallbackController {
   
   public CallbackController(VideoService videoService,
                             TagService tagService,
+                            MessageService messageService,
                             VideoRepository videoRepository,
                             MemberRepository memberRepository,
                             GoodsRepository goodsRepository,
@@ -49,6 +51,7 @@ public class CallbackController {
                             ObjectMapper objectMapper) {
     this.videoService = videoService;
     this.tagService = tagService;
+    this.messageService = messageService;
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
@@ -59,7 +62,8 @@ public class CallbackController {
   
   @Transactional
   @PostMapping
-  public Video createVideo(@Valid @RequestBody CallbackCreateVideoRequest request) {
+  public Video createVideo(@Valid @RequestBody CallbackCreateVideoRequest request,
+                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.info("callback createVideo: {}", request.toString());
     videoRepository.findByVideoKey(request.getVideoKey())
       .ifPresent(v -> { throw new BadRequestException("already_exist", "Already exist, videoKey: " + request.getVideoKey()); });
@@ -80,7 +84,7 @@ public class CallbackController {
         video.setMember(m);
         return Optional.empty();
       })
-      .orElseThrow(() -> new MemberNotFoundException(request.getUserId()));
+      .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
     
     if (StringUtils.isNotEmpty(video.getContent())) {
       List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
@@ -132,7 +136,7 @@ public class CallbackController {
           throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
         }
         return updateVideoProperties(request, v);})
-      .orElseThrow(() -> new NotFoundException("not_found_video", "video not found, videoKey: " + request.getVideoKey()));
+      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey()));
 
     return videoService.update(video);
   }
