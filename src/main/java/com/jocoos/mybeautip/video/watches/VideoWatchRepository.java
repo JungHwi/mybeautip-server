@@ -15,5 +15,7 @@ public interface VideoWatchRepository extends JpaRepository<VideoWatch, Long> {
 
   Integer countByVideoIdAndModifiedAtAfter(Long videoId, Date time);
 
+  Integer countByVideoIdAndIsGuestIsTrueAndModifiedAtAfter(Long videoId, Date time);
+
   Slice<VideoWatch> findByVideoIdAndIsGuestIsFalseAndModifiedAtAfterAndCreatedByIdAfter(Long videoId, Date time, Long createdBy, Pageable pageable);
 }

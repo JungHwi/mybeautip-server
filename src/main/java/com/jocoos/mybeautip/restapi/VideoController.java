@@ -489,6 +489,9 @@ public class VideoController {
     List<MemberInfo> members = Lists.newArrayList();
     list.stream().forEach(watch -> members.add(memberService.getMemberInfo(watch.getCreatedBy())));
 
+    int guestCount = videoWatchRepository.countByVideoIdAndIsGuestIsTrueAndModifiedAtAfter(id, new Date(duration));
+
+
     String nextCursor = null;
     if (members.size() > 0) {
       nextCursor = String.valueOf(members.get(members.size() - 1).getId());
@@ -496,6 +499,7 @@ public class VideoController {
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/watches", members)
       .withCount(count)
+      .withGuestCount(guestCount)
       .withCursor(nextCursor).toBuild();
   }
 

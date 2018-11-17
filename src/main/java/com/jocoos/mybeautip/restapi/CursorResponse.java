@@ -22,12 +22,14 @@ public class CursorResponse<E> {
   private String nextCursor;
   private String nextRef;
   private Integer totalCount;
+  private Integer guestCount; // used at watcher list
 
   public static class Builder<E> {
     private List<E> content;
     private String nextCursor;
     private String nextRef;
     private Integer totalCount;
+    private Integer guestCount;
 
     @JsonIgnore
     private String uri;
@@ -98,6 +100,11 @@ public class CursorResponse<E> {
       return this;
     }
 
+    public Builder withGuestCount(int guestCount) {
+      this.guestCount = guestCount;
+      return this;
+    }
+
     public CursorResponse<E> toBuild() {
       String countValue = null;
       if (this.properties.containsKey("count")) {
@@ -121,5 +128,6 @@ public class CursorResponse<E> {
     this.nextCursor = builder.nextCursor;
     this.nextRef = builder.nextRef;
     this.totalCount = builder.totalCount;
+    this.guestCount = builder.guestCount;
   }
 }
