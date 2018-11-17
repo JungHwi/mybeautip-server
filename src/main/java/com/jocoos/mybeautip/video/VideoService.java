@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
@@ -29,6 +30,7 @@ import java.util.Optional;
 public class VideoService {
 
   private final MemberService memberService;
+  private final MessageService messageService;
   private final TagService tagService;
   private final VideoRepository videoRepository;
   private final CommentRepository commentRepository;
@@ -41,6 +43,7 @@ public class VideoService {
   private long watchDuration;
   
   public VideoService(MemberService memberService,
+                      MessageService messageService,
                       TagService tagService,
                       VideoRepository videoRepository,
                       CommentRepository commentRepository,
@@ -49,6 +52,7 @@ public class VideoService {
                       BlockRepository blockRepository,
                       MemberRepository memberRepository) {
     this.memberService = memberService;
+    this.messageService = messageService;
     this.tagService = tagService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
@@ -209,7 +213,7 @@ public class VideoService {
     return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
   }
 
-  public VideoController.VideoInfo setWatcher(Long id, Member me) {
+  public VideoController.VideoInfo setWatcher(Long id, Member me, String lang) {
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .map(v -> {
         if ("live".equalsIgnoreCase(v.getState())) {
@@ -226,11 +230,11 @@ public class VideoService {
         }
         return v;
       })
-      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getVideoNotFoundMessage(lang)));
     return generateVideoInfo(video);
   }
 
-  public VideoController.VideoInfo setWatcherWithGuest(Long id, String guestUsername) {
+  public VideoController.VideoInfo setWatcherWithGuest(Long id, String guestUsername, String lang) {
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .map(v -> {
         if ("live".equalsIgnoreCase(v.getState())) {
@@ -247,7 +251,7 @@ public class VideoService {
         }
         return v;
       })
-      .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, id: " + id));
+      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getVideoNotFoundMessage(lang)));
     return generateVideoInfo(video);
   }
   

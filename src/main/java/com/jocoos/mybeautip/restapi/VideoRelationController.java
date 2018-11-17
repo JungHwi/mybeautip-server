@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -28,15 +29,18 @@ import com.jocoos.mybeautip.video.*;
 public class VideoRelationController {
 
   private final VideoService videoService;
+  private final MessageService messageService;
   private final VideoRepository videoRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
 
   public VideoRelationController(VideoService videoService,
+                                 MessageService messageService,
                                  VideoRepository videoRepository,
                                  VideoGoodsRepository videoGoodsRepository,
                                  MotdRecommendationRepository motdRecommendationRepository) {
     this.videoService = videoService;
+    this.messageService = messageService;
     this.videoRepository = videoRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
@@ -46,9 +50,11 @@ public class VideoRelationController {
   @GetMapping("/{id:.+}/relations")
   public CursorResponse getRelationVideos(@PathVariable Long id,
                                           @RequestParam(defaultValue = "10") int count,
-                                          @RequestParam(required = false) String cursor) {
+                                          @RequestParam(required = false) String cursor,
+                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
-    Video video = videoRepository.findById(id).orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id"));
+    Video video = videoRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getVideoNotFoundMessage(lang)));
 
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     List<VideoGoods> videoGoods = videoGoodsRepository.findAllByVideoId(video.getId());

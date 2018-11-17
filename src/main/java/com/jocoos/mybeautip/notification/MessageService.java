@@ -13,6 +13,7 @@ public class MessageService {
   private static final String NOTIFICATION_NAME_FORMAT = "notification.%s";
   private static final String GOODS_COMPANY_TEXT = "goods.company_text";
   private static final String MEMBER_NOT_FOUND = "member.not_found";
+  private static final String VIDEO_NOT_FOUND = "video.not_found";
 
   private final MessageSource messageSource;
 
@@ -37,6 +38,10 @@ public class MessageService {
 
   public String getMemberNotFoundMessage(String lang) {
     return messageSource.getMessage(MEMBER_NOT_FOUND, null, getLocale(lang));
+  }
+
+  public String getVideoNotFoundMessage(String lang) {
+    return messageSource.getMessage(VIDEO_NOT_FOUND, null, getLocale(lang));
   }
 
   public String getMessage(String code, Locale locale) {
