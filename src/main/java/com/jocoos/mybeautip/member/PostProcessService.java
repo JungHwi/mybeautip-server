@@ -4,6 +4,7 @@ import javax.transaction.Transactional;
 
 import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,17 +20,20 @@ public class PostProcessService {
   private final FollowingRepository followingRepository;
   private final CartRepository cartRepository;
   private final MemberRepository memberRepository;
+  private final MemberRecommendationRepository memberRecommendationRepository;
   
   public PostProcessService(VideoService videoService,
                             VideoRepository videoRepository,
                             FollowingRepository followingRepository,
                             CartRepository cartRepository,
-                            MemberRepository memberRepository) {
+                            MemberRepository memberRepository,
+                            MemberRecommendationRepository memberRecommendationRepository) {
     this.videoService = videoService;
     this.videoRepository = videoRepository;
     this.followingRepository = followingRepository;
     this.cartRepository = cartRepository;
     this.memberRepository = memberRepository;
+    this.memberRecommendationRepository = memberRecommendationRepository;
   }
   
   @Async
@@ -63,5 +67,9 @@ public class PostProcessService {
     log.debug("Member {} deleted: cart items will be deleted", member.getId());
     cartRepository.findByCreatedById(member.getId())
         .forEach(cartRepository::delete);
+
+    log.debug("Member {} deleted: recommended member will be deleted", member.getId());
+    memberRecommendationRepository.findByMemberId(member.getId())
+        .ifPresent(memberRecommendationRepository::delete);
   }
 }
