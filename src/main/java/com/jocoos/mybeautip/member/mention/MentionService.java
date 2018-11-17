@@ -117,7 +117,7 @@ public class MentionService {
       log.debug("member: {}", memberId);
 
       if (StringUtils.isNumeric(memberId)) {
-        Optional<Member> member = memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(memberId));
+        Optional<Member> member = memberRepository.findById(Long.parseLong(memberId));
         if (member.isPresent()) {
           Member m = member.get();
           mentionResult.add(new MentionTag(m));
