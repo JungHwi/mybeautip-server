@@ -17,5 +17,7 @@ public interface FollowingRepository extends CrudRepository<Following, Long> {
 
   List<Following> findByCreatedAtBeforeAndMemberYouId(Date createdAt, Long you);
   
-  List<Following> findByMemberMeIdOrMemberYouId(Long me, Long you);
+  List<Following> findByMemberMeId(Long me);
+
+  List<Following> findByMemberYouId(Long you);
 }

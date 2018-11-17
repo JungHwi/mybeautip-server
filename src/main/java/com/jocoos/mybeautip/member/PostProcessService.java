@@ -18,15 +18,18 @@ public class PostProcessService {
   private final VideoRepository videoRepository;
   private final FollowingRepository followingRepository;
   private final CartRepository cartRepository;
+  private final MemberRepository memberRepository;
   
   public PostProcessService(VideoService videoService,
                             VideoRepository videoRepository,
                             FollowingRepository followingRepository,
-                            CartRepository cartRepository) {
+                            CartRepository cartRepository,
+                            MemberRepository memberRepository) {
     this.videoService = videoService;
     this.videoRepository = videoRepository;
     this.followingRepository = followingRepository;
     this.cartRepository = cartRepository;
+    this.memberRepository = memberRepository;
   }
   
   @Async
@@ -45,8 +48,17 @@ public class PostProcessService {
         });
 
     log.debug("Member {} deleted: followings will be deleted", member.getId());
-    followingRepository.findByMemberMeIdOrMemberYouId(member.getId(), member.getId())
-        .forEach(followingRepository::delete);
+    followingRepository.findByMemberMeId(member.getId())
+        .forEach(following -> {
+          followingRepository.delete(following);
+          memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+        });
+
+    followingRepository.findByMemberYouId(member.getId())
+        .forEach(following -> {
+          followingRepository.delete(following);
+          memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
+        });
 
     log.debug("Member {} deleted: cart items will be deleted", member.getId());
     cartRepository.findByCreatedById(member.getId())
