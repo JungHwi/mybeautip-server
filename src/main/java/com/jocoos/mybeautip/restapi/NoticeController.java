@@ -13,13 +13,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,22 +41,11 @@ public class NoticeController {
   @GetMapping
   public ResponseEntity<NoticeResponse> getNotices(@RequestParam("device_os") String deviceOs,
                                                    @RequestParam("app_version") String appVersion,
-                                                   @RequestParam(defaultValue = "ko") String lang) {
-
-    Locale locale;
-    switch (lang) {
-      case "ko":
-        locale = Locale.KOREAN;
-        break;
-      case "en":
-      case "ja":
-      default:
-        locale = Locale.ENGLISH;
-        break;
-    }
+                                                   @RequestParam(defaultValue = "ko") String lang,
+                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String language) {
     List<NoticeInfo> notices = noticeService.findByOs(deviceOs, appVersion)
        .stream().map(input -> new NoticeInfo(input.getType(),
-            messageService.getMessage(input.getMessage(), locale)))
+            messageService.getMessage(input.getMessage(), language)))
        .collect(Collectors.toList());
 
     NoticeResponse response = new NoticeResponse();

@@ -26,12 +26,12 @@ import com.jocoos.mybeautip.member.address.AddressService;
 @RequestMapping("/api/1/members/me/addresses")
 public class AddressController {
 
-  private static final String ADDRESS_TOO_MANY_ADDRESS = "address.too_many_addresses";
-
   private final AddressService addressService;
   private final MemberService memberService;
   private final MessageService messageService;
   private final AddressRepository addressRepository;
+
+  private static final String ADDRESS_TOO_MANY_ADDRESS = "address.too_many_addresses";
 
   public AddressController(AddressService addressService,
                            MemberService memberService,

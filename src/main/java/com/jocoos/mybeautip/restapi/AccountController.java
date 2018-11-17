@@ -29,6 +29,8 @@ public class AccountController {
   private final MessageService messageService;
   private final AccountRepository accountRepository;
 
+  private static final String ACCOUNT_NOT_FOUND = "account.not_found";
+
   public AccountController(MemberService memberService,
                            MessageService messageService,
                            AccountRepository accountRepository) {
@@ -48,7 +50,7 @@ public class AccountController {
          log.debug("accountInfo: {}", accountInfo);
 
          return new ResponseEntity<>(accountInfo, HttpStatus.OK);
-       }).orElseThrow(() -> new NotFoundException("account_not_found", messageService.getAccountNotFoundMessage(lang)));
+       }).orElseThrow(() -> new NotFoundException("account_not_found", messageService.getMessage(ACCOUNT_NOT_FOUND, lang)));
   }
 
   @PatchMapping

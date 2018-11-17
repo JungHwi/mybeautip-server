@@ -41,6 +41,9 @@ public class OrderController {
   private final DeliveryRepository deliveryRepository;
   private final OrderInquiryRepository orderInquiryRepository;
 
+  private static final String ORDER_NOT_FOUND = "order.not_found";
+  private static final String ORDER_INQUIRY_NOT_FOUND = "order.inquiry_not_found";
+
   public OrderController(MemberService memberService,
                          OrderService orderService,
                          MessageService messageService,
@@ -92,7 +95,7 @@ public class OrderController {
 
          return new ResponseEntity<>(new OrderInfo(order, delivery, payment, purchaseInfos), HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getOrderNotFoundMessage(lang)));
+       .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
   }
 
   @GetMapping("/orders")
@@ -149,7 +152,7 @@ public class OrderController {
 
     Long me = memberService.currentMemberId();
     Order order = orderRepository.findByIdAndCreatedById(id, me)
-        .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getOrderNotFoundMessage(lang)));
+        .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
     OrderInquiry inquiry;
 
     Byte state = Byte.parseByte(request.getState());
@@ -225,7 +228,7 @@ public class OrderController {
                                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return orderInquiryRepository.findByIdAndCreatedById(id, memberService.currentMemberId())
        .map(orderInquiry -> new ResponseEntity<>(new OrderInquiryInfo(orderInquiry), HttpStatus.OK))
-       .orElseThrow(() -> new NotFoundException("inquiry_not_found", messageService.getOrderInquiryNotFoundMessage(lang)));
+       .orElseThrow(() -> new NotFoundException("inquiry_not_found", messageService.getMessage(ORDER_INQUIRY_NOT_FOUND, lang)));
   }
 
   @Data

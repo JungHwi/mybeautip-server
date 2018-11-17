@@ -21,6 +21,8 @@ public class GoodsOptionService {
   private final MessageService messageService;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
+
+  private static final String GOODS_NOT_FOUND = "goods.not_found";
   
   public GoodsOptionService(MessageService messageService,
                             GoodsRepository goodsRepository,
@@ -32,7 +34,7 @@ public class GoodsOptionService {
   
   public GoodsOptionInfo getGoodsOptionData(int goodsNo, String lang) {
     Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
-        .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang)));
+        .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
   
     List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
     if (options.size() == 0) {

@@ -1,12 +1,9 @@
 package com.jocoos.mybeautip.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import lombok.Getter;
-
-import com.jocoos.mybeautip.member.MemberService;
 
 @Getter
 @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -20,10 +17,6 @@ public class BadRequestException extends MybeautipRuntimeException {
 
   public BadRequestException(String message, String description) {
     super(message, description);
-  }
-
-  public BadRequestException(MemberService.UsernameErrorCode code) {
-    super(code.getError(), code.getErrorDescription());
   }
 
   public BadRequestException(FieldError error) {

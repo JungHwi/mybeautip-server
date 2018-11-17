@@ -2,36 +2,42 @@ package com.jocoos.mybeautip.member;
 
 import java.util.Optional;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
+import com.jocoos.mybeautip.word.BannedWordService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.following.Following;
-import com.jocoos.mybeautip.member.following.FollowingRepository;
-import com.jocoos.mybeautip.security.MyBeautipUserDetails;
-import com.jocoos.mybeautip.word.BannedWordService;
 
 @Slf4j
 @Service
 public class MemberService {
 
   private final BannedWordService bannedWordService;
+  private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
   
   private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
 
+  private static final String USERNAME_INVALID_LENGTH = "username.invalid_length";
+  private static final String USERNAME_INVALID_FORMAT = "username.invalid_format";
+  private static final String USERNAME_INVALID_CHAR = "username.invalid_char";
+  private static final String USERNAME_ALREADY_USED = "username.already_used";
+  private static final String EMAIL_INVALID_FORMAT = "email.invalid_format";
+
   public MemberService(BannedWordService bannedWordService,
+                       MessageService messageService,
                        MemberRepository memberRepository,
                        FollowingRepository followingRepository) {
     this.bannedWordService = bannedWordService;
+    this.messageService = messageService;
     this.memberRepository = memberRepository;
     this.followingRepository = followingRepository;
   }
@@ -106,46 +112,32 @@ public class MemberService {
     }
   }
 
-  public void checkUsernameValidation(@RequestParam String username) {
+  public void checkUsernameValidation(@RequestParam String username, String lang) {
     if (username.length() < 2 || username.length() > 25) {
-      throw new BadRequestException(UsernameErrorCode.INVALID_LENGTH);
+      throw new BadRequestException("invalid_length", messageService.getMessage(USERNAME_INVALID_LENGTH, lang));
     }
 
     if (StringUtils.isNumeric(username)) {
-      throw new BadRequestException(UsernameErrorCode.INVALID_NUMBER);
+      throw new BadRequestException("invalid_number", messageService.getMessage(USERNAME_INVALID_FORMAT, lang));
     }
 
     String regex = "^[\\w가-힣!_~]+$";
     if (!(username.matches(regex))) {
-      throw new BadRequestException(UsernameErrorCode.INVALID_CHAR);
+      throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
     }
 
     if (!currentMember().getUsername().equals(username)) {
       if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
-        throw new BadRequestException(UsernameErrorCode.ALREADY_USED);
+        throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
       }
     }
 
-    bannedWordService.findWordAndThrowException(username);
+    bannedWordService.findWordAndThrowException(username, lang);
   }
   
-  public void checkEmailValidation(String email) {
+  public void checkEmailValidation(String email, String lang) {
     if (email.length() > 50 || !email.matches(emailRegex)) {
-      throw new BadRequestException(MemberService.UsernameErrorCode.INVALID_EMAIL);
+      throw new BadRequestException("invalid_email", messageService.getMessage(EMAIL_INVALID_FORMAT, lang));
     }
-  }
-
-  @Getter
-  @AllArgsConstructor
-  public enum UsernameErrorCode {
-    INVALID_LENGTH("invalid_length", "Valid username length is between 2 and 25."),
-    INVALID_NUMBER("invalid_number", "Username should contain at least one character."),
-    INVALID_CHAR("invalid_char", "Username contains illegal characters."),
-    BANNED_WORD("banned_word", "Username contains banned words."),
-    ALREADY_USED("already_used", "Username is already used."),
-    INVALID_EMAIL("invalid_email", "Must be a well-formed email address.");
-
-    private final String error;
-    private final String errorDescription;
   }
 }

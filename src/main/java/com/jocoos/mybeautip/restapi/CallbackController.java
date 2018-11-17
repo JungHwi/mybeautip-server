@@ -39,6 +39,8 @@ public class CallbackController {
   private final VideoGoodsRepository videoGoodsRepository;
   private final VideoLikeRepository videoLikeRepository;
   private final ObjectMapper objectMapper;
+
+  private static final String MEMBER_NOT_FOUND = "member.not_found";
   
   public CallbackController(VideoService videoService,
                             TagService tagService,
@@ -84,7 +86,7 @@ public class CallbackController {
         video.setMember(m);
         return Optional.empty();
       })
-      .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+      .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
     if (StringUtils.isNotEmpty(video.getContent())) {
       List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());

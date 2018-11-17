@@ -28,6 +28,9 @@ public class ReportController {
   private final MemberRepository memberRepository;
   private final ReportRepository reportRepository;
 
+  private static final String MEMBER_NOT_FOUND = "member.not_found";
+  private static final String MEMBER_ALREADY_REPORTED = "member.already_reported";
+
   public ReportController(MemberService memberService,
                           MessageService messageService,
                           MemberRepository memberRepository,
@@ -48,10 +51,10 @@ public class ReportController {
     }
 
     reportRepository.findByMeIdAndYouId(memberService.currentMemberId(), request.getMemberId())
-        .ifPresent(report -> { throw new BadRequestException("Already reported.");});
+        .ifPresent(report -> { throw new BadRequestException("already_reported", messageService.getMessage(MEMBER_ALREADY_REPORTED, lang));});
 
     Member you = memberRepository.findByIdAndDeletedAtIsNull(request.getMemberId())
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
     reportRepository.save(new Report(memberService.currentMember(), you, request.getReason()));
   }

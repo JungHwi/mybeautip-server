@@ -41,6 +41,8 @@ public class VideoService {
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
+
+  private static final String VIDEO_NOT_FOUND = "video.not_found";
   
   public VideoService(MemberService memberService,
                       MessageService messageService,
@@ -230,7 +232,7 @@ public class VideoService {
         }
         return v;
       })
-      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getVideoNotFoundMessage(lang)));
+      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
     return generateVideoInfo(video);
   }
 
@@ -251,7 +253,7 @@ public class VideoService {
         }
         return v;
       })
-      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getVideoNotFoundMessage(lang)));
+      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
     return generateVideoInfo(video);
   }
   

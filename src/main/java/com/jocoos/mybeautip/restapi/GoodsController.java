@@ -49,6 +49,8 @@ public class GoodsController {
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsDetailService goodsDetailService;
 
+  private static final String GOODS_NOT_FOUND = "goods.not_found";
+
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
                          VideoService videoService,
@@ -83,7 +85,7 @@ public class GoodsController {
     if (optional.isPresent()) {
       return goodsService.generateGoodsInfo(optional.get());
     } else {
-      throw new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang));
+      throw new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang));
     }
   }
 
@@ -112,7 +114,7 @@ public class GoodsController {
         }
         return response;
       })
-      .orElseThrow(()-> new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang)));
+      .orElseThrow(()-> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
   }
 
   @GetMapping("/{goodsNo}/details")
@@ -186,7 +188,7 @@ public class GoodsController {
           GoodsLikeInfo info = new GoodsLikeInfo(goodsLike, goodsService.generateGoodsInfo(goods));
           return new ResponseEntity<>(info, HttpStatus.OK);
         })
-        .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getGoodsNotFoundMessage(lang)));
+        .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
   }
 
   @Transactional

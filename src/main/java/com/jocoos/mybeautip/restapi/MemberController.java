@@ -94,6 +94,8 @@ public class MemberController {
   @Value("${mybeautip.revenue.revenue-ratio}")
   private int revenueRatio;
 
+  private static final String MEMBER_NOT_FOUND = "member.not_found";
+
   public MemberController(MemberService memberService,
                           GoodsService goodsService,
                           VideoService videoService,
@@ -142,7 +144,7 @@ public class MemberController {
     log.debug("member id: {}", principal.getName());
     return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
               .map(m -> new Resource<>(new MemberMeInfo(m, pointRatio, revenueRatio)))
-              .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+              .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
 
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -151,11 +153,11 @@ public class MemberController {
     log.debug("member id: {}", memberService.currentMemberId());
     
     if (updateMemberRequest.getUsername() != null) {
-      memberService.checkUsernameValidation(updateMemberRequest.getUsername());
+      memberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
     }
 
     if (updateMemberRequest.getEmail() != null) {
-      memberService.checkEmailValidation(updateMemberRequest.getEmail());
+      memberService.checkEmailValidation(updateMemberRequest.getEmail(), lang);
     }
 
     return memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
@@ -178,7 +180,7 @@ public class MemberController {
 
           return new ResponseEntity<>(memberService.getMemberInfo(m), HttpStatus.OK);
         })
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
 
   @GetMapping
@@ -264,7 +266,7 @@ public class MemberController {
   public MemberInfo getMember(@PathVariable Long id,
                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return memberRepository.findByIdAndDeletedAtIsNull(id).map(memberService::getMemberInfo)
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
 
   @GetMapping(value = "/me/like_count")
@@ -280,7 +282,7 @@ public class MemberController {
   @GetMapping(value = "/{id:.+}/like_count")
   public LikeCountResponse getMemberLikesCount(@PathVariable Long id,
                                                @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+    memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     LikeCountResponse response = new LikeCountResponse();
     response.setGoods(goodsLikeRepository.countByCreatedById(id));
     response.setStore(storeLikeRepository.countByCreatedById(id));
@@ -302,7 +304,7 @@ public class MemberController {
                                        @RequestParam(defaultValue = "20") int count,
                                        @RequestParam(required = false) Long cursor,
                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+    memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     return createLikeResponse(id, category, count, cursor, String.format("/api/1/members/%d/likes", id));
   }
 
@@ -335,7 +337,7 @@ public class MemberController {
                                         @RequestParam(required = false) String state,
                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
-      .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+      .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
     Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
     List<VideoController.VideoInfo> videos = Lists.newArrayList();

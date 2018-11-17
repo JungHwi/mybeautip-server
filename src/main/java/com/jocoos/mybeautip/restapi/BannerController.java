@@ -28,6 +28,8 @@ public class BannerController {
   private final MessageService messageService;
   private final BannerRepository bannerRepository;
 
+  private static final String BANNER_NOT_FOUND = "banner.not_found";
+
   public BannerController(MessageService messageService,
                           BannerRepository bannerRepository) {
     this.messageService = messageService;
@@ -53,7 +55,7 @@ public class BannerController {
          bannerRepository.updateViewCount(id, 1L);
          return new ResponseEntity<>(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("banner_not_found", messageService.getBannerNotFoundMessage(lang)));
+       .orElseThrow(() -> new NotFoundException("banner_not_found", messageService.getMessage(BANNER_NOT_FOUND, lang)));
   }
 
 

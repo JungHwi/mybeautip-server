@@ -36,6 +36,8 @@ public class BlockController {
   private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final BlockRepository blockRepository;
+
+  private static final String MEMBER_NOT_FOUND = "member.not_found";
   
   public BlockController(MemberService memberService,
                          MessageService messageService,
@@ -65,7 +67,7 @@ public class BlockController {
     log.debug("Block " + me + " : " + you);
 
     Member member = memberRepository.findByIdAndDeletedAtIsNull(you)
-      .orElseThrow(() -> new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang)));
+      .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
     Optional<Block> optional = blockRepository.findByMeAndMemberYouId(me, you);
 

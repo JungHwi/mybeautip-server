@@ -57,6 +57,10 @@ public class PostController {
   private final MentionService mentionService;
   private final TagService tagService;
   private final MessageService messageService;
+
+  private static final String COMMENT_NOT_FOUND = "comment.not_found";
+
+  private static final String POST_NOT_FOUND = "post.not_found";
   
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -163,7 +167,7 @@ public class PostController {
             .ifPresent(like -> info.setLikeId(like.getId()));
          return new ResponseEntity<>(info, HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
 
   @GetMapping("/{id:.+}/goods")
@@ -179,7 +183,7 @@ public class PostController {
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
 
   @GetMapping("/{id:.+}/winners")
@@ -195,7 +199,7 @@ public class PostController {
          });
          return new ResponseEntity<>(result, HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
 
   @Transactional
@@ -209,7 +213,7 @@ public class PostController {
          postRepository.updateViewCount(post.getId(), 1);
          return new ResponseEntity(HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
 
   @Transactional
@@ -229,7 +233,7 @@ public class PostController {
          PostLike postLike = postLikeRepository.save(new PostLike(post));
          return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getPostNotFoundMessage(lang)));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
 
   @Transactional
@@ -307,9 +311,9 @@ public class PostController {
   @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
-                                       @RequestBody CreateCommentRequest request,
-                                       BindingResult bindingResult) {
-
+                                   @RequestBody CreateCommentRequest request,
+                                   BindingResult bindingResult,
+                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
@@ -320,7 +324,7 @@ public class PostController {
             commentRepository.updateCommentCount(parent.getId(), 1);
             return Optional.empty();
          })
-         .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid comment parent id"));
+         .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
     }
 
     Comment comment = new Comment();

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.word;
 
 import java.util.Hashtable;
 
+import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -9,19 +10,23 @@ import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.MemberService;
 
 @Slf4j
 @Service
 public class BannedWordService {
 
-  private BannedWordRepository bannedWordRepository;
+  private final MessageService messageService;
+  private final BannedWordRepository bannedWordRepository;
 
-  public BannedWordService(BannedWordRepository bannedWordRepository) {
+  private static final String USERNAME_BANNED_WORD = "username.banned_word";
+
+  public BannedWordService(MessageService messageService,
+                           BannedWordRepository bannedWordRepository) {
+    this.messageService = messageService;
     this.bannedWordRepository = bannedWordRepository;
   }
 
-  public String findWordAndThrowException(String word) {
+  public String findWordAndThrowException(String word, String lang) {
     if (Strings.isNullOrEmpty(word)) {
       return word;
     }
@@ -29,7 +34,7 @@ public class BannedWordService {
     String lowerCase = word.toLowerCase();
     getDictionary(BannedWord.CATEGORY_USERNAME).forEach((key, value) -> {
       if (lowerCase.contains(value.getWord().toLowerCase())) {
-        throw new BadRequestException(MemberService.UsernameErrorCode.BANNED_WORD);
+        throw new BadRequestException("banned_word", messageService.getMessage(USERNAME_BANNED_WORD, lang));
       }
     });
 

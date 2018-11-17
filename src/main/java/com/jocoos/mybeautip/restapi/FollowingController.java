@@ -35,11 +35,12 @@ import com.jocoos.mybeautip.member.following.FollowingRepository;
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class FollowingController {
-
   private final MemberService memberService;
   private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
+
+  private static final String MEMBER_NOT_FOUND = "member.not_found";
   
   public FollowingController(MemberService memberService,
                              MessageService messageService,
@@ -69,7 +70,7 @@ public class FollowingController {
     }
 
     if (!memberRepository.existsById(you)) {
-      throw new MemberNotFoundException(messageService.getMemberNotFoundMessage(lang));
+      throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
     }
     
     Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(me, you);

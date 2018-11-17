@@ -25,6 +25,8 @@ public class AddressService {
   private final AddressRepository addressRepository;
   private final DeliveryChargeAreaRepository deliveryChargeAreaRepository;
 
+  private final String ADDRESS_NOT_FOUND = "address.not_found";
+
   public AddressService(AddressRepository addressRepository,
                         MemberService memberService,
                         MessageService messageService,
@@ -49,7 +51,7 @@ public class AddressService {
       address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
       return addressRepository.save(address);
     } else {
-      throw new NotFoundException("address_not_found", messageService.getAddressNotFoundMessage(lang));
+      throw new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang));
     }
   }
 
@@ -61,7 +63,7 @@ public class AddressService {
       address.setDeletedAt(new Date());
       addressRepository.save(address);
     } else {
-      throw new NotFoundException("address_not_found", messageService.getAddressNotFoundMessage(lang));
+      throw new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang));
     }
   }
   

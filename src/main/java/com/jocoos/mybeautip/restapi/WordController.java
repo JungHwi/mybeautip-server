@@ -4,10 +4,7 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -23,17 +20,18 @@ public class WordController {
 
   @GetMapping
   public void isValidParams(@RequestParam(required = false) String username,
-                              @RequestParam(required = false) String email) {
+                            @RequestParam(required = false) String email,
+                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     if (username == null && email == null) {
       throw new BadRequestException("invalid_query_string");
     }
     
     if (email != null) {
-      memberService.checkEmailValidation(email);
+      memberService.checkEmailValidation(email, lang);
     }
   
     if (username != null) {
-      memberService.checkUsernameValidation(username);
+      memberService.checkUsernameValidation(username, lang);
     }
   }
 }

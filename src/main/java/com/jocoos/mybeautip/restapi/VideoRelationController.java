@@ -34,6 +34,8 @@ public class VideoRelationController {
   private final VideoGoodsRepository videoGoodsRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
 
+  private static final String VIDEO_NOT_FOUND = "video.not_found";
+
   public VideoRelationController(VideoService videoService,
                                  MessageService messageService,
                                  VideoRepository videoRepository,
@@ -54,7 +56,7 @@ public class VideoRelationController {
                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Video video = videoRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getVideoNotFoundMessage(lang)));
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     List<VideoGoods> videoGoods = videoGoodsRepository.findAllByVideoId(video.getId());

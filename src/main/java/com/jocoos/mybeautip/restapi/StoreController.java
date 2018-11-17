@@ -46,6 +46,8 @@ public class StoreController {
   private final StoreLikeRepository storeLikeRepository;
   private final GoodsRepository goodsRepository;
 
+  private static final String STORE_NOT_FOUND = "store.not_found";
+
   public StoreController(MemberService memberService,
                          GoodsService goodsService,
                          MessageService messageService,
@@ -79,7 +81,7 @@ public class StoreController {
       storeInfo = new StoreInfo(store, likeId);
       return new ResponseEntity<>(storeInfo, HttpStatus.OK);
     } else {
-      throw new NotFoundException("store_not_found", messageService.getStoreNotFoundMessage(lang));
+      throw new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang));
     }
   }
 
@@ -91,7 +93,7 @@ public class StoreController {
                                       HttpServletRequest httpServletRequest,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     storeRepository.findById(id)
-      .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getStoreNotFoundMessage(lang)));
+      .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
 
     Date startCursor = (org.apache.logging.log4j.util.Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
@@ -140,7 +142,7 @@ public class StoreController {
         StoreLike storeLike = storeLikeRepository.save(new StoreLike(store));
         return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
       })
-      .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getStoreNotFoundMessage(lang)));
+      .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
   }
 
   @Transactional
