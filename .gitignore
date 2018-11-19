@@ -1,0 +1,24 @@
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Java class files
+*.class
+*.log*
+
+# Eclipse project files
+.classpath
+.project
+
+# generated files
+bin/
+gen/
+out/
+build/
+tools/update-s3-image-path/node_modules
+tools/*.zip
+
+# files for gradle
+.gradle/

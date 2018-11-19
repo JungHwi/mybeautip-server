@@ -1,0 +1,119 @@
+package com.jocoos.mybeautip.member;
+
+import javax.persistence.*;
+import java.util.Date;
+import java.util.Map;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+
+@Data
+@NoArgsConstructor
+@Slf4j
+@EqualsAndHashCode(callSuper = false)
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "members")
+public class Member {
+
+  static final int LINK_FACEBOOK = 1;
+  static final int LINK_NAVER = 2;
+  static final int LINK_KAKAO = 4;
+
+  @Transient
+  @JsonIgnore
+  private final String deaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @JsonIgnore
+  @Column(nullable = false)
+  private boolean visible;
+
+  @Column(length = 50, nullable = false)
+  private String username;
+
+  @Column(length = 200)
+  private String avatarUrl;
+
+  @Column(length = 50)
+  private String email;
+
+  @Column
+  private int point;
+
+  @Column(length = 200)
+  private String intro;
+
+  @Column(nullable = false)
+  private int link;
+
+  @Column(nullable = false)
+  private int followerCount;
+
+  @Column(nullable = false)
+  private int followingCount;
+
+  @Column(nullable = false)
+  private int videoCount; // public video count
+
+  @JsonIgnore
+  @Column(nullable = false)
+  private int totalVideoCount;
+
+  @Column
+  private int revenue;
+
+  @Column
+  private Date revenueModifiedAt;
+
+  @Column
+  @CreatedDate
+  private Date createdAt;
+
+  @Column
+  @LastModifiedDate
+  private Date modifiedAt;
+
+  @Column
+  private Date deletedAt;
+
+  public int parseLink(String grantType) {
+    switch (grantType) {
+      case "facebook": {
+        return LINK_FACEBOOK;
+      }
+      case "naver": {
+        return LINK_NAVER;
+      }
+      case "kakao": {
+        return LINK_KAKAO;
+      }
+      default: {
+        throw new IllegalArgumentException("Unknown grant type");
+      }
+    }
+  }
+
+  public Member(Map<String, String> params) {
+    this.link = parseLink(params.get("grant_type"));
+    this.username = (StringUtils.isBlank(params.get("username"))) ? "" : params.get("username");
+    this.email = (StringUtils.isBlank(params.get("email"))) ? "" : params.get("email");
+    this.intro = (StringUtils.isBlank(params.get("intro"))) ? "" : params.get("intro");
+    this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? deaultAvatarUrl : params.get("avatar_url");
+    this.point = 0;
+    this.visible = false;
+    this.revenueModifiedAt = new Date();
+  }
+}

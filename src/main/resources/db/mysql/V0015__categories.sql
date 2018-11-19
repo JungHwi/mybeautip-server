@@ -1,0 +1,1 @@
+ALTER TABLE `goods_categories` ADD `thumbnail_url` VARCHAR(255);

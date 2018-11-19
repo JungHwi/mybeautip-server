@@ -1,0 +1,43 @@
+spring:
+  profiles: production
+  datasource:
+    url: jdbc:mysql://13.209.183.3:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    username: mybeautip
+    password: akdlqbxlq#1@Jocoos
+    test-on-borrow: true
+    validation-query: SELECT 1
+  flyway:
+    baselineOnMigrate: false
+    locations: classpath:db/mysql
+
+mybeautip:
+  security:
+    access-token-validity-seconds: 7776000      # 90 days
+    refresh-token-validity-seconds: 15552000     # 180 days
+  aws:
+    sns:
+      application:
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip"
+    s3:
+      bucket: 'mybeautip-prod'
+      region: 'ap-northeast-2'
+  slack:
+    key: T02GN94AU/BE58JHXSP/gX7G3sOlHhDVQTfWqFYQ8ue8
+    channel: "#z-mybeautip-prod"
+  iamport:
+    api: https://api.iamport.kr
+    key: 3621612290867148
+    secret: Z4CYi1YGDdOfk2ti4mYQtpEJiJPfxzlxEXvWZtCCGqR1skjxHinaI1U1LJgijBPXzlTyOwavW2xpmRW4
+
+flipflop:
+  app-key: 9z27htVnKe
+  video:
+    thumbnail-format: https://s3.ap-northeast-2.amazonaws.com/flipflop-prod/${flipflop.app-key}/videos/%s/thumbnail.jpg
+
+redis:
+  host: 13.209.183.3
+  port: 6379
+  password: akdlqbxlq#1@Jocoos
+
+logging:
+  config: classpath:log/log4j2-file.yml

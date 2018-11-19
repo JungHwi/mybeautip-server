@@ -1,0 +1,112 @@
+buildscript {
+  ext {
+    springVersion = '2.0.0.RELEASE'
+    springCloudVersion = '1.2.2.RELEASE'
+    springOauth2Version = '2.2.1.RELEASE'
+    springJwtVersion = '1.0.9.RELEASE'
+    swaggerVersion = '2.9.2'
+    awsSdkVersion = '1.10.73'
+    jacksonDataFormatVersion = '2.7.3'
+  }
+  repositories {
+    mavenCentral()
+    maven {
+      url 'https://repo.spring.io/libs-release'
+    }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springVersion}"
+  }
+}
+
+plugins {
+  id 'org.springframework.boot' version '2.0.0.RELEASE'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: "org.springframework.boot"
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'project-report'
+
+compileJava {
+  options.encoding = 'UTF-8'
+  options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
+bootJar {
+  baseName = 'mybeautip-server'
+  version = '1.0.0'
+}
+
+springBoot {
+  buildInfo {
+    properties {
+      version = '1.0.0'
+      name = 'myBeautip Server Application'
+      group = 'com.jocoos.mybeautip'
+    }
+  }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile "org.springframework.boot:spring-boot-starter-actuator:${springVersion}"
+  compile "org.springframework.boot:spring-boot-starter-web:${springVersion}"
+  compile "org.springframework.boot:spring-boot-starter-log4j2:${springVersion}"
+  compile "org.springframework.boot:spring-boot-starter-data-rest:${springVersion}"
+  compile "org.springframework.boot:spring-boot-starter-data-jpa:${springVersion}"
+  compile "org.springframework.boot:spring-boot-starter-security:${springVersion}"
+  compile "org.springframework.boot:spring-boot-starter-aop:${springVersion}"
+  compile "org.springframework.security.oauth:spring-security-oauth2:${springOauth2Version}"
+  compile "org.springframework.security:spring-security-jwt:${springJwtVersion}"
+  compile "org.springframework.boot:spring-boot-devtools:${springVersion}"
+  compile "org.springframework.cloud:spring-cloud-aws-messaging:${springVersion}"
+  compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonDataFormatVersion}"
+  compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonDataFormatVersion}"
+  compile 'org.projectlombok:lombok:1.16.20'
+  compile 'org.flywaydb:flyway-core:5.0.7'
+  compile "io.springfox:springfox-data-rest:${swaggerVersion}"
+  compile "io.springfox:springfox-swagger2:${swaggerVersion}"
+  compile "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+  compile 'org.apache.commons:commons-exec:1.3'
+  compile 'org.apache.commons:commons-lang3:3.7'
+	compile 'org.apache.commons:commons-collections4:4.2'
+  compile 'org.apache.httpcomponents:httpclient:4.5.5'
+  compile 'org.json:json:20180813'
+  compile 'mysql:mysql-connector-java'
+  compile 'com.h2database:h2'
+  compile 'com.amazonaws:aws-java-sdk-sts:1.11.375'
+  compile 'org.jsoup:jsoup:1.11.2'
+  compile 'redis.clients:jedis:2.9.0'
+  testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.0.RELEASE'
+  testCompile ("org.springframework.boot:spring-boot-starter-test:${springVersion}") {
+    exclude module: 'commons-logging'
+  }
+}
+
+test {
+  enabled = false
+}
+
+configurations {
+  compile.exclude module: 'spring-boot-starter-logging'
+}
+
+eclipse {
+  classpath {
+    containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+    containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+  }
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.13'
+}

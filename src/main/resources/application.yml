@@ -1,0 +1,145 @@
+server:
+  port: ${port:8080}
+
+spring:
+  data:
+    rest:
+      base-path: /api/admin
+      default-page-size: 10
+  main:
+    show_banner: false
+  messages:
+    always-use-message-format: false
+    basename: i18n/messages
+    cache-duration: -1
+    encoding: UTF-8
+    use-code-as-default-message: true
+  profiles:
+    active: ${profile:local}
+  datasource:
+    url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    username: mybeautip
+    password: akdlqbxlq#1@Jocoos
+    test-on-borrow: true
+    validation-query: SELECT 1
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+    default-property-inclusion: NON_NULL
+    property-naming-strategy: CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
+  flyway:
+    baselineOnMigrate: true
+    locations: classpath:db/mysql
+  jpa:
+    properties:
+      hibernate.globally_quoted_identifiers: true
+      hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+      hibernate.jdbc.batch_versioned_data: false
+      hibernate.format_sql: true
+    show-sql: false
+
+security:
+  oauth2:
+    private-key:
+      -----BEGIN RSA PRIVATE KEY-----
+      MIICXAIBAAKBgGy1sRWsm0ELfGdHk07lrqMvVmVnZy9vdiP/eRQRMjFquACq1MPQ
+      nCUnuw4MlP/VwKIiv++sYJ3f2AqLBbdvnfQHudv6duWK8E4lRePRBSECGwyQxblN
+      LDdVWAkDjuAN1zJANzbVaS7fcZfpuTVvqJimAsCOtlfLad3ak4C4mlUnAgMBAAEC
+      gYBAM7oG8+6pJpBtKo9sLCfMhlt+/eep0ykxr2KhoFpFZyKOelW3488j/mfxryqc
+      QXBIET/L28Ef3CBqcZqJsGjW+86MA5dECiQwP3SkoAJQ9x0D4h2RBUJ2YAymgKx6
+      icv6zJ4ei7MHqHg3GG/E4FBSXcdSJLhEflJTZGvRUK6xIQJBAMQKNAF8vqdsoxxs
+      lqiR+68B41gOeyWsUKKBcpZEfGSKCLn8fuqkPGyS3ub2xFozPfsufrlIx7M5BKfG
+      UZDi4VcCQQCN9Zhcv97gwuc7bYYJBRLV06WBwK/W0ueCPMdnBUAYZvXCGCv2lcC7
+      zFuuWdLtF09X3sEaQi+cOSvASHQaqrixAkEAkJSt0kL8IWJf0cDMRDqWEnYkA3d6
+      n0g8l/08U1LjIwsicHil6cuCvNh9CH4KRjPwjGW4FFJ25dkxc8MxuNd7NQJANMSr
+      GybzSScJ3wxKO4YYR0WCCyY99qO1DLNdB81q0udKyRhFF0b5OpWvKrMW9aypgKc7
+      rnAV1INn4PTNu6/kMQJBAJRwBtsDwG3NvAqGpspml+1q5mXKkAiNmKw16vGQC8MI
+      2S276FsagKGbfXbNKdXqqI8UuZ9YGu+h/zBLqm6ATeY=
+      -----END RSA PRIVATE KEY-----
+    public-key:
+      -----BEGIN PUBLIC KEY-----
+      MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgGy1sRWsm0ELfGdHk07lrqMvVmVn
+      Zy9vdiP/eRQRMjFquACq1MPQnCUnuw4MlP/VwKIiv++sYJ3f2AqLBbdvnfQHudv6
+      duWK8E4lRePRBSECGwyQxblNLDdVWAkDjuAN1zJANzbVaS7fcZfpuTVvqJimAsCO
+      tlfLad3ak4C4mlUnAgMBAAE=
+      -----END PUBLIC KEY-----
+
+mybeautip:
+  addr:
+    confirm-key: U01TX0FVVEgyMDE3MDExMDE1NDM0NTE4MjAx
+  security:
+    access-token-validity-seconds: 86400      # 24 hours
+    refresh-token-validity-seconds: 28800     # 8 hours
+  aws:
+    sns:
+      application:
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip-dev"
+    s3:
+      bucket: 'mybeautip-dev'
+      region: 'ap-northeast-2'
+    sts:
+      token-validity-duration-seconds: 129600 # 30days
+  store:
+    image-path:
+      prefix: "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/"
+      cover-suffix: "_cover.png"
+      thumbnail-suffix: "_thumbnail.png"
+      refund-suffix: "_refund.png"
+      as-suffix: "_as.png"
+  category:
+    image-path:
+      prefix: "https://s3.ap-northeast-2.amazonaws.com/mybeautip/category/"
+      suffix: ".png"
+  iamport:
+    api: https://api.iamport.kr
+    key: 5876646040523690
+    secret: Ge5fy5b7SXOyoqDTua9MQ6OyjiSpFkblyhA7mLefJ2O7tr1XBaKrhz0ARSZwcbRKssRPe64X9T5Ck6AW
+  video:
+    watch-duration: 10000
+  point:
+    minimum: 1000
+    earn-ratio: 1 # %
+    earn-after-days: 7
+    scheduler-prefix: member-gift-task-pool-
+    scheduler-pool-size: 10
+  revenue:
+    revenue-ratio: 3    # %
+    platform-ratio: 10  # %
+  shipping:
+    fixed: 2500 # 원(₩)
+  slack:
+    key:
+    channel:
+
+cloud:
+  aws:
+    credentials:
+      accessKey: AKIAIV3IWTDTFUA4GYSQ
+      secretKey: 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
+    region:
+      static: ap-northeast-2
+
+godomall:
+  goods-view-url: http://m.mybeautip.tv/goods/goods_view.php
+
+management:
+  endpoints:
+    web:
+      base-path: /monitor
+
+flipflop:
+  app-key: testapp3
+
+redis:
+  host: localhost
+  port: 6379
+  password: akdlqbxlq#1@Jocoos
+
+---
+spring:
+  profiles: local
+
+logging:
+  config: classpath:log/log4j2-console.yml
+
+

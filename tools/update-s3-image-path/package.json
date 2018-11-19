@@ -1,0 +1,18 @@
+{
+  "name": "update-s3-image-path",
+  "version": "1.0.0",
+  "description": "AWS Lambda 함수를 위한 코드로, 빌드 및 배포는 아래 사용법에 따라 진행한다.",
+  "main": "update-image-url.js",
+  "dependencies": {
+    "aws-sdk": "^2.316.0",
+    "request": "^2.88.0",
+    "string": "^3.3.3",
+    "npm": "^6.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

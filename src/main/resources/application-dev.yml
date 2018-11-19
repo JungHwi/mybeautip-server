@@ -1,0 +1,19 @@
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    username: mybeautip
+    password: akdlqbxlq#1@Jocoos
+    test-on-borrow: true
+    validation-query: SELECT 1
+
+mybeautip:
+  security:
+    access-token-validity-seconds: 86400     # 8 hours
+    refresh-token-validity-seconds: 259200    # 3 days
+  slack:
+    key: T02GN94AU/BDKJFF7PZ/xtjzRfDhftfbJ78R0SMXL0JZ
+    channel: "#z-mybeautip-dev"
+
+logging:
+  config: classpath:log/log4j2-file.yml
