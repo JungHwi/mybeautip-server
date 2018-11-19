@@ -105,4 +105,8 @@ public class Purchase extends CreatedDateAuditable {
   public String getGoodsName() {
     return goods.getGoodsNm();
   }
+
+  public Integer getGoodsSupplierId() {
+    return goods.getScmNo();
+  }
 }
