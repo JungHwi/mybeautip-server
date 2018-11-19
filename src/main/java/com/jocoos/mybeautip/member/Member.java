@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.recommendation.MemberRecommendation;
+
 
 @Data
 @NoArgsConstructor
@@ -31,7 +33,7 @@ public class Member {
 
   @Transient
   @JsonIgnore
-  private final String deaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
+  private final String defaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -111,9 +113,12 @@ public class Member {
     this.username = (StringUtils.isBlank(params.get("username"))) ? "" : params.get("username");
     this.email = (StringUtils.isBlank(params.get("email"))) ? "" : params.get("email");
     this.intro = (StringUtils.isBlank(params.get("intro"))) ? "" : params.get("intro");
-    this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? deaultAvatarUrl : params.get("avatar_url");
+    this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? defaultAvatarUrl : params.get("avatar_url");
     this.point = 0;
     this.visible = false;
     this.revenueModifiedAt = new Date();
   }
+
+  @OneToOne(mappedBy = "member")
+  private MemberRecommendation recommendation;
 }
