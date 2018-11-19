@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.config;
 
+import java.util.Arrays;
+
 import com.jocoos.mybeautip.security.MybeautipUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +69,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.addAllowedOrigin("*");
     configuration.addAllowedMethod("*");
-    configuration.addAllowedHeader("Authorization");
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
     configuration.setAllowCredentials(true);
     configuration.setMaxAge(3600L);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
