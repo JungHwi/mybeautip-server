@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.recommendation.MemberRecommendation;
 
 
@@ -121,4 +123,7 @@ public class Member {
 
   @OneToOne(mappedBy = "member")
   private MemberRecommendation recommendation;
+
+  @OneToMany(mappedBy = "you")
+  private List<Report> reports;
 }
