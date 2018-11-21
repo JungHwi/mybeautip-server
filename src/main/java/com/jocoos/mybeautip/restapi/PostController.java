@@ -102,7 +102,7 @@ public class PostController {
     List<PostInfo> result = Lists.newArrayList();
 
     posts.stream().forEach(post -> {
-      PostInfo info = new PostInfo(post);
+      PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()));
       log.debug("post info: {}", info);
 
       postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
@@ -160,7 +160,7 @@ public class PostController {
     Long memberId = memberService.currentMemberId();
     return postRepository.findById(id)
        .map(post -> {
-         PostInfo info = new PostInfo(post);
+         PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()));
          log.debug("post info: {}", info);
 
          postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
@@ -454,11 +454,12 @@ public class PostController {
     private int commentCount;
     private int viewCount;
     private Date createdAt;
-    private Member createdBy;
+    private MemberInfo createdBy;
     private Long likeId;
 
-    public PostInfo(Post post) {
+    public PostInfo(Post post, MemberInfo memberInfo) {
       BeanUtils.copyProperties(post, this);
+      this.createdBy = memberInfo;
     }
   }
 
