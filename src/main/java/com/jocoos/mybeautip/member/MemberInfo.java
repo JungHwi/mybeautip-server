@@ -24,6 +24,7 @@ public class MemberInfo {
   private List<VideoController.VideoInfo> videos;
   private Date createdAt;
   private Date modifiedAt;
+  private Date deletedAt;
 
   public MemberInfo(Member member, Long followingId) {
     this.id = member.getId();
@@ -33,6 +34,7 @@ public class MemberInfo {
     this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
     this.createdAt = member.getCreatedAt();
     this.modifiedAt = member.getModifiedAt();
+    this.deletedAt = member.getDeletedAt();
     this.followerCount = member.getFollowerCount();
     this.followingCount = member.getFollowingCount();
     this.videoCount = member.getVideoCount();
