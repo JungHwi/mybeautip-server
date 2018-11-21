@@ -121,9 +121,9 @@ public class Member {
     this.revenueModifiedAt = new Date();
   }
 
-  @OneToOne(mappedBy = "member")
-  private MemberRecommendation recommendation;
+//  @OneToOne(mappedBy = "member")
+//  private MemberRecommendation recommendation;
 
-  @OneToMany(mappedBy = "you")
-  private List<Report> reports;
+//  @OneToMany(mappedBy = "you")
+//  private List<Report> reports;
 }
