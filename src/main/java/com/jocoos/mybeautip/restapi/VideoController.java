@@ -177,15 +177,20 @@ public class VideoController {
   public CursorResponse getComments(@PathVariable Long id,
                                     @RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) Long cursor,
+                                    @RequestParam(required = false) String direction,
                                     @RequestParam(name = "parent_id", required = false) Long parentId) {
-    PageRequest page = PageRequest.of(0, count);
-    Slice<Comment> comments;
-    Long me = memberService.currentMemberId();
-
-    if (parentId != null) {
-      comments = videoService.findCommentsByParentId(parentId, cursor, page);
+    PageRequest page;
+    if ("next".equals(direction)) {
+      page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
     } else {
-      comments = videoService.findCommentsByVideoId(id, cursor, page);
+      page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id")); // default
+    }
+    
+    Slice<Comment> comments;
+    if (parentId != null) {
+      comments = videoService.findCommentsByParentId(parentId, cursor, page, direction);
+    } else {
+      comments = videoService.findCommentsByVideoId(id, cursor, page, direction);
     }
 
     List<CommentInfo> result = Lists.newArrayList();
@@ -202,7 +207,8 @@ public class VideoController {
       } else {
         commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
-
+      
+      Long me = memberService.currentMemberId();
       if (me != null) {
         Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
            .map(CommentLike::getId).orElse(null);
@@ -214,7 +220,11 @@ public class VideoController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getId() + 1);
+      if ("next".equals(direction)) {
+        nextCursor = String.valueOf(result.get(result.size() - 1).getId() + 1);
+      } else {
+        nextCursor = String.valueOf(result.get(result.size() - 1).getId() - 1);
+      }
     }
 
     int totalCount = videoRepository.findById(id).map(Video::getCommentCount).orElse(0);

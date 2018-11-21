@@ -102,7 +102,7 @@ public class PostController {
     List<PostInfo> result = Lists.newArrayList();
 
     posts.stream().forEach(post -> {
-      PostInfo info = new PostInfo(post);
+      PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()));
       log.debug("post info: {}", info);
 
       postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
@@ -160,7 +160,7 @@ public class PostController {
     Long memberId = memberService.currentMemberId();
     return postRepository.findById(id)
        .map(post -> {
-         PostInfo info = new PostInfo(post);
+         PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()));
          log.debug("post info: {}", info);
 
          postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
@@ -257,21 +257,25 @@ public class PostController {
 
   @GetMapping("/{id:.+}/comments")
   public CursorResponse getComments(@PathVariable Long id,
-                                        @RequestParam(defaultValue = "20") int count,
-                                        @RequestParam(required = false) Long cursor,
-                                        @RequestParam(required = false) Long parentId) {
-    PageRequest page = PageRequest.of(0, count);
-    Slice<Comment> comments;
-
-    if (parentId != null) {
-      comments = postService.findCommentsByParentId(parentId, cursor, page);
+                                    @RequestParam(defaultValue = "20") int count,
+                                    @RequestParam(required = false) Long cursor,
+                                    @RequestParam(required = false) String direction,
+                                    @RequestParam(required = false) Long parentId) {
+    PageRequest page;
+    if ("next".equals(direction)) {
+      page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
     } else {
-      comments = postService.findCommentsByPostId(id, cursor, page);
+      page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id")); // default
+    }
+    
+    Slice<Comment> comments;
+    if (parentId != null) {
+      comments = postService.findCommentsByParentId(parentId, cursor, page, direction);
+    } else {
+      comments = postService.findCommentsByPostId(id, cursor, page, direction);
     }
 
     List<CommentInfo> result = Lists.newArrayList();
-    Long me = memberService.currentMemberId();
-
     comments.stream().forEach(comment -> {
         CommentInfo commentInfo = null;
       if (comment.getComment().contains("@")) {
@@ -285,7 +289,8 @@ public class PostController {
       } else {
         commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
-
+  
+      Long me = memberService.currentMemberId();
       if (me != null) {
         Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
            .map(CommentLike::getId).orElse(null);
@@ -296,7 +301,11 @@ public class PostController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getId() + 1);
+      if ("next".equals(direction)) {
+        nextCursor = String.valueOf(result.get(result.size() - 1).getId() + 1);
+      } else {
+        nextCursor = String.valueOf(result.get(result.size() - 1).getId() - 1);
+      }
     }
 
     int totalCount = postRepository.findById(id).map(Post::getCommentCount).orElse(0);
@@ -445,11 +454,12 @@ public class PostController {
     private int commentCount;
     private int viewCount;
     private Date createdAt;
-    private Member createdBy;
+    private MemberInfo createdBy;
     private Long likeId;
 
-    public PostInfo(Post post) {
+    public PostInfo(Post post, MemberInfo memberInfo) {
       BeanUtils.copyProperties(post, this);
+      this.createdBy = memberInfo;
     }
   }
 
