@@ -48,7 +48,7 @@ public class MentionService {
         if (mentioned.equals(tag.getUsername())) {
           // FIXME: Uncheck my username and username in following list
 
-          Optional<Member> member = memberRepository.findByIdAndDeletedAtIsNull(tag.getMemberId());
+          Optional<Member> member = memberRepository.findById(tag.getMemberId());
           if (member.isPresent()) {
             notificationService.notifyAddComment(postComment, member.get());
             comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
@@ -80,7 +80,7 @@ public class MentionService {
         if (mentioned.equals(tag.getUsername())) {
           // FIXME: Uncheck my username and username in following list
 
-          Optional<Member> member = memberRepository.findByIdAndDeletedAtIsNull(tag.getMemberId());
+          Optional<Member> member = memberRepository.findById(tag.getMemberId());
           if (member.isPresent()) {
             notificationService.notifyAddComment(videoComment, member.get());
             comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));

@@ -175,20 +175,28 @@ public class VideoService {
     return "all";
   }
 
-  public Slice<Comment> findCommentsByVideoId(Long id, Long cursor, Pageable pageable) {
+  public Slice<Comment> findCommentsByVideoId(Long id, Long cursor, Pageable pageable, String direction) {
     Slice<Comment> comments;
     if (cursor != null) {
-      comments = commentRepository.findByVideoIdAndIdGreaterThanEqualAndParentIdIsNull(id, cursor, pageable);
+      if ("next".equals(direction)) {
+        comments = commentRepository.findByVideoIdAndIdGreaterThanEqualAndParentIdIsNull(id, cursor, pageable);
+      } else {
+        comments = commentRepository.findByVideoIdAndIdLessThanEqualAndParentIdIsNull(id, cursor, pageable);
+      }
     } else {
       comments = commentRepository.findByVideoIdAndParentIdIsNull(id, pageable);
     }
     return comments;
   }
 
-  public Slice<Comment> findCommentsByParentId(Long parentId, Long cursor, Pageable pageable) {
+  public Slice<Comment> findCommentsByParentId(Long parentId, Long cursor, Pageable pageable, String direction) {
     Slice<Comment> comments;
     if (cursor != null) {
-      comments = commentRepository.findByParentIdAndIdGreaterThanEqual(parentId, cursor, pageable);
+      if ("next".equals(direction)) {
+        comments = commentRepository.findByParentIdAndIdGreaterThanEqual(parentId, cursor, pageable);
+      } else {
+        comments = commentRepository.findByParentIdAndIdLessThanEqual(parentId, cursor, pageable);
+      }
     } else {
       comments = commentRepository.findByParentId(parentId, pageable);
     }
