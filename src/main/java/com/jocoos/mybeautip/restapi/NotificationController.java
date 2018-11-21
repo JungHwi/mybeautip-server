@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.notification.NotificationService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
@@ -67,15 +67,15 @@ public class NotificationController {
     }
 
     notifications
-       .forEach(n -> {
-         String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
-         Optional<Following> following = followingRepository.findByMemberMeIdAndMemberYouId(n.getTargetMember().getId(), n.getResourceOwner().getId());
-         if (following.isPresent()) {
-           result.add(new NotificationInfo(n, message, following.get().getId()));
-         } else {
-           result.add(new NotificationInfo(n, message));
-         }
-       });
+      .forEach(n -> {
+      String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
+      Optional<Following> following = followingRepository.findByMemberMeIdAndMemberYouId(n.getTargetMember().getId(), n.getResourceOwner().getId());
+      if (following.isPresent()) {
+        result.add(new NotificationInfo(n, message, following.get().getId(), memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner())));
+      } else {
+        result.add(new NotificationInfo(n, message, memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner())));
+      }
+    });
     
     notificationService.readAllNotification(memberId);
 
@@ -104,30 +104,34 @@ public class NotificationController {
   @Data
   public static class NotificationInfo {
     private Long id;
-    private Member targetMember;
+    private MemberInfo targetMember;
     private String type;
     private boolean read;
     private String resourceType;
     private Long resourceId;
     private List<Long> resourceIds;
-    private Member resourceOwner;
+    private MemberInfo resourceOwner;
     private String imageUrl;
     private String message;
     private Date createdAt;
     private Long followId;
 
-    public NotificationInfo(Notification notification, String message) {
+    public NotificationInfo(Notification notification, String message, MemberInfo targetMember, MemberInfo resourceOwner) {
       BeanUtils.copyProperties(notification, this);
       this.resourceIds = Stream.of(notification.getResourceIds().split(","))
           .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
       this.message = message;
+      this.targetMember = targetMember;
+      this.resourceOwner = resourceOwner;
     }
 
-    public NotificationInfo(Notification notification, String message, Long followId) {
-      this(notification, message);
+    public NotificationInfo(Notification notification, String message, Long followId, MemberInfo targetMember, MemberInfo resourceOwner) {
+      this(notification, message, targetMember, resourceOwner);
       this.resourceIds = Stream.of(notification.getResourceIds().split(","))
           .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
       this.followId = followId;
+      this.targetMember = targetMember;
+      this.resourceOwner = resourceOwner;
     }
   }
 }
