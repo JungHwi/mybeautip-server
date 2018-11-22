@@ -35,4 +35,12 @@ public class Report extends CreatedDateAuditable {
     this.you = you;
     this.reason = reason;
   }
+
+  public Member getReporter() {
+    return me;
+  }
+
+  public Member getReportee() {
+    return you;
+  }
 }

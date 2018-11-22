@@ -42,9 +42,5 @@ public interface MemberExcerpt {
 
   Date getDeletedAt();
 
-  MemberRecommendation getRecommendation();
-
   Date getModifiedAt();
-
-  List<Report> getReports();
 }

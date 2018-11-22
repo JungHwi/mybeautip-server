@@ -120,10 +120,4 @@ public class Member {
     this.visible = false;
     this.revenueModifiedAt = new Date();
   }
-
-//  @OneToOne(mappedBy = "member")
-//  private MemberRecommendation recommendation;
-
-//  @OneToMany(mappedBy = "you")
-//  private List<Report> reports;
 }
