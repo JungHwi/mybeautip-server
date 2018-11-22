@@ -153,6 +153,11 @@ public class AdminController {
 
     Page<MemberDetailInfo> details = members.map(m -> {
       MemberDetailInfo info = new MemberDetailInfo(m.getMember(), m);
+      Page<Report> reports = reportRepository.findByYouId(m.getMemberId(), PageRequest.of(1, 1));
+      if (reports != null) {
+        info.setReportCount(reports.getTotalElements());
+      }
+
       return info;
     });
 
