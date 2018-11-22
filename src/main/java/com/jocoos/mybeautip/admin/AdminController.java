@@ -137,13 +137,27 @@ public class AdminController {
       if (reports != null) {
         info.setReportCount(reports.getTotalElements());
       }
-      log.debug("info: {}", info);
       return info;
     });
 
-    return new ResponseEntity(details, HttpStatus.OK);
+    return new ResponseEntity<>(details, HttpStatus.OK);
   }
 
+  @GetMapping("/recommendedMemberDetails")
+  public ResponseEntity<Page<MemberDetailInfo>> getRecommendedMemberDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size) {
+
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.ASC, "seq"));
+    Page<MemberRecommendation> members = memberRecommendationRepository.findAll(pageable);
+
+    Page<MemberDetailInfo> details = members.map(m -> {
+      MemberDetailInfo info = new MemberDetailInfo(m.getMember(), m);
+      return info;
+    });
+
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
 
   @PostMapping("/members")
   public ResponseEntity<RecommendedMemberInfo> createRecommendedMember(

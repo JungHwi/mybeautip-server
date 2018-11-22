@@ -23,4 +23,9 @@ public class MemberDetailInfo extends MemberInfo {
   public MemberDetailInfo(Member member) {
     BeanUtils.copyProperties(member, this);
   }
+
+  public MemberDetailInfo(Member member, MemberRecommendation recommendation) {
+    this(member);
+    this.recommendation = recommendation;
+  }
 }
