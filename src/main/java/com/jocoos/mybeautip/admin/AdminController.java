@@ -5,10 +5,14 @@ import javax.validation.constraints.Size;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.report.Report;
+import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
 import com.jocoos.mybeautip.restapi.VideoController;
@@ -39,6 +46,7 @@ public class AdminController {
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
+  private final ReportRepository reportRepository;
   private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
 
   public AdminController(PostRepository postRepository,
@@ -47,7 +55,7 @@ public class AdminController {
                          GoodsRepository goodsRepository,
                          MemberRecommendationRepository memberRecommendationRepository,
                          GoodsRecommendationRepository goodsRecommendationRepository,
-                         MotdRecommendationRepository motdRecommendationRepository) {
+                         MotdRecommendationRepository motdRecommendationRepository, ReportRepository reportRepository) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
@@ -55,6 +63,7 @@ public class AdminController {
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
+    this.reportRepository = reportRepository;
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -103,6 +112,38 @@ public class AdminController {
 
     return new ResponseEntity<>(HttpStatus.OK);
   }
+
+  @GetMapping("/memberDetails")
+  public ResponseEntity<Page<MemberDetailInfo>> getMemberDetails(
+     @RequestParam List<Integer> links,
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "false") boolean isDeleted) {
+
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    Page<Member> members = null;
+    if(isDeleted) {
+      members = memberRepository.findByLinkInAndDeletedAtIsNotNull(links, pageable);
+    } else {
+      members = memberRepository.findByLinkInAndDeletedAtIsNull(links, pageable);
+    }
+
+    Page<MemberDetailInfo> details = members.map(m -> {
+      MemberDetailInfo info = new MemberDetailInfo(m);
+      Optional<MemberRecommendation> recommendation = memberRecommendationRepository.findByMemberId(m.getId());
+      recommendation.ifPresent(r -> info.setRecommendation(r));
+
+      Page<Report> reports = reportRepository.findByYouId(m.getId(), PageRequest.of(1, 1));
+      if (reports != null) {
+        info.setReportCount(reports.getTotalElements());
+      }
+      log.debug("info: {}", info);
+      return info;
+    });
+
+    return new ResponseEntity(details, HttpStatus.OK);
+  }
+
 
   @PostMapping("/members")
   public ResponseEntity<RecommendedMemberInfo> createRecommendedMember(
