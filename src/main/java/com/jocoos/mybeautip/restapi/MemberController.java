@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
@@ -78,6 +79,7 @@ public class MemberController {
   private final CommentLikeRepository commentLikeRepository;
   private final RevenueRepository revenueRepository;
   private final MemberLeaveLogRepository memberLeaveLogRepository;
+  private final DeviceRepository deviceRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
   private String storeImagePrefix;
@@ -115,7 +117,8 @@ public class MemberController {
                           NotificationService notificationService,
                           DeviceService deviceService,
                           PostProcessService postProcessService,
-                          MessageService messageService) {
+                          MessageService messageService,
+                          DeviceRepository deviceRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -136,6 +139,7 @@ public class MemberController {
     this.deviceService = deviceService;
     this.postProcessService = postProcessService;
     this.messageService = messageService;
+    this.deviceRepository = deviceRepository;
   }
 
   @GetMapping("/me")
@@ -147,6 +151,7 @@ public class MemberController {
               .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
 
+  @Transactional
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
                                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -176,6 +181,19 @@ public class MemberController {
             tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro());
             m.setIntro(updateMemberRequest.getIntro());
           }
+  
+          if (updateMemberRequest.getPushable() != null) {
+            if (!m.getPushable().equals(updateMemberRequest.getPushable())) {
+              deviceRepository.findByCreatedByIdAndValidIsTrue(m.getId()).forEach(
+                  device -> {
+                    device.setPushable(updateMemberRequest.getPushable());
+                    deviceRepository.save(device);
+                  }
+              );
+            }
+            m.setPushable(updateMemberRequest.getPushable());
+          }
+          
           memberRepository.save(m);
 
           return new ResponseEntity<>(memberService.getMemberInfo(m), HttpStatus.OK);
@@ -389,7 +407,7 @@ public class MemberController {
   
         // Sync processing before response
         notificationService.readAllNotification(member.getId());
-        deviceService.setPushable(member.getId(), false);
+        deviceService.disableAllDevices(member.getId());
         memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
         
         // Async processing after response
@@ -431,10 +449,14 @@ public class MemberController {
       .withCursor(nextCursor).toBuild();
   }
 
+  @Transactional
   @GetMapping("/me/revenues")
   public CursorResponse getRevenues(@RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
+    member.setRevenueModifiedAt(null);
+    memberRepository.save(member);
+    
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
     Slice<Revenue>  list;
 
@@ -604,6 +626,8 @@ public class MemberController {
 
     @Size(max = 200)
     private String intro;
+    
+    private Boolean pushable;
   }
 
   @Data

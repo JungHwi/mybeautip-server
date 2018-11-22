@@ -19,6 +19,7 @@ public class MemberMeInfo extends MemberInfo {
   private int revenueRatio;
 
   private Date revenueModifiedAt;
+  private Boolean pushable;
 
   public MemberMeInfo(Member member) {
     BeanUtils.copyProperties(member, this);
