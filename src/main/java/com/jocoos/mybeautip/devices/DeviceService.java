@@ -72,9 +72,10 @@ public class DeviceService {
        .orElseGet(() -> deviceRepository.save(register(info)));
   }
   
-  public void setPushable(Long memberId, boolean pushable) {
+  public void disableAllDevices(Long memberId) {
     deviceRepository.findByCreatedById(memberId).forEach(device -> {
-      device.setPushable(pushable);
+      device.setValid(false);
+      device.setPushable(false);
       deviceRepository.save(device);
     });
   }
@@ -89,7 +90,7 @@ public class DeviceService {
   }
 
   public void push(Notification notification) {
-    deviceRepository.findByCreatedById(notification.getTargetMember().getId())
+    deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId())
        .forEach(d -> {
          if (d.isPushable()) {
            push(d, notification);
@@ -123,6 +124,7 @@ public class DeviceService {
        * deviceRepository.delete(device);
        */
       if (device.isPushable()) {
+        device.setValid(false);
         device.setPushable(false);
         deviceRepository.save(device);
       }
@@ -213,8 +215,15 @@ public class DeviceService {
     device.setLanguage(request.getDeviceLanguage());
     device.setAppVersion(request.getAppVersion());
     device.setTimezone(request.getDeviceTimezone());
-    device.setPushable(request.isPushable());
 
+    if (request.isPushable()) { // enable device, pushable is set according to Member Info
+      device.setValid(true);
+      device.setPushable(memberService.currentMember().getPushable());
+    } else {  // disable device
+      device.setValid(false);
+      device.setPushable(false);
+    }
+    
     return device;
   }
 }

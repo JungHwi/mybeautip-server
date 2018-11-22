@@ -44,7 +44,10 @@ public class Device extends MemberAuditable {
   @Column(nullable = false)
   private String appVersion;
 
-  @Column
+  @Column(nullable = false)
+  private boolean valid;
+  
+  @Column(nullable = false)
   private boolean pushable;
 
   @Column

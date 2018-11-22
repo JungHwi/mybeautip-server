@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface DeviceRepository extends JpaRepository<Device, String> {
 
   List<Device> findByCreatedById(Long created);
+  
+  List<Device> findByCreatedByIdAndValidIsTrue(Long created);
 }
