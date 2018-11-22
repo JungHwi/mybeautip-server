@@ -50,6 +50,7 @@ public class GoodsController {
   private final GoodsDetailService goodsDetailService;
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
+  private static final String ALREADY_LIKED = "like.already_liked";
 
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
@@ -179,7 +180,7 @@ public class GoodsController {
     return goodsRepository.findByGoodsNo(goodsNo)
         .map(goods -> {
           if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goodsNo, memberId).isPresent()) {
-            throw new BadRequestException("duplicated_goods_like", "Already goods liked");
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
           }
 
           goodsRepository.updateLikeCount(goodsNo, 1);

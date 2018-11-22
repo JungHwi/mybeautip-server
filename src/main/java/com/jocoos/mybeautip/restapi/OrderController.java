@@ -62,14 +62,15 @@ public class OrderController {
 
   @PostMapping("/orders")
   public ResponseEntity<OrderInfo> createOrder(@Valid @RequestBody CreateOrderRequest request,
-                                               BindingResult bindingResult) {
+                                               BindingResult bindingResult,
+                                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
     Member member = memberService.currentMember();
-    Order order = orderService.create(request, member);
+    Order order = orderService.create(request, member, lang);
     log.debug("order: {}", order);
 
     return new ResponseEntity<>(new OrderInfo(order), HttpStatus.OK);

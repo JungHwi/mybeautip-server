@@ -74,6 +74,7 @@ public class VideoController {
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
+  private static final String ALREADY_LIKED = "like.already_liked";
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -334,7 +335,7 @@ public class VideoController {
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
       .map(video -> {
         if (videoLikeRepository.findByVideoIdAndCreatedById(videoId, memberId).isPresent()) {
-          throw new BadRequestException("duplicated_video_like", "Already video liked");
+          throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
         }
 
         videoRepository.updateLikeCount(videoId, 1);
@@ -393,14 +394,15 @@ public class VideoController {
   @Transactional
   @PostMapping("/{videoId:.+}/comments/{commentId:.+}/likes")
   public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long videoId,
-                                                                  @PathVariable Long commentId) {
+                                                        @PathVariable Long commentId,
+                                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberService.currentMember();
     
     return commentRepository.findByIdAndVideoId(commentId, videoId)
         .map(comment -> {
           if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId
               ()).isPresent()) {
-            throw new BadRequestException("duplicated_video_comment_like", "Already video comment liked");
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
           }
 
 
@@ -534,10 +536,6 @@ public class VideoController {
                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new BadRequestException("Login required");
-    }
-
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 

@@ -59,8 +59,8 @@ public class PostController {
   private final MessageService messageService;
 
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
-
   private static final String POST_NOT_FOUND = "post.not_found";
+  private static final String ALREADY_LIKED = "like.already_liked";
   
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -225,7 +225,7 @@ public class PostController {
        .map(post -> {
          Long postId = post.getId();
          if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
-           throw new BadRequestException("duplicated_post_like", "Already post liked");
+           throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
 
          postRepository.updateLikeCount(id, 1);
@@ -358,9 +358,9 @@ public class PostController {
 
   @PatchMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long postId,
-                                          @PathVariable Long id,
-                                          @RequestBody UpdateCommentRequest request,
-                                          BindingResult bindingResult) {
+                                      @PathVariable Long id,
+                                      @RequestBody UpdateCommentRequest request,
+                                      BindingResult bindingResult) {
 
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
@@ -381,7 +381,7 @@ public class PostController {
   @Transactional
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long postId,
-                                             @PathVariable Long id) {
+                                         @PathVariable Long id) {
     postRepository.updateCommentCount(postId, -1);
 
     Long memberId = memberService.currentMemberId();
@@ -400,12 +400,13 @@ public class PostController {
   @Transactional
   @PostMapping("/{postId:.+}/comments/{commentId:.+}/likes")
   public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long postId,
-                                                                @PathVariable Long commentId) {
+                                                        @PathVariable Long commentId,
+                                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberService.currentMember();
     return commentRepository.findByIdAndPostId(commentId, postId)
        .map(comment -> {
          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
-           throw new BadRequestException("duplicated_post_like", "Already post liked");
+           throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
          
          commentRepository.updateLikeCount(comment.getId(), 1);

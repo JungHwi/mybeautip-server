@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class BadRequestException extends MybeautipRuntimeException {
 
-  static final String DEFAULT_MESSAGE = "bad request";
+  static final String DEFAULT_MESSAGE = "bad_request";
 
   public BadRequestException(String description) {
     super(DEFAULT_MESSAGE, description);
