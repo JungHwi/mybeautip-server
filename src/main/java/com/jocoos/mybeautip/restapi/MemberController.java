@@ -169,7 +169,6 @@ public class MemberController {
         .map(m -> {
           if (updateMemberRequest.getUsername() != null) {
             m.setUsername(updateMemberRequest.getUsername());
-            m.setVisible(true);
           }
           if (updateMemberRequest.getEmail() != null) {
             m.setEmail(updateMemberRequest.getEmail());
@@ -193,7 +192,8 @@ public class MemberController {
             }
             m.setPushable(updateMemberRequest.getPushable());
           }
-          
+  
+          m.setVisible(true);
           memberRepository.save(m);
 
           return new ResponseEntity<>(memberService.getMemberInfo(m), HttpStatus.OK);
