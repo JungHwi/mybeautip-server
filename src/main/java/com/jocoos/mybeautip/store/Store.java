@@ -50,6 +50,9 @@ public class Store extends ModifiedDateAuditable {
   @Column(nullable = false)
   private int likeCount;
 
+  @Column(nullable = false)
+  private int goodsCount;
+
   @Column
   private Date deletedAt;
 
