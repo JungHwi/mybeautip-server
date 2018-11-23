@@ -47,7 +47,6 @@ public class AdminController {
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
   private final ReportRepository reportRepository;
-  private final AdminMemberRepository adminMemberRepository;
   private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
 
   public AdminController(PostRepository postRepository,
@@ -56,9 +55,7 @@ public class AdminController {
                          GoodsRepository goodsRepository,
                          MemberRecommendationRepository memberRecommendationRepository,
                          GoodsRecommendationRepository goodsRecommendationRepository,
-                         MotdRecommendationRepository motdRecommendationRepository,
-                         ReportRepository reportRepository,
-                         AdminMemberRepository adminMemberRepository) {
+                         MotdRecommendationRepository motdRecommendationRepository, ReportRepository reportRepository) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
@@ -67,7 +64,6 @@ public class AdminController {
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
     this.reportRepository = reportRepository;
-    this.adminMemberRepository = adminMemberRepository;
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -125,7 +121,6 @@ public class AdminController {
      @RequestParam(defaultValue = "false") boolean isDeleted) {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
-
     Page<Member> members = null;
     if(isDeleted) {
       members = memberRepository.findByLinkInAndDeletedAtIsNotNull(links, pageable);
@@ -138,42 +133,10 @@ public class AdminController {
       Optional<MemberRecommendation> recommendation = memberRecommendationRepository.findByMemberId(m.getId());
       recommendation.ifPresent(r -> info.setRecommendation(r));
 
-      Page<Report> reports = reportRepository.findByYouId(m.getId(), PageRequest.of(0, 1));
+      Page<Report> reports = reportRepository.findByYouId(m.getId(), PageRequest.of(1, 1));
       if (reports != null) {
         info.setReportCount(reports.getTotalElements());
       }
-      return info;
-    });
-
-    return new ResponseEntity<>(details, HttpStatus.OK);
-  }
-
-  @GetMapping("/storeDetails")
-  public ResponseEntity<Page<StoreDetailInfo>> getStoreDetails(
-     @RequestParam(defaultValue = "0") int page,
-     @RequestParam(defaultValue = "10") int size,
-     @RequestParam(defaultValue = "false") boolean isDeleted,
-     @RequestParam(required = false) String sort) {
-
-    Sort pageSort = null;
-    if (sort != null && "like".equals(sort)) {
-      pageSort = new Sort(Sort.Direction.DESC, "store.likeCount");
-    } else {
-      pageSort = new Sort(Sort.Direction.DESC, "store.id");
-    }
-
-    Pageable pageable = PageRequest.of(page, size, pageSort);
-    Page<AdminMember> members = null;
-    if(isDeleted) {
-      members = adminMemberRepository.findByMemberLinkAndMemberDeletedAtIsNotNull(8, pageable);
-    } else {
-      members = adminMemberRepository.findByMemberLinkAndMemberDeletedAtIsNull(8, pageable);
-    }
-
-    Page<StoreDetailInfo> details = members.map(m -> {
-      StoreDetailInfo info = new StoreDetailInfo(m);
-      Page<Goods> goods = goodsRepository.findByScmNoOrderByGoodsNoDesc(m.getStore().getId(), PageRequest.of(0, 1));
-      info.setGoodsCount(goods.getTotalElements());
       return info;
     });
 

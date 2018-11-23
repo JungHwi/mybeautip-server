@@ -13,11 +13,7 @@ public interface AdminMemberRepository extends JpaRepository<AdminMember, String
   Page<AdminMember> findByMemberLinkAndMemberDeletedAtIsNullOrderByStoreIdDesc(int link, Pageable pageable);
 
   Page<AdminMember> findByMemberLinkAndMemberDeletedAtIsNotNullOrderByStoreIdDesc(int link, Pageable pageable);
-
-  Page<AdminMember> findByMemberLinkAndMemberDeletedAtIsNull(int link, Pageable pageable);
-
-  Page<AdminMember> findByMemberLinkAndMemberDeletedAtIsNotNull(int link, Pageable pageable);
-
+  
   Page<AdminMember> findByMemberLinkAndMemberDeletedAtIsNullOrderByStoreLikeCountDesc(int link, Pageable pageable);
 
   Page<AdminMember> findByMemberLinkAndMemberDeletedAtIsNullOrderByStoreGoodsCountDesc(int link, Pageable pageable);
