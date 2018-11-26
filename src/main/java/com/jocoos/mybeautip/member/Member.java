@@ -70,6 +70,9 @@ public class Member {
   private int followingCount;
 
   @Column(nullable = false)
+  private int reportCount;
+
+  @Column(nullable = false)
   private int videoCount; // public video count
 
   @JsonIgnore

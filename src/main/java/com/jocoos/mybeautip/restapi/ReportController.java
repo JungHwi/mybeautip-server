@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -42,6 +43,7 @@ public class ReportController {
   }
   
   @PutMapping
+  @Transactional
   public void reportMember(@Valid @RequestBody ReportRequest request,
                            BindingResult bindingResult,
                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -57,6 +59,7 @@ public class ReportController {
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
     reportRepository.save(new Report(memberService.currentMember(), you, request.getReason()));
+    memberRepository.updateReportCount(you.getId(), 1);
   }
 
   @GetMapping("/{id:.+}")
