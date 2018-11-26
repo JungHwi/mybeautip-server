@@ -118,9 +118,40 @@ public class AdminController {
      @RequestParam List<Integer> links,
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
-     @RequestParam(defaultValue = "false") boolean isDeleted) {
+     @RequestParam(defaultValue = "false") boolean isDeleted,
+     @RequestParam(required = false) String sort) {
 
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    Pageable pageable = null;
+    if (sort != null) {
+      Sort pagingSort = null;
+      switch (sort) {
+        case "video":
+          pagingSort = new Sort(Sort.Direction.DESC, "videoCount");
+          break;
+        case "revenue":
+          pagingSort = new Sort(Sort.Direction.DESC, "revenue");
+          break;
+        case "point":
+          pagingSort = new Sort(Sort.Direction.DESC, "point");
+          break;
+        case "follower":
+          pagingSort = new Sort(Sort.Direction.DESC, "followerCount");
+          break;
+        case "following":
+          pagingSort = new Sort(Sort.Direction.DESC, "followingCount");
+          break;
+        case "report":
+          pagingSort = new Sort(Sort.Direction.DESC, "reportCount");
+          break;
+        default:
+          pagingSort = new Sort(Sort.Direction.DESC, "id");
+      }
+
+      pageable = PageRequest.of(page, size, pagingSort);
+    } else {
+      pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    }
+
     Page<Member> members = null;
     if(isDeleted) {
       members = memberRepository.findByLinkInAndDeletedAtIsNotNull(links, pageable);
