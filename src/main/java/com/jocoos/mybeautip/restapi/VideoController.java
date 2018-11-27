@@ -503,7 +503,6 @@ public class VideoController {
 
     int guestCount = videoWatchRepository.countByVideoIdAndIsGuestIsTrueAndModifiedAtAfter(id, new Date(duration));
 
-
     String nextCursor = null;
     if (members.size() > 0) {
       nextCursor = String.valueOf(members.get(members.size() - 1).getId());
@@ -661,6 +660,9 @@ public class VideoController {
     List<MemberInfo> members = Lists.newArrayList();
     list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
+    long duration = new Date().getTime() - watchDuration;
+    int guestCount = videoWatchRepository.countByVideoIdAndIsGuestIsTrueAndModifiedAtAfter(id, new Date(duration));
+
     String nextCursor = null;
     if (members.size() > 0) {
       nextCursor = String.valueOf(list.getContent().get(list.getContent().size() - 1).getModifiedAt().getTime());
@@ -668,6 +670,7 @@ public class VideoController {
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/views", members)
       .withCount(count)
+      .withGuestCount(guestCount)
       .withCursor(nextCursor).toBuild();
   }
 
