@@ -48,6 +48,21 @@ public class NotificationAspect {
     }
   }
 
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.updateVideo(..))",
+     returning = "result")
+  public void onAfterUploadedMyVideo(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof Video) {
+      Video v = (Video) result;
+      log.debug("video: {}", v);
+
+      if ("UPLOADED".equals(v.getType()) && "VOD".equals(v.getState())) {
+        notificationService.notifyUploadedMyVideo(v);
+      }
+    }
+  }
+
   @Before(value = "execution(* com.jocoos.mybeautip.member.following.FollowingRepository.save(..))")
   public void onBeforeSaveFollowingMember(JoinPoint joinPoint) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -162,19 +177,6 @@ public class NotificationAspect {
       MemberLeaveLog memberLeaveLog = (MemberLeaveLog) result;
       log.info("video: {}", memberLeaveLog);
       slackService.sendForDeleteMember(memberLeaveLog);
-    }
-  }
-
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.updateVideo(..))",
-      returning = "result")
-  public void onAfterUploadedMyVideo(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-
-    if (result instanceof Video) {
-      Video v = (Video) result;
-      if ("UPLOADED".equals(v.getType()) && "VOD".equals(v.getState())) {
-        notificationService.notifyUploadedMyVideo(v);
-      }
     }
   }
 }
