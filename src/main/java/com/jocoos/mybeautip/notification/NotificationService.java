@@ -65,6 +65,12 @@ public class NotificationService {
        });
   }
 
+  public void notifyUploadedMyVideo(Video video) {
+    Notification notification = new Notification(video);
+    notificationRepository.save(notification);
+    deviceService.push(notification);
+  }
+
   public void notifyFollowMember(Following following) {
     Notification notification = followingRepository.findByMemberMeIdAndMemberYouId(
        following.getMemberYou().getId(), following.getMemberMe().getId())
