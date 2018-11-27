@@ -45,20 +45,9 @@ public class NotificationAspect {
       log.debug("video: {}", video);
       notificationService.notifyCreateVideo(video);
       slackService.sendForVideo(video);
-    }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.updateVideo(..))",
-     returning = "result")
-  public void onAfterUploadedMyVideo(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-
-    if (result instanceof Video) {
-      Video v = (Video) result;
-      log.debug("video: {}", v);
-
-      if ("UPLOADED".equals(v.getType()) && "VOD".equals(v.getState())) {
-        notificationService.notifyUploadedMyVideo(v);
+      if ("UPLOADED".equals(video.getType()) && "VOD".equals(video.getState())) {
+        notificationService.notifyUploadedMyVideo(video);
       }
     }
   }
