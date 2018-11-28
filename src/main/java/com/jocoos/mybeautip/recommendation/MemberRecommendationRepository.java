@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.recommendation;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,4 +12,6 @@ public interface MemberRecommendationRepository extends JpaRepository<MemberReco
   List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(Date statedAt, Date endedAt, Pageable pageable);
 
   Optional<MemberRecommendation> findByMemberId(Long memberId);
+
+  Page<MemberRecommendation> findByMemberDeletedAtIsNull(Pageable pageable);
 }

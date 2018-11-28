@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
@@ -180,7 +181,7 @@ public class AdminController {
      @RequestParam(defaultValue = "10") int size) {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.ASC, "seq"));
-    Page<MemberRecommendation> members = memberRecommendationRepository.findAll(pageable);
+    Page<MemberRecommendation> members = memberRecommendationRepository.findByMemberDeletedAtIsNull(pageable);
 
     Page<MemberDetailInfo> details = members.map(m -> {
       MemberDetailInfo info = new MemberDetailInfo(m.getMember(), m);
@@ -195,16 +196,19 @@ public class AdminController {
     return new ResponseEntity<>(details, HttpStatus.OK);
   }
 
-  @PostMapping("/members")
+  @PostMapping("/recommendedMembers")
   public ResponseEntity<RecommendedMemberInfo> createRecommendedMember(
       @RequestBody CreateRecommendedMemberRequest request) {
+
     log.debug("request: {}", request);
 
-    Optional<MemberRecommendation> optional
-        = memberRecommendationRepository.findById(request.getMemberId());
-    MemberRecommendation recommendation = optional.orElseGet(MemberRecommendation::new);
-    BeanUtils.copyProperties(request, recommendation);
-    log.debug("recommended member: {}", recommendation);
+    memberRecommendationRepository.findByMemberId(request.getMemberId())
+       .ifPresent(r -> {
+         throw new BadRequestException("member_duplicated", "Already member is recommended");
+       });
+
+    MemberRecommendation recommendation = new MemberRecommendation();
+    recommendation.setSeq(request.getSeq());
 
     return memberRepository.findByIdAndDeletedAtIsNull(request.getMemberId()).map(m -> {
       recommendation.setMember(m);
@@ -216,6 +220,7 @@ public class AdminController {
         log.error("invalid date format", e);
       }
 
+      log.debug("recommended member: {}", recommendation);
       memberRecommendationRepository.save(recommendation);
 
       RecommendedMemberInfo info = new RecommendedMemberInfo();
@@ -224,17 +229,19 @@ public class AdminController {
     }).orElseThrow(() -> new MemberNotFoundException(request.getMemberId()));
   }
 
-  @PostMapping("/goods")
+  @PostMapping("/recommendedGoods")
   public ResponseEntity<RecommendedGoodsInfo> createRecommendedGoods(
       @RequestBody CreateRecommendedGoodsRequest request) {
     log.debug("request: {}", request);
 
+    goodsRecommendationRepository.findByGoodsNo(request.getGoodsNo())
+       .ifPresent(r -> {
+         throw new BadRequestException("duplicated_goods", "Already goods is recommended");
+       });
 
-    Optional<GoodsRecommendation> optional
-        = goodsRecommendationRepository.findByGoodsNo(request.getGoodsNo());
-    GoodsRecommendation recommendation = optional.orElseGet(GoodsRecommendation::new);
-    BeanUtils.copyProperties(request, recommendation);
-    log.debug("recommended goods: {}", recommendation);
+    GoodsRecommendation recommendation = new GoodsRecommendation();
+    recommendation.setSeq(request.getSeq());
+
 
     return goodsRepository.findByGoodsNo(request.getGoodsNo()).map(g -> {
       recommendation.setGoods(g);
@@ -246,6 +253,7 @@ public class AdminController {
         log.error("invalid date format", e);
       }
 
+      log.debug("recommended goods: {}", recommendation);
       goodsRecommendationRepository.save(recommendation);
 
       RecommendedGoodsInfo info = new RecommendedGoodsInfo();
@@ -254,15 +262,19 @@ public class AdminController {
     }).orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
   }
 
-  @PostMapping("/motd")
+  @PostMapping("/recommendedMotd")
   public ResponseEntity<RecommendedMotdInfo> createRecommendedMotd(
     @RequestBody CreateRecommendedMotdRequest request) {
     log.debug("request: {}", request);
 
-    Optional<MotdRecommendation> optional = motdRecommendationRepository.findByVideoId(request.getVideoId());
-    MotdRecommendation recommendation = optional.orElseGet(MotdRecommendation::new);
-    BeanUtils.copyProperties(request, recommendation);
-    log.debug("recommended motd: {}", recommendation);
+    motdRecommendationRepository.findByVideoId(request.getVideoId())
+      .ifPresent(r -> {
+        throw new BadRequestException("duplicated_motds", "Already motds is recommended");
+      });
+    MotdRecommendation recommendation = new MotdRecommendation();
+    recommendation.setSeq(request.getSeq());
+
+
 
     SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
     try {
@@ -272,6 +284,7 @@ public class AdminController {
       log.error("invalid date format", e);
     }
 
+    log.debug("recommended motd: {}", recommendation);
     motdRecommendationRepository.save(recommendation);
 
     RecommendedMotdInfo info = new RecommendedMotdInfo();
@@ -325,6 +338,7 @@ public class AdminController {
   @Data
   private static class RecommendedMemberInfo {
     private Long id;
+    private int seq;
     private Member member;
     private Long createdBy;
     private Date createdAt;
@@ -345,6 +359,7 @@ public class AdminController {
     private String goodsNo;
     private Integer state;  // 상태 (1: 구매가능, 2:품절, 3: 구매불가(판매 안함), 4: 노출안함, 5: 삭제됨)
     private Goods goods;
+    private int seq;
     private Long createdBy;
     private Date createdAt;
     private Date startedAt;
