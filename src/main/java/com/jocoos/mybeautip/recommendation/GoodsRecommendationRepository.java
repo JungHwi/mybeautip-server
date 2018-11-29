@@ -14,11 +14,23 @@ public interface GoodsRecommendationRepository extends JpaRepository<GoodsRecomm
 
   List<GoodsRecommendation> findAllByGoodsGoodsNo(String goodsNo);
 
+  Slice<GoodsRecommendation> findByStartedAtBeforeAndEndedAtAfterAndGoodsStateLessThanEqual(Date statedAt, Date endedAt, int state, Pageable page);
+
+  Page<GoodsRecommendation> findByOrderBySeqDesc(Pageable pageable);
+
   Page<GoodsRecommendation> findByOrderByGoodsHitCntDesc(Pageable pageable);
 
   Page<GoodsRecommendation> findByOrderByGoodsOrderCntDesc(Pageable pageable);
 
   Page<GoodsRecommendation> findByOrderByGoodsLikeCountDesc(Pageable pageable);
-  
-  Slice<GoodsRecommendation> findByStartedAtBeforeAndEndedAtAfterAndGoodsStateLessThanEqual(Date statedAt, Date endedAt, int state, Pageable page);
+
+
+  Page<GoodsRecommendation> findByGoodsCateCdOrderBySeqDesc(String code, Pageable pageable);
+
+  Page<GoodsRecommendation> findByGoodsCateCdOrderByGoodsHitCntDesc(String code, Pageable pageable);
+
+  Page<GoodsRecommendation> findByGoodsCateCdOrderByGoodsOrderCntDesc(String code, Pageable pageable);
+
+  Page<GoodsRecommendation> findByGoodsCateCdOrderByGoodsLikeCountDesc(String code, Pageable pageable);
+
 }

@@ -72,8 +72,6 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
 
   Page<Goods> findByScmNoOrderByGoodsNoDesc(Integer scmNo, Pageable pageable);
 
-  Page<Goods> findByScmNoAndCateCd(Integer scmNo, String code, Pageable pageable);
-
   Page<Goods> findByOrderByHitCntDesc(Pageable pageable);
 
   Page<Goods> findByOrderByOrderCntDesc(Pageable pageable);
@@ -85,5 +83,23 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
   Page<Goods> findByScmNoOrderByOrderCntDesc(Integer scmNo, Pageable pageable);
 
   Page<Goods> findByScmNoOrderByLikeCountDesc(Integer scmNo, Pageable pageable);
+
+
+  Page<Goods> findByCateCdOrderByGoodsNoDesc(String code, Pageable pageable);
+
+  Page<Goods> findByCateCdOrderByHitCntDesc(String code, Pageable pageable);
+
+  Page<Goods> findByCateCdOrderByOrderCntDesc(String code, Pageable pageable);
+
+  Page<Goods> findByCateCdOrderByLikeCountDesc(String code, Pageable pageable);
+
+
+  Page<Goods> findByScmNoAndCateCdOrderByGoodsNoDesc(Integer scmNo, String code, Pageable pageable);
+
+  Page<Goods> findByScmNoAndCateCdOrderByHitCntDesc(Integer scmNo, String code, Pageable pageable);
+
+  Page<Goods> findByScmNoAndCateCdOrderByOrderCntDesc(Integer scmNo, String code, Pageable pageable);
+
+  Page<Goods> findByScmNoAndCateCdOrderByLikeCountDesc(Integer scmNo, String code, Pageable pageable);
 
 }
