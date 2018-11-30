@@ -17,8 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
@@ -34,6 +36,7 @@ import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
 import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.store.StoreRepository;
 
 @Slf4j
 @RestController
@@ -48,6 +51,7 @@ public class AdminController {
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
   private final ReportRepository reportRepository;
+  private final StoreRepository storeRepository;
   private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
 
   public AdminController(PostRepository postRepository,
@@ -56,7 +60,9 @@ public class AdminController {
                          GoodsRepository goodsRepository,
                          MemberRecommendationRepository memberRecommendationRepository,
                          GoodsRecommendationRepository goodsRecommendationRepository,
-                         MotdRecommendationRepository motdRecommendationRepository, ReportRepository reportRepository) {
+                         MotdRecommendationRepository motdRecommendationRepository,
+                         ReportRepository reportRepository,
+                         StoreRepository storeRepository) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
@@ -65,6 +71,7 @@ public class AdminController {
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
     this.reportRepository = reportRepository;
+    this.storeRepository = storeRepository;
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -229,6 +236,54 @@ public class AdminController {
     }).orElseThrow(() -> new MemberNotFoundException(request.getMemberId()));
   }
 
+  @GetMapping("/goodsDetails")
+  public ResponseEntity<Page<GoodsDetailInfo>> getGoodsDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "false") boolean isDeleted,
+     @RequestParam(defaultValue = "1") int state,
+     @RequestParam(required = false) String code,
+     @RequestParam(required = false) String sort) {
+
+    Pageable pageable = null;
+    if (sort != null) {
+      Sort pagingSort = null;
+      switch (sort) {
+        case "order":
+          pagingSort = new Sort(Sort.Direction.DESC, "orderCnt");
+          break;
+        case "hit":
+          pagingSort = new Sort(Sort.Direction.DESC, "hitCnt");
+          break;
+        case "like":
+          pagingSort = new Sort(Sort.Direction.DESC, "likeCount");
+          break;
+        default:
+          pagingSort = new Sort(Sort.Direction.DESC, "goodsNo");
+      }
+
+      pageable = PageRequest.of(page, size, pagingSort);
+    } else {
+      pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "goodsNo"));
+    }
+
+    Page<Goods> goods = null;
+    if (!Strings.isNullOrEmpty(code)) {
+      goods = goodsRepository.findByStateAndCateCd(state, code, pageable);
+    } else {
+      goods = goodsRepository.findByState(state, pageable);
+    }
+
+    Page<GoodsDetailInfo> details = goods.map(g -> {
+      GoodsDetailInfo info = new GoodsDetailInfo(g);
+      goodsRecommendationRepository.findByGoodsNo(g.getGoodsNo()).ifPresent(r -> info.setRecommendation(r));
+      storeRepository.findById(g.getScmNo()).ifPresent(s -> info.setStore(s));
+      return info;
+    });
+
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
   @PostMapping("/recommendedGoods")
   public ResponseEntity<RecommendedGoodsInfo> createRecommendedGoods(
       @RequestBody CreateRecommendedGoodsRequest request) {
@@ -245,6 +300,7 @@ public class AdminController {
 
     return goodsRepository.findByGoodsNo(request.getGoodsNo()).map(g -> {
       recommendation.setGoods(g);
+      recommendation.setGoodsNo(g.getGoodsNo());
 
       try {
         recommendation.setStartedAt(df.parse(request.getStartedAt()));
@@ -260,6 +316,18 @@ public class AdminController {
       BeanUtils.copyProperties(recommendation, info);
       return new ResponseEntity<>(info, HttpStatus.OK);
     }).orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
+  }
+
+  @DeleteMapping("/recommendedGoods/{goodsNo:.+}")
+  public ResponseEntity deleteRecommendedGoods(@PathVariable String goodsNo) {
+    log.debug("deleted goodsNo: {}", goodsNo);
+
+    return goodsRecommendationRepository.findByGoodsNo(goodsNo)
+       .map(r -> {
+         goodsRecommendationRepository.delete(r);
+         return new ResponseEntity(HttpStatus.NO_CONTENT);
+
+       }).orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
   }
 
   @PostMapping("/recommendedMotd")

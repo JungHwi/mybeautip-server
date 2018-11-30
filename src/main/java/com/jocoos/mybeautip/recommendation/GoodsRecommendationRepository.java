@@ -24,7 +24,6 @@ public interface GoodsRecommendationRepository extends JpaRepository<GoodsRecomm
 
   Page<GoodsRecommendation> findByOrderByGoodsLikeCountDesc(Pageable pageable);
 
-
   Page<GoodsRecommendation> findByGoodsCateCdOrderBySeqDesc(String code, Pageable pageable);
 
   Page<GoodsRecommendation> findByGoodsCateCdOrderByGoodsHitCntDesc(String code, Pageable pageable);
@@ -32,5 +31,9 @@ public interface GoodsRecommendationRepository extends JpaRepository<GoodsRecomm
   Page<GoodsRecommendation> findByGoodsCateCdOrderByGoodsOrderCntDesc(String code, Pageable pageable);
 
   Page<GoodsRecommendation> findByGoodsCateCdOrderByGoodsLikeCountDesc(String code, Pageable pageable);
+
+  Page<GoodsRecommendation> findByGoodsStateOrderBySeqDesc(int state, Pageable pageable);
+
+  Page<GoodsRecommendation> findByGoodsCateCdAndGoodsStateOrderBySeqDesc(String code, int state, Pageable pageable);
 
 }

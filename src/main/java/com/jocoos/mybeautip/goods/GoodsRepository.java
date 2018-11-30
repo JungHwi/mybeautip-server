@@ -68,6 +68,11 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
                                Pageable pageable);
 
 
+  Page<Goods> findByState(int state, Pageable pageable);
+
+  Page<Goods> findByStateAndCateCd(int state, String code, Pageable pageable);
+
+
   Page<Goods> findByOrderByGoodsNoDesc(Pageable pageable);
 
   Page<Goods> findByScmNoOrderByGoodsNoDesc(Integer scmNo, Pageable pageable);
