@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
@@ -37,6 +36,10 @@ import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.store.StoreRepository;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.video.report.VideoReportRepository;
 
 @Slf4j
 @RestController
@@ -52,6 +55,8 @@ public class AdminController {
   private final MotdRecommendationRepository motdRecommendationRepository;
   private final ReportRepository reportRepository;
   private final StoreRepository storeRepository;
+  private final VideoRepository videoRepository;
+  private final VideoReportRepository videoReportRepository;
   private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
 
   public AdminController(PostRepository postRepository,
@@ -62,7 +67,9 @@ public class AdminController {
                          GoodsRecommendationRepository goodsRecommendationRepository,
                          MotdRecommendationRepository motdRecommendationRepository,
                          ReportRepository reportRepository,
-                         StoreRepository storeRepository) {
+                         StoreRepository storeRepository,
+                         VideoRepository videoRepository,
+                         VideoReportRepository videoReportRepository) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
@@ -72,6 +79,8 @@ public class AdminController {
     this.motdRecommendationRepository = motdRecommendationRepository;
     this.reportRepository = reportRepository;
     this.storeRepository = storeRepository;
+    this.videoRepository = videoRepository;
+    this.videoReportRepository = videoReportRepository;
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -330,7 +339,7 @@ public class AdminController {
        }).orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
   }
 
-  @PostMapping("/recommendedMotd")
+  @PostMapping("/recommendedMotds")
   public ResponseEntity<RecommendedMotdInfo> createRecommendedMotd(
     @RequestBody CreateRecommendedMotdRequest request) {
     log.debug("request: {}", request);
@@ -342,22 +351,66 @@ public class AdminController {
     MotdRecommendation recommendation = new MotdRecommendation();
     recommendation.setSeq(request.getSeq());
 
+    return videoRepository.findByIdAndDeletedAtIsNull(request.getVideoId())
+       .map(v -> {
+         recommendation.setVideo(v);
+         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
+         try {
+           recommendation.setStartedAt(df.parse(request.getStartedAt()));
+           recommendation.setEndedAt(df.parse(request.getEndedAt()));
+         } catch (ParseException e) {
+           log.error("invalid date format", e);
+         }
 
+         log.debug("recommended motd: {}", recommendation);
+         motdRecommendationRepository.save(recommendation);
 
-    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
-    try {
-      recommendation.setStartedAt(df.parse(request.getStartedAt()));
-      recommendation.setEndedAt(df.parse(request.getEndedAt()));
-    } catch (ParseException e) {
-      log.error("invalid date format", e);
-    }
+         RecommendedMotdInfo info = new RecommendedMotdInfo();
+         BeanUtils.copyProperties(recommendation, info);
+         return new ResponseEntity<>(info, HttpStatus.OK);
+       }).orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id"));
+  }
 
-    log.debug("recommended motd: {}", recommendation);
-    motdRecommendationRepository.save(recommendation);
+  @GetMapping("/motdDetails")
+  public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size) {
 
-    RecommendedMotdInfo info = new RecommendedMotdInfo();
-    BeanUtils.copyProperties(recommendation, info);
-    return new ResponseEntity<>(info, HttpStatus.OK);
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
+    Page<Video> videos = videoRepository.findByTypeAndState("UPLOADED", "VOD", pageable);
+
+    Page<MotdDetailInfo> details = videos.map(v -> {
+      MotdDetailInfo info = new MotdDetailInfo(v);
+      motdRecommendationRepository.findByVideoId(v.getId())
+         .ifPresent(r -> info.setRecommendation(r));
+
+      Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getId(), PageRequest.of(0, 1));
+      info.setReportCount(reports.getTotalElements());
+
+      return info;
+    });
+
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  @GetMapping("/recommendedMotdDetails")
+  public ResponseEntity<Page<MotdDetailInfo>> getRecommendedMotdDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size) {
+
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.ASC, "seq"));;
+    Page<MotdRecommendation> videos = motdRecommendationRepository.findByVideoDeletedAtIsNull(pageable);
+
+    Page<MotdDetailInfo> details = videos.map(v -> {
+      MotdDetailInfo info = new MotdDetailInfo(v.getVideo());
+      info.setRecommendation(v);
+
+      Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getVideo().getId(), PageRequest.of(0, 1));
+      info.setReportCount(reports.getTotalElements());
+      return info;
+    });
+
+    return new ResponseEntity<>(details, HttpStatus.OK);
   }
 
   @Data
