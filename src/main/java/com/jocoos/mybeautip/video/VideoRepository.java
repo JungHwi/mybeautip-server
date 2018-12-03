@@ -102,10 +102,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   @Modifying
   @Query("update Video v set v.viewCount = v.viewCount + ?2, v.modifiedAt = now() where v.id = ?1")
   void updateViewCount(Long id, int i);
-  
-  @Modifying
-  @Query("update Video v set v.viewCountByGuest = v.viewCountByGuest + ?2, v.modifiedAt = now() where v.id = ?1")
-  void updateViewCountByGuest(Long id, int i);
 
   @Modifying
   @Query("update Video v set v.totalWatchCount = v.totalWatchCount + ?2, v.modifiedAt = now() where v.id = ?1")

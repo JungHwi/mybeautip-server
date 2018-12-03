@@ -24,6 +24,12 @@ public class VideoView extends MemberAuditable {
   @ManyToOne
   @JoinColumn(name = "video_id")
   private Video video;
+  
+  @Column
+  private String guestName;
+  
+  @Column(nullable = false)
+  private Integer viewCount = 0;
 
   @Column
   @LastModifiedDate
@@ -32,5 +38,12 @@ public class VideoView extends MemberAuditable {
   public VideoView(Video video, Member member) {
     this.video = video;
     this.createdBy = member;
+    this.viewCount = 1; // init
+  }
+  
+  public VideoView(Video video, String guestName) {
+    this.video = video;
+    this.guestName = guestName;
+    this.viewCount = 1; // init
   }
 }

@@ -639,13 +639,22 @@ public class VideoController {
           if (optional.isPresent()) {
             VideoView view = optional.get();
             view.setModifiedAt(new Date());
+            view.setViewCount(view.getViewCount() + 1);
             videoViewRepository.save(view);
           } else {
             videoViewRepository.save(new VideoView(v, me));
           }
-        } else {  // Guest, just update viewCountByGuest
-          videoRepository.updateViewCountByGuest(v.getId(), 1);
-          v.setViewCountByGuest(v.getViewCountByGuest() + 1);
+        } else {  // Guest
+          String guestName = memberService.getGuestUserName();
+          Optional<VideoView> optional = videoViewRepository.findByVideoIdAndGuestName(id, guestName);
+          if (optional.isPresent()) {
+            VideoView view = optional.get();
+            view.setModifiedAt(new Date());
+            view.setViewCount(view.getViewCount() + 1);
+            videoViewRepository.save(view);
+          } else {
+            videoViewRepository.save(new VideoView(v, guestName));
+          }
         }
 
         return new ResponseEntity<>(videoService.generateVideoInfo(v), HttpStatus.OK);
@@ -655,33 +664,28 @@ public class VideoController {
 
   @GetMapping("/{id:.+}/views")
   public CursorResponse getViewerList(@PathVariable Long id,
-                                       @RequestParam(defaultValue = "100") int count,
-                                       @RequestParam(required = false) String cursor,
-                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+                                      @RequestParam(defaultValue = "100") int count,
+                                      @RequestParam(required = false) String cursor,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
-
 
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
-    Slice<VideoView> list = videoViewRepository.findByVideoIdAndModifiedAtBefore(id, startCursor, pageable);
+    Slice<VideoView> list = videoViewRepository.findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(id, startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
     list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
-    int guestCount;
     String nextCursor = null;
 
     if (members.size() > 0) {
       nextCursor = String.valueOf(list.getContent().get(list.getContent().size() - 1).getModifiedAt().getTime());
-      guestCount = video.getViewCount() - members.size() > 0 ? video.getViewCount() - members.size() : 0;
-    } else {
-      guestCount = video.getViewCount() > 0 ? video.getViewCount() : 0;
     }
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/views", members)
       .withCount(count)
-      .withGuestCount(guestCount)
+      .withGuestCount(videoViewRepository.countByVideoIdAndCreatedByIsNull(id))
       .withCursor(nextCursor).toBuild();
   }
 
