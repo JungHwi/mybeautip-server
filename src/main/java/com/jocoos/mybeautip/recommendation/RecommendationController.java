@@ -135,20 +135,6 @@ public class RecommendationController {
     }
     return new ResponseEntity<>(info, HttpStatus.OK);
   }
-  
-  @GetMapping("/motd")  // Will be deprecated, use getRecommendedMotds
-  public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedMotd(
-      @RequestParam(defaultValue = "100") int count) {
-    Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
-        PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
-
-    List<VideoController.VideoInfo> result = Lists.newArrayList();
-    for (MotdRecommendation recommendation : videos) {
-      videoRepository.findById(recommendation.getVideoId()).map(video ->
-          result.add(videoService.generateVideoInfo(video)));
-    }
-    return new ResponseEntity<>(result, HttpStatus.OK);
-  }
 
   @GetMapping("/keywords")
   public ResponseEntity<List<KeywordInfo>> getRecommendedKeywords(

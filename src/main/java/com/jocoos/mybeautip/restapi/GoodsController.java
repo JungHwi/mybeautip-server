@@ -133,21 +133,6 @@ public class GoodsController {
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
-
-  // Will be deprecated
-  @GetMapping("/{goodsNo}/options")
-  public ResponseEntity<List<GoodsOptionInfo>> getGoodsOptions(@PathVariable Integer goodsNo) {
-    Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
-        .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
-    
-    List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
-    List<GoodsOptionInfo> result = new ArrayList<>();
-    
-    for (GoodsOption option : options) {
-      result.add(new GoodsOptionInfo(option, isSoldOut(goods, option)));
-    }
-    return new ResponseEntity<>(result, HttpStatus.OK);
-  }
   
   @GetMapping("/{goodsNo}/option_data")
   public GoodsOptionService.GoodsOptionInfo getGoodsOptionData(@PathVariable Integer goodsNo,
