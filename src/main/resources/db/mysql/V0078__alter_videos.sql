@@ -1,0 +1,1 @@
+ALTER TABLE `videos` MODIFY COLUMN `content` VARCHAR(4000);
