@@ -643,6 +643,9 @@ public class VideoController {
           } else {
             videoViewRepository.save(new VideoView(v, me));
           }
+        } else {  // Guest, just update viewCountByGuest
+          videoRepository.updateViewCountByGuest(v.getId(), 1);
+          v.setViewCountByGuest(v.getViewCountByGuest() + 1);
         }
 
         return new ResponseEntity<>(videoService.generateVideoInfo(v), HttpStatus.OK);

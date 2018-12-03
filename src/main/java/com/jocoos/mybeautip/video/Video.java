@@ -69,6 +69,9 @@ public class Video {
 
   @Column(nullable = false)
   private Integer viewCount;
+  
+  @Column(nullable = false)
+  private Integer viewCountByGuest;
 
   @Column(nullable = false)
   private Integer likeCount;
