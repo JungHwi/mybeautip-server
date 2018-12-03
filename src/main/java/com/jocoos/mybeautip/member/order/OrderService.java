@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.member.order;
 
 import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
@@ -14,6 +13,7 @@ import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.point.PointService;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentData;
@@ -37,6 +37,10 @@ public class OrderService {
 
   @Value("${mybeautip.point.minimum}")
   private int minimumPoint;
+  
+  private static final String GOODS_NOT_FOUND = "goods.not_found";
+  private static final String POINT_BAD_REQUEST = "order.point_bad_rqeust";
+  private static final String POINT_NOT_ENOUGH = "order.point_not_enough";
 
   private final SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmssSSS");
   private final OrderRepository orderRepository;
@@ -52,6 +56,7 @@ public class OrderService {
   private final RevenueService revenueService;
   private final PointService pointService;
   private final IamportService iamportService;
+  private final MessageService messageService;
 
   public OrderService(OrderRepository orderRepository,
                       MemberRepository memberRepository,
@@ -65,7 +70,8 @@ public class OrderService {
                       CartRepository cartRepository,
                       RevenueService revenueService,
                       PointService pointService,
-                      IamportService iamportService) {
+                      IamportService iamportService,
+                      MessageService messageService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
     this.deliveryRepository = deliveryRepository;
@@ -79,14 +85,11 @@ public class OrderService {
     this.revenueService = revenueService;
     this.pointService = pointService;
     this.iamportService = iamportService;
+    this.messageService = messageService;
   }
 
   @Transactional
-  public Order create(OrderController.CreateOrderRequest request, Member member) {
-    if (member == null) {
-      throw new MemberNotFoundException("Login required");
-    }
-
+  public Order create(OrderController.CreateOrderRequest request, Member member, String lang) {
     Order order = new Order();
     if ("bank".equals(request.getPayment().getMethod())) {
       order.setState(Order.State.ORDERED);
@@ -100,11 +103,11 @@ public class OrderService {
 
     if (request.getPoint() > 0) {
       if (request.getPoint() < minimumPoint) {
-        throw new BadRequestException("invalid_point", "minimum point - " + minimumPoint);
+        throw new BadRequestException("point_bad_request", messageService.getMessage(POINT_BAD_REQUEST, lang));
       }
 
       if (member.getPoint() < request.getPoint()) {
-        throw new BadRequestException("invalid_point", "member point not enough");
+        throw new BadRequestException("point_not_enough", messageService.getMessage(POINT_NOT_ENOUGH, lang));
       }
     }
 
@@ -146,7 +149,7 @@ public class OrderService {
         purchases.add(purchase);
         return Optional.empty();
       })
-      .orElseThrow(() -> new NotFoundException("goods_not_found", "Goods not found:" + p.getGoodsNo())));
+      .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang))));
 
     log.debug("purchases: {}", purchases);
     order.setPurchases(purchases);

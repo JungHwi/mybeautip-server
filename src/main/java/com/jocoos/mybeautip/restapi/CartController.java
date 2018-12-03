@@ -50,6 +50,7 @@ public class CartController {
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String OPTION_NOT_FOUND = "option.not_found";
   private static final String CART_ITEM_NOT_FOUND = "cart.item_not_found";
+  private static final String STORE_NOT_FOUND = "store.not_found";
 
   public CartController(MemberService memberService,
                         CartService cartService,
@@ -196,7 +197,7 @@ public class CartController {
     }
 
     Store store = storeRepository.findById(goods.getScmNo())
-      .orElseThrow(() -> new NotFoundException("store_not_found", "store not found: " + goods.getScmNo()));
+      .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
 
     return new Cart(goods, option, store, quantity);
   }

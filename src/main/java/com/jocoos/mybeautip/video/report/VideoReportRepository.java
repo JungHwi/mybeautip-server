@@ -10,4 +10,6 @@ public interface VideoReportRepository extends JpaRepository<VideoReport, Long> 
   Optional<VideoReport> findByVideoIdAndCreatedById(Long videoId, Long createdById);
 
   Page<VideoReport> findByVideoState(String state, Pageable pageable);
+
+  Page<VideoReport> findByVideoId(Long videoId, Pageable pageable);
 }

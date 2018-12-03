@@ -38,6 +38,7 @@ public class BlockController {
   private final BlockRepository blockRepository;
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";
+  private static final String MEMBER_REPORT_BAD_REQUEST = "member.report_bad_request";
   
   public BlockController(MemberService memberService,
                          MessageService messageService,
@@ -62,7 +63,7 @@ public class BlockController {
     long you = blockMemberRequest.getMemberId();
     
     if (me == you) {
-      throw new BadRequestException("Can't block myself");
+      throw new BadRequestException("report_bad_request", messageService.getMessage(MEMBER_REPORT_BAD_REQUEST, lang));
     }
     log.debug("Block " + me + " : " + you);
 

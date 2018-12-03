@@ -72,7 +72,7 @@ public class CallbackController {
 
     Video video = new Video();
     BeanUtils.copyProperties(request, video);
-    video.setVisibility("PUBLIC");
+    video.setVisibility(request.getVisibility());
     video.setCommentCount(0);
     video.setLikeCount(0);
     video.setViewCount(0);
@@ -238,7 +238,8 @@ public class CallbackController {
 
     @NotNull
     String type;
-
+  
+    String visibility;
     String state;
     Integer duration = 0;
     String title ="";

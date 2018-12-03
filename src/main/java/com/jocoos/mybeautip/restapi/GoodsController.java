@@ -50,6 +50,7 @@ public class GoodsController {
   private final GoodsDetailService goodsDetailService;
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
+  private static final String ALREADY_LIKED = "like.already_liked";
 
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
@@ -132,21 +133,6 @@ public class GoodsController {
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
-
-  // Will be deprecated
-  @GetMapping("/{goodsNo}/options")
-  public ResponseEntity<List<GoodsOptionInfo>> getGoodsOptions(@PathVariable Integer goodsNo) {
-    Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
-        .orElseThrow(()-> new NotFoundException("goods_not_found", "goods not found: " + goodsNo));
-    
-    List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
-    List<GoodsOptionInfo> result = new ArrayList<>();
-    
-    for (GoodsOption option : options) {
-      result.add(new GoodsOptionInfo(option, isSoldOut(goods, option)));
-    }
-    return new ResponseEntity<>(result, HttpStatus.OK);
-  }
   
   @GetMapping("/{goodsNo}/option_data")
   public GoodsOptionService.GoodsOptionInfo getGoodsOptionData(@PathVariable Integer goodsNo,
@@ -179,7 +165,7 @@ public class GoodsController {
     return goodsRepository.findByGoodsNo(goodsNo)
         .map(goods -> {
           if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goodsNo, memberId).isPresent()) {
-            throw new BadRequestException("duplicated_goods_like", "Already goods liked");
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
           }
 
           goodsRepository.updateLikeCount(goodsNo, 1);

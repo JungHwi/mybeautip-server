@@ -1,0 +1,1 @@
+ALTER TABLE `videos` ADD COLUMN `view_count_by_guest` INT DEFAULT 0 AFTER `view_count`;

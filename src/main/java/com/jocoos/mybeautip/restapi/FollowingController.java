@@ -41,6 +41,7 @@ public class FollowingController {
   private final FollowingRepository followingRepository;
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";
+  private static final String MEMBER_FOLLOWING_BAD_REQUEST = "member.following_bad_request";
   
   public FollowingController(MemberService memberService,
                              MessageService messageService,
@@ -66,7 +67,7 @@ public class FollowingController {
     long you = followingMemberRequest.getMemberId();
     
     if (me == you) {
-      throw new BadRequestException("Can't follow myself");
+      throw new BadRequestException("following_bad_request", messageService.getMessage(MEMBER_FOLLOWING_BAD_REQUEST, lang));
     }
 
     memberRepository.findByIdAndDeletedAtIsNull(you)

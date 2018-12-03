@@ -43,8 +43,15 @@ public class NotificationAspect {
     if (result instanceof Video) {
       Video video = (Video) result;
       log.debug("video: {}", video);
-      notificationService.notifyCreateVideo(video);
+      if ("PUBLIC".equals(video.getVisibility())) {
+        notificationService.notifyCreateVideo(video);
+      }
+
       slackService.sendForVideo(video);
+
+      if ("UPLOADED".equals(video.getType()) && "VOD".equals(video.getState())) {
+        notificationService.notifyUploadedMyVideo(video);
+      }
     }
   }
 

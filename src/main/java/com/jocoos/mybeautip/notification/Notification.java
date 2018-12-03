@@ -27,6 +27,8 @@ import java.util.Map;
 @Table(name = "notifications")
 public class Notification {
 
+  public static final String MY_VIDEO_UPLOADED= "my_video_uploaded";
+
   public static final String FOLLOWING = "following";
   public static final String VIDEO_STARTED = "video_started";
   public static final String VIDEO_UPLOADED = "video_uploaded";
@@ -121,6 +123,18 @@ public class Notification {
     this.resourceOwner = video.getMember();
     this.imageUrl = thumbnail;
   }
+
+  public Notification(Video video) {
+    this.type = MY_VIDEO_UPLOADED;
+    this.targetMember = video.getMember();
+    this.args = Lists.newArrayList(video.getMember().getUsername());
+    this.resourceType = RESOURCE_TYPE_VIDEO;
+    this.resourceId = video.getId();  // TODO: deprecated
+    this.resourceIds = StringUtils.joinWith(",", video.getId());
+    this.resourceOwner = video.getMember();
+    this.imageUrl = video.getThumbnailUrl();
+  }
+
   
   public Notification(VideoLike videoLike, Member source) {
     this.type = VIDEO_LIKE;

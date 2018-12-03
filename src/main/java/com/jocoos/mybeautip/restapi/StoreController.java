@@ -47,6 +47,7 @@ public class StoreController {
   private final GoodsRepository goodsRepository;
 
   private static final String STORE_NOT_FOUND = "store.not_found";
+  private static final String ALREADY_LIKED = "like.already_liked";
 
   public StoreController(MemberService memberService,
                          GoodsService goodsService,
@@ -133,7 +134,7 @@ public class StoreController {
       .map(store -> {
         Integer storeId = store.getId();
         if (storeLikeRepository.findByStoreIdAndCreatedById(storeId, memberId).isPresent()) {
-          throw new BadRequestException("duplicated_store_like", "Already store liked");
+          throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
         }
 
         storeRepository.updateLikeCount(id, 1);

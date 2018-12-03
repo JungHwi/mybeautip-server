@@ -70,6 +70,9 @@ public class Member {
   private int followingCount;
 
   @Column(nullable = false)
+  private int reportCount;
+
+  @Column(nullable = false)
   private int videoCount; // public video count
 
   @JsonIgnore
@@ -81,6 +84,9 @@ public class Member {
 
   @Column
   private Date revenueModifiedAt;
+  
+  @Column
+  private Boolean pushable;
 
   @Column
   @CreatedDate
@@ -118,12 +124,7 @@ public class Member {
     this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? defaultAvatarUrl : params.get("avatar_url");
     this.point = 0;
     this.visible = false;
-    this.revenueModifiedAt = new Date();
+    this.revenueModifiedAt = null;
+    this.pushable = true; // default true
   }
-
-//  @OneToOne(mappedBy = "member")
-//  private MemberRecommendation recommendation;
-
-//  @OneToMany(mappedBy = "you")
-//  private List<Report> reports;
 }

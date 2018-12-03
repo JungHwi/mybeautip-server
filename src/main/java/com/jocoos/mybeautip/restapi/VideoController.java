@@ -74,6 +74,7 @@ public class VideoController {
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
+  private static final String ALREADY_LIKED = "like.already_liked";
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -334,7 +335,7 @@ public class VideoController {
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
       .map(video -> {
         if (videoLikeRepository.findByVideoIdAndCreatedById(videoId, memberId).isPresent()) {
-          throw new BadRequestException("duplicated_video_like", "Already video liked");
+          throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
         }
 
         videoRepository.updateLikeCount(videoId, 1);
@@ -393,14 +394,15 @@ public class VideoController {
   @Transactional
   @PostMapping("/{videoId:.+}/comments/{commentId:.+}/likes")
   public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long videoId,
-                                                                  @PathVariable Long commentId) {
+                                                        @PathVariable Long commentId,
+                                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberService.currentMember();
     
     return commentRepository.findByIdAndVideoId(commentId, videoId)
         .map(comment -> {
           if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId
               ()).isPresent()) {
-            throw new BadRequestException("duplicated_video_comment_like", "Already video comment liked");
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
           }
 
 
@@ -501,7 +503,6 @@ public class VideoController {
 
     int guestCount = videoWatchRepository.countByVideoIdAndIsGuestIsTrueAndModifiedAtAfter(id, new Date(duration));
 
-
     String nextCursor = null;
     if (members.size() > 0) {
       nextCursor = String.valueOf(members.get(members.size() - 1).getId());
@@ -534,10 +535,6 @@ public class VideoController {
                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Long memberId = memberService.currentMemberId();
-    if (memberId == null) {
-      throw new BadRequestException("Login required");
-    }
-
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
@@ -642,9 +639,21 @@ public class VideoController {
           if (optional.isPresent()) {
             VideoView view = optional.get();
             view.setModifiedAt(new Date());
+            view.setViewCount(view.getViewCount() + 1);
             videoViewRepository.save(view);
           } else {
             videoViewRepository.save(new VideoView(v, me));
+          }
+        } else {  // Guest
+          String guestName = memberService.getGuestUserName();
+          Optional<VideoView> optional = videoViewRepository.findByVideoIdAndGuestName(id, guestName);
+          if (optional.isPresent()) {
+            VideoView view = optional.get();
+            view.setModifiedAt(new Date());
+            view.setViewCount(view.getViewCount() + 1);
+            videoViewRepository.save(view);
+          } else {
+            videoViewRepository.save(new VideoView(v, guestName));
           }
         }
 
@@ -655,21 +664,28 @@ public class VideoController {
 
   @GetMapping("/{id:.+}/views")
   public CursorResponse getViewerList(@PathVariable Long id,
-                                       @RequestParam(defaultValue = "100") int count,
-                                       @RequestParam(required = false) String cursor) {
+                                      @RequestParam(defaultValue = "100") int count,
+                                      @RequestParam(required = false) String cursor,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
-    Slice<VideoView> list = videoViewRepository.findByVideoIdAndModifiedAtBefore(id, startCursor, pageable);
+
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+
+    Slice<VideoView> list = videoViewRepository.findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(id, startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
     list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
     String nextCursor = null;
+
     if (members.size() > 0) {
       nextCursor = String.valueOf(list.getContent().get(list.getContent().size() - 1).getModifiedAt().getTime());
     }
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/views", members)
       .withCount(count)
+      .withGuestCount(videoViewRepository.countByVideoIdAndCreatedByIsNull(id))
       .withCursor(nextCursor).toBuild();
   }
 
