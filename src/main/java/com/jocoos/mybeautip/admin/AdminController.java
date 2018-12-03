@@ -171,7 +171,7 @@ public class AdminController {
 
     Page<Member> members = null;
     if(isDeleted) {
-      members = memberRepository.findByLinkInAndDeletedAtIsNotNull(links, pageable);
+      members = memberRepository.findByLinkInAndEmailIsNotNullAndDeletedAtIsNotNull(links, pageable);
     } else {
       members = memberRepository.findByLinkInAndDeletedAtIsNull(links, pageable);
     }
