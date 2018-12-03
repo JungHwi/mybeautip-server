@@ -28,9 +28,11 @@ public class FeedAspect {
     log.debug("joinPoint: {}", joinPoint.toLongString());
 
     if (result instanceof Video) {
-    Video video = (Video) result;
-      log.debug("video: {}", video);
-      feedService.feedVideo(video);
+      Video video = (Video) result;
+      if ("PUBLIC".equals(video.getVisibility())) {
+        log.debug("video: {}", video);
+        feedService.feedVideo(video);
+      }
     }
   }
 
