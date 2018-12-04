@@ -1,11 +1,18 @@
 package com.jocoos.mybeautip.restapi;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Lists;
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.notification.Notification;
+import com.jocoos.mybeautip.notification.NotificationRepository;
 import com.jocoos.mybeautip.notification.NotificationService;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -14,18 +21,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.following.Following;
-import com.jocoos.mybeautip.member.following.FollowingRepository;
-import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.Notification;
-import com.jocoos.mybeautip.notification.NotificationRepository;
+import static com.jocoos.mybeautip.notification.Notification.*;
 
 @Slf4j
 @RestController
@@ -65,17 +67,25 @@ public class NotificationController {
     } else {
       notifications = notificationRepository.findByTargetMemberId(memberId, page);
     }
-
+    
+    String[] typeWithUsername = {FOLLOWING, VIDEO_STARTED, VIDEO_UPLOADED, VIDEO_LIKE, COMMENT, COMMENT_REPLY, COMMENT_LIKE, MENTION};
+    
     notifications
       .forEach(n -> {
-      String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
-      Optional<Following> following = followingRepository.findByMemberMeIdAndMemberYouId(n.getTargetMember().getId(), n.getResourceOwner().getId());
-      if (following.isPresent()) {
-        result.add(new NotificationInfo(n, message, following.get().getId(), memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner())));
-      } else {
-        result.add(new NotificationInfo(n, message, memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner())));
-      }
-    });
+        if (StringUtils.equalsAny(n.getType(), typeWithUsername)) {
+          if (n.getArgs().size() > 0) {
+            n.getArgs().set(0, n.getResourceOwner().getUsername());
+          }
+        }
+        
+        String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
+        Optional<Following> following = followingRepository.findByMemberMeIdAndMemberYouId(n.getTargetMember().getId(), n.getResourceOwner().getId());
+        if (following.isPresent()) {
+          result.add(new NotificationInfo(n, message, following.get().getId(), memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner())));
+        } else {
+          result.add(new NotificationInfo(n, message, memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner())));
+        }
+      });
     
     notificationService.readAllNotification(memberId);
 
