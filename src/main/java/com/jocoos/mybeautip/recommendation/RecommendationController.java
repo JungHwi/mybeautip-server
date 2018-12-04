@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.restapi.CursorResponse;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.video.Video;
@@ -14,7 +15,10 @@ import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -42,6 +46,7 @@ public class RecommendationController {
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
+  private final MotdRecommendationBaseRepository motdRecommendationBaseRepository;
   private final KeywordRecommendationRepository keywordRecommendationRepository;
   
   private final int SEQ_START = 1;
@@ -55,6 +60,7 @@ public class RecommendationController {
                                   MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository,
                                   MotdRecommendationRepository motdRecommendationRepository,
+                                  MotdRecommendationBaseRepository motdRecommendationBaseRepository,
                                   KeywordRecommendationRepository keywordRecommendationRepository) {
     this.goodsService = goodsService;
     this.memberServie = memberServie;
@@ -64,6 +70,7 @@ public class RecommendationController {
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
+    this.motdRecommendationBaseRepository = motdRecommendationBaseRepository;
     this.keywordRecommendationRepository = keywordRecommendationRepository;
   }
 
@@ -131,12 +138,49 @@ public class RecommendationController {
     Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
       PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "seq")));
 
+    return new ResponseEntity<>(createMotdList(videos), HttpStatus.OK);
+  }
+
+  private List<RecommendedMotdInfo> createMotdList(Iterable<MotdRecommendation> recommendations) {
     List<RecommendedMotdInfo> info = new ArrayList<>();
-    for (MotdRecommendation recommendation : videos) {
+    for (MotdRecommendation recommendation : recommendations) {
       info.add(new RecommendedMotdInfo(recommendation, videoService.generateVideoInfo(recommendation.getVideo())));
     }
-    return new ResponseEntity<>(info, HttpStatus.OK);
+    return info;
   }
+
+  @GetMapping("/motd-bases")
+  public CursorResponse getBaseRecommendedMotds(
+     @RequestParam(defaultValue = "10") int count,
+     @RequestParam(defaultValue = "desc") String direction,
+     @RequestParam(required = false) Long cursor) {
+
+    Date createDate = null;
+    if (cursor != null) {
+      createDate = new Date(cursor);
+    } else {
+      createDate = new Date();
+    }
+
+    Slice<MotdRecommendationBase> videos = motdRecommendationBaseRepository.findByBaseDateBefore(createDate,
+       PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "baseDate")));
+
+    List<RecommendedMotdBaseInfo> result = new ArrayList<>();
+    for (MotdRecommendationBase recommendation : videos) {
+      result.add(new RecommendedMotdBaseInfo(recommendation, createMotdList(recommendation.getMotds())));
+    }
+
+    String nextCursor = null;
+    if (!CollectionUtils.isEmpty(result)) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getBaseDate().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/recommendations/motd-bases", result)
+       .withCount(count)
+       .withCursor(nextCursor)
+       .toBuild();
+  }
+
 
   @GetMapping("/keywords")
   public ResponseEntity<List<KeywordInfo>> getRecommendedKeywords(
@@ -197,6 +241,19 @@ public class RecommendationController {
     RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo video) {
       BeanUtils.copyProperties(recommendation, this);
       this.content = video;
+    }
+  }
+
+  @Data
+  private static class RecommendedMotdBaseInfo {
+    private Date baseDate;
+    private List<RecommendedMotdInfo> motds;
+    private Date createdAt;
+    private VideoController.VideoInfo content;
+
+    RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase, List<RecommendedMotdInfo> motds) {
+      BeanUtils.copyProperties(motdRecommendationBase, this);
+      this.motds = motds;
     }
   }
 }

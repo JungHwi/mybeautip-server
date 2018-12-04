@@ -6,8 +6,15 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 
+@EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
+@Data
 @Entity
 @Table(name = "recommended_motd_bases")
 public class MotdRecommendationBase extends CreatedDateAuditable {
