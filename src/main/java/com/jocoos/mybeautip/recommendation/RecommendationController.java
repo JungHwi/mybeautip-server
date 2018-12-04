@@ -125,9 +125,11 @@ public class RecommendationController {
 
   @GetMapping("/motds")
   public ResponseEntity<List<RecommendedMotdInfo>> getRecommendedMotds(
-    @RequestParam(defaultValue = "100") int count) {
+    @RequestParam(defaultValue = "100") int count,
+    @RequestParam(defaultValue = "desc") String direction) {
+
     Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
-      PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+      PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "seq")));
 
     List<RecommendedMotdInfo> info = new ArrayList<>();
     for (MotdRecommendation recommendation : videos) {
