@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
 import com.jocoos.mybeautip.notification.NotificationRepository;
@@ -125,6 +126,7 @@ public class NotificationController {
     private String message;
     private Date createdAt;
     private Long followId;
+    private List<MentionTag> mentionInfo;
 
     public NotificationInfo(Notification notification, String message, MemberInfo targetMember, MemberInfo resourceOwner) {
       BeanUtils.copyProperties(notification, this);
