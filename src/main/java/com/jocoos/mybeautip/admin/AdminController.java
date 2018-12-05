@@ -1,9 +1,11 @@
 package com.jocoos.mybeautip.admin;
 
+import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
@@ -34,10 +38,10 @@ import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
-import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.store.StoreRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 
@@ -45,6 +49,8 @@ import com.jocoos.mybeautip.video.report.VideoReportRepository;
 @RestController
 @RequestMapping("/api/admin/manual")
 public class AdminController {
+  private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd HHmmss");
+  private static final SimpleDateFormat BASE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 
   private final PostRepository postRepository;
   private final BannerRepository bannerRepository;
@@ -53,11 +59,12 @@ public class AdminController {
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
+  private final MotdRecommendationBaseRepository motdRecommendationBaseRepository;
   private final ReportRepository reportRepository;
   private final StoreRepository storeRepository;
   private final VideoRepository videoRepository;
   private final VideoReportRepository videoReportRepository;
-  private final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
+  private final VideoService videoService;
 
   public AdminController(PostRepository postRepository,
                          BannerRepository bannerRepository,
@@ -66,10 +73,11 @@ public class AdminController {
                          MemberRecommendationRepository memberRecommendationRepository,
                          GoodsRecommendationRepository goodsRecommendationRepository,
                          MotdRecommendationRepository motdRecommendationRepository,
+                         MotdRecommendationBaseRepository motdRecommendationBaseRepository,
                          ReportRepository reportRepository,
                          StoreRepository storeRepository,
                          VideoRepository videoRepository,
-                         VideoReportRepository videoReportRepository) {
+                         VideoReportRepository videoReportRepository, VideoService videoService) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
@@ -77,10 +85,12 @@ public class AdminController {
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
+    this.motdRecommendationBaseRepository = motdRecommendationBaseRepository;
     this.reportRepository = reportRepository;
     this.storeRepository = storeRepository;
     this.videoRepository = videoRepository;
     this.videoReportRepository = videoReportRepository;
+    this.videoService = videoService;
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -102,12 +112,8 @@ public class AdminController {
     BeanUtils.copyProperties(request, banner);
     log.debug("banner: {}", banner);
 
-    try {
-      banner.setStartedAt(df.parse(request.getStartedAt()));
-      banner.setEndedAt(df.parse(request.getEndedAt()));
-    } catch (ParseException e) {
-      log.error("invalid date format", e);
-    }
+    banner.setStartedAt(getRecommendedDate(request.getStartedAt()));
+    banner.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
     bannerRepository.save(banner);
 
@@ -228,14 +234,8 @@ public class AdminController {
 
     return memberRepository.findByIdAndDeletedAtIsNull(request.getMemberId()).map(m -> {
       recommendation.setMember(m);
-
-      try {
-        recommendation.setStartedAt(df.parse(request.getStartedAt()));
-        recommendation.setEndedAt(df.parse(request.getEndedAt()));
-      } catch (ParseException e) {
-        log.error("invalid date format", e);
-      }
-
+      recommendation.setStartedAt(getRecommendedDate(request.getStartedAt()));
+      recommendation.setEndedAt(getRecommendedDate(request.getEndedAt()));
       log.debug("recommended member: {}", recommendation);
       memberRecommendationRepository.save(recommendation);
 
@@ -310,13 +310,8 @@ public class AdminController {
     return goodsRepository.findByGoodsNo(request.getGoodsNo()).map(g -> {
       recommendation.setGoods(g);
       recommendation.setGoodsNo(g.getGoodsNo());
-
-      try {
-        recommendation.setStartedAt(df.parse(request.getStartedAt()));
-        recommendation.setEndedAt(df.parse(request.getEndedAt()));
-      } catch (ParseException e) {
-        log.error("invalid date format", e);
-      }
+      recommendation.setStartedAt(getRecommendedDate(request.getStartedAt()));
+      recommendation.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
       log.debug("recommended goods: {}", recommendation);
       goodsRecommendationRepository.save(recommendation);
@@ -339,8 +334,9 @@ public class AdminController {
        }).orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
   }
 
+  @Transactional
   @PostMapping("/recommendedMotds")
-  public ResponseEntity<RecommendedMotdInfo> createRecommendedMotd(
+  public ResponseEntity<RecommendationController.RecommendedMotdBaseInfo> createRecommendedMotd(
     @RequestBody CreateRecommendedMotdRequest request) {
     log.debug("request: {}", request);
 
@@ -354,22 +350,83 @@ public class AdminController {
     return videoRepository.findByIdAndDeletedAtIsNull(request.getVideoId())
        .map(v -> {
          recommendation.setVideo(v);
-         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd HHmmss");
-         try {
-           recommendation.setStartedAt(df.parse(request.getStartedAt()));
-           recommendation.setEndedAt(df.parse(request.getEndedAt()));
-         } catch (ParseException e) {
-           log.error("invalid date format", e);
+         recommendation.setStartedAt(getRecommendedDate(request.getStartedAt()));
+         recommendation.setEndedAt(getRecommendedDate(request.getEndedAt()));
+
+         Date baseDate = getBaseDate(request.getStartedAt());
+         log.debug("baseDate: {}", baseDate);
+
+         Optional<MotdRecommendationBase> base = motdRecommendationBaseRepository.findByBaseDate(baseDate);
+         MotdRecommendationBase newBase = null;
+         if (base.isPresent()) {
+           newBase = base.get();
+           motdRecommendationBaseRepository.updateMotdCount(base.get().getId(), 1);
+
+         } else {
+           newBase = new MotdRecommendationBase();
+           newBase.setBaseDate(baseDate);
+           newBase.setMotdCount(1);
+           motdRecommendationBaseRepository.save(newBase);
          }
 
-         log.debug("recommended motd: {}", recommendation);
+         recommendation.setBaseId(newBase.getId());
          motdRecommendationRepository.save(recommendation);
 
-         RecommendedMotdInfo info = new RecommendedMotdInfo();
+         RecommendationController.RecommendedMotdBaseInfo info =
+            new RecommendationController.RecommendedMotdBaseInfo(newBase);
          BeanUtils.copyProperties(recommendation, info);
          return new ResponseEntity<>(info, HttpStatus.OK);
        }).orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id"));
   }
+
+
+  @Transactional
+  @DeleteMapping("/recommendedMotds/{videoId:.+}")
+  public ResponseEntity deleteRecommendedMotds(@PathVariable Long videoId) {
+    log.debug("deleted motd video id: {}", videoId);
+
+    return motdRecommendationRepository.findByVideoId(videoId)
+       .map(r -> {
+         motdRecommendationRepository.delete(r);
+         motdRecommendationBaseRepository.findById(r.getBaseId())
+          .ifPresent(b -> {
+            if (b.getMotdCount() == 1) {
+              motdRecommendationBaseRepository.delete(b);
+            } else {
+              motdRecommendationBaseRepository.updateMotdCount(b.getId(), -1);
+            }
+          });
+         return new ResponseEntity(HttpStatus.NO_CONTENT);
+       })
+       .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id"));
+  }
+
+  private List<RecommendationController.RecommendedMotdInfo> createMotdList(Iterable<MotdRecommendation> recommendations) {
+    List<RecommendationController.RecommendedMotdInfo> info = new ArrayList<>();
+    for (MotdRecommendation recommendation : recommendations) {
+      info.add(new RecommendationController.RecommendedMotdInfo(recommendation, videoService.generateVideoInfo(recommendation.getVideo())));
+    }
+    return info;
+  }
+
+  private Date getRecommendedDate(String date) {
+    try {
+      return RECOMMENDED_DATE_FORMAT.parse(date);
+    } catch (ParseException e) {
+      log.error("invalid recommended date format", e);
+      throw new BadRequestException("invalid date format", e.getMessage() + " - " + date);
+    }
+  }
+
+  private Date getBaseDate(String date) {
+    try {
+      return BASE_DATE_FORMAT.parse(date);
+    } catch (ParseException e) {
+      log.error("invalid base date format", e);
+      throw new BadRequestException("invalid date format", e.getMessage() + " - " + date);
+    }
+  }
+
 
   @GetMapping("/motdDetails")
   public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
@@ -398,7 +455,7 @@ public class AdminController {
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size) {
 
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.ASC, "seq"));;
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "seq"));;
     Page<MotdRecommendation> videos = motdRecommendationRepository.findByVideoDeletedAtIsNull(pageable);
 
     Page<MotdDetailInfo> details = videos.map(v -> {
@@ -493,15 +550,5 @@ public class AdminController {
     private int seq;
     private String startedAt;
     private String endedAt;
-  }
-
-  @Data
-  private static class RecommendedMotdInfo {
-    private Long id;
-    private VideoController.VideoInfo video;
-    private Long createdBy;
-    private Date createdAt;
-    private Date startedAt;
-    private Date endedAt;
   }
 }
