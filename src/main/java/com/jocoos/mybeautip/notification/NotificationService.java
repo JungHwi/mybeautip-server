@@ -15,6 +15,7 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -30,6 +31,9 @@ public class NotificationService {
   private final FollowingRepository followingRepository;
   private final NotificationRepository notificationRepository;
   private final MemberRepository memberRepository;
+  
+  @Value("${mybeautip.notification.duplicate-limit-duration}")
+  private int duration;
 
   public NotificationService(DeviceService deviceService,
                              VideoRepository videoRepository,
@@ -70,10 +74,19 @@ public class NotificationService {
        following.getMemberYou().getId(), following.getMemberMe().getId())
          .map(f -> new Notification(following, f.getId()))
          .orElseGet(() -> new Notification(following, null));
-
-    Notification n = notificationRepository.save(notification);
-    log.debug("notification: {}", n);
-    deviceService.push(n);
+    
+    int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
+        Notification.FOLLOWING,
+        notification.getTargetMember(),
+        notification.getResourceId(),
+        notification.getResourceOwner(),
+        new Date(System.currentTimeMillis() - duration));
+    
+    if (count == 0) {
+      Notification n = notificationRepository.save(notification);
+      log.debug("notification: {}", n);
+      deviceService.push(n);
+    }
   }
 
   public void notifyAddComment(Comment comment) {
@@ -136,23 +149,52 @@ public class NotificationService {
       if (commentLike.getComment().getVideoId() != null) {
         Video video = videoRepository.findById(commentLike.getComment().getVideoId())
             .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + commentLike.getComment().getVideoId()));
-        n = notificationRepository.save(new Notification(video, commentLike, commentLike.getComment().getComment()));
+  
+        int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
+            Notification.COMMENT_LIKE,
+            commentLike.getComment().getCreatedBy(),
+            commentLike.getComment().getId(),
+            commentLike.getCreatedBy(),
+            new Date(System.currentTimeMillis() - duration));
+        
+        if (count == 0) {
+          n = notificationRepository.save(new Notification(video, commentLike, commentLike.getComment().getComment()));
+          deviceService.push(n);
+        }
       }
 
       if (commentLike.getComment().getPostId() != null) {
         Post post = postRepository.findById(commentLike.getComment().getPostId())
             .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + commentLike.getComment().getPostId()));
-        n = notificationRepository.save(new Notification(post, commentLike, commentLike.getComment().getComment()));
+  
+        int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
+            Notification.COMMENT_LIKE,
+            commentLike.getComment().getCreatedBy(),
+            commentLike.getComment().getId(),
+            commentLike.getCreatedBy(),
+            new Date(System.currentTimeMillis() - duration));
+  
+        if (count == 0) {
+          n = notificationRepository.save(new Notification(post, commentLike, commentLike.getComment().getComment()));
+          deviceService.push(n);
+        }
       }
-
-      deviceService.push(n);
     }
   }
 
   public void notifyAddVideoLike(VideoLike videoLike) {
     if (!(videoLike.getCreatedBy().getId().equals(videoLike.getVideo().getMember().getId()))) {
-      Notification n = notificationRepository.save(new Notification(videoLike, videoLike.getCreatedBy()));
-      deviceService.push(n);
+      int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
+          Notification.VIDEO_LIKE,
+          videoLike.getVideo().getMember(),
+          videoLike.getVideo().getId(),
+          videoLike.getCreatedBy(),
+          new Date(System.currentTimeMillis() - duration));
+      
+      if (count == 0) {
+        Notification n = notificationRepository.save(new Notification(videoLike, videoLike.getCreatedBy()));
+        deviceService.push(n);
+      }
     }
   }
 
