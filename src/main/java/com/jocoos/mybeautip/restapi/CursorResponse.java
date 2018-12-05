@@ -112,7 +112,7 @@ public class CursorResponse<E> {
       }
       int count = (countValue == null) ? 0 : Integer.parseInt(countValue);
 
-      if (this.content.size() >= count) {
+      if (this.content.size() >= count && uri != null) {
         createRef();
         log.debug("created nextRef: {}", nextRef);
       } else {
