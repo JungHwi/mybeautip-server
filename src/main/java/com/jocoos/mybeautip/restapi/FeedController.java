@@ -40,7 +40,7 @@ public class FeedController {
   
     if (me.getFollowingCount() == 0) {
       List<VideoController.VideoInfo> videos = Lists.newArrayList();
-      videoService.findVideos(null, null, null, 30)
+      videoService.findVideos(null, null, null, count)
           .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
       return new CursorResponse.Builder<>(null, videos).toBuild();
     }
