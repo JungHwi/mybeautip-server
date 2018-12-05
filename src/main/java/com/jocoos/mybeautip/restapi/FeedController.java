@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import java.util.List;
 
+import com.jocoos.mybeautip.member.Member;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,8 +36,16 @@ public class FeedController {
   @GetMapping
   public CursorResponse getFeeds(@RequestParam(defaultValue = "20") int count,
                                  @RequestParam(required = false) String cursor) {
-    Long memberId = memberService.currentMemberId();
-    List<Video> videos = feedService.getVideoKeys(memberId, cursor, count);
+    Member me = memberService.currentMember();
+  
+    if (me.getFollowingCount() == 0) {
+      List<VideoController.VideoInfo> videos = Lists.newArrayList();
+      videoService.findVideos(null, null, null, 30)
+          .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+      return new CursorResponse.Builder<>(null, videos).toBuild();
+    }
+    
+    List<Video> videos = feedService.getVideoKeys(me.getId(), cursor, count);
 
     List<String> videoKeys = Lists.newArrayList();
     if (videos != null && videos.size() > 0) {
