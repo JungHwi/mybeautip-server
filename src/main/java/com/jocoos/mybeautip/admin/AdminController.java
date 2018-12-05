@@ -551,14 +551,4 @@ public class AdminController {
     private String startedAt;
     private String endedAt;
   }
-
-//  @Data
-//  private static class RecommendedMotdInfo {
-//    private Long id;
-//    private VideoController.VideoInfo video;
-//    private Long createdBy;
-//    private Date createdAt;
-//    private Date startedAt;
-//    private Date endedAt;
-//  }
 }
