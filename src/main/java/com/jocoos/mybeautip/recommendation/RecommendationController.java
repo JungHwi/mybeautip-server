@@ -233,26 +233,30 @@ public class RecommendationController {
   }
   
   @Data
-  private static class RecommendedMotdInfo {
+  public static class RecommendedMotdInfo {
     private Integer seq;
     private Date createdAt;
     private VideoController.VideoInfo content;
-  
-    RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo video) {
+
+    public RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo video) {
       BeanUtils.copyProperties(recommendation, this);
       this.content = video;
     }
   }
 
   @Data
-  private static class RecommendedMotdBaseInfo {
+  public static class RecommendedMotdBaseInfo {
     private Date baseDate;
     private List<RecommendedMotdInfo> motds;
     private Date createdAt;
     private VideoController.VideoInfo content;
 
-    RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase, List<RecommendedMotdInfo> motds) {
+    public RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase) {
       BeanUtils.copyProperties(motdRecommendationBase, this);
+    }
+
+    public RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase, List<RecommendedMotdInfo> motds) {
+      this(motdRecommendationBase);
       this.motds = motds;
     }
   }
