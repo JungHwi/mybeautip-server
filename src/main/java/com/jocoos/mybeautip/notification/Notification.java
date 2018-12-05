@@ -171,7 +171,7 @@ public class Notification {
     this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
 
-  public Notification(Video video, Comment comment, String commentStr, Long parentId, Member target, String thumbnail) {
+  public Notification(Video video, Comment comment, Long parentId, Member target, String thumbnail) {
     this.type = COMMENT_REPLY;
     this.targetMember = target;
     this.read = false;
@@ -180,10 +180,10 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", video.getId(), comment.getParentId(), comment.getId());
     this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), commentStr);
+    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
   
-  public Notification(Post post, Comment comment, String commentStr, Long parentId, Member target, String thumbnail) {
+  public Notification(Post post, Comment comment, Long parentId, Member target, String thumbnail) {
     this.type = COMMENT_REPLY;
     this.targetMember = target;
     this.read = false;
@@ -192,7 +192,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", post.getId(), comment.getParentId(), comment.getId());
     this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), commentStr);
+    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
 
   public Notification(Video video, CommentLike commentLike, String commentStr) {
