@@ -34,6 +34,9 @@ public class MotdRecommendation extends MemberAuditable {
   @LastModifiedDate
   private Date modifiedAt;
 
+  @Column(nullable = false)
+  private Long baseId;
+
   @Column
   private Date startedAt;
 
