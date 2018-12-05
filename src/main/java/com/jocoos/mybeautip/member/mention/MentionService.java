@@ -50,8 +50,9 @@ public class MentionService {
 
           Optional<Member> member = memberRepository.findById(tag.getMemberId());
           if (member.isPresent()) {
-            notificationService.notifyAddComment(postComment, member.get());
             comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
+            postComment.setComment(comment);
+            notificationService.notifyAddCommentWithMention(postComment, member.get());
             log.debug("mentioned comment: {}", comment);
           }
         }
@@ -82,8 +83,9 @@ public class MentionService {
 
           Optional<Member> member = memberRepository.findById(tag.getMemberId());
           if (member.isPresent()) {
-            notificationService.notifyAddComment(videoComment, member.get());
             comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
+            videoComment.setComment(comment);
+            notificationService.notifyAddCommentWithMention(videoComment, member.get());
             log.debug("mentioned comment: {}", comment);
           }
         }

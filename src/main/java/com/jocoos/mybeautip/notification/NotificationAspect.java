@@ -66,17 +66,6 @@ public class NotificationAspect {
     }
   }
 
-  @After(value = "execution(* com.jocoos.mybeautip.member.comment.CommentService.save(..))")
-  public void onAfterSaveComment(JoinPoint joinPoint) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-    Object o = joinPoint.getArgs()[0];
-    if (o instanceof Comment) {
-      Comment comment = (Comment) o;
-      log.debug("comment: {}", comment);
-      notificationService.notifyAddComment(comment);
-    }
-  }
-
   @After(value = "execution(* com.jocoos.mybeautip.video.VideoLikeRepository.save(..))")
   public void onAfterSaveVideoLike(JoinPoint joinPoint) {
     log.debug("joinPoint: {}", joinPoint.toLongString());

@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.notification.NotificationService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -69,6 +70,7 @@ public class VideoController {
   private final MentionService mentionService;
   private final RevenueService revenueService;
   private final TagService tagService;
+  private final NotificationService notificationService;
   private final RevenueRepository revenueRepository;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
@@ -95,6 +97,7 @@ public class VideoController {
                          MentionService mentionService,
                          RevenueService revenueService,
                          TagService tagService,
+                         NotificationService notificationService,
                          RevenueRepository revenueRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
@@ -112,6 +115,7 @@ public class VideoController {
     this.mentionService = mentionService;
     this.revenueService = revenueService;
     this.tagService = tagService;
+    this.notificationService = notificationService;
     this.revenueRepository = revenueRepository;
   }
 
@@ -271,6 +275,8 @@ public class VideoController {
     List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {
       mentionService.updateVideoCommentWithMention(comment, mentionTags);
+    } else {
+      notificationService.notifyAddComment(comment);
     }
 
     return new ResponseEntity<>(

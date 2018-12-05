@@ -53,5 +53,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   Page<Member> findByDeletedAtIsNotNull(Pageable pageable);
 
-  Page<Member> findByLinkInAndDeletedAtIsNotNull(Collection<Integer> links, Pageable pageable);
+  Page<Member> findByLinkInAndEmailIsNotNullAndDeletedAtIsNotNull(Collection<Integer> links, Pageable pageable);
 }

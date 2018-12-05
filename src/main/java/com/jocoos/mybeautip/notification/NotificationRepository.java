@@ -21,4 +21,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   int countByTargetMemberAndReadIsFalse(Member member);
   
   List<Notification> findByTargetMemberIdAndReadIsFalse(Long targetMember);
+  
+  int countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(String type, Member targetMember, Long resourceId, Member resourceOwner, Date createdAt);
 }

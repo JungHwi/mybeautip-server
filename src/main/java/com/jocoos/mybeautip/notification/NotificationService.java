@@ -9,22 +9,17 @@ import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
-import com.jocoos.mybeautip.member.mention.MentionResult;
-import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -36,6 +31,9 @@ public class NotificationService {
   private final FollowingRepository followingRepository;
   private final NotificationRepository notificationRepository;
   private final MemberRepository memberRepository;
+  
+  @Value("${mybeautip.notification.duplicate-limit-duration}")
+  private int duration;
 
   public NotificationService(DeviceService deviceService,
                              VideoRepository videoRepository,
@@ -76,10 +74,19 @@ public class NotificationService {
        following.getMemberYou().getId(), following.getMemberMe().getId())
          .map(f -> new Notification(following, f.getId()))
          .orElseGet(() -> new Notification(following, null));
-
-    Notification n = notificationRepository.save(notification);
-    log.debug("notification: {}", n);
-    deviceService.push(n);
+    
+    int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
+        Notification.FOLLOWING,
+        notification.getTargetMember(),
+        notification.getResourceId(),
+        notification.getResourceOwner(),
+        new Date(System.currentTimeMillis() - duration));
+    
+    if (count == 0) {
+      Notification n = notificationRepository.save(notification);
+      log.debug("notification: {}", n);
+      deviceService.push(n);
+    }
   }
 
   public void notifyAddComment(Comment comment) {
@@ -98,7 +105,7 @@ public class NotificationService {
          Notification n = null;
          if (comment.getParentId() != null) {
            Member parent = findCommentMemberByParentId(comment.getParentId());
-           n = notificationRepository.save(new Notification(post, comment, getCommentStr(comment), comment.getParentId(), parent, post.getThumbnailUrl()));
+           n = notificationRepository.save(new Notification(post, comment, comment.getParentId(), parent, post.getThumbnailUrl()));
          } else {
            if (!(comment.getCreatedBy().getId().equals(post.getCreatedBy().getId()))) {
              n = notificationRepository.save(new Notification(post, comment, post.getCreatedBy(), post.getThumbnailUrl()));
@@ -117,7 +124,7 @@ public class NotificationService {
          Notification n = null;
          if (comment.getParentId() != null) {
            Member parent = findCommentMemberByParentId(comment.getParentId());
-           n = notificationRepository.save(new Notification(v, comment, getCommentStr(comment), comment.getParentId(), parent, v.getThumbnailUrl()));
+           n = notificationRepository.save(new Notification(v, comment, comment.getParentId(), parent, v.getThumbnailUrl()));
          } else {
            if (!(comment.getCreatedBy().getId().equals(v.getMember().getId()))) {
              n = notificationRepository.save(new Notification(v, comment, v.getMember(), v.getThumbnailUrl()));
@@ -142,27 +149,56 @@ public class NotificationService {
       if (commentLike.getComment().getVideoId() != null) {
         Video video = videoRepository.findById(commentLike.getComment().getVideoId())
             .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + commentLike.getComment().getVideoId()));
-        n = notificationRepository.save(new Notification(video, commentLike, getCommentStr(commentLike.getComment())));
+  
+        int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
+            Notification.COMMENT_LIKE,
+            commentLike.getComment().getCreatedBy(),
+            commentLike.getComment().getId(),
+            commentLike.getCreatedBy(),
+            new Date(System.currentTimeMillis() - duration));
+        
+        if (count == 0) {
+          n = notificationRepository.save(new Notification(video, commentLike, commentLike.getComment().getComment()));
+          deviceService.push(n);
+        }
       }
 
       if (commentLike.getComment().getPostId() != null) {
         Post post = postRepository.findById(commentLike.getComment().getPostId())
             .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + commentLike.getComment().getPostId()));
-        n = notificationRepository.save(new Notification(post, commentLike, getCommentStr(commentLike.getComment())));
+  
+        int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
+            Notification.COMMENT_LIKE,
+            commentLike.getComment().getCreatedBy(),
+            commentLike.getComment().getId(),
+            commentLike.getCreatedBy(),
+            new Date(System.currentTimeMillis() - duration));
+  
+        if (count == 0) {
+          n = notificationRepository.save(new Notification(post, commentLike, commentLike.getComment().getComment()));
+          deviceService.push(n);
+        }
       }
-
-      deviceService.push(n);
     }
   }
 
   public void notifyAddVideoLike(VideoLike videoLike) {
     if (!(videoLike.getCreatedBy().getId().equals(videoLike.getVideo().getMember().getId()))) {
-      Notification n = notificationRepository.save(new Notification(videoLike, videoLike.getCreatedBy()));
-      deviceService.push(n);
+      int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
+          Notification.VIDEO_LIKE,
+          videoLike.getVideo().getMember(),
+          videoLike.getVideo().getId(),
+          videoLike.getCreatedBy(),
+          new Date(System.currentTimeMillis() - duration));
+      
+      if (count == 0) {
+        Notification n = notificationRepository.save(new Notification(videoLike, videoLike.getCreatedBy()));
+        deviceService.push(n);
+      }
     }
   }
 
-  public void notifyAddComment(Comment comment, Member... mentioned) {
+  public void notifyAddCommentWithMention(Comment comment, Member... mentioned) {
     if (comment.getPostId() == null && comment.getVideoId() == null) {
       log.error("A comment has any post or video id. {}", comment);
     }
@@ -217,40 +253,5 @@ public class NotificationService {
           notification.setRead(true);
           notificationRepository.save(notification);
         });
-  }
-  
-  // Return comment with mention info
-  private String getCommentStr(Comment comment) {
-    String commentStr = comment.getComment();
-    if (comment.getComment().contains("@")) {
-      MentionResult mentionResult = new MentionResult();
-  
-      List<String> mentions = findMentionTags(commentStr);
-      for (String memberId : mentions) {
-        log.debug("member: {}", memberId);
-    
-        if (StringUtils.isNumeric(memberId)) {
-          Optional<Member> member = memberRepository.findById(Long.parseLong(memberId));
-          if (member.isPresent()) {
-            Member m = member.get();
-            mentionResult.add(new MentionTag(m));
-            commentStr = commentStr.replaceAll(createMentionTag(m.getId()), createMentionTag(m.getUsername()));
-          }
-        }
-      }
-    }
-    return commentStr;
-  }
-  
-  private String createMentionTag(Object username) {
-    StringBuilder sb = new StringBuilder("@");
-    return sb.append(username).toString();
-  }
-  
-  private List<String> findMentionTags(String comment) {
-    return Arrays.stream(comment.split(" "))
-        .filter(c -> c.startsWith("@"))
-        .map(c -> c.substring(1))
-        .collect(Collectors.toList());
   }
 }
