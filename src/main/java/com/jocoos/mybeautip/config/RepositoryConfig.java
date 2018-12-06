@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.config;
 
+import com.jocoos.mybeautip.app.AppInfo;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.order.Purchase;
@@ -26,6 +27,6 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
     config.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class, Order.class,
         Category.class, DeliveryCharge.class, DeliveryChargeDetail.class, Store.class,
         Goods.class, GoodsOption.class, VideoReport.class, Report.class, Post.class, Purchase.class,
-       MemberCoupon.class, MemberPoint.class, MotdRecommendationBase.class);
+       MemberCoupon.class, MemberPoint.class, MotdRecommendationBase.class, AppInfo.class);
   }
 }
