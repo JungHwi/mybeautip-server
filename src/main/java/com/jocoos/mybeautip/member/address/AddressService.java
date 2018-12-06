@@ -47,7 +47,11 @@ public class AddressService {
     Optional<Address> optional = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId());
     if (optional.isPresent()) {
       Address address = optional.get();
+      boolean originalBase = address.getBase();
       BeanUtils.copyProperties(update, address);
+      if (update.getBase() == null) {
+        address.setBase(originalBase);
+      }
       address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
       return addressRepository.save(address);
     } else {

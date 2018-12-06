@@ -25,7 +25,7 @@ public class Address extends MemberAuditable {
   private Long id;
 
   @Column(nullable = false)
-  private boolean base;
+  private Boolean base;
 
   @Column(nullable = false)
   private String title;
