@@ -236,13 +236,13 @@ public class RecommendationController {
   public static class RecommendedMotdInfo {
     private Integer seq;
     private Date createdAt;
-    private VideoController.VideoInfo video;
+    private VideoController.VideoInfo content;
     private Date startedAt;
     private Date endedAt;
 
-    public RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo video) {
+    public RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo content) {
       BeanUtils.copyProperties(recommendation, this);
-      this.video = video;
+      this.content = content;
     }
   }
 
