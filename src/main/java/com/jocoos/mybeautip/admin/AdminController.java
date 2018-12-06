@@ -20,10 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
@@ -451,23 +450,28 @@ public class AdminController {
   }
 
   @GetMapping("/recommendedMotdDetails")
-  public ResponseEntity<Page<MotdDetailInfo>> getRecommendedMotdDetails(
+  public ResponseEntity<Page<RecommendationController.RecommendedMotdBaseInfo>> getRecommendedMotdDetails(
      @RequestParam(defaultValue = "0") int page,
-     @RequestParam(defaultValue = "10") int size) {
+     @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "desc") String direction) {
 
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "seq"));;
-    Page<MotdRecommendation> videos = motdRecommendationRepository.findByVideoDeletedAtIsNull(pageable);
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "baseDate"));
+    Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findAll(pageable);
 
-    Page<MotdDetailInfo> details = videos.map(v -> {
-      MotdDetailInfo info = new MotdDetailInfo(v.getVideo());
-      info.setRecommendation(v);
-
-      Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getVideo().getId(), PageRequest.of(0, 1));
-      info.setReportCount(reports.getTotalElements());
+    Page<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
+      RecommendationController.RecommendedMotdBaseInfo info = new RecommendationController.RecommendedMotdBaseInfo(b, createRecommendedMotd(b));
       return info;
     });
 
     return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  private List<RecommendationController.RecommendedMotdInfo> createRecommendedMotd(MotdRecommendationBase base) {
+    List<RecommendationController.RecommendedMotdInfo> motds = Lists.newArrayList();
+    for (MotdRecommendation m : base.getMotds()) {
+      motds.add(new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
+    }
+    return motds;
   }
 
   @Data
