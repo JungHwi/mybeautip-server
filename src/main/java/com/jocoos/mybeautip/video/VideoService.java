@@ -22,6 +22,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Optional;
 
@@ -223,12 +224,12 @@ public class VideoService {
     return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
   }
 
+  @Transactional
   public VideoController.VideoInfo setWatcher(Long id, Member me, String lang) {
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .map(v -> {
         if ("live".equalsIgnoreCase(v.getState())) {
-          Optional<VideoWatch> optional;
-          optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());
+          Optional<VideoWatch> optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());
           if (optional.isPresent()) {
             optional.get().setModifiedAt(new Date());
             videoWatchRepository.save(optional.get());
@@ -244,6 +245,7 @@ public class VideoService {
     return generateVideoInfo(video);
   }
 
+  @Transactional
   public VideoController.VideoInfo setWatcherWithGuest(Long id, String guestUsername, String lang) {
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .map(v -> {
