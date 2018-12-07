@@ -102,4 +102,22 @@ public class Video {
 
   @Column
   public Date deletedAt;
+  
+  public Video(Member owner) {
+    this.member = owner;
+    this.videoKey = "";
+    this.state = "CREATED";
+    this.url = "";
+    this.thumbnailPath = "";
+    this.thumbnailUrl = "";
+    this.relatedGoodsCount = 0;
+    this.relatedGoodsThumbnailUrl = "";
+    this.commentCount = 0;
+    this.heartCount = 0;
+    this.likeCount = 0;
+    this.watchCount = 0;
+    this.totalWatchCount = 0;
+    this.viewCount = 0;
+    this.orderCount = 0;
+  }
 }

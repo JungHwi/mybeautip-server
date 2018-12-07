@@ -9,7 +9,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import org.springframework.beans.BeanUtils;
@@ -72,6 +76,9 @@ public class VideoController {
   private final TagService tagService;
   private final NotificationService notificationService;
   private final RevenueRepository revenueRepository;
+  private final GoodsRepository goodsRepository;
+  private final MemberRepository memberRepository;
+  private final ObjectMapper objectMapper;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
@@ -98,7 +105,10 @@ public class VideoController {
                          RevenueService revenueService,
                          TagService tagService,
                          NotificationService notificationService,
-                         RevenueRepository revenueRepository) {
+                         RevenueRepository revenueRepository,
+                         GoodsRepository goodsRepository,
+                         MemberRepository memberRepository,
+                         ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.messageService = messageService;
@@ -117,6 +127,58 @@ public class VideoController {
     this.tagService = tagService;
     this.notificationService = notificationService;
     this.revenueRepository = revenueRepository;
+    this.goodsRepository = goodsRepository;
+    this.memberRepository = memberRepository;
+    this.objectMapper = objectMapper;
+  }
+  
+  @Transactional
+  @PostMapping
+  public VideoInfo createVideo(@Valid @RequestBody CreateVideoRequest request,
+                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    log.info("callback createVideo: {}", request.toString());
+
+    Video video = new Video(memberService.currentMember());
+    BeanUtils.copyProperties(request, video);
+    
+    if (StringUtils.isNotEmpty(video.getContent())) {
+      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
+      try {
+        video.setTagInfo(objectMapper.writeValueAsString(tags));
+      } catch (JsonProcessingException e) {
+        log.warn("tag parsing failed, tags: ", tags.toString());
+      }
+    }
+    Video createdVideo = videoRepository.save(video); // do not notify
+    
+    // Set related goods info
+    if (StringUtils.isNotEmpty(request.getData())) {
+      String[] userData = StringUtils.deleteWhitespace(request.getData()).split(",");
+      List<VideoGoods> videoGoods = new ArrayList<>();
+      for (String goods : userData) {
+        if (goods.length() != 10) { // invalid goodsNo
+          continue;
+        }
+        goodsRepository.findByGoodsNo(goods).map(g -> {
+          videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
+          return Optional.empty();
+        });
+      }
+      
+      if (videoGoods.size() > 0) {
+        videoGoodsRepository.saveAll(videoGoods);
+        
+        // Set related goods count & one thumbnail image
+        String url = videoGoods.get(0).getGoods().getListImageData().toString();
+        createdVideo.setRelatedGoodsThumbnailUrl(url);
+        createdVideo.setRelatedGoodsCount(videoGoods.size());
+        videoService.save(createdVideo);
+      }
+    }
+    
+    memberRepository.updateVideoCount(video.getMember().getId(), video.getMember().getVideoCount() + 1);
+    memberRepository.updateTotalVideoCount(video.getMember().getId(), video.getMember().getTotalVideoCount() + 1);
+    return videoService.generateVideoInfo(createdVideo);
   }
 
   @GetMapping("{id}")
@@ -733,6 +795,17 @@ public class VideoController {
       if (this.relatedGoodsCount == null) { this.relatedGoodsCount = 0;}  // FIXME: check policy
       if (this.relatedGoodsThumbnailUrl == null) { this.relatedGoodsThumbnailUrl = "";} // FIXME: check policy
     }
+  }
+  
+  @Data
+  public static class CreateVideoRequest {
+    @NotNull
+    String type = "BROADCASTED";
+    String visibility = "PUBLIC";
+    String title ="";
+    String content = "";
+    String chatRoomId ="";
+    String data = "";
   }
 
   @Data
