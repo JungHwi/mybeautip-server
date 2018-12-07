@@ -105,7 +105,7 @@ public class StoreController {
     if (StringUtils.isEmpty(category)) {
       slice = goodsRepository.findByCreatedAtBeforeAndScmNoAndStateLessThanEqual(startCursor, id, Goods.GoodsState.NO_SALE.ordinal(), pageable);
     } else {
-      slice = goodsRepository.findByCreatedAtBeforeAndScmNoAndCateCdAndStateLessThanEqual(startCursor, id, category, Goods.GoodsState.NO_SALE.ordinal(), pageable);
+      slice = goodsRepository.findByCreatedAtBeforeAndScmNoAndCateCd(startCursor, id, category, pageable);
     }
 
     List<GoodsInfo> result = new ArrayList<>();
