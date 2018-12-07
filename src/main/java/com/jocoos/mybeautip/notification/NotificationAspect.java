@@ -35,7 +35,7 @@ public class NotificationAspect {
     this.slackService = slackService;
   }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.createVideo(..))",
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.startVideo(..))",
     returning = "result")
   public void onAfterReturningCreateVideo(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
