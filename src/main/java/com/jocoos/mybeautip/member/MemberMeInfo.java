@@ -23,7 +23,7 @@ public class MemberMeInfo extends MemberInfo {
 
   public MemberMeInfo(Member member) {
     BeanUtils.copyProperties(member, this);
-    this.setVideoCount(member.getTotalVideoCount());
+    this.setVideoCount((member.getTotalVideoCount() < 0) ? 0 : member.getTotalVideoCount());
   }
 
   public MemberMeInfo(Member member, int pointRatio, int revenueRatio) {

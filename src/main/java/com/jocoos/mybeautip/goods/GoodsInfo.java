@@ -66,7 +66,8 @@ public class GoodsInfo {
                    String deliveryInfo, String refundInfo, String companyInfo) {
     BeanUtils.copyProperties(goods, this);
     this.likeId = likeId;
-    this.relatedVideoTotalCount = relatedVideoTotalCount;
+    this.likeCount = (this.getLikeCount() < 0) ? 0: this.getLikeCount();
+    this.relatedVideoTotalCount = (relatedVideoTotalCount < 0) ? 0 : relatedVideoTotalCount;
     this.detailRef = String.format("/api/1/goods/%s/details", goodsNo);
     this.relatedGoodsRef = String.format("/api/1/goods/%s/related-goods", goodsNo);
     this.relatedVideoRef = (relatedVideoTotalCount > 0) ? String.format("/api/1/goods/%s/videos", goodsNo) : "";

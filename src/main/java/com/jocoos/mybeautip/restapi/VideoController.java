@@ -730,6 +730,9 @@ public class VideoController {
       this.owner = owner;
       this.likeId = likeId;
       this.blocked = blocked;
+      this.likeCount = (this.getLikeCount() < 0) ? 0 : this.getLikeCount();
+      this.commentCount = (this.getCommentCount() < 0) ? 0 : this.getCommentCount();
+      this.orderCount = (this.getOrderCount() < 0) ? 0 : this.getOrderCount();
       if (this.relatedGoodsCount == null) { this.relatedGoodsCount = 0;}  // FIXME: check policy
       if (this.relatedGoodsThumbnailUrl == null) { this.relatedGoodsThumbnailUrl = "";} // FIXME: check policy
     }

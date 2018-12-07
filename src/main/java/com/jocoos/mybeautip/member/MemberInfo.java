@@ -35,9 +35,9 @@ public class MemberInfo {
     this.createdAt = member.getCreatedAt();
     this.modifiedAt = member.getModifiedAt();
     this.deletedAt = member.getDeletedAt();
-    this.followerCount = member.getFollowerCount();
-    this.followingCount = member.getFollowingCount();
-    this.videoCount = member.getVideoCount();
+    this.followerCount = (member.getFollowerCount() < 0) ? 0 : member.getFollowerCount();
+    this.followingCount = (member.getFollowingCount() < 0) ? 0 : member.getFollowingCount();
+    this.videoCount = (member.getVideoCount() < 0) ? 0 : member.getVideoCount();
     this.followingId = followingId;
   }
 }
