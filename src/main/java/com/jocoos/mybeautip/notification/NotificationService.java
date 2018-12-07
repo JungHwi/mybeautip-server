@@ -3,53 +3,58 @@ package com.jocoos.mybeautip.notification;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
-import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class NotificationService {
   private final DeviceService deviceService;
-  private final MentionService mentionService;
   private final VideoRepository videoRepository;
   private final CommentRepository commentRepository;
   private final PostRepository postRepository;
   private final FollowingRepository followingRepository;
   private final NotificationRepository notificationRepository;
+  private final MemberRepository memberRepository;
   
   @Value("${mybeautip.notification.duplicate-limit-duration}")
   private int duration;
 
   public NotificationService(DeviceService deviceService,
-                             MentionService mentionService,
                              VideoRepository videoRepository,
                              CommentRepository commentRepository,
                              PostRepository postRepository,
                              FollowingRepository followingRepository,
-                             NotificationRepository notificationRepository) {
+                             NotificationRepository notificationRepository,
+                             MemberRepository memberRepository) {
     this.deviceService = deviceService;
-    this.mentionService = mentionService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
     this.postRepository = postRepository;
     this.followingRepository = followingRepository;
     this.notificationRepository = notificationRepository;
+    this.memberRepository = memberRepository;
   }
 
   public void notifyCreateVideo(Video video) {
@@ -224,7 +229,7 @@ public class NotificationService {
                if (n.getArgs().size() > 1) {
                  String original = n.getArgs().get(1);
                  if (original.contains("@")) {
-                   MentionResult mentionResult = mentionService.createMentionComment(original);
+                   MentionResult mentionResult = createMentionComment(original);
                    if (mentionResult != null) {
                      n.getArgs().set(1, mentionResult.getComment());
                    }
@@ -251,7 +256,7 @@ public class NotificationService {
                if (n.getArgs().size() > 1) {
                  String original = n.getArgs().get(1);
                  if (original.contains("@")) {
-                   MentionResult mentionResult = mentionService.createMentionComment(original);
+                   MentionResult mentionResult = createMentionComment(original);
                    if (mentionResult != null) {
                      n.getArgs().set(1, mentionResult.getComment());
                    }
@@ -272,5 +277,40 @@ public class NotificationService {
           notification.setRead(true);
           notificationRepository.save(notification);
         });
+  }
+  
+  private String createMentionTag(Object username) {
+    StringBuilder sb = new StringBuilder("@");
+    return sb.append(username).toString();
+  }
+  
+  private List<String> findMentionTags(String comment) {
+    return Arrays.stream(comment.split(" "))
+        .filter(c -> c.startsWith("@"))
+        .map(c -> c.substring(1))
+        .collect(Collectors.toList());
+  }
+  
+  private MentionResult createMentionComment(String original) {
+    MentionResult mentionResult = new MentionResult();
+    
+    String comment = original;
+    List<String> mentions = findMentionTags(original);
+    for (String memberId : mentions) {
+      log.debug("member: {}", memberId);
+      
+      if (StringUtils.isNumeric(memberId)) {
+        Optional<Member> member = memberRepository.findById(Long.parseLong(memberId));
+        if (member.isPresent()) {
+          Member m = member.get();
+          mentionResult.add(new MentionTag(m));
+          comment = comment.replaceAll(createMentionTag(m.getId()), createMentionTag(m.getUsername()));
+        }
+      }
+    }
+    
+    log.debug("original comment: {}", comment);
+    mentionResult.setComment(comment);
+    return mentionResult;
   }
 }
