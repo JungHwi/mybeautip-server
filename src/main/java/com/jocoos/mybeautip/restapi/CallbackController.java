@@ -71,7 +71,7 @@ public class CallbackController {
     memberRepository.findByIdAndDeletedAtIsNull(request.getUserId())
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
-    Video video = videoRepository.findById(request.getVideoKey())
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(request.getVideoKey())
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey()));
     
     BeanUtils.copyProperties(request, video);

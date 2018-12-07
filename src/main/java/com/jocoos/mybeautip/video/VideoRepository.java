@@ -83,8 +83,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
   Optional<Video> findByVideoKeyAndDeletedAtIsNull(String videoKey);
 
-  Optional<Video> findByVideoKey(String videoKey);
-
   Optional<Video> findByIdAndMemberId(Long id, Long memberId);
 
   @Modifying
