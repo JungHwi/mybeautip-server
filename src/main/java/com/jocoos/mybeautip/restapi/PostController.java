@@ -461,8 +461,6 @@ public class PostController {
     public PostInfo(Post post, MemberInfo memberInfo) {
       BeanUtils.copyProperties(post, this);
       this.createdBy = memberInfo;
-      this.likeCount = (this.getLikeCount() < 0) ? 0 : this.getLikeCount();
-      this.commentCount = (this.getCommentCount() < 0) ? 0 : this.getCommentCount();
     }
   }
 
