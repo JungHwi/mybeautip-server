@@ -9,17 +9,23 @@ import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -220,6 +226,15 @@ public class NotificationService {
              if (!(comment.getCreatedBy().getId().equals(m.getId()))) {
                Notification n = notificationRepository.save(new Notification(post, comment, m));
                log.debug("mentioned post comment: {}", n);
+               if (n.getArgs().size() > 1) {
+                 String original = n.getArgs().get(1);
+                 if (original.contains("@")) {
+                   MentionResult mentionResult = createMentionComment(original);
+                   if (mentionResult != null) {
+                     n.getArgs().set(1, mentionResult.getComment());
+                   }
+                 }
+               }
                deviceService.push(n);
              }
            });
@@ -238,6 +253,15 @@ public class NotificationService {
              if (!(comment.getCreatedBy().getId().equals(m.getId()))) {
                Notification n = notificationRepository.save(new Notification(v, comment, m));
                log.debug("mentioned video comment: {}", n);
+               if (n.getArgs().size() > 1) {
+                 String original = n.getArgs().get(1);
+                 if (original.contains("@")) {
+                   MentionResult mentionResult = createMentionComment(original);
+                   if (mentionResult != null) {
+                     n.getArgs().set(1, mentionResult.getComment());
+                   }
+                 }
+               }
                deviceService.push(n);
              }
            });
@@ -253,5 +277,40 @@ public class NotificationService {
           notification.setRead(true);
           notificationRepository.save(notification);
         });
+  }
+  
+  private String createMentionTag(Object username) {
+    StringBuilder sb = new StringBuilder("@");
+    return sb.append(username).toString();
+  }
+  
+  private List<String> findMentionTags(String comment) {
+    return Arrays.stream(comment.split(" "))
+        .filter(c -> c.startsWith("@"))
+        .map(c -> c.substring(1))
+        .collect(Collectors.toList());
+  }
+  
+  private MentionResult createMentionComment(String original) {
+    MentionResult mentionResult = new MentionResult();
+    
+    String comment = original;
+    List<String> mentions = findMentionTags(original);
+    for (String memberId : mentions) {
+      log.debug("member: {}", memberId);
+      
+      if (StringUtils.isNumeric(memberId)) {
+        Optional<Member> member = memberRepository.findById(Long.parseLong(memberId));
+        if (member.isPresent()) {
+          Member m = member.get();
+          mentionResult.add(new MentionTag(m));
+          comment = comment.replaceAll(createMentionTag(m.getId()), createMentionTag(m.getUsername()));
+        }
+      }
+    }
+    
+    log.debug("original comment: {}", comment);
+    mentionResult.setComment(comment);
+    return mentionResult;
   }
 }

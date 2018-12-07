@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class AppInfo extends CreatedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+  private Long id;
 
   @Column(nullable = false)
   private String os;

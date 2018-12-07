@@ -18,6 +18,8 @@ public interface VideoGoodsRepository extends JpaRepository<VideoGoods, Long> {
      Date cursor, String goodsNo, String visibility, Pageable pageable);
   
   List<VideoGoods> findAllByVideoId(Long id);
+  
+  List<VideoGoods> findAllByMemberId(Long memberId);
 
   int countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(String goodsNo, String visibility);
 

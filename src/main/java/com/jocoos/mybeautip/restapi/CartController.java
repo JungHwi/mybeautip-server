@@ -82,7 +82,6 @@ public class CartController {
   @PostMapping
   public CartService.CartInfo addCart(@Valid @RequestBody AddCartRequest request,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    List<Cart> list = new ArrayList<>();
     if (request.getItems().size() + cartRepository.countByCreatedById(memberService.currentMemberId()) > 100) {
       throw new BadRequestException("too_many_items", messageService.getMessage(CART_TOO_MANY_ITEMS, lang));
     }

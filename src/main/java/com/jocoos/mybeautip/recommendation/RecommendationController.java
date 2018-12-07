@@ -237,19 +237,22 @@ public class RecommendationController {
     private Integer seq;
     private Date createdAt;
     private VideoController.VideoInfo content;
+    private Date startedAt;
+    private Date endedAt;
 
-    public RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo video) {
+    public RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo content) {
       BeanUtils.copyProperties(recommendation, this);
-      this.content = video;
+      this.content = content;
     }
   }
 
   @Data
   public static class RecommendedMotdBaseInfo {
+    private Long id;
     private Date baseDate;
     private List<RecommendedMotdInfo> motds;
     private Date createdAt;
-    private VideoController.VideoInfo content;
+    private int motdCount;
 
     public RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase) {
       BeanUtils.copyProperties(motdRecommendationBase, this);

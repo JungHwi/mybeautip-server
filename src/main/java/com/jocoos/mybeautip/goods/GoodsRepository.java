@@ -48,8 +48,15 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
                                            Pageable of);
 
   Slice<Goods> findByCreatedAtBeforeAndScmNoAndStateLessThanEqual(Date createdAt, Integer scmNo, int state, Pageable pageable);
-
-  Slice<Goods> findByCreatedAtBeforeAndScmNoAndCateCdAndStateLessThanEqual(Date createdAt, Integer scmNo, String code, int state, Pageable pageable);
+  
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
+      "and g.scmNo = :store " +
+      "and g.state <=2 " +
+      "and g.createdAt < :cursor order by g.createdAt desc")
+  Slice<Goods> findByCreatedAtBeforeAndScmNoAndCateCd(@Param("cursor")Date cursor,
+                                                      @Param("store")Integer store,
+                                                      @Param("category")String category,
+                                                      Pageable pageable);
 
   Optional<Goods> findByGoodsNo(String goodsNo);
   

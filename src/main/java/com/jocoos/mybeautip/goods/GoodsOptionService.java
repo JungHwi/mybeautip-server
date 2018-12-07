@@ -119,7 +119,7 @@ public class GoodsOptionService {
       this.soldOut = soldOut;
       this.optionPrice = option.getOptionPrice();
       this.stockCnt = option.getStockCnt();
-      this.no = option.getSno();
+      this.no = option.getOptionNo();
     }
   
     public OptionData(String name, boolean soldOut, List<OptionData> subOptions) {

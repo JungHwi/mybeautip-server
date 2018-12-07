@@ -58,7 +58,7 @@ public class AddressController {
       throw new BadRequestException("too_many_addresses", messageService.getMessage(ADDRESS_TOO_MANY_ADDRESS, lang));
     }
 
-    if (request.isBase()) {
+    if (request.getBase() != null && request.getBase()) {
       addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
         .ifPresent(prevBaseAddress -> {
           prevBaseAddress.setBase(false);
@@ -70,6 +70,9 @@ public class AddressController {
     log.debug("CreateAddressRequest: {}", request);
 
     BeanUtils.copyProperties(request, address);
+    if (request.getBase() == null) {
+      address.setBase(false);
+    }
     log.debug("address: {}", address);
 
     return new ResponseEntity<>(new AddressInfo(addressService.insert(address)), HttpStatus.OK);
@@ -80,7 +83,7 @@ public class AddressController {
                                                    @RequestBody UpdateAddressRequest request,
                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("UpdateAddressRequest: {}", request);
-    if (request.isBase()) {
+    if (request.getBase() != null && request.getBase()) {
       addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
         .ifPresent(prevBaseAddress -> {
           prevBaseAddress.setBase(false);
@@ -102,7 +105,7 @@ public class AddressController {
 
   @Data
   public static class CreateAddressRequest {
-    private boolean base;
+    private Boolean base;
 
     @Size(max = 20)
     @NotNull
@@ -141,7 +144,7 @@ public class AddressController {
   @Data
   public static class UpdateAddressRequest {
 
-    private boolean base;
+    private Boolean base;
 
     @Size(max = 20)
     @NotNull
@@ -181,7 +184,7 @@ public class AddressController {
   @NoArgsConstructor
   public static class AddressInfo {
     private Long id;
-    private boolean base;
+    private Boolean base;
     private String title;
     private String recipient;
     private String phone;
