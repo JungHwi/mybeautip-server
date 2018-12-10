@@ -1,30 +1,26 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import com.jocoos.mybeautip.notification.MessageService;
-import org.springframework.beans.BeanUtils;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.*;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -64,75 +60,25 @@ public class CallbackController {
   
   @Transactional
   @PostMapping
-  public Video createVideo(@Valid @RequestBody CallbackCreateVideoRequest request,
+  public Video startVideo(@Valid @RequestBody CallbackStartVideoRequest request,
                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.info("callback createVideo: {}", request.toString());
-    videoRepository.findByVideoKey(request.getVideoKey())
-        .ifPresent(v -> { throw new BadRequestException("already_exist", "Already exist, videoKey: " + request.getVideoKey()); });
-    
-    Video video = new Video();
-    BeanUtils.copyProperties(request, video);
-    video.setVisibility(request.getVisibility());
-    video.setCommentCount(0);
-    video.setLikeCount(0);
-    video.setViewCount(0);
-    video.setHeartCount(0);
-    video.setWatchCount(0);
-    video.setTotalWatchCount(0);
-    video.setOrderCount(0);
-    
-    memberRepository.findByIdAndDeletedAtIsNull((request.getUserId()))
-        .map(m -> {
-          video.setMember(m);
-          return Optional.empty();
-        })
+  
+    memberRepository.findByIdAndDeletedAtIsNull(request.getUserId())
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
-    
-    if (StringUtils.isNotEmpty(video.getContent())) {
-      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
-      try {
-        video.setTagInfo(objectMapper.writeValueAsString(tags));
-      } catch (JsonProcessingException e) {
-        log.warn("tag parsing failed, tags: ", tags.toString());
-      }
-    }
-    Video createdVideo = videoService.save(video);
-    
-    // Set related goods info
-    if (StringUtils.isNotEmpty(request.getData())) {
-      String[] userData = StringUtils.deleteWhitespace(request.getData()).split(",");
-      List<VideoGoods> videoGoods = new ArrayList<>();
-      for (String goods : userData) {
-        if (goods.length() != 10) { // invalid goodsNo
-          continue;
-        }
-        goodsRepository.findByGoodsNo(goods).map(g -> {
-          videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
-          return Optional.empty();
-        });
-      }
+  
+    Video video = videoRepository.findById(request.getVideoKey())
+        .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey()));
       
-      if (videoGoods.size() > 0) {
-        videoGoodsRepository.saveAll(videoGoods);
-        
-        // Set related goods count & one thumbnail image
-        String url = videoGoods.get(0).getGoods().getListImageData().toString();
-        createdVideo.setRelatedGoodsThumbnailUrl(url);
-        createdVideo.setRelatedGoodsCount(videoGoods.size());
-        videoService.save(createdVideo);
-      }
-    }
-    
-    memberRepository.updateVideoCount(video.getMember().getId(), video.getMember().getVideoCount() + 1);
-    memberRepository.updateTotalVideoCount(video.getMember().getId(), video.getMember().getTotalVideoCount() + 1);
-    return createdVideo;
+    BeanUtils.copyProperties(request, video);
+    return videoService.save(video);
   }
   
   @Transactional
   @PatchMapping
   public Video updateVideo(@Valid @RequestBody CallbackUpdateVideoRequest request) {
     log.info("callback updateVideo: {}", request.toString());
-    Video video = videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey())
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(request.getVideoKey())
         .map(v -> {
           if (v.getMember().getId() != request.getUserId().longValue()) {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
@@ -229,26 +175,20 @@ public class CallbackController {
   }
   
   @Data
-  public static class CallbackCreateVideoRequest {
+  public static class CallbackStartVideoRequest {
     @NotNull
     Long userId;
     
     @NotNull
-    String videoKey;
+    Long videoKey;
     
     @NotNull
-    String type;
-    
-    String visibility;
     String state;
-    Integer duration = 0;
-    String title ="";
-    String content = "";
+
     String url ="";
     String thumbnailPath = "";
     String thumbnailUrl = "";
-    String chatRoomId ="";
-    String data = "";
+    String chatRoomId;
   }
   
   @Data
@@ -257,7 +197,7 @@ public class CallbackController {
     Long userId;
     
     @NotNull
-    String videoKey;
+    Long videoKey;
     
     String visibility;
     String state;
