@@ -124,7 +124,7 @@ public class CallbackController {
   @PatchMapping
   public Video updateVideo(@Valid @RequestBody CallbackUpdateVideoRequest request) {
     log.info("callback updateVideo: {}", request.toString());
-    Video video = videoRepository.findByIdAndDeletedAtIsNull(Long.parseLong(request.getVideoKey()))
+    Video video = videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey())
         .map(v -> {
           if (v.getMember().getId() != request.getUserId().longValue()) {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
