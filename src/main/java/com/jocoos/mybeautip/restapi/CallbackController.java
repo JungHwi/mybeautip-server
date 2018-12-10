@@ -67,7 +67,7 @@ public class CallbackController {
     memberRepository.findByIdAndDeletedAtIsNull(request.getUserId())
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   
-    Video video = videoRepository.findById(request.getVideoKey())
+    Video video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey()));
       
     BeanUtils.copyProperties(request, video);
@@ -78,7 +78,7 @@ public class CallbackController {
   @PatchMapping
   public Video updateVideo(@Valid @RequestBody CallbackUpdateVideoRequest request) {
     log.info("callback updateVideo: {}", request.toString());
-    Video video = videoRepository.findByIdAndDeletedAtIsNull(request.getVideoKey())
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(Long.parseLong(request.getVideoKey()))
         .map(v -> {
           if (v.getMember().getId() != request.getUserId().longValue()) {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
@@ -180,7 +180,7 @@ public class CallbackController {
     Long userId;
     
     @NotNull
-    Long videoKey;
+    String videoKey;
     
     @NotNull
     String state;
@@ -197,7 +197,7 @@ public class CallbackController {
     Long userId;
     
     @NotNull
-    Long videoKey;
+    String videoKey;
     
     String visibility;
     String state;
