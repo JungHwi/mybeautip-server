@@ -2,12 +2,14 @@ package com.jocoos.mybeautip.devices;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.sns.AmazonSNS;
@@ -89,6 +91,14 @@ public class DeviceService {
     return device;
   }
 
+  @Async
+  public void push(List<Notification> notifications) {
+    log.debug("{}", notifications);
+    for (Notification n : notifications) {
+      push(n);
+    }
+  }
+
   public void push(Notification notification) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId())
        .forEach(d -> {
@@ -132,7 +142,9 @@ public class DeviceService {
   }
 
   private String convertToGcmMessage(Notification notification, String os) {
-    String message = messageService.getNotificationMessage(
+
+    String message = !Strings.isNullOrEmpty(notification.getInstantMessage()) ?
+       notification.getInstantMessage() : messageService.getNotificationMessage(
        notification.getType(), notification.getArgs().toArray());
 
     Map<String, String> data = Maps.newHashMap();
@@ -148,7 +160,7 @@ public class DeviceService {
       data.put("image", notification.getImageUrl());
     }
 
-
+    log.debug("data: {}", data);
     int badge = notificationRepository.countByTargetMemberAndReadIsFalse(notification.getTargetMember());
     log.debug("target_member: {}, badge: {}", notification.getTargetMember().getId(), badge);
     switch (os) {

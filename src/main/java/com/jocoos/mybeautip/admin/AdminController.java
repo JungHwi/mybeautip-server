@@ -175,25 +175,46 @@ public class AdminController {
     }
 
     Page<Member> members = null;
-    if(isDeleted) {
+    if (isDeleted) {
       members = memberRepository.findByLinkInAndEmailIsNotNullAndDeletedAtIsNotNull(links, pageable);
     } else {
       members = memberRepository.findByLinkInAndDeletedAtIsNull(links, pageable);
     }
 
-    Page<MemberDetailInfo> details = members.map(m -> {
-      MemberDetailInfo info = new MemberDetailInfo(m);
-      Optional<MemberRecommendation> recommendation = memberRecommendationRepository.findByMemberId(m.getId());
-      recommendation.ifPresent(r -> info.setRecommendation(r));
-
-      Page<Report> reports = reportRepository.findByYouId(m.getId(), PageRequest.of(1, 1));
-      if (reports != null) {
-        info.setReportCount(reports.getTotalElements());
-      }
-      return info;
-    });
-
+    Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
     return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/memberDetails", params = {"pushable"})
+  public ResponseEntity<Page<MemberDetailInfo>> getSearchMemberDetails(
+     @RequestParam(defaultValue = "false") boolean pushable,
+     @RequestParam(required = false) String username,
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "100") int size) {
+
+    List<Integer> links = Lists.newArrayList(1, 2, 4);
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
+    Page<Member> members = null;
+    if (!Strings.isNullOrEmpty(username)) {
+      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNullAndUsernameContaining(links, pushable, username, pageable);
+    } else {
+      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNull(links, pushable, pageable);
+    }
+
+    Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  private MemberDetailInfo memberToMemberDetails(Member m) {
+    MemberDetailInfo info = new MemberDetailInfo(m);
+    Optional<MemberRecommendation> recommendation = memberRecommendationRepository.findByMemberId(m.getId());
+    recommendation.ifPresent(r -> info.setRecommendation(r));
+
+    Page<Report> reports = reportRepository.findByYouId(m.getId(), PageRequest.of(1, 1));
+    if (reports != null) {
+      info.setReportCount(reports.getTotalElements());
+    }
+    return info;
   }
 
   @GetMapping("/recommendedMemberDetails")

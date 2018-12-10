@@ -27,6 +27,7 @@ import java.util.Map;
 @Table(name = "notifications")
 public class Notification {
 
+  public static final String INSTANT = "instant";
   public static final String MY_VIDEO_UPLOADED= "my_video_uploaded";
 
   public static final String FOLLOWING = "following";
@@ -96,7 +97,10 @@ public class Notification {
   @Column
   @CreatedDate
   private Date createdAt;
-  
+
+  @Transient
+  private String instantMessage;
+
   public Notification(Following following, Long followId) {
     this.type = FOLLOWING;
     this.targetMember = following.getMemberYou();
@@ -241,5 +245,11 @@ public class Notification {
     this.resourceOwner = videoComment.getCreatedBy();
     this.imageUrl = video.getThumbnailUrl();
     this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
+  }
+
+  public Notification(Member target, String message) {
+    this.type = INSTANT;
+    this.targetMember = target;
+    this.instantMessage = message;
   }
 }
