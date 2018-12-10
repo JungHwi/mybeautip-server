@@ -224,21 +224,23 @@ public class CallbackController {
   public static class CallbackStartVideoRequest {
     @NotNull
     Long userId;
-    
+  
     @NotNull
     String videoKey;
   
     @NotNull
-    String state;
-    
     String type;
+  
     String visibility;
-    String data;
-
+    String state;
+    Integer duration = 0;
+    String title ="";
+    String content = "";
     String url ="";
     String thumbnailPath = "";
     String thumbnailUrl = "";
-    String chatRoomId;
+    String chatRoomId ="";
+    String data = "";
   }
   
   @Data
