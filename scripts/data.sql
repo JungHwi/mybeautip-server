@@ -106,6 +106,14 @@ update mybeautip.stores set description='재생크림,egf재생,피부과,흔적
 update mybeautip.stores set description='우리 가족 건강을 위한 선택' where id=36;
 update mybeautip.stores set description='이너뷰티케어 \'알롱\' 보이지않는 곳의 아름다움이 진정한 아름다움 입니다.' where id=38;
 update mybeautip.stores set description='야시엔코 - 夜時의 기적' where id=39;
+update mybeautip.stores set description='엄마의 마음으로 고객이 안심할수 있는 자연주의 홈메이드 브랜드 입니다.' where id=40;
+update mybeautip.stores set description='반갑습니다. 더매치에 오신것을 환영합니다.' where id=41;
+update mybeautip.stores set description='수입화장품 피토씨, 퍼펙타, 클레아닉 수입총판, 국내화장품 레츠큐어 제조.유통업체입니다' where id=42;
+update mybeautip.stores set description='아이차밍에 오신것을 환영합니다. Lizly , Witchspouch , The choute 공식판매처 입니다.' where id=44;
+update mybeautip.stores set description='자연이 품은 피부 스토리' where id=45;
+update mybeautip.stores set description='인간사랑, 피부사랑, 발효프로그램 기능성 화장품 위시포물러' where id=46;
+update mybeautip.stores set description='아름다움을 위한 준비' where id=47;
+update mybeautip.stores set description='반갑습니다. 엠브로스에 오신것을 환영합니다.' where id=48;
 
 update mybeautip.stores set delivery_info='배송기간은 주문일(무통장입금은 결제완료일)로부터 1일(24시간) 에서 5일정도 걸립니다. 배송비는 각 스토어의 규정을 따르고 있습니다.  일부 상품의 경우에는 지역에 따라 추가 배송비용이 발생할 수 있습니다.' where id>0;
 update mybeautip.stores set cancel_info='주문취소 신청 기간\n주문 취소는 배송 시작 전에만 가능하며 개별의 상품의 주문 취소는 불가능 합니다. 배송 시작 후에는 교환/반품을 이용해주세요.\n\n교환/반품 신청 기간\n상품 수령 후 7일 이내로 고객센터 교환 및 반품 신청 (교환/반품 절차가 스토어 별로 상이하오니, 별도의 고객센터 안내에 따라 제품을 반송 해주시면 됩니다.)\n\n교환 가능 옵션\n교환 시 해당 제품, 다른 옵션으로만 교환 가능합니다.\n\n단순변심에 의한 환불\n왕복배송비는 고객부담으로 스토어 배송 정책, 배송형태에 따라 비용과 지불방식이 달라질 수 있습니다. 반송이 완료되어야 환불이 진행되며 해당 상품의 재고가 없는 경우 환불처리 될 수 있습니다.\n\n상품 파손 및 오배송에 의한 교환/환불\n판매자 부담이므로 상품만 보내주시면 됩니다.\n\n교환/반품 불가 사유\n단순변심으로 인한 교환/반품 요청이 상품을 수령한 날로부터 7일을 경과한 경우\n포장을 개봉하여 사용 또는 일부 소비에 의하여 상품 등의 가치가 현저히 감소된 경우\n상품을 개봉하여 사용/장착으로 상품의 가치가 훼손 된 경우\n고객님의 책임이 있는 사유로 상품등의 가치가 심하게 파손되거나 훼손된 경우\n구매하신 상품의 구성품(사은품 포함)이 누락된 경우\n전자상거래 등에서 소비자보호에 관한 법률이 정하는 청약철회 제한 사유에 해당되는 경우' where id>0;
