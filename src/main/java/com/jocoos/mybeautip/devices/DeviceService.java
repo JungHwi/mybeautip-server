@@ -110,6 +110,11 @@ public class DeviceService {
        });
   }
 
+  public String getDeviceOs(int platform) {
+    return platform == 1 ? Device.OS_NAME_IOS :
+       platform == 2 ? Device.OS_NAME_ANDROID : null;
+  }
+
   private void push(Device device, Notification notification) {
     String message = convertToGcmMessage(notification, device.getOs());
     log.debug("gcm message: {}", message);
@@ -157,7 +162,9 @@ public class DeviceService {
       data.put("resource_ids", String.valueOf(Stream.of(notification.getResourceIds().split(","))
          .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList())));
     }
-    data.put("member_id", String.valueOf(notification.getResourceOwner().getId()));
+    if (notification.getResourceOwner() != null) {
+      data.put("member_id", String.valueOf(notification.getResourceOwner().getId()));
+    }
     if (!Strings.isNullOrEmpty(notification.getImageUrl())) {
       data.put("image", notification.getImageUrl());
     }
