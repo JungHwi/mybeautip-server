@@ -96,9 +96,9 @@ public class AdminNotificationController {
     } else {
       String deviceOs = deviceService.getDeviceOs(request.getPlatform());
       if (deviceOs == null) {
-        devices = deviceRepository.findByCreatedByPushableAndCreatedByDeletedAtIsNull(true, pageable);
+        devices = deviceRepository.findByPushableAndCreatedByDeletedAtIsNull(true, pageable);
       } else {
-        devices = deviceRepository.findByCreatedByPushableAndOsAndCreatedByDeletedAtIsNull(true, deviceOs, pageable);
+        devices = deviceRepository.findByPushableAndOsAndCreatedByDeletedAtIsNull(true, deviceOs, pageable);
       }
     }
 
