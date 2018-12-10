@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
+import com.jocoos.mybeautip.devices.Device;
+import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -63,6 +65,7 @@ public class AdminController {
   private final StoreRepository storeRepository;
   private final VideoRepository videoRepository;
   private final VideoReportRepository videoReportRepository;
+  private final DeviceRepository deviceRepository;
   private final VideoService videoService;
 
   public AdminController(PostRepository postRepository,
@@ -76,7 +79,9 @@ public class AdminController {
                          ReportRepository reportRepository,
                          StoreRepository storeRepository,
                          VideoRepository videoRepository,
-                         VideoReportRepository videoReportRepository, VideoService videoService) {
+                         VideoReportRepository videoReportRepository,
+                         DeviceRepository deviceRepository,
+                         VideoService videoService) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
@@ -89,6 +94,7 @@ public class AdminController {
     this.storeRepository = storeRepository;
     this.videoRepository = videoRepository;
     this.videoReportRepository = videoReportRepository;
+    this.deviceRepository = deviceRepository;
     this.videoService = videoService;
   }
 
@@ -193,7 +199,7 @@ public class AdminController {
      @RequestParam(defaultValue = "100") int size) {
 
     List<Integer> links = Lists.newArrayList(1, 2, 4);
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
     Page<Member> members = null;
     if (!Strings.isNullOrEmpty(username)) {
       members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNullAndUsernameContaining(links, pushable, username, pageable);

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.devices.Device;
@@ -78,6 +79,7 @@ public class DeviceController {
     private boolean pushable;
   }
 
+  @NoArgsConstructor
   @Data
   public static class DeviceInfo {
 

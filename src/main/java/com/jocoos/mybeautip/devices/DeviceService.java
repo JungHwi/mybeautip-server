@@ -110,6 +110,11 @@ public class DeviceService {
        });
   }
 
+  public String getDeviceOs(int platform) {
+    return platform == 1 ? Device.OS_NAME_IOS :
+       platform == 2 ? Device.OS_NAME_ANDROID : null;
+  }
+
   private void push(Device device, Notification notification) {
     String message = convertToGcmMessage(notification, device.getOs());
     log.debug("gcm message: {}", message);
