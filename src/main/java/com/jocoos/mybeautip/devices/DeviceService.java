@@ -153,8 +153,10 @@ public class DeviceService {
     data.put("body", message);
     data.put("resource_type", notification.getResourceType());
     data.put("resource_id", String.valueOf(notification.getResourceId()));
-    data.put("resource_ids", String.valueOf(Stream.of(notification.getResourceIds().split(","))
-        .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList())));
+    if (notification.getResourceIds() != null) {
+      data.put("resource_ids", String.valueOf(Stream.of(notification.getResourceIds().split(","))
+         .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList())));
+    }
     data.put("member_id", String.valueOf(notification.getResourceOwner().getId()));
     if (!Strings.isNullOrEmpty(notification.getImageUrl())) {
       data.put("image", notification.getImageUrl());
