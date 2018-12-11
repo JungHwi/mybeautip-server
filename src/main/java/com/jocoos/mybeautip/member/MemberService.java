@@ -71,8 +71,7 @@ public class MemberService {
     if (authentication == null || !authentication.isAuthenticated()) {
       return null;
     }
-
-    log.debug("authentication: {}", authentication);
+    
     return authentication.getPrincipal();
   }
 

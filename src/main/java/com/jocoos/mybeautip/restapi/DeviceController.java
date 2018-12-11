@@ -4,17 +4,16 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.jocoos.mybeautip.member.MemberService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.devices.Device;
@@ -27,13 +26,13 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 @RequestMapping(value = "/api/1/devices", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DeviceController {
 
-  private final NoticeService noticeService;
   private final DeviceService deviceService;
+  private final MemberService memberService;
 
-  public DeviceController(NoticeService noticeService,
-                          DeviceService deviceService) {
-    this.noticeService = noticeService;
+  public DeviceController(DeviceService deviceService,
+                          MemberService memberService) {
     this.deviceService = deviceService;
+    this.memberService = memberService;
   }
 
   @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -43,6 +42,9 @@ public class DeviceController {
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
+    
+    // Check member's devices validity
+    deviceService.validateAlreadyRegisteredDevices(memberService.currentMemberId());
 
     log.debug("request: {}", request);
     Device device = deviceService.saveOrUpdate(request);
@@ -78,6 +80,7 @@ public class DeviceController {
     private boolean pushable;
   }
 
+  @NoArgsConstructor
   @Data
   public static class DeviceInfo {
 

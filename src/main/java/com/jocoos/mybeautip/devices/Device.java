@@ -20,6 +20,9 @@ import java.util.Date;
 @Table(name = "devices")
 public class Device extends MemberAuditable {
 
+  public static final String OS_NAME_IOS = "ios";
+  public static final String OS_NAME_ANDROID = "android";
+
   @Id
   private String id;
 

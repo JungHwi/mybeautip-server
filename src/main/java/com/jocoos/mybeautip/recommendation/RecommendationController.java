@@ -243,6 +243,7 @@ public class RecommendationController {
     public RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo content) {
       BeanUtils.copyProperties(recommendation, this);
       this.content = content;
+      this.createdAt = this.startedAt;
     }
   }
 
