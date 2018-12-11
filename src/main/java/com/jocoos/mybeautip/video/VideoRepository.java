@@ -80,9 +80,9 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   Slice<Video> searchVideos(@Param("keyword") String keyword, @Param("cursor") Date cursor, Pageable pageable);
 
   Optional<Video> findByIdAndDeletedAtIsNull(Long id);
-
+  
   Optional<Video> findByVideoKeyAndDeletedAtIsNull(String videoKey);
-
+  
   Optional<Video> findByIdAndMemberId(Long id, Long memberId);
 
   @Modifying

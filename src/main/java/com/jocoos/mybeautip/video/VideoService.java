@@ -267,8 +267,8 @@ public class VideoService {
     return generateVideoInfo(video);
   }
   
-  public Video deleteVideo(long memberId, String videoKey) {
-    return videoRepository.findByVideoKeyAndDeletedAtIsNull(videoKey)
+  public Video deleteVideo(long memberId, Long videoId) {
+    return videoRepository.findByIdAndDeletedAtIsNull(videoId)
         .map(v -> {
           if (v.getMember().getId() != memberId) {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
@@ -283,7 +283,7 @@ public class VideoService {
           memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
           return v;
         })
-        .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
+        .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoId: " + videoId));
   }
 
   /**
