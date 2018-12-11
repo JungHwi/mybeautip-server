@@ -13,11 +13,11 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
   
   List<Device> findByCreatedByIdAndValidIsTrue(Long created);
 
-  Page<Device> findByCreatedByPushableAndCreatedByDeletedAtIsNull(boolean pushable, Pageable pageable);
+  Page<Device> findByPushableAndCreatedByDeletedAtIsNull(boolean pushable, Pageable pageable);
 
   Page<Device> findByCreatedByIdAndCreatedByPushableAndCreatedByDeletedAtIsNull(Long memberId, boolean pushable, Pageable pageable);
 
-  Page<Device> findByCreatedByPushableAndOsAndCreatedByDeletedAtIsNull(boolean pushable, String os, Pageable pageable);
+  Page<Device> findByPushableAndOsAndCreatedByDeletedAtIsNull(boolean pushable, String os, Pageable pageable);
 
   Page<Device> findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(Collection<Integer> links, boolean pushable, String username, Pageable pageable);
 
@@ -26,8 +26,5 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
   Page<Device> findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNull(Collection<Integer> links, boolean pushable, Pageable pageable);
 
   Page<Device> findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNull(Collection<Integer> links, boolean pushable, String os, Pageable pageable);
-
-
-
 
 }
