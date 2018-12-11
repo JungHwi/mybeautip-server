@@ -26,14 +26,11 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 @RequestMapping(value = "/api/1/devices", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DeviceController {
 
-  private final NoticeService noticeService;
   private final DeviceService deviceService;
   private final MemberService memberService;
 
-  public DeviceController(NoticeService noticeService,
-                          DeviceService deviceService,
+  public DeviceController(DeviceService deviceService,
                           MemberService memberService) {
-    this.noticeService = noticeService;
     this.deviceService = deviceService;
     this.memberService = memberService;
   }
