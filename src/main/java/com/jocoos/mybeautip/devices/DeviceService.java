@@ -128,13 +128,10 @@ public class DeviceService {
 
       PublishResult result = amazonSNS.publish(request);
       log.debug("result: {}", result);
-    } catch (AuthorizationErrorException e) {
-      log.error("authorizationErrorException", e);
-    } catch (PlatformApplicationDisabledException e) {
-      log.error("platformApplicationDisabledException", e);
-    } catch (EndpointDisabledException e) {
-      log.error("EndpointDisabledException", e);
-      if (device.isPushable()) {
+    } catch (AmazonSNSException e) {
+      log.info("AmazonSNSException: " + e.getMessage());
+      
+      if (!isValid(device)) {
         device.setValid(false);
         device.setPushable(false);
         deviceRepository.save(device);
@@ -246,18 +243,26 @@ public class DeviceService {
   public void validateAlreadyRegisteredDevices(Long memberId) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(memberId)
         .forEach(device -> {
-            GetEndpointAttributesRequest request = new GetEndpointAttributesRequest().withEndpointArn(device.getArn());
-            GetEndpointAttributesResult result = amazonSNS.getEndpointAttributes(request);
-            if (result != null && result.getAttributes() != null) {
-              String value = result.getAttributes().get("Enabled");
-              if (StringUtils.isNotEmpty(value)) {
-                if ("false".equalsIgnoreCase(value)) {
-                  device.setValid(false);
-                  device.setPushable(false);
-                  deviceRepository.save(device);
-                }
-              }
-            }
-          });
+          if (!isValid(device)) {
+            device.setValid(false);
+            device.setPushable(false);
+            deviceRepository.save(device);
+          }
+        });
     }
+  
+  private boolean isValid(Device device) {
+    boolean valid = true;
+    GetEndpointAttributesRequest request = new GetEndpointAttributesRequest().withEndpointArn(device.getArn());
+    GetEndpointAttributesResult result = amazonSNS.getEndpointAttributes(request);
+    if (result != null && result.getAttributes() != null) {
+      String value = result.getAttributes().get("Enabled");
+      if (StringUtils.isNotEmpty(value)) {
+        if ("false".equalsIgnoreCase(value)) {
+          valid = false;
+        }
+      }
+    }
+    return valid;
+  }
 }
