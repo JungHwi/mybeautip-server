@@ -10,21 +10,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface DeviceRepository extends JpaRepository<Device, String> {
 
   List<Device> findByCreatedById(Long created);
-  
+
   List<Device> findByCreatedByIdAndValidIsTrue(Long created);
 
-  Page<Device> findByPushableAndCreatedByDeletedAtIsNull(boolean pushable, Pageable pageable);
+  Page<Device> findByPushableAndValid(boolean pushable, boolean vaild, Pageable pageable);
 
-  Page<Device> findByCreatedByIdAndCreatedByPushableAndCreatedByDeletedAtIsNull(Long memberId, boolean pushable, Pageable pageable);
+  Page<Device> findByPushableAndValidAndOs(boolean pushable, boolean vaild, String os, Pageable pageable);
 
-  Page<Device> findByPushableAndOsAndCreatedByDeletedAtIsNull(boolean pushable, String os, Pageable pageable);
+  Page<Device> findByCreatedByIdAndPushableAndValid(Long memberId, boolean pushable, boolean vaild, Pageable pageable);
 
-  Page<Device> findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(Collection<Integer> links, boolean pushable, String username, Pageable pageable);
+  List<Device> findByCreatedByIdAndOs(Long created, String os);
 
-  Page<Device> findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(Collection<Integer> links, boolean pushable, String os, String username, Pageable pageable);
+  Page<Device> findByCreatedByLinkInAndPushableAndValidAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(Collection<Integer> links, boolean pushable, boolean valid, String username, Pageable pageable);
 
-  Page<Device> findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNull(Collection<Integer> links, boolean pushable, Pageable pageable);
+  Page<Device> findByCreatedByLinkInAndPushableAndValidAndOsAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(Collection<Integer> links, boolean pushable, boolean valid, String os, String username, Pageable pageable);
 
-  Page<Device> findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNull(Collection<Integer> links, boolean pushable, String os, Pageable pageable);
+  Page<Device> findByCreatedByLinkInAndPushableAndValidAndCreatedByDeletedAtIsNull(Collection<Integer> links, boolean pushable, boolean valid, Pageable pageable);
+
+  Page<Device> findByCreatedByLinkInAndPushableAndValidAndOsAndCreatedByDeletedAtIsNull(Collection<Integer> links, boolean pushable, boolean valid, String os, Pageable pageable);
 
 }
