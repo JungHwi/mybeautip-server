@@ -65,7 +65,7 @@ public class CallbackController {
     log.info("callback startVideo: {}", request.toString());
   
     Member member = memberRepository.findByIdAndDeletedAtIsNull(request.getUserId())
-        .orElseThrow(() -> {
+        .orElseGet(() -> {
           log.error("Invalid UserID: " + request.getUserId());
           throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
         });
@@ -117,7 +117,7 @@ public class CallbackController {
       return videoService.save(video);
     } else {
       video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
-          .orElseThrow(() -> {
+          .orElseGet(() -> {
             log.error("Cannot find videoId: " + request.getVideoKey());
             throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
           });
@@ -137,7 +137,7 @@ public class CallbackController {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
           }
           return updateVideoProperties(request, v);})
-        .orElseThrow(() -> {
+        .orElseGet(() -> {
           log.error("Cannot find video " + request.getVideoKey());
           throw new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey());
         });
