@@ -285,6 +285,25 @@ public class VideoService {
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoId: " + videoId));
   }
+  
+  public Video deleteVideo(long memberId, String videoKey) {
+    return videoRepository.findByVideoKeyAndDeletedAtIsNull(videoKey)
+        .map(v -> {
+          if (v.getMember().getId() != memberId) {
+            throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
+          }
+          tagService.decreaseRefCount(v.getTagInfo());
+          v.setDeletedAt(new Date());
+          saveWithDeletedAt(v);
+          videoLikeRepository.deleteByVideoId(v.getId());
+          if ("PUBLIC".equals(v.getVisibility())) {
+            memberRepository.updateVideoCount(v.getMember().getId(), v.getMember().getVideoCount() - 1);
+          }
+          memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
+          return v;
+        })
+        .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
+  }
 
   /**
    * Wrap method to avoid duplication for feed aspect

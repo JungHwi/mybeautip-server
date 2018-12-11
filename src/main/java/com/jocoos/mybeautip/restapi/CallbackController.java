@@ -139,7 +139,7 @@ public class CallbackController {
   @DeleteMapping
   public Video deleteVideo(@Valid @RequestBody CallbackDeleteVideoRequest request) {
     log.info("deleteVideo {}", request.toString());
-    return videoService.deleteVideo(request.getUserId(), Long.parseLong(request.getVideoKey()));
+    return videoService.deleteVideo(request.getUserId(), request.getVideoKey());
   }
   
   private Video updateVideoProperties(CallbackUpdateVideoRequest source, Video target) {
