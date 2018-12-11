@@ -27,6 +27,7 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.notification.Notification;
+import com.jocoos.mybeautip.restapi.DeviceController;
 
 @Slf4j
 @RestController
@@ -45,36 +46,96 @@ public class AdminNotificationController {
     this.deviceRepository = deviceRepository;
   }
 
+
   @GetMapping(value = "/deviceDetails")
   public ResponseEntity<Page<DeviceDetailInfo>> getDeviceDetails(
+     @RequestParam(defaultValue = "true") boolean pushable,
+     @RequestParam(defaultValue = "true") boolean valid,
+     @RequestParam(required = false) String username,
+     @RequestParam(defaultValue = "0") int platform,
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "100") int size) {
+
+    List<Integer> links = Lists.newArrayList(0, 1, 2, 4);
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "createdAt"));
+
+    String deviceOs = deviceService.getDeviceOs(platform);
+    Page<Device> devices = null;
+    if (!Strings.isNullOrEmpty(username)) {
+      if (deviceOs != null) {
+        devices = deviceRepository.findByCreatedByLinkInAndPushableAndValidAndOsAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, valid, deviceOs, username, pageable);
+      } else {
+        devices = deviceRepository.findByCreatedByLinkInAndPushableAndValidAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, valid, username, pageable);
+      }
+    } else {
+      if (deviceOs != null) {
+        devices = deviceRepository.findByCreatedByLinkInAndPushableAndValidAndOsAndCreatedByDeletedAtIsNull(links, pushable, valid, deviceOs, pageable);
+      } else {
+        devices = deviceRepository.findByCreatedByLinkInAndPushableAndValidAndCreatedByDeletedAtIsNull(links, pushable, valid, pageable);
+      }
+    }
+
+    Page<DeviceDetailInfo> details = devices.map(d-> new DeviceDetailInfo(d, new MemberDetailInfo(d.getCreatedBy())));
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/memberDeviceDetails")
+  public ResponseEntity<Page<MemberDevicesInfo>> getMemberDeviceDetails(
      @RequestParam(defaultValue = "false") boolean pushable,
      @RequestParam(required = false) String username,
      @RequestParam(defaultValue = "0") int platform,
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "100") int size) {
 
-    List<Integer> links = Lists.newArrayList(1, 2, 4);
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    List<Integer> links = Lists.newArrayList(0, 1, 2, 4);
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "createdAt"));
 
-
-    String deviceOs = deviceService.getDeviceOs(platform);
-    Page<Device> devices = null;
+    Page<Member> members = null;
     if (!Strings.isNullOrEmpty(username)) {
-      if (deviceOs != null) {
-        devices = deviceRepository.findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, deviceOs, username, pageable);
-      } else {
-        devices = deviceRepository.findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, username, pageable);
-      }
+      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNullAndUsernameContaining(links, true, username, pageable);
     } else {
-      if (deviceOs != null) {
-        devices = deviceRepository.findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNull(links, pushable, deviceOs, pageable);
-      } else {
-        devices = deviceRepository.findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNull(links, pushable, pageable);
-      }
+      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNull(links, true, pageable);
     }
 
-    Page<DeviceDetailInfo> details = devices.map(d-> new DeviceDetailInfo(d, new MemberDetailInfo(d.getCreatedBy())));
-    return new ResponseEntity<>(details, HttpStatus.OK);
+    String deviceOs = deviceService.getDeviceOs(platform);
+    Page<MemberDevicesInfo> result = members.map(m -> {
+      MemberDevicesInfo info = new MemberDevicesInfo(m);
+      List<DeviceController.DeviceInfo> devices = Lists.newArrayList();
+      List<Device> list = null;
+
+      if (!Strings.isNullOrEmpty(deviceOs)) {
+        list = deviceRepository.findByCreatedByIdAndOs(m.getId(), deviceOs);
+      } else {
+        list = deviceRepository.findByCreatedById(m.getId());
+      }
+
+      list.stream().forEach(
+         d -> devices.add(new DeviceController.DeviceInfo(d))
+      );
+
+      info.setDevices(devices);
+      return info;
+    });
+
+
+//    String deviceOs = deviceService.getDeviceOs(platform);
+//    Page<Device> devices = null;
+//    if (!Strings.isNullOrEmpty(username)) {
+//      if (deviceOs != null) {
+//        devices = deviceRepository.findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, deviceOs, username, pageable);
+//      } else {
+//        devices = deviceRepository.findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, username, pageable);
+//      }
+//    } else {
+//      if (deviceOs != null) {
+//        devices = deviceRepository.findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNull(links, pushable, deviceOs, pageable);
+//      } else {
+//        devices = deviceRepository.findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNull(links, pushable, pageable);
+//      }
+//    }
+
+//    Page<DeviceDetailInfo> details = devices.map(d-> new DeviceDetailInfo(d, new MemberDetailInfo(d.getCreatedBy())));
+    return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
   @PostMapping("/notifications")
@@ -92,13 +153,13 @@ public class AdminNotificationController {
 
     Long memberId = request.getTarget();
     if (memberId!= null) {
-      devices = deviceRepository.findByCreatedByIdAndCreatedByPushableAndCreatedByDeletedAtIsNull(memberId, true, pageable);
+      devices = deviceRepository.findByCreatedByIdAndPushableAndValid(memberId, true, true, pageable);
     } else {
       String deviceOs = deviceService.getDeviceOs(request.getPlatform());
       if (deviceOs == null) {
-        devices = deviceRepository.findByPushableAndCreatedByDeletedAtIsNull(true, pageable);
+        devices = deviceRepository.findByPushableAndValid(true, true, pageable);
       } else {
-        devices = deviceRepository.findByPushableAndOsAndCreatedByDeletedAtIsNull(true, deviceOs, pageable);
+        devices = deviceRepository.findByPushableAndValidAndOs(true, true, deviceOs, pageable);
       }
     }
 
