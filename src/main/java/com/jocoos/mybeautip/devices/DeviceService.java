@@ -67,6 +67,11 @@ public class DeviceService {
        .map(device -> {
          copyDevice(info, device);
 
+         if (memberService.currentMember() == null) {
+           device.setValid(true);
+           device.setPushable(true);
+         }
+         
          device.setCreatedBy(memberService.currentMember());
 
          log.debug("device: {}", device);
