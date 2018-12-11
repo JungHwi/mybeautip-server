@@ -251,9 +251,7 @@ public class DeviceService {
             if (result != null && result.getAttributes() != null) {
               String value = result.getAttributes().get("Enabled");
               if (StringUtils.isNotEmpty(value)) {
-                boolean enabled = Boolean.getBoolean(value);
-  
-                if (!enabled) {
+                if ("false".equalsIgnoreCase(value)) {
                   device.setValid(false);
                   device.setPushable(false);
                   deviceRepository.save(device);
