@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -133,11 +134,6 @@ public class DeviceService {
       log.error("platformApplicationDisabledException", e);
     } catch (EndpointDisabledException e) {
       log.error("EndpointDisabledException", e);
-
-      /*
-       * FIXME: Change pushable false or delete device info?
-       * deviceRepository.delete(device);
-       */
       if (device.isPushable()) {
         device.setValid(false);
         device.setPushable(false);
@@ -147,7 +143,6 @@ public class DeviceService {
   }
 
   private String convertToGcmMessage(Notification notification, String os) {
-
     String message = !Strings.isNullOrEmpty(notification.getInstantMessage()) ?
        notification.getInstantMessage() : messageService.getNotificationMessage(
        notification.getType(), notification.getArgs().toArray());
@@ -247,4 +242,24 @@ public class DeviceService {
     
     return device;
   }
+  
+  public void validateAlreadyRegisteredDevices(Long memberId) {
+    deviceRepository.findByCreatedByIdAndValidIsTrue(memberId)
+        .forEach(device -> {
+            GetEndpointAttributesRequest request = new GetEndpointAttributesRequest().withEndpointArn(device.getArn());
+            GetEndpointAttributesResult result = amazonSNS.getEndpointAttributes(request);
+            if (result != null && result.getAttributes() != null) {
+              String value = result.getAttributes().get("Enabled");
+              if (StringUtils.isNotEmpty(value)) {
+                boolean enabled = Boolean.getBoolean(value);
+  
+                if (!enabled) {
+                  device.setValid(false);
+                  device.setPushable(false);
+                  deviceRepository.save(device);
+                }
+              }
+            }
+          });
+    }
 }
