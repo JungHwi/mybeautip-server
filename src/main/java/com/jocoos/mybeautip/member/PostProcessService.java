@@ -51,7 +51,7 @@ public class PostProcessService {
     log.debug("Member {} deleted: video will be deleted", member.getId());
     videoRepository.findByMemberAndDeletedAtIsNull(member)
         .forEach(video -> {
-          videoService.deleteVideo(member.getId(), video.getVideoKey());
+          videoService.deleteVideo(member.getId(), video.getId());
           log.debug("{} video deleted", video.getId());
         });
 
