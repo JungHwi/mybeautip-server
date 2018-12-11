@@ -62,10 +62,13 @@ public class CallbackController {
   @PostMapping
   public Video startVideo(@Valid @RequestBody CallbackStartVideoRequest request,
                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    log.info("callback createVideo: {}", request.toString());
+    log.info("callback startVideo: {}", request.toString());
   
     Member member = memberRepository.findByIdAndDeletedAtIsNull(request.getUserId())
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+        .orElseThrow(() -> {
+          log.error("Invalid UserID: " + request.getUserId());
+          throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
+        });
   
     Video video;
     
@@ -114,7 +117,10 @@ public class CallbackController {
       return videoService.save(video);
     } else {
       video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
-          .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey()));
+          .orElseThrow(() -> {
+            log.error("Cannot find videoId: " + request.getVideoKey());
+            throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
+          });
       BeanUtils.copyProperties(request, video);
       return videoService.save(video);
     }
@@ -127,10 +133,14 @@ public class CallbackController {
     Video video = videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey())
         .map(v -> {
           if (v.getMember().getId() != request.getUserId().longValue()) {
+            log.error("Invalid UserID: " + request.getUserId());
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
           }
           return updateVideoProperties(request, v);})
-        .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey()));
+        .orElseThrow(() -> {
+          log.error("Cannot find video " + request.getVideoKey());
+          throw new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey());
+        });
     
     return videoService.update(video);
   }
