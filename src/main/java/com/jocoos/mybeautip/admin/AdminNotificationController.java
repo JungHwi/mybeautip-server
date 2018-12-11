@@ -117,24 +117,6 @@ public class AdminNotificationController {
       return info;
     });
 
-
-//    String deviceOs = deviceService.getDeviceOs(platform);
-//    Page<Device> devices = null;
-//    if (!Strings.isNullOrEmpty(username)) {
-//      if (deviceOs != null) {
-//        devices = deviceRepository.findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, deviceOs, username, pageable);
-//      } else {
-//        devices = deviceRepository.findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, username, pageable);
-//      }
-//    } else {
-//      if (deviceOs != null) {
-//        devices = deviceRepository.findByCreatedByLinkInAndPushableAndOsAndCreatedByDeletedAtIsNull(links, pushable, deviceOs, pageable);
-//      } else {
-//        devices = deviceRepository.findByCreatedByLinkInAndPushableAndCreatedByDeletedAtIsNull(links, pushable, pageable);
-//      }
-//    }
-
-//    Page<DeviceDetailInfo> details = devices.map(d-> new DeviceDetailInfo(d, new MemberDetailInfo(d.getCreatedBy())));
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
