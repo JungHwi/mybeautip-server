@@ -267,6 +267,7 @@ public class VideoService {
     return generateVideoInfo(video);
   }
   
+  @Transactional
   public Video deleteVideo(long memberId, Long videoId) {
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
         .map(v -> {
@@ -286,6 +287,7 @@ public class VideoService {
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoId: " + videoId));
   }
   
+  @Transactional
   public Video deleteVideo(long memberId, String videoKey) {
     return videoRepository.findByVideoKeyAndDeletedAtIsNull(videoKey)
         .map(v -> {
