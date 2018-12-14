@@ -22,6 +22,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -251,6 +252,9 @@ public class CallbackController {
     String thumbnailUrl = "";
     String chatRoomId ="";
     String data = "";
+    
+    @NotNull
+    Date createdAt;
   }
   
   @Data
