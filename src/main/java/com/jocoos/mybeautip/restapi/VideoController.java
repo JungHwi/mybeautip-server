@@ -16,6 +16,10 @@ import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
+import com.jocoos.mybeautip.search.SearchHistory;
+import com.jocoos.mybeautip.search.SearchHistoryRepository;
+import com.jocoos.mybeautip.search.SearchStat;
+import com.jocoos.mybeautip.search.SearchStatRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -78,6 +82,8 @@ public class VideoController {
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
   private final MemberRepository memberRepository;
+  private final SearchHistoryRepository searchHistoryRepository;
+  private final SearchStatRepository searchStatRepository;
   private final ObjectMapper objectMapper;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
@@ -108,6 +114,8 @@ public class VideoController {
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
                          MemberRepository memberRepository,
+                         SearchHistoryRepository searchHistoryRepository,
+                         SearchStatRepository searchStatRepository,
                          ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.videoService = videoService;
@@ -129,6 +137,8 @@ public class VideoController {
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
     this.memberRepository = memberRepository;
+    this.searchHistoryRepository = searchHistoryRepository;
+    this.searchStatRepository = searchStatRepository;
     this.objectMapper = objectMapper;
   }
   
@@ -209,7 +219,8 @@ public class VideoController {
       .withCount(count)
       .withCursor(nextCursor).toBuild();
   }
-
+  
+  @Transactional
   @GetMapping("/search")
   public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
                                   @RequestParam(required = false) String cursor,
@@ -222,7 +233,18 @@ public class VideoController {
     if (videos.size() > 0) {
       nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
     }
-
+  
+    if (StringUtils.isNotBlank(keyword)) {
+      // Update search history and stats
+      searchHistoryRepository.save(new SearchHistory(keyword, 1, memberService.currentMember()));
+      Optional<SearchStat> optional = searchStatRepository.findByKeyword(keyword);
+      if (optional.isPresent()) {
+        searchStatRepository.updateCount(optional.get().getId(), 1);
+      } else {
+        searchStatRepository.save(new SearchStat(keyword));
+      }
+    }
+    
     return new CursorResponse.Builder<>("/api/1/videos/search", videos)
       .withKeyword(keyword)
       .withCount(count)

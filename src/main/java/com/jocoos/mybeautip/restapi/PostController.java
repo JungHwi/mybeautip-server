@@ -25,6 +25,10 @@ import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.*;
+import com.jocoos.mybeautip.search.SearchHistory;
+import com.jocoos.mybeautip.search.SearchHistoryRepository;
+import com.jocoos.mybeautip.search.SearchStat;
+import com.jocoos.mybeautip.search.SearchStatRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +61,8 @@ public class PostController {
   private final MentionService mentionService;
   private final TagService tagService;
   private final MessageService messageService;
+  private final SearchHistoryRepository searchHistoryRepository;
+  private final SearchStatRepository searchStatRepository;
 
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String POST_NOT_FOUND = "post.not_found";
@@ -74,7 +80,9 @@ public class PostController {
                         CommentService commentService,
                         MentionService mentionService,
                         TagService tagService,
-                        MessageService messageService) {
+                        MessageService messageService,
+                        SearchHistoryRepository searchHistoryRepository,
+                        SearchStatRepository searchStatRepository) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -88,8 +96,11 @@ public class PostController {
     this.mentionService = mentionService;
     this.tagService = tagService;
     this.messageService = messageService;
+    this.searchHistoryRepository = searchHistoryRepository;
+    this.searchStatRepository = searchStatRepository;
   }
-
+  
+  @Transactional
   @GetMapping
   public CursorResponse getPosts(@RequestParam(defaultValue = "20") int count,
                                    @RequestParam(required = false, defaultValue = "0") int category,
@@ -114,6 +125,17 @@ public class PostController {
     String nextCursor = null;
     if (result.size() > 0) {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    }
+    
+    if (StringUtils.isNotBlank(keyword)) {
+      // Update search history and stats
+      searchHistoryRepository.save(new SearchHistory(keyword, 3, memberService.currentMember()));
+      Optional<SearchStat> optional = searchStatRepository.findByKeyword(keyword);
+      if (optional.isPresent()) {
+        searchStatRepository.updateCount(optional.get().getId(), 1);
+      } else {
+        searchStatRepository.save(new SearchStat(keyword));
+      }
     }
 
     return new CursorResponse.Builder<>("/api/1/posts", result)

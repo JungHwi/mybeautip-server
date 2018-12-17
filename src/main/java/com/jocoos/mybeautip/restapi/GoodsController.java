@@ -8,12 +8,17 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.search.SearchHistory;
+import com.jocoos.mybeautip.search.SearchHistoryRepository;
+import com.jocoos.mybeautip.search.SearchStat;
+import com.jocoos.mybeautip.search.SearchStatRepository;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -48,6 +53,8 @@ public class GoodsController {
   private final GoodsLikeRepository goodsLikeRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsDetailService goodsDetailService;
+  private final SearchHistoryRepository searchHistoryRepository;
+  private final SearchStatRepository searchStatRepository;
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
@@ -61,7 +68,9 @@ public class GoodsController {
                          GoodsOptionRepository goodsOptionRepository,
                          GoodsLikeRepository goodsLikeRepository,
                          VideoGoodsRepository videoGoodsRepository,
-                         GoodsDetailService goodsDetailService) {
+                         GoodsDetailService goodsDetailService,
+                         SearchHistoryRepository searchHistoryRepository,
+                         SearchStatRepository searchStatRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -72,10 +81,24 @@ public class GoodsController {
     this.goodsLikeRepository = goodsLikeRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsDetailService = goodsDetailService;
+    this.searchHistoryRepository = searchHistoryRepository;
+    this.searchStatRepository = searchStatRepository;
   }
 
+  @Transactional
   @GetMapping
   public CursorResponse getGoodsList(@Valid GoodsListRequest request) {
+    if (StringUtils.isNotBlank(request.getKeyword())) {
+      String keyword = request.getKeyword();
+      // Update search history and stats
+      searchHistoryRepository.save(new SearchHistory(keyword, 2, memberService.currentMember()));
+      Optional<SearchStat> optional = searchStatRepository.findByKeyword(keyword);
+      if (optional.isPresent()) {
+        searchStatRepository.updateCount(optional.get().getId(), 1);
+      } else {
+        searchStatRepository.save(new SearchStat(keyword));
+      }
+    }
     return goodsService.getGoodsList(request);
   }
 

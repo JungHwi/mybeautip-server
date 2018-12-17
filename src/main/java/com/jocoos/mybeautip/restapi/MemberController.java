@@ -24,6 +24,10 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
+import com.jocoos.mybeautip.search.SearchHistory;
+import com.jocoos.mybeautip.search.SearchHistoryRepository;
+import com.jocoos.mybeautip.search.SearchStat;
+import com.jocoos.mybeautip.search.SearchStatRepository;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.tag.TagService;
@@ -53,6 +57,7 @@ import javax.validation.constraints.Size;
 import java.security.Principal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -80,6 +85,8 @@ public class MemberController {
   private final RevenueRepository revenueRepository;
   private final MemberLeaveLogRepository memberLeaveLogRepository;
   private final DeviceRepository deviceRepository;
+  private final SearchHistoryRepository searchHistoryRepository;
+  private final SearchStatRepository searchStatRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
   private String storeImagePrefix;
@@ -118,7 +125,9 @@ public class MemberController {
                           DeviceService deviceService,
                           PostProcessService postProcessService,
                           MessageService messageService,
-                          DeviceRepository deviceRepository) {
+                          DeviceRepository deviceRepository,
+                          SearchHistoryRepository searchHistoryRepository,
+                          SearchStatRepository searchStatRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -140,6 +149,8 @@ public class MemberController {
     this.postProcessService = postProcessService;
     this.messageService = messageService;
     this.deviceRepository = deviceRepository;
+    this.searchHistoryRepository = searchHistoryRepository;
+    this.searchStatRepository = searchStatRepository;
   }
 
   @GetMapping("/me")
@@ -200,7 +211,8 @@ public class MemberController {
         })
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
-
+  
+  @Transactional
   @GetMapping
   @ResponseBody
   public CursorResponse getMembers(@RequestParam(defaultValue = "20") int count,
@@ -216,6 +228,17 @@ public class MemberController {
 
       if (members.size() > 0) {
         nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
+      }
+    }
+  
+    if (StringUtils.isNotBlank(keyword)) {
+      // Update search history and stats
+      searchHistoryRepository.save(new SearchHistory(keyword, 0, memberService.currentMember()));
+      Optional<SearchStat> optional = searchStatRepository.findByKeyword(keyword);
+      if (optional.isPresent()) {
+        searchStatRepository.updateCount(optional.get().getId(), 1);
+      } else {
+        searchStatRepository.save(new SearchStat(keyword));
       }
     }
 
