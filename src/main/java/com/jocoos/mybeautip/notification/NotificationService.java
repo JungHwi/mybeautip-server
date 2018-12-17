@@ -165,6 +165,17 @@ public class NotificationService {
         
         if (count == 0) {
           n = notificationRepository.save(new Notification(video, commentLike, commentLike.getComment().getComment()));
+  
+          log.debug("commentlike video notification: {}", n);
+          if (n.getArgs().size() > 1) {
+            String original = n.getArgs().get(1);
+            if (original.contains("@")) {
+              MentionResult mentionResult = createMentionComment(original);
+              if (mentionResult != null) {
+                n.getArgs().set(1, mentionResult.getComment());
+              }
+            }
+          }
           deviceService.push(n);
         }
       }
@@ -182,6 +193,16 @@ public class NotificationService {
   
         if (count == 0) {
           n = notificationRepository.save(new Notification(post, commentLike, commentLike.getComment().getComment()));
+          log.debug("commentlike post notification: {}", n);
+          if (n.getArgs().size() > 1) {
+            String original = n.getArgs().get(1);
+            if (original.contains("@")) {
+              MentionResult mentionResult = createMentionComment(original);
+              if (mentionResult != null) {
+                n.getArgs().set(1, mentionResult.getComment());
+              }
+            }
+          }
           deviceService.push(n);
         }
       }

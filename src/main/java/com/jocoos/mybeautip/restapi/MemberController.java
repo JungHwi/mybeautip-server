@@ -97,6 +97,7 @@ public class MemberController {
   private int revenueRatio;
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";
+  private final String defaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
 
   public MemberController(MemberService memberService,
                           GoodsService goodsService,
@@ -174,7 +175,11 @@ public class MemberController {
             m.setEmail(updateMemberRequest.getEmail());
           }
           if (updateMemberRequest.getAvatarUrl() != null) {
-            m.setAvatarUrl(updateMemberRequest.getAvatarUrl());
+            if ("".equals(updateMemberRequest.getAvatarUrl())) {
+              m.setAvatarUrl(defaultAvatarUrl);
+            } else {
+              m.setAvatarUrl(updateMemberRequest.getAvatarUrl());
+            }
           }
           if (updateMemberRequest.getIntro() != null) {
             tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro());
