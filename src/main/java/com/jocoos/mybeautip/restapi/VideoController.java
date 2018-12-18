@@ -176,8 +176,6 @@ public class VideoController {
       }
     }
     
-    memberRepository.updateVideoCount(video.getMember().getId(), video.getMember().getVideoCount() + 1);
-    memberRepository.updateTotalVideoCount(video.getMember().getId(), video.getMember().getTotalVideoCount() + 1);
     return videoService.generateVideoInfo(createdVideo);
   }
 

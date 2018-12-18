@@ -38,14 +38,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   int countByUsernameAndDeletedAtIsNull(String username);
 
   @Modifying
-  @Query("update Member m set m.videoCount = ?2, m.modifiedAt = now() where m.id = ?1")
-  void updateVideoCount(Long id, Integer count);
-
-  @Modifying
-  @Query("update Member m set m.totalVideoCount = ?2, m.modifiedAt = now() where m.id = ?1")
-  void updateTotalVideoCount(Long id, Integer count);
-
-  @Modifying
   @Query("update Member m set m.revenue = m.revenue + ?2, m.modifiedAt = now() where m.id = ?1")
   void updateRevenue(Long id, Integer revenue);
 
