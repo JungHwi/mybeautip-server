@@ -1,13 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -25,10 +17,7 @@ import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.*;
-import com.jocoos.mybeautip.search.SearchHistory;
-import com.jocoos.mybeautip.search.SearchHistoryRepository;
-import com.jocoos.mybeautip.search.SearchStat;
-import com.jocoos.mybeautip.search.SearchStatRepository;
+import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.tag.TagService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +31,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -61,8 +58,7 @@ public class PostController {
   private final MentionService mentionService;
   private final TagService tagService;
   private final MessageService messageService;
-  private final SearchHistoryRepository searchHistoryRepository;
-  private final SearchStatRepository searchStatRepository;
+  private final KeywordService keywordService;
 
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String POST_NOT_FOUND = "post.not_found";
@@ -81,8 +77,7 @@ public class PostController {
                         MentionService mentionService,
                         TagService tagService,
                         MessageService messageService,
-                        SearchHistoryRepository searchHistoryRepository,
-                        SearchStatRepository searchStatRepository) {
+                        KeywordService keywordService) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -96,8 +91,7 @@ public class PostController {
     this.mentionService = mentionService;
     this.tagService = tagService;
     this.messageService = messageService;
-    this.searchHistoryRepository = searchHistoryRepository;
-    this.searchStatRepository = searchStatRepository;
+    this.keywordService = keywordService;
   }
   
   @Transactional
@@ -129,13 +123,7 @@ public class PostController {
     
     if (StringUtils.isNotBlank(keyword)) {
       // Update search history and stats
-      searchHistoryRepository.save(new SearchHistory(keyword, 3, memberService.currentMember()));
-      Optional<SearchStat> optional = searchStatRepository.findByKeyword(keyword);
-      if (optional.isPresent()) {
-        searchStatRepository.updateCount(optional.get().getId(), 1);
-      } else {
-        searchStatRepository.save(new SearchStat(keyword));
-      }
+      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.POST, memberService.currentMember());
     }
 
     return new CursorResponse.Builder<>("/api/1/posts", result)
@@ -362,7 +350,7 @@ public class PostController {
     comment.setPostId(id);
     BeanUtils.copyProperties(request, comment);
     
-    tagService.parseHashTagsAndToucheRefCount(comment.getComment());
+    tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
     postRepository.updateCommentCount(id, 1);
 
     commentService.save(comment);
@@ -392,6 +380,7 @@ public class PostController {
     return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
        .map(comment -> {
          comment.setComment(request.getComment());
+         tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
          return new ResponseEntity<>(
             new CommentInfo(commentRepository.save(comment), memberService.getMemberInfo(comment.getCreatedBy())),
             HttpStatus.OK

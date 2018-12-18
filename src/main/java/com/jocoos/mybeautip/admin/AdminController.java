@@ -10,6 +10,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.tag.TagService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,8 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
-import com.jocoos.mybeautip.devices.Device;
-import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -65,8 +66,9 @@ public class AdminController {
   private final StoreRepository storeRepository;
   private final VideoRepository videoRepository;
   private final VideoReportRepository videoReportRepository;
-  private final DeviceRepository deviceRepository;
   private final VideoService videoService;
+  private final TagService tagService;
+  private final MemberService memberService;
 
   public AdminController(PostRepository postRepository,
                          BannerRepository bannerRepository,
@@ -80,8 +82,9 @@ public class AdminController {
                          StoreRepository storeRepository,
                          VideoRepository videoRepository,
                          VideoReportRepository videoReportRepository,
-                         DeviceRepository deviceRepository,
-                         VideoService videoService) {
+                         VideoService videoService,
+                         TagService tagService,
+                         MemberService memberService) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
@@ -94,8 +97,9 @@ public class AdminController {
     this.storeRepository = storeRepository;
     this.videoRepository = videoRepository;
     this.videoReportRepository = videoReportRepository;
-    this.deviceRepository = deviceRepository;
+    this.tagService = tagService;
     this.videoService = videoService;
+    this.memberService = memberService;
   }
 
   @DeleteMapping("/posts/{id:.+}")
@@ -116,6 +120,14 @@ public class AdminController {
     Banner banner = new Banner();
     BeanUtils.copyProperties(request, banner);
     log.debug("banner: {}", banner);
+  
+    if (StringUtils.isNotEmpty(request.getDescription())) {
+      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
+      if (tags != null && tags.size() > 0) {
+        // Log TagHistory
+        tagService.logHistory(tags, TagService.TagCategory.VIDEO, memberService.currentMember());
+      }
+    }
 
     banner.setStartedAt(getRecommendedDate(request.getStartedAt()));
     banner.setEndedAt(getRecommendedDate(request.getEndedAt()));
@@ -134,6 +146,8 @@ public class AdminController {
        .map(banner -> {
          banner.setDeletedAt(new Date());
          bannerRepository.save(banner);
+  
+         tagService.decreaseRefCount(banner.getDescription());
          return Optional.empty();
        })
        .orElseThrow(() -> new NotFoundException("banner_not_found", "invalid banner id"));

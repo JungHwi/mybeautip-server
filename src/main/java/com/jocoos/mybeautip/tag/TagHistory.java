@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.search;
+package com.jocoos.mybeautip.tag;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.member.Member;
@@ -14,14 +14,14 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "search_history")
-public class SearchHistory extends MemberAuditable {
+@Table(name = "tag_history")
+public class TagHistory extends MemberAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   
   @Column
-  private String keyword;
+  private String tag;
   
   @Column(nullable = false)
   private Integer category; // 0: member, 1: video, 2: goods, 3: post
@@ -36,8 +36,8 @@ public class SearchHistory extends MemberAuditable {
   @LastModifiedDate
   private Date modifiedAt;
   
-  public SearchHistory(String keyword, int category, Member me) {
-    this.keyword = keyword;
+  public TagHistory(String tag, int category, Member me) {
+    this.tag = tag;
     this.category = category;
     this.isGuest = (me == null);
     this.createdBy = me;

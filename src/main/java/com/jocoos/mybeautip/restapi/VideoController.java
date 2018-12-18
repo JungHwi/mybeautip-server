@@ -1,25 +1,38 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.mention.MentionTag;
+import com.jocoos.mybeautip.member.revenue.*;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
-import com.jocoos.mybeautip.search.SearchHistory;
-import com.jocoos.mybeautip.search.SearchHistoryRepository;
-import com.jocoos.mybeautip.search.SearchStat;
-import com.jocoos.mybeautip.search.SearchStatRepository;
+import com.jocoos.mybeautip.search.KeywordService;
+import com.jocoos.mybeautip.tag.TagService;
+import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.video.report.VideoReportRepository;
+import com.jocoos.mybeautip.video.view.VideoView;
+import com.jocoos.mybeautip.video.view.VideoViewRepository;
+import com.jocoos.mybeautip.video.watches.VideoWatch;
+import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -31,32 +44,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.*;
-import com.jocoos.mybeautip.member.mention.MentionResult;
-import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.mention.MentionTag;
-import com.jocoos.mybeautip.member.revenue.*;
-import com.jocoos.mybeautip.tag.TagService;
-import com.jocoos.mybeautip.video.*;
-import com.jocoos.mybeautip.video.report.VideoReport;
-import com.jocoos.mybeautip.video.report.VideoReportRepository;
-import com.jocoos.mybeautip.video.view.VideoView;
-import com.jocoos.mybeautip.video.view.VideoViewRepository;
-import com.jocoos.mybeautip.video.watches.VideoWatch;
-import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -79,11 +74,10 @@ public class VideoController {
   private final RevenueService revenueService;
   private final TagService tagService;
   private final NotificationService notificationService;
+  private final KeywordService keywordService;
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
   private final MemberRepository memberRepository;
-  private final SearchHistoryRepository searchHistoryRepository;
-  private final SearchStatRepository searchStatRepository;
   private final ObjectMapper objectMapper;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
@@ -111,11 +105,10 @@ public class VideoController {
                          RevenueService revenueService,
                          TagService tagService,
                          NotificationService notificationService,
+                         KeywordService keywordService,
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
                          MemberRepository memberRepository,
-                         SearchHistoryRepository searchHistoryRepository,
-                         SearchStatRepository searchStatRepository,
                          ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.videoService = videoService;
@@ -134,11 +127,10 @@ public class VideoController {
     this.revenueService = revenueService;
     this.tagService = tagService;
     this.notificationService = notificationService;
+    this.keywordService = keywordService;
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
     this.memberRepository = memberRepository;
-    this.searchHistoryRepository = searchHistoryRepository;
-    this.searchStatRepository = searchStatRepository;
     this.objectMapper = objectMapper;
   }
   
@@ -153,10 +145,15 @@ public class VideoController {
     
     if (StringUtils.isNotEmpty(video.getContent())) {
       List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
-      try {
-        video.setTagInfo(objectMapper.writeValueAsString(tags));
-      } catch (JsonProcessingException e) {
-        log.warn("tag parsing failed, tags: ", tags.toString());
+      if (tags != null && tags.size() > 0) {
+        try {
+          video.setTagInfo(objectMapper.writeValueAsString(tags));
+        } catch (JsonProcessingException e) {
+          log.warn("tag parsing failed, tags: ", tags.toString());
+        }
+        
+        // Log TagHistory
+        tagService.logHistory(tags, TagService.TagCategory.VIDEO, memberService.currentMember());
       }
     }
     Video createdVideo = videoRepository.save(video); // do not notify
@@ -236,13 +233,7 @@ public class VideoController {
   
     if (StringUtils.isNotBlank(keyword)) {
       // Update search history and stats
-      searchHistoryRepository.save(new SearchHistory(keyword, 1, memberService.currentMember()));
-      Optional<SearchStat> optional = searchStatRepository.findByKeyword(keyword);
-      if (optional.isPresent()) {
-        searchStatRepository.updateCount(optional.get().getId(), 1);
-      } else {
-        searchStatRepository.save(new SearchStat(keyword));
-      }
+      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.VIDEO, memberService.currentMember());
     }
     
     return new CursorResponse.Builder<>("/api/1/videos/search", videos)
@@ -351,7 +342,7 @@ public class VideoController {
     comment.setVideoId(id);
     BeanUtils.copyProperties(request, comment);
     
-    tagService.parseHashTagsAndToucheRefCount(comment.getComment());
+    tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
     videoRepository.updateCommentCount(id, 1);
 
     commentService.save(comment);
@@ -383,7 +374,7 @@ public class VideoController {
     return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberId)
       .map(comment -> {
         comment.setComment(request.getComment());
-        tagService.parseHashTagsAndToucheRefCount(comment.getComment());
+        tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
         return new ResponseEntity<>(
           new CommentInfo(commentRepository.save(comment)),
           HttpStatus.OK

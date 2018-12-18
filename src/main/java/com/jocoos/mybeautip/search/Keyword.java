@@ -11,8 +11,8 @@ import javax.persistence.*;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "search_stats")
-public class SearchStat extends ModifiedDateAuditable {
+@Table(name = "keywords")
+public class Keyword extends ModifiedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -23,7 +23,7 @@ public class SearchStat extends ModifiedDateAuditable {
   @Column(nullable = false)
   private Integer count;
   
-  public SearchStat(String keyword) {
+  public Keyword(String keyword) {
     this.keyword = keyword;
     this.count = 1;
   }
