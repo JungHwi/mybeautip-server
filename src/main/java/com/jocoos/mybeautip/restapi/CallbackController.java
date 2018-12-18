@@ -112,8 +112,11 @@ public class CallbackController {
         }
       }
   
-      memberRepository.updateVideoCount(video.getMember().getId(), video.getMember().getVideoCount() + 1);
-      memberRepository.updateTotalVideoCount(video.getMember().getId(), video.getMember().getTotalVideoCount() + 1);
+      if ("PUBLIC".equals(request.getVisibility())) {
+        member.setVideoCount(member.getVideoCount() + 1);
+      }
+      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
+      memberRepository.save(member);
       
       return videoService.save(video);
     } else {
@@ -123,6 +126,13 @@ public class CallbackController {
             throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
           });
       BeanUtils.copyProperties(request, video);
+  
+      if ("PUBLIC".equals(request.getVisibility())) {
+        member.setVideoCount(member.getVideoCount() + 1);
+      }
+      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
+      memberRepository.save(member);
+      
       return videoService.save(video);
     }
   }
@@ -153,6 +163,7 @@ public class CallbackController {
     return videoService.deleteVideo(request.getUserId(), request.getVideoKey());
   }
   
+  @Transactional
   private Video updateVideoProperties(CallbackUpdateVideoRequest source, Video target) {
     // immutable properties: video_id, video_key, type, owner, likecount, commentcount, relatedgoodscount, relatedgoodsurl
     // mutable properties: title, content, url, thumbnail_url, chatroomid, data, state, duration, visibility, banned, watchcount, heartcount, viewcount
@@ -215,17 +226,19 @@ public class CallbackController {
       String prevState = target.getVisibility();
       String newState = source.getVisibility();
       
+      Member member = target.getMember();
       if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
-        memberRepository.updateVideoCount(target.getMember().getId(), target.getMember().getVideoCount() - 1);
+        member.setVideoCount(member.getVideoCount() - 1);
         log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
         target.setVisibility(newState);
       }
       
       if ("PRIVATE".equalsIgnoreCase(prevState) && "PUBLIC".equalsIgnoreCase(newState)) {
-        memberRepository.updateVideoCount(target.getMember().getId(), target.getMember().getVideoCount() + 1);
+        member.setVideoCount(member.getVideoCount() + 1);
         log.debug("Video state will be changed PRIVATE to PUBLIC: {}", target.getId());
         target.setVisibility(newState);
       }
+      memberRepository.save(member);
     }
     
     return target;

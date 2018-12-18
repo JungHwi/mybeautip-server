@@ -278,10 +278,12 @@ public class VideoService {
           v.setDeletedAt(new Date());
           saveWithDeletedAt(v);
           videoLikeRepository.deleteByVideoId(v.getId());
+          Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            memberRepository.updateVideoCount(v.getMember().getId(), v.getMember().getVideoCount() - 1);
+            member.setVideoCount(member.getVideoCount() - 1);
           }
-          memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
+          member.setTotalVideoCount(member.getTotalVideoCount() - 1);
+          memberRepository.save(member);
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoId: " + videoId));
@@ -298,10 +300,12 @@ public class VideoService {
           v.setDeletedAt(new Date());
           saveWithDeletedAt(v);
           videoLikeRepository.deleteByVideoId(v.getId());
+          Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            memberRepository.updateVideoCount(v.getMember().getId(), v.getMember().getVideoCount() - 1);
+            member.setVideoCount(member.getVideoCount() - 1);
           }
-          memberRepository.updateTotalVideoCount(v.getMember().getId(), v.getMember().getTotalVideoCount() - 1);
+          member.setTotalVideoCount(member.getTotalVideoCount() - 1);
+          memberRepository.save(member);
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
