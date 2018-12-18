@@ -125,7 +125,7 @@ public class AdminController {
       List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
       if (tags != null && tags.size() > 0) {
         // Log TagHistory
-        tagService.logHistory(tags, TagService.TagCategory.VIDEO, memberService.currentMember());
+        tagService.logHistory(tags, TagService.TagCategory.POST, memberService.currentMember());
       }
     }
 
