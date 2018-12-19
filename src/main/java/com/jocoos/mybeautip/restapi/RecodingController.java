@@ -177,6 +177,7 @@ public class RecodingController {
     private Long likeId;
     private String type;
     private Object state;
+    private String username;
     private Date createdAt;
 
     public BasicInfo(Post post, Long likeId) {
@@ -198,6 +199,7 @@ public class RecodingController {
       this.category = null;
       this.state = video.getState();
       this.likeId = likeId;
+      this.username = video.getMember().getUsername();
     }
   }
 }
