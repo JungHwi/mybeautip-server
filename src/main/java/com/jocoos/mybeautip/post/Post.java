@@ -39,7 +39,7 @@ public class Post extends MemberAuditable {
 
   /**
    * Event progress
-   * 0: default(no event), 1: in progress 2: end
+   * 0: default(no event), 1: 진행중 2: 선정중 3: 발표 4:종료
    */
   @Column(nullable = false)
   private int progress;

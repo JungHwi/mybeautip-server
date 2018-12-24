@@ -55,7 +55,7 @@ public class FeedAspect {
     }
   }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.saveWithDeletedAt(..))",
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.deleteVideo(..))",
     returning = "result")
   public void onAfterReturningDeleteVideo(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());

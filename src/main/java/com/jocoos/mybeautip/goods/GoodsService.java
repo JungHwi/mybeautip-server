@@ -70,35 +70,32 @@ public class GoodsService {
     this.storeRepository = storeRepository;
   }
   
-  public CursorResponse getGoodsList(GoodsListRequest request) {
-    Date startCursor = (Strings.isBlank(request.getCursor())) ?
-        new Date() : new Date(Long.parseLong(request.getCursor()));
+  public CursorResponse getGoodsList(int count, String cursor, String keyword, String category) {
+    Date startCursor = (Strings.isBlank(cursor)) ?
+        new Date() : new Date(Long.parseLong(cursor));
     
     List<GoodsInfo> result = new ArrayList<>();
     Slice<Goods> slice = null;
     
-    FILTER filter  = getRequestFilter(request);
+    FILTER filter  = getRequestFilter(keyword, category);
     log.debug("GetGoodsList filter by: " + filter.toString());
     switch (filter) {
       case ALL:
         slice = goodsRepository.getGoodsList(startCursor,
-            of(0, request.getCount()));
+            of(0, count));
         break;
       case CATEGORY:
         slice = goodsRepository.findAllByCategory(
-          generateSearchableCategory(request.getCategory()),
-          startCursor, of(0, request.getCount()));
+            generateSearchableCategory(category), startCursor, of(0, count));
         break;
         
       case KEYWORD:
-        slice = goodsRepository.findAllByKeyword(request.getKeyword(), startCursor,
-            of(0, request.getCount()));
+        slice = goodsRepository.findAllByKeyword(keyword, startCursor, of(0, count));
         break;
         
       case CATEGORY_AND_KEYWORD:
         slice = goodsRepository.findAllByCategoryAndKeyword(
-          generateSearchableCategory(request.getCategory()),
-          request.getKeyword(), startCursor, of(0, request.getCount()));
+            generateSearchableCategory(category), keyword, startCursor, of(0, count));
         break;
       
       default:
@@ -117,23 +114,23 @@ public class GoodsService {
     }
 
     return new CursorResponse.Builder<>("/api/1/goods", result)
-      .withCount(request.getCount())
+      .withCount(count)
       .withCursor(nextCursor)
-      .withCategory(request.getCategory())
-      .withKeyword(request.getKeyword()).toBuild();
+      .withCategory(category)
+      .withKeyword(keyword).toBuild();
   }
 
-  private FILTER getRequestFilter(GoodsListRequest request) {
-    if (Strings.isEmpty(request.getCategory()) && Strings.isEmpty(request.getKeyword())) {
+  private FILTER getRequestFilter(String keyword, String category) {
+    if (Strings.isEmpty(category) && Strings.isEmpty(keyword)) {
       return FILTER.ALL;
     }
-    if (Strings.isNotEmpty(request.getCategory()) && Strings.isEmpty(request.getKeyword())) {
+    if (Strings.isNotEmpty(category) && Strings.isEmpty(keyword)) {
       return FILTER.CATEGORY;
     }
-    if (Strings.isNotEmpty(request.getKeyword()) && Strings.isEmpty(request.getCategory())) {
+    if (Strings.isNotEmpty(keyword) && Strings.isEmpty(category)) {
       return FILTER.KEYWORD;
     }
-    if (Strings.isNotEmpty(request.getKeyword()) && Strings.isNotEmpty(request.getCategory())) {
+    if (Strings.isNotEmpty(keyword) && Strings.isNotEmpty(category)) {
       return FILTER.CATEGORY_AND_KEYWORD;
     }
 

@@ -26,7 +26,7 @@ public class MemberInfo {
   private Date modifiedAt;
   private Date deletedAt;
 
-  public MemberInfo(Member member, Long followingId) {
+  public MemberInfo(Member member) {
     this.id = member.getId();
     this.username = member.getUsername();
     this.email = member.getEmail();
@@ -38,6 +38,10 @@ public class MemberInfo {
     this.followerCount = member.getFollowerCount();
     this.followingCount = member.getFollowingCount();
     this.videoCount = member.getVideoCount();
+  }
+
+  public MemberInfo(Member member, Long followingId) {
+    this(member);
     this.followingId = followingId;
   }
 }

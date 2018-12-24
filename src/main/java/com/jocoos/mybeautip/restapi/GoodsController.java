@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +43,6 @@ public class GoodsController {
   private final GoodsOptionService goodsOptionService;
   private final MessageService messageService;
   private final GoodsRepository goodsRepository;
-  private final GoodsOptionRepository goodsOptionRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsDetailService goodsDetailService;
@@ -58,7 +56,6 @@ public class GoodsController {
                          GoodsOptionService goodsOptionService,
                          MessageService messageService,
                          GoodsRepository goodsRepository,
-                         GoodsOptionRepository goodsOptionRepository,
                          GoodsLikeRepository goodsLikeRepository,
                          VideoGoodsRepository videoGoodsRepository,
                          GoodsDetailService goodsDetailService) {
@@ -68,15 +65,30 @@ public class GoodsController {
     this.goodsOptionService = goodsOptionService;
     this.messageService = messageService;
     this.goodsRepository = goodsRepository;
-    this.goodsOptionRepository = goodsOptionRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsDetailService = goodsDetailService;
   }
 
+  @Transactional
   @GetMapping
-  public CursorResponse getGoodsList(@Valid GoodsListRequest request) {
-    return goodsService.getGoodsList(request);
+  public CursorResponse getGoodsList(@RequestParam(defaultValue = "20") int count,
+                                     @RequestParam(required = false) String cursor,
+                                     @RequestParam(required = false) String keyword,
+                                     @RequestParam(required = false) String category) {
+    if (count > 100) {
+      count = 100;
+    }
+    
+    if (keyword != null && keyword.length() > 255) {
+      throw new BadRequestException("invalid_keyword", "Valid keyword size is between 1 to 255.");
+    }
+  
+    if (category != null && category.length() > 6) {
+      throw new BadRequestException("invalid_category", "Valid category size is between 1 to 6.");
+    }
+    
+    return goodsService.getGoodsList(count, cursor, keyword, category);
   }
 
   @GetMapping("/{goodsNo}")

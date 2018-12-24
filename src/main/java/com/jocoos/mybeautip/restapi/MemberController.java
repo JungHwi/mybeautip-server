@@ -13,10 +13,9 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.*;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentInfo;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.Revenue;
 import com.jocoos.mybeautip.member.revenue.RevenueInfo;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
@@ -67,6 +66,7 @@ public class MemberController {
   private final DeviceService deviceService;
   private final PostProcessService postProcessService;
   private final MessageService messageService;
+  private final MentionService mentionService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -119,7 +119,8 @@ public class MemberController {
                           DeviceService deviceService,
                           PostProcessService postProcessService,
                           MessageService messageService,
-                          DeviceRepository deviceRepository) {
+                          DeviceRepository deviceRepository,
+                          MentionService mentionService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -141,6 +142,7 @@ public class MemberController {
     this.postProcessService = postProcessService;
     this.messageService = messageService;
     this.deviceRepository = deviceRepository;
+    this.mentionService = mentionService;
   }
 
   @GetMapping("/me")
@@ -182,7 +184,7 @@ public class MemberController {
             }
           }
           if (updateMemberRequest.getIntro() != null) {
-            tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro());
+            tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro(), TagService.TagCategory.MEMBER, m);
             m.setIntro(updateMemberRequest.getIntro());
           }
   
@@ -205,7 +207,8 @@ public class MemberController {
         })
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
-
+  
+  @Transactional
   @GetMapping
   @ResponseBody
   public CursorResponse getMembers(@RequestParam(defaultValue = "20") int count,
@@ -408,7 +411,9 @@ public class MemberController {
         member.setFollowingCount(0);
         member.setFollowerCount(0);
         member.setDeletedAt(new Date());
-        memberRepository.save(member);
+        memberRepository.saveAndFlush(member);
+        
+        log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
   
         // Sync processing before response
         notificationService.readAllNotification(member.getId());
@@ -435,11 +440,24 @@ public class MemberController {
 
     List<CommentInfo> result = Lists.newArrayList();
     comments.stream().forEach(comment -> {
-      CommentInfo commentInfo = new CommentInfo(
-        comment, memberService.getMemberInfo(comment.getCreatedBy()));
+      CommentInfo commentInfo;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          comment.setComment(mentionResult.getComment());
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+        }
+      } else {
+        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+      }
+      
       if (me != null) {
-        commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+            .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
       }
       result.add(commentInfo);
     });
@@ -452,6 +470,58 @@ public class MemberController {
     return new CursorResponse.Builder<>("/api/1/members/me/comments", result)
       .withCount(count)
       .withCursor(nextCursor).toBuild();
+  }
+  
+  @GetMapping(value = "/{id:.+}/comments")
+  public CursorResponse getMemberComments(@PathVariable Long id,
+                                          @RequestParam(defaultValue = "100") int count,
+                                          @RequestParam(required = false) String cursor,
+                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    Slice<Comment> comments;
+    if (StringUtils.isNumeric(cursor)) {
+      Date createdAt = new Date(Long.parseLong(cursor));
+      comments = commentRepository.findByCreatedByIdAndCreatedAtBeforeAndParentIdIsNull(member.getId(), createdAt, pageable);
+    } else {
+      comments = commentRepository.findByCreatedByIdAndParentIdIsNull(member.getId(), pageable);
+    }
+    
+    List<CommentInfo> result = Lists.newArrayList();
+    comments.stream().forEach(comment -> {
+      CommentInfo commentInfo;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          comment.setComment(mentionResult.getComment());
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+        }
+      } else {
+        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+      }
+      
+      Long me = memberService.currentMemberId();
+      if (me != null) {
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+            .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
+      }
+      result.add(commentInfo);
+    });
+    
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    }
+    
+    return new CursorResponse.Builder<>("/api/1/members/" + id + "/comments", result)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
   }
 
   @Transactional
