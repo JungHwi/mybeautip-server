@@ -13,10 +13,9 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.*;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentInfo;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.Revenue;
 import com.jocoos.mybeautip.member.revenue.RevenueInfo;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
@@ -24,7 +23,6 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
-import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.tag.TagService;
@@ -68,7 +66,7 @@ public class MemberController {
   private final DeviceService deviceService;
   private final PostProcessService postProcessService;
   private final MessageService messageService;
-  private final KeywordService keywordService;
+  private final MentionService mentionService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -122,7 +120,7 @@ public class MemberController {
                           PostProcessService postProcessService,
                           MessageService messageService,
                           DeviceRepository deviceRepository,
-                          KeywordService keywordService) {
+                          MentionService mentionService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -144,7 +142,7 @@ public class MemberController {
     this.postProcessService = postProcessService;
     this.messageService = messageService;
     this.deviceRepository = deviceRepository;
-    this.keywordService = keywordService;
+    this.mentionService = mentionService;
   }
 
   @GetMapping("/me")
@@ -440,11 +438,24 @@ public class MemberController {
 
     List<CommentInfo> result = Lists.newArrayList();
     comments.stream().forEach(comment -> {
-      CommentInfo commentInfo = new CommentInfo(
-        comment, memberService.getMemberInfo(comment.getCreatedBy()));
+      CommentInfo commentInfo;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          comment.setComment(mentionResult.getComment());
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+        }
+      } else {
+        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+      }
+      
       if (me != null) {
-        commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-          .ifPresent(liked -> commentInfo.setLikeId(liked.getId()));
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+            .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
       }
       result.add(commentInfo);
     });
