@@ -8,14 +8,12 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -28,7 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,11 +43,9 @@ public class GoodsController {
   private final GoodsOptionService goodsOptionService;
   private final MessageService messageService;
   private final GoodsRepository goodsRepository;
-  private final GoodsOptionRepository goodsOptionRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsDetailService goodsDetailService;
-  private final KeywordService keywordService;
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
@@ -61,32 +56,39 @@ public class GoodsController {
                          GoodsOptionService goodsOptionService,
                          MessageService messageService,
                          GoodsRepository goodsRepository,
-                         GoodsOptionRepository goodsOptionRepository,
                          GoodsLikeRepository goodsLikeRepository,
                          VideoGoodsRepository videoGoodsRepository,
-                         GoodsDetailService goodsDetailService,
-                         KeywordService keywordService) {
+                         GoodsDetailService goodsDetailService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
     this.goodsOptionService = goodsOptionService;
     this.messageService = messageService;
     this.goodsRepository = goodsRepository;
-    this.goodsOptionRepository = goodsOptionRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsDetailService = goodsDetailService;
-    this.keywordService = keywordService;
   }
 
   @Transactional
   @GetMapping
-  public CursorResponse getGoodsList(@Valid GoodsListRequest request) {
-    if (StringUtils.isNotBlank(request.getKeyword())) {
-      // Update search history and stats
-      keywordService.logHistoryAndUpdateStats(request.getKeyword(), KeywordService.KeywordCategory.GOODS, memberService.currentMember());
+  public CursorResponse getGoodsList(@RequestParam(defaultValue = "20") int count,
+                                     @RequestParam(required = false) String cursor,
+                                     @RequestParam(required = false) String keyword,
+                                     @RequestParam(required = false) String category) {
+    if (count > 100) {
+      count = 100;
     }
-    return goodsService.getGoodsList(request);
+    
+    if (keyword != null && keyword.length() > 255) {
+      throw new BadRequestException("invalid_keyword", "Valid keyword size is between 1 to 255.");
+    }
+  
+    if (category != null && category.length() > 6) {
+      throw new BadRequestException("invalid_category", "Valid category size is between 1 to 6.");
+    }
+    
+    return goodsService.getGoodsList(count, cursor, keyword, category);
   }
 
   @GetMapping("/{goodsNo}")

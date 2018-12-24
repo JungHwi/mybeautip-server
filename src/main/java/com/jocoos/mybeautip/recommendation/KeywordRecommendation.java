@@ -28,11 +28,11 @@ public class KeywordRecommendation extends MemberAuditable {
   private int category;
 
   @ManyToOne
-  @JoinColumn(name = "member_id")
+  @JoinColumn(name = "member")
   private Member member;
 
   @ManyToOne
-  @JoinColumn(name = "tag_id")
+  @JoinColumn(name = "tag")
   private Tag tag;
 
   @Column(nullable = false)

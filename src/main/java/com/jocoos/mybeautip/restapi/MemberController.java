@@ -223,11 +223,6 @@ public class MemberController {
         nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
       }
     }
-  
-    if (StringUtils.isNotBlank(keyword)) {
-      // Update search history and stats
-      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.MEMBER, memberService.currentMember());
-    }
 
     return new CursorResponse.Builder<>("/api/1/members", members)
        .withKeyword(keyword)

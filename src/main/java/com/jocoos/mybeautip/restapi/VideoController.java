@@ -74,7 +74,6 @@ public class VideoController {
   private final RevenueService revenueService;
   private final TagService tagService;
   private final NotificationService notificationService;
-  private final KeywordService keywordService;
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
   private final MemberRepository memberRepository;
@@ -105,7 +104,6 @@ public class VideoController {
                          RevenueService revenueService,
                          TagService tagService,
                          NotificationService notificationService,
-                         KeywordService keywordService,
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
                          MemberRepository memberRepository,
@@ -127,7 +125,6 @@ public class VideoController {
     this.revenueService = revenueService;
     this.tagService = tagService;
     this.notificationService = notificationService;
-    this.keywordService = keywordService;
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
     this.memberRepository = memberRepository;
@@ -220,8 +217,8 @@ public class VideoController {
   @Transactional
   @GetMapping("/search")
   public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
-                                  @RequestParam(required = false) String cursor,
-                                  @RequestParam String keyword) {
+                                     @RequestParam(required = false) String cursor,
+                                     @RequestParam String keyword) {
     Slice<Video> list = videoService.findVideosWithKeyword(keyword, cursor, count);
     List<VideoInfo> videos = Lists.newArrayList();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
@@ -229,11 +226,6 @@ public class VideoController {
     String nextCursor = null;
     if (videos.size() > 0) {
       nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
-    }
-  
-    if (StringUtils.isNotBlank(keyword)) {
-      // Update search history and stats
-      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.VIDEO, memberService.currentMember());
     }
     
     return new CursorResponse.Builder<>("/api/1/videos/search", videos)

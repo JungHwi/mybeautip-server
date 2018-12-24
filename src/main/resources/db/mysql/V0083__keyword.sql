@@ -42,3 +42,11 @@ CREATE TABLE `tag_history` (
   PRIMARY KEY(`id`),
   CONSTRAINT `fk_tag_history_member` FOREIGN KEY (`created_by`) REFERENCES `members` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE `recommended_keywords` CHANGE COLUMN `member_id` `member` BIGINT DEFAULT NULL;
+ALTER TABLE `recommended_keywords` CHANGE COLUMN `tag_id` `tag` BIGINT DEFAULT NULL;
+ALTER TABLE `recommended_keywords` DROP FOREIGN KEY `fk_keyword_recommendations_members`;
+ALTER TABLE `recommended_keywords` DROP FOREIGN KEY `fk_keyword_recommendations_tags`;
+ALTER TABLE `recommended_keywords` ADD CONSTRAINT `fk_keyword_recommendations_members` FOREIGN KEY (`member`) REFERENCES `members` (`id`);
+ALTER TABLE `recommended_keywords` ADD CONSTRAINT `fk_keyword_recommendations_tags` FOREIGN KEY (`tag`) REFERENCES `tags` (`id`);

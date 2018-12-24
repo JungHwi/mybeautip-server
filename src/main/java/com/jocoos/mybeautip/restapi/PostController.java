@@ -120,11 +120,6 @@ public class PostController {
     if (result.size() > 0) {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
     }
-    
-    if (StringUtils.isNotBlank(keyword)) {
-      // Update search history and stats
-      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.POST, memberService.currentMember());
-    }
 
     return new CursorResponse.Builder<>("/api/1/posts", result)
        .withCount(count)
