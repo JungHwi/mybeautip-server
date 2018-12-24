@@ -24,6 +24,7 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
+import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.tag.TagService;
@@ -67,6 +68,7 @@ public class MemberController {
   private final DeviceService deviceService;
   private final PostProcessService postProcessService;
   private final MessageService messageService;
+  private final KeywordService keywordService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -119,7 +121,8 @@ public class MemberController {
                           DeviceService deviceService,
                           PostProcessService postProcessService,
                           MessageService messageService,
-                          DeviceRepository deviceRepository) {
+                          DeviceRepository deviceRepository,
+                          KeywordService keywordService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -141,6 +144,7 @@ public class MemberController {
     this.postProcessService = postProcessService;
     this.messageService = messageService;
     this.deviceRepository = deviceRepository;
+    this.keywordService = keywordService;
   }
 
   @GetMapping("/me")
@@ -182,7 +186,7 @@ public class MemberController {
             }
           }
           if (updateMemberRequest.getIntro() != null) {
-            tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro());
+            tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro(), TagService.TagCategory.MEMBER, m);
             m.setIntro(updateMemberRequest.getIntro());
           }
   
@@ -205,7 +209,8 @@ public class MemberController {
         })
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
-
+  
+  @Transactional
   @GetMapping
   @ResponseBody
   public CursorResponse getMembers(@RequestParam(defaultValue = "20") int count,

@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.jocoos.mybeautip.member.Member;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,24 +20,32 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 @Service
 public class TagService {
   
+  public enum TagCategory {MEMBER, VIDEO, COMMENT, POST}
+  
   private static final String startSign = "#";
   private static final String regex = "^[\\p{L}\\p{N}_]+";  // letters, numbers, underscore(_)
   private static final int MAX_TAG_LENGTH = 25;
   
   private final TagRepository tagRepository;
+  private final TagHistoryRepository tagHistoryRepository;
   private final ObjectMapper objectMapper;
   
-  public TagService(TagRepository tagRepository, ObjectMapper objectMapper) {
+  public TagService(TagRepository tagRepository,
+                    TagHistoryRepository tagHistoryRepository,
+                    ObjectMapper objectMapper) {
     this.tagRepository = tagRepository;
+    this.tagHistoryRepository = tagHistoryRepository;
     this.objectMapper = objectMapper;
   }
   
   /**
    * Parse TagInfo from the text, and save tags without increasing refCount
    */
-  public void parseHashTagsAndToucheRefCount(String text) {
+  @Transactional
+  public void parseHashTagsAndToucheRefCount(String text, TagCategory category, Member member) {
     List<String> tags = getHashTags(text);
     touchRefCount(getUniqueTagNames(tags));
+    logHistory(tags, category, member);
   }
   
   /**
@@ -160,6 +169,23 @@ public class TagService {
     for (String name : uniqueTagNames) {
       tagRepository.findByName(name)
           .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+    }
+  }
+  
+  public void logHistory(List<String> tags, TagCategory category, Member me) {
+    if (tags != null && tags.size() > 0) {
+      TagHistory history;
+      for (String tag : tags) {
+        Optional<TagHistory> optional = tagHistoryRepository.findByTagAndCreatedBy(tag, me);
+        if (optional.isPresent()) {
+          history = optional.get();
+          history.setCategory(category.ordinal());
+          history.setCount(history.getCount() + 1);
+        } else {
+          history = new TagHistory(tag, category.ordinal(), me);
+        }
+        tagHistoryRepository.save(history);
+      }
     }
   }
 }

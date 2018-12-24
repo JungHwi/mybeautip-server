@@ -79,10 +79,15 @@ public class CallbackController {
   
       if (StringUtils.isNotEmpty(video.getContent())) {
         List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
-        try {
-          video.setTagInfo(objectMapper.writeValueAsString(tags));
-        } catch (JsonProcessingException e) {
-          log.warn("tag parsing failed, tags: ", tags.toString());
+        if (tags != null && tags.size() > 0) {
+          try {
+            video.setTagInfo(objectMapper.writeValueAsString(tags));
+          } catch (JsonProcessingException e) {
+            log.warn("tag parsing failed, tags: ", tags.toString());
+          }
+  
+          // Log TagHistory
+          tagService.logHistory(tags, TagService.TagCategory.VIDEO, member);
         }
       }
       Video createdVideo = videoService.save(video);
@@ -171,10 +176,15 @@ public class CallbackController {
     // Can be modified with empty string
     if (source.getContent() != null) {
       List<String> tags = tagService.getHashTagsAndUpdateRefCount(target.getTagInfo(), source.getContent());
-      try {
-        target.setTagInfo(objectMapper.writeValueAsString(tags));
-      } catch (JsonProcessingException e) {
-        log.warn("tag parsing failed, tags: ", tags.toString());
+      if (tags != null && tags.size() > 0) {
+        try {
+          target.setTagInfo(objectMapper.writeValueAsString(tags));
+        } catch (JsonProcessingException e) {
+          log.warn("tag parsing failed, tags: ", tags.toString());
+        }
+  
+        // Log TagHistory
+        tagService.logHistory(tags, TagService.TagCategory.VIDEO, target.getMember());
       }
       target.setContent(source.getContent());
     }
