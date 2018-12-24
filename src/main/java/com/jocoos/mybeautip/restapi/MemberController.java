@@ -411,7 +411,9 @@ public class MemberController {
         member.setFollowingCount(0);
         member.setFollowerCount(0);
         member.setDeletedAt(new Date());
-        memberRepository.save(member);
+        memberRepository.saveAndFlush(member);
+        
+        log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
   
         // Sync processing before response
         notificationService.readAllNotification(member.getId());
