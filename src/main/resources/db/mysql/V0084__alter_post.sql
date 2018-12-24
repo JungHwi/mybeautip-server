@@ -1,0 +1,1 @@
+ALTER TABLE `posts` CHANGE COLUMN `title` `title` VARCHAR(64) NOT NULL;
