@@ -469,6 +469,58 @@ public class MemberController {
       .withCount(count)
       .withCursor(nextCursor).toBuild();
   }
+  
+  @GetMapping(value = "/{id:.+}/comments")
+  public CursorResponse getMemberComments(@PathVariable Long id,
+                                          @RequestParam(defaultValue = "100") int count,
+                                          @RequestParam(required = false) String cursor,
+                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    Slice<Comment> comments;
+    if (StringUtils.isNumeric(cursor)) {
+      Date createdAt = new Date(Long.parseLong(cursor));
+      comments = commentRepository.findByCreatedByIdAndCreatedAtBeforeAndParentIdIsNull(member.getId(), createdAt, pageable);
+    } else {
+      comments = commentRepository.findByCreatedByIdAndParentIdIsNull(member.getId(), pageable);
+    }
+    
+    List<CommentInfo> result = Lists.newArrayList();
+    comments.stream().forEach(comment -> {
+      CommentInfo commentInfo;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          comment.setComment(mentionResult.getComment());
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+        }
+      } else {
+        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+      }
+      
+      Long me = memberService.currentMemberId();
+      if (me != null) {
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+            .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
+      }
+      result.add(commentInfo);
+    });
+    
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    }
+    
+    return new CursorResponse.Builder<>("/api/1/members/" + id + "/comments", result)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
+  }
 
   @Transactional
   @GetMapping("/me/revenues")
