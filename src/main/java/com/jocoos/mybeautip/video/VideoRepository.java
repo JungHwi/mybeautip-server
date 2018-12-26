@@ -109,6 +109,8 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
   Page<Video> findByTypeAndState(String type, String state, Pageable pageable);
 
+  Page<Video> findByMemberIdAndTypeAndState(Long owner, String type, String state, Pageable pageable);
+
   Page<Video> findByType(String type, Pageable pageable);
 
   Page<Video> findByState(String state, Pageable pageable);

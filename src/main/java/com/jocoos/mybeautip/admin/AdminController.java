@@ -471,10 +471,16 @@ public class AdminController {
   @GetMapping("/motdDetails")
   public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
      @RequestParam(defaultValue = "0") int page,
-     @RequestParam(defaultValue = "10") int size) {
+     @RequestParam(defaultValue = "10") int size,
+     @RequestParam(required = false) Long memberId) {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
-    Page<Video> videos = videoRepository.findByTypeAndState("UPLOADED", "VOD", pageable);
+    Page<Video> videos = null;
+    if (memberId != null) {
+      videos = videoRepository.findByMemberIdAndTypeAndState(memberId, "UPLOADED", "VOD", pageable);
+    } else {
+      videos = videoRepository.findByTypeAndState("UPLOADED", "VOD", pageable);
+    }
 
     Page<MotdDetailInfo> details = videos.map(v -> {
       MotdDetailInfo info = new MotdDetailInfo(v);
