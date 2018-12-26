@@ -51,7 +51,7 @@ import com.jocoos.mybeautip.video.report.VideoReportRepository;
 @RestController
 @RequestMapping("/api/admin/manual")
 public class AdminController {
-  private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd HHmmss");
+  private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
   private static final SimpleDateFormat BASE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 
   private final PostRepository postRepository;
