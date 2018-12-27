@@ -72,6 +72,12 @@ public class CallbackController {
         });
   
     Video video;
+  
+    // Ignore when videoKey is already exist
+    Optional<Video> optional = videoRepository.findByVideoKey(request.getVideoKey());
+    if (optional.isPresent()) {
+      return null;
+    }
     
     if ("UPLOADED".equals(request.getType())) {
       video = new Video(member);

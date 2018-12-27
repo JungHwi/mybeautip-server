@@ -40,6 +40,11 @@ public class NotificationAspect {
   public void onAfterReturningStartVideo(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
 
+    // Ignore when duplicate createVideo
+    if (result == null) {
+      return;
+    }
+    
     if (result instanceof Video) {
       Video video = (Video) result;
       log.debug("video: {}", video);
