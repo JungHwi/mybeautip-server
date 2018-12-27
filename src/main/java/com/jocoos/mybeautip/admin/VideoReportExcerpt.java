@@ -15,7 +15,7 @@ public interface VideoReportExcerpt {
 
   Video getVideo();
 
-  Member getCreatedBy();
+  Member getMember();
 
   String getReason();
 
