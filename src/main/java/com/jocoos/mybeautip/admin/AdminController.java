@@ -472,14 +472,23 @@ public class AdminController {
   public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "false") boolean isDeleted,
      @RequestParam(required = false) Long memberId) {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
     Page<Video> videos = null;
     if (memberId != null) {
-      videos = videoRepository.findByMemberIdAndTypeAndState(memberId, "UPLOADED", "VOD", pageable);
+      if (isDeleted) {
+        videos = videoRepository.findByMemberIdAndTypeAndStateAndDeletedAtIsNotNull(memberId, "UPLOADED", "VOD", pageable);
+      } else {
+        videos = videoRepository.findByMemberIdAndTypeAndStateAndDeletedAtIsNull(memberId, "UPLOADED", "VOD", pageable);
+      }
     } else {
-      videos = videoRepository.findByTypeAndState("UPLOADED", "VOD", pageable);
+      if (isDeleted) {
+        videos = videoRepository.findByTypeAndStateAndDeletedAtIsNotNull("UPLOADED", "VOD", pageable);
+      } else {
+        videos = videoRepository.findByTypeAndStateAndDeletedAtIsNull("UPLOADED", "VOD", pageable);
+      }
     }
 
     Page<MotdDetailInfo> details = videos.map(v -> {
