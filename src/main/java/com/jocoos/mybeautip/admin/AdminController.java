@@ -595,7 +595,7 @@ public class AdminController {
   @Data
   private static class RecommendedGoodsInfo {
     private String goodsNo;
-    private Integer state;  // 상태 (1: 구매가능, 2:품절, 3: 구매불가(판매 안함), 4: 노출안함, 5: 삭제됨)
+    private Integer state;  // 상태 (0: 구매가능, 1:품절, 2: 구매불가(판매 안함), 3: 노출안함, 4: 삭제됨)
     private Goods goods;
     private int seq;
     private Long createdBy;

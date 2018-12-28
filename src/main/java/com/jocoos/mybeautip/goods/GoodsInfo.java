@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 @NoArgsConstructor
 public class GoodsInfo {
   private String goodsNo;  // 상품번호
-  private Integer state;  // 상태 (1: 구매가능, 2:품절, 3: 구매불가(판매 안함), 4: 노출안함, 5: 삭제됨)
+  private Integer state;  // 상태 (0: 구매가능, 1:품절, 2: 구매불가(판매 안함), 3: 노출안함, 4: 삭제됨)
   private String goodsNm;  // 상품명
   private String cateCd;  //  대표 카테고리
   private String soldOutFl;  // 품절상태 (n= 정상, y=품절(수동))
