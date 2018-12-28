@@ -16,6 +16,9 @@ public interface VideoReportExcerpt {
 
   Video getVideo();
 
+  @Value("#{target.video.member}")
+  Member getVideoOwner();
+
   @Value("#{target.createdBy}")
   Member getMember();
 

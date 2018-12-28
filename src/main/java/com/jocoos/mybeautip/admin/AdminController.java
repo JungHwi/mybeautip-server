@@ -475,6 +475,7 @@ public class AdminController {
      @RequestParam(defaultValue = "false") boolean isDeleted,
      @RequestParam(required = false) Long memberId) {
 
+    Member me = memberService.currentMember();
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
     Page<Video> videos = null;
     if (memberId != null) {
@@ -494,7 +495,10 @@ public class AdminController {
     Page<MotdDetailInfo> details = videos.map(v -> {
       MotdDetailInfo info = new MotdDetailInfo(v);
       motdRecommendationRepository.findByVideoId(v.getId())
-         .ifPresent(r -> info.setRecommendation(r));
+        .ifPresent(r -> info.setRecommendation(r));
+
+      videoReportRepository.findByVideoIdAndCreatedById(v.getId(), me.getId())
+        .ifPresent(r -> info.setVideoReportId(r.getId()));
 
       Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getId(), PageRequest.of(0, 1));
       info.setReportCount(reports.getTotalElements());

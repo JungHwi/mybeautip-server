@@ -19,6 +19,7 @@ public class MotdDetailInfo extends VideoController.VideoInfo {
   private MotdRecommendation recommendation;
   private Long reportCount;
   private MemberInfo member;
+  private Long videoReportId;
 
   public MotdDetailInfo(Video video) {
     BeanUtils.copyProperties(video, this);
