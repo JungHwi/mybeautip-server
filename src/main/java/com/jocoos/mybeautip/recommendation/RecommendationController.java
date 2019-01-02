@@ -135,7 +135,8 @@ public class RecommendationController {
     @RequestParam(defaultValue = "100") int count,
     @RequestParam(defaultValue = "desc") String direction) {
 
-    Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
+    Date now = new Date();
+    Slice<MotdRecommendation> videos = motdRecommendationRepository.findByVideoCreatedAtBeforeAndEndedAtAfter(now, now,
       PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "seq")));
 
     return new ResponseEntity<>(createMotdList(videos), HttpStatus.OK);

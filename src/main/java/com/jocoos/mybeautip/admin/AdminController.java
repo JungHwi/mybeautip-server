@@ -14,10 +14,7 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.tag.TagService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -510,15 +507,16 @@ public class AdminController {
   }
 
   @GetMapping("/recommendedMotdDetails")
-  public ResponseEntity<Page<RecommendationController.RecommendedMotdBaseInfo>> getRecommendedMotdDetails(
+  public ResponseEntity<Slice<RecommendationController.RecommendedMotdBaseInfo>> getRecommendedMotdDetails(
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "desc") String direction) {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "baseDate"));
-    Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findAll(pageable);
+    Date now = new Date();
 
-    Page<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
+    Slice<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findByBaseDateBefore(now, pageable);
+    Slice<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
       RecommendationController.RecommendedMotdBaseInfo info = new RecommendationController.RecommendedMotdBaseInfo(b, createRecommendedMotd(b));
       return info;
     });
