@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
@@ -385,7 +386,8 @@ public class MemberController {
   @DeleteMapping("/me")
   public void deleteMe(@Valid @RequestBody DeleteMemberRequest request,
                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
+    Long id = memberService.currentMemberId();
+    Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
     int link = member.getLink();
@@ -415,13 +417,15 @@ public class MemberController {
     
     log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
     
+    Member deletedMember = memberRepository.findById(id)
+        .orElseThrow(() -> new MybeautipRuntimeException("internal_server_error", "deleted member not found, id:" + id));
     // Sync processing before response
-    notificationService.readAllNotification(member.getId());
-    deviceService.disableAllDevices(member.getId());
-    memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
+    notificationService.readAllNotification(deletedMember.getId());
+    deviceService.disableAllDevices(deletedMember.getId());
+    memberLeaveLogRepository.save(new MemberLeaveLog(deletedMember, request.getReason()));
     
     // Async processing after response
-    postProcessService.deleteMember(member);
+    postProcessService.deleteMember(deletedMember);
   }
 
   @GetMapping(value = "/me/comments")
