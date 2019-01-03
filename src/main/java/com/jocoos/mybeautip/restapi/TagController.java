@@ -171,7 +171,7 @@ public class TagController {
   }
   
   @Data
-  public class TagInfo {
+  public static class TagInfo {
     private String name;
     private Integer refCount;
     private Date modifiedAt;

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.text.ParseException;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.tag.Tag;
+import com.jocoos.mybeautip.tag.TagRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -59,10 +62,12 @@ public class AdminController {
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
   private final MotdRecommendationBaseRepository motdRecommendationBaseRepository;
+  private final KeywordRecommendationRepository keywordRecommendationRepository;
   private final ReportRepository reportRepository;
   private final StoreRepository storeRepository;
   private final VideoRepository videoRepository;
   private final VideoReportRepository videoReportRepository;
+  private final TagRepository tagRepository;
   private final VideoService videoService;
   private final TagService tagService;
   private final MemberService memberService;
@@ -75,10 +80,12 @@ public class AdminController {
                          GoodsRecommendationRepository goodsRecommendationRepository,
                          MotdRecommendationRepository motdRecommendationRepository,
                          MotdRecommendationBaseRepository motdRecommendationBaseRepository,
+                         KeywordRecommendationRepository keywordRecommendationRepository,
                          ReportRepository reportRepository,
                          StoreRepository storeRepository,
                          VideoRepository videoRepository,
                          VideoReportRepository videoReportRepository,
+                         TagRepository tagRepository,
                          VideoService videoService,
                          TagService tagService,
                          MemberService memberService) {
@@ -90,10 +97,12 @@ public class AdminController {
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
     this.motdRecommendationBaseRepository = motdRecommendationBaseRepository;
+    this.keywordRecommendationRepository = keywordRecommendationRepository;
     this.reportRepository = reportRepository;
     this.storeRepository = storeRepository;
     this.videoRepository = videoRepository;
     this.videoReportRepository = videoReportRepository;
+    this.tagRepository = tagRepository;
     this.tagService = tagService;
     this.videoService = videoService;
     this.memberService = memberService;
@@ -531,6 +540,48 @@ public class AdminController {
     }
     return motds;
   }
+  
+  @Transactional
+  @PostMapping("/recommendedKeywords")
+  public void CreateRecommendedKeywordsRequest(@Valid @RequestBody CreateRecommendedKeywordsRequest request) {
+    
+    log.debug("request: {}", request);
+    
+    List<RecommendedKeyword> items = request.getItems();
+    KeywordRecommendation keyword;
+    int seq = 1;
+    
+    for (RecommendedKeyword item : items) {
+      switch (item.getCategory()) {
+        case 1: // Member
+          Member member = memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue(item.getWord())
+              .orElseThrow(() -> new MemberNotFoundException(item.getWord()));
+          
+          keyword = keywordRecommendationRepository.findByMember(member).orElse(null);
+          if (keyword == null) {
+            keywordRecommendationRepository.save(new KeywordRecommendation(member, seq++));
+          } else {
+            keyword.setSeq(seq++);
+            keywordRecommendationRepository.save(keyword);
+          }
+          break;
+        case 2: // Tag
+        default:
+          Tag tag = tagRepository.findByName(item.getWord()).orElse(null);
+          if (tag == null) {
+            tag = tagRepository.save(new Tag(item.getWord(), 0));
+          }
+          keyword = keywordRecommendationRepository.findByTag(tag).orElse(null);
+          if (keyword == null) {
+            keywordRecommendationRepository.save(new KeywordRecommendation(tag, seq++));
+          } else {
+            keyword.setSeq(seq++);
+            keywordRecommendationRepository.save(keyword);
+          }
+          break;
+      }
+    }
+  }
 
   @Data
   public static class CreateBannerRequest {
@@ -612,5 +663,21 @@ public class AdminController {
     private int seq;
     private String startedAt;
     private String endedAt;
+  }
+  
+  @Data
+  private static class CreateRecommendedKeywordsRequest {
+    @Valid
+    @NotNull(message = "items must not be null")
+    private List<RecommendedKeyword> items;
+  }
+  
+  @Data
+  private static class RecommendedKeyword {
+    @NotNull(message = "category must not be null")
+    private Integer category; // 1: Member, 2: Tag
+    
+    @NotNull(message = "word must not be null")
+    private String word;
   }
 }
