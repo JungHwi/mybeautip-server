@@ -419,13 +419,15 @@ public class MemberController {
     
     log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
     
+    Member deletedMember = memberRepository.findById(id)
+        .orElseThrow(() -> new MybeautipRuntimeException("internal_server_error", "deleted member not found, id:" + id));
     // Sync processing before response
-    notificationService.readAllNotification(member.getId());
-    deviceService.disableAllDevices(member.getId());
-    memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
+    notificationService.readAllNotification(deletedMember.getId());
+    deviceService.disableAllDevices(deletedMember.getId());
+    memberLeaveLogRepository.save(new MemberLeaveLog(deletedMember, request.getReason()));
     
     // Async processing after response
-    postProcessService.deleteMember(member);
+    postProcessService.deleteMember(deletedMember);
   }
 
   @GetMapping(value = "/me/comments")
