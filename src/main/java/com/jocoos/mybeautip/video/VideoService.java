@@ -286,6 +286,7 @@ public class VideoService {
           if ("PUBLIC".equals(v.getVisibility())) {
             member.setVideoCount(member.getVideoCount() - 1);
           }
+
           member.setTotalVideoCount(member.getTotalVideoCount() - 1);
           memberRepository.save(member);
           return v;
