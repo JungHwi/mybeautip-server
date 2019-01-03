@@ -49,11 +49,7 @@ public class PostProcessService {
     // TODO: Delete garbage data depends on policy(order, addresses, account, likes, views, blocks, reports, comments)
 
     log.debug("Member {} deleted: video will be deleted", member.getId());
-    videoRepository.findByMemberAndDeletedAtIsNull(member)
-        .forEach(video -> {
-          videoService.deleteVideo(member.getId(), video.getId());
-          log.debug("{} video deleted", video.getId());
-        });
+    videoService.deleteVideos(member);
 
     log.debug("Member {} deleted: followings will be deleted", member.getId());
     followingRepository.findByMemberMeId(member.getId())

@@ -507,7 +507,7 @@ public class AdminController {
   }
 
   @GetMapping("/recommendedMotdDetails")
-  public ResponseEntity<Slice<RecommendationController.RecommendedMotdBaseInfo>> getRecommendedMotdDetails(
+  public ResponseEntity<Page<RecommendationController.RecommendedMotdBaseInfo>> getRecommendedMotdDetails(
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "desc") String direction) {
@@ -515,8 +515,8 @@ public class AdminController {
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "baseDate"));
     Date now = new Date();
 
-    Slice<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findByBaseDateBefore(now, pageable);
-    Slice<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
+    Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findByBaseDateBefore(now, pageable);
+    Page<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
       RecommendationController.RecommendedMotdBaseInfo info = new RecommendationController.RecommendedMotdBaseInfo(b, createRecommendedMotd(b));
       return info;
     });

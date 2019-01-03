@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
@@ -33,6 +34,7 @@ public class VideoService {
   private final MemberService memberService;
   private final MessageService messageService;
   private final TagService tagService;
+  private final FeedService feedService;
   private final VideoRepository videoRepository;
   private final CommentRepository commentRepository;
   private final VideoLikeRepository videoLikeRepository;
@@ -48,6 +50,7 @@ public class VideoService {
   public VideoService(MemberService memberService,
                       MessageService messageService,
                       TagService tagService,
+                      FeedService feedService,
                       VideoRepository videoRepository,
                       CommentRepository commentRepository,
                       VideoLikeRepository videoLikeRepository,
@@ -57,6 +60,7 @@ public class VideoService {
     this.memberService = memberService;
     this.messageService = messageService;
     this.tagService = tagService;
+    this.feedService = feedService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
     this.videoLikeRepository = videoLikeRepository;
@@ -281,6 +285,7 @@ public class VideoService {
           if ("PUBLIC".equals(v.getVisibility())) {
             member.setVideoCount(member.getVideoCount() - 1);
           }
+
           member.setTotalVideoCount(member.getTotalVideoCount() - 1);
           memberRepository.save(member);
           return v;
@@ -307,6 +312,19 @@ public class VideoService {
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
+  }
+  
+  // Delete All user's videos when member left
+  @Transactional
+  public void deleteVideos(Member member) {
+    videoRepository.findByMemberAndDeletedAtIsNull(member)
+        .forEach(video -> {
+          tagService.decreaseRefCount(video.getTagInfo());
+          video.setDeletedAt(new Date());
+          saveWithDeletedAt(video);
+          videoLikeRepository.deleteByVideoId(video.getId());
+          feedService.feedDeletedVideo(video.getId());
+        });
   }
 
   /**
