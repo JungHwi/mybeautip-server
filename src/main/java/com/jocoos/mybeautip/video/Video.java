@@ -30,6 +30,9 @@ public class Video {
 
   @Column(nullable = false)
   private String state;
+  
+  @Column(nullable = false)
+  private Boolean muted;
 
   @Column(nullable = false)
   private String visibility;

@@ -273,6 +273,7 @@ public class CallbackController {
   
     String visibility;
     String state;
+    Boolean muted;
     Integer duration = 0;
     String title ="";
     String content = "";
