@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
@@ -410,6 +411,8 @@ public class MemberController {
     member.setVisible(false);
     member.setFollowingCount(0);
     member.setFollowerCount(0);
+    member.setVideoCount(0);
+    member.setTotalVideoCount(0);
     member.setDeletedAt(new Date());
     memberRepository.saveAndFlush(member);
     
