@@ -386,8 +386,7 @@ public class MemberController {
   @DeleteMapping("/me")
   public void deleteMe(@Valid @RequestBody DeleteMemberRequest request,
                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Long id = memberService.currentMemberId();
-    Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
+    Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
     int link = member.getLink();
@@ -419,15 +418,13 @@ public class MemberController {
     
     log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
     
-    Member deletedMember = memberRepository.findById(id)
-        .orElseThrow(() -> new MybeautipRuntimeException("internal_server_error", "deleted member not found, id:" + id));
     // Sync processing before response
-    notificationService.readAllNotification(deletedMember.getId());
-    deviceService.disableAllDevices(deletedMember.getId());
-    memberLeaveLogRepository.save(new MemberLeaveLog(deletedMember, request.getReason()));
+    notificationService.readAllNotification(member.getId());
+    deviceService.disableAllDevices(member.getId());
+    memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
     
     // Async processing after response
-    postProcessService.deleteMember(deletedMember);
+    postProcessService.deleteMember(member);
   }
 
   @GetMapping(value = "/me/comments")
