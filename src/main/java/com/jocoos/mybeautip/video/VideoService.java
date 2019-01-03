@@ -275,7 +275,6 @@ public class VideoService {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
           }
           tagService.decreaseRefCount(v.getTagInfo());
-          v.setDeletedAt(new Date());
           saveWithDeletedAt(v);
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
@@ -297,7 +296,6 @@ public class VideoService {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
           }
           tagService.decreaseRefCount(v.getTagInfo());
-          v.setDeletedAt(new Date());
           saveWithDeletedAt(v);
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
@@ -335,6 +333,7 @@ public class VideoService {
    * @return
    */
   public Video saveWithDeletedAt(Video video) {
+    video.setDeletedAt(new Date());
     return videoRepository.save(video);
   }
 }
