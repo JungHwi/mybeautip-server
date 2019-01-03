@@ -70,82 +70,14 @@ public class CallbackController {
           log.error("Invalid UserID: " + request.getUserId());
           throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
         });
-  
-    Video video;
-  
+    
     // Ignore when videoKey is already exist
-    Optional<Video> optional = videoRepository.findByVideoKey(request.getVideoKey());
-    if (optional.isPresent()) {
+    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
+      log.debug("VideoKey is already exist, videoKey: " + request.getVideoKey());
       return null;
     }
     
-    if ("UPLOADED".equals(request.getType())) {
-      video = new Video(member);
-      BeanUtils.copyProperties(request, video);
-  
-      if (StringUtils.isNotEmpty(video.getContent())) {
-        List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
-        if (tags != null && tags.size() > 0) {
-          try {
-            video.setTagInfo(objectMapper.writeValueAsString(tags));
-          } catch (JsonProcessingException e) {
-            log.warn("tag parsing failed, tags: ", tags.toString());
-          }
-  
-          // Log TagHistory
-          tagService.logHistory(tags, TagService.TagCategory.VIDEO, member);
-        }
-      }
-      Video createdVideo = videoService.save(video);
-  
-      // Set related goods info
-      if (StringUtils.isNotEmpty(request.getData())) {
-        String[] userData = StringUtils.deleteWhitespace(request.getData()).split(",");
-        List<VideoGoods> videoGoods = new ArrayList<>();
-        for (String goods : userData) {
-          if (goods.length() != 10) { // invalid goodsNo
-            continue;
-          }
-          goodsRepository.findByGoodsNo(goods).map(g -> {
-            videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
-            return Optional.empty();
-          });
-        }
-    
-        if (videoGoods.size() > 0) {
-          videoGoodsRepository.saveAll(videoGoods);
-      
-          // Set related goods count & one thumbnail image
-          String url = videoGoods.get(0).getGoods().getListImageData().toString();
-          createdVideo.setRelatedGoodsThumbnailUrl(url);
-          createdVideo.setRelatedGoodsCount(videoGoods.size());
-          videoService.save(createdVideo);
-        }
-      }
-  
-      if ("PUBLIC".equals(request.getVisibility())) {
-        member.setVideoCount(member.getVideoCount() + 1);
-      }
-      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
-      memberRepository.save(member);
-      
-      return videoService.save(video);
-    } else {
-      video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
-          .orElseGet(() -> {
-            log.error("Cannot find videoId: " + request.getVideoKey());
-            throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
-          });
-      BeanUtils.copyProperties(request, video);
-  
-      if ("PUBLIC".equals(request.getVisibility())) {
-        member.setVideoCount(member.getVideoCount() + 1);
-      }
-      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
-      memberRepository.save(member);
-      
-      return videoService.save(video);
-    }
+    return videoService.startVideo(request, member);
   }
   
   @Transactional
@@ -273,6 +205,7 @@ public class CallbackController {
   
     String visibility;
     String state;
+    Boolean muted = false;
     Integer duration = 0;
     String title ="";
     String content = "";

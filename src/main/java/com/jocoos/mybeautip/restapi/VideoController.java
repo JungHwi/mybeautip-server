@@ -767,6 +767,7 @@ public class VideoController {
     private String videoKey;
     private String type;
     private String state;
+    private Boolean muted;
     private String visibility;
     private String title;
     private String content;
@@ -809,6 +810,7 @@ public class VideoController {
     String content = "";
     String chatRoomId ="";
     String data = "";
+    Boolean muted = false;
   }
 
   @Data
