@@ -4,6 +4,7 @@ import javax.transaction.Transactional;
 
 import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.notification.NotificationRepository;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
@@ -23,6 +24,7 @@ public class PostProcessService {
   private final MemberRepository memberRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final VideoGoodsRepository videoGoodsRepository;
+  private final NotificationRepository notificationRepository;
   
   public PostProcessService(VideoService videoService,
                             VideoRepository videoRepository,
@@ -30,7 +32,8 @@ public class PostProcessService {
                             CartRepository cartRepository,
                             MemberRepository memberRepository,
                             MemberRecommendationRepository memberRecommendationRepository,
-                            VideoGoodsRepository videoGoodsRepository) {
+                            VideoGoodsRepository videoGoodsRepository,
+                            NotificationRepository notificationRepository) {
     this.videoService = videoService;
     this.videoRepository = videoRepository;
     this.followingRepository = followingRepository;
@@ -38,6 +41,7 @@ public class PostProcessService {
     this.memberRepository = memberRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.videoGoodsRepository = videoGoodsRepository;
+    this.notificationRepository = notificationRepository;
   }
   
   @Async
@@ -75,5 +79,11 @@ public class PostProcessService {
     log.debug("Member {} deleted: videoGoods will be deleted", member.getId());
     videoGoodsRepository.findAllByMemberId(member.getId())
         .forEach(videoGoodsRepository::delete);
+  
+    log.debug("Member {} deleted: notifications will be deleted", member.getId());
+    notificationRepository.findByResourceOwnerId(member.getId())
+        .forEach(notificationRepository::delete);
+    notificationRepository.findByTargetMemberId(member.getId())
+        .forEach(notificationRepository::delete);
   }
 }
