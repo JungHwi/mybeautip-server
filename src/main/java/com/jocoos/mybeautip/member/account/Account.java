@@ -25,6 +25,9 @@ public class Account {
 
   @Column
   private String bankName;
+  
+  @Transient
+  private String bankCode;
 
   @Column
   private String bankAccount;
@@ -43,7 +46,8 @@ public class Account {
   @LastModifiedDate
   private Date modifiedAt;
 
-  public Account(Long memberId) {
+  public Account(Long memberId, boolean validity) {
     this.memberId = memberId;
+    this.validity = validity;
   }
 }

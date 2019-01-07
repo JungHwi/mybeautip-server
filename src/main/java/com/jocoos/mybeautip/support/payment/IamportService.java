@@ -99,4 +99,8 @@ public class IamportService implements IamportApi {
 
     return response;
   }
+  
+  public String getApi() {
+    return api;
+  }
 }
