@@ -407,6 +407,7 @@ public class MemberController {
         throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
     }
     
+    member.setIntro("");
     member.setAvatarUrl("https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_deleted.png");
     member.setVisible(false);
     member.setFollowingCount(0);
