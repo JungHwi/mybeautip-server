@@ -5,6 +5,7 @@ import javax.transaction.Transactional;
 import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.notification.NotificationRepository;
+import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
@@ -25,6 +26,7 @@ public class PostProcessService {
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final NotificationRepository notificationRepository;
+  private final KeywordRecommendationRepository keywordRecommendationRepository;
   
   public PostProcessService(VideoService videoService,
                             VideoRepository videoRepository,
@@ -33,7 +35,8 @@ public class PostProcessService {
                             MemberRepository memberRepository,
                             MemberRecommendationRepository memberRecommendationRepository,
                             VideoGoodsRepository videoGoodsRepository,
-                            NotificationRepository notificationRepository) {
+                            NotificationRepository notificationRepository,
+                            KeywordRecommendationRepository keywordRecommendationRepository) {
     this.videoService = videoService;
     this.videoRepository = videoRepository;
     this.followingRepository = followingRepository;
@@ -42,6 +45,7 @@ public class PostProcessService {
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.notificationRepository = notificationRepository;
+    this.keywordRecommendationRepository = keywordRecommendationRepository;
   }
   
   @Async
@@ -85,5 +89,9 @@ public class PostProcessService {
         .forEach(notificationRepository::delete);
     notificationRepository.findByTargetMemberId(member.getId())
         .forEach(notificationRepository::delete);
+  
+    log.debug("Member {} deleted: recommended keyword will be deleted", member.getId());
+    keywordRecommendationRepository.findByMember(member)
+        .ifPresent(keywordRecommendationRepository::delete);
   }
 }
