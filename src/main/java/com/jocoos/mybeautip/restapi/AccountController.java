@@ -12,11 +12,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -25,8 +25,6 @@ import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @Slf4j
 @RestController
@@ -37,7 +35,6 @@ public class AccountController {
   private final MessageService messageService;
   private final IamportService iamportService;
   private final AccountRepository accountRepository;
-  private final RestTemplate restTemplate;
 
   private static final String ACCOUNT_NOT_FOUND = "account.not_found";
   private static final String ACCOUNT_BANK_NOT_SUPPORTED = "account.not_supported_bank_code";
@@ -74,13 +71,11 @@ public class AccountController {
   public AccountController(MemberService memberService,
                            MessageService messageService,
                            IamportService iamportService,
-                           AccountRepository accountRepository,
-                           RestTemplate restTemplate) {
+                           AccountRepository accountRepository) {
     this.memberService = memberService;
     this.messageService = messageService;
     this.iamportService = iamportService;
     this.accountRepository = accountRepository;
-    this.restTemplate = restTemplate;
   }
 
   @GetMapping
@@ -150,19 +145,8 @@ public class AccountController {
       throw new BadRequestException("invalid_bank_code", messageService.getMessage(ACCOUNT_INVALID_BANK_CODE, lang));
     }
     
-    String accessToken = iamportService.getToken();
-    String requestUri = fromUriString(iamportService.getApi()).path("/vbanks/holder")
-        .queryParam("bank_code", info.getBankCode())
-        .queryParam("bank_num", info.getBankAccount())
-        .toUriString();
-  
-    HttpHeaders headers = new HttpHeaders();
-    headers.add(HttpHeaders.AUTHORIZATION, accessToken);
-  
-    HttpEntity<Object> request = new HttpEntity<>(headers);
-    ResponseEntity<VbankResponse> response;
     try {
-      response = restTemplate.exchange(requestUri, HttpMethod.GET, request, VbankResponse.class);
+      ResponseEntity<VbankResponse> response = iamportService.validAccountInfo(info);
       log.debug("{}, {}", response.getStatusCode(), response.getBody());
 
       if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null && response.getBody().getCode() == 0) {

@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.support.payment;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.restapi.AccountController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
@@ -100,7 +102,18 @@ public class IamportService implements IamportApi {
     return response;
   }
   
-  public String getApi() {
-    return api;
+  public ResponseEntity<VbankResponse> validAccountInfo(AccountController.UpdateAccountInfo info)
+      throws HttpStatusCodeException {
+    String accessToken = getToken();
+    String requestUri = fromUriString(api).path("/vbanks/holder")
+        .queryParam("bank_code", info.getBankCode())
+        .queryParam("bank_num", info.getBankAccount())
+        .toUriString();
+  
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.AUTHORIZATION, accessToken);
+  
+    HttpEntity<Object> request = new HttpEntity<>(headers);
+    return restTemplate.exchange(requestUri, HttpMethod.GET, request, VbankResponse.class);
   }
 }
