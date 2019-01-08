@@ -44,6 +44,8 @@ public class AccountController {
   private static final String ACCOUNT_INVALID_INFO = "account.invalid_info";
   private static final String ACCOUNT_INVALID_BANK_CODE = "account.invalid_bank_code";
   
+  private static final String BANK_CODE_ETC = "000";
+  
   private final Map<String, String> bankCodeMap = new HashMap<String, String>() {
     {
       put("004", "KB국민은행");
@@ -65,6 +67,7 @@ public class AccountController {
       put("027", "한국씨티은행(한미은행)");
       put("089", "K뱅크");
       put("090", "카카오뱅크");
+      put(BANK_CODE_ETC, "");
     }
   };
 
@@ -135,6 +138,10 @@ public class AccountController {
   }
   
   private boolean validAccount(UpdateAccountInfo info, String lang) {
+    if (BANK_CODE_ETC.equals(info.getBankCode())) {
+      return false;
+    }
+    
     if (!bankCodeMap.containsKey(info.getBankCode())) {  // Not supported bank code
       throw new BadRequestException("not_supported_bank_code", messageService.getMessage(ACCOUNT_BANK_NOT_SUPPORTED, lang));
     }
