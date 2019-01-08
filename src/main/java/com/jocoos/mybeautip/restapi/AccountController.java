@@ -136,7 +136,7 @@ public class AccountController {
   
   private boolean validAccount(UpdateAccountInfo info, String lang) {
     if (!bankCodeMap.containsKey(info.getBankCode())) {  // Not supported bank code
-      throw new BadRequestException("not_supported_bank", messageService.getMessage(ACCOUNT_BANK_NOT_SUPPORTED, lang));
+      throw new BadRequestException("not_supported_bank_code", messageService.getMessage(ACCOUNT_BANK_NOT_SUPPORTED, lang));
     }
   
     if (!info.getBankName().equals(bankCodeMap.get(info.getBankCode()))) {  // BadRequest, bank code and name does not match
