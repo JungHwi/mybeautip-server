@@ -147,7 +147,7 @@ public class GoodsService {
     }
     // Set total count of related videos
     int relatedVideoTotalCount = videoGoodsRepository
-        .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(goods.getGoodsNo(), "PUBLIC");
+        .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(goods.getGoodsNo(), "PUBLIC", "CREATED");
     String deliveryInfo = "";
     String refundInfo = "";
     String asInfo = "";

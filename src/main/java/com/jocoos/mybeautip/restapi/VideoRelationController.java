@@ -72,7 +72,7 @@ public class VideoRelationController {
     Set<Video> combines = Sets.newConcurrentHashSet();
     for (Goods g: goodses) {
       log.debug("goods: {}", g.getGoodsNo());
-      Slice<VideoGoods> goodsVideo = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(dateCursor, g.getGoodsNo(), "PUBLIC", page);
+      Slice<VideoGoods> goodsVideo = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(dateCursor, g.getGoodsNo(), "PUBLIC", "CREATED", page);
       goodsVideo.stream().forEach(v -> {
         log.debug("v id: {}, v key: {}", v.getVideo().getId(), v.getVideo().getVideoKey());
         if (!v.getVideo().getId().equals(id)) {
