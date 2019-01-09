@@ -176,7 +176,7 @@ public class VideoController {
         String url = videoGoods.get(0).getGoods().getListImageData().toString();
         createdVideo.setRelatedGoodsThumbnailUrl(url);
         createdVideo.setRelatedGoodsCount(videoGoods.size());
-        videoService.save(createdVideo);
+        videoRepository.save(createdVideo);
       }
     }
     
