@@ -136,6 +136,11 @@ public class GoodsService {
 
     return FILTER.ALL;
   }
+  
+  public GoodsInfo generateGoodsInfo(String goodsNo) {
+    Goods goods = goodsRepository.findByGoodsNo(goodsNo).orElse(null);
+    return (goods == null) ? null : generateGoodsInfo(goods);
+  }
 
   public GoodsInfo generateGoodsInfo(Goods goods) {
     // Set like ID if exist

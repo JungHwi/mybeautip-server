@@ -35,10 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -107,7 +104,15 @@ public class PostController {
     List<PostInfo> result = Lists.newArrayList();
 
     posts.stream().forEach(post -> {
-      PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()));
+      List<GoodsInfo> goodsInfo = new ArrayList<>();
+      post.getGoods().forEach(goodsNo -> {
+        GoodsInfo info = goodsService.generateGoodsInfo(goodsNo);
+        if (info != null) {
+          goodsInfo.add(info);
+        }
+      });
+      
+      PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
       log.debug("post info: {}", info);
 
       postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
@@ -165,7 +170,15 @@ public class PostController {
     Long memberId = memberService.currentMemberId();
     return postRepository.findById(id)
        .map(post -> {
-         PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()));
+         List<GoodsInfo> goodsInfo = new ArrayList<>();
+         post.getGoods().forEach(goodsNo -> {
+           GoodsInfo info = goodsService.generateGoodsInfo(goodsNo);
+           if (info != null) {
+             goodsInfo.add(info);
+           }
+         });
+         
+         PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
          log.debug("post info: {}", info);
 
          postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
@@ -455,7 +468,8 @@ public class PostController {
     private int category;
     private int progress;
     private Set<PostContent> contents;
-    private List<String> goods;
+    private List<String> goods; // deprecated
+    private List<GoodsInfo> goodsInfo;
     private Set<Long> winners;
     private int likeCount;
     private int commentCount;
@@ -464,9 +478,10 @@ public class PostController {
     private MemberInfo createdBy;
     private Long likeId;
 
-    public PostInfo(Post post, MemberInfo memberInfo) {
+    public PostInfo(Post post, MemberInfo memberInfo, List<GoodsInfo> goodsInfo) {
       BeanUtils.copyProperties(post, this);
       this.createdBy = memberInfo;
+      this.goodsInfo = goodsInfo;
     }
   }
 
