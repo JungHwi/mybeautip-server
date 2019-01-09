@@ -188,6 +188,7 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
 
+  // TODO: will be deprecated
   @GetMapping("/{id:.+}/goods")
   public ResponseEntity<List<GoodsInfo>> getGoods(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
