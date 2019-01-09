@@ -426,7 +426,7 @@ CREATE TABLE `posts` (
   `title` VARCHAR(32) NOT NULL,
   `description` VARCHAR(2000) NOT NULL,
   `thumbnail_url` VARCHAR(255) NOT NULL,
-  `category` TINYINT NOT NULL DEFAULT 1 COMMENT '1: trend, 2: card news',
+  `category` TINYINT NOT NULL DEFAULT 1 COMMENT '1: trend, 2: card news, 3: event, 4: notice, 5: MOTD, 6: curation'
   `progress` int DEFAULT 0,
   `view_count` INT NOT NULL DEFAULT 0,
   `like_count` INT NOT NULL DEFAULT 0,
