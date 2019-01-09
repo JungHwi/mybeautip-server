@@ -137,9 +137,8 @@ public class GoodsService {
     return FILTER.ALL;
   }
   
-  public GoodsInfo generateGoodsInfo(String goodsNo) {
-    Goods goods = goodsRepository.findByGoodsNo(goodsNo).orElse(null);
-    return (goods == null) ? null : generateGoodsInfo(goods);
+  public Optional<GoodsInfo> generateGoodsInfo(String goodsNo) {
+    return goodsRepository.findByGoodsNo(goodsNo).map(this::generateGoodsInfo);
   }
 
   public GoodsInfo generateGoodsInfo(Goods goods) {

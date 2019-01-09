@@ -105,12 +105,7 @@ public class PostController {
 
     posts.stream().forEach(post -> {
       List<GoodsInfo> goodsInfo = new ArrayList<>();
-      post.getGoods().forEach(goodsNo -> {
-        GoodsInfo info = goodsService.generateGoodsInfo(goodsNo);
-        if (info != null) {
-          goodsInfo.add(info);
-        }
-      });
+      post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
       
       PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
       log.debug("post info: {}", info);
@@ -171,12 +166,7 @@ public class PostController {
     return postRepository.findById(id)
        .map(post -> {
          List<GoodsInfo> goodsInfo = new ArrayList<>();
-         post.getGoods().forEach(goodsNo -> {
-           GoodsInfo info = goodsService.generateGoodsInfo(goodsNo);
-           if (info != null) {
-             goodsInfo.add(info);
-           }
-         });
+         post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
          
          PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
          log.debug("post info: {}", info);
