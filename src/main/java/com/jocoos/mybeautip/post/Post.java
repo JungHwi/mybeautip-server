@@ -32,7 +32,7 @@ public class Post extends MemberAuditable {
   private String thumbnailUrl;
 
   /**
-   * 1: trend, 2: card news, 3: event, 4: notice, 5: MOTD, 6: curation
+   * 1: trend, 2: card news, 3: event, 4: notices, 5: MOTD, 6. curation
    */
   @Column(nullable = false)
   private int category;
