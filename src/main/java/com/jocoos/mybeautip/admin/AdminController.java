@@ -125,7 +125,7 @@ public class AdminController {
 
     Banner banner = new Banner();
     BeanUtils.copyProperties(request, banner);
-    log.debug("banner: {}", banner);
+
   
     if (StringUtils.isNotEmpty(request.getDescription())) {
       List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
@@ -139,6 +139,7 @@ public class AdminController {
     banner.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
     bannerRepository.save(banner);
+    log.debug("banner: {}", banner);
 
     BannerInfo info = new BannerInfo();
     BeanUtils.copyProperties(banner, info);
@@ -492,9 +493,9 @@ public class AdminController {
       }
     } else {
       if (isDeleted) {
-        videos = videoRepository.findByTypeAndStateAndDeletedAtIsNotNull("UPLOADED", "VOD", pageable);
+        videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNotNull("UPLOADED", Lists.newArrayList("VOD"), pageable);
       } else {
-        videos = videoRepository.findByTypeAndStateAndDeletedAtIsNull("UPLOADED", "VOD", pageable);
+        videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNull("UPLOADED", Lists.newArrayList("VOD"), pageable);
       }
     }
 

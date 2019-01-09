@@ -109,9 +109,9 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   
   List<Video> findByMemberAndDeletedAtIsNull(Member member);
 
-  Page<Video> findByTypeAndStateAndDeletedAtIsNull(String type, String state, Pageable pageable);
+  Page<Video> findByTypeAndStateInAndDeletedAtIsNull(String type, Collection<String> state, Pageable pageable);
 
-  Page<Video> findByTypeAndStateAndDeletedAtIsNotNull(String type, String state, Pageable pageable);
+  Page<Video> findByTypeAndStateInAndDeletedAtIsNotNull(String type, Collection<String> state, Pageable pageable);
 
   Page<Video> findByMemberIdAndTypeAndStateAndDeletedAtIsNull(Long owner, String type, String state, Pageable pageable);
 
