@@ -129,7 +129,7 @@ public class AdminController {
 
     Banner banner = new Banner();
     BeanUtils.copyProperties(request, banner);
-    banner.setLink(String.format("/posts/%d", request.getPostId()));
+    banner.setLink(String.format("/api/1/posts/%d", request.getPostId()));
     banner.setPost(post);
     banner.setCategory(1);
   
