@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.admin;
 
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 import com.jocoos.mybeautip.member.Member;
@@ -15,7 +16,11 @@ public interface VideoReportExcerpt {
 
   Video getVideo();
 
-  Member getCreatedBy();
+  @Value("#{target.video.member}")
+  Member getVideoOwner();
+
+  @Value("#{target.createdBy}")
+  Member getMember();
 
   String getReason();
 

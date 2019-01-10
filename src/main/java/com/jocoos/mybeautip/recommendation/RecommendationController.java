@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.CursorResponse;
 import com.jocoos.mybeautip.restapi.VideoController;
@@ -16,9 +15,7 @@ import com.jocoos.mybeautip.video.VideoService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -39,34 +36,30 @@ import java.util.List;
 public class RecommendationController {
 
   private final GoodsService goodsService;
-  private final MemberService memberServie;
+  private final MemberService memberService;
   private final VideoService videoService;
   private final VideoRepository videoRepository;
-  private final MemberRepository memberRepository;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
   private final MotdRecommendationBaseRepository motdRecommendationBaseRepository;
   private final KeywordRecommendationRepository keywordRecommendationRepository;
   
-  private final int SEQ_START = 1;
   private final int MAX_RECOMMENDED_BJ_COUNT = 100;
 
   public RecommendationController(GoodsService goodsService,
-                                  MemberService memberServie,
+                                  MemberService memberService,
                                   VideoService videoService,
                                   VideoRepository videoRepository,
-                                  MemberRepository memberRepository,
                                   MemberRecommendationRepository memberRecommendationRepository,
                                   GoodsRecommendationRepository goodsRecommendationRepository,
                                   MotdRecommendationRepository motdRecommendationRepository,
                                   MotdRecommendationBaseRepository motdRecommendationBaseRepository,
                                   KeywordRecommendationRepository keywordRecommendationRepository) {
     this.goodsService = goodsService;
-    this.memberServie = memberServie;
+    this.memberService = memberService;
     this.videoService = videoService;
     this.videoRepository = videoRepository;
-    this.memberRepository = memberRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
@@ -83,7 +76,7 @@ public class RecommendationController {
     List<MemberInfo> result = Lists.newArrayList();
 
     members.forEach(r -> {
-      MemberInfo memberInfo = memberServie.getMemberInfo(r.getMember());
+      MemberInfo memberInfo = memberService.getMemberInfo(r.getMember());
       if (memberInfo.getVideoCount() > 0) {
         List<VideoController.VideoInfo> videoList = Lists.newArrayList();
         Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
@@ -135,7 +128,8 @@ public class RecommendationController {
     @RequestParam(defaultValue = "100") int count,
     @RequestParam(defaultValue = "desc") String direction) {
 
-    Slice<MotdRecommendation> videos = motdRecommendationRepository.findAll(
+    Date now = new Date();
+    Slice<MotdRecommendation> videos = motdRecommendationRepository.findByVideoCreatedAtBeforeAndEndedAtAfter(now, now,
       PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "seq")));
 
     return new ResponseEntity<>(createMotdList(videos), HttpStatus.OK);
@@ -190,44 +184,47 @@ public class RecommendationController {
 
     List<KeywordInfo> result = Lists.newArrayList();
     for (KeywordRecommendation keyword : keywords) {
-      result.add(new KeywordInfo(keyword));
+      switch (keyword.getCategory()) {
+        case 1:
+          result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+          break;
+        case 2:
+        default:
+          result.add(new KeywordInfo(keyword, new TagInfo(keyword.getTag())));
+          break;
+      }
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
   @Data
-  class KeywordInfo {
+  public static class KeywordInfo {
     Integer category;
     MemberInfo member;
     TagInfo tag;
     Integer seq;
-    Date startedAt;
-    Date endedAt;
+    Date startedAt; // Deprecated
+    Date endedAt; // Deprecated
     Date createdAt;
-
-    KeywordInfo(KeywordRecommendation keyword) {
+    Date modifiedAt;
+    
+    public KeywordInfo(KeywordRecommendation keyword, MemberInfo member) {
       BeanUtils.copyProperties(keyword, this);
-      switch (category) {
-        case 1:
-          member = memberServie.getMemberInfo(keyword.getMember());
-          break;
-
-        case 2:
-          tag = new TagInfo(keyword.getTag());
-          break;
-
-        default:
-          break;
-      }
+      this.member = member;
+    }
+  
+    public KeywordInfo(KeywordRecommendation keyword, TagInfo tag) {
+      BeanUtils.copyProperties(keyword, this);
+      this.tag = tag;
     }
   }
 
   @Data
-  private static class TagInfo {
+  public static class TagInfo {
     private String name;
     private Integer refCount;
 
-    TagInfo(Tag tag) {
+    public TagInfo(Tag tag) {
       BeanUtils.copyProperties(tag, this);
     }
   }

@@ -1,0 +1,1 @@
+ALTER TABLE `videos` ADD COLUMN `muted` TINYINT DEFAULT 0 AFTER `state`;

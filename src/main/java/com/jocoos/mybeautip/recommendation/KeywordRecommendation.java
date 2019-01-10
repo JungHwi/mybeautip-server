@@ -47,4 +47,16 @@ public class KeywordRecommendation extends MemberAuditable {
 
   @Column
   private Date endedAt;
+  
+  public KeywordRecommendation(Member member, int seq) {
+    this.category = 1;
+    this.member = member;
+    this.seq = seq;
+  }
+  
+  public KeywordRecommendation(Tag tag, int seq) {
+    this.category = 2;
+    this.tag = tag;
+    this.seq = seq;
+  }
 }

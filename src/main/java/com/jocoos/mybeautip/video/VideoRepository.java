@@ -81,6 +81,8 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
   Optional<Video> findByIdAndDeletedAtIsNull(Long id);
   
+  Optional<Video> findByVideoKey(String videoKey);
+  
   Optional<Video> findByVideoKeyAndDeletedAtIsNull(String videoKey);
   
   Optional<Video> findByIdAndMemberId(Long id, Long memberId);
@@ -107,9 +109,17 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   
   List<Video> findByMemberAndDeletedAtIsNull(Member member);
 
-  Page<Video> findByTypeAndState(String type, String state, Pageable pageable);
+  Page<Video> findByTypeAndStateInAndDeletedAtIsNull(String type, Collection<String> state, Pageable pageable);
 
-  Page<Video> findByType(String type, Pageable pageable);
+  Page<Video> findByTypeAndStateInAndDeletedAtIsNotNull(String type, Collection<String> state, Pageable pageable);
+
+  Page<Video> findByMemberIdAndTypeAndStateAndDeletedAtIsNull(Long owner, String type, String state, Pageable pageable);
+
+  Page<Video> findByMemberIdAndTypeAndStateAndDeletedAtIsNotNull(Long owner, String type, String state, Pageable pageable);
+
+  Page<Video> findByTypeAndDeletedAtIsNull(String type, Pageable pageable);
+
+  Page<Video> findByTypeAndDeletedAtIsNotNull(String type, Pageable pageable);
 
   Page<Video> findByState(String state, Pageable pageable);
 

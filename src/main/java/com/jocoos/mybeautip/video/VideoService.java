@@ -1,7 +1,11 @@
 package com.jocoos.mybeautip.video;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.feed.FeedService;
+import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
@@ -9,12 +13,14 @@ import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +29,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -33,12 +41,16 @@ public class VideoService {
   private final MemberService memberService;
   private final MessageService messageService;
   private final TagService tagService;
+  private final FeedService feedService;
   private final VideoRepository videoRepository;
   private final CommentRepository commentRepository;
   private final VideoLikeRepository videoLikeRepository;
   private final VideoWatchRepository videoWatchRepository;
   private final BlockRepository blockRepository;
   private final MemberRepository memberRepository;
+  private final GoodsRepository goodsRepository;
+  private final VideoGoodsRepository videoGoodsRepository;
+  private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -48,21 +60,29 @@ public class VideoService {
   public VideoService(MemberService memberService,
                       MessageService messageService,
                       TagService tagService,
+                      FeedService feedService,
                       VideoRepository videoRepository,
                       CommentRepository commentRepository,
                       VideoLikeRepository videoLikeRepository,
                       VideoWatchRepository videoWatchRepository,
                       BlockRepository blockRepository,
-                      MemberRepository memberRepository) {
+                      MemberRepository memberRepository,
+                      GoodsRepository goodsRepository,
+                      VideoGoodsRepository videoGoodsRepository,
+                      ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.messageService = messageService;
     this.tagService = tagService;
+    this.feedService = feedService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
     this.videoLikeRepository = videoLikeRepository;
     this.videoWatchRepository = videoWatchRepository;
     this.blockRepository = blockRepository;
     this.memberRepository = memberRepository;
+    this.goodsRepository = goodsRepository;
+    this.videoGoodsRepository = videoGoodsRepository;
+    this.objectMapper = objectMapper;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -268,6 +288,85 @@ public class VideoService {
   }
   
   @Transactional
+  public Video startVideo(CallbackController.CallbackStartVideoRequest request, Member member) {
+    Video video;
+    if ("UPLOADED".equals(request.getType())) {
+      video = new Video(member);
+      BeanUtils.copyProperties(request, video);
+    
+      if (StringUtils.isNotEmpty(video.getContent())) {
+        List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
+        if (tags != null && tags.size() > 0) {
+          try {
+            video.setTagInfo(objectMapper.writeValueAsString(tags));
+          } catch (JsonProcessingException e) {
+            log.warn("tag parsing failed, tags: ", tags.toString());
+          }
+        
+          // Log TagHistory
+          tagService.logHistory(tags, TagService.TagCategory.VIDEO, member);
+        }
+      }
+      Video createdVideo = videoRepository.save(video);
+    
+      // Set related goods info
+      if (StringUtils.isNotEmpty(request.getData())) {
+        String[] userData = StringUtils.deleteWhitespace(request.getData()).split(",");
+        List<VideoGoods> videoGoods = new ArrayList<>();
+        for (String goods : userData) {
+          if (goods.length() != 10) { // invalid goodsNo
+            continue;
+          }
+          goodsRepository.findByGoodsNo(goods).ifPresent(g -> {
+            videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
+          });
+        }
+      
+        if (videoGoods.size() > 0) {
+          videoGoodsRepository.saveAll(videoGoods);
+        
+          // Set related goods count & one thumbnail image
+          String url = videoGoods.get(0).getGoods().getListImageData().toString();
+          createdVideo.setRelatedGoodsThumbnailUrl(url);
+          createdVideo.setRelatedGoodsCount(videoGoods.size());
+          videoRepository.save(createdVideo);
+        }
+      }
+    
+      if ("PUBLIC".equals(request.getVisibility())) {
+        member.setVideoCount(member.getVideoCount() + 1);
+      }
+      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
+      memberRepository.save(member);
+  
+      video = videoRepository.save(video);
+      if ("PUBLIC".equals(video.getVisibility())) {
+        feedService.feedVideo(video);
+      }
+      return video;
+    } else {
+      video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
+          .orElseGet(() -> {
+            log.error("Cannot find videoId: " + request.getVideoKey());
+            throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
+          });
+      BeanUtils.copyProperties(request, video);
+    
+      if ("PUBLIC".equals(request.getVisibility())) {
+        member.setVideoCount(member.getVideoCount() + 1);
+      }
+      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
+      memberRepository.save(member);
+    
+      video = videoRepository.save(video);
+      if ("PUBLIC".equals(video.getVisibility())) {
+        feedService.feedVideo(video);
+      }
+      return video;
+    }
+  }
+  
+  @Transactional
   public Video deleteVideo(long memberId, Long videoId) {
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
         .map(v -> {
@@ -275,13 +374,13 @@ public class VideoService {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
           }
           tagService.decreaseRefCount(v.getTagInfo());
-          v.setDeletedAt(new Date());
           saveWithDeletedAt(v);
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
             member.setVideoCount(member.getVideoCount() - 1);
           }
+
           member.setTotalVideoCount(member.getTotalVideoCount() - 1);
           memberRepository.save(member);
           return v;
@@ -297,7 +396,6 @@ public class VideoService {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
           }
           tagService.decreaseRefCount(v.getTagInfo());
-          v.setDeletedAt(new Date());
           saveWithDeletedAt(v);
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
@@ -309,6 +407,19 @@ public class VideoService {
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
+  }
+  
+  // Delete All user's videos when member left
+  @Transactional
+  public void deleteVideos(Member member) {
+    videoRepository.findByMemberAndDeletedAtIsNull(member)
+        .forEach(video -> {
+          tagService.decreaseRefCount(video.getTagInfo());
+          video.setDeletedAt(new Date());
+          saveWithDeletedAt(video);
+          videoLikeRepository.deleteByVideoId(video.getId());
+          feedService.feedDeletedVideo(video.getId());
+        });
   }
 
   /**
@@ -335,6 +446,7 @@ public class VideoService {
    * @return
    */
   public Video saveWithDeletedAt(Video video) {
+    video.setDeletedAt(new Date());
     return videoRepository.save(video);
   }
 }

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.text.ParseException;
@@ -11,13 +12,12 @@ import java.util.List;
 import java.util.Optional;
 
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.tag.Tag;
+import com.jocoos.mybeautip.tag.TagRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +51,7 @@ import com.jocoos.mybeautip.video.report.VideoReportRepository;
 @RestController
 @RequestMapping("/api/admin/manual")
 public class AdminController {
-  private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd HHmmss");
+  private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
   private static final SimpleDateFormat BASE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 
   private final PostRepository postRepository;
@@ -62,10 +62,12 @@ public class AdminController {
   private final GoodsRecommendationRepository goodsRecommendationRepository;
   private final MotdRecommendationRepository motdRecommendationRepository;
   private final MotdRecommendationBaseRepository motdRecommendationBaseRepository;
+  private final KeywordRecommendationRepository keywordRecommendationRepository;
   private final ReportRepository reportRepository;
   private final StoreRepository storeRepository;
   private final VideoRepository videoRepository;
   private final VideoReportRepository videoReportRepository;
+  private final TagRepository tagRepository;
   private final VideoService videoService;
   private final TagService tagService;
   private final MemberService memberService;
@@ -78,10 +80,12 @@ public class AdminController {
                          GoodsRecommendationRepository goodsRecommendationRepository,
                          MotdRecommendationRepository motdRecommendationRepository,
                          MotdRecommendationBaseRepository motdRecommendationBaseRepository,
+                         KeywordRecommendationRepository keywordRecommendationRepository,
                          ReportRepository reportRepository,
                          StoreRepository storeRepository,
                          VideoRepository videoRepository,
                          VideoReportRepository videoReportRepository,
+                         TagRepository tagRepository,
                          VideoService videoService,
                          TagService tagService,
                          MemberService memberService) {
@@ -93,10 +97,12 @@ public class AdminController {
     this.goodsRecommendationRepository = goodsRecommendationRepository;
     this.motdRecommendationRepository = motdRecommendationRepository;
     this.motdRecommendationBaseRepository = motdRecommendationBaseRepository;
+    this.keywordRecommendationRepository = keywordRecommendationRepository;
     this.reportRepository = reportRepository;
     this.storeRepository = storeRepository;
     this.videoRepository = videoRepository;
     this.videoReportRepository = videoReportRepository;
+    this.tagRepository = tagRepository;
     this.tagService = tagService;
     this.videoService = videoService;
     this.memberService = memberService;
@@ -119,7 +125,7 @@ public class AdminController {
 
     Banner banner = new Banner();
     BeanUtils.copyProperties(request, banner);
-    log.debug("banner: {}", banner);
+
   
     if (StringUtils.isNotEmpty(request.getDescription())) {
       List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
@@ -133,6 +139,7 @@ public class AdminController {
     banner.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
     bannerRepository.save(banner);
+    log.debug("banner: {}", banner);
 
     BannerInfo info = new BannerInfo();
     BeanUtils.copyProperties(banner, info);
@@ -471,15 +478,34 @@ public class AdminController {
   @GetMapping("/motdDetails")
   public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
      @RequestParam(defaultValue = "0") int page,
-     @RequestParam(defaultValue = "10") int size) {
+     @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "false") boolean isDeleted,
+     @RequestParam(required = false) Long memberId) {
 
+    Member me = memberService.currentMember();
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
-    Page<Video> videos = videoRepository.findByTypeAndState("UPLOADED", "VOD", pageable);
+    Page<Video> videos = null;
+    if (memberId != null) {
+      if (isDeleted) {
+        videos = videoRepository.findByMemberIdAndTypeAndStateAndDeletedAtIsNotNull(memberId, "UPLOADED", "VOD", pageable);
+      } else {
+        videos = videoRepository.findByMemberIdAndTypeAndStateAndDeletedAtIsNull(memberId, "UPLOADED", "VOD", pageable);
+      }
+    } else {
+      if (isDeleted) {
+        videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNotNull("UPLOADED", Lists.newArrayList("VOD"), pageable);
+      } else {
+        videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNull("UPLOADED", Lists.newArrayList("VOD"), pageable);
+      }
+    }
 
     Page<MotdDetailInfo> details = videos.map(v -> {
       MotdDetailInfo info = new MotdDetailInfo(v);
       motdRecommendationRepository.findByVideoId(v.getId())
-         .ifPresent(r -> info.setRecommendation(r));
+        .ifPresent(r -> info.setRecommendation(r));
+
+      videoReportRepository.findByVideoIdAndCreatedById(v.getId(), me.getId())
+        .ifPresent(r -> info.setVideoReportId(r.getId()));
 
       Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getId(), PageRequest.of(0, 1));
       info.setReportCount(reports.getTotalElements());
@@ -497,8 +523,9 @@ public class AdminController {
      @RequestParam(defaultValue = "desc") String direction) {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "baseDate"));
-    Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findAll(pageable);
+    Date now = new Date();
 
+    Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findByBaseDateBefore(now, pageable);
     Page<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
       RecommendationController.RecommendedMotdBaseInfo info = new RecommendationController.RecommendedMotdBaseInfo(b, createRecommendedMotd(b));
       return info;
@@ -513,6 +540,48 @@ public class AdminController {
       motds.add(new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
     }
     return motds;
+  }
+  
+  @Transactional
+  @PostMapping("/recommendedKeywords")
+  public void CreateRecommendedKeywordsRequest(@Valid @RequestBody CreateRecommendedKeywordsRequest request) {
+    
+    log.debug("request: {}", request);
+    
+    List<RecommendedKeyword> items = request.getItems();
+    KeywordRecommendation keyword;
+    int seq = 1;
+    
+    for (RecommendedKeyword item : items) {
+      switch (item.getCategory()) {
+        case 1: // Member
+          Member member = memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue(item.getWord())
+              .orElseThrow(() -> new MemberNotFoundException(item.getWord()));
+          
+          keyword = keywordRecommendationRepository.findByMember(member).orElse(null);
+          if (keyword == null) {
+            keywordRecommendationRepository.save(new KeywordRecommendation(member, seq++));
+          } else {
+            keyword.setSeq(seq++);
+            keywordRecommendationRepository.save(keyword);
+          }
+          break;
+        case 2: // Tag
+        default:
+          Tag tag = tagRepository.findByName(item.getWord()).orElse(null);
+          if (tag == null) {
+            tag = tagRepository.save(new Tag(item.getWord(), 0));
+          }
+          keyword = keywordRecommendationRepository.findByTag(tag).orElse(null);
+          if (keyword == null) {
+            keywordRecommendationRepository.save(new KeywordRecommendation(tag, seq++));
+          } else {
+            keyword.setSeq(seq++);
+            keywordRecommendationRepository.save(keyword);
+          }
+          break;
+      }
+    }
   }
 
   @Data
@@ -580,7 +649,7 @@ public class AdminController {
   @Data
   private static class RecommendedGoodsInfo {
     private String goodsNo;
-    private Integer state;  // 상태 (1: 구매가능, 2:품절, 3: 구매불가(판매 안함), 4: 노출안함, 5: 삭제됨)
+    private Integer state;  // 상태 (0: 구매가능, 1:품절, 2: 구매불가(판매 안함), 3: 노출안함, 4: 삭제됨)
     private Goods goods;
     private int seq;
     private Long createdBy;
@@ -595,5 +664,21 @@ public class AdminController {
     private int seq;
     private String startedAt;
     private String endedAt;
+  }
+  
+  @Data
+  private static class CreateRecommendedKeywordsRequest {
+    @Valid
+    @NotNull(message = "items must not be null")
+    private List<RecommendedKeyword> items;
+  }
+  
+  @Data
+  private static class RecommendedKeyword {
+    @NotNull(message = "category must not be null")
+    private Integer category; // 1: Member, 2: Tag
+    
+    @NotNull(message = "word must not be null")
+    private String word;
   }
 }

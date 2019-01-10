@@ -136,6 +136,10 @@ public class GoodsService {
 
     return FILTER.ALL;
   }
+  
+  public Optional<GoodsInfo> generateGoodsInfo(String goodsNo) {
+    return goodsRepository.findByGoodsNo(goodsNo).map(this::generateGoodsInfo);
+  }
 
   public GoodsInfo generateGoodsInfo(Goods goods) {
     // Set like ID if exist
@@ -147,7 +151,7 @@ public class GoodsService {
     }
     // Set total count of related videos
     int relatedVideoTotalCount = videoGoodsRepository
-        .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNull(goods.getGoodsNo(), "PUBLIC");
+        .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(goods.getGoodsNo(), "PUBLIC", "CREATED");
     String deliveryInfo = "";
     String refundInfo = "";
     String asInfo = "";

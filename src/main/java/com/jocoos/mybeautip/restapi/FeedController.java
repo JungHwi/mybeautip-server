@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.restapi;
 import java.util.List;
 
 import com.jocoos.mybeautip.member.Member;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,15 +47,16 @@ public class FeedController {
     }
     
     List<Video> videos = feedService.getVideoKeys(me.getId(), cursor, count);
-
-    List<String> videoKeys = Lists.newArrayList();
-    if (videos != null && videos.size() > 0) {
-      videos.forEach(v -> videoKeys.add(v.getVideoKey()));
-    }
-
+    
     List<VideoController.VideoInfo> result = Lists.newArrayList();
-    videos.stream()
-       .forEach(v -> result.add(videoService.generateVideoInfo(v)));
+    videos
+       .forEach(v -> {
+         if (StringUtils.isBlank(v.getVideoKey())) {
+           log.info("feed has invalid videoKey, member_id: " + me.getId());
+         } else {
+           result.add(videoService.generateVideoInfo(v));
+         }
+       });
 
     String nextCursor = null;
     if (result.size() > 0) {
