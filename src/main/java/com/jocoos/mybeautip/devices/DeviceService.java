@@ -167,8 +167,13 @@ public class DeviceService {
     }
 
     log.debug("data: {}", data);
-    int badge = notificationRepository.countByTargetMemberAndReadIsFalse(notification.getTargetMember());
-    log.debug("target_member: {}, badge: {}", notification.getTargetMember().getId(), badge);
+    int badge = 0;
+    if (notification.getTargetMember() == null) { // Instant push can send to guest
+      log.debug("target_member: guest, badge: 0");
+    } else {
+      badge = notificationRepository.countByTargetMemberAndReadIsFalse(notification.getTargetMember());
+      log.debug("target_member: {}, badge: {}", notification.getTargetMember().getId(), badge);
+    }
     switch (os) {
       case "android":
       case "ios":
