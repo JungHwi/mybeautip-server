@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.banner;
 
 import java.util.Date;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,8 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
   void updateViewCount(Long id, Long count);
 
   Slice<Banner> findByStartedAtBeforeAndEndedAtAfter(Date statedAt, Date endedAt, Pageable page);
+
+  Page<Banner> findByDeletedAtIsNull(Pageable pageable);
+
+  Page<Banner> findByDeletedAtIsNotNull(Pageable pageable);
 }

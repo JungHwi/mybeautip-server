@@ -26,7 +26,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   @Query("update Post p set p.commentCount = p.commentCount + ?2, p.modifiedAt = now() where p.id = ?1")
   void updateCommentCount(Long id, int count);
 
-  Slice<Post> findByCategoryAndDeletedAtIsNull(int category, Pageable pageable);
+  Page<Post> findByCategoryAndDeletedAtIsNull(int category, Pageable pageable);
 
   Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNull(Date createdAt, Pageable pageable);
 
@@ -40,5 +40,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date createdAt, String title, String description, Pageable pageable);
 
-  Page<Post> findByCategory(int category, Pageable pageable);
+  Page<Post> findByDeletedAtIsNull(Pageable pageable);
+
+  Page<Post> findByDeletedAtIsNotNull(Pageable pageable);
 }
