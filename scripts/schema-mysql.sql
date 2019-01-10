@@ -513,6 +513,7 @@ CREATE TABLE `banners` (
   `category` TINYINT NOT NULL DEFAULT 1 COMMENT '1: post, 2: goods, 3: goods list, 4: video',
   `seq` INT NOT NULL,
   `link` VARCHAR(255) NOT NULL,
+  `post_id` BIGINT NOT NULL,
   `started_at` DATETIME(3) DEFAULT NULL,
   `ended_at` DATETIME(3) DEFAULT NULL,
   `view_count` INT NOT NULL DEFAULT 0,
