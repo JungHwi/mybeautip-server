@@ -38,7 +38,9 @@ public class BannerController {
 
   @GetMapping
   public ResponseEntity<List<BannerInfo>> getBanners(@RequestParam(defaultValue = "5") int count) {
-    Slice<Banner> banners = bannerRepository.findAll(PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq"));
+    Date now = new Date();
+    Slice<Banner> banners = bannerRepository.findByStartedAtBeforeAndEndedAtAfter(now, now, pageRequest);
     List<BannerInfo> result = Lists.newArrayList();
 
     banners.stream().forEach(b -> result.add(new BannerInfo(b)));
