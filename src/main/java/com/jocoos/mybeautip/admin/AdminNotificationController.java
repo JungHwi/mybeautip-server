@@ -144,11 +144,10 @@ public class AdminNotificationController {
         devices = deviceRepository.findByPushableAndValidAndOs(true, true, deviceOs, pageable);
       }
     }
-
-    notifications.addAll(devices.map(d -> new Notification(d.getCreatedBy(), request.getMessage()))
-       .stream().collect(Collectors.toList()));
-
-    deviceService.push(notifications);
+    
+    devices.forEach(device ->
+      deviceService.push(device, new Notification(device.getCreatedBy(), request.getMessage())));
+    
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }
 
