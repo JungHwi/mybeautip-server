@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.post;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.banner.Banner;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -52,6 +54,9 @@ public class Post extends MemberAuditable {
 
   @Column(nullable = false)
   private int commentCount;
+
+  @OneToOne(mappedBy = "post")
+  private Banner banner;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(

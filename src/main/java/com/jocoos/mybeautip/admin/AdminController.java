@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.tag.TagRepository;
 import com.jocoos.mybeautip.tag.TagService;
@@ -123,9 +124,14 @@ public class AdminController {
   public ResponseEntity<BannerInfo> createTrend(@RequestBody CreateBannerRequest request) {
     log.debug("request: {}", request);
 
+    Post post = postRepository.findById(request.getPostId())
+       .orElseThrow(() -> new BadRequestException("post_not_found", "invalid post id"));
+
     Banner banner = new Banner();
     BeanUtils.copyProperties(request, banner);
-
+    banner.setLink(String.format("/posts/%d", request.getPostId()));
+    banner.setPost(post);
+    banner.setCategory(1);
   
     if (StringUtils.isNotEmpty(request.getDescription())) {
       List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
@@ -144,7 +150,6 @@ public class AdminController {
     BannerInfo info = new BannerInfo();
     BeanUtils.copyProperties(banner, info);
     return new ResponseEntity<>(info, HttpStatus.OK);
-
   }
 
   @DeleteMapping("/banners/{id:.+}")
@@ -595,9 +600,7 @@ public class AdminController {
     @NotNull
     private int seq;
     @NotNull
-    private int category;
-    @NotNull @Size(max = 255)
-    private String link;
+    private Long postId;
     @NotNull
     private String startedAt;
     @NotNull
