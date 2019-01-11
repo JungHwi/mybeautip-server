@@ -20,9 +20,11 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.Post;
@@ -49,6 +51,7 @@ public class RecodingController {
   private final ViewRecodingService viewRecodingService;
   private final MemberService memberService;
   private final PostService postService;
+  private final GoodsService goodsService;
   private final MessageService messageService;
   private final PostRepository postRepository;
   private final GoodsRepository goodsRepository;
@@ -60,6 +63,7 @@ public class RecodingController {
   public RecodingController(ViewRecodingService viewRecodingService,
                             MemberService memberService,
                             PostService postService,
+                            GoodsService goodsService,
                             MessageService messageService,
                             PostRepository postRepository,
                             GoodsRepository goodsRepository,
@@ -70,6 +74,7 @@ public class RecodingController {
     this.viewRecodingService = viewRecodingService;
     this.memberService = memberService;
     this.postService = postService;
+    this.goodsService = goodsService;
     this.messageService = messageService;
     this.postRepository = postRepository;
     this.goodsRepository = goodsRepository;
@@ -132,6 +137,31 @@ public class RecodingController {
     }
   
     return new CursorResponse.Builder<>("/api/1/members/me/views/log", result)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
+  }
+  
+  @GetMapping("/views/goods")
+  public CursorResponse findAllMyViewsLogForGoods(@RequestParam(defaultValue = "20") int count,
+                                                  @RequestParam(required = false) String cursor) {
+    Long memberId = memberService.currentMemberId();
+    
+    Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(memberId, count, cursor, 2);
+    List<GoodsInfo> result = new ArrayList<>();
+  
+    for (ViewRecoding recoding : recodings) {
+      goodsService.generateGoodsInfo(recoding.getItemId()).ifPresent(result::add);
+    }
+    
+    count = result.size();  // result size can be less than count when resource_not_found (invalid situation, but ignore)
+    log.debug("{}", result);
+    
+    String nextCursor = null;
+    if (result.size() > 0) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
+    }
+    
+    return new CursorResponse.Builder<>("/api/1/members/me/views/goods", result)
         .withCount(count)
         .withCursor(nextCursor).toBuild();
   }
