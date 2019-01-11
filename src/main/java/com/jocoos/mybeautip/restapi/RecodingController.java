@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -104,7 +105,7 @@ public class RecodingController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
     }
 
     return new CursorResponse.Builder<>("/api/1/members/me/recodings", result)
@@ -240,6 +241,7 @@ public class RecodingController {
     private String itemId;
     private int category;
     private Date createdAt;
+    @JsonIgnore private Date modifiedAt;
     private BasicInfo detail;
 
     public RecodingInfo(ViewRecoding viewRecoding) {

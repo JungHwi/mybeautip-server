@@ -32,7 +32,7 @@ public class ViewRecodingService {
       throw new BadRequestException("The count must be less or equals to 200");
     }
 
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
 
     Date now;
     if (!Strings.isNullOrEmpty(cursor)) {
@@ -43,9 +43,9 @@ public class ViewRecodingService {
 
     Date weekAgo = new Date(now.getTime() - 7 * DAY_IN_MS);
     if (category == null) {
-      return viewRecodingRepository.findByCreatedByIdAndCreatedAtBeforeAndCreatedAtAfter(memberId, now, weekAgo, page);
+      return viewRecodingRepository.findByCreatedByIdAndModifiedAtBeforeAndModifiedAtAfter(memberId, now, weekAgo, page);
     } else {
-      return viewRecodingRepository.findByCategoryAndCreatedByIdAndCreatedAtBeforeAndCreatedAtAfter(category, memberId, now, weekAgo, page);
+      return viewRecodingRepository.findByCategoryAndCreatedByIdAndModifiedAtBeforeAndModifiedAtAfter(category, memberId, now, weekAgo, page);
     }
   }
   
