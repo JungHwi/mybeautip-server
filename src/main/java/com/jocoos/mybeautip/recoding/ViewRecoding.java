@@ -1,11 +1,20 @@
 package com.jocoos.mybeautip.recoding;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
+
+import org.springframework.data.annotation.LastModifiedDate;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import com.jocoos.mybeautip.audit.MemberAuditable;
 
 @NoArgsConstructor
 @Data
@@ -30,6 +39,13 @@ public class ViewRecoding extends MemberAuditable {
    */
   @Column(nullable = false)
   private int category;
+  
+  @Column(nullable = false)
+  private int viewCount;
+  
+  @Column
+  @LastModifiedDate
+  private Date modifiedAt;
 
   public ViewRecoding(String itemId, int category) {
     this.itemId = itemId;
