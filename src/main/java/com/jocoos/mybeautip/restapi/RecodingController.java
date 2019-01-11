@@ -1,8 +1,10 @@
 package com.jocoos.mybeautip.restapi;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Slice;
@@ -215,7 +217,9 @@ public class RecodingController {
             .map(goods -> {
               Long likeId = goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goods.getGoodsNo(), me)
                   .map(GoodsLike::getId).orElse(null);
-              return new ViewsLogInfo(recoding, goods, likeId);
+              NumberFormat format = NumberFormat.getCurrencyInstance(Locale.KOREA);
+              String formattedGoodsPrice = format.format(goods.getGoodsPrice());
+              return new ViewsLogInfo(recoding, goods, formattedGoodsPrice, likeId);
             })
             .orElseGet(() -> new ViewsLogInfo(recoding, RESOURCE_TYPE_GOODS));
       case 3:
@@ -346,14 +350,14 @@ public class RecodingController {
       this.likeId = likeId;
     }
   
-    public ViewsLogInfo(ViewRecoding log, Goods goods, Long likeId) {
+    public ViewsLogInfo(ViewRecoding log, Goods goods, String formattedGoodsPrice, Long likeId) {
       this.id = log.getId();
       this.modifiedAt = log.getModifiedAt();
       this.resourceType = RESOURCE_TYPE_GOODS;
       this.resourceId = Long.parseLong(goods.getGoodsNo());
       this.imageUrl = goods.getListImageData().toString();
       this.title = goods.getGoodsNm();
-      this.content = goods.getGoodsPrice() + "원";
+      this.content = formattedGoodsPrice;
       this.likeId = likeId;
       this.goodsState = goods.getState();
     }
