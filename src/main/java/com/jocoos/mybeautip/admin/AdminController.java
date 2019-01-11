@@ -125,7 +125,7 @@ public class AdminController {
     log.debug("request: {}", request);
 
     Post post = postRepository.findByIdAndDeletedAtIsNull(request.getPostId())
-       .orElseThrow(() -> new BadRequestException("post_not_found", "invalid post id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
 
     Banner banner = new Banner();
     BeanUtils.copyProperties(request, banner);
