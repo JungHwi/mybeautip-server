@@ -43,4 +43,23 @@ public class PostService {
     }
     return comments;
   }
+  
+  public String getPostCategoryName(int category) {
+    switch (category) {
+      case 1:
+        return "post.category_trend";
+      case 2:
+        return "post.category_cardnews";
+      case 3:
+        return "post.category_event";
+      case 4:
+        return "post.category_notice";
+      case 5:
+        return "post.category_motd";
+      case 6:
+        return "post.category_curation";
+      default:
+        return "post";
+    }
+  }
 }
