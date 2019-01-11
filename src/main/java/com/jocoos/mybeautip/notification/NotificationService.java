@@ -181,7 +181,7 @@ public class NotificationService {
       }
 
       if (commentLike.getComment().getPostId() != null) {
-        Post post = postRepository.findById(commentLike.getComment().getPostId())
+        Post post = postRepository.findByIdAndDeletedAtIsNull(commentLike.getComment().getPostId())
             .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + commentLike.getComment().getPostId()));
   
         int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
