@@ -111,7 +111,7 @@ public class AdminController {
 
   @DeleteMapping("/posts/{id:.+}")
   public ResponseEntity<?> deletePost(@PathVariable Long id) {
-    postRepository.findById(id).map(post -> {
+    postRepository.findByIdAndDeletedAtIsNull(id).map(post -> {
       post.setDeletedAt(new Date());
       postRepository.save(post);
       return Optional.empty();
@@ -124,7 +124,7 @@ public class AdminController {
   public ResponseEntity<BannerInfo> createTrend(@RequestBody CreateBannerRequest request) {
     log.debug("request: {}", request);
 
-    Post post = postRepository.findById(request.getPostId())
+    Post post = postRepository.findByIdAndDeletedAtIsNull(request.getPostId())
        .orElseThrow(() -> new BadRequestException("post_not_found", "invalid post id"));
 
     Banner banner = new Banner();

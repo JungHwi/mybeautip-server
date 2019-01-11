@@ -163,7 +163,7 @@ public class PostController {
   public ResponseEntity<PostInfo> getPost(@PathVariable Long id,
                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
-    return postRepository.findById(id)
+    return postRepository.findByIdAndDeletedAtIsNull(id)
        .map(post -> {
          List<GoodsInfo> goodsInfo = new ArrayList<>();
          post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
@@ -182,7 +182,7 @@ public class PostController {
   @GetMapping("/{id:.+}/goods")
   public ResponseEntity<List<GoodsInfo>> getGoods(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    return postRepository.findById(id)
+    return postRepository.findByIdAndDeletedAtIsNull(id)
        .map(post -> {
          List<GoodsInfo> result = Lists.newArrayList();
          post.getGoods().stream().forEach(gno -> {
@@ -198,7 +198,7 @@ public class PostController {
   @GetMapping("/{id:.+}/winners")
   public ResponseEntity<List<MemberInfo>> getWinners(@PathVariable Long id,
                                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    return postRepository.findById(id)
+    return postRepository.findByIdAndDeletedAtIsNull(id)
        .map(post -> {
          List<MemberInfo> result = Lists.newArrayList();
          post.getWinners().stream().forEach(mid -> {
@@ -217,7 +217,7 @@ public class PostController {
                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     // TODO: Add history using spring AOP!!
-    return postRepository.findById(id)
+    return postRepository.findByIdAndDeletedAtIsNull(id)
        .map(post -> {
          postRepository.updateViewCount(post.getId(), 1);
          return new ResponseEntity(HttpStatus.OK);
@@ -230,7 +230,7 @@ public class PostController {
   public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
-    return postRepository.findById(id)
+    return postRepository.findByIdAndDeletedAtIsNull(id)
        .map(post -> {
          Long postId = post.getId();
          if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
@@ -270,6 +270,9 @@ public class PostController {
                                     @RequestParam(required = false) Long cursor,
                                     @RequestParam(required = false) String direction,
                                     @RequestParam(required = false) Long parentId) {
+    postRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
+    
     PageRequest page;
     if ("next".equals(direction)) {
       page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
@@ -317,7 +320,7 @@ public class PostController {
       }
     }
 
-    int totalCount = postRepository.findById(id).map(Post::getCommentCount).orElse(0);
+    int totalCount = postRepository.findByIdAndDeletedAtIsNull(id).map(Post::getCommentCount).orElse(0);
 
     return new CursorResponse
       .Builder<>("/api/1/posts/" + id + "/comments", result)
