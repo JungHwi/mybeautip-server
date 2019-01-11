@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.recoding;
 
+import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -45,5 +47,19 @@ public class ViewRecodingService {
     } else {
       return viewRecodingRepository.findByCategoryAndCreatedByIdAndCreatedAtBeforeAndCreatedAtAfter(category, memberId, now, weekAgo, page);
     }
+  }
+  
+  @Transactional
+  public void insertOrUpdate(String itemId, int category) {
+    viewRecodingRepository.findByItemIdAndCategory(itemId, category)
+        .map(recoding -> {
+          recoding.setViewCount(recoding.getViewCount() + 1);
+          viewRecodingRepository.saveAndFlush(recoding);
+          return Optional.empty();
+        })
+        .orElseGet(() -> {
+          viewRecodingRepository.save(new ViewRecoding(itemId, category));
+          return Optional.empty();
+        });
   }
 }

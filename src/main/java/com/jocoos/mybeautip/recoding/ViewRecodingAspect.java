@@ -17,12 +17,12 @@ import com.jocoos.mybeautip.member.MemberService;
 public class ViewRecodingAspect {
 
   private final MemberService memberService;
-  private final ViewRecodingRepository viewRecodingRepository;
+  private final ViewRecodingService viewRecodingService;
 
   public ViewRecodingAspect(MemberService memberService,
-                            ViewRecodingRepository viewRecodingRepository) {
+                            ViewRecodingService viewRecodingService) {
     this.memberService = memberService;
-    this.viewRecodingRepository = viewRecodingRepository;
+    this.viewRecodingService = viewRecodingService;
   }
 
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.PostController.addViewCount(..))",
@@ -41,7 +41,7 @@ public class ViewRecodingAspect {
         if (response.getStatusCode() == HttpStatus.OK) {
           log.debug("response status code: {}", response.getStatusCode());
           if (memberService.currentMemberId() != null) {
-            viewRecodingRepository.save(new ViewRecoding(String.valueOf(postId), ViewRecoding.CATEGORY_POST));
+            viewRecodingService.insertOrUpdate(String.valueOf(postId), ViewRecoding.CATEGORY_POST);
           }
         }
       } else {
@@ -69,7 +69,7 @@ public class ViewRecodingAspect {
         if (response.getStatusCode() == HttpStatus.OK) {
           log.debug("response status code: {}", response.getStatusCode());
           if (memberService.currentMemberId() != null) {
-            viewRecodingRepository.save(new ViewRecoding(goodsNo, ViewRecoding.CATEGORY_GOODS));
+            viewRecodingService.insertOrUpdate(goodsNo, ViewRecoding.CATEGORY_GOODS);
           }
         }
       } else {
@@ -97,7 +97,7 @@ public class ViewRecodingAspect {
         if (response.getStatusCode() == HttpStatus.OK) {
           log.debug("response status code: {}", response.getStatusCode());
           if (memberService.currentMemberId() != null) {
-            viewRecodingRepository.save(new ViewRecoding(String.valueOf(videoId), ViewRecoding.CATEGORY_VIDEO));
+            viewRecodingService.insertOrUpdate(String.valueOf(String.valueOf(videoId)), ViewRecoding.CATEGORY_VIDEO);
           }
         }
       } else {
