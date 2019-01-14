@@ -20,6 +20,7 @@ import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.word.BannedWord;
 
 @Configuration
 public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
@@ -29,6 +30,6 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
     config.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class, Order.class,
         Category.class, DeliveryCharge.class, DeliveryChargeDetail.class, Store.class,
         Goods.class, GoodsOption.class, VideoReport.class, Report.class, Post.class, Purchase.class,
-       MemberCoupon.class, MemberPoint.class, MotdRecommendationBase.class, AppInfo.class, Device.class, Video.class);
+       MemberCoupon.class, MemberPoint.class, MotdRecommendationBase.class, AppInfo.class, Device.class, Video.class, BannedWord.class);
   }
 }
