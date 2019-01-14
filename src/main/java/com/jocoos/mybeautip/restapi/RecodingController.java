@@ -1,9 +1,10 @@
 package com.jocoos.mybeautip.restapi;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Slice;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -104,7 +106,7 @@ public class RecodingController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
     }
 
     return new CursorResponse.Builder<>("/api/1/members/me/recodings", result)
@@ -127,8 +129,7 @@ public class RecodingController {
     Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(memberId, count, cursor, null);
     List<ViewsLogInfo> result = new ArrayList<>();
   
-    recodings.forEach(recoding -> getViewsLogInfo(recoding, lang).ifPresent(result::add));
-    count = result.size();  // result size can be less than count when resource_not_found (invalid situation, but ignore)
+    recodings.forEach(recoding -> result.add(getViewsLogInfo(recoding, lang)));
     log.debug("{}", result);
   
     String nextCursor = null;
@@ -153,7 +154,6 @@ public class RecodingController {
       goodsService.generateGoodsInfo(recoding.getItemId()).ifPresent(result::add);
     }
     
-    count = result.size();  // result size can be less than count when resource_not_found (invalid situation, but ignore)
     log.debug("{}", result);
     
     String nextCursor = null;
@@ -200,7 +200,7 @@ public class RecodingController {
     }
   }
   
-  private Optional<ViewsLogInfo> getViewsLogInfo(ViewRecoding recoding, String lang) {
+  private ViewsLogInfo getViewsLogInfo(ViewRecoding recoding, String lang) {
     Long me = memberService.currentMemberId();
     switch (recoding.getCategory()) {
       case 1:
@@ -210,24 +210,26 @@ public class RecodingController {
                   .map(PostLike::getId).orElse(null);
               String content = messageService.getMessage(postService.getPostCategoryName(post.getCategory()), lang);
               return new ViewsLogInfo(recoding, post, content, likeId);
-            });
-        // ignore when not_found_post
+            })
+            .orElseGet(() -> new ViewsLogInfo(recoding, RESOURCE_TYPE_POST));
       case 2:
         return goodsRepository.findByGoodsNo(recoding.getItemId())
             .map(goods -> {
               Long likeId = goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goods.getGoodsNo(), me)
                   .map(GoodsLike::getId).orElse(null);
-              return new ViewsLogInfo(recoding, goods, likeId);
-            });
-        // ignore when not_found_goods
+              NumberFormat format = NumberFormat.getCurrencyInstance(Locale.KOREA);
+              String formattedGoodsPrice = format.format(goods.getGoodsPrice());
+              return new ViewsLogInfo(recoding, goods, formattedGoodsPrice, likeId);
+            })
+            .orElseGet(() -> new ViewsLogInfo(recoding, RESOURCE_TYPE_GOODS));
       case 3:
         return videoRepository.findById(Long.parseLong(recoding.getItemId()))
             .map(video -> {
               Long likeId = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me)
                   .map(VideoLike::getId).orElse(null);
               return new ViewsLogInfo(recoding, video, likeId);
-            });
-        // ignore when not_found_video
+            })
+            .orElseGet(() -> new ViewsLogInfo(recoding, RESOURCE_TYPE_VIDEO));
       default:
         throw new IllegalArgumentException("Unknown category type - " + recoding.getCategory());
     }
@@ -240,6 +242,7 @@ public class RecodingController {
     private String itemId;
     private int category;
     private Date createdAt;
+    @JsonIgnore private Date modifiedAt;
     private BasicInfo detail;
 
     public RecodingInfo(ViewRecoding viewRecoding) {
@@ -327,8 +330,13 @@ public class RecodingController {
     private Date videoDeletedAt;
     private Date modifiedAt;
     
-    public ViewsLogInfo(ViewRecoding log) {
+    public ViewsLogInfo(ViewRecoding log, String resourceType) {
       BeanUtils.copyProperties(log, this);
+      this.resourceType = resourceType;
+      this.resourceId = 0L;
+      this.imageUrl = "";
+      this.title = "";
+      this.content = "";
     }
   
     public ViewsLogInfo(ViewRecoding log, Post post, String content, Long likeId) {
@@ -342,14 +350,14 @@ public class RecodingController {
       this.likeId = likeId;
     }
   
-    public ViewsLogInfo(ViewRecoding log, Goods goods, Long likeId) {
+    public ViewsLogInfo(ViewRecoding log, Goods goods, String formattedGoodsPrice, Long likeId) {
       this.id = log.getId();
       this.modifiedAt = log.getModifiedAt();
       this.resourceType = RESOURCE_TYPE_GOODS;
       this.resourceId = Long.parseLong(goods.getGoodsNo());
       this.imageUrl = goods.getListImageData().toString();
       this.title = goods.getGoodsNm();
-      this.content = goods.getGoodsPrice() + "원";
+      this.content = formattedGoodsPrice;
       this.likeId = likeId;
       this.goodsState = goods.getState();
     }

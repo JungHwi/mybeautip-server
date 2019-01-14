@@ -50,5 +50,6 @@ public class ViewRecoding extends MemberAuditable {
   public ViewRecoding(String itemId, int category) {
     this.itemId = itemId;
     this.category = category;
+    this.viewCount = 1; // default value
   }
 }

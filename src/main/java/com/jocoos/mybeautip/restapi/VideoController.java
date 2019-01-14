@@ -515,30 +515,38 @@ public class VideoController {
   @PostMapping(value = "/{id:.+}/watches")
   public ResponseEntity<VideoInfo> joinWatch(@PathVariable Long id,
                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    VideoInfo video;
     Member me = memberService.currentMember();
-    if (me == null) { // Guest
-      video = videoService.setWatcherWithGuest(id, memberService.getGuestUserName(), lang);
-    } else {
-      video = videoService.setWatcher(id, me, lang);
-    }
-
-    return new ResponseEntity<>(video, HttpStatus.OK);
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+        .map(v -> {
+          if (me == null) { // Guest
+            videoService.setWatcherWithGuest(v, memberService.getGuestUserName());
+          } else {
+            videoService.setWatcher(v, me);
+          }
+          return videoService.addView(v, me);
+        })
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+    
+    return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 
   @Transactional
   @PatchMapping(value = "/{id:.+}/watches")
   public ResponseEntity<VideoInfo> keepWatch(@PathVariable Long id,
                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    VideoInfo video;
     Member me = memberService.currentMember();
-    if (me == null) { // Guest
-      video = videoService.setWatcherWithGuest(id, memberService.getGuestUserName(), lang);
-    } else {
-      video = videoService.setWatcher(id, me, lang);
-    }
-
-    return new ResponseEntity<>(video, HttpStatus.OK);
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+        .map(v -> {
+          if (me == null) { // Guest
+            videoService.setWatcherWithGuest(v, memberService.getGuestUserName());
+          } else {
+            videoService.setWatcher(v, me);
+          }
+          return v;
+        })
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+  
+    return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 
   @Transactional
@@ -698,39 +706,11 @@ public class VideoController {
   @PostMapping("/{id:.+}/view_count")
   public ResponseEntity<VideoInfo> addView(@PathVariable Long id,
                                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Member me = memberService.currentMember();
-
-    return videoRepository.findByIdAndDeletedAtIsNull(id)
-      .map(v -> {
-        videoRepository.updateViewCount(v.getId(), 1);
-        v.setViewCount(v.getViewCount() + 1);
-
-        if (me != null) {   // Guest can add view_count, but can not be inserted into viewer list
-          Optional<VideoView> optional = videoViewRepository.findByVideoIdAndCreatedById(id, me.getId());
-          if (optional.isPresent()) {
-            VideoView view = optional.get();
-            view.setModifiedAt(new Date());
-            view.setViewCount(view.getViewCount() + 1);
-            videoViewRepository.save(view);
-          } else {
-            videoViewRepository.save(new VideoView(v, me));
-          }
-        } else {  // Guest
-          String guestName = memberService.getGuestUserName();
-          Optional<VideoView> optional = videoViewRepository.findByVideoIdAndGuestName(id, guestName);
-          if (optional.isPresent()) {
-            VideoView view = optional.get();
-            view.setModifiedAt(new Date());
-            view.setViewCount(view.getViewCount() + 1);
-            videoViewRepository.save(view);
-          } else {
-            videoViewRepository.save(new VideoView(v, guestName));
-          }
-        }
-
-        return new ResponseEntity<>(videoService.generateVideoInfo(v), HttpStatus.OK);
-      })
-      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+        .map(v -> videoService.addView(v, memberService.currentMember()))
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+    
+    return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 
   @GetMapping("/{id:.+}/views")
