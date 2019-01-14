@@ -11,14 +11,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.tag.Tag;
-import com.jocoos.mybeautip.tag.TagRepository;
-import com.jocoos.mybeautip.tag.TagService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +24,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
@@ -37,11 +35,16 @@ import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
 import com.jocoos.mybeautip.store.StoreRepository;
+import com.jocoos.mybeautip.tag.Tag;
+import com.jocoos.mybeautip.tag.TagRepository;
+import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
@@ -528,9 +531,7 @@ public class AdminController {
      @RequestParam(defaultValue = "desc") String direction) {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "baseDate"));
-    Date now = new Date();
-
-    Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findByBaseDateBefore(now, pageable);
+    Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findAll(pageable);
     Page<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
       RecommendationController.RecommendedMotdBaseInfo info = new RecommendationController.RecommendedMotdBaseInfo(b, createRecommendedMotd(b));
       return info;
