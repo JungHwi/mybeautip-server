@@ -11,6 +11,8 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.CallbackController;
@@ -53,6 +55,7 @@ public class VideoService {
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final VideoViewRepository videoViewRepository;
+  private final CommentLikeRepository commentLikeRepository;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.video.watch-duration}")
@@ -73,6 +76,7 @@ public class VideoService {
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
                       VideoViewRepository videoViewRepository,
+                      CommentLikeRepository commentLikeRepository,
                       ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.messageService = messageService;
@@ -87,6 +91,7 @@ public class VideoService {
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.videoViewRepository = videoViewRepository;
+    this.commentLikeRepository = commentLikeRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -452,6 +457,17 @@ public class VideoService {
     
     video.setViewCount(video.getViewCount() + 1);
     return videoRepository.saveAndFlush(video);
+  }
+  
+  @Transactional
+  public void deleteComment(Comment comment) {
+    videoRepository.updateCommentCount(comment.getVideoId(), -1);
+    if (comment.getParentId() != null) {
+      commentRepository.updateCommentCount(comment.getParentId(), -1);
+    }
+    List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
+    commentLikeRepository.deleteAll(commentLikes);
+    commentRepository.delete(comment);
   }
 
   /**
