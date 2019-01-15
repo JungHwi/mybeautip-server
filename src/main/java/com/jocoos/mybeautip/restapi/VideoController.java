@@ -376,19 +376,10 @@ public class VideoController {
   @Transactional
   @DeleteMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long videoId,
-                                              @PathVariable Long id) {
-    videoRepository.updateCommentCount(videoId, -1);
-
-    Long memberId = memberService.currentMemberId();
-    return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberId)
+                                         @PathVariable Long id) {
+    return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberService.currentMemberId())
       .map(comment -> {
-        if (comment.getParentId() != null) {
-          commentRepository.updateCommentCount(comment.getParentId(), -1);
-        }
-        List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(
-            comment.getId());
-        commentLikeRepository.deleteAll(commentLikes);
-        commentRepository.delete(comment);
+        videoService.deleteComment(comment);
         return new ResponseEntity<>(HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));

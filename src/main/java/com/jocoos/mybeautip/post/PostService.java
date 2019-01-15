@@ -1,6 +1,11 @@
 package com.jocoos.mybeautip.post;
 
+import javax.transaction.Transactional;
+import java.util.List;
+
 import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -11,9 +16,15 @@ import org.springframework.stereotype.Service;
 public class PostService {
 
   private final CommentRepository commentRepository;
+  private final PostRepository postRepository;
+  private final CommentLikeRepository commentLikeRepository;
 
-  public PostService(CommentRepository commentRepository) {
+  public PostService(CommentRepository commentRepository,
+                     PostRepository postRepository,
+                     CommentLikeRepository commentLikeRepository) {
     this.commentRepository = commentRepository;
+    this.postRepository = postRepository;
+    this.commentLikeRepository = commentLikeRepository;
   }
 
   public Slice<Comment> findCommentsByPostId(Long id, Long cursor, Pageable pageable, String direction) {
@@ -61,5 +72,16 @@ public class PostService {
       default:
         return "post";
     }
+  }
+  
+  @Transactional
+  public void deleteComment(Comment comment) {
+    postRepository.updateCommentCount(comment.getPostId(), -1);
+    if (comment.getParentId() != null) {
+      commentRepository.updateCommentCount(comment.getParentId(), -1);
+    }
+    List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
+    commentLikeRepository.deleteAll(commentLikes);
+    commentRepository.delete(comment);
   }
 }

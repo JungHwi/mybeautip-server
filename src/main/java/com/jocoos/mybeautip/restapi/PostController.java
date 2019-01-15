@@ -400,16 +400,9 @@ public class PostController {
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long postId,
                                          @PathVariable Long id) {
-    postRepository.updateCommentCount(postId, -1);
-
-    Long memberId = memberService.currentMemberId();
-    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
+    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberService.currentMemberId())
        .map(comment -> {
-         if (comment.getParentId() != null) {
-           commentRepository.updateCommentCount(comment.getParentId(), -1);
-         }
-         // FIXME: need to delete comment_likes relevant to comment
-         commentRepository.delete(comment);
+         postService.deleteComment(comment);
          return new ResponseEntity<>(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
