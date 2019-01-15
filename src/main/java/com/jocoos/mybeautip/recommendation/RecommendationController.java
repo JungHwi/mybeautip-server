@@ -48,6 +48,9 @@ public class RecommendationController {
   
   private final int MAX_RECOMMENDED_BJ_COUNT = 100;
   private final int MAX_RECOMMENDED_KEYWORD_COUNT = 100;
+  private static final String RESOURCE_TYPE_MEMBER = "member";
+  private static final String RESOURCE_TYPE_TAG = "tag";
+  private static final String DEFAULT_HASHTAG_IMG_URL = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/app/img_hashtag_default.png";
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberService,
@@ -200,6 +203,7 @@ public class RecommendationController {
   }
 
 
+  @Deprecated
   @GetMapping("/keywords")
   public ResponseEntity<List<KeywordInfo>> getRecommendedKeywords(
     @RequestParam(defaultValue = "100") int count) {
@@ -210,7 +214,9 @@ public class RecommendationController {
     for (KeywordRecommendation keyword : keywords) {
       switch (keyword.getCategory()) {
         case 1:
-          result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+          if (keyword.getMember().isVisible()) {
+            result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+          }
           break;
         case 2:
         default:
@@ -228,7 +234,9 @@ public class RecommendationController {
       for (KeywordRecommendation keyword : keywords) {
         switch (keyword.getCategory()) {
           case 1:
-            result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+            if (keyword.getMember().isVisible()) {
+              result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+            }
             break;
           case 2:
           default:
@@ -239,7 +247,51 @@ public class RecommendationController {
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
-
+  
+  @GetMapping("/search-keywords")
+  public ResponseEntity<List<SearchKeywordInfo>> getRecommendedSearchKeywords(
+      @RequestParam(defaultValue = "100") int count) {
+    List<KeywordRecommendation> keywords = keywordRecommendationRepository.findBySeqLessThan(
+        MAX_RECOMMENDED_KEYWORD_COUNT + 1, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    
+    List<SearchKeywordInfo> result = Lists.newArrayList();
+    for (KeywordRecommendation keyword : keywords) {
+      switch (keyword.getCategory()) {
+        case 1:
+          if (keyword.getMember().isVisible()) {
+            result.add(new SearchKeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+          }
+          break;
+        case 2:
+        default:
+          result.add(new SearchKeywordInfo(keyword, new TagInfo(keyword.getTag())));
+          break;
+      }
+    }
+    
+    count = count - result.size();
+    if (count > 0) {
+      keywords = keywordRecommendationRepository.findBySeqGreaterThan(
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+      Collections.shuffle(keywords);
+      
+      for (KeywordRecommendation keyword : keywords) {
+        switch (keyword.getCategory()) {
+          case 1:
+            if (keyword.getMember().isVisible()) {
+              result.add(new SearchKeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+            }
+            break;
+          case 2:
+          default:
+            result.add(new SearchKeywordInfo(keyword, new TagInfo(keyword.getTag())));
+            break;
+        }
+      }
+    }
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+  
   @Data
   public static class KeywordInfo {
     Integer category;
@@ -261,9 +313,41 @@ public class RecommendationController {
       this.tag = tag;
     }
   }
+  
+  @Data
+  public static class SearchKeywordInfo {
+    private Long id;
+    private String resourceType;  // "member", "tag"
+    private Long resourceId;
+    private String imageUrl;
+    private String title;
+    private String content;
+    private Date createdAt;
+  
+    public SearchKeywordInfo(KeywordRecommendation keyword, MemberInfo member) {
+      id = keyword.getId();
+      createdAt = keyword.getCreatedAt();
+      resourceType = RESOURCE_TYPE_MEMBER;
+      resourceId = member.getId();
+      imageUrl = member.getAvatarUrl();
+      title = member.getUsername();
+      content = member.getIntro();
+    }
+  
+    public SearchKeywordInfo(KeywordRecommendation keyword, TagInfo tag) {
+      id = keyword.getId();
+      createdAt = keyword.getCreatedAt();
+      resourceType = RESOURCE_TYPE_TAG;
+      resourceId = tag.getId();
+      imageUrl = DEFAULT_HASHTAG_IMG_URL;
+      title = tag.getName();
+      content = String.valueOf(tag.getRefCount());
+    }
+  }
 
   @Data
   public static class TagInfo {
+    private Long id;
     private String name;
     private Integer refCount;
 
