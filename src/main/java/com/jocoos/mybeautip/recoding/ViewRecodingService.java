@@ -61,7 +61,7 @@ public class ViewRecodingService {
     if (category == ViewRecoding.CATEGORY_POST) {
       Post post = postRepository.findByIdAndDeletedAtIsNull(Long.parseLong(itemId))
           .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + itemId));
-      if (post.getCategory() == Post.PostCategory.NOTICE.ordinal()) {
+      if (post.getCategory() == Post.CATEGORY_NOTICE) {
         return; // Do not insert view log when post type is 'notice'
       }
     }
