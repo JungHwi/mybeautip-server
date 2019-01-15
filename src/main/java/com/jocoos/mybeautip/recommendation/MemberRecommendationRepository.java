@@ -13,7 +13,7 @@ public interface MemberRecommendationRepository extends JpaRepository<MemberReco
   
   List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(Date statedAt, Date endedAt, int seq, Pageable pageable);
   
-  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeq(Date statedAt, Date endedAt, int seq, Pageable pageable);
+  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqLessThan(Date statedAt, Date endedAt, int seq, Pageable pageable);
 
   Optional<MemberRecommendation> findByMemberId(Long memberId);
 

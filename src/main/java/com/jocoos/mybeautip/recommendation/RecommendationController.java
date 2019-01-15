@@ -47,6 +47,7 @@ public class RecommendationController {
   private final KeywordRecommendationRepository keywordRecommendationRepository;
   
   private final int MAX_RECOMMENDED_BJ_COUNT = 100;
+  private final int MAX_RECOMMENDED_KEYWORD_COUNT = 100;
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberService,
@@ -72,8 +73,8 @@ public class RecommendationController {
   public ResponseEntity<List<MemberInfo>> getRecommendedMembers(
       @RequestParam(defaultValue = "100") int count) {
     Date now = new Date();
-    List<MemberRecommendation> members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(
-        now, now, 0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    List<MemberRecommendation> members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqLessThan(
+        now, now, MAX_RECOMMENDED_BJ_COUNT + 1, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
 
     members.forEach(r -> {
@@ -93,8 +94,8 @@ public class RecommendationController {
     
     count = count - result.size();
     if (count > 0) {
-      members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeq(
-          now, now, 0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+      members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(
+          now, now, MAX_RECOMMENDED_BJ_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
       Collections.shuffle(members);
   
       members.forEach(r -> {
@@ -202,8 +203,8 @@ public class RecommendationController {
   @GetMapping("/keywords")
   public ResponseEntity<List<KeywordInfo>> getRecommendedKeywords(
     @RequestParam(defaultValue = "100") int count) {
-    List<KeywordRecommendation> keywords = keywordRecommendationRepository.findBySeqGreaterThan(
-      0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    List<KeywordRecommendation> keywords = keywordRecommendationRepository.findBySeqLessThan(
+        MAX_RECOMMENDED_KEYWORD_COUNT + 1, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
     List<KeywordInfo> result = Lists.newArrayList();
     for (KeywordRecommendation keyword : keywords) {
@@ -220,8 +221,8 @@ public class RecommendationController {
     
     count = count - result.size();
     if (count > 0) {
-      keywords = keywordRecommendationRepository.findBySeq(
-          0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+      keywords = keywordRecommendationRepository.findBySeqGreaterThan(
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
       Collections.shuffle(keywords);
       
       for (KeywordRecommendation keyword : keywords) {
