@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 
@@ -56,7 +57,7 @@ public class ViewRecodingService {
   }
   
   @Transactional
-  public void insertOrUpdate(String itemId, int category) {
+  public void insertOrUpdate(String itemId, int category, Member me) {
     if (category == ViewRecoding.CATEGORY_POST) {
       Post post = postRepository.findByIdAndDeletedAtIsNull(Long.parseLong(itemId))
           .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + itemId));
@@ -65,7 +66,7 @@ public class ViewRecodingService {
       }
     }
     
-    viewRecodingRepository.findByItemIdAndCategory(itemId, category)
+    viewRecodingRepository.findByItemIdAndCategoryAndCreatedBy(itemId, category, me)
         .map(recoding -> {
           recoding.setViewCount(recoding.getViewCount() + 1);
           viewRecodingRepository.saveAndFlush(recoding);
