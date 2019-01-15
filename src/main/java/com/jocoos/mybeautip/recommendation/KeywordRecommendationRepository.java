@@ -14,4 +14,7 @@ public interface KeywordRecommendationRepository extends JpaRepository<KeywordRe
   
   Optional<KeywordRecommendation> findByMember(Member member);
   Optional<KeywordRecommendation> findByTag(Tag tag);
+  
+  List<KeywordRecommendation> findBySeqGreaterThan(int seq, Pageable pageable);
+  List<KeywordRecommendation> findBySeq(int seq, Pageable pageable);
 }

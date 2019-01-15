@@ -202,8 +202,8 @@ public class RecommendationController {
   @GetMapping("/keywords")
   public ResponseEntity<List<KeywordInfo>> getRecommendedKeywords(
     @RequestParam(defaultValue = "100") int count) {
-    Slice<KeywordRecommendation> keywords = keywordRecommendationRepository.findAll(
-      PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    List<KeywordRecommendation> keywords = keywordRecommendationRepository.findBySeqGreaterThan(
+      0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
     List<KeywordInfo> result = Lists.newArrayList();
     for (KeywordRecommendation keyword : keywords) {
@@ -215,6 +215,26 @@ public class RecommendationController {
         default:
           result.add(new KeywordInfo(keyword, new TagInfo(keyword.getTag())));
           break;
+      }
+    }
+    
+    count = count - result.size();
+    if (count > 0) {
+      keywords = keywordRecommendationRepository.findBySeq(
+          0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+      
+      Collections.shuffle(keywords);
+      
+      for (KeywordRecommendation keyword : keywords) {
+        switch (keyword.getCategory()) {
+          case 1:
+            result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+            break;
+          case 2:
+          default:
+            result.add(new KeywordInfo(keyword, new TagInfo(keyword.getTag())));
+            break;
+        }
       }
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
