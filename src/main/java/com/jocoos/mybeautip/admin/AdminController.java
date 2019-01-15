@@ -154,10 +154,14 @@ public class AdminController {
 
     Member me = memberService.currentMember();
 
-    List<GoodsInfo> goodsInfoList = post.getGoods().stream()
-       .map(gno -> goodsService.generateGoodsInfo(gno).orElseThrow(() -> new NotFoundException("goodsNo not found", "invalid good no"))
-    ).collect(Collectors.toList());
-
+    List<GoodsInfo> goodsInfoList = new ArrayList<>();
+    List<String> goodsList = post.getGoods();
+    for (String info : goodsList) {
+      goodsService.generateGoodsInfo(info)
+          .map(goodsInfoList::add)
+          .orElseThrow(() -> new NotFoundException("goodsNo not found", "invalid good no"));
+    }
+    
     PostController.PostInfo info = new PostController.PostInfo(post, new MemberInfo(me), goodsInfoList);
     return new ResponseEntity<>(info, HttpStatus.OK);
   }
