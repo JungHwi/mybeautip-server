@@ -19,6 +19,10 @@ import java.util.Set;
 @Entity
 @Table(name = "posts")
 public class Post extends MemberAuditable {
+  
+  public enum PostCategory {
+    NONE, TREND, CARDNEWS, EVENT, NOTICE, MOTD, CURATION
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
