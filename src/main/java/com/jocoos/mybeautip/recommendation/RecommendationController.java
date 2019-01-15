@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class RecommendationController {
   private final KeywordRecommendationRepository keywordRecommendationRepository;
   
   private final int MAX_RECOMMENDED_BJ_COUNT = 100;
+  private final int MAX_RECOMMENDED_KEYWORD_COUNT = 100;
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberService,
@@ -71,8 +73,8 @@ public class RecommendationController {
   public ResponseEntity<List<MemberInfo>> getRecommendedMembers(
       @RequestParam(defaultValue = "100") int count) {
     Date now = new Date();
-    List<MemberRecommendation> members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(
-        now, now, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    List<MemberRecommendation> members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqLessThan(
+        now, now, MAX_RECOMMENDED_BJ_COUNT + 1, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
 
     members.forEach(r -> {
@@ -89,6 +91,28 @@ public class RecommendationController {
         result.add(memberInfo);
       }
     });
+    
+    count = count - result.size();
+    if (count > 0) {
+      members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(
+          now, now, MAX_RECOMMENDED_BJ_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+      Collections.shuffle(members);
+  
+      members.forEach(r -> {
+        MemberInfo memberInfo = memberService.getMemberInfo(r.getMember());
+        if (memberInfo.getVideoCount() > 0) {
+          List<VideoController.VideoInfo> videoList = Lists.newArrayList();
+          Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
+          if (slice.hasContent()) {
+            for (Video video : slice) {
+              videoList.add(videoService.generateVideoInfo(video));
+            }
+            memberInfo.setVideos(videoList);
+          }
+          result.add(memberInfo);
+        }
+      });
+    }
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
@@ -179,8 +203,8 @@ public class RecommendationController {
   @GetMapping("/keywords")
   public ResponseEntity<List<KeywordInfo>> getRecommendedKeywords(
     @RequestParam(defaultValue = "100") int count) {
-    Slice<KeywordRecommendation> keywords = keywordRecommendationRepository.findAll(
-      PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    List<KeywordRecommendation> keywords = keywordRecommendationRepository.findBySeqLessThan(
+        MAX_RECOMMENDED_KEYWORD_COUNT + 1, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
 
     List<KeywordInfo> result = Lists.newArrayList();
     for (KeywordRecommendation keyword : keywords) {
@@ -192,6 +216,25 @@ public class RecommendationController {
         default:
           result.add(new KeywordInfo(keyword, new TagInfo(keyword.getTag())));
           break;
+      }
+    }
+    
+    count = count - result.size();
+    if (count > 0) {
+      keywords = keywordRecommendationRepository.findBySeqGreaterThan(
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+      Collections.shuffle(keywords);
+      
+      for (KeywordRecommendation keyword : keywords) {
+        switch (keyword.getCategory()) {
+          case 1:
+            result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+            break;
+          case 2:
+          default:
+            result.add(new KeywordInfo(keyword, new TagInfo(keyword.getTag())));
+            break;
+        }
       }
     }
     return new ResponseEntity<>(result, HttpStatus.OK);
