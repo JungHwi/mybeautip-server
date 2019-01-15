@@ -14,6 +14,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   Optional<Post> findByIdAndDeletedAtIsNull(Long id);
 
+  Optional<Post> findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(Date startedAt, Date endedAt, Long id);
+
   @Modifying
   @Query("update Post p set p.viewCount = p.viewCount + ?2, p.modifiedAt = now() where p.id = ?1")
   void updateViewCount(Long id, int count);
@@ -26,21 +28,20 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   @Query("update Post p set p.commentCount = p.commentCount + ?2, p.modifiedAt = now() where p.id = ?1")
   void updateCommentCount(Long id, int count);
 
+  Page<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNull(Date startedAt, Date endedAt, int category, Pageable pageable);
+
+  Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(Date startedAt, Date endedAt, Pageable pageable);
+
+  Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date startedAt, Date endedAt, int category, String title, String description, Pageable pageable);
+
+  Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date startedAt, Date endedAt, String title, String description, Pageable pageable);
+
+
+  // apis for Admin
   Page<Post> findByCategoryAndDeletedAtIsNull(int category, Pageable pageable);
-
-  Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNull(Date createdAt, Pageable pageable);
-
-  Slice<Post> findByDeletedAtIsNullAndTitleContainingOrDescriptionContaining(String title, String description, Pageable pageable);
-
-  Slice<Post> findByCategoryAndCreatedAtBeforeAndDeletedAtIsNull(int category, Date createdAt, Pageable pageable);
-
-  Slice<Post> findByCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(int category, String title, String description, Pageable pageable);
-
-  Slice<Post> findByCategoryAndCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(int category, Date createdAt, String title, String description, Pageable pageable);
-
-  Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date createdAt, String title, String description, Pageable pageable);
 
   Page<Post> findByDeletedAtIsNull(Pageable pageable);
 
   Page<Post> findByDeletedAtIsNotNull(Pageable pageable);
+
 }
