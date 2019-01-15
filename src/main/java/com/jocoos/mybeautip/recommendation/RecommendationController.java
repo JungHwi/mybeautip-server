@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -71,8 +72,8 @@ public class RecommendationController {
   public ResponseEntity<List<MemberInfo>> getRecommendedMembers(
       @RequestParam(defaultValue = "100") int count) {
     Date now = new Date();
-    List<MemberRecommendation> members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(
-        now, now, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    List<MemberRecommendation> members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(
+        now, now, 0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
     List<MemberInfo> result = Lists.newArrayList();
 
     members.forEach(r -> {
@@ -89,6 +90,28 @@ public class RecommendationController {
         result.add(memberInfo);
       }
     });
+    
+    count = count - result.size();
+    if (count > 0) {
+      members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeq(
+          now, now, 0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+      Collections.shuffle(members);
+  
+      members.forEach(r -> {
+        MemberInfo memberInfo = memberService.getMemberInfo(r.getMember());
+        if (memberInfo.getVideoCount() > 0) {
+          List<VideoController.VideoInfo> videoList = Lists.newArrayList();
+          Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
+          if (slice.hasContent()) {
+            for (Video video : slice) {
+              videoList.add(videoService.generateVideoInfo(video));
+            }
+            memberInfo.setVideos(videoList);
+          }
+          result.add(memberInfo);
+        }
+      });
+    }
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }

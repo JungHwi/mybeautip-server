@@ -10,6 +10,10 @@ import java.util.Optional;
 
 public interface MemberRecommendationRepository extends JpaRepository<MemberRecommendation, Long> {
   List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(Date statedAt, Date endedAt, Pageable pageable);
+  
+  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(Date statedAt, Date endedAt, int seq, Pageable pageable);
+  
+  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeq(Date statedAt, Date endedAt, int seq, Pageable pageable);
 
   Optional<MemberRecommendation> findByMemberId(Long memberId);
 
