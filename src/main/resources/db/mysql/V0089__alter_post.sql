@@ -4,7 +4,7 @@ ALTER TABLE `posts` ADD COLUMN `started_at` DATETIME DEFAULT NULL AFTER `opened`
 
 ALTER TABLE `posts` ADD COLUMN `ended_at` DATETIME DEFAULT NULL AFTER `started_at`;
 
-UPDATE `posts` SET started_at = now(), ended_at = '2019-02-28 23:59:59';
+UPDATE `posts` SET opened = 1, started_at = now(), ended_at = '2019-02-28 23:59:59';
 
 
 -- DELETE FROM flyway_schema_history WHERE installed_rank = 89;
