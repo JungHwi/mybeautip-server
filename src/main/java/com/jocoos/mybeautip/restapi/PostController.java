@@ -476,6 +476,9 @@ public class PostController {
     private Date createdAt;
     private MemberInfo createdBy;
     private Long likeId;
+    private boolean opened;
+    private Date startedAt;
+    private Date endedAt;
 
     public PostInfo(Post post, MemberInfo memberInfo, List<GoodsInfo> goodsInfo) {
       BeanUtils.copyProperties(post, this);

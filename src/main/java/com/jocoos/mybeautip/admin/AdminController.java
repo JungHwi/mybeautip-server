@@ -6,10 +6,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -32,15 +31,20 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.post.Post;
+import com.jocoos.mybeautip.post.PostContent;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
+import com.jocoos.mybeautip.restapi.PostController;
 import com.jocoos.mybeautip.store.StoreRepository;
 import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.tag.TagRepository;
@@ -74,6 +78,7 @@ public class AdminController {
   private final TagRepository tagRepository;
   private final VideoService videoService;
   private final TagService tagService;
+  private final GoodsService goodsService;
   private final MemberService memberService;
 
   public AdminController(PostRepository postRepository,
@@ -92,7 +97,7 @@ public class AdminController {
                          TagRepository tagRepository,
                          VideoService videoService,
                          TagService tagService,
-                         MemberService memberService) {
+                         GoodsService goodsService, MemberService memberService) {
     this.postRepository = postRepository;
     this.bannerRepository = bannerRepository;
     this.memberRepository = memberRepository;
@@ -109,6 +114,7 @@ public class AdminController {
     this.tagRepository = tagRepository;
     this.tagService = tagService;
     this.videoService = videoService;
+    this.goodsService = goodsService;
     this.memberService = memberService;
   }
 
@@ -121,6 +127,39 @@ public class AdminController {
     }).orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
 
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @PostMapping("/posts")
+  public ResponseEntity<PostController.PostInfo> createPost(@RequestBody CreatePostRequest request) {
+    log.debug("request: {}", request);
+
+    Post post = new Post();
+    BeanUtils.copyProperties(request, post);
+    log.debug("post: {}", post);
+    postRepository.save(post);
+
+    if (StringUtils.isNotEmpty(request.getDescription())) {
+      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
+      if (tags != null && tags.size() > 0) {
+        // Log TagHistory
+        tagService.logHistory(tags, TagService.TagCategory.POST, memberService.currentMember());
+      }
+    }
+
+    post.setStartedAt(getRecommendedDate(request.getStartedAt()));
+    post.setEndedAt(getRecommendedDate(request.getEndedAt()));
+
+    postRepository.save(post);
+    log.debug("saved post: {}", post);
+
+    Member me = memberService.currentMember();
+
+    List<GoodsInfo> goodsInfoList = post.getGoods().stream()
+       .map(gno -> goodsService.generateGoodsInfo(gno).orElseThrow(() -> new NotFoundException("goodsNo not found", "invalid good no"))
+    ).collect(Collectors.toList());
+
+    PostController.PostInfo info = new PostController.PostInfo(post, new MemberInfo(me), goodsInfoList);
+    return new ResponseEntity(info, HttpStatus.OK);
   }
 
   @PostMapping("/banners")
@@ -589,6 +628,28 @@ public class AdminController {
       }
     }
   }
+
+  @Data
+  public static class CreatePostRequest {
+    @NotNull
+    private int category;
+    @NotNull @Size(max = 32)
+    private String title;
+    @NotNull @Size(max = 2000)
+    private String description;
+    @NotNull @Size(max = 255)
+    private String thumbnailUrl;
+    private int progress;
+    private boolean opened;
+    private Set<PostContent> contents;
+    @NotNull
+    private List<String> goods;
+    @NotNull
+    private String startedAt;
+    @NotNull
+    private String endedAt;
+  }
+
 
   @Data
   public static class CreateBannerRequest {
