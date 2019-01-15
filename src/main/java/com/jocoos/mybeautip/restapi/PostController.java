@@ -162,7 +162,7 @@ public class PostController {
                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     Date now = new Date();
-    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(now, now, id)
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          List<GoodsInfo> goodsInfo = new ArrayList<>();
          post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
@@ -182,7 +182,7 @@ public class PostController {
   public ResponseEntity<List<GoodsInfo>> getGoods(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Date now = new Date();
-    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(now, now, id)
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          List<GoodsInfo> result = Lists.newArrayList();
          post.getGoods().stream().forEach(gno -> {
@@ -199,7 +199,7 @@ public class PostController {
   public ResponseEntity<List<MemberInfo>> getWinners(@PathVariable Long id,
                                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Date now = new Date();
-    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(now, now, id)
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          List<MemberInfo> result = Lists.newArrayList();
          post.getWinners().stream().forEach(mid -> {
@@ -219,7 +219,7 @@ public class PostController {
 
     // TODO: Add history using spring AOP!!
     Date now = new Date();
-    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(now, now, id)
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          postRepository.updateViewCount(post.getId(), 1);
          return new ResponseEntity(HttpStatus.OK);
@@ -233,7 +233,7 @@ public class PostController {
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     Date now = new Date();
-    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(now, now, id)
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          Long postId = post.getId();
          if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
@@ -274,7 +274,7 @@ public class PostController {
                                     @RequestParam(required = false) String direction,
                                     @RequestParam(required = false) Long parentId) {
     Date now = new Date();
-    postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(now, now, id)
+    postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
         .orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
     
     PageRequest page;
@@ -324,7 +324,7 @@ public class PostController {
       }
     }
 
-    int totalCount = postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(now, now, id)
+    int totalCount = postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(Post::getCommentCount).orElse(0);
 
     return new CursorResponse

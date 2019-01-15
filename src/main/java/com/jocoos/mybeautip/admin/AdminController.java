@@ -159,7 +159,7 @@ public class AdminController {
     ).collect(Collectors.toList());
 
     PostController.PostInfo info = new PostController.PostInfo(post, new MemberInfo(me), goodsInfoList);
-    return new ResponseEntity(info, HttpStatus.OK);
+    return new ResponseEntity<>(info, HttpStatus.OK);
   }
 
   @PostMapping("/banners")

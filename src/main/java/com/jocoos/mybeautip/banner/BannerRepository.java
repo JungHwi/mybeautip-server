@@ -15,7 +15,7 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
   @Query("update Banner b set b.viewCount = b.viewCount + ?2, b.modifiedAt = now() where b.id = ?1")
   void updateViewCount(Long id, Long count);
 
-  Slice<Banner> findByStartedAtBeforeAndEndedAtAfter(Date statedAt, Date endedAt, Pageable page);
+  Slice<Banner> findByStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(Date statedAt, Date endedAt, Pageable pageable);
 
   Page<Banner> findByDeletedAtIsNull(Pageable pageable);
 
