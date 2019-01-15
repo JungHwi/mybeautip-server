@@ -44,6 +44,12 @@ public interface PostExcerpt {
 
   Member getCreatedBy();
 
+  boolean isOpened();
+
+  Date getStartedAt();
+
+  Date getEndedAt();
+
   Date getCreatedAt();
 
   Date getModifiedAt();

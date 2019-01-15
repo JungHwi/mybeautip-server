@@ -48,6 +48,18 @@ public class Post extends MemberAuditable {
   private int category;
 
   /**
+   * Show post to users whether or not
+   */
+  @Column(nullable = false)
+  private boolean opened;
+
+  @Column
+  private Date startedAt;
+
+  @Column
+  private Date endedAt;
+
+  /**
    * Event progress
    * 0: default(no event), 1: 진행중 2: 선정중 3: 발표 4:종료
    */
