@@ -13,6 +13,10 @@ import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.post.Post;
+import com.jocoos.mybeautip.post.PostRepository;
 
 @Slf4j
 @Service
@@ -22,9 +26,12 @@ public class ViewRecodingService {
   private static final int MAX_COUNT = 200;
 
   private final ViewRecodingRepository viewRecodingRepository;
+  private final PostRepository postRepository;
 
-  public ViewRecodingService(ViewRecodingRepository viewRecodingRepository) {
+  public ViewRecodingService(ViewRecodingRepository viewRecodingRepository,
+                             PostRepository postRepository) {
     this.viewRecodingRepository = viewRecodingRepository;
+    this.postRepository = postRepository;
   }
 
   public Slice<ViewRecoding> findByWeekAgo(Long memberId, int count, String cursor, Integer category) {
@@ -50,8 +57,16 @@ public class ViewRecodingService {
   }
   
   @Transactional
-  public void insertOrUpdate(String itemId, int category) {
-    viewRecodingRepository.findByItemIdAndCategory(itemId, category)
+  public void insertOrUpdate(String itemId, int category, Member me) {
+    if (category == ViewRecoding.CATEGORY_POST) {
+      Post post = postRepository.findByIdAndDeletedAtIsNull(Long.parseLong(itemId))
+          .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + itemId));
+      if (post.getCategory() == Post.CATEGORY_NOTICE) {
+        return; // Do not insert view log when post type is 'notice'
+      }
+    }
+    
+    viewRecodingRepository.findByItemIdAndCategoryAndCreatedBy(itemId, category, me)
         .map(recoding -> {
           recoding.setViewCount(recoding.getViewCount() + 1);
           viewRecodingRepository.saveAndFlush(recoding);

@@ -20,6 +20,14 @@ import java.util.Set;
 @Table(name = "posts")
 public class Post extends MemberAuditable {
 
+  public static final int CATEGORY_TREND = 1;
+  public static final int CATEGORY_CARDNEWS = 2;
+  public static final int CATEGORY_EVENT = 3;
+  public static final int CATEGORY_NOTICE = 4;
+  public static final int CATEGORY_MOTD = 5;
+  public static final int CATEGORY_CURATION = 6;
+  
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

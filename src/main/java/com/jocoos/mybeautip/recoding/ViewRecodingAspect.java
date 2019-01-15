@@ -41,7 +41,8 @@ public class ViewRecodingAspect {
         if (response.getStatusCode() == HttpStatus.OK) {
           log.debug("response status code: {}", response.getStatusCode());
           if (memberService.currentMemberId() != null) {
-            viewRecodingService.insertOrUpdate(String.valueOf(postId), ViewRecoding.CATEGORY_POST);
+            viewRecodingService.insertOrUpdate(String.valueOf(postId),
+                ViewRecoding.CATEGORY_POST, memberService.currentMember());
           }
         }
       } else {
@@ -69,7 +70,8 @@ public class ViewRecodingAspect {
         if (response.getStatusCode() == HttpStatus.OK) {
           log.debug("response status code: {}", response.getStatusCode());
           if (memberService.currentMemberId() != null) {
-            viewRecodingService.insertOrUpdate(goodsNo, ViewRecoding.CATEGORY_GOODS);
+            viewRecodingService.insertOrUpdate(goodsNo,
+                ViewRecoding.CATEGORY_GOODS, memberService.currentMember());
           }
         }
       } else {
@@ -98,7 +100,8 @@ public class ViewRecodingAspect {
         if (response.getStatusCode() == HttpStatus.OK) {
           log.debug("response status code: {}", response.getStatusCode());
           if (memberService.currentMemberId() != null) {
-            viewRecodingService.insertOrUpdate(String.valueOf(String.valueOf(videoId)), ViewRecoding.CATEGORY_VIDEO);
+            viewRecodingService.insertOrUpdate(String.valueOf(String.valueOf(videoId)),
+                ViewRecoding.CATEGORY_VIDEO, memberService.currentMember());
           }
         }
       } else {
