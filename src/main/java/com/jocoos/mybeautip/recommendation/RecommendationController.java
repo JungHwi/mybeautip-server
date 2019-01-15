@@ -222,7 +222,6 @@ public class RecommendationController {
     if (count > 0) {
       keywords = keywordRecommendationRepository.findBySeq(
           0, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
-      
       Collections.shuffle(keywords);
       
       for (KeywordRecommendation keyword : keywords) {
