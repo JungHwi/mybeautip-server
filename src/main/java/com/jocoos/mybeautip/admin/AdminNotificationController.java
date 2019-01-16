@@ -146,7 +146,8 @@ public class AdminNotificationController {
     }
     
     devices.forEach(device ->
-      deviceService.push(device, new Notification(device.getCreatedBy(), request.getMessage())));
+      deviceService.push(device, new Notification(device.getCreatedBy(), request.getTitle(),
+          request.getMessage(), request.getResourceType(), request.getResourceIds())));
     
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }
@@ -156,10 +157,16 @@ public class AdminNotificationController {
   @NoArgsConstructor
   static class NotificationRequest {
     int size = 100;
+    
     @NotNull
     int platform;
+    
+    String title;
+    String resourceType;
+    String resourceIds;
+    Long target;
+    
     @NotNull
     String message;
-    Long target;
   }
 }

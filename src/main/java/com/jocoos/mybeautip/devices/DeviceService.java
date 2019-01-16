@@ -25,6 +25,8 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
 import com.jocoos.mybeautip.notification.NotificationRepository;
+import com.jocoos.mybeautip.notification.PushHistory;
+import com.jocoos.mybeautip.notification.PushHistoryRepository;
 import com.jocoos.mybeautip.restapi.DeviceController;
 
 @Slf4j
@@ -39,6 +41,7 @@ public class DeviceService {
   private final MessageService messageService;
   private final DeviceRepository deviceRepository;
   private final NotificationRepository notificationRepository;
+  private final PushHistoryRepository pushHistoryRepository;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.aws.sns.application.gcm-arn}")
@@ -51,12 +54,14 @@ public class DeviceService {
                        DeviceRepository deviceRepository,
                        MessageService messageService,
                        NotificationRepository notificationRepository,
+                       PushHistoryRepository pushHistoryRepository,
                        ObjectMapper objectMapper,
                        AmazonSNS amazonSNS) {
     this.memberService = memberService;
     this.deviceRepository = deviceRepository;
     this.messageService = messageService;
     this.notificationRepository = notificationRepository;
+    this.pushHistoryRepository = pushHistoryRepository;
     this.objectMapper = objectMapper;
     this.amazonSNS = amazonSNS;
   }
@@ -133,8 +138,16 @@ public class DeviceService {
 
       PublishResult result = amazonSNS.publish(request);
       log.debug("result: {}", result);
+      
+      if (StringUtils.isNotEmpty(notification.getInstantMessageBody())) { // FIXME: better way to distinguish push type?
+        pushHistoryRepository.save(new PushHistory(notification, device.getOs(), true));
+      }
     } catch (AmazonSNSException e) {
       log.info("AmazonSNSException: " + e.getMessage());
+  
+      if (StringUtils.isNotEmpty(notification.getInstantMessageBody())) { // FIXME: better way to distinguish push type?
+        pushHistoryRepository.save(new PushHistory(notification, device.getOs(), false));
+      }
       
       if (!isValid(device)) {
         device.setValid(false);
@@ -145,8 +158,8 @@ public class DeviceService {
   }
 
   private String convertToGcmMessage(Notification notification, String os) {
-    String message = !Strings.isNullOrEmpty(notification.getInstantMessage()) ?
-       notification.getInstantMessage() : messageService.getNotificationMessage(
+    String message = !Strings.isNullOrEmpty(notification.getInstantMessageBody()) ?
+       notification.getInstantMessageBody() : messageService.getNotificationMessage(
        notification.getType(), notification.getArgs().toArray());
 
     Map<String, String> data = Maps.newHashMap();
@@ -164,6 +177,12 @@ public class DeviceService {
     }
     if (!Strings.isNullOrEmpty(notification.getImageUrl())) {
       data.put("image", notification.getImageUrl());
+    }
+  
+    if (!Strings.isNullOrEmpty(notification.getInstantMessageTitle())) {  // FIXME: better way to distinguish push type?
+      data.put("title", notification.getInstantMessageTitle());
+    } else {
+      data.put("title", null);
     }
 
     log.debug("data: {}", data);
@@ -189,7 +208,7 @@ public class DeviceService {
     Map<String, Map<String, String>> data = Maps.newHashMap();
     Map<String, String> notification = Maps.newHashMap();
 
-    notification.put("title", messageService.getNotificationMessage("title", null));
+    notification.put("title", message.get("title"));
     notification.put("body", message.get("body"));
     notification.put("badge", String.valueOf(badge));
     
