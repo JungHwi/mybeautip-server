@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.admin;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -124,13 +126,9 @@ public class AdminNotificationController {
   }
 
   @PostMapping("/notifications")
-  public ResponseEntity pushNotifications(@RequestBody NotificationRequest request,
-                                          BindingResult bindingResult) {
+  public ResponseEntity pushNotifications(@Valid @RequestBody NotificationRequest request) {
 
     log.debug("notification request: {}", request);
-    if (bindingResult.hasErrors()) {
-      throw new BadRequestException(bindingResult.getFieldError());
-    }
 
     Pageable pageable = PageRequest.of(0, request.getSize());
     List<Notification> notifications = Lists.newArrayList();
@@ -163,15 +161,18 @@ public class AdminNotificationController {
     int size = 100;
     
     @NotNull
-    int platform;
+    Integer platform;
     
     int category;
+  
+    @Size(max=30)
     String title;
     String resourceType;
     String resourceIds;
     Long target;
     
     @NotNull
+    @Size(max=120)
     String message;
   }
 }
