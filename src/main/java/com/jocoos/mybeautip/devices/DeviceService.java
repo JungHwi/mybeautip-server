@@ -2,23 +2,26 @@ package com.jocoos.mybeautip.devices;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.model.*;
+import com.amazonaws.services.sns.model.AmazonSNSException;
+import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
+import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
+import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
@@ -97,14 +100,6 @@ public class DeviceService {
     return device;
   }
 
-  @Async
-  public void push(List<Notification> notifications) {
-    log.debug("{}", notifications);
-    for (Notification n : notifications) {
-      push(n);
-    }
-  }
-
   public void push(Notification notification) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId())
        .forEach(d -> {
@@ -145,8 +140,8 @@ public class DeviceService {
   }
 
   private String convertToGcmMessage(Notification notification, String os) {
-    String message = !Strings.isNullOrEmpty(notification.getInstantMessage()) ?
-       notification.getInstantMessage() : messageService.getNotificationMessage(
+    String message = !Strings.isNullOrEmpty(notification.getInstantMessageBody()) ?
+       notification.getInstantMessageBody() : messageService.getNotificationMessage(
        notification.getType(), notification.getArgs().toArray());
 
     Map<String, String> data = Maps.newHashMap();
@@ -164,6 +159,12 @@ public class DeviceService {
     }
     if (!Strings.isNullOrEmpty(notification.getImageUrl())) {
       data.put("image", notification.getImageUrl());
+    }
+  
+    if (!Strings.isNullOrEmpty(notification.getInstantMessageTitle())) {
+      data.put("title", notification.getInstantMessageTitle());
+    } else {
+      data.put("title", null);
     }
 
     log.debug("data: {}", data);
@@ -189,7 +190,7 @@ public class DeviceService {
     Map<String, Map<String, String>> data = Maps.newHashMap();
     Map<String, String> notification = Maps.newHashMap();
 
-    notification.put("title", messageService.getNotificationMessage("title", null));
+    notification.put("title", message.get("title"));
     notification.put("body", message.get("body"));
     notification.put("badge", String.valueOf(badge));
     
