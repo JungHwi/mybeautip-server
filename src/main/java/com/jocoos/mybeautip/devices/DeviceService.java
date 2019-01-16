@@ -2,31 +2,32 @@ package com.jocoos.mybeautip.devices;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.model.*;
+import com.amazonaws.services.sns.model.AmazonSNSException;
+import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
+import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
+import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
 import com.jocoos.mybeautip.notification.NotificationRepository;
-import com.jocoos.mybeautip.notification.PushHistory;
-import com.jocoos.mybeautip.notification.PushHistoryRepository;
 import com.jocoos.mybeautip.restapi.DeviceController;
 
 @Slf4j
@@ -41,7 +42,6 @@ public class DeviceService {
   private final MessageService messageService;
   private final DeviceRepository deviceRepository;
   private final NotificationRepository notificationRepository;
-  private final PushHistoryRepository pushHistoryRepository;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.aws.sns.application.gcm-arn}")
@@ -54,14 +54,12 @@ public class DeviceService {
                        DeviceRepository deviceRepository,
                        MessageService messageService,
                        NotificationRepository notificationRepository,
-                       PushHistoryRepository pushHistoryRepository,
                        ObjectMapper objectMapper,
                        AmazonSNS amazonSNS) {
     this.memberService = memberService;
     this.deviceRepository = deviceRepository;
     this.messageService = messageService;
     this.notificationRepository = notificationRepository;
-    this.pushHistoryRepository = pushHistoryRepository;
     this.objectMapper = objectMapper;
     this.amazonSNS = amazonSNS;
   }
@@ -102,14 +100,6 @@ public class DeviceService {
     return device;
   }
 
-  @Async
-  public void push(List<Notification> notifications) {
-    log.debug("{}", notifications);
-    for (Notification n : notifications) {
-      push(n);
-    }
-  }
-
   public void push(Notification notification) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId())
        .forEach(d -> {
@@ -138,16 +128,8 @@ public class DeviceService {
 
       PublishResult result = amazonSNS.publish(request);
       log.debug("result: {}", result);
-      
-      if (StringUtils.isNotEmpty(notification.getInstantMessageBody())) { // FIXME: better way to distinguish push type?
-        pushHistoryRepository.save(new PushHistory(notification, device.getOs(), true));
-      }
     } catch (AmazonSNSException e) {
       log.info("AmazonSNSException: " + e.getMessage());
-  
-      if (StringUtils.isNotEmpty(notification.getInstantMessageBody())) { // FIXME: better way to distinguish push type?
-        pushHistoryRepository.save(new PushHistory(notification, device.getOs(), false));
-      }
       
       if (!isValid(device)) {
         device.setValid(false);
@@ -179,7 +161,7 @@ public class DeviceService {
       data.put("image", notification.getImageUrl());
     }
   
-    if (!Strings.isNullOrEmpty(notification.getInstantMessageTitle())) {  // FIXME: better way to distinguish push type?
+    if (!Strings.isNullOrEmpty(notification.getInstantMessageTitle())) {
       data.put("title", notification.getInstantMessageTitle());
     } else {
       data.put("title", null);
