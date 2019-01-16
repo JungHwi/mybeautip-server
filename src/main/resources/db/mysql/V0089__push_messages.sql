@@ -7,8 +7,8 @@ CREATE TABLE `push_messages` (
   `platform` TINYINT DEFAULT 0,  -- 1: ios, 2: android
   `resource_type` VARCHAR(20) DEFAULT NULL,
   `resource_ids` VARCHAR(20) DEFAULT NULL,
-  `title` VARCHAR(255) NOT NULL,
-  `body` VARCHAR(4096) NOT NULL,
+  `title` VARCHAR(30) NOT NULL,
+  `body` VARCHAR(120) NOT NULL,
   `target_device_count` INT DEFAULT 0,
   `created_by` BIGINT NOT NULL,
   `created_at` DATETIME(3) NOT NULL,
