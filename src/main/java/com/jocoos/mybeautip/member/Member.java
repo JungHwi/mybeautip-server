@@ -73,7 +73,7 @@ public class Member {
   private int reportCount;
 
   @Column(nullable = false)
-  private int videoCount; // public video count
+  private int publicVideoCount;
 
   @JsonIgnore
   @Column(nullable = false)

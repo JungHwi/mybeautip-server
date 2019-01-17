@@ -1,0 +1,1 @@
+ALTER TABLE `videos` ADD COLUMN `locked` TINYINT(1) NOT NULL DEFAULT 0 AFTER `state`;

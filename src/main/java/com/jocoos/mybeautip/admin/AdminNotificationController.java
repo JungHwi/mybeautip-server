@@ -1,8 +1,9 @@
 package com.jocoos.mybeautip.admin;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,10 +24,11 @@ import com.jocoos.mybeautip.devices.Device;
 import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.notification.Notification;
+import com.jocoos.mybeautip.notification.event.PushMessage;
+import com.jocoos.mybeautip.notification.event.PushMessageRepository;
 import com.jocoos.mybeautip.restapi.DeviceController;
 
 @Slf4j
@@ -37,13 +39,16 @@ public class AdminNotificationController {
   private final DeviceService deviceService;
   private final MemberRepository memberRepository;
   private final DeviceRepository deviceRepository;
+  private final PushMessageRepository pushMessageRepository;
 
   public AdminNotificationController(DeviceService deviceService,
                                      MemberRepository memberRepository,
-                                     DeviceRepository deviceRepository) {
+                                     DeviceRepository deviceRepository,
+                                     PushMessageRepository pushMessageRepository) {
     this.deviceService = deviceService;
     this.memberRepository = memberRepository;
     this.deviceRepository = deviceRepository;
+    this.pushMessageRepository = pushMessageRepository;
   }
 
 
@@ -121,7 +126,7 @@ public class AdminNotificationController {
   }
 
   @PostMapping("/notifications")
-  public ResponseEntity pushNotifications(@RequestBody NotificationRequest request,
+  public ResponseEntity pushNotifications(@Valid @RequestBody NotificationRequest request,
                                           BindingResult bindingResult) {
 
     log.debug("notification request: {}", request);
@@ -144,23 +149,34 @@ public class AdminNotificationController {
         devices = deviceRepository.findByPushableAndValidAndOs(true, true, deviceOs, pageable);
       }
     }
-
-    notifications.addAll(devices.map(d -> new Notification(d.getCreatedBy(), request.getMessage()))
-       .stream().collect(Collectors.toList()));
-
-    deviceService.push(notifications);
+    
+    devices.forEach(device ->
+      deviceService.push(device, new Notification(device.getCreatedBy(), request.getTitle(),
+          request.getMessage(), request.getResourceType(), request.getResourceIds())));
+    
+    pushMessageRepository.save(new PushMessage(request, devices.getSize()));
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }
 
 
   @Data
   @NoArgsConstructor
-  static class NotificationRequest {
+  public static class NotificationRequest {
     int size = 100;
+    
     @NotNull
-    int platform;
-    @NotNull
-    String message;
+    Integer platform;
+    
+    int category;
+  
+    @Size(max=30)
+    String title;
+    String resourceType;
+    String resourceIds;
     Long target;
+    
+    @NotNull
+    @Size(max=120)
+    String message;
   }
 }

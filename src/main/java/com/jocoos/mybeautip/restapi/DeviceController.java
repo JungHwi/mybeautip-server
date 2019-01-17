@@ -4,13 +4,15 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.jocoos.mybeautip.member.MemberService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,8 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.devices.Device;
 import com.jocoos.mybeautip.devices.DeviceService;
-import com.jocoos.mybeautip.devices.NoticeService;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.MemberService;
 
 @Slf4j
 @RestController

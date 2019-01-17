@@ -11,11 +11,15 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.tag.TagService;
+import com.jocoos.mybeautip.video.view.VideoView;
+import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +54,8 @@ public class VideoService {
   private final MemberRepository memberRepository;
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
+  private final VideoViewRepository videoViewRepository;
+  private final CommentLikeRepository commentLikeRepository;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.video.watch-duration}")
@@ -69,6 +75,8 @@ public class VideoService {
                       MemberRepository memberRepository,
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
+                      VideoViewRepository videoViewRepository,
+                      CommentLikeRepository commentLikeRepository,
                       ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.messageService = messageService;
@@ -82,6 +90,8 @@ public class VideoService {
     this.memberRepository = memberRepository;
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
+    this.videoViewRepository = videoViewRepository;
+    this.commentLikeRepository = commentLikeRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -245,46 +255,42 @@ public class VideoService {
   }
 
   @Transactional
-  public VideoController.VideoInfo setWatcher(Long id, Member me, String lang) {
-    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-      .map(v -> {
-        if ("live".equalsIgnoreCase(v.getState())) {
-          Optional<VideoWatch> optional = videoWatchRepository.findByVideoIdAndCreatedById(v.getId(), me.getId());
-          if (optional.isPresent()) {
-            optional.get().setModifiedAt(new Date());
-            videoWatchRepository.save(optional.get());
-          } else {
-            videoWatchRepository.save(new VideoWatch(v, me));
-            videoRepository.updateTotalWatchCount(v.getId(), 1);
-            v.setTotalWatchCount(v.getTotalWatchCount() + 1);
-          }
-        }
-        return v;
-      })
-      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-    return generateVideoInfo(video);
+  public Video setWatcher(Video video, Member me) {
+    if ("live".equalsIgnoreCase(video.getState())) {
+      videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId())
+          .map(watch -> {
+            watch.setModifiedAt(new Date());
+            videoWatchRepository.save(watch);
+            return Optional.empty();
+          })
+          .orElseGet(() -> {
+            videoWatchRepository.save(new VideoWatch(video, me));
+            video.setTotalWatchCount(video.getTotalWatchCount() + 1);
+            return Optional.empty();
+          });
+      return videoRepository.saveAndFlush(video);
+    }
+    return video;
   }
 
   @Transactional
-  public VideoController.VideoInfo setWatcherWithGuest(Long id, String guestUsername, String lang) {
-    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-      .map(v -> {
-        if ("live".equalsIgnoreCase(v.getState())) {
-          Optional<VideoWatch> optional = videoWatchRepository.findByVideoIdAndUsername(v.getId(), guestUsername);
-
-          if (optional.isPresent()) {
-            optional.get().setModifiedAt(new Date());
-            videoWatchRepository.save(optional.get());
-          } else {
-            videoWatchRepository.save(new VideoWatch(v, guestUsername));
-            videoRepository.updateTotalWatchCount(v.getId(), 1);
-            v.setTotalWatchCount(v.getTotalWatchCount() + 1);
-          }
-        }
-        return v;
-      })
-      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-    return generateVideoInfo(video);
+  public Video setWatcherWithGuest(Video video, String guestUsername) {
+    if ("live".equalsIgnoreCase(video.getState())) {
+      videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestUsername)
+          .map(watch -> {
+            watch.setModifiedAt(new Date());
+            videoWatchRepository.save(watch);
+            return Optional.empty();
+          })
+          .orElseGet(() -> {
+            videoWatchRepository.save(new VideoWatch(video, guestUsername));
+            video.setTotalWatchCount(video.getTotalWatchCount() + 1);
+            video.setViewCount(video.getViewCount() + 1);
+            return Optional.empty();
+          });
+      return videoRepository.saveAndFlush(video);
+    }
+    return video;
   }
   
   @Transactional
@@ -334,7 +340,7 @@ public class VideoService {
       }
     
       if ("PUBLIC".equals(request.getVisibility())) {
-        member.setVideoCount(member.getVideoCount() + 1);
+        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
       }
       member.setTotalVideoCount(member.getTotalVideoCount() + 1);
       memberRepository.save(member);
@@ -353,7 +359,7 @@ public class VideoService {
       BeanUtils.copyProperties(request, video);
     
       if ("PUBLIC".equals(request.getVisibility())) {
-        member.setVideoCount(member.getVideoCount() + 1);
+        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
       }
       member.setTotalVideoCount(member.getTotalVideoCount() + 1);
       memberRepository.save(member);
@@ -378,7 +384,7 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            member.setVideoCount(member.getVideoCount() - 1);
+            member.setPublicVideoCount(member.getPublicVideoCount() - 1);
           }
 
           member.setTotalVideoCount(member.getTotalVideoCount() - 1);
@@ -400,7 +406,7 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            member.setVideoCount(member.getVideoCount() - 1);
+            member.setPublicVideoCount(member.getPublicVideoCount() - 1);
           }
           member.setTotalVideoCount(member.getTotalVideoCount() - 1);
           memberRepository.save(member);
@@ -420,6 +426,75 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(video.getId());
           feedService.feedDeletedVideo(video.getId());
         });
+  }
+  
+  @Transactional
+  public Video addView(Video video, Member me) {
+    if (me != null) {
+      videoViewRepository.findByVideoIdAndCreatedById(video.getId(), me.getId())
+          .map(view -> {
+            view.setViewCount(view.getViewCount() + 1);
+            videoViewRepository.save(view);
+            return Optional.empty();
+          })
+          .orElseGet(() -> {
+            videoViewRepository.save(new VideoView(video, me));
+            return Optional.empty();
+          });
+    } else {  // Guest can add view_count, but can not be inserted into viewer list
+      String guestName = memberService.getGuestUserName();
+      videoViewRepository.findByVideoIdAndGuestName(video.getId(), guestName)
+          .map(view -> {
+            view.setViewCount(view.getViewCount() + 1);
+            videoViewRepository.save(view);
+            return Optional.empty();
+          })
+          .orElseGet(() -> {
+            videoViewRepository.save(new VideoView(video, guestName));
+            return Optional.empty();
+          });
+    }
+    
+    video.setViewCount(video.getViewCount() + 1);
+    return videoRepository.saveAndFlush(video);
+  }
+  
+  @Transactional
+  public void deleteComment(Comment comment) {
+    videoRepository.updateCommentCount(comment.getVideoId(), -1);
+    if (comment.getParentId() != null) {
+      commentRepository.updateCommentCount(comment.getParentId(), -1);
+    }
+    List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
+    commentLikeRepository.deleteAll(commentLikes);
+    commentRepository.delete(comment);
+  }
+  
+  
+  @Transactional
+  public Video lockVideo(Video video) {
+    if (video.getLocked()) {  // Already locked
+      return video;
+    }
+  
+    log.debug("Video locked: " + video.getId());
+  
+    if ("PUBLIC".equals(video.getVisibility())) {
+      Member member = video.getMember();
+      member.setPublicVideoCount(member.getPublicVideoCount() - 1);
+      memberRepository.save(member);
+      video.setVisibility("PRIVATE");
+    }
+    
+    video.setLocked(true);
+    return update(video);
+  }
+  
+  @Transactional
+  public Video unLockVideo(Video video) {
+    log.debug("Video unlocked: " + video.getId());
+    video.setLocked(false);
+    return update(video);
   }
 
   /**

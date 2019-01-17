@@ -176,13 +176,13 @@ public class CallbackController {
       
       Member member = target.getMember();
       if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
-        member.setVideoCount(member.getVideoCount() - 1);
+        member.setPublicVideoCount(member.getPublicVideoCount() - 1);
         log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
         target.setVisibility(newState);
       }
       
       if ("PRIVATE".equalsIgnoreCase(prevState) && "PUBLIC".equalsIgnoreCase(newState)) {
-        member.setVideoCount(member.getVideoCount() + 1);
+        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
         log.debug("Video state will be changed PRIVATE to PUBLIC: {}", target.getId());
         target.setVisibility(newState);
       }

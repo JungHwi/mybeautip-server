@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.post;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.banner.Banner;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,14 @@ import java.util.Set;
 @Entity
 @Table(name = "posts")
 public class Post extends MemberAuditable {
+
+  public static final int CATEGORY_TREND = 1;
+  public static final int CATEGORY_CARDNEWS = 2;
+  public static final int CATEGORY_EVENT = 3;
+  public static final int CATEGORY_NOTICE = 4;
+  public static final int CATEGORY_MOTD = 5;
+  public static final int CATEGORY_CURATION = 6;
+  
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +48,18 @@ public class Post extends MemberAuditable {
   private int category;
 
   /**
+   * Show post to users whether or not
+   */
+  @Column(nullable = false)
+  private boolean opened;
+
+  @Column
+  private Date startedAt;
+
+  @Column
+  private Date endedAt;
+
+  /**
    * Event progress
    * 0: default(no event), 1: 진행중 2: 선정중 3: 발표 4:종료
    */
@@ -52,6 +74,9 @@ public class Post extends MemberAuditable {
 
   @Column(nullable = false)
   private int commentCount;
+
+  @OneToOne(mappedBy = "post")
+  private Banner banner;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(

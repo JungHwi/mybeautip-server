@@ -9,10 +9,13 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
   Optional<Post> findByIdAndDeletedAtIsNull(Long id);
+
+  Optional<Post> findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(Long id, Date startedAt, Date endedAt);
 
   @Modifying
   @Query("update Post p set p.viewCount = p.viewCount + ?2, p.modifiedAt = now() where p.id = ?1")
@@ -26,19 +29,24 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   @Query("update Post p set p.commentCount = p.commentCount + ?2, p.modifiedAt = now() where p.id = ?1")
   void updateCommentCount(Long id, int count);
 
-  Slice<Post> findByCategoryAndDeletedAtIsNull(int category, Pageable pageable);
+  Page<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNull(Date startedAt, Date endedAt, int category, Pageable pageable);
 
-  Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNull(Date createdAt, Pageable pageable);
+  Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(Date startedAt, Date endedAt, Pageable pageable);
 
-  Slice<Post> findByDeletedAtIsNullAndTitleContainingOrDescriptionContaining(String title, String description, Pageable pageable);
+  Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date startedAt, Date endedAt, int category, String title, String description, Pageable pageable);
+  
+  @Query("select p from Post p where p.deletedAt is null " +
+      "and p.opened is true and p.startedAt < :now and p.endedAt > :now " +
+      "and p.category != 4 " +
+      "and (p.title like concat('%',:keyword,'%') or p.description like concat('%',:keyword,'%')) " +
+      "and p.createdAt < :cursor order by p.createdAt desc")
+  Slice<Post> searchPost(@Param("keyword") String keyword, @Param("now") Date now, @Param("cursor") Date cursor, Pageable pageable);
+  
+  // apis for Admin
+  Page<Post> findByCategoryAndDeletedAtIsNull(int category, Pageable pageable);
 
-  Slice<Post> findByCategoryAndCreatedAtBeforeAndDeletedAtIsNull(int category, Date createdAt, Pageable pageable);
+  Page<Post> findByDeletedAtIsNull(Pageable pageable);
 
-  Slice<Post> findByCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(int category, String title, String description, Pageable pageable);
+  Page<Post> findByDeletedAtIsNotNull(Pageable pageable);
 
-  Slice<Post> findByCategoryAndCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(int category, Date createdAt, String title, String description, Pageable pageable);
-
-  Slice<Post> findByCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date createdAt, String title, String description, Pageable pageable);
-
-  Page<Post> findByCategory(int category, Pageable pageable);
 }

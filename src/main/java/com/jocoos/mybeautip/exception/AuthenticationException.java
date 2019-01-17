@@ -13,6 +13,11 @@ public class AuthenticationException extends ClientAuthenticationException {
   }
 
   @Override
+  public int getHttpErrorCode() {
+    return 401;
+  }
+
+  @Override
   public String getOAuth2ErrorCode() {
     return "mybeautip authentication error";
   }

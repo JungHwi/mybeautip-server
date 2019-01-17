@@ -382,6 +382,7 @@ public class MemberController {
       .withCursor(nextCursor).toBuild();
   }
 
+  @Deprecated
   @Transactional
   @DeleteMapping("/me")
   public void deleteMe(@Valid @RequestBody DeleteMemberRequest request,
@@ -412,7 +413,53 @@ public class MemberController {
     member.setVisible(false);
     member.setFollowingCount(0);
     member.setFollowerCount(0);
-    member.setVideoCount(0);
+    member.setPublicVideoCount(0);
+    member.setTotalVideoCount(0);
+    member.setDeletedAt(new Date());
+    memberRepository.saveAndFlush(member);
+    
+    log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
+    
+    // Sync processing before response
+    notificationService.readAllNotification(member.getId());
+    deviceService.disableAllDevices(member.getId());
+    memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
+    
+    // Async processing after response
+    postProcessService.deleteMember(member);
+  }
+  
+  @Transactional
+  @PutMapping("/me/delete")
+  public void deleteMember(@Valid @RequestBody DeleteMemberRequest request,
+                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    
+    int link = member.getLink();
+    switch (link) {
+      case 1:
+        facebookMemberRepository.findByMemberId(member.getId()).ifPresent(facebookMemberRepository::delete);
+        break;
+      
+      case 2:
+        naverMemberRepository.findByMemberId(member.getId()).ifPresent(naverMemberRepository::delete);
+        break;
+      
+      case 4:
+        kakaoMemberRepository.findByMemberId(member.getId()).ifPresent(kakaoMemberRepository::delete);
+        break;
+      
+      default:
+        throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
+    }
+    
+    member.setIntro("");
+    member.setAvatarUrl("https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_deleted.png");
+    member.setVisible(false);
+    member.setFollowingCount(0);
+    member.setFollowerCount(0);
+    member.setPublicVideoCount(0);
     member.setTotalVideoCount(0);
     member.setDeletedAt(new Date());
     memberRepository.saveAndFlush(member);

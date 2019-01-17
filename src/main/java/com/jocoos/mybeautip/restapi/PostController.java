@@ -135,25 +135,23 @@ public class PostController {
 
     if (StringUtils.isNumeric(cursor)) {
       dateCursor = new Date(Long.parseLong(cursor));
+    } else {
+      dateCursor = new Date();
     }
 
-    // FIXME: How to make a code gracefully
-    if (category > 0 && !Strings.isNullOrEmpty(keyword) && dateCursor != null) {
-      posts = postRepository.findByCategoryAndCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(category, dateCursor, keyword, keyword, page);
-    } else if (!Strings.isNullOrEmpty(keyword) && dateCursor != null) {
-      posts = postRepository.findByCreatedAtBeforeAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, keyword, keyword, page);
-    } else if (category > 0 && !Strings.isNullOrEmpty(keyword)) {
-      posts = postRepository.findByCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(category, keyword, keyword, page);
-    } else if (category > 0 && dateCursor != null) {
-      posts = postRepository.findByCategoryAndCreatedAtBeforeAndDeletedAtIsNull(category, dateCursor, page);
-    } else if (dateCursor != null) {
-      posts = postRepository.findByCreatedAtBeforeAndDeletedAtIsNull(dateCursor, page);
-    } else if (!Strings.isNullOrEmpty(keyword)) {
-      posts = postRepository.findByDeletedAtIsNullAndTitleContainingOrDescriptionContaining(keyword, keyword, page);
-    } else if (category > 0){
-      posts = postRepository.findByCategoryAndDeletedAtIsNull(category, page);
+
+    if (category > 0) {
+      if (!Strings.isNullOrEmpty(keyword)) {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, keyword, keyword, page);
+      } else {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNull(dateCursor, dateCursor, category, page);
+      }
     } else {
-      posts = postRepository.findAll(page);
+      if (!Strings.isNullOrEmpty(keyword)) {
+        posts = postRepository.searchPost(keyword, new Date(), dateCursor, page);
+      } else {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(dateCursor, dateCursor, page);
+      }
     }
 
     return posts;
@@ -163,7 +161,8 @@ public class PostController {
   public ResponseEntity<PostInfo> getPost(@PathVariable Long id,
                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
-    return postRepository.findById(id)
+    Date now = new Date();
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          List<GoodsInfo> goodsInfo = new ArrayList<>();
          post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
@@ -182,7 +181,8 @@ public class PostController {
   @GetMapping("/{id:.+}/goods")
   public ResponseEntity<List<GoodsInfo>> getGoods(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    return postRepository.findById(id)
+    Date now = new Date();
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          List<GoodsInfo> result = Lists.newArrayList();
          post.getGoods().stream().forEach(gno -> {
@@ -198,7 +198,8 @@ public class PostController {
   @GetMapping("/{id:.+}/winners")
   public ResponseEntity<List<MemberInfo>> getWinners(@PathVariable Long id,
                                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    return postRepository.findById(id)
+    Date now = new Date();
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          List<MemberInfo> result = Lists.newArrayList();
          post.getWinners().stream().forEach(mid -> {
@@ -217,7 +218,8 @@ public class PostController {
                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     // TODO: Add history using spring AOP!!
-    return postRepository.findById(id)
+    Date now = new Date();
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          postRepository.updateViewCount(post.getId(), 1);
          return new ResponseEntity(HttpStatus.OK);
@@ -230,7 +232,8 @@ public class PostController {
   public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
-    return postRepository.findById(id)
+    Date now = new Date();
+    return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          Long postId = post.getId();
          if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
@@ -270,6 +273,10 @@ public class PostController {
                                     @RequestParam(required = false) Long cursor,
                                     @RequestParam(required = false) String direction,
                                     @RequestParam(required = false) Long parentId) {
+    Date now = new Date();
+    postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
+        .orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
+    
     PageRequest page;
     if ("next".equals(direction)) {
       page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
@@ -317,7 +324,8 @@ public class PostController {
       }
     }
 
-    int totalCount = postRepository.findById(id).map(Post::getCommentCount).orElse(0);
+    int totalCount = postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
+       .map(Post::getCommentCount).orElse(0);
 
     return new CursorResponse
       .Builder<>("/api/1/posts/" + id + "/comments", result)
@@ -392,16 +400,9 @@ public class PostController {
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long postId,
                                          @PathVariable Long id) {
-    postRepository.updateCommentCount(postId, -1);
-
-    Long memberId = memberService.currentMemberId();
-    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
+    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberService.currentMemberId())
        .map(comment -> {
-         if (comment.getParentId() != null) {
-           commentRepository.updateCommentCount(comment.getParentId(), -1);
-         }
-         // FIXME: need to delete comment_likes relevant to comment
-         commentRepository.delete(comment);
+         postService.deleteComment(comment);
          return new ResponseEntity<>(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
@@ -468,6 +469,9 @@ public class PostController {
     private Date createdAt;
     private MemberInfo createdBy;
     private Long likeId;
+    private boolean opened;
+    private Date startedAt;
+    private Date endedAt;
 
     public PostInfo(Post post, MemberInfo memberInfo, List<GoodsInfo> goodsInfo) {
       BeanUtils.copyProperties(post, this);

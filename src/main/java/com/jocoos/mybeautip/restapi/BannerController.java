@@ -16,32 +16,46 @@ import org.springframework.web.bind.annotation.*;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.post.PostRepository;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/api/1/banners", produces = MediaType.APPLICATION_JSON_VALUE)
 public class BannerController {
 
   private final MessageService messageService;
   private final BannerRepository bannerRepository;
+  private final PostRepository postRepository;
 
   private static final String BANNER_NOT_FOUND = "banner.not_found";
 
   public BannerController(MessageService messageService,
-                          BannerRepository bannerRepository) {
+                          BannerRepository bannerRepository, PostRepository postRepository) {
     this.messageService = messageService;
     this.bannerRepository = bannerRepository;
+    this.postRepository = postRepository;
   }
 
   @GetMapping
   public ResponseEntity<List<BannerInfo>> getBanners(@RequestParam(defaultValue = "5") int count) {
-    Slice<Banner> banners = bannerRepository.findAll(PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+    PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq"));
+    Date now = new Date();
+    Slice<Banner> banners = bannerRepository.findByStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(now, now, pageRequest);
     List<BannerInfo> result = Lists.newArrayList();
+    log.debug("now: {}", now);
 
-    banners.stream().forEach(b -> result.add(new BannerInfo(b)));
+    banners.stream()
+       .forEach(b -> {
+         log.debug("{}", b.getPost().getId());
+         postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(b.getPost().getId(), now, now)
+         .ifPresent(p -> result.add(new BannerInfo(b)));
+          }
+       );
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }

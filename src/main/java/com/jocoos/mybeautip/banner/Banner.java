@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.banner;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.post.Post;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -29,9 +31,7 @@ public class Banner extends MemberAuditable {
   @Column(nullable = false)
   private String thumbnailUrl;
 
-  /**
-   * 1: trend, 2: card news, 3: event, 4: notice, 5: MOTD, 6: curation
-   */
+  @Deprecated
   @Column(nullable = false)
   private int category;
 
@@ -41,8 +41,13 @@ public class Banner extends MemberAuditable {
   @Column(nullable = false)
   private Long viewCount = 0L;
 
+  @Deprecated
   @Column(nullable = false)
   private String link;
+
+  @ManyToOne
+  @JoinColumn(name = "post_id", nullable = false)
+  private Post post;
 
   @Column
   private Date startedAt;

@@ -99,7 +99,10 @@ public class Notification {
   private Date createdAt;
 
   @Transient
-  private String instantMessage;
+  private String instantMessageTitle;
+  
+  @Transient
+  private String instantMessageBody;
 
   public Notification(Following following, Long followId) {
     this.type = FOLLOWING;
@@ -247,9 +250,12 @@ public class Notification {
     this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
   }
 
-  public Notification(Member target, String message) {
+  public Notification(Member target, String title, String message, String resourceType, String resourceIds) {
     this.type = INSTANT;
     this.targetMember = target;
-    this.instantMessage = message;
+    this.instantMessageTitle = title;
+    this.instantMessageBody = message;
+    this.resourceType = resourceType;
+    this.resourceIds = resourceIds;
   }
 }
