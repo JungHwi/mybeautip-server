@@ -413,7 +413,7 @@ public class MemberController {
     member.setVisible(false);
     member.setFollowingCount(0);
     member.setFollowerCount(0);
-    member.setVideoCount(0);
+    member.setPublicVideoCount(0);
     member.setTotalVideoCount(0);
     member.setDeletedAt(new Date());
     memberRepository.saveAndFlush(member);
@@ -459,7 +459,7 @@ public class MemberController {
     member.setVisible(false);
     member.setFollowingCount(0);
     member.setFollowerCount(0);
-    member.setVideoCount(0);
+    member.setPublicVideoCount(0);
     member.setTotalVideoCount(0);
     member.setDeletedAt(new Date());
     memberRepository.saveAndFlush(member);

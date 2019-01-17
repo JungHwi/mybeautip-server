@@ -340,7 +340,7 @@ public class VideoService {
       }
     
       if ("PUBLIC".equals(request.getVisibility())) {
-        member.setVideoCount(member.getVideoCount() + 1);
+        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
       }
       member.setTotalVideoCount(member.getTotalVideoCount() + 1);
       memberRepository.save(member);
@@ -359,7 +359,7 @@ public class VideoService {
       BeanUtils.copyProperties(request, video);
     
       if ("PUBLIC".equals(request.getVisibility())) {
-        member.setVideoCount(member.getVideoCount() + 1);
+        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
       }
       member.setTotalVideoCount(member.getTotalVideoCount() + 1);
       memberRepository.save(member);
@@ -384,7 +384,7 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            member.setVideoCount(member.getVideoCount() - 1);
+            member.setPublicVideoCount(member.getPublicVideoCount() - 1);
           }
 
           member.setTotalVideoCount(member.getTotalVideoCount() - 1);
@@ -406,7 +406,7 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            member.setVideoCount(member.getVideoCount() - 1);
+            member.setPublicVideoCount(member.getPublicVideoCount() - 1);
           }
           member.setTotalVideoCount(member.getTotalVideoCount() - 1);
           memberRepository.save(member);
@@ -481,7 +481,7 @@ public class VideoService {
   
     if ("PUBLIC".equals(video.getVisibility())) {
       Member member = video.getMember();
-      member.setVideoCount(member.getVideoCount() - 1);
+      member.setPublicVideoCount(member.getPublicVideoCount() - 1);
       memberRepository.save(member);
       video.setVisibility("PRIVATE");
     }
