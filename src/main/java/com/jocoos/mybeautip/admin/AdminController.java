@@ -632,44 +632,6 @@ public class AdminController {
       }
     }
   }
-  
-  @PatchMapping("/lock-video")
-  public void lockVideo(@Valid @RequestBody LockVideoRequest request) {
-    log.debug("request: {}", request);
-    
-    videoRepository.findByIdAndDeletedAtIsNull(request.getVideoId())
-        .map(video -> {
-          if (video.getLocked()) {
-            throw new BadRequestException("already_locked", "Video already locked");
-          }
-          return videoService.lockVideo(video);
-        })
-        .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + request.getVideoId()));
-  }
-  
-  @PatchMapping("/unlock-video")
-  public void unLockVideo(@Valid @RequestBody LockVideoRequest request) {
-    log.debug("request: {}", request);
-    
-    videoRepository.findByIdAndDeletedAtIsNull(request.getVideoId())
-        .map(video -> {
-          if (!video.getLocked()) {
-            throw new BadRequestException("already_unlocked", "Video does not lock.");
-          }
-          return videoService.unLockVideo(video);
-        })
-        .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + request.getVideoId()));
-  }
-  
-  
-  
-  
-  @Data
-  private static class LockVideoRequest {
-    @Valid
-    @NotNull(message = "video_id must not be null")
-    private Long videoId;
-  }
 
   @Data
   public static class CreatePostRequest {
