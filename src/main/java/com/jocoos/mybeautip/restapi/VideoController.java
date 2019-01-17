@@ -738,6 +738,7 @@ public class VideoController {
     private String videoKey;
     private String type;
     private String state;
+    private Boolean locked;
     private Boolean muted;
     private String visibility;
     private String title;
