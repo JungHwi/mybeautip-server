@@ -30,7 +30,7 @@ public interface MemberExcerpt {
 
   int getFollowingCount();
 
-  int getVideoCount();
+  int getPublicVideoCount();
 
   int getTotalVideoCount();
 

@@ -37,7 +37,7 @@ public class MemberInfo {
     this.deletedAt = member.getDeletedAt();
     this.followerCount = member.getFollowerCount();
     this.followingCount = member.getFollowingCount();
-    this.videoCount = member.getVideoCount();
+    this.videoCount = member.getPublicVideoCount();
   }
 
   public MemberInfo(Member member, Long followingId) {
