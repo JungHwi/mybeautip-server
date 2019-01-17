@@ -9,6 +9,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
@@ -33,10 +34,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(Date startedAt, Date endedAt, Pageable pageable);
 
   Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date startedAt, Date endedAt, int category, String title, String description, Pageable pageable);
-
-  Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryNotAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date startedAt, Date endedAt, int category, String title, String description, Pageable pageable);
-
-
+  
+  @Query("select p from Post p where p.deletedAt is null " +
+      "and p.opened is true and p.startedAt < :now and p.endedAt > :now " +
+      "and p.category != 4 " +
+      "and (p.title like concat('%',:keyword,'%') or p.description like concat('%',:keyword,'%')) " +
+      "and p.createdAt < :cursor order by p.createdAt desc")
+  Slice<Post> searchPost(@Param("keyword") String keyword, @Param("now") Date now, @Param("cursor") Date cursor, Pageable pageable);
+  
   // apis for Admin
   Page<Post> findByCategoryAndDeletedAtIsNull(int category, Pageable pageable);
 
