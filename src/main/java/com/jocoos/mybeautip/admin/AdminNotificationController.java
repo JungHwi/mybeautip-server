@@ -126,9 +126,13 @@ public class AdminNotificationController {
   }
 
   @PostMapping("/notifications")
-  public ResponseEntity pushNotifications(@Valid @RequestBody NotificationRequest request) {
+  public ResponseEntity pushNotifications(@Valid @RequestBody NotificationRequest request,
+                                          BindingResult bindingResult) {
 
     log.debug("notification request: {}", request);
+    if (bindingResult.hasErrors()) {
+      throw new BadRequestException(bindingResult.getFieldError());
+    }
 
     Pageable pageable = PageRequest.of(0, request.getSize());
     List<Notification> notifications = Lists.newArrayList();
