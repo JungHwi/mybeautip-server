@@ -148,7 +148,7 @@ public class PostController {
       }
     } else {
       if (!Strings.isNullOrEmpty(keyword)) {
-        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, keyword, keyword, page);
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryNotAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, Post.CATEGORY_NOTICE, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(dateCursor, dateCursor, page);
       }
