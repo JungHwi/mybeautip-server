@@ -469,6 +469,33 @@ public class VideoService {
     commentLikeRepository.deleteAll(commentLikes);
     commentRepository.delete(comment);
   }
+  
+  
+  @Transactional
+  public Video lockVideo(Video video) {
+    if (video.getLocked()) {  // Already locked
+      return video;
+    }
+  
+    log.debug("Video locked: " + video.getId());
+  
+    if ("PUBLIC".equals(video.getVisibility())) {
+      Member member = video.getMember();
+      member.setVideoCount(member.getVideoCount() - 1);
+      memberRepository.save(member);
+      video.setVisibility("PRIVATE");
+    }
+    
+    video.setLocked(true);
+    return update(video);
+  }
+  
+  @Transactional
+  public Video unLockVideo(Video video) {
+    log.debug("Video unlocked: " + video.getId());
+    video.setLocked(false);
+    return update(video);
+  }
 
   /**
    * Wrap method to avoid duplication for feed aspect

@@ -32,6 +32,9 @@ public class Video {
   private String state;
   
   @Column(nullable = false)
+  private Boolean locked;
+  
+  @Column(nullable = false)
   private Boolean muted;
 
   @Column(nullable = false)
