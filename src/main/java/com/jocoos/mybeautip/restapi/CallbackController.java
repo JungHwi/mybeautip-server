@@ -206,6 +206,7 @@ public class CallbackController {
     String visibility;
     String state;
     Boolean muted = false;
+    Boolean locked = false;
     Integer duration = 0;
     String title ="";
     String content = "";
