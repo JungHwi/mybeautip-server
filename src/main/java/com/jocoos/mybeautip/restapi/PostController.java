@@ -474,9 +474,13 @@ public class PostController {
     private Date endedAt;
 
     public PostInfo(Post post, MemberInfo memberInfo, List<GoodsInfo> goodsInfo) {
-      BeanUtils.copyProperties(post, this);
+      this(post);
       this.createdBy = memberInfo;
       this.goodsInfo = goodsInfo;
+    }
+
+    public PostInfo(Post post) {
+      BeanUtils.copyProperties(post, this);
     }
   }
 
