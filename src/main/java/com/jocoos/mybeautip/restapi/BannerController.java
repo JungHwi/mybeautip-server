@@ -51,9 +51,9 @@ public class BannerController {
 
     banners.stream()
        .forEach(b -> {
-         log.debug("{}", b.getPost().getId());
          postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(b.getPost().getId(), now, now)
-         .ifPresent(p -> result.add(new BannerInfo(b)));
+         .ifPresent(p ->
+            result.add(new BannerInfo(b, new PostController.PostInfo(p))));
           }
        );
 
@@ -85,13 +85,19 @@ public class BannerController {
     private int category;
     private int seq;
     private String link;
-    private String startedAt;
-    private String endedAt;
+    private Date startedAt;
+    private Date endedAt;
     private Long viewCount;
     private Date createdAt;
+    private PostController.PostInfo post;
 
     public BannerInfo(Banner banner) {
       BeanUtils.copyProperties(banner, this);
+    }
+
+    public BannerInfo(Banner banner, PostController.PostInfo post) {
+      this(banner);
+      this.post = post;
     }
   }
 }

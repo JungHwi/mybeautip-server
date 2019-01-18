@@ -1,8 +1,33 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -20,7 +45,6 @@ import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.member.revenue.*;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
-import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReport;
@@ -29,29 +53,6 @@ import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -783,6 +784,7 @@ public class VideoController {
     String chatRoomId ="";
     String data = "";
     Boolean muted = false;
+    Boolean locked = false;
   }
 
   @Data
