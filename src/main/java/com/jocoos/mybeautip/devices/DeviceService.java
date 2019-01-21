@@ -242,7 +242,7 @@ public class DeviceService {
 
     if (request.isPushable()) { // enable device, pushable is set according to Member Info
       device.setValid(true);
-      device.setPushable(memberService.currentMember().getPushable());
+      device.setPushable((memberService.currentMember() == null) ? true : memberService.currentMember().getPushable());
     } else {  // disable device
       device.setValid(false);
       device.setPushable(false);
