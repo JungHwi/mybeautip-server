@@ -251,6 +251,7 @@ public class DeviceService {
     return device;
   }
   
+  @Transactional
   public void validateAlreadyRegisteredDevices(Long memberId) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(memberId)
         .forEach(device -> {
