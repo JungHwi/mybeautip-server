@@ -20,6 +20,8 @@ public interface VideoExceprt {
 
   public String getVisibility();
 
+  public boolean getLocked();
+
   public String getTitle();
 
   public String getContent();
