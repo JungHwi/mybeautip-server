@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.jocoos.mybeautip.devices.Device;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 
 @Slf4j
@@ -44,12 +45,16 @@ public class DeviceController {
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
+    Member me = memberService.currentMember();
     
+    if (me != null) {
     // Check member's devices validity
-    deviceService.validateAlreadyRegisteredDevices(memberService.currentMemberId());
+      deviceService.validateAlreadyRegisteredDevices(me.getId());
+    }
 
     log.debug("request: {}", request);
-    Device device = deviceService.saveOrUpdate(request);
+    log.debug("request member: {}", me);
+    Device device = deviceService.saveOrUpdate(request, me);
     log.debug("saved device: {}", device);
 
     return new ResponseEntity<>(new DeviceInfo(device), HttpStatus.OK);

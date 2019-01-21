@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
@@ -65,22 +66,23 @@ public class DeviceService {
   }
 
   @Transactional
-  public Device saveOrUpdate(DeviceController.UpdateDeviceRequest info) {
+  public Device saveOrUpdate(DeviceController.UpdateDeviceRequest info, Member me) {
     return deviceRepository.findById(info.getDeviceId())
        .map(device -> {
-         device = copyDevice(info, device);
+         device = copyDevice(info, device, me);
 
-         if (memberService.currentMember() == null) {
+         if (me == null) {
            device.setValid(true);
            device.setPushable(true);
+           device.setCreatedBy(null);
+         } else {
+           device.setCreatedBy(me);
          }
-         
-         device.setCreatedBy(memberService.currentMember());
 
          log.debug("device: {}", device);
          return deviceRepository.save(device);
        })
-       .orElseGet(() -> deviceRepository.save(register(info)));
+       .orElseGet(() -> deviceRepository.save(register(info, me)));
   }
   
   public void disableAllDevices(Long memberId) {
@@ -91,9 +93,9 @@ public class DeviceService {
     });
   }
 
-  public Device register(DeviceController.UpdateDeviceRequest info) {
+  public Device register(DeviceController.UpdateDeviceRequest info, Member me) {
     Device device = new Device(info.getDeviceId());
-    device = copyDevice(info, device);
+    device = copyDevice(info, device, me);
     device.setArn(createARN(info.getDeviceId(), info.getDeviceOs()));
 
     log.debug("device: {}", device);
@@ -227,7 +229,7 @@ public class DeviceService {
         throw new IllegalArgumentException("Not supported os type - " + os);
     }
   }
-  private Device copyDevice(DeviceController.UpdateDeviceRequest request, Device device) {
+  private Device copyDevice(DeviceController.UpdateDeviceRequest request, Device device, Member me) {
     if (device == null) {
       throw new NotFoundException("device_not_found", "Device is null or not found");
     }
@@ -242,7 +244,7 @@ public class DeviceService {
 
     if (request.isPushable()) { // enable device, pushable is set according to Member Info
       device.setValid(true);
-      device.setPushable((memberService.currentMember() == null) ? true : memberService.currentMember().getPushable());
+      device.setPushable((me == null) ? true : me.getPushable());
     } else {  // disable device
       device.setValid(false);
       device.setPushable(false);
