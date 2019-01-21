@@ -68,7 +68,7 @@ public class DeviceService {
   public Device saveOrUpdate(DeviceController.UpdateDeviceRequest info) {
     return deviceRepository.findById(info.getDeviceId())
        .map(device -> {
-         copyDevice(info, device);
+         device = copyDevice(info, device);
 
          if (memberService.currentMember() == null) {
            device.setValid(true);
@@ -93,7 +93,7 @@ public class DeviceService {
 
   public Device register(DeviceController.UpdateDeviceRequest info) {
     Device device = new Device(info.getDeviceId());
-    copyDevice(info, device);
+    device = copyDevice(info, device);
     device.setArn(createARN(info.getDeviceId(), info.getDeviceOs()));
 
     log.debug("device: {}", device);
