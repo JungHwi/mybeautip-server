@@ -11,6 +11,8 @@ import com.jocoos.mybeautip.tag.Tag;
 @Projection(name = "keyword_details", types = KeywordRecommendation.class)
 public interface KeywordExcerpt {
 
+  Long getId();
+
   int getCategory();
 
   Member getMember();
