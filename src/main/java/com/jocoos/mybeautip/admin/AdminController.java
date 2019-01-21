@@ -602,6 +602,8 @@ public class AdminController {
     int seq = 1;
     
     for (RecommendedKeyword item : items) {
+      int itemSeq = item.getSeq() != null ? item.getSeq() : seq++;
+
       switch (item.getCategory()) {
         case 1: // Member
           Member member = memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue(item.getWord())
@@ -609,7 +611,7 @@ public class AdminController {
           
           keyword = keywordRecommendationRepository.findByMember(member).orElse(null);
           if (keyword == null) {
-            keywordRecommendationRepository.save(new KeywordRecommendation(member, seq++));
+            keywordRecommendationRepository.save(new KeywordRecommendation(member, itemSeq));
           } else {
             keyword.setSeq(seq++);
             keywordRecommendationRepository.save(keyword);
@@ -623,7 +625,7 @@ public class AdminController {
           }
           keyword = keywordRecommendationRepository.findByTag(tag).orElse(null);
           if (keyword == null) {
-            keywordRecommendationRepository.save(new KeywordRecommendation(tag, seq++));
+            keywordRecommendationRepository.save(new KeywordRecommendation(tag, itemSeq));
           } else {
             keyword.setSeq(seq++);
             keywordRecommendationRepository.save(keyword);
@@ -749,5 +751,7 @@ public class AdminController {
     
     @NotNull(message = "word must not be null")
     private String word;
+
+    private Integer seq;
   }
 }
