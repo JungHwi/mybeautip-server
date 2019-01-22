@@ -139,4 +139,16 @@ public class MemberService {
       throw new BadRequestException("invalid_email", messageService.getMessage(EMAIL_INVALID_FORMAT, lang));
     }
   }
+  
+  public boolean hasCommentPostPermission(Member member) {
+    return ((member.getPermission() & Member.COMMENT_POST) == 0);
+  }
+  
+  public boolean hasLivePostPermission(Member member) {
+    return ((member.getPermission() & Member.LIVE_POST) == 0);
+  }
+  
+  public boolean hasMotdPostPermission(Member member) {
+    return ((member.getPermission() & Member.MOTD_POST) == 0);
+  }
 }

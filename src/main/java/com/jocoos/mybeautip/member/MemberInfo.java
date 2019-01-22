@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.member;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,12 +12,6 @@ import com.jocoos.mybeautip.restapi.VideoController;
 @NoArgsConstructor
 @Data
 public class MemberInfo {
-  @JsonIgnore private final int CHAT_POST = 1;
-  @JsonIgnore private final int COMMENT_POST = 2;
-  @JsonIgnore private final int LIVE_POST = 4;
-  @JsonIgnore private final int MOTD_POST = 8;
-  @JsonIgnore private final int REVENUE_RETURN = 16;
-  
   private Long id;
   private String username;
   private String email;
@@ -56,7 +49,7 @@ public class MemberInfo {
   
   @Data
   @NoArgsConstructor
-  public class PermissionInfo {
+  public static class PermissionInfo {
     private Boolean chatPost = false;
     private Boolean commentPost = false;
     private Boolean livePost = false;
@@ -64,19 +57,19 @@ public class MemberInfo {
     private Boolean revenueReturn = false;
     
     public PermissionInfo(int value) {
-      if ((value & CHAT_POST) == CHAT_POST) {
+      if ((value & Member.CHAT_POST) == Member.CHAT_POST) {
         this.chatPost = true;
       }
-      if ((value & COMMENT_POST) == COMMENT_POST) {
+      if ((value & Member.COMMENT_POST) == Member.COMMENT_POST) {
         this.commentPost = true;
       }
-      if ((value & LIVE_POST) == LIVE_POST) {
+      if ((value & Member.LIVE_POST) == Member.LIVE_POST) {
         this.livePost = true;
       }
-      if ((value & MOTD_POST) == MOTD_POST) {
+      if ((value & Member.MOTD_POST) == Member.MOTD_POST) {
         this.motdPost = true;
       }
-      if ((value & REVENUE_RETURN) == REVENUE_RETURN) {
+      if ((value & Member.REVENUE_RETURN) == Member.REVENUE_RETURN) {
         this.revenueReturn = true;
       }
     }
