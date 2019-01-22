@@ -24,11 +24,15 @@ public class VideoReport extends MemberAuditable {
   private Video video;
 
   @Column
+  private Integer reasonCode;
+  
+  @Column(nullable = false)
   private String reason;
 
-  public VideoReport(Video video, Member member, String reason) {
+  public VideoReport(Video video, Member member, int reasonCode, String reason) {
     this.video = video;
     this.createdBy = member;
+    this.reasonCode = reasonCode;
     this.reason = reason;
   }
 }

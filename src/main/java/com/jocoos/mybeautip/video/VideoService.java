@@ -63,9 +63,6 @@ public class VideoService {
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
-
-  private static final String VIDEO_NOT_FOUND = "video.not_found";
-  private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   
   public VideoService(MemberService memberService,
                       MessageService messageService,
@@ -504,17 +501,10 @@ public class VideoService {
   }
   
   @Transactional
-  public Video reportVideo(long id, Member me, String reason, String lang) {
-    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-    
-    if (videoReportRepository.findByVideoIdAndCreatedById(id, me.getId()).isPresent()) {
-      throw new BadRequestException("already_reported", messageService.getMessage(VIDEO_ALREADY_REPORTED, lang));
-    } else {
-      videoReportRepository.save(new VideoReport(video, me, reason));
-      video.setReportCount(video.getReportCount() + 1);
-      return videoRepository.save(video);
-    }
+  public Video reportVideo(Video video, Member me, int reasonCode, String reason) {
+    videoReportRepository.save(new VideoReport(video, me, reasonCode, reason));
+    video.setReportCount(video.getReportCount() + 1);
+    return videoRepository.save(video);
   }
 
   /**

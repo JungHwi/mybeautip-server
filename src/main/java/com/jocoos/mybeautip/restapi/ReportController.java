@@ -1,24 +1,28 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.report.Report;
-import com.jocoos.mybeautip.member.report.ReportRepository;
-import com.jocoos.mybeautip.notification.MessageService;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @RestController
@@ -26,36 +30,38 @@ import org.springframework.web.bind.annotation.*;
 public class ReportController {
   private final MemberService memberService;
   private final MessageService messageService;
-  private final MemberRepository memberRepository;
   private final ReportRepository reportRepository;
+  private final VideoRepository videoRepository;
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";
   private static final String MEMBER_ALREADY_REPORTED = "member.already_reported";
 
   public ReportController(MemberService memberService,
                           MessageService messageService,
-                          MemberRepository memberRepository,
-                          ReportRepository reportRepository) {
+                          ReportRepository reportRepository,
+                          VideoRepository videoRepository) {
     this.memberService = memberService;
     this.messageService = messageService;
-    this.memberRepository = memberRepository;
     this.reportRepository = reportRepository;
+    this.videoRepository = videoRepository;
   }
   
   @PutMapping
-  @Transactional
   public void reportMember(@Valid @RequestBody ReportRequest request,
-                           BindingResult bindingResult,
                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    if (bindingResult.hasErrors()) {
-      log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid report request");
+    int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+    
+    Video video = null;
+    if (request.getVideoId() != null) {
+      video = videoRepository.findById(request.getVideoId()).orElse(null);
     }
     
-    reportRepository.findByMeIdAndYouId(memberService.currentMemberId(), request.getMemberId())
-        .ifPresent(report -> { throw new BadRequestException("already_reported", messageService.getMessage(MEMBER_ALREADY_REPORTED, lang));});
-
-    memberService.reportMember(memberService.currentMember(), request.getMemberId(), request.getReason(), lang);
+    if (reportRepository.findByMeIdAndYouId(memberService.currentMemberId(), request.getMemberId()).isPresent()) {
+      throw new BadRequestException("already_reported", messageService.getMessage(MEMBER_ALREADY_REPORTED, lang));
+    }
+    
+    memberService.reportMember(memberService.currentMember(), request.getMemberId(), reasonCode,
+        request.getReason(), video, lang);
   }
 
   @GetMapping("/{id:.+}")
@@ -74,6 +80,10 @@ public class ReportController {
     @NotNull
     @Size(min = 1, max = 400)
     private String reason = "";
+    
+    private Integer reasonCode;
+    
+    private Long videoId;
   }
 
   @Data

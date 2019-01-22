@@ -70,7 +70,6 @@ import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
-import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
@@ -106,6 +105,7 @@ public class VideoController {
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
+  private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -674,15 +674,19 @@ public class VideoController {
   @PostMapping(value = "/{id:.+}/report")
   public ResponseEntity<VideoInfo> reportVideo(@PathVariable Long id,
                                                @Valid @RequestBody VideoReportRequest request,
-                                               BindingResult bindingResult,
                                                @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    if (bindingResult.hasErrors()) {
-      throw new BadRequestException(bindingResult.getFieldError());
+    int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+    Member me = memberService.currentMember();
+    
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+  
+    if (videoReportRepository.findByVideoIdAndCreatedById(id, me.getId()).isPresent()) {
+      throw new BadRequestException("already_reported", messageService.getMessage(VIDEO_ALREADY_REPORTED, lang));
     }
     
-    Member me = memberService.currentMember();
-    Video video = videoService.reportVideo(id, me, request.getReason(), lang);
-    return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+    Video result = videoService.reportVideo(video, me, reasonCode, request.getReason());
+    return new ResponseEntity<>(videoService.generateVideoInfo(result), HttpStatus.OK);
   }
 
   /**
@@ -778,7 +782,7 @@ public class VideoController {
     private Integer likeCount;
     private Integer commentCount;
     private Integer orderCount;
-    private Integer reportCount;
+    private Long reportCount;
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
     private Long likeId;
@@ -858,6 +862,8 @@ public class VideoController {
     @NotNull
     @Size(max = 80)
     private String reason;
+    
+    private Integer reasonCode;
   }
 
   @Data

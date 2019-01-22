@@ -86,7 +86,7 @@ public class Video {
   private Integer orderCount;
   
   @Column
-  private Integer reportCount;
+  private Long reportCount;
 
   @Column(nullable = false)
   private Integer relatedGoodsCount;
