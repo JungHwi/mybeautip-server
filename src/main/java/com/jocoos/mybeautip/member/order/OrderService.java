@@ -1,6 +1,22 @@
 package com.jocoos.mybeautip.member.order;
 
+import javax.transaction.Transactional;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -22,16 +38,6 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoService;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -279,6 +285,9 @@ public class OrderService {
              payment.setMessage(iamportData.getStatus());
              payment.setReceipt(iamportData.getReceiptUrl());
              payment.setState(state | Payment.STATE_READY | Payment.STATE_PAID);
+             if (StringUtils.isNotEmpty(iamportData.getCardName())) {
+               payment.setCardName(iamportData.getCardName());
+             }
            } else {
              String failReason = iamportData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
              log.warn("fail reason: {}", failReason);

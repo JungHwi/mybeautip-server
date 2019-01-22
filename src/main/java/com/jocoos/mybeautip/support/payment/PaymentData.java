@@ -30,4 +30,6 @@ public class PaymentData {
   private String cancelReason;
   @JsonProperty("receipt_url")
   private String receiptUrl;
+  @JsonProperty("card_name")
+  private String cardName;
 }
