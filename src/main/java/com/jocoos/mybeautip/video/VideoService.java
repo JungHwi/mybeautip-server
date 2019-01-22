@@ -496,6 +496,15 @@ public class VideoService {
     video.setLocked(false);
     return update(video);
   }
+  
+  @Transactional
+  public void updateOrderCount(long videoId, int count) {
+    videoRepository.findByIdAndDeletedAtIsNull(videoId)
+        .ifPresent(video -> {
+          video.setOrderCount(video.getOrderCount() + 1);
+          videoRepository.save(video);
+        });
+  }
 
   /**
    * Wrap method to avoid duplication for feed aspect
