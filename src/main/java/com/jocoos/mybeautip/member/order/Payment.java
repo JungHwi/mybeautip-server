@@ -44,6 +44,9 @@ public class Payment extends ModifiedDateAuditable {
    */
   @Column(nullable = false)
   private String method;
+  
+  @Column
+  private String cardName;
 
   /**
    * 0: created, 1: stopped, 2:failed
