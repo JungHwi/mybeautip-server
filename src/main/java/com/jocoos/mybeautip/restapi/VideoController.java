@@ -103,7 +103,6 @@ public class VideoController {
   private final ObjectMapper objectMapper;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
-  private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
@@ -672,7 +671,6 @@ public class VideoController {
   /**
    * Report
    */
-  @Transactional
   @PostMapping(value = "/{id:.+}/report")
   public ResponseEntity<VideoInfo> reportVideo(@PathVariable Long id,
                                                @Valid @RequestBody VideoReportRequest request,
@@ -683,16 +681,7 @@ public class VideoController {
     }
     
     Member me = memberService.currentMember();
-    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-
-    Optional<VideoReport> optional = videoReportRepository.findByVideoIdAndCreatedById(id, me.getId());
-    if (optional.isPresent()) {
-      throw new BadRequestException("already_reported", messageService.getMessage(VIDEO_ALREADY_REPORTED, lang));
-    } else {
-      videoReportRepository.save(new VideoReport(video, me, request.getReason()));
-    }
-
+    Video video = videoService.reportVideo(id, me, request.getReason(), lang);
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 

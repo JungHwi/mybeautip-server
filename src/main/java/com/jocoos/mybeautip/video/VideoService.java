@@ -18,6 +18,8 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.tag.TagService;
+import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
@@ -56,12 +58,14 @@ public class VideoService {
   private final VideoGoodsRepository videoGoodsRepository;
   private final VideoViewRepository videoViewRepository;
   private final CommentLikeRepository commentLikeRepository;
+  private final VideoReportRepository videoReportRepository;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
+  private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   
   public VideoService(MemberService memberService,
                       MessageService messageService,
@@ -77,6 +81,7 @@ public class VideoService {
                       VideoGoodsRepository videoGoodsRepository,
                       VideoViewRepository videoViewRepository,
                       CommentLikeRepository commentLikeRepository,
+                      VideoReportRepository videoReportRepository,
                       ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.messageService = messageService;
@@ -92,6 +97,7 @@ public class VideoService {
     this.videoGoodsRepository = videoGoodsRepository;
     this.videoViewRepository = videoViewRepository;
     this.commentLikeRepository = commentLikeRepository;
+    this.videoReportRepository = videoReportRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -495,6 +501,20 @@ public class VideoService {
     log.debug("Video unlocked: " + video.getId());
     video.setLocked(false);
     return update(video);
+  }
+  
+  @Transactional
+  public Video reportVideo(long id, Member me, String reason, String lang) {
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+    
+    if (videoReportRepository.findByVideoIdAndCreatedById(id, me.getId()).isPresent()) {
+      throw new BadRequestException("already_reported", messageService.getMessage(VIDEO_ALREADY_REPORTED, lang));
+    } else {
+      videoReportRepository.save(new VideoReport(video, me, reason));
+      video.setReportCount(video.getReportCount() + 1);
+      return videoRepository.save(video);
+    }
   }
 
   /**
