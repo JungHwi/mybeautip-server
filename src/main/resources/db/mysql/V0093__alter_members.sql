@@ -6,6 +6,9 @@ ALTER TABLE `member_reports` ADD COLUMN `video_id` BIGINT DEFAULT NULL AFTER `re
 ALTER TABLE `member_reports` ADD CONSTRAINT `fk_member_reports_videos` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`);
 
 
+UPDATE `videos` v set `report_count`=(select count(*) from `video_reports` where `video_id`=v.`id`);
+UPDATE `members` m set `report_count`=(select count(*) from `member_reports` where `you`=m.`id`);
+
 --DELETE FROM `flyway_schema_history` WHERE version='0093';
 --ALTER TABLE `members` DROP COLUMN `permission`;
 --ALTER TABLE `videos` DROP COLUMN `report_count`;
