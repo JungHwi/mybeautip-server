@@ -1,7 +1,39 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
@@ -11,31 +43,24 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentInfo;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.CommentService;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.post.*;
+import com.jocoos.mybeautip.post.Post;
+import com.jocoos.mybeautip.post.PostContent;
+import com.jocoos.mybeautip.post.PostLike;
+import com.jocoos.mybeautip.post.PostLikeRepository;
+import com.jocoos.mybeautip.post.PostRepository;
+import com.jocoos.mybeautip.post.PostService;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.tag.TagService;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import javax.transaction.Transactional;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.*;
 
 @Slf4j
 @RestController
@@ -60,6 +85,7 @@ public class PostController {
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String POST_NOT_FOUND = "post.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
+  private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -338,10 +364,15 @@ public class PostController {
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
-                                   BindingResult bindingResult,
-                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
+                                   BindingResult bindingResult) {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
+    }
+  
+    Member member = memberService.currentMember();
+    if (!memberService.hasCommentPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
     }
 
     if (request.getParentId() != null) {
@@ -357,7 +388,7 @@ public class PostController {
     comment.setPostId(id);
     BeanUtils.copyProperties(request, comment);
     
-    tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
+    tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, member);
     postRepository.updateCommentCount(id, 1);
 
     commentService.save(comment);
@@ -373,18 +404,24 @@ public class PostController {
     );
   }
 
+  @Transactional
   @PatchMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long postId,
                                       @PathVariable Long id,
                                       @RequestBody UpdateCommentRequest request,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
                                       BindingResult bindingResult) {
 
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
+  
+    Member member = memberService.currentMember();
+    if (!memberService.hasCommentPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
+    }
 
-    Long memberId = memberService.currentMemberId();
-    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
+    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, member.getId())
        .map(comment -> {
          comment.setComment(request.getComment());
          tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());

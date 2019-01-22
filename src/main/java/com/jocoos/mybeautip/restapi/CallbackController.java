@@ -1,30 +1,37 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.tag.TagService;
-import com.jocoos.mybeautip.video.*;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.tag.TagService;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @RestController
@@ -33,29 +40,28 @@ public class CallbackController {
   private final VideoService videoService;
   private final TagService tagService;
   private final MessageService messageService;
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final VideoRepository videoRepository;
-  private final GoodsRepository goodsRepository;
-  private final VideoGoodsRepository videoGoodsRepository;
   private final ObjectMapper objectMapper;
   
   private static final String MEMBER_NOT_FOUND = "member.not_found";
+  private static final String LIVE_NOT_ALLOWED = "video.live_not_allowed";
+  private static final String MOTD_UPLOAD_NOT_ALLOWED = "video.motd_upload_not_allowed";
   
   public CallbackController(VideoService videoService,
                             TagService tagService,
                             MessageService messageService,
+                            MemberService memberService,
                             VideoRepository videoRepository,
                             MemberRepository memberRepository,
-                            GoodsRepository goodsRepository,
-                            VideoGoodsRepository videoGoodsRepository,
                             ObjectMapper objectMapper) {
     this.videoService = videoService;
     this.tagService = tagService;
     this.messageService = messageService;
+    this.memberService = memberService;
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
-    this.goodsRepository = goodsRepository;
-    this.videoGoodsRepository = videoGoodsRepository;
     this.objectMapper = objectMapper;
   }
   
@@ -70,6 +76,15 @@ public class CallbackController {
           log.error("Invalid UserID: " + request.getUserId());
           throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
         });
+    
+    // Check member permission
+    if ("UPLOADED".equals(request.getType()) && !memberService.hasMotdPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(MOTD_UPLOAD_NOT_ALLOWED, lang));
+    }
+  
+    if ("BROADCASTED".equals(request.getType()) && !memberService.hasLivePostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(LIVE_NOT_ALLOWED, lang));
+    }
     
     // Ignore when videoKey is already exist
     if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {

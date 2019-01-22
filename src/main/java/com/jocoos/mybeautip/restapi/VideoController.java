@@ -18,7 +18,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,17 +45,31 @@ import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentInfo;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.CommentService;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
-import com.jocoos.mybeautip.member.revenue.*;
+import com.jocoos.mybeautip.member.revenue.Revenue;
+import com.jocoos.mybeautip.member.revenue.RevenueInfo;
+import com.jocoos.mybeautip.member.revenue.RevenueOverview;
+import com.jocoos.mybeautip.member.revenue.RevenueRepository;
+import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.tag.TagService;
-import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.VideoLike;
+import com.jocoos.mybeautip.video.VideoLikeRepository;
+import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import com.jocoos.mybeautip.video.view.VideoView;
@@ -77,14 +100,14 @@ public class VideoController {
   private final NotificationService notificationService;
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
-  private final MemberRepository memberRepository;
   private final ObjectMapper objectMapper;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
-
+  private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
+  
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
   
@@ -107,7 +130,6 @@ public class VideoController {
                          NotificationService notificationService,
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
-                         MemberRepository memberRepository,
                          ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.videoService = videoService;
@@ -128,7 +150,6 @@ public class VideoController {
     this.notificationService = notificationService;
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
-    this.memberRepository = memberRepository;
     this.objectMapper = objectMapper;
   }
   
@@ -316,6 +337,11 @@ public class VideoController {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
+  
+    Member member = memberService.currentMember();
+    if (!memberService.hasCommentPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
+    }
     
     videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
@@ -350,19 +376,25 @@ public class VideoController {
       HttpStatus.OK
     );
   }
-
+  
+  @Transactional
   @PatchMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long videoId,
                                            @PathVariable Long id,
                                            @RequestBody VideoController.UpdateCommentRequest request,
+                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
                                            BindingResult bindingResult) {
 
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
+  
+    Member member = memberService.currentMember();
+    if (!memberService.hasCommentPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
+    }
 
-    Long memberId = memberService.currentMemberId();
-    return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberId)
+    return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, member.getId())
       .map(comment -> {
         comment.setComment(request.getComment());
         tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
