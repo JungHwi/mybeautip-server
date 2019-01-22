@@ -789,6 +789,7 @@ public class VideoController {
     private Integer likeCount;
     private Integer commentCount;
     private Integer orderCount;
+    private Integer reportCount;
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
     private Long likeId;

@@ -84,6 +84,9 @@ public class Video {
 
   @Column(nullable = false)
   private Integer orderCount;
+  
+  @Column
+  private Integer reportCount;
 
   @Column(nullable = false)
   private Integer relatedGoodsCount;
