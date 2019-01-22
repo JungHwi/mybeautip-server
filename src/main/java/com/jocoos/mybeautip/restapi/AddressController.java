@@ -45,16 +45,12 @@ public class AddressController {
   }
 
   @GetMapping
-  public ResponseEntity<List<AddressInfo>> getAddresses(@RequestParam(required = false) Boolean base) {
+  public ResponseEntity<List<AddressInfo>> getAddresses(@RequestParam(required = false) String type) {
     List<Address> addresses = new ArrayList<>();
-    if (base != null) {
-      if (base) {
+    if (type != null && type.equals("base")) {
         Address address = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(
             memberService.currentMemberId()).orElse(null);
         addresses.add(address);
-      } else {
-        addresses = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsFalse(memberService.currentMemberId());
-      }
     } else {
       addresses = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(memberService.currentMemberId());
     }

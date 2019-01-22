@@ -13,8 +13,6 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 
   Optional<Address> findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(Long memberId);
   
-  List<Address> findByCreatedByIdAndDeletedAtIsNullAndBaseIsFalse(Long memberId);
-
   Optional<Address> findByIdAndCreatedByIdAndDeletedAtIsNull(Long id, Long memberId);
 
 }
