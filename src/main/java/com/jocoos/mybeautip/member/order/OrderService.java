@@ -1,6 +1,22 @@
 package com.jocoos.mybeautip.member.order;
 
+import javax.transaction.Transactional;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -21,15 +37,7 @@ import com.jocoos.mybeautip.support.payment.PaymentResponse;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @Service
@@ -57,6 +65,7 @@ public class OrderService {
   private final PointService pointService;
   private final IamportService iamportService;
   private final MessageService messageService;
+  private final VideoService videoService;
 
   public OrderService(OrderRepository orderRepository,
                       MemberRepository memberRepository,
@@ -71,7 +80,8 @@ public class OrderService {
                       RevenueService revenueService,
                       PointService pointService,
                       IamportService iamportService,
-                      MessageService messageService) {
+                      MessageService messageService,
+                      VideoService videoService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
     this.deliveryRepository = deliveryRepository;
@@ -86,6 +96,7 @@ public class OrderService {
     this.pointService = pointService;
     this.iamportService = iamportService;
     this.messageService = messageService;
+    this.videoService = videoService;
   }
 
   @Transactional
@@ -258,6 +269,7 @@ public class OrderService {
     return order;
   }
 
+  @Transactional
   private Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
     return paymentRepository.findById(orderId)
        .map(payment -> {
@@ -273,6 +285,9 @@ public class OrderService {
              payment.setMessage(iamportData.getStatus());
              payment.setReceipt(iamportData.getReceiptUrl());
              payment.setState(state | Payment.STATE_READY | Payment.STATE_PAID);
+             if (StringUtils.isNotEmpty(iamportData.getCardName())) {
+               payment.setCardName(iamportData.getCardName());
+             }
            } else {
              String failReason = iamportData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
              log.warn("fail reason: {}", failReason);
@@ -291,6 +306,7 @@ public class OrderService {
     .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid order id or payment id"));
   }
 
+  @Transactional
   private void saveOrderAndPurchasesStatus(Order order, String status) {
     order.setStatus(status);
     order.getPurchases().forEach(p -> p.setStatus(status));
@@ -299,6 +315,7 @@ public class OrderService {
     log.debug("order: {}", order);
   }
   
+  @Transactional
   private void completeOrder(Order order) {
     log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.Status.PAID);
@@ -318,6 +335,7 @@ public class OrderService {
 
     if (order.getVideoId() != null) {
       saveRevenuesForSeller(order);
+      videoService.updateOrderCount(order.getVideoId(), 1); // TODO: decrease when order cancelled
     }
     
     deleteCartItems(order);
@@ -329,6 +347,7 @@ public class OrderService {
   /**
    * Save revenues for seller
    */
+  @Transactional
   private void saveRevenuesForSeller(Order order) {
     Map<Goods, Video> videoGoods = videoGoodsRepository.findAllByVideoId(order.getVideoId())
        .stream().collect(Collectors.toMap(VideoGoods::getGoods, VideoGoods::getVideo));
@@ -353,6 +372,7 @@ public class OrderService {
   }
   
   // Delete cart items when order is completed(paid)
+  @Transactional
   private void deleteCartItems(Order order) {
     log.debug("delete cart items: purchase count is " + order.getPurchases().size());
     for (Purchase p: order.getPurchases()) {
