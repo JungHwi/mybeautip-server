@@ -63,6 +63,8 @@ public class VideoService {
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
+
+  private static final String VIDEO_NOT_FOUND = "video.not_found";
   
   public VideoService(MemberService memberService,
                       MessageService messageService,
