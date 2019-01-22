@@ -51,15 +51,11 @@ public class ReportController {
       log.debug("bindingResult: {}", bindingResult);
       throw new BadRequestException("invalid report request");
     }
-
+    
     reportRepository.findByMeIdAndYouId(memberService.currentMemberId(), request.getMemberId())
         .ifPresent(report -> { throw new BadRequestException("already_reported", messageService.getMessage(MEMBER_ALREADY_REPORTED, lang));});
 
-    Member you = memberRepository.findByIdAndDeletedAtIsNull(request.getMemberId())
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
-
-    reportRepository.save(new Report(memberService.currentMember(), you, request.getReason()));
-    memberRepository.updateReportCount(you.getId(), 1);
+    memberService.reportMember(memberService.currentMember(), request.getMemberId(), request.getReason(), lang);
   }
 
   @GetMapping("/{id:.+}")
