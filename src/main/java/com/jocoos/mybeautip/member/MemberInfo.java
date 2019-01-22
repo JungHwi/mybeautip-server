@@ -17,6 +17,7 @@ public class MemberInfo {
   private String email;
   private String avatarUrl;
   private String intro;
+  private Integer permission;
   private Integer followerCount;
   private Integer followingCount;
   private Long followingId;
@@ -32,6 +33,7 @@ public class MemberInfo {
     this.email = member.getEmail();
     this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
     this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
+    this.permission = member.getPermission();
     this.createdAt = member.getCreatedAt();
     this.modifiedAt = member.getModifiedAt();
     this.deletedAt = member.getDeletedAt();

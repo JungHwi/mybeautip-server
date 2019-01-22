@@ -62,7 +62,10 @@ public class Member {
 
   @Column(nullable = false)
   private int link;
-
+  
+  @Column
+  private int permission;
+  
   @Column(nullable = false)
   private int followerCount;
 
