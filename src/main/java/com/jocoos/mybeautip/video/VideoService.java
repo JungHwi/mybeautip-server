@@ -501,6 +501,15 @@ public class VideoService {
   }
   
   @Transactional
+  public void updateOrderCount(long videoId, int count) {
+    videoRepository.findByIdAndDeletedAtIsNull(videoId)
+        .ifPresent(video -> {
+          video.setOrderCount(video.getOrderCount() + 1);
+          videoRepository.save(video);
+        });
+  }
+  
+  @Transactional
   public Video reportVideo(Video video, Member me, int reasonCode, String reason) {
     videoReportRepository.save(new VideoReport(video, me, reasonCode, reason));
     video.setReportCount(video.getReportCount() + 1);
