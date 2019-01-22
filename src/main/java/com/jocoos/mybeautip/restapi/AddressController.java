@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,8 +45,20 @@ public class AddressController {
   }
 
   @GetMapping
-  public ResponseEntity<List<AddressInfo>> getAddresses() {
-    List<Address> addresses = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(memberService.currentMemberId());
+  public ResponseEntity<List<AddressInfo>> getAddresses(@RequestParam(required = false) Boolean base) {
+    List<Address> addresses = new ArrayList<>();
+    if (base != null) {
+      if (base) {
+        Address address = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(
+            memberService.currentMemberId()).orElse(null);
+        addresses.add(address);
+      } else {
+        addresses = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsFalse(memberService.currentMemberId());
+      }
+    } else {
+      addresses = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(memberService.currentMemberId());
+    }
+  
     List<AddressInfo> addressInfos = addresses.stream().map(AddressInfo::new).collect(Collectors.toList());
 
     return new ResponseEntity<>(addressInfos, HttpStatus.OK);
