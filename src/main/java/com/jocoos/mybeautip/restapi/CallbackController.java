@@ -90,6 +90,11 @@ public class CallbackController {
             log.error("Invalid UserID: " + request.getUserId());
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
           }
+          
+          if (v.getLocked() && "PUBLIC".equals(v.getVisibility())) {
+            throw new BadRequestException("video_locked", "Video Locked.");
+          }
+          
           return updateVideoProperties(request, v);})
         .orElseGet(() -> {
           log.error("Cannot find video " + request.getVideoKey());
