@@ -530,11 +530,31 @@ public class AdminController {
   public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "id") String sort,
      @RequestParam(defaultValue = "false") boolean isDeleted,
      @RequestParam(required = false) Long memberId) {
 
     Member me = memberService.currentMember();
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
+
+
+    Pageable pageable;
+    switch (sort) {
+      case "views":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "viewCount"));
+        break;
+      case "like":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "likeCount"));
+        break;
+      case "comments":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "commentCount"));
+        break;
+      case "watch":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "totalWatchCount"));
+        break;
+      default:
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    }
+
     Page<Video> videos = null;
     if (memberId != null) {
       if (isDeleted) {
