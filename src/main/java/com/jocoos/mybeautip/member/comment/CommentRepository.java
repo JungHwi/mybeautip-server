@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member.comment;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -45,5 +46,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
   Slice<Comment> findByCreatedByIdAndCreatedAtBeforeAndParentIdIsNull(Long id, Date createdAt, Pageable pageable);
 
   Slice<Comment> findByCreatedByIdAndParentIdIsNull(Long id, Pageable pageable);
+
+  Page<Comment> findByPostId(Long id, Pageable pageable);
 }
 

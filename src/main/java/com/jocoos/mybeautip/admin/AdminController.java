@@ -23,6 +23,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.banner.Banner;
@@ -349,6 +350,7 @@ public class AdminController {
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "false") boolean isDeleted,
      @RequestParam(defaultValue = "1") int state,
+     @RequestParam(required = false) List<String> goodses,
      @RequestParam(required = false) String code,
      @RequestParam(required = false) String sort) {
 
@@ -379,6 +381,10 @@ public class AdminController {
       goods = goodsRepository.findByStateAndCateCd(state, code, pageable);
     } else {
       goods = goodsRepository.findByState(state, pageable);
+    }
+
+    if (!CollectionUtils.isEmpty(goodses)) {
+      goods = goodsRepository.findByGoodsNoIn(goodses, pageable);
     }
 
     Page<GoodsDetailInfo> details = goods.map(g -> {
