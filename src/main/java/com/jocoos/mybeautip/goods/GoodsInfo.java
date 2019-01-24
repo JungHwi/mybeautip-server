@@ -70,7 +70,7 @@ public class GoodsInfo {
     this.detailRef = String.format("/api/1/goods/%s/details", goodsNo);
     this.relatedGoodsRef = String.format("/api/1/goods/%s/related-goods", goodsNo);
     this.relatedVideoRef = (relatedVideoTotalCount > 0) ? String.format("/api/1/goods/%s/videos", goodsNo) : "";
-    this.optionRef = ("y".equalsIgnoreCase(goods.getOptionFl())) ? String.format("/api/1/goods/%s/options", goodsNo) : "";
+    this.optionRef = ("y".equalsIgnoreCase(goods.getOptionFl())) ? String.format("/api/1/goods/%s/option_data", goodsNo) : "";
 
     if (goods.getGoodsMustInfo() == null) {
       this.goodsMustInfo = new ArrayList<>();

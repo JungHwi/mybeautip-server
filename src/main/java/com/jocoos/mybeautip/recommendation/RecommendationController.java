@@ -150,18 +150,6 @@ public class RecommendationController {
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
-  @GetMapping("/motds")
-  public ResponseEntity<List<RecommendedMotdInfo>> getRecommendedMotds(
-    @RequestParam(defaultValue = "100") int count,
-    @RequestParam(defaultValue = "desc") String direction) {
-
-    Date now = new Date();
-    Slice<MotdRecommendation> videos = motdRecommendationRepository.findByVideoCreatedAtBeforeAndEndedAtAfter(now, now,
-      PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "seq")));
-
-    return new ResponseEntity<>(createMotdList(videos), HttpStatus.OK);
-  }
-
   private List<RecommendedMotdInfo> createMotdList(Iterable<MotdRecommendation> recommendations) {
     List<RecommendedMotdInfo> info = new ArrayList<>();
     for (MotdRecommendation recommendation : recommendations) {
