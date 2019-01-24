@@ -36,7 +36,7 @@ public class Report extends CreatedDateAuditable {
   private String reason;
   
   @ManyToOne
-  @JoinColumn(name = "video")
+  @JoinColumn(name = "video_id")
   private Video video;
   
   public Report(Member me, Member you, int reasonCode, String reason, Video video) {
