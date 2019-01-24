@@ -265,10 +265,8 @@ public class PostController {
          if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
-
-         postRepository.updateLikeCount(id, 1);
-         post.setLikeCount(post.getLikeCount() + 1);
-         PostLike postLike = postLikeRepository.save(new PostLike(post));
+         
+         PostLike postLike = postService.likePost(post);
          return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
@@ -279,18 +277,14 @@ public class PostController {
   public ResponseEntity<?> removePostLike(@PathVariable Long id,
                                           @PathVariable Long likeId){
     Long memberId = memberService.currentMemberId();
-    return postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
-       .map(post -> {
-         Optional<PostLike> liked = postLikeRepository.findById(likeId);
-         if (!liked.isPresent()) {
-           throw new NotFoundException("like_not_found", "invalid post like id");
-         }
-
-         postLikeRepository.delete(liked.get());
-         postRepository.updateLikeCount(id, -1);
-         return new ResponseEntity(HttpStatus.OK);
+    postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
+       .map(liked -> {
+         postService.unLikePost(liked);
+         return Optional.empty();
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or like id"));
+  
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @GetMapping("/{id:.+}/comments")
@@ -456,13 +450,10 @@ public class PostController {
          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
-         
-         commentRepository.updateLikeCount(comment.getId(), 1);
-         comment.setLikeCount(comment.getLikeCount() + 1);
-         CommentLike commentLikeLike = commentLikeRepository.save(new CommentLike(comment));
-         return new ResponseEntity<>(new CommentLikeInfo(commentLikeLike), HttpStatus.OK);
+         CommentLike commentLike = postService.likeCommentPost(comment);
+         return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post or comment id"));
+       .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
   }
 
   @Transactional
@@ -474,14 +465,14 @@ public class PostController {
     Comment comment = commentRepository.findByIdAndPostId(commentId, postId)
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or comment id"));
 
-    return commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
+    commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
        .map(liked -> {
-         commentLikeRepository.delete(liked);
-         commentRepository.updateLikeCount(liked.getComment().getId(), -1);
-
-         return new ResponseEntity(HttpStatus.OK);
+         postService.unLikeCommentPost(liked);
+         return Optional.empty();
        })
        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post comment like id"));
+  
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   /**

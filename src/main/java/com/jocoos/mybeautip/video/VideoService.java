@@ -239,6 +239,7 @@ public class VideoService {
     return comments;
   }
 
+  @Transactional
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
     boolean blocked = false;
@@ -517,7 +518,33 @@ public class VideoService {
     video.setReportCount(video.getReportCount() + 1);
     return videoRepository.save(video);
   }
-
+  
+  @Transactional
+  public VideoLike likeVideo(Video video) {
+    videoRepository.updateLikeCount(video.getId(), 1);
+    video.setLikeCount(video.getLikeCount() + 1);
+    return videoLikeRepository.save(new VideoLike(video));
+  }
+  
+  @Transactional
+  public void unLikeVideo(VideoLike liked) {
+    videoLikeRepository.delete(liked);
+    videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
+  }
+  
+  @Transactional
+  public CommentLike likeVideoComment(Comment comment) {
+    commentRepository.updateLikeCount(comment.getId(), 1);
+    comment.setLikeCount(comment.getLikeCount() + 1);
+    return commentLikeRepository.save(new CommentLike(comment));
+  }
+  
+  @Transactional
+  public void unLikeVideoComment(CommentLike liked) {
+    commentLikeRepository.delete(liked);
+    commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+  }
+  
   /**
    * Wrap method to avoid duplication for feed aspect
    * @param video

@@ -428,13 +428,10 @@ public class VideoController {
     
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
       .map(video -> {
-        if (videoLikeRepository.findByVideoIdAndCreatedById(videoId, memberId).isPresent()) {
+        if (videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), memberId).isPresent()) {
           throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
         }
-
-        videoRepository.updateLikeCount(videoId, 1);
-        video.setLikeCount(video.getLikeCount() + 1);
-        VideoLike videoLike = videoLikeRepository.save(new VideoLike(video));
+        VideoLike videoLike = videoService.likeVideo(video);
         VideoLikeInfo info = new VideoLikeInfo(videoLike, videoService.generateVideoInfo(video));
         return new ResponseEntity<>(info, HttpStatus.OK);
       })
@@ -448,18 +445,14 @@ public class VideoController {
                                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     
-    return videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
-      .map(video -> {
-        Optional<VideoLike> liked = videoLikeRepository.findById(likeId);
-        if (!liked.isPresent()) {
-          throw new NotFoundException("like_not_found", "invalid video like id");
-        }
-
-        videoLikeRepository.delete(liked.get());
-        videoRepository.updateLikeCount(videoId, -1);
-        return new ResponseEntity(HttpStatus.OK);
+    videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
+      .map(liked -> {
+        videoService.unLikeVideo(liked);
+        return Optional.empty();
       })
-      .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id or like id"));
+      .orElseThrow(() -> new NotFoundException("like_not_found", "invalid video like id"));
+  
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @GetMapping("/{id:.+}/likes")
@@ -494,16 +487,11 @@ public class VideoController {
     
     return commentRepository.findByIdAndVideoId(commentId, videoId)
         .map(comment -> {
-          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId
-              ()).isPresent()) {
+          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
             throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
           }
-
-
-          commentRepository.updateLikeCount(comment.getId(), 1);
-          comment.setLikeCount(comment.getLikeCount() + 1);
-          CommentLike commentLikeLike = commentLikeRepository.save(new CommentLike(comment));
-          return new ResponseEntity<>(new CommentLikeInfo(commentLikeLike), HttpStatus.OK);
+          CommentLike commentLike = videoService.likeVideoComment(comment);
+          return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
         })
         .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));
   }
@@ -516,19 +504,15 @@ public class VideoController {
     Member me = memberService.currentMember();
     
     Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
-        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video id or comment " +
-            "id"));
+        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video id or comment " + "id"));
 
-    return commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment
-        .getId(), me.getId())
+    commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
         .map(liked -> {
-          commentLikeRepository.delete(liked);
-          commentRepository.updateLikeCount(liked.getComment().getId(), -1);
-
-          return new ResponseEntity(HttpStatus.OK);
+          videoService.unLikeVideoComment(liked);
+          return Optional.empty();
         })
-        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid video " +
-            "comment like id"));
+        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid video " + "comment like id"));
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   /**
