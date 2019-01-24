@@ -281,7 +281,7 @@ public class RecommendationController {
   }
   
   @Data
-  public static class KeywordInfo {
+  public static class KeywordInfo { // FIXME: will be deprecated
     Integer category;
     MemberInfo member;
     TagInfo tag;
@@ -294,11 +294,15 @@ public class RecommendationController {
     public KeywordInfo(KeywordRecommendation keyword, MemberInfo member) {
       BeanUtils.copyProperties(keyword, this);
       this.member = member;
+      this.startedAt = new Date(System.currentTimeMillis());
+      this.endedAt = new Date(System.currentTimeMillis());
     }
   
     public KeywordInfo(KeywordRecommendation keyword, TagInfo tag) {
       BeanUtils.copyProperties(keyword, this);
       this.tag = tag;
+      this.startedAt = new Date(System.currentTimeMillis());
+      this.endedAt = new Date(System.currentTimeMillis());
     }
   }
   
