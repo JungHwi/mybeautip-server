@@ -25,6 +25,7 @@ public class CommentService {
   @Transactional
   public void lockComment(Comment comment) {
     comment.setLocked(true);
+    comment.setOriginalComment(comment.getComment());
     comment.setComment(messageService.getMessage(COMMENT_LOCKED, Locale.KOREAN));
     commentRepository.save(comment);
   }

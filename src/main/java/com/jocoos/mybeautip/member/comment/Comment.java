@@ -31,7 +31,10 @@ public class Comment extends MemberAuditable {
 
   @Column(nullable = false)
   private String comment;
-
+  
+  @Column
+  private String originalComment;
+  
   @Column
   private Long parentId;
 
