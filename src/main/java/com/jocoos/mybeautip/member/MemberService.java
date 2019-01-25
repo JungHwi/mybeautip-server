@@ -150,7 +150,7 @@ public class MemberService {
   }
   
   public boolean hasCommentPostPermission(Member member) {
-    return ((member.getPermission() & Member.COMMENT_POST) == 0);
+    return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
   }
   
   @Transactional
