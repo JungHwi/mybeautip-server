@@ -86,6 +86,7 @@ public class PostController {
   private static final String POST_NOT_FOUND = "post.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
+  private static final String COMMENT_LOCKED = "comment.locked";
   
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -417,6 +418,10 @@ public class PostController {
 
     return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, member.getId())
        .map(comment -> {
+         if (comment.getLocked()) {
+           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
+         }
+         
          comment.setComment(request.getComment());
          tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
          return new ResponseEntity<>(
@@ -430,9 +435,14 @@ public class PostController {
   @Transactional
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long postId,
-                                         @PathVariable Long id) {
+                                         @PathVariable Long id,
+                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberService.currentMemberId())
        .map(comment -> {
+         if (comment.getLocked()) {
+           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
+         }
+         
          postService.deleteComment(comment);
          return new ResponseEntity<>(HttpStatus.OK);
        })

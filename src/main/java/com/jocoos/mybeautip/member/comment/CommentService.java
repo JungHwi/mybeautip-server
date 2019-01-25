@@ -10,7 +10,7 @@ import com.jocoos.mybeautip.notification.MessageService;
 @Service
 public class CommentService {
 
-  private final String COMMENT_LOCKED = "comment.locked";
+  private final String COMMENT_LOCK_MESSAGE = "comment.lock_message";
   
   private final MessageService messageService;
   private final CommentRepository commentRepository;
@@ -26,7 +26,7 @@ public class CommentService {
   public void lockComment(Comment comment) {
     comment.setLocked(true);
     comment.setOriginalComment(comment.getComment());
-    comment.setComment(messageService.getMessage(COMMENT_LOCKED, Locale.KOREAN));
+    comment.setComment(messageService.getMessage(COMMENT_LOCK_MESSAGE, Locale.KOREAN));
     commentRepository.save(comment);
   }
 
