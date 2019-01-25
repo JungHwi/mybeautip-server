@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SearchHistoryRepository extends JpaRepository<SearchHistory, Long> {
-  Optional<SearchHistory> findByKeywordAndCreatedBy(String keyword, Member createdBy);
+  Optional<SearchHistory> findByKeywordAndCategoryAndCreatedBy(String keyword, int category, Member createdBy);
   
   List<SearchHistory> findByCreatedBy(Member createdBy, Pageable pageable);
   
