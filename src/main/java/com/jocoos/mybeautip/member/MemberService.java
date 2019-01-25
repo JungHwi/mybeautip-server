@@ -153,14 +153,6 @@ public class MemberService {
     return ((member.getPermission() & Member.COMMENT_POST) == 0);
   }
   
-  public boolean hasLivePostPermission(Member member) {
-    return ((member.getPermission() & Member.LIVE_POST) == 0);
-  }
-  
-  public boolean hasMotdPostPermission(Member member) {
-    return ((member.getPermission() & Member.MOTD_POST) == 0);
-  }
-  
   @Transactional
   public void reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {
     Member you = memberRepository.findByIdAndDeletedAtIsNull(targetId)
