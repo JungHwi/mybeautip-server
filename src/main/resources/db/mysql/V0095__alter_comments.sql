@@ -4,3 +4,4 @@ ALTER TABLE `comments` ADD COLUMN `original_comment` VARCHAR(500) DEFAULT NULL A
 
 --delete from flyway_schema_history where version='0095';
 --alter table comments drop column locked;
+--alter table comments drop column original_comment;
