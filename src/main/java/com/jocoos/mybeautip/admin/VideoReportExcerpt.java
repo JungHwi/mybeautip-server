@@ -9,7 +9,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.report.VideoReport;
 
-@Projection(name = "reported_motd", types = VideoReport.class)
+@Projection(name = "video_report_details", types = VideoReport.class)
 public interface VideoReportExcerpt {
 
   Long getId();

@@ -14,55 +14,57 @@ public interface VideoExceprt {
 
   String getVideoKey();
 
-  public String getType();
+  String getType();
 
-  public String getState();
+  String getState();
 
-  public String getVisibility();
+  String getVisibility();
 
-  public boolean getLocked();
+  boolean getLocked();
 
-  public String getTitle();
+  String getTitle();
 
-  public String getContent();
+  String getContent();
 
-  public String getUrl();
+  String getUrl();
 
-  public String getThumbnailPath();
+  String getThumbnailPath();
 
-  public String getThumbnailUrl();
+  String getThumbnailUrl();
 
-  public String getChatRoomId();
+  String getChatRoomId();
 
-  public int getDuration();
+  int getDuration();
 
-  public String getData();
+  String getData();
 
-  public Integer getWatchCount();
+  Integer getWatchCount();
 
-  public Integer getTotalWatchCount();
+  Integer getTotalWatchCount();
 
-  public Integer getHeartCount();
+  Integer getHeartCount();
 
-  public Integer getViewCount();
+  Integer getViewCount();
 
-  public Integer getLikeCount();
+  Integer getLikeCount();
 
-  public Integer getCommentCount();
+  Integer getCommentCount();
 
-  public Integer getOrderCount();
+  Integer getOrderCount();
 
-  public Integer getRelatedGoodsCount();
+  Integer getReportCount();
 
-  public String getRelatedGoodsThumbnailUrl();
+  Integer getRelatedGoodsCount();
 
-  public Member getMember();
+  String getRelatedGoodsThumbnailUrl();
 
-  public String getTagInfo();
+  Member getMember();
 
-  public Date getCreatedAt();
+  String getTagInfo();
 
-  public Date getModifiedAt();
+  Date getCreatedAt();
 
-  public Date getDeletedAt();
+  Date getModifiedAt();
+
+  Date getDeletedAt();
 }
