@@ -16,6 +16,7 @@ public class CommentInfo {
   private Long id;
   private Long postId;
   private Long videoId;
+  private Boolean locked;
   private String comment;
   private Long parentId;
   private int commentCount;
