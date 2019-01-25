@@ -77,15 +77,6 @@ public class CallbackController {
           throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
         });
     
-    // Check member permission
-    if ("UPLOADED".equals(request.getType()) && !memberService.hasMotdPostPermission(member)) {
-      throw new BadRequestException("invalid_permission", messageService.getMessage(MOTD_UPLOAD_NOT_ALLOWED, lang));
-    }
-  
-    if ("BROADCASTED".equals(request.getType()) && !memberService.hasLivePostPermission(member)) {
-      throw new BadRequestException("invalid_permission", messageService.getMessage(LIVE_NOT_ALLOWED, lang));
-    }
-    
     // Ignore when videoKey is already exist
     if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
       log.debug("VideoKey is already exist, videoKey: " + request.getVideoKey());
