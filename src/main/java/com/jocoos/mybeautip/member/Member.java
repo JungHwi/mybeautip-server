@@ -135,5 +135,6 @@ public class Member {
     this.visible = false;
     this.revenueModifiedAt = null;
     this.pushable = true; // default true
+    this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
   }
 }
