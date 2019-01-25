@@ -106,6 +106,7 @@ public class VideoController {
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
+  private static final String COMMENT_LOCKED = "comment.locked";
   
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -395,6 +396,9 @@ public class VideoController {
 
     return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, member.getId())
       .map(comment -> {
+        if (comment.getLocked()) {
+          throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
+        }
         comment.setComment(request.getComment());
         tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
         return new ResponseEntity<>(
@@ -408,9 +412,13 @@ public class VideoController {
   @Transactional
   @DeleteMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long videoId,
-                                         @PathVariable Long id) {
+                                         @PathVariable Long id,
+                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberService.currentMemberId())
       .map(comment -> {
+        if (comment.getLocked()) {
+          throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
+        }
         videoService.deleteComment(comment);
         return new ResponseEntity<>(HttpStatus.OK);
       })

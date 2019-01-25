@@ -27,7 +27,7 @@ public class Comment extends MemberAuditable {
   private Long videoId;
   
   @Column
-  private Boolean locked;
+  private Boolean locked = false;
 
   @Column(nullable = false)
   private String comment;
