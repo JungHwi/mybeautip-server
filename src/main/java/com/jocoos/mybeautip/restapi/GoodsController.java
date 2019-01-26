@@ -141,18 +141,18 @@ public class GoodsController {
         int count = 0;
         for (VideoGoods videoGoods : videoGoodsList) {
           memberSet.add(videoGoods.getVideo().getMember());
-          count++;
-          if (count >= MAX_REVIEWER_COUNT) {
-            break;
-          }
         }
         
         List<MemberInfo> result = new ArrayList<>();
         for (Member m : memberSet) {
           result.add(memberService.getMemberInfo(m));
+          count++;
+          if (count >= MAX_REVIEWER_COUNT) {
+            break;
+          }
         }
         response.setMembers(result);
-        response.setTotalMemberCount(result.size());
+        response.setTotalMemberCount(memberSet.size());
         return response;
       })
       .orElseThrow(()-> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
