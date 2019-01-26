@@ -4,11 +4,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -65,6 +66,8 @@ public class GoodsController {
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
+  
+  private static final int MAX_REVIEWER_COUNT = 6;
 
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
@@ -131,15 +134,25 @@ public class GoodsController {
     GoodsRelatedVideoInfoResponse response = new GoodsRelatedVideoInfoResponse();
     return goodsRepository.findByGoodsNo(goodsNo)
       .map(goods -> {
-        Page<Member> page = videoGoodsRepository.getDistinctMembers(goods, PageRequest.of(0, 6));
-        if (page.hasContent()) {
-          List<MemberInfo> result = new ArrayList<>();
-          for (Member m : page.getContent()) {
-            result.add(memberService.getMemberInfo(m));
+        List<VideoGoods> videoGoodsList = videoGoodsRepository.findByGoodsAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(goods, "PUBLIC", "CREATED");
+        
+        // Get distinct members
+        Set<Member> memberSet = new HashSet<>();
+        int count = 0;
+        for (VideoGoods videoGoods : videoGoodsList) {
+          memberSet.add(videoGoods.getVideo().getMember());
+          count++;
+          if (count >= MAX_REVIEWER_COUNT) {
+            break;
           }
-          response.setMembers(result);
-          response.setTotalMemberCount(page.getTotalElements());
         }
+        
+        List<MemberInfo> result = new ArrayList<>();
+        for (Member m : memberSet) {
+          result.add(memberService.getMemberInfo(m));
+        }
+        response.setMembers(result);
+        response.setTotalMemberCount(result.size());
         return response;
       })
       .orElseThrow(()-> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
@@ -261,11 +274,11 @@ public class GoodsController {
   @Data
   @AllArgsConstructor
   class GoodsRelatedVideoInfoResponse {
-    Long totalMemberCount;
+    Integer totalMemberCount;
     List<MemberInfo> members;
 
     GoodsRelatedVideoInfoResponse() {
-      totalMemberCount = 0L;
+      totalMemberCount = 0;
     }
   }
 }
