@@ -19,8 +19,12 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 @Slf4j
 @Service
 public class TagService {
-  
-  public enum TagCategory {MEMBER, VIDEO, COMMENT, POST}
+  // Tag category
+  public static final int TAG_MEMBER = 1;
+  public static final int TAG_VIDEO = 2;
+  public static final int TAG_POST = 3;
+  public static final int TAG_BANNER = 4;
+  public static final int TAG_COMMENT = 5;
   
   private static final String startSign = "#";
   private static final String regex = "^[\\p{L}\\p{N}_]+";  // letters, numbers, underscore(_)
@@ -38,66 +42,83 @@ public class TagService {
     this.objectMapper = objectMapper;
   }
   
-  /**
-   * Parse TagInfo from the text, and save tags without increasing refCount
-   */
+  // Save tags without increasing refCount
   @Transactional
-  public void parseHashTagsAndToucheRefCount(String text, TagCategory category, Member member) {
-    List<String> tags = getHashTags(text);
-    touchRefCount(getUniqueTagNames(tags));
-    logHistory(tags, category, member);
-  }
-  
-  /**
-   * Parse TagInfo from the text, and save tags and increase refCount
-   */
-  @Transactional
-  public List<String> getHashTagsAndIncreaseRefCount(String text) {
-    List<String> tags = getHashTags(text);
-    increaseRefCount(getUniqueTagNames(tags));
-    return tags;
-  }
-  
-  @Transactional
-  public List<String> getHashTagsAndUpdateRefCount(String oldTagInfo, String text) {
-    List<String> oldTags = new ArrayList<>();
-    if (oldTagInfo != null) {
-      try {
-        oldTags = Arrays.asList(objectMapper.readValue(oldTagInfo, String[].class));
-      } catch (IOException e) {
-        log.warn("cannot read tag info, tags:", oldTagInfo);
+  public void touchRefCount(String text) {
+    List<String> tags = parseHashTag(text);
+    for (String name : tags) {
+      Optional<Tag> optional = tagRepository.findByName(name);
+      if (optional.isPresent()) {
+        Tag tag = optional.get();
+        tag.setModifiedAt(new Date());
+        tagRepository.save(tag);
+      } else {
+        tagRepository.save(new Tag(name, 0));
       }
     }
-    
-    List<String> newTags = getHashTags(text);
-    
-    List<String> oldTagNames = getUniqueTagNames(oldTags);
-    List<String> newTagNames = getUniqueTagNames(newTags);
-    
-    List<String> remove = (List<String>) CollectionUtils.removeAll(oldTagNames, newTagNames);
-    List<String> add = (List<String>) CollectionUtils.removeAll(newTagNames, oldTagNames);
-    
-    decreaseRefCount(remove);
-    increaseRefCount(add);
-    
-    return newTags;
   }
   
   @Transactional
-  public void decreaseRefCount(String tagsInfo) {
-    if (tagsInfo == null) {
-      return;
+  public void increaseRefCount(String text) {
+    List<String> tags = parseHashTag(text);
+    for (String name : tags) {
+      Optional<Tag> optional = tagRepository.findByName(name);
+      if (optional.isPresent()) {
+        tagRepository.updateTagRefCount(optional.get().getId(), 1);
+      } else {
+        tagRepository.save(new Tag(name, 1));
+      }
     }
-    List<String> tags = new ArrayList<>();
-    try {
-      tags = Arrays.asList(objectMapper.readValue(tagsInfo, String[].class));
-    } catch (IOException e) {
-      log.warn("cannot read tag info, tags:", tagsInfo);
-    }
-    decreaseRefCount(getUniqueTagNames(tags));
   }
   
-  private List<String> getHashTags(String text) {
+  @Transactional
+  public void decreaseRefCount(String text) {
+    List<String> tags = parseHashTag(text);
+    for (String name : tags) {
+      tagRepository.findByName(name)
+          .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+    }
+  }
+  
+  @Transactional
+  public void updateRefCount(String oldText, String newText) {
+    decreaseRefCount(oldText);
+    increaseRefCount(newText);
+  }
+  
+  @Transactional
+  public void addHistory(String text, int category, long resourceId, Member me) {
+    List<String> uniqueTagNames = parseHashTag(text);
+    for (String name : uniqueTagNames) {
+      Tag tag = tagRepository.findByName(name).orElse(new Tag(name, 1));
+      
+      tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
+          .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me)));
+    }
+  }
+  
+  @Transactional
+  public void removeHistory(String text, int category, long resourceId, Member me) {
+    List<String> uniqueTagNames = parseHashTag(text);
+    for (String name : uniqueTagNames) {
+      tagRepository.findByName(name)
+          .ifPresent(tag -> tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
+              .ifPresent(tagHistoryRepository::delete));
+    }
+  }
+  
+  @Transactional
+  public void removeAllHistory(Member me) {
+    tagHistoryRepository.findByCreatedBy(me).forEach(tagHistoryRepository::delete);
+  }
+  
+  @Transactional
+  public void updateHistory(String oldText, String newText, int category, long resourceId, Member me) {
+    removeHistory(oldText, category, resourceId, me);
+    addHistory(newText, category, resourceId, me);
+  }
+  
+  private List<String> parseHashTag(String text) {
     List<String> tags = new ArrayList<>();
     String delimiters = " \n\r\t"; // space, new line, tab
     StringTokenizer tokenizer = new StringTokenizer(text, delimiters);
@@ -128,10 +149,7 @@ public class TagService {
         }
       }
     }
-    return tags;
-  }
-  
-  private List<String> getUniqueTagNames(List<String> tags) {
+    
     List<String> uniqueTagNames = new ArrayList<>();
     for (String name : tags) {
       if (!uniqueTagNames.contains(name)) {
@@ -139,53 +157,5 @@ public class TagService {
       }
     }
     return uniqueTagNames;
-  }
-  
-  private void touchRefCount(List<String> uniqueTagNames) {
-    for (String name : uniqueTagNames) {
-      Optional<Tag> optional = tagRepository.findByName(name);
-      if (optional.isPresent()) {
-        Tag tag = optional.get();
-        tag.setModifiedAt(new Date());
-        tagRepository.save(tag);
-      } else {
-        tagRepository.save(new Tag(name, 0));
-      }
-    }
-  }
-  
-  private void increaseRefCount(List<String> uniqueTagNames) {
-    for (String name : uniqueTagNames) {
-      Optional<Tag> optional = tagRepository.findByName(name);
-      if (optional.isPresent()) {
-        tagRepository.updateTagRefCount(optional.get().getId(), 1);
-      } else {
-        tagRepository.save(new Tag(name, 1));
-      }
-    }
-  }
-  
-  private void decreaseRefCount(List<String> uniqueTagNames) {
-    for (String name : uniqueTagNames) {
-      tagRepository.findByName(name)
-          .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
-    }
-  }
-  
-  public void logHistory(List<String> tags, TagCategory category, Member me) {
-    if (tags != null && tags.size() > 0) {
-      TagHistory history;
-      for (String tag : tags) {
-        Optional<TagHistory> optional = tagHistoryRepository.findByTagAndCategoryAndCreatedBy(tag, category.ordinal(), me);
-        if (optional.isPresent()) {
-          history = optional.get();
-          history.setCategory(category.ordinal());
-          history.setCount(history.getCount() + 1);
-        } else {
-          history = new TagHistory(tag, category.ordinal(), me);
-        }
-        tagHistoryRepository.save(history);
-      }
-    }
   }
 }

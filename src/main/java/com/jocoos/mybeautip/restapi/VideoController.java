@@ -161,21 +161,12 @@ public class VideoController {
 
     Video video = new Video(memberService.currentMember());
     BeanUtils.copyProperties(request, video);
-    
-    if (StringUtils.isNotEmpty(video.getContent())) {
-      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
-      if (tags != null && tags.size() > 0) {
-        try {
-          video.setTagInfo(objectMapper.writeValueAsString(tags));
-        } catch (JsonProcessingException e) {
-          log.warn("tag parsing failed, tags: ", tags.toString());
-        }
-        
-        // Log TagHistory
-        tagService.logHistory(tags, TagService.TagCategory.VIDEO, memberService.currentMember());
-      }
-    }
     Video createdVideo = videoRepository.save(video); // do not notify
+    
+    if (StringUtils.isNotEmpty(createdVideo.getContent())) {
+      tagService.increaseRefCount(createdVideo.getContent());
+      tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());
+    }
     
     // Set related goods info
     if (StringUtils.isNotEmpty(request.getData())) {
@@ -358,12 +349,12 @@ public class VideoController {
     Comment comment = new Comment();
     comment.setVideoId(id);
     BeanUtils.copyProperties(request, comment);
-    
-    tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
     videoRepository.updateCommentCount(id, 1);
-
-    commentService.save(comment);
-
+    comment = commentService.save(comment);
+    
+    tagService.touchRefCount(comment.getComment());
+    tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+    
     List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {
       mentionService.updateVideoCommentWithMention(comment, mentionTags);
@@ -399,8 +390,11 @@ public class VideoController {
         if (comment.getLocked()) {
           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
         }
+        
+        tagService.touchRefCount(comment.getComment());
+        tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+  
         comment.setComment(request.getComment());
-        tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
         return new ResponseEntity<>(
           new CommentInfo(commentRepository.save(comment)),
           HttpStatus.OK
@@ -420,6 +414,7 @@ public class VideoController {
           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
         }
         videoService.deleteComment(comment);
+        tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
         return new ResponseEntity<>(HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));

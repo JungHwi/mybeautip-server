@@ -124,6 +124,8 @@ public class AdminController {
     postRepository.findByIdAndDeletedAtIsNull(id).map(post -> {
       post.setDeletedAt(new Date());
       postRepository.save(post);
+      tagService.decreaseRefCount(post.getDescription());
+      tagService.removeHistory(post.getDescription(), TagService.TAG_POST, post.getId(), post.getCreatedBy());
       return Optional.empty();
     }).orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
 
@@ -136,25 +138,17 @@ public class AdminController {
 
     Post post = new Post();
     BeanUtils.copyProperties(request, post);
-    log.debug("post: {}", post);
-    postRepository.save(post);
-
-    if (StringUtils.isNotEmpty(request.getDescription())) {
-      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
-      if (tags != null && tags.size() > 0) {
-        // Log TagHistory
-        tagService.logHistory(tags, TagService.TagCategory.POST, memberService.currentMember());
-      }
-    }
-
     post.setStartedAt(getRecommendedDate(request.getStartedAt()));
     post.setEndedAt(getRecommendedDate(request.getEndedAt()));
-
     postRepository.save(post);
     log.debug("saved post: {}", post);
+  
+    if (StringUtils.isNotEmpty(request.getDescription())) {
+      tagService.increaseRefCount(request.getDescription());
+      tagService.addHistory(request.getDescription(), TagService.TAG_POST, post.getId(), post.getCreatedBy());
+    }
 
     Member me = memberService.currentMember();
-
     List<GoodsInfo> goodsInfoList = new ArrayList<>();
     List<String> goodsList = post.getGoods();
     for (String info : goodsList) {
@@ -179,21 +173,17 @@ public class AdminController {
     banner.setLink(String.format("/api/1/posts/%d", request.getPostId()));
     banner.setPost(post);
     banner.setCategory(1);
-  
-    if (StringUtils.isNotEmpty(request.getDescription())) {
-      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
-      if (tags != null && tags.size() > 0) {
-        // Log TagHistory
-        tagService.logHistory(tags, TagService.TagCategory.POST, memberService.currentMember());
-      }
-    }
-
     banner.setStartedAt(getRecommendedDate(request.getStartedAt()));
     banner.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
-    bannerRepository.save(banner);
+    banner = bannerRepository.save(banner);
     log.debug("banner: {}", banner);
-
+  
+    if (StringUtils.isNotEmpty(request.getDescription())) {
+      tagService.touchRefCount(request.getDescription());
+      tagService.addHistory(request.getDescription(), TagService.TAG_BANNER, banner.getId(), banner.getCreatedBy());
+    }
+    
     BannerInfo info = new BannerInfo();
     BeanUtils.copyProperties(banner, info);
     return new ResponseEntity<>(info, HttpStatus.OK);
@@ -206,7 +196,7 @@ public class AdminController {
          banner.setDeletedAt(new Date());
          bannerRepository.save(banner);
   
-         tagService.decreaseRefCount(banner.getDescription());
+         tagService.removeHistory(banner.getDescription(), TagService.TAG_BANNER, banner.getId(), banner.getCreatedBy());
          return Optional.empty();
        })
        .orElseThrow(() -> new NotFoundException("banner_not_found", "invalid banner id"));

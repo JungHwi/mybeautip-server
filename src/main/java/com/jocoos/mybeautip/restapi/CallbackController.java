@@ -124,17 +124,8 @@ public class CallbackController {
     
     // Can be modified with empty string
     if (source.getContent() != null) {
-      List<String> tags = tagService.getHashTagsAndUpdateRefCount(target.getTagInfo(), source.getContent());
-      if (tags != null && tags.size() > 0) {
-        try {
-          target.setTagInfo(objectMapper.writeValueAsString(tags));
-        } catch (JsonProcessingException e) {
-          log.warn("tag parsing failed, tags: ", tags.toString());
-        }
-  
-        // Log TagHistory
-        tagService.logHistory(tags, TagService.TagCategory.VIDEO, target.getMember());
-      }
+      tagService.updateRefCount(target.getContent(), source.getContent());
+      tagService.updateHistory(target.getContent(), source.getContent(), TagService.TAG_VIDEO, target.getId(), target.getMember());
       target.setContent(source.getContent());
     }
     

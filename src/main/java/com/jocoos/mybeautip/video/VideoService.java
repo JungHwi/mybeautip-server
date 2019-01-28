@@ -305,21 +305,12 @@ public class VideoService {
     if ("UPLOADED".equals(request.getType())) {
       video = new Video(member);
       BeanUtils.copyProperties(request, video);
-    
-      if (StringUtils.isNotEmpty(video.getContent())) {
-        List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
-        if (tags != null && tags.size() > 0) {
-          try {
-            video.setTagInfo(objectMapper.writeValueAsString(tags));
-          } catch (JsonProcessingException e) {
-            log.warn("tag parsing failed, tags: ", tags.toString());
-          }
-        
-          // Log TagHistory
-          tagService.logHistory(tags, TagService.TagCategory.VIDEO, member);
-        }
-      }
       Video createdVideo = videoRepository.save(video);
+      
+      if (StringUtils.isNotEmpty(createdVideo.getContent())) {
+        tagService.increaseRefCount(createdVideo.getContent());
+        tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());
+      }
     
       // Set related goods info
       if (StringUtils.isNotEmpty(request.getData())) {
@@ -385,7 +376,8 @@ public class VideoService {
           if (v.getMember().getId() != memberId) {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
           }
-          tagService.decreaseRefCount(v.getTagInfo());
+          tagService.decreaseRefCount(v.getContent());
+          tagService.removeHistory(v.getContent(), TagService.TAG_VIDEO, v.getId(), v.getMember());
           saveWithDeletedAt(v);
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
@@ -407,7 +399,8 @@ public class VideoService {
           if (v.getMember().getId() != memberId) {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
           }
-          tagService.decreaseRefCount(v.getTagInfo());
+          tagService.decreaseRefCount(v.getContent());
+          tagService.removeHistory(v.getContent(), TagService.TAG_VIDEO, v.getId(), v.getMember());
           saveWithDeletedAt(v);
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
@@ -426,7 +419,8 @@ public class VideoService {
   public void deleteVideos(Member member) {
     videoRepository.findByMemberAndDeletedAtIsNull(member)
         .forEach(video -> {
-          tagService.decreaseRefCount(video.getTagInfo());
+          tagService.decreaseRefCount(video.getContent());
+          tagService.removeHistory(video.getContent(), TagService.TAG_VIDEO, video.getId(), video.getMember());
           video.setDeletedAt(new Date());
           saveWithDeletedAt(video);
           videoLikeRepository.deleteByVideoId(video.getId());

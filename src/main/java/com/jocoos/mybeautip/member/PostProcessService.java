@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.notification.NotificationRepository;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
+import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class PostProcessService {
   
   private final VideoService videoService;
+  private final TagService tagService;
   private final VideoRepository videoRepository;
   private final FollowingRepository followingRepository;
   private final CartRepository cartRepository;
@@ -29,6 +31,7 @@ public class PostProcessService {
   private final KeywordRecommendationRepository keywordRecommendationRepository;
   
   public PostProcessService(VideoService videoService,
+                            TagService tagService,
                             VideoRepository videoRepository,
                             FollowingRepository followingRepository,
                             CartRepository cartRepository,
@@ -38,6 +41,7 @@ public class PostProcessService {
                             NotificationRepository notificationRepository,
                             KeywordRecommendationRepository keywordRecommendationRepository) {
     this.videoService = videoService;
+    this.tagService = tagService;
     this.videoRepository = videoRepository;
     this.followingRepository = followingRepository;
     this.cartRepository = cartRepository;
@@ -55,7 +59,7 @@ public class PostProcessService {
     // 2. Delete all followings related members (followings/followers)
     // 3. Delete all cart items created by member
     // TODO: Delete garbage data depends on policy(order, addresses, account, likes, views, blocks, reports, comments)
-
+    
     log.debug("Member {} deleted: video will be deleted", member.getId());
     videoService.deleteVideos(member);
 
@@ -93,5 +97,7 @@ public class PostProcessService {
     log.debug("Member {} deleted: recommended keyword will be deleted", member.getId());
     keywordRecommendationRepository.findByMember(member)
         .ifPresent(keywordRecommendationRepository::delete);
+    
+    tagService.removeAllHistory(member);
   }
 }

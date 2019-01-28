@@ -20,27 +20,28 @@ public class TagHistory extends MemberAuditable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   
-  @Column
-  private String tag;
+  @ManyToOne
+  @JoinColumn(name = "tag_id")
+  private Tag tag;
   
   @Column(nullable = false)
   private Integer category; // 0: member, 1: video, 2: goods, 3: post
   
   @Column(nullable = false)
-  private Boolean isGuest;
+  private Long resourceId;
   
   @Column(nullable = false)
-  private Integer count;
+  private Boolean isGuest;
   
   @Column
   @LastModifiedDate
   private Date modifiedAt;
   
-  public TagHistory(String tag, int category, Member me) {
+  public TagHistory(Tag tag, int category, long resourceId, Member me) {
     this.tag = tag;
     this.category = category;
+    this.resourceId = resourceId;
     this.isGuest = (me == null);
     this.createdBy = me;
-    this.count = 1;
   }
 }

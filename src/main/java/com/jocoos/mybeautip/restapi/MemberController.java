@@ -185,7 +185,8 @@ public class MemberController {
             }
           }
           if (updateMemberRequest.getIntro() != null) {
-            tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro(), TagService.TagCategory.MEMBER, m);
+            tagService.touchRefCount(updateMemberRequest.getIntro());
+            tagService.updateHistory(m.getIntro(), updateMemberRequest.getIntro(), TagService.TAG_MEMBER, m.getId(), m);
             m.setIntro(updateMemberRequest.getIntro());
           }
   
