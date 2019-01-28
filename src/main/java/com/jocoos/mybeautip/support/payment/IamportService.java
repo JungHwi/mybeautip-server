@@ -4,6 +4,8 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.restapi.AccountController;
+import com.jocoos.mybeautip.support.slack.SlackService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -19,7 +21,8 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 @Slf4j
 @Service
 public class IamportService implements IamportApi {
-
+  private final SlackService slackService;
+  
   @Value("${mybeautip.iamport.api}")
   private String api;
 
@@ -32,7 +35,9 @@ public class IamportService implements IamportApi {
 
   private final RestTemplate restTemplate;
 
-  public IamportService(RestTemplate restTemplate) {
+  public IamportService(SlackService slackService,
+                        RestTemplate restTemplate) {
+    this.slackService = slackService;
     this.restTemplate = restTemplate;
   }
 
@@ -50,8 +55,12 @@ public class IamportService implements IamportApi {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
     PaymentTokenResponse response = restTemplate.postForObject(tokenUri, request, PaymentTokenResponse.class);
-    log.debug("{}, {}", response.getCode(), response.getResponse());
-    if (response.getCode() != 0) {
+    if (response != null) {
+      log.debug("{}, {}", response.getCode(), response.getResponse());
+    }
+    if (response == null || response.getCode() != 0) {
+      log.warn("invalid_import_response, GetToken failed");
+      slackService.sendForImportGetTokenFail();
       throw new MybeautipRuntimeException(response.getMessage());
     }
 
@@ -71,7 +80,8 @@ public class IamportService implements IamportApi {
       responseEntity = restTemplate.exchange(tokenUri, HttpMethod.GET, request, PaymentResponse.class);
       return responseEntity.getBody();
     } catch (HttpClientErrorException e) {
-      log.error("Get payment error", e);
+      log.error("invalid_import_response: Get payment error", e);
+      slackService.sendForImportGetPaymentFail(id);
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         throw new NotFoundException("payment_not_found", "invalid payment id");
       }
@@ -94,8 +104,13 @@ public class IamportService implements IamportApi {
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
     PaymentResponse response = restTemplate.postForObject(tokenUri, request, PaymentResponse.class);
-    log.debug("{}, {}", response.getCode(), response.getResponse());
-    if (response.getCode() != 0) {
+    if (response != null) {
+      log.debug("{}, {}", response.getCode(), response.getResponse());
+    }
+    
+    if (response == null || response.getCode() != 0) {
+      log.warn("invalid_import_response, Check payment status, payment_id: {}" +  impUid);
+      slackService.sendForImportPaymentException(impUid);
       throw new BadRequestException("invalid_payment_request", response.getMessage());
     }
 

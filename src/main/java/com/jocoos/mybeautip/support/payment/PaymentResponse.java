@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PaymentResponse {
-  private int code;
+  private Integer code;
   private String message;
   private PaymentData response;
 }
