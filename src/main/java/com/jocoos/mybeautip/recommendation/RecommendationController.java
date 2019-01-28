@@ -1,20 +1,11 @@
 package com.jocoos.mybeautip.recommendation;
 
-import com.google.common.collect.Lists;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.restapi.CursorResponse;
-import com.jocoos.mybeautip.restapi.VideoController;
-import com.jocoos.mybeautip.tag.Tag;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -26,10 +17,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import com.google.common.collect.Lists;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.restapi.CursorResponse;
+import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.tag.Tag;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @RestController
@@ -174,10 +177,15 @@ public class RecommendationController {
     Slice<MotdRecommendationBase> videos = motdRecommendationBaseRepository.findByBaseDateBefore(createDate,
        PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "baseDate")));
 
-    List<RecommendedMotdBaseInfo> result = new ArrayList<>();
-    for (MotdRecommendationBase recommendation : videos) {
-      result.add(new RecommendedMotdBaseInfo(recommendation, createMotdList(recommendation.getMotds())));
-    }
+    Date now = new Date();
+    List<RecommendedMotdBaseInfo> result = videos.stream()
+       .map(base -> {
+         Slice<MotdRecommendation> motds = motdRecommendationRepository.findByBaseIdAndStartedAtBeforeAndEndedAtAfter(base.getId(), now, now,
+            PageRequest.of(0, base.getMotdCount(), Sort.Direction.DESC, "seq"));
+         return new RecommendedMotdBaseInfo(base, createMotdList(motds));
+       })
+       .filter(i -> i.getExposedCount() > 0)
+       .collect(Collectors.toList());
 
     String nextCursor = null;
     if (!CollectionUtils.isEmpty(result)) {
@@ -189,7 +197,6 @@ public class RecommendationController {
        .withCursor(nextCursor)
        .toBuild();
   }
-
 
   @Deprecated
   @GetMapping("/keywords")
@@ -370,6 +377,7 @@ public class RecommendationController {
     private List<RecommendedMotdInfo> motds;
     private Date createdAt;
     private int motdCount;
+    private int exposedCount;
 
     public RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase) {
       BeanUtils.copyProperties(motdRecommendationBase, this);
@@ -378,6 +386,9 @@ public class RecommendationController {
     public RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase, List<RecommendedMotdInfo> motds) {
       this(motdRecommendationBase);
       this.motds = motds;
+      if (!CollectionUtils.isEmpty(motds)) {
+        this.exposedCount = motds.size();
+      }
     }
   }
 }
