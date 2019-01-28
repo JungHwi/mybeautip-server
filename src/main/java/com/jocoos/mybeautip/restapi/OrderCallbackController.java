@@ -4,6 +4,8 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentResponse;
+import com.jocoos.mybeautip.support.slack.SlackService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderCallbackController {
 
   private final IamportService iamportService;
+  private final SlackService slackService;
   private final OrderRepository orderRepository;
 
   public OrderCallbackController(IamportService iamportService,
+                                 SlackService slackService,
                                  OrderRepository orderRepository) {
     this.iamportService = iamportService;
+    this.slackService = slackService;
     this.orderRepository = orderRepository;
   }
 
@@ -45,7 +50,8 @@ public class OrderCallbackController {
     PaymentResponse response = iamportService.getPayment(token, impUid);
     if (response.getCode() != 0 || response.getResponse() == null) {
       html = getErrorHtml(merchantUid, response.getMessage());
-      log.debug("OrderCallbackComplete response: " + html);
+      log.warn("invalid_import_response, OrderCallbackComplete response: " + html);
+      slackService.sendForImportPaymentException(impUid);
       return new ResponseEntity<>(html, HttpStatus.OK);
     }
   

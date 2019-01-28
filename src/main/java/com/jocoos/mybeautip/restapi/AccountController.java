@@ -160,7 +160,7 @@ public class AccountController {
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         throw new BadRequestException("invalid_account", messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
       } else {
-        log.warn("import GET /vbank/holder API returns exception", e.getStatusCode());
+        log.warn("invalid_import_response, GET /vbank/holder API returns exception", e.getStatusCode());
         return false;
       }
     }

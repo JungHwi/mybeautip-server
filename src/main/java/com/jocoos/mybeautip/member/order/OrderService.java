@@ -34,6 +34,7 @@ import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentData;
 import com.jocoos.mybeautip.support.payment.PaymentResponse;
+import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -66,6 +67,7 @@ public class OrderService {
   private final IamportService iamportService;
   private final MessageService messageService;
   private final VideoService videoService;
+  private final SlackService slackService;
 
   public OrderService(OrderRepository orderRepository,
                       MemberRepository memberRepository,
@@ -81,7 +83,8 @@ public class OrderService {
                       PointService pointService,
                       IamportService iamportService,
                       MessageService messageService,
-                      VideoService videoService) {
+                      VideoService videoService,
+                      SlackService slackService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
     this.deliveryRepository = deliveryRepository;
@@ -97,6 +100,7 @@ public class OrderService {
     this.iamportService = iamportService;
     this.messageService = messageService;
     this.videoService = videoService;
+    this.slackService = slackService;
   }
 
   @Transactional
@@ -251,8 +255,9 @@ public class OrderService {
     PaymentResponse response = iamportService.getPayment(iamportService.getToken(), impUid);
     
     if (response.getCode() != 0 || response.getResponse() == null) {
-      log.warn("notifyPayment response is not success: " + response.getMessage());
-      throw new MybeautipRuntimeException("invalid_iamport_response", "notifyPayment response is not success");
+      log.warn("invalid_import_response, notifyPayment response is not success: " + response.getMessage());
+      slackService.sendForImportPaymentException(impUid);
+      throw new MybeautipRuntimeException("invalid_import_response", "notifyPayment response is not success");
     }
     
     Payment payment = checkPaymentAndUpdate(order.getId(), impUid);
@@ -290,11 +295,13 @@ public class OrderService {
              }
            } else {
              String failReason = iamportData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
-             log.warn("fail reason: {}", failReason);
+             log.warn("invalid_import_response, fail reason: {}", failReason);
+             slackService.sendForImportPaymentMismatch(paymentId);
              payment.setState(state | Payment.STATE_FAILED);
              payment.setMessage(failReason);
            }
          } else {
+           slackService.sendForImportPaymentException(paymentId);
            payment.setMessage(response.getMessage());
            payment.setPaymentId(paymentId);
            payment.setState(state | Payment.STATE_STOPPED);
