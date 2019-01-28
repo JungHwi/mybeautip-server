@@ -176,7 +176,7 @@ public class TagService {
     if (tags != null && tags.size() > 0) {
       TagHistory history;
       for (String tag : tags) {
-        Optional<TagHistory> optional = tagHistoryRepository.findByTagAndCreatedBy(tag, me);
+        Optional<TagHistory> optional = tagHistoryRepository.findByTagAndCategoryAndCreatedBy(tag, category.ordinal(), me);
         if (optional.isPresent()) {
           history = optional.get();
           history.setCategory(category.ordinal());

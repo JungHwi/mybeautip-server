@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TagHistoryRepository extends JpaRepository<TagHistory, Long> {
-  Optional<TagHistory> findByTagAndCreatedBy(String tag, Member createdBy);
+  Optional<TagHistory> findByTagAndCategoryAndCreatedBy(String tag, int category, Member createdBy);
   
   List<TagHistory> findByCreatedBy(Member createdBy, Pageable pageable);
   
