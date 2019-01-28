@@ -601,6 +601,7 @@ public class AdminController {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "baseDate"));
     Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findAll(pageable);
+
     Page<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
       RecommendationController.RecommendedMotdBaseInfo info = new RecommendationController.RecommendedMotdBaseInfo(b, createRecommendedMotd(b));
       return info;
@@ -614,6 +615,7 @@ public class AdminController {
     for (MotdRecommendation m : base.getMotds()) {
       motds.add(new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
     }
+    Collections.reverse(motds);
     return motds;
   }
   
@@ -622,7 +624,7 @@ public class AdminController {
   public void CreateRecommendedKeywordsRequest(@Valid @RequestBody CreateRecommendedKeywordsRequest request) {
     
     log.debug("request: {}", request);
-    
+
     List<RecommendedKeyword> items = request.getItems();
     KeywordRecommendation keyword;
     int seq = 1;
