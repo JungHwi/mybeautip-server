@@ -422,7 +422,7 @@ public class PostController {
            throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
          }
          
-         tagService.touchRefCount(comment.getComment());
+         tagService.touchRefCount(request.getComment());
          tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
   
          comment.setComment(request.getComment());
