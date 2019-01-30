@@ -110,10 +110,8 @@ public class TagService {
   public void addHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
     for (String name : uniqueTagNames) {
-      Tag tag = tagRepository.findByName(name).orElse(tagRepository.save(new Tag(name, 1)));
-      
-      tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
-          .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me)));
+      tagRepository.findByName(name).ifPresent(tag -> tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
+          .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me))));
     }
   }
   
@@ -147,10 +145,8 @@ public class TagService {
     }
   
     for (String name : addTagNames) {
-      Tag tag = tagRepository.findByName(name).orElse(tagRepository.save(new Tag(name, 1)));
-  
-      tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
-          .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me)));
+      tagRepository.findByName(name).ifPresent(tag -> tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
+          .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me))));
     }
   }
   
