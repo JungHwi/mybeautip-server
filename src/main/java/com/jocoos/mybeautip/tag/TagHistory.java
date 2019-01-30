@@ -1,14 +1,23 @@
 package com.jocoos.mybeautip.tag;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
-import com.jocoos.mybeautip.member.Member;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import java.util.Date;
+
+import org.springframework.data.annotation.LastModifiedDate;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.LastModifiedDate;
 
-import javax.persistence.*;
-import java.util.Date;
+import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
 @Data
@@ -25,7 +34,7 @@ public class TagHistory extends MemberAuditable {
   private Tag tag;
   
   @Column(nullable = false)
-  private Integer category; // 0: member, 1: video, 2: goods, 3: post
+  private Integer category; // 1: member, 2: video, 3: post, 4: banner, 5: comment
   
   @Column(nullable = false)
   private Long resourceId;
