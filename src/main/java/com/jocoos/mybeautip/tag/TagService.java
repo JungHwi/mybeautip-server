@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -84,15 +85,32 @@ public class TagService {
   
   @Transactional
   public void updateRefCount(String oldText, String newText) {
-    decreaseRefCount(oldText);
-    increaseRefCount(newText);
+    List<String> oldTagNames = parseHashTag(oldText);
+    List<String> newTagNames = parseHashTag(newText);
+  
+    List<String> removeTagNames = (List<String>) CollectionUtils.removeAll(oldTagNames, newTagNames);
+    List<String> addTagNames = (List<String>) CollectionUtils.removeAll(newTagNames, oldTagNames);
+  
+    for (String name : removeTagNames) {
+      tagRepository.findByName(name)
+          .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+    }
+  
+    for (String name : addTagNames) {
+      Optional<Tag> optional = tagRepository.findByName(name);
+      if (optional.isPresent()) {
+        tagRepository.updateTagRefCount(optional.get().getId(), 1);
+      } else {
+        tagRepository.save(new Tag(name, 1));
+      }
+    }
   }
   
   @Transactional
   public void addHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
     for (String name : uniqueTagNames) {
-      Tag tag = tagRepository.findByName(name).orElse(new Tag(name, 1));
+      Tag tag = tagRepository.findByName(name).orElse(tagRepository.save(new Tag(name, 1)));
       
       tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
           .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me)));
@@ -116,8 +134,24 @@ public class TagService {
   
   @Transactional
   public void updateHistory(String oldText, String newText, int category, long resourceId, Member me) {
-    removeHistory(oldText, category, resourceId, me);
-    addHistory(newText, category, resourceId, me);
+    List<String> oldTagNames = parseHashTag(oldText);
+    List<String> newTagNames = parseHashTag(newText);
+    
+    List<String> removeTagNames = (List<String>) CollectionUtils.removeAll(oldTagNames, newTagNames);
+    List<String> addTagNames = (List<String>) CollectionUtils.removeAll(newTagNames, oldTagNames);
+  
+    for (String name : removeTagNames) {
+      tagRepository.findByName(name)
+          .ifPresent(t -> tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(t, category, resourceId, me)
+              .ifPresent(tagHistoryRepository::delete));
+    }
+  
+    for (String name : addTagNames) {
+      Tag tag = tagRepository.findByName(name).orElse(tagRepository.save(new Tag(name, 1)));
+  
+      tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
+          .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me)));
+    }
   }
   
   private List<String> parseHashTag(String text) {
