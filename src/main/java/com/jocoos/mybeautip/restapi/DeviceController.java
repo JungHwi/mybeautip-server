@@ -86,7 +86,7 @@ public class DeviceController {
     @NotNull @Size(max = 40)
     private String deviceTimezone;
 
-    private boolean pushable;
+    private Boolean pushable;
   }
 
   @NoArgsConstructor
@@ -100,7 +100,7 @@ public class DeviceController {
     private String deviceLanguage;
     private String appVersion;
     private String deviceTimezone;
-    private boolean pushable;
+    private Boolean pushable;
 
     public DeviceInfo(Device device) {
       BeanUtils.copyProperties(device, this);

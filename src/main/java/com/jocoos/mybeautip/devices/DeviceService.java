@@ -242,12 +242,12 @@ public class DeviceService {
     device.setAppVersion(request.getAppVersion());
     device.setTimezone(request.getDeviceTimezone());
 
-    if (request.isPushable()) { // enable device, pushable is set according to Member Info
-      device.setValid(true);
-      device.setPushable((me == null) ? true : me.getPushable());
-    } else {  // disable device
+    if (request.getPushable() == null || !request.getPushable()) { // disable device
       device.setValid(false);
       device.setPushable(false);
+    } else {  // enable device, pushable is set according to Member Info
+      device.setValid(true);
+      device.setPushable((me == null) ? true : me.getPushable());
     }
     
     return device;
