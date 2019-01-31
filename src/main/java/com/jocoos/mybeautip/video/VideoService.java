@@ -301,6 +301,12 @@ public class VideoService {
   
   @Transactional
   public Video startVideo(CallbackController.CallbackStartVideoRequest request, Member member) {
+    // Ignore when videoKey is already exist
+    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
+      log.warn("VideoKey is already exist, videoKey: " + request.getVideoKey());
+      throw new BadRequestException("bad_video_key", "video_key_is_already_exist");
+    }
+    
     Video video;
     if ("UPLOADED".equals(request.getType())) {
       video = new Video(member);

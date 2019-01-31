@@ -77,12 +77,6 @@ public class CallbackController {
           throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
         });
     
-    // Ignore when videoKey is already exist
-    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
-      log.debug("VideoKey is already exist, videoKey: " + request.getVideoKey());
-      return null;
-    }
-    
     return videoService.startVideo(request, member);
   }
   
