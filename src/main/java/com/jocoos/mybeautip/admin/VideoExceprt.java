@@ -60,8 +60,6 @@ public interface VideoExceprt {
 
   Member getMember();
 
-  String getTagInfo();
-
   Date getCreatedAt();
 
   Date getModifiedAt();
