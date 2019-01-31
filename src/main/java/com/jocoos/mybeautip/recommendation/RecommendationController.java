@@ -223,10 +223,11 @@ public class RecommendationController {
     count = count - result.size();
     if (count > 0) {
       keywords = keywordRecommendationRepository.findBySeqGreaterThan(
-          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, new Sort(Sort.Direction.ASC, "seq")));
       Collections.shuffle(keywords);
+      List<KeywordRecommendation> subList = keywords.subList(0, count);
       
-      for (KeywordRecommendation keyword : keywords) {
+      for (KeywordRecommendation keyword : subList) {
         switch (keyword.getCategory()) {
           case 1:
             if (keyword.getMember().isVisible()) {
@@ -267,10 +268,11 @@ public class RecommendationController {
     count = count - result.size();
     if (count > 0) {
       keywords = keywordRecommendationRepository.findBySeqGreaterThan(
-          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, new Sort(Sort.Direction.ASC, "seq")));
       Collections.shuffle(keywords);
+      List<KeywordRecommendation> subList = keywords.subList(0, count);
       
-      for (KeywordRecommendation keyword : keywords) {
+      for (KeywordRecommendation keyword : subList) {
         switch (keyword.getCategory()) {
           case 1:
             if (keyword.getMember().isVisible()) {
