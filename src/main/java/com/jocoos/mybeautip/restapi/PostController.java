@@ -382,11 +382,11 @@ public class PostController {
     Comment comment = new Comment();
     comment.setPostId(id);
     BeanUtils.copyProperties(request, comment);
-    
-    tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, member);
     postRepository.updateCommentCount(id, 1);
-
-    commentService.save(comment);
+    comment = commentService.save(comment);
+  
+    tagService.touchRefCount(comment.getComment());
+    tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
 
     List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {
@@ -422,8 +422,10 @@ public class PostController {
            throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
          }
          
+         tagService.touchRefCount(request.getComment());
+         tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+  
          comment.setComment(request.getComment());
-         tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
          return new ResponseEntity<>(
             new CommentInfo(commentRepository.save(comment), memberService.getMemberInfo(comment.getCreatedBy())),
             HttpStatus.OK
@@ -442,8 +444,8 @@ public class PostController {
          if (comment.getLocked()) {
            throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
          }
-         
          postService.deleteComment(comment);
+         tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
          return new ResponseEntity<>(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
