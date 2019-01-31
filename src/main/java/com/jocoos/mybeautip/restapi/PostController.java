@@ -258,17 +258,18 @@ public class PostController {
   @PostMapping("/{id:.+}/likes")
   public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Long memberId = memberService.currentMemberId();
+    Member me = memberService.currentMember();
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          Long postId = post.getId();
-         if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
+         if (postLikeRepository.findByPostIdAndCreatedById(postId, me.getId()).isPresent()) {
            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
          
          PostLike postLike = postService.likePost(post);
-         return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
+         return new ResponseEntity<>(new PostLikeInfo(postLike, memberService.getMemberInfo(me),
+             memberService.getMemberInfo(post.getCreatedBy())), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
@@ -527,13 +528,14 @@ public class PostController {
   @Data
   public static class PostLikeInfo {
     private Long id;
-    private Member createdBy;
+    private MemberInfo createdBy; // deprecated
     private Date createdAt;
     private PostBasicInfo post;
 
-    public PostLikeInfo(PostLike postLike) {
+    public PostLikeInfo(PostLike postLike, MemberInfo likeMemberInfo, MemberInfo memberInfo) {
       BeanUtils.copyProperties(postLike, this);
-      post = new PostBasicInfo(postLike.getPost());
+      this.createdBy = likeMemberInfo;
+      post = new PostBasicInfo(postLike.getPost(), memberInfo);
     }
   }
 
@@ -546,12 +548,13 @@ public class PostController {
     private int progress;
     private String thumbnailUrl;
     private Date createdAt;
-    private Member createdBy;
+    private MemberInfo createdBy;
     private int likeCount;
     private Long likeId;
 
-    public PostBasicInfo(Post post) {
+    public PostBasicInfo(Post post, MemberInfo createdBy) {
       BeanUtils.copyProperties(post, this);
+      this.createdBy = createdBy;
     }
   }
 
@@ -574,7 +577,7 @@ public class PostController {
   @Data
   public static class CommentLikeInfo {
     private Long id;
-    private MemberInfo createdBy;
+    private MemberInfo createdBy; // deprecated
     private Date createdAt;
     private CommentInfo comment;
 

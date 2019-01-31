@@ -239,7 +239,7 @@ public class GoodsController {
   @Data
   public static class GoodsLikeInfo {
     private Long id;
-    private Long createdBy;
+    private Long createdBy; // deprecated
     private Date createdAt;
     private GoodsInfo goods;
 

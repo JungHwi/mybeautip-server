@@ -635,7 +635,8 @@ public class MemberController {
     }
 
     postLikes.stream().forEach(like -> {
-      PostController.PostLikeInfo info = new PostController.PostLikeInfo(like);
+      PostController.PostLikeInfo info = new PostController.PostLikeInfo(like,
+          memberService.getMemberInfo(like.getCreatedBy()), memberService.getMemberInfo(like.getPost().getCreatedBy()));
       postLikeRepository.findByPostIdAndCreatedById(like.getPost().getId(), memberId)
         .ifPresent(likeByMe -> info.getPost().setLikeId(likeByMe.getId()));
       result.add(info);
