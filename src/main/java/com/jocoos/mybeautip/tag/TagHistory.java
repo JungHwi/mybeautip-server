@@ -16,7 +16,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
@@ -24,7 +24,7 @@ import com.jocoos.mybeautip.member.Member;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "tag_history")
-public class TagHistory extends MemberAuditable {
+public class TagHistory extends CreatedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -45,6 +45,10 @@ public class TagHistory extends MemberAuditable {
   @Column
   @LastModifiedDate
   private Date modifiedAt;
+  
+  @ManyToOne
+  @JoinColumn(name = "created_by")
+  private Member createdBy;
   
   public TagHistory(Tag tag, int category, long resourceId, Member me) {
     this.tag = tag;
