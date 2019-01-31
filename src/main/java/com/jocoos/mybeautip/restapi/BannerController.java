@@ -42,7 +42,7 @@ public class BannerController {
   }
 
   @GetMapping
-  public ResponseEntity<List<BannerInfo>> getBanners(@RequestParam(defaultValue = "5") int count) {
+  public ResponseEntity<List<BannerInfo>> getBanners(@RequestParam(defaultValue = "20") int count) {
     PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "seq", "createdAt"));
     Date now = new Date();
     Slice<Banner> banners = bannerRepository.findByStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(now, now, pageRequest);
