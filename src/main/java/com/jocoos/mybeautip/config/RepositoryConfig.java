@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.order.Purchase;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.report.Report;
+import com.jocoos.mybeautip.notification.event.PushMessage;
 import com.jocoos.mybeautip.recommendation.MotdRecommendationBase;
 import com.jocoos.mybeautip.store.Store;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,7 @@ public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
     config.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class, Order.class,
         Category.class, DeliveryCharge.class, DeliveryChargeDetail.class, Store.class,
         Goods.class, GoodsOption.class, VideoReport.class, Report.class, Post.class, Purchase.class,
-       MemberCoupon.class, MemberPoint.class, MotdRecommendationBase.class, AppInfo.class, Device.class, Video.class, BannedWord.class);
+       MemberCoupon.class, MemberPoint.class, MotdRecommendationBase.class, AppInfo.class, Device.class, Video.class, BannedWord.class,
+       PushMessage.class);
   }
 }
