@@ -135,7 +135,6 @@ public class AdminNotificationController {
     }
 
     Pageable pageable = PageRequest.of(0, request.getSize());
-    List<Notification> notifications = Lists.newArrayList();
     Page<Device> devices = null;
 
     Long memberId = request.getTarget();
@@ -154,7 +153,7 @@ public class AdminNotificationController {
       deviceService.push(device, new Notification(device.getCreatedBy(), request.getTitle(),
           request.getMessage(), request.getResourceType(), request.getResourceIds())));
     
-    pushMessageRepository.save(new PushMessage(request, devices.getSize()));
+    pushMessageRepository.save(new PushMessage(request, devices.getContent().size()));
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }
 
