@@ -90,31 +90,25 @@ public class PostService {
   
   @Transactional
   public PostLike likePost(Post post) {
-    post.setLikeCount(post.getLikeCount() + 1);
-    postRepository.save(post);
+    postRepository.updateLikeCount(post.getId(), 1);
     return postLikeRepository.save(new PostLike(post));
   }
   
   @Transactional
   public void unLikePost(PostLike liked) {
     postLikeRepository.delete(liked);
-    Post post = liked.getPost();
-    post.setLikeCount(post.getLikeCount() - 1);
-    postRepository.save(post);
+    postRepository.updateLikeCount(liked.getPost().getId(), -1);
   }
   
   @Transactional
   public CommentLike likeCommentPost(Comment comment) {
-    comment.setLikeCount(comment.getLikeCount() + 1);
-    commentRepository.save(comment);
+    commentRepository.updateLikeCount(comment.getId(), 1);
     return commentLikeRepository.save(new CommentLike(comment));
   }
   
   @Transactional
   public void unLikeCommentPost(CommentLike liked) {
     commentLikeRepository.delete(liked);
-    Comment comment = liked.getComment();
-    comment.setLikeCount(comment.getCommentCount() - 1);
-    commentRepository.save(comment);
+    commentRepository.updateLikeCount(liked.getComment().getId(), -1);
   }
 }

@@ -521,32 +521,26 @@ public class VideoService {
   
   @Transactional
   public VideoLike likeVideo(Video video) {
-    video.setLikeCount(video.getLikeCount() + 1);
-    videoRepository.save(video);
+    videoRepository.updateLikeCount(video.getId(), 1);
     return videoLikeRepository.save(new VideoLike(video));
   }
   
   @Transactional
   public void unLikeVideo(VideoLike liked) {
     videoLikeRepository.delete(liked);
-    Video video = liked.getVideo();
-    video.setLikeCount(video.getLikeCount() - 1);
-    videoRepository.save(video);
+    videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
   }
   
   @Transactional
   public CommentLike likeVideoComment(Comment comment) {
-    comment.setLikeCount(comment.getLikeCount() + 1);
-    commentRepository.save(comment);
+    commentRepository.updateLikeCount(comment.getId(), 1);
     return commentLikeRepository.save(new CommentLike(comment));
   }
   
   @Transactional
   public void unLikeVideoComment(CommentLike liked) {
     commentLikeRepository.delete(liked);
-    Comment comment = liked.getComment();
-    comment.setLikeCount(comment.getLikeCount() - 1);
-    commentRepository.save(comment);
+    commentRepository.updateLikeCount(liked.getComment().getId(), -1);
   }
   
   /**
