@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.devices.Device;
+import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -32,34 +33,44 @@ public class DeviceController {
 
   private final DeviceService deviceService;
   private final MemberService memberService;
+  private final DeviceRepository deviceRepository;
 
   public DeviceController(DeviceService deviceService,
-                          MemberService memberService) {
+                          MemberService memberService,
+                          DeviceRepository deviceRepository) {
     this.deviceService = deviceService;
     this.memberService = memberService;
+    this.deviceRepository = deviceRepository;
   }
 
   @Transactional
   @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<DeviceInfo> register(@Valid @RequestBody DeviceController.UpdateDeviceRequest request,
-                                                 BindingResult bindingResult) {
+                                             BindingResult bindingResult) {
 
     if (bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
-    Member me = memberService.currentMember();
     
+    Member me = memberService.currentMember();
     if (me != null) {
     // Check member's devices validity
       deviceService.validateAlreadyRegisteredDevices(me.getId());
     }
 
-    log.debug("request: {}", request);
-    log.debug("request member: {}", me);
-    Device device = deviceService.saveOrUpdate(request, me);
-    log.debug("saved device: {}", device);
-
-    return new ResponseEntity<>(new DeviceInfo(device), HttpStatus.OK);
+    log.debug("request: {}, member: {}", request, me);
+    
+    Device device = deviceRepository.findById(request.getDeviceId()).orElse(null);
+    Device result;
+    if (device == null) {
+      result = deviceService.create(request, me);
+    } else {
+      result = deviceService.update(request, device, me);
+    }
+    
+    DeviceInfo info = new DeviceInfo(result);
+    log.debug("result device: {}", info);
+    return new ResponseEntity<>(new DeviceInfo(result), HttpStatus.OK);
   }
 
   @Data
