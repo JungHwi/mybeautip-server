@@ -6,23 +6,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.post.PostLike;
 
-@Projection(name = "video_report_details", types = VideoReport.class)
-public interface VideoReportExcerpt {
+@Projection(name = "post_like_details", types = PostLike.class)
+public interface PostLikeExcerpt {
 
   Long getId();
-
-  Video getVideo();
-
-  @Value("#{target.video.member}")
-  Member getVideoOwner();
 
   @Value("#{target.createdBy}")
   Member getMember();
 
-  String getReason();
-
   Date getCreatedAt();
+
 }

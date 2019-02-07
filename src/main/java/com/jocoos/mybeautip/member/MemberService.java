@@ -1,12 +1,17 @@
 package com.jocoos.mybeautip.member;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.member.report.Report;
+import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
+import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.word.BannedWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +28,7 @@ public class MemberService {
   private final MessageService messageService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
+  private final ReportRepository reportRepository;
   
   private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
 
@@ -31,15 +37,18 @@ public class MemberService {
   private static final String USERNAME_INVALID_CHAR = "username.invalid_char";
   private static final String USERNAME_ALREADY_USED = "username.already_used";
   private static final String EMAIL_INVALID_FORMAT = "email.invalid_format";
+  private static final String MEMBER_NOT_FOUND = "member.not_found";
 
   public MemberService(BannedWordService bannedWordService,
                        MessageService messageService,
                        MemberRepository memberRepository,
-                       FollowingRepository followingRepository) {
+                       FollowingRepository followingRepository,
+                       ReportRepository reportRepository) {
     this.bannedWordService = bannedWordService;
     this.messageService = messageService;
     this.memberRepository = memberRepository;
     this.followingRepository = followingRepository;
+    this.reportRepository = reportRepository;
   }
 
   public Long currentMemberId() {
@@ -138,5 +147,18 @@ public class MemberService {
     if (email.length() > 50 || !email.matches(emailRegex)) {
       throw new BadRequestException("invalid_email", messageService.getMessage(EMAIL_INVALID_FORMAT, lang));
     }
+  }
+  
+  public boolean hasCommentPostPermission(Member member) {
+    return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
+  }
+  
+  @Transactional
+  public void reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {
+    Member you = memberRepository.findByIdAndDeletedAtIsNull(targetId)
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    
+    reportRepository.save(new Report(me, you, reasonCode, reason, video));
+    memberRepository.updateReportCount(you.getId(), 1);
   }
 }

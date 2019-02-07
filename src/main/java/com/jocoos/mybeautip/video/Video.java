@@ -84,6 +84,9 @@ public class Video {
 
   @Column(nullable = false)
   private Integer orderCount;
+  
+  @Column
+  private Long reportCount;
 
   @Column(nullable = false)
   private Integer relatedGoodsCount;
@@ -94,9 +97,6 @@ public class Video {
   @ManyToOne
   @JoinColumn(name = "owner")
   private Member member;
-  
-  @Column
-  private String tagInfo;
 
   @Column
   @CreatedDate
@@ -125,5 +125,6 @@ public class Video {
     this.totalWatchCount = 0;
     this.viewCount = 0;
     this.orderCount = 0;
+    this.reportCount = 0L;
   }
 }

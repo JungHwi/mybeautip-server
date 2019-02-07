@@ -18,7 +18,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,18 +45,31 @@ import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentInfo;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.CommentService;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
-import com.jocoos.mybeautip.member.revenue.*;
+import com.jocoos.mybeautip.member.revenue.Revenue;
+import com.jocoos.mybeautip.member.revenue.RevenueInfo;
+import com.jocoos.mybeautip.member.revenue.RevenueOverview;
+import com.jocoos.mybeautip.member.revenue.RevenueRepository;
+import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.tag.TagService;
-import com.jocoos.mybeautip.video.*;
-import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.VideoLike;
+import com.jocoos.mybeautip.video.VideoLikeRepository;
+import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
@@ -77,14 +99,15 @@ public class VideoController {
   private final NotificationService notificationService;
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
-  private final MemberRepository memberRepository;
   private final ObjectMapper objectMapper;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
-  private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
-
+  private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
+  private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
+  private static final String COMMENT_LOCKED = "comment.locked";
+  
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
   
@@ -107,7 +130,6 @@ public class VideoController {
                          NotificationService notificationService,
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
-                         MemberRepository memberRepository,
                          ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.videoService = videoService;
@@ -128,7 +150,6 @@ public class VideoController {
     this.notificationService = notificationService;
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
-    this.memberRepository = memberRepository;
     this.objectMapper = objectMapper;
   }
   
@@ -140,21 +161,12 @@ public class VideoController {
 
     Video video = new Video(memberService.currentMember());
     BeanUtils.copyProperties(request, video);
-    
-    if (StringUtils.isNotEmpty(video.getContent())) {
-      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(video.getContent());
-      if (tags != null && tags.size() > 0) {
-        try {
-          video.setTagInfo(objectMapper.writeValueAsString(tags));
-        } catch (JsonProcessingException e) {
-          log.warn("tag parsing failed, tags: ", tags.toString());
-        }
-        
-        // Log TagHistory
-        tagService.logHistory(tags, TagService.TagCategory.VIDEO, memberService.currentMember());
-      }
-    }
     Video createdVideo = videoRepository.save(video); // do not notify
+    
+    if (StringUtils.isNotEmpty(createdVideo.getContent())) {
+      tagService.increaseRefCount(createdVideo.getContent());
+      tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());
+    }
     
     // Set related goods info
     if (StringUtils.isNotEmpty(request.getData())) {
@@ -316,6 +328,11 @@ public class VideoController {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
+  
+    Member member = memberService.currentMember();
+    if (!memberService.hasCommentPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
+    }
     
     videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
@@ -332,12 +349,12 @@ public class VideoController {
     Comment comment = new Comment();
     comment.setVideoId(id);
     BeanUtils.copyProperties(request, comment);
-    
-    tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
     videoRepository.updateCommentCount(id, 1);
-
-    commentService.save(comment);
-
+    comment = commentService.save(comment);
+    
+    tagService.touchRefCount(comment.getComment());
+    tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+    
     List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {
       mentionService.updateVideoCommentWithMention(comment, mentionTags);
@@ -350,22 +367,34 @@ public class VideoController {
       HttpStatus.OK
     );
   }
-
+  
+  @Transactional
   @PatchMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long videoId,
                                            @PathVariable Long id,
                                            @RequestBody VideoController.UpdateCommentRequest request,
+                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
                                            BindingResult bindingResult) {
 
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
+  
+    Member member = memberService.currentMember();
+    if (!memberService.hasCommentPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
+    }
 
-    Long memberId = memberService.currentMemberId();
-    return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberId)
+    return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, member.getId())
       .map(comment -> {
+        if (comment.getLocked()) {
+          throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
+        }
+        
+        tagService.touchRefCount(request.getComment());
+        tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+  
         comment.setComment(request.getComment());
-        tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
         return new ResponseEntity<>(
           new CommentInfo(commentRepository.save(comment)),
           HttpStatus.OK
@@ -377,10 +406,15 @@ public class VideoController {
   @Transactional
   @DeleteMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long videoId,
-                                         @PathVariable Long id) {
+                                         @PathVariable Long id,
+                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return commentRepository.findByIdAndVideoIdAndCreatedById(id, videoId, memberService.currentMemberId())
       .map(comment -> {
+        if (comment.getLocked()) {
+          throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
+        }
         videoService.deleteComment(comment);
+        tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
         return new ResponseEntity<>(HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));
@@ -397,13 +431,10 @@ public class VideoController {
     
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
       .map(video -> {
-        if (videoLikeRepository.findByVideoIdAndCreatedById(videoId, memberId).isPresent()) {
+        if (videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), memberId).isPresent()) {
           throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
         }
-
-        videoRepository.updateLikeCount(videoId, 1);
-        video.setLikeCount(video.getLikeCount() + 1);
-        VideoLike videoLike = videoLikeRepository.save(new VideoLike(video));
+        VideoLike videoLike = videoService.likeVideo(video);
         VideoLikeInfo info = new VideoLikeInfo(videoLike, videoService.generateVideoInfo(video));
         return new ResponseEntity<>(info, HttpStatus.OK);
       })
@@ -417,18 +448,14 @@ public class VideoController {
                                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     
-    return videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
-      .map(video -> {
-        Optional<VideoLike> liked = videoLikeRepository.findById(likeId);
-        if (!liked.isPresent()) {
-          throw new NotFoundException("like_not_found", "invalid video like id");
-        }
-
-        videoLikeRepository.delete(liked.get());
-        videoRepository.updateLikeCount(videoId, -1);
-        return new ResponseEntity(HttpStatus.OK);
+    videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
+      .map(liked -> {
+        videoService.unLikeVideo(liked);
+        return Optional.empty();
       })
-      .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id or like id"));
+      .orElseThrow(() -> new NotFoundException("like_not_found", "invalid video like id"));
+  
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @GetMapping("/{id:.+}/likes")
@@ -463,16 +490,11 @@ public class VideoController {
     
     return commentRepository.findByIdAndVideoId(commentId, videoId)
         .map(comment -> {
-          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId
-              ()).isPresent()) {
+          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
             throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
           }
-
-
-          commentRepository.updateLikeCount(comment.getId(), 1);
-          comment.setLikeCount(comment.getLikeCount() + 1);
-          CommentLike commentLikeLike = commentLikeRepository.save(new CommentLike(comment));
-          return new ResponseEntity<>(new CommentLikeInfo(commentLikeLike), HttpStatus.OK);
+          CommentLike commentLike = videoService.likeVideoComment(comment);
+          return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
         })
         .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));
   }
@@ -485,19 +507,15 @@ public class VideoController {
     Member me = memberService.currentMember();
     
     Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
-        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video id or comment " +
-            "id"));
+        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video id or comment " + "id"));
 
-    return commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment
-        .getId(), me.getId())
+    commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
         .map(liked -> {
-          commentLikeRepository.delete(liked);
-          commentRepository.updateLikeCount(liked.getComment().getId(), -1);
-
-          return new ResponseEntity(HttpStatus.OK);
+          videoService.unLikeVideoComment(liked);
+          return Optional.empty();
         })
-        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid video " +
-            "comment like id"));
+        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid video " + "comment like id"));
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   /**
@@ -640,28 +658,22 @@ public class VideoController {
   /**
    * Report
    */
-  @Transactional
   @PostMapping(value = "/{id:.+}/report")
   public ResponseEntity<VideoInfo> reportVideo(@PathVariable Long id,
                                                @Valid @RequestBody VideoReportRequest request,
-                                               BindingResult bindingResult,
                                                @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    if (bindingResult.hasErrors()) {
-      throw new BadRequestException(bindingResult.getFieldError());
+    int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+    Member me = memberService.currentMember();
+    
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+  
+    if (videoReportRepository.findByVideoIdAndCreatedById(id, me.getId()).isPresent()) {
+      throw new BadRequestException("already_reported", messageService.getMessage(VIDEO_ALREADY_REPORTED, lang));
     }
     
-    Member me = memberService.currentMember();
-    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-      .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-
-    Optional<VideoReport> optional = videoReportRepository.findByVideoIdAndCreatedById(id, me.getId());
-    if (optional.isPresent()) {
-      throw new BadRequestException("already_reported", messageService.getMessage(VIDEO_ALREADY_REPORTED, lang));
-    } else {
-      videoReportRepository.save(new VideoReport(video, me, request.getReason()));
-    }
-
-    return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+    Video result = videoService.reportVideo(video, me, reasonCode, request.getReason());
+    return new ResponseEntity<>(videoService.generateVideoInfo(result), HttpStatus.OK);
   }
 
   /**
@@ -757,6 +769,7 @@ public class VideoController {
     private Integer likeCount;
     private Integer commentCount;
     private Integer orderCount;
+    private Long reportCount;
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
     private Long likeId;
@@ -808,7 +821,7 @@ public class VideoController {
   @Data
   public static class VideoLikeInfo {
     private Long id;
-    private Long createdBy;
+    private Long createdBy; // deprecated
     private Date createdAt;
     private VideoInfo video;
 
@@ -821,7 +834,7 @@ public class VideoController {
   @Data
   public static class CommentLikeInfo {
     private Long id;
-    private MemberInfo createdBy;
+    private MemberInfo createdBy; // deprecated
     private Date createdAt;
     private CommentInfo comment;
 
@@ -836,6 +849,8 @@ public class VideoController {
     @NotNull
     @Size(max = 80)
     private String reason;
+    
+    private Integer reasonCode;
   }
 
   @Data

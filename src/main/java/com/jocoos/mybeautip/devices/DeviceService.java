@@ -23,7 +23,7 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
@@ -63,24 +63,53 @@ public class DeviceService {
     this.objectMapper = objectMapper;
     this.amazonSNS = amazonSNS;
   }
-
+  
   @Transactional
-  public Device saveOrUpdate(DeviceController.UpdateDeviceRequest info) {
-    return deviceRepository.findById(info.getDeviceId())
-       .map(device -> {
-         copyDevice(info, device);
-
-         if (memberService.currentMember() == null) {
-           device.setValid(true);
-           device.setPushable(true);
-         }
-         
-         device.setCreatedBy(memberService.currentMember());
-
-         log.debug("device: {}", device);
-         return deviceRepository.save(device);
-       })
-       .orElseGet(() -> deviceRepository.save(register(info)));
+  private Device copyBasicInfo(DeviceController.UpdateDeviceRequest src, Device target) {
+    target.setId(src.getDeviceId());
+    target.setOs(src.getDeviceOs());
+    target.setOsVersion(src.getDeviceOsVersion());
+    target.setName(src.getDeviceName());
+    target.setLanguage(src.getDeviceLanguage());
+    target.setAppVersion(src.getAppVersion());
+    target.setTimezone(src.getDeviceTimezone());
+    target.setArn(createARN(src.getDeviceId(), src.getDeviceOs()));
+    return target;
+  }
+  
+  @Transactional
+  public Device create(DeviceController.UpdateDeviceRequest request, Member me) {
+    Device device = copyBasicInfo(request, new Device());
+    
+    if (request.getPushable() == null || !request.getPushable()) {  // disable device
+      device.setValid(false);
+      device.setPushable(false);
+    } else {  // enable device, pushable is set according to Member Info
+      device.setValid(true);
+      device.setPushable((me == null) ? true : me.getPushable());
+    }
+  
+    device.setCreatedBy(me);
+    return deviceRepository.save(device);
+  }
+  
+  @Transactional
+  public Device update(DeviceController.UpdateDeviceRequest request, Device target, Member me) {
+    Device device = copyBasicInfo(request, target);
+    device.setCreatedBy(me);
+    
+    if (request.getPushable() != null) {
+      if (!request.getPushable()) {  // disable device
+        device.setValid(false);
+        device.setPushable(false);
+      } else {  // enable device, pushable is set according to Member Info
+        device.setValid(true);
+        device.setPushable((me == null) ? true : me.getPushable());
+      }
+    }
+  
+    device.setCreatedBy(me);
+    return deviceRepository.save(device);
   }
   
   public void disableAllDevices(Long memberId) {
@@ -90,16 +119,7 @@ public class DeviceService {
       deviceRepository.save(device);
     });
   }
-
-  public Device register(DeviceController.UpdateDeviceRequest info) {
-    Device device = new Device(info.getDeviceId());
-    copyDevice(info, device);
-    device.setArn(createARN(info.getDeviceId(), info.getDeviceOs()));
-
-    log.debug("device: {}", device);
-    return device;
-  }
-
+  
   public void push(Notification notification) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId())
        .forEach(d -> {
@@ -227,30 +247,8 @@ public class DeviceService {
         throw new IllegalArgumentException("Not supported os type - " + os);
     }
   }
-  private Device copyDevice(DeviceController.UpdateDeviceRequest request, Device device) {
-    if (device == null) {
-      throw new NotFoundException("device_not_found", "Device is null or not found");
-    }
-
-    device.setId(request.getDeviceId());
-    device.setOs(request.getDeviceOs());
-    device.setOsVersion(request.getDeviceOsVersion());
-    device.setName(request.getDeviceName());
-    device.setLanguage(request.getDeviceLanguage());
-    device.setAppVersion(request.getAppVersion());
-    device.setTimezone(request.getDeviceTimezone());
-
-    if (request.isPushable()) { // enable device, pushable is set according to Member Info
-      device.setValid(true);
-      device.setPushable(memberService.currentMember().getPushable());
-    } else {  // disable device
-      device.setValid(false);
-      device.setPushable(false);
-    }
-    
-    return device;
-  }
   
+  @Transactional
   public void validateAlreadyRegisteredDevices(Long memberId) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(memberId)
         .forEach(device -> {

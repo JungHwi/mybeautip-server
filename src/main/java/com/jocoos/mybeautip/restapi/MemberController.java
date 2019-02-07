@@ -185,7 +185,8 @@ public class MemberController {
             }
           }
           if (updateMemberRequest.getIntro() != null) {
-            tagService.parseHashTagsAndToucheRefCount(updateMemberRequest.getIntro(), TagService.TagCategory.MEMBER, m);
+            tagService.touchRefCount(updateMemberRequest.getIntro());
+            tagService.updateHistory(m.getIntro(), updateMemberRequest.getIntro(), TagService.TAG_MEMBER, m.getId(), m);
             m.setIntro(updateMemberRequest.getIntro());
           }
   
@@ -634,7 +635,8 @@ public class MemberController {
     }
 
     postLikes.stream().forEach(like -> {
-      PostController.PostLikeInfo info = new PostController.PostLikeInfo(like);
+      PostController.PostLikeInfo info = new PostController.PostLikeInfo(like,
+          memberService.getMemberInfo(like.getCreatedBy()), memberService.getMemberInfo(like.getPost().getCreatedBy()));
       postLikeRepository.findByPostIdAndCreatedById(like.getPost().getId(), memberId)
         .ifPresent(likeByMe -> info.getPost().setLikeId(likeByMe.getId()));
       result.add(info);

@@ -383,6 +383,7 @@ public class OrderController {
     private Long id;
     private String paymentId;
     private String method;
+    private String cardName;
     private int state;
     private String message;
     private String receipt;

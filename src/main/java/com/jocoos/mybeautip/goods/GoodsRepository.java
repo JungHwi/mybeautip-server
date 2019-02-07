@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.goods;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -113,5 +114,7 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
   Page<Goods> findByScmNoAndCateCdOrderByOrderCntDesc(Integer scmNo, String code, Pageable pageable);
 
   Page<Goods> findByScmNoAndCateCdOrderByLikeCountDesc(Integer scmNo, String code, Pageable pageable);
+
+  Page<Goods> findByGoodsNoIn(Collection<String> goodses, Pageable pageable);
 
 }

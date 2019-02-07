@@ -18,13 +18,16 @@ public class PostService {
   private final CommentRepository commentRepository;
   private final PostRepository postRepository;
   private final CommentLikeRepository commentLikeRepository;
+  private final PostLikeRepository postLikeRepository;
 
   public PostService(CommentRepository commentRepository,
                      PostRepository postRepository,
-                     CommentLikeRepository commentLikeRepository) {
+                     CommentLikeRepository commentLikeRepository,
+                     PostLikeRepository postLikeRepository) {
     this.commentRepository = commentRepository;
     this.postRepository = postRepository;
     this.commentLikeRepository = commentLikeRepository;
+    this.postLikeRepository = postLikeRepository;
   }
 
   public Slice<Comment> findCommentsByPostId(Long id, Long cursor, Pageable pageable, String direction) {
@@ -83,5 +86,29 @@ public class PostService {
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
     commentRepository.delete(comment);
+  }
+  
+  @Transactional
+  public PostLike likePost(Post post) {
+    postRepository.updateLikeCount(post.getId(), 1);
+    return postLikeRepository.save(new PostLike(post));
+  }
+  
+  @Transactional
+  public void unLikePost(PostLike liked) {
+    postLikeRepository.delete(liked);
+    postRepository.updateLikeCount(liked.getPost().getId(), -1);
+  }
+  
+  @Transactional
+  public CommentLike likeCommentPost(Comment comment) {
+    commentRepository.updateLikeCount(comment.getId(), 1);
+    return commentLikeRepository.save(new CommentLike(comment));
+  }
+  
+  @Transactional
+  public void unLikeCommentPost(CommentLike liked) {
+    commentLikeRepository.delete(liked);
+    commentRepository.updateLikeCount(liked.getComment().getId(), -1);
   }
 }

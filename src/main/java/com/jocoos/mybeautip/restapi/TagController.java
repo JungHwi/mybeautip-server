@@ -87,9 +87,9 @@ public class TagController {
   private List<TagInfo> searchMyTags(String keyword, String method, Pageable page) {
     List<TagHistory> list;
     if ("contain".equals(method)) {
-      list = tagHistoryRepository.findByCreatedByAndTagContaining(memberService.currentMember(), keyword, page);
+      list = tagHistoryRepository.findByCreatedByAndTagNameContaining(memberService.currentMember(), keyword, page);
     } else {
-      list = tagHistoryRepository.findByCreatedByAndTagStartingWith(memberService.currentMember(), keyword, page);
+      list = tagHistoryRepository.findByCreatedByAndTagNameStartingWith(memberService.currentMember(), keyword, page);
     }
     List<TagInfo> info = new ArrayList<>();
     for (TagHistory item : list) {
@@ -110,9 +110,9 @@ public class TagController {
   private List<TagInfo> searchAllTags(String keyword, String method, Pageable page) {
     List<TagHistory> list;
     if ("contain".equals(method)) {
-      list = tagHistoryRepository.findByTagContaining(keyword, page);
+      list = tagHistoryRepository.findByTagNameContaining(keyword, page);
     } else {
-      list = tagHistoryRepository.findByTagStartingWith(keyword, page);
+      list = tagHistoryRepository.findByTagNameStartingWith(keyword, page);
     }
     List<TagInfo> info = new ArrayList<>();
     for (TagHistory item : list) {
@@ -177,8 +177,8 @@ public class TagController {
     private Date modifiedAt;
     
     public TagInfo(TagHistory history) {
-      this.name = history.getTag();
-      this.refCount = history.getCount();
+      this.name = history.getTag().getName();
+      this.refCount = history.getTag().getRefCount();
       this.modifiedAt = history.getModifiedAt();
     }
     

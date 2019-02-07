@@ -1,7 +1,39 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
@@ -11,31 +43,24 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentInfo;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.comment.CommentService;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.post.*;
+import com.jocoos.mybeautip.post.Post;
+import com.jocoos.mybeautip.post.PostContent;
+import com.jocoos.mybeautip.post.PostLike;
+import com.jocoos.mybeautip.post.PostLikeRepository;
+import com.jocoos.mybeautip.post.PostRepository;
+import com.jocoos.mybeautip.post.PostService;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.tag.TagService;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import javax.transaction.Transactional;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.*;
 
 @Slf4j
 @RestController
@@ -60,6 +85,8 @@ public class PostController {
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String POST_NOT_FOUND = "post.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
+  private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
+  private static final String COMMENT_LOCKED = "comment.locked";
   
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -231,19 +258,18 @@ public class PostController {
   @PostMapping("/{id:.+}/likes")
   public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Long memberId = memberService.currentMemberId();
+    Member me = memberService.currentMember();
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          Long postId = post.getId();
-         if (postLikeRepository.findByPostIdAndCreatedById(postId, memberId).isPresent()) {
+         if (postLikeRepository.findByPostIdAndCreatedById(postId, me.getId()).isPresent()) {
            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
-
-         postRepository.updateLikeCount(id, 1);
-         post.setLikeCount(post.getLikeCount() + 1);
-         PostLike postLike = postLikeRepository.save(new PostLike(post));
-         return new ResponseEntity<>(new PostLikeInfo(postLike), HttpStatus.OK);
+         
+         PostLike postLike = postService.likePost(post);
+         return new ResponseEntity<>(new PostLikeInfo(postLike, memberService.getMemberInfo(me),
+             memberService.getMemberInfo(post.getCreatedBy())), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
@@ -253,18 +279,14 @@ public class PostController {
   public ResponseEntity<?> removePostLike(@PathVariable Long id,
                                           @PathVariable Long likeId){
     Long memberId = memberService.currentMemberId();
-    return postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
-       .map(post -> {
-         Optional<PostLike> liked = postLikeRepository.findById(likeId);
-         if (!liked.isPresent()) {
-           throw new NotFoundException("like_not_found", "invalid post like id");
-         }
-
-         postLikeRepository.delete(liked.get());
-         postRepository.updateLikeCount(id, -1);
-         return new ResponseEntity(HttpStatus.OK);
+    postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
+       .map(liked -> {
+         postService.unLikePost(liked);
+         return Optional.empty();
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or like id"));
+  
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @GetMapping("/{id:.+}/comments")
@@ -338,10 +360,15 @@ public class PostController {
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
-                                   BindingResult bindingResult,
-                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
+                                   BindingResult bindingResult) {
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
+    }
+  
+    Member member = memberService.currentMember();
+    if (!memberService.hasCommentPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
     }
 
     if (request.getParentId() != null) {
@@ -356,11 +383,11 @@ public class PostController {
     Comment comment = new Comment();
     comment.setPostId(id);
     BeanUtils.copyProperties(request, comment);
-    
-    tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
     postRepository.updateCommentCount(id, 1);
-
-    commentService.save(comment);
+    comment = commentService.save(comment);
+  
+    tagService.touchRefCount(comment.getComment());
+    tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
 
     List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {
@@ -373,21 +400,33 @@ public class PostController {
     );
   }
 
+  @Transactional
   @PatchMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long postId,
                                       @PathVariable Long id,
                                       @RequestBody UpdateCommentRequest request,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
                                       BindingResult bindingResult) {
 
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
     }
+  
+    Member member = memberService.currentMember();
+    if (!memberService.hasCommentPostPermission(member)) {
+      throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
+    }
 
-    Long memberId = memberService.currentMemberId();
-    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberId)
+    return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, member.getId())
        .map(comment -> {
+         if (comment.getLocked()) {
+           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
+         }
+         
+         tagService.touchRefCount(request.getComment());
+         tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+  
          comment.setComment(request.getComment());
-         tagService.parseHashTagsAndToucheRefCount(comment.getComment(), TagService.TagCategory.COMMENT, memberService.currentMember());
          return new ResponseEntity<>(
             new CommentInfo(commentRepository.save(comment), memberService.getMemberInfo(comment.getCreatedBy())),
             HttpStatus.OK
@@ -399,10 +438,15 @@ public class PostController {
   @Transactional
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long postId,
-                                         @PathVariable Long id) {
+                                         @PathVariable Long id,
+                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberService.currentMemberId())
        .map(comment -> {
+         if (comment.getLocked()) {
+           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
+         }
          postService.deleteComment(comment);
+         tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
          return new ResponseEntity<>(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
@@ -419,13 +463,10 @@ public class PostController {
          if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
-         
-         commentRepository.updateLikeCount(comment.getId(), 1);
-         comment.setLikeCount(comment.getLikeCount() + 1);
-         CommentLike commentLikeLike = commentLikeRepository.save(new CommentLike(comment));
-         return new ResponseEntity<>(new CommentLikeInfo(commentLikeLike), HttpStatus.OK);
+         CommentLike commentLike = postService.likeCommentPost(comment);
+         return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
        })
-       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post or comment id"));
+       .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
   }
 
   @Transactional
@@ -437,14 +478,14 @@ public class PostController {
     Comment comment = commentRepository.findByIdAndPostId(commentId, postId)
        .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or comment id"));
 
-    return commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
+    commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
        .map(liked -> {
-         commentLikeRepository.delete(liked);
-         commentRepository.updateLikeCount(liked.getComment().getId(), -1);
-
-         return new ResponseEntity(HttpStatus.OK);
+         postService.unLikeCommentPost(liked);
+         return Optional.empty();
        })
        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post comment like id"));
+  
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   /**
@@ -487,13 +528,14 @@ public class PostController {
   @Data
   public static class PostLikeInfo {
     private Long id;
-    private Member createdBy;
+    private MemberInfo createdBy; // deprecated
     private Date createdAt;
     private PostBasicInfo post;
 
-    public PostLikeInfo(PostLike postLike) {
+    public PostLikeInfo(PostLike postLike, MemberInfo likeMemberInfo, MemberInfo memberInfo) {
       BeanUtils.copyProperties(postLike, this);
-      post = new PostBasicInfo(postLike.getPost());
+      this.createdBy = likeMemberInfo;
+      post = new PostBasicInfo(postLike.getPost(), memberInfo);
     }
   }
 
@@ -506,12 +548,13 @@ public class PostController {
     private int progress;
     private String thumbnailUrl;
     private Date createdAt;
-    private Member createdBy;
+    private MemberInfo createdBy;
     private int likeCount;
     private Long likeId;
 
-    public PostBasicInfo(Post post) {
+    public PostBasicInfo(Post post, MemberInfo createdBy) {
       BeanUtils.copyProperties(post, this);
+      this.createdBy = createdBy;
     }
   }
 
@@ -534,7 +577,7 @@ public class PostController {
   @Data
   public static class CommentLikeInfo {
     private Long id;
-    private MemberInfo createdBy;
+    private MemberInfo createdBy; // deprecated
     private Date createdAt;
     private CommentInfo comment;
 

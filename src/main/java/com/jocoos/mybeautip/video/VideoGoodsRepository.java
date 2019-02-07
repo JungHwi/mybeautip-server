@@ -22,7 +22,6 @@ public interface VideoGoodsRepository extends JpaRepository<VideoGoods, Long> {
   List<VideoGoods> findAllByMemberId(Long memberId);
 
   int countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(String goodsNo, String visibility, String state);
-
-  @Query("select distinct v.member from VideoGoods v where v.member in (select v2.member from VideoGoods v2 where v2.goods=?1)")
-  Page<Member> getDistinctMembers(Goods goods, Pageable pageable);
+  
+  List<VideoGoods> findByGoodsAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(Goods goods, String visibility, String state);
 }

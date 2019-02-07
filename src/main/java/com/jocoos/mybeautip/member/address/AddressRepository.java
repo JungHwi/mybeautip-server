@@ -12,7 +12,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   Long countByCreatedByIdAndDeletedAtIsNull(Long memberId);
 
   Optional<Address> findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(Long memberId);
-
+  
   Optional<Address> findByIdAndCreatedByIdAndDeletedAtIsNull(Long id, Long memberId);
 
 }

@@ -146,6 +146,30 @@ public class SlackService {
     send(message);
   }
   
+  public void sendForImportGetTokenFail() {
+    String message = String.format("*아임포트 확인필요*" +
+        "```토큰획득 실패```");
+    send(message);
+  }
+  
+  public void sendForImportGetPaymentFail(String impUid) {
+    String message = String.format("*아임포트 확인필요*" +
+        "```결제조회 실패, payment_id: %s```", impUid);
+    send(message);
+  }
+  
+  public void sendForImportPaymentException(String impUid) {
+    String message = String.format("*아임포트 확인필요*" +
+        "```결제상태 확인필요, payment_id: %s```", impUid);
+    send(message);
+  }
+  
+  public void sendForImportPaymentMismatch(String impUid) {
+    String message = String.format("*아임포트 확인필요*" +
+        "```결제금액과 상태 확인필요, payment_id: %s```", impUid);
+    send(message);
+  }
+  
   private String getPurchaseInfo(List<Purchase> purchases) {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {

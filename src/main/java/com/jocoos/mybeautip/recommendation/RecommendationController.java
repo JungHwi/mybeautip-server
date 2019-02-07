@@ -1,20 +1,11 @@
 package com.jocoos.mybeautip.recommendation;
 
-import com.google.common.collect.Lists;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.restapi.CursorResponse;
-import com.jocoos.mybeautip.restapi.VideoController;
-import com.jocoos.mybeautip.tag.Tag;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -26,10 +17,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import com.google.common.collect.Lists;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.restapi.CursorResponse;
+import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.tag.Tag;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @RestController
@@ -150,18 +153,6 @@ public class RecommendationController {
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
-  @GetMapping("/motds")
-  public ResponseEntity<List<RecommendedMotdInfo>> getRecommendedMotds(
-    @RequestParam(defaultValue = "100") int count,
-    @RequestParam(defaultValue = "desc") String direction) {
-
-    Date now = new Date();
-    Slice<MotdRecommendation> videos = motdRecommendationRepository.findByVideoCreatedAtBeforeAndEndedAtAfter(now, now,
-      PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "seq")));
-
-    return new ResponseEntity<>(createMotdList(videos), HttpStatus.OK);
-  }
-
   private List<RecommendedMotdInfo> createMotdList(Iterable<MotdRecommendation> recommendations) {
     List<RecommendedMotdInfo> info = new ArrayList<>();
     for (MotdRecommendation recommendation : recommendations) {
@@ -186,10 +177,15 @@ public class RecommendationController {
     Slice<MotdRecommendationBase> videos = motdRecommendationBaseRepository.findByBaseDateBefore(createDate,
        PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "baseDate")));
 
-    List<RecommendedMotdBaseInfo> result = new ArrayList<>();
-    for (MotdRecommendationBase recommendation : videos) {
-      result.add(new RecommendedMotdBaseInfo(recommendation, createMotdList(recommendation.getMotds())));
-    }
+    Date now = new Date();
+    List<RecommendedMotdBaseInfo> result = videos.stream()
+       .map(base -> {
+         Slice<MotdRecommendation> motds = motdRecommendationRepository.findByBaseIdAndStartedAtBeforeAndEndedAtAfter(base.getId(), now, now,
+            PageRequest.of(0, base.getMotdCount(), Sort.Direction.DESC, "seq"));
+         return new RecommendedMotdBaseInfo(base, createMotdList(motds));
+       })
+       .filter(i -> i.getExposedCount() > 0)
+       .collect(Collectors.toList());
 
     String nextCursor = null;
     if (!CollectionUtils.isEmpty(result)) {
@@ -201,7 +197,6 @@ public class RecommendationController {
        .withCursor(nextCursor)
        .toBuild();
   }
-
 
   @Deprecated
   @GetMapping("/keywords")
@@ -228,10 +223,11 @@ public class RecommendationController {
     count = count - result.size();
     if (count > 0) {
       keywords = keywordRecommendationRepository.findBySeqGreaterThan(
-          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, new Sort(Sort.Direction.ASC, "seq")));
       Collections.shuffle(keywords);
+      List<KeywordRecommendation> subList = keywords.subList(0, count);
       
-      for (KeywordRecommendation keyword : keywords) {
+      for (KeywordRecommendation keyword : subList) {
         switch (keyword.getCategory()) {
           case 1:
             if (keyword.getMember().isVisible()) {
@@ -272,10 +268,11 @@ public class RecommendationController {
     count = count - result.size();
     if (count > 0) {
       keywords = keywordRecommendationRepository.findBySeqGreaterThan(
-          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, new Sort(Sort.Direction.ASC, "seq")));
       Collections.shuffle(keywords);
+      List<KeywordRecommendation> subList = keywords.subList(0, count);
       
-      for (KeywordRecommendation keyword : keywords) {
+      for (KeywordRecommendation keyword : subList) {
         switch (keyword.getCategory()) {
           case 1:
             if (keyword.getMember().isVisible()) {
@@ -293,7 +290,7 @@ public class RecommendationController {
   }
   
   @Data
-  public static class KeywordInfo {
+  public static class KeywordInfo { // FIXME: will be deprecated
     Integer category;
     MemberInfo member;
     TagInfo tag;
@@ -306,11 +303,15 @@ public class RecommendationController {
     public KeywordInfo(KeywordRecommendation keyword, MemberInfo member) {
       BeanUtils.copyProperties(keyword, this);
       this.member = member;
+      this.startedAt = new Date(System.currentTimeMillis());
+      this.endedAt = new Date(System.currentTimeMillis());
     }
   
     public KeywordInfo(KeywordRecommendation keyword, TagInfo tag) {
       BeanUtils.copyProperties(keyword, this);
       this.tag = tag;
+      this.startedAt = new Date(System.currentTimeMillis());
+      this.endedAt = new Date(System.currentTimeMillis());
     }
   }
   
@@ -378,6 +379,7 @@ public class RecommendationController {
     private List<RecommendedMotdInfo> motds;
     private Date createdAt;
     private int motdCount;
+    private int exposedCount;
 
     public RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase) {
       BeanUtils.copyProperties(motdRecommendationBase, this);
@@ -386,6 +388,9 @@ public class RecommendationController {
     public RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase, List<RecommendedMotdInfo> motds) {
       this(motdRecommendationBase);
       this.motds = motds;
+      if (!CollectionUtils.isEmpty(motds)) {
+        this.exposedCount = motds.size();
+      }
     }
   }
 }

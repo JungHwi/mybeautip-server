@@ -1,9 +1,45 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.godo.GoodsDetailService;
-import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsInfo;
+import com.jocoos.mybeautip.goods.GoodsLike;
+import com.jocoos.mybeautip.goods.GoodsLikeRepository;
+import com.jocoos.mybeautip.goods.GoodsOption;
+import com.jocoos.mybeautip.goods.GoodsOptionService;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
@@ -11,25 +47,6 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 
 @Slf4j
@@ -49,6 +66,8 @@ public class GoodsController {
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
+  
+  private static final int MAX_REVIEWER_COUNT = 6;
 
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
@@ -69,8 +88,7 @@ public class GoodsController {
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsDetailService = goodsDetailService;
   }
-
-  @Transactional
+  
   @GetMapping
   public CursorResponse getGoodsList(@RequestParam(defaultValue = "20") int count,
                                      @RequestParam(required = false) String cursor,
@@ -116,15 +134,25 @@ public class GoodsController {
     GoodsRelatedVideoInfoResponse response = new GoodsRelatedVideoInfoResponse();
     return goodsRepository.findByGoodsNo(goodsNo)
       .map(goods -> {
-        Page<Member> page = videoGoodsRepository.getDistinctMembers(goods, PageRequest.of(0, 6));
-        if (page.hasContent()) {
-          List<MemberInfo> result = new ArrayList<>();
-          for (Member m : page.getContent()) {
-            result.add(memberService.getMemberInfo(m));
-          }
-          response.setMembers(result);
-          response.setTotalMemberCount(page.getTotalElements());
+        List<VideoGoods> videoGoodsList = videoGoodsRepository.findByGoodsAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(goods, "PUBLIC", "CREATED");
+        
+        // Get distinct members
+        Set<Member> memberSet = new HashSet<>();
+        int count = 0;
+        for (VideoGoods videoGoods : videoGoodsList) {
+          memberSet.add(videoGoods.getVideo().getMember());
         }
+        
+        List<MemberInfo> result = new ArrayList<>();
+        for (Member m : memberSet) {
+          result.add(memberService.getMemberInfo(m));
+          count++;
+          if (count >= MAX_REVIEWER_COUNT) {
+            break;
+          }
+        }
+        response.setMembers(result);
+        response.setTotalMemberCount(memberSet.size());
         return response;
       })
       .orElseThrow(()-> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
@@ -211,30 +239,13 @@ public class GoodsController {
   @Data
   public static class GoodsLikeInfo {
     private Long id;
-    private Long createdBy;
+    private Long createdBy; // deprecated
     private Date createdAt;
     private GoodsInfo goods;
 
     GoodsLikeInfo(GoodsLike goodsLike, GoodsInfo goods) {
       BeanUtils.copyProperties(goodsLike, this);
       this.goods = goods;
-    }
-  }
-
-  @Data
-  public static class GoodsOptionInfo {
-    private Integer optionNo;
-    private String optionValue;
-    private String optionValue1;
-    private String optionValue2;
-    private Integer optionPrice;
-    private Integer stockCnt;
-    private Boolean soldOut;
-
-    GoodsOptionInfo(GoodsOption option, boolean soldOut) {
-      BeanUtils.copyProperties(option, this);
-      this.optionValue = option.getOptionValue1();
-      this.soldOut = soldOut;
     }
   }
 
@@ -263,11 +274,11 @@ public class GoodsController {
   @Data
   @AllArgsConstructor
   class GoodsRelatedVideoInfoResponse {
-    Long totalMemberCount;
+    Integer totalMemberCount;
     List<MemberInfo> members;
 
     GoodsRelatedVideoInfoResponse() {
-      totalMemberCount = 0L;
+      totalMemberCount = 0;
     }
   }
 }

@@ -24,8 +24,8 @@ public class KeywordService {
   
   @Transactional
   public void logHistoryAndUpdateStats(String keyword, KeywordCategory category, Member member) {
-    Optional<SearchHistory> optionalSearchHistory = searchHistoryRepository.findByKeywordAndCreatedBy(
-        keyword, member);
+    Optional<SearchHistory> optionalSearchHistory = searchHistoryRepository.findByKeywordAndCategoryAndCreatedBy(
+        keyword, category.ordinal(), member);
     SearchHistory history;
     if (optionalSearchHistory.isPresent()) {  // update exist item
       history = optionalSearchHistory.get();

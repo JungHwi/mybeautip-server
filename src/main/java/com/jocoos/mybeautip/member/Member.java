@@ -32,6 +32,12 @@ public class Member {
   static final int LINK_FACEBOOK = 1;
   static final int LINK_NAVER = 2;
   static final int LINK_KAKAO = 4;
+  
+  public static final int CHAT_POST = 1;
+  public static final int COMMENT_POST = 2;
+  public static final int LIVE_POST = 4;
+  public static final int MOTD_POST = 8;
+  public static final int REVENUE_RETURN = 16;
 
   @Transient
   @JsonIgnore
@@ -62,7 +68,10 @@ public class Member {
 
   @Column(nullable = false)
   private int link;
-
+  
+  @Column
+  private int permission;
+  
   @Column(nullable = false)
   private int followerCount;
 
@@ -126,5 +135,6 @@ public class Member {
     this.visible = false;
     this.revenueModifiedAt = null;
     this.pushable = true; // default true
+    this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
   }
 }

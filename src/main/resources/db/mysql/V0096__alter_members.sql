@@ -1,0 +1,1 @@
+UPDATE `members` SET permission=31; -- Default permission, sum(1:chat, 2:comment, 4:live, 8:motd, 16:revenue return)

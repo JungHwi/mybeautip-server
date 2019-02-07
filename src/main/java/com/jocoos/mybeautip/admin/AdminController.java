@@ -23,6 +23,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.banner.Banner;
@@ -123,6 +124,8 @@ public class AdminController {
     postRepository.findByIdAndDeletedAtIsNull(id).map(post -> {
       post.setDeletedAt(new Date());
       postRepository.save(post);
+      tagService.decreaseRefCount(post.getDescription());
+      tagService.removeHistory(post.getDescription(), TagService.TAG_POST, post.getId(), post.getCreatedBy());
       return Optional.empty();
     }).orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
 
@@ -135,25 +138,17 @@ public class AdminController {
 
     Post post = new Post();
     BeanUtils.copyProperties(request, post);
-    log.debug("post: {}", post);
-    postRepository.save(post);
-
-    if (StringUtils.isNotEmpty(request.getDescription())) {
-      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
-      if (tags != null && tags.size() > 0) {
-        // Log TagHistory
-        tagService.logHistory(tags, TagService.TagCategory.POST, memberService.currentMember());
-      }
-    }
-
     post.setStartedAt(getRecommendedDate(request.getStartedAt()));
     post.setEndedAt(getRecommendedDate(request.getEndedAt()));
-
     postRepository.save(post);
     log.debug("saved post: {}", post);
+  
+    if (StringUtils.isNotEmpty(request.getDescription())) {
+      tagService.increaseRefCount(request.getDescription());
+      tagService.addHistory(request.getDescription(), TagService.TAG_POST, post.getId(), post.getCreatedBy());
+    }
 
     Member me = memberService.currentMember();
-
     List<GoodsInfo> goodsInfoList = new ArrayList<>();
     List<String> goodsList = post.getGoods();
     for (String info : goodsList) {
@@ -178,21 +173,17 @@ public class AdminController {
     banner.setLink(String.format("/api/1/posts/%d", request.getPostId()));
     banner.setPost(post);
     banner.setCategory(1);
-  
-    if (StringUtils.isNotEmpty(request.getDescription())) {
-      List<String> tags = tagService.getHashTagsAndIncreaseRefCount(request.getDescription());
-      if (tags != null && tags.size() > 0) {
-        // Log TagHistory
-        tagService.logHistory(tags, TagService.TagCategory.POST, memberService.currentMember());
-      }
-    }
-
     banner.setStartedAt(getRecommendedDate(request.getStartedAt()));
     banner.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
-    bannerRepository.save(banner);
+    banner = bannerRepository.save(banner);
     log.debug("banner: {}", banner);
-
+  
+    if (StringUtils.isNotEmpty(request.getDescription())) {
+      tagService.touchRefCount(request.getDescription());
+      tagService.addHistory(request.getDescription(), TagService.TAG_BANNER, banner.getId(), banner.getCreatedBy());
+    }
+    
     BannerInfo info = new BannerInfo();
     BeanUtils.copyProperties(banner, info);
     return new ResponseEntity<>(info, HttpStatus.OK);
@@ -205,7 +196,7 @@ public class AdminController {
          banner.setDeletedAt(new Date());
          bannerRepository.save(banner);
   
-         tagService.decreaseRefCount(banner.getDescription());
+         tagService.removeHistory(banner.getDescription(), TagService.TAG_BANNER, banner.getId(), banner.getCreatedBy());
          return Optional.empty();
        })
        .orElseThrow(() -> new NotFoundException("banner_not_found", "invalid banner id"));
@@ -349,6 +340,7 @@ public class AdminController {
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "false") boolean isDeleted,
      @RequestParam(defaultValue = "1") int state,
+     @RequestParam(required = false) List<String> goodses,
      @RequestParam(required = false) String code,
      @RequestParam(required = false) String sort) {
 
@@ -379,6 +371,10 @@ public class AdminController {
       goods = goodsRepository.findByStateAndCateCd(state, code, pageable);
     } else {
       goods = goodsRepository.findByState(state, pageable);
+    }
+
+    if (!CollectionUtils.isEmpty(goodses)) {
+      goods = goodsRepository.findByGoodsNoIn(goodses, pageable);
     }
 
     Page<GoodsDetailInfo> details = goods.map(g -> {
@@ -530,11 +526,31 @@ public class AdminController {
   public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "id") String sort,
      @RequestParam(defaultValue = "false") boolean isDeleted,
      @RequestParam(required = false) Long memberId) {
 
     Member me = memberService.currentMember();
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));;
+
+
+    Pageable pageable;
+    switch (sort) {
+      case "views":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "viewCount"));
+        break;
+      case "like":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "likeCount"));
+        break;
+      case "comments":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "commentCount"));
+        break;
+      case "watch":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "totalWatchCount"));
+        break;
+      default:
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    }
+
     Page<Video> videos = null;
     if (memberId != null) {
       if (isDeleted) {
@@ -575,6 +591,7 @@ public class AdminController {
 
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "baseDate"));
     Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findAll(pageable);
+
     Page<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
       RecommendationController.RecommendedMotdBaseInfo info = new RecommendationController.RecommendedMotdBaseInfo(b, createRecommendedMotd(b));
       return info;
@@ -588,6 +605,7 @@ public class AdminController {
     for (MotdRecommendation m : base.getMotds()) {
       motds.add(new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
     }
+    Collections.reverse(motds);
     return motds;
   }
   
@@ -596,12 +614,14 @@ public class AdminController {
   public void CreateRecommendedKeywordsRequest(@Valid @RequestBody CreateRecommendedKeywordsRequest request) {
     
     log.debug("request: {}", request);
-    
+
     List<RecommendedKeyword> items = request.getItems();
     KeywordRecommendation keyword;
     int seq = 1;
     
     for (RecommendedKeyword item : items) {
+      int itemSeq = item.getSeq() != null ? item.getSeq() : seq++;
+
       switch (item.getCategory()) {
         case 1: // Member
           Member member = memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue(item.getWord())
@@ -609,7 +629,7 @@ public class AdminController {
           
           keyword = keywordRecommendationRepository.findByMember(member).orElse(null);
           if (keyword == null) {
-            keywordRecommendationRepository.save(new KeywordRecommendation(member, seq++));
+            keywordRecommendationRepository.save(new KeywordRecommendation(member, itemSeq));
           } else {
             keyword.setSeq(seq++);
             keywordRecommendationRepository.save(keyword);
@@ -623,7 +643,7 @@ public class AdminController {
           }
           keyword = keywordRecommendationRepository.findByTag(tag).orElse(null);
           if (keyword == null) {
-            keywordRecommendationRepository.save(new KeywordRecommendation(tag, seq++));
+            keywordRecommendationRepository.save(new KeywordRecommendation(tag, itemSeq));
           } else {
             keyword.setSeq(seq++);
             keywordRecommendationRepository.save(keyword);
@@ -749,5 +769,7 @@ public class AdminController {
     
     @NotNull(message = "word must not be null")
     private String word;
+
+    private Integer seq;
   }
 }

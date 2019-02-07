@@ -24,6 +24,7 @@ public class MemberMeInfo extends MemberInfo {
   public MemberMeInfo(Member member) {
     BeanUtils.copyProperties(member, this);
     this.setVideoCount(member.getTotalVideoCount());
+    this.setPermission(new PermissionInfo(member.getPermission()));
   }
 
   public MemberMeInfo(Member member, int pointRatio, int revenueRatio) {
