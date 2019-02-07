@@ -217,7 +217,7 @@ public class AdminController {
       Sort pagingSort = null;
       switch (sort) {
         case "video":
-          pagingSort = new Sort(Sort.Direction.DESC, "videoCount");
+          pagingSort = new Sort(Sort.Direction.DESC, "publicVideoCount");
           break;
         case "revenue":
           pagingSort = new Sort(Sort.Direction.DESC, "revenue");
