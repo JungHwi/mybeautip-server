@@ -125,7 +125,7 @@ public class PostController {
                                    @RequestParam(required = false) String keyword,
                                    @RequestParam(required = false) String cursor) {
 
-    Long memberId = memberService.currentMemberId();
+    Member me = memberService.currentMember();
 
     Slice<Post> posts = findPosts(count, category, keyword, cursor);
     List<PostInfo> result = Lists.newArrayList();
@@ -137,11 +137,15 @@ public class PostController {
       PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
       log.debug("post info: {}", info);
 
-      postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
+      postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
          .ifPresent(like -> info.setLikeId(like.getId()));
 
       result.add(info);
     });
+  
+    if (StringUtils.isNotBlank(keyword)) {
+      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.POST, me);
+    }
 
     String nextCursor = null;
     if (result.size() > 0) {

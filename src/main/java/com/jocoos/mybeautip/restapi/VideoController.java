@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -62,6 +60,7 @@ import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
+import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
@@ -97,9 +96,9 @@ public class VideoController {
   private final RevenueService revenueService;
   private final TagService tagService;
   private final NotificationService notificationService;
+  private final KeywordService keywordService;
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
-  private final ObjectMapper objectMapper;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
@@ -128,9 +127,9 @@ public class VideoController {
                          RevenueService revenueService,
                          TagService tagService,
                          NotificationService notificationService,
+                         KeywordService keywordService,
                          RevenueRepository revenueRepository,
-                         GoodsRepository goodsRepository,
-                         ObjectMapper objectMapper) {
+                         GoodsRepository goodsRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.messageService = messageService;
@@ -148,9 +147,9 @@ public class VideoController {
     this.revenueService = revenueService;
     this.tagService = tagService;
     this.notificationService = notificationService;
+    this.keywordService = keywordService;
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
-    this.objectMapper = objectMapper;
   }
   
   @Transactional
@@ -233,6 +232,11 @@ public class VideoController {
     Slice<Video> list = videoService.findVideosWithKeyword(keyword, cursor, count);
     List<VideoInfo> videos = Lists.newArrayList();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+  
+    if (StringUtils.isNotBlank(keyword)) {
+      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.VIDEO,
+          memberService.currentMember());
+    }
 
     String nextCursor = null;
     if (videos.size() > 0) {
