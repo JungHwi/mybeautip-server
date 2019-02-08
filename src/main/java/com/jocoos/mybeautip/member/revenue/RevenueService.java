@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member.revenue;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,15 +25,17 @@ public class RevenueService {
   @Value("${mybeautip.revenue.platform-ratio}")
   private int platformRatio;
 
-
+  private final RevenuePaymentService revenuePaymentService;
   private final RevenueRepository revenueRepository;
   private final VideoRepository videoRepository;
   private final MemberRepository memberRepository;
 
-  public RevenueService(RevenueRepository revenueRepository,
+  public RevenueService(RevenuePaymentService revenuePaymentService,
+                        RevenueRepository revenueRepository,
                         VideoRepository videoRepository,
                         MemberRepository memberRepository) {
     this.revenueRepository = revenueRepository;
+    this.revenuePaymentService = revenuePaymentService;
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
   }
@@ -52,10 +55,12 @@ public class RevenueService {
     return Math.toIntExact(((totalPrice * revenueRatio) / 100));
   }
 
+  @Transactional
   public Revenue save(Video video, Purchase purchase) {
     Revenue revenue = revenueRepository.save(new Revenue(video, purchase, getRevenue(purchase.getTotalPrice())));
     log.debug("revenue: {}", revenue);
 
+    revenuePaymentService.appendEstimatedAmount(video.getMember(), purchase.getCreatedAt(), getRevenue(purchase.getTotalPrice()));
     memberRepository.updateRevenue(video.getMember().getId(), revenue.getRevenue());
     return revenue;
   }
