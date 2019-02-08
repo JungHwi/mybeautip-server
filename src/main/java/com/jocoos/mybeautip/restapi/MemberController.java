@@ -423,7 +423,6 @@ public class MemberController {
     
     // Sync processing before response
     notificationService.readAllNotification(member.getId());
-    deviceService.disableAllDevices(member.getId());
     memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
     
     // Async processing after response
@@ -469,7 +468,6 @@ public class MemberController {
     
     // Sync processing before response
     notificationService.readAllNotification(member.getId());
-    deviceService.disableAllDevices(member.getId());
     memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
     
     // Async processing after response
