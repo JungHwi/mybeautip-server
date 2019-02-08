@@ -225,7 +225,8 @@ public class RecommendationController {
       keywords = keywordRecommendationRepository.findBySeqGreaterThan(
           MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, new Sort(Sort.Direction.ASC, "seq")));
       Collections.shuffle(keywords);
-      List<KeywordRecommendation> subList = keywords.subList(0, count);
+      int subListCount = (count <= keywords.size()) ? count : keywords.size();
+      List<KeywordRecommendation> subList = keywords.subList(0, subListCount);
       
       for (KeywordRecommendation keyword : subList) {
         switch (keyword.getCategory()) {

@@ -23,27 +23,28 @@ public class KeywordService {
   }
   
   @Transactional
-  public void logHistoryAndUpdateStats(String keyword, KeywordCategory category, Member member) {
-    Optional<SearchHistory> optionalSearchHistory = searchHistoryRepository.findByKeywordAndCategoryAndCreatedBy(
+  public void updateKeywordCount(String keyword) {
+    Optional<Keyword> optional = keywordRepository.findByKeyword(keyword);
+    if (optional.isPresent()) {
+      keywordRepository.updateCount(optional.get().getId(), 1);
+    } else {
+      keywordRepository.save(new Keyword(keyword));
+    }
+  }
+  
+  @Transactional
+  public void logHistory(String keyword, KeywordCategory category, Member member) {
+    Optional<SearchHistory> optional = searchHistoryRepository.findByKeywordAndCategoryAndCreatedBy(
         keyword, category.ordinal(), member);
+    
     SearchHistory history;
-    if (optionalSearchHistory.isPresent()) {  // update exist item
-      history = optionalSearchHistory.get();
-      history.setCategory(category.ordinal());
+    if (optional.isPresent()) {
+      history = optional.get();
       history.setCount(history.getCount() + 1);
+      history.setCategory(category.ordinal());
     } else {
       history = new SearchHistory(keyword, category.ordinal(), member);
     }
     searchHistoryRepository.save(history);
-  
-    Optional<Keyword> optionalKeyword = keywordRepository.findByKeyword(keyword);
-    Keyword item;
-    if (optionalKeyword.isPresent()) {
-      item = optionalKeyword.get();
-      item.setCount(item.getCount() + 1);
-    } else {
-      item = new Keyword(keyword);
-    }
-    keywordRepository.save(item);
   }
 }

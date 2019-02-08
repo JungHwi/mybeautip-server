@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -44,6 +45,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoService;
@@ -63,6 +65,7 @@ public class GoodsController {
   private final GoodsLikeRepository goodsLikeRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsDetailService goodsDetailService;
+  private final KeywordService keywordService;
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
@@ -77,7 +80,8 @@ public class GoodsController {
                          GoodsRepository goodsRepository,
                          GoodsLikeRepository goodsLikeRepository,
                          VideoGoodsRepository videoGoodsRepository,
-                         GoodsDetailService goodsDetailService) {
+                         GoodsDetailService goodsDetailService,
+                         KeywordService keywordService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -87,6 +91,7 @@ public class GoodsController {
     this.goodsLikeRepository = goodsLikeRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsDetailService = goodsDetailService;
+    this.keywordService = keywordService;
   }
   
   @GetMapping
@@ -104,6 +109,11 @@ public class GoodsController {
   
     if (category != null && category.length() > 6) {
       throw new BadRequestException("invalid_category", "Valid category size is between 1 to 6.");
+    }
+  
+    if (StringUtils.isNotBlank(keyword)) {
+      keywordService.updateKeywordCount(keyword);
+      keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, memberService.currentMember());
     }
     
     return goodsService.getGoodsList(count, cursor, keyword, category);
