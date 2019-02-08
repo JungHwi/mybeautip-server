@@ -112,8 +112,8 @@ public class GoodsController {
     }
   
     if (StringUtils.isNotBlank(keyword)) {
-      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.GOODS,
-          memberService.currentMember());
+      keywordService.updateKeywordCount(keyword);
+      keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, memberService.currentMember());
     }
     
     return goodsService.getGoodsList(count, cursor, keyword, category);

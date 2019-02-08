@@ -213,7 +213,6 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
   
-  @Transactional
   @GetMapping
   @ResponseBody
   public CursorResponse getMembers(@RequestParam(defaultValue = "20") int count,
@@ -233,8 +232,8 @@ public class MemberController {
     }
   
     if (StringUtils.isNotBlank(keyword)) {
-      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.MEMBER,
-          memberService.currentMember());
+      keywordService.updateKeywordCount(keyword);
+      keywordService.logHistory(keyword, KeywordService.KeywordCategory.MEMBER, memberService.currentMember());
     }
 
     return new CursorResponse.Builder<>("/api/1/members", members)

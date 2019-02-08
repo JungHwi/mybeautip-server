@@ -224,7 +224,6 @@ public class VideoController {
       .withCursor(nextCursor).toBuild();
   }
   
-  @Transactional
   @GetMapping("/search")
   public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
@@ -234,8 +233,8 @@ public class VideoController {
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
   
     if (StringUtils.isNotBlank(keyword)) {
-      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.VIDEO,
-          memberService.currentMember());
+      keywordService.updateKeywordCount(keyword);
+      keywordService.logHistory(keyword, KeywordService.KeywordCategory.VIDEO, memberService.currentMember());
     }
 
     String nextCursor = null;

@@ -118,7 +118,6 @@ public class PostController {
     this.keywordService = keywordService;
   }
   
-  @Transactional
   @GetMapping
   public CursorResponse getPosts(@RequestParam(defaultValue = "20") int count,
                                    @RequestParam(required = false, defaultValue = "0") int category,
@@ -144,7 +143,8 @@ public class PostController {
     });
   
     if (StringUtils.isNotBlank(keyword)) {
-      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.POST, me);
+      keywordService.updateKeywordCount(keyword);
+      keywordService.logHistory(keyword, KeywordService.KeywordCategory.POST, me);
     }
 
     String nextCursor = null;
