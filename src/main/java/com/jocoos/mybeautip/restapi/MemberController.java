@@ -6,7 +6,6 @@ import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
@@ -24,6 +23,7 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.post.PostLike;
 import com.jocoos.mybeautip.post.PostLikeRepository;
+import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.tag.TagService;
@@ -68,6 +68,7 @@ public class MemberController {
   private final PostProcessService postProcessService;
   private final MessageService messageService;
   private final MentionService mentionService;
+  private final KeywordService keywordService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -121,7 +122,8 @@ public class MemberController {
                           PostProcessService postProcessService,
                           MessageService messageService,
                           DeviceRepository deviceRepository,
-                          MentionService mentionService) {
+                          MentionService mentionService,
+                          KeywordService keywordService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -144,6 +146,7 @@ public class MemberController {
     this.messageService = messageService;
     this.deviceRepository = deviceRepository;
     this.mentionService = mentionService;
+    this.keywordService = keywordService;
   }
 
   @GetMapping("/me")
@@ -227,6 +230,11 @@ public class MemberController {
       if (members.size() > 0) {
         nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
       }
+    }
+  
+    if (StringUtils.isNotBlank(keyword)) {
+      keywordService.logHistoryAndUpdateStats(keyword, KeywordService.KeywordCategory.MEMBER,
+          memberService.currentMember());
     }
 
     return new CursorResponse.Builder<>("/api/1/members", members)
