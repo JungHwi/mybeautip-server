@@ -194,14 +194,6 @@ public class MemberController {
           }
   
           if (updateMemberRequest.getPushable() != null) {
-            if (!m.getPushable().equals(updateMemberRequest.getPushable())) {
-              deviceRepository.findByCreatedByIdAndValidIsTrue(m.getId()).forEach(
-                  device -> {
-                    device.setPushable(updateMemberRequest.getPushable());
-                    deviceRepository.save(device);
-                  }
-              );
-            }
             m.setPushable(updateMemberRequest.getPushable());
           }
   
