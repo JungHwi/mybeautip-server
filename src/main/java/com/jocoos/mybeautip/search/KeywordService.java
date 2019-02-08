@@ -27,23 +27,20 @@ public class KeywordService {
     Optional<SearchHistory> optionalSearchHistory = searchHistoryRepository.findByKeywordAndCategoryAndCreatedBy(
         keyword, category.ordinal(), member);
     SearchHistory history;
-    if (optionalSearchHistory.isPresent()) {  // update exist item
+    if (optionalSearchHistory.isPresent()) {
       history = optionalSearchHistory.get();
       history.setCategory(category.ordinal());
       history.setCount(history.getCount() + 1);
+      searchHistoryRepository.save(history);
     } else {
-      history = new SearchHistory(keyword, category.ordinal(), member);
+      searchHistoryRepository.save(new SearchHistory(keyword, category.ordinal(), member));
     }
-    searchHistoryRepository.save(history);
-  
+    
     Optional<Keyword> optionalKeyword = keywordRepository.findByKeyword(keyword);
-    Keyword item;
     if (optionalKeyword.isPresent()) {
-      item = optionalKeyword.get();
-      item.setCount(item.getCount() + 1);
+      keywordRepository.updateCount(optionalKeyword.get().getId(), 1);
     } else {
-      item = new Keyword(keyword);
+      keywordRepository.save(new Keyword(keyword));
     }
-    keywordRepository.save(item);
   }
 }
