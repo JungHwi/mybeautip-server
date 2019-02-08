@@ -86,7 +86,7 @@ public class DeviceService {
       device.setPushable(false);
     } else {  // enable device, pushable is set according to Member Info
       device.setValid(true);
-      device.setPushable((me == null) ? true : me.getPushable());
+      device.setPushable(true);
     }
   
     device.setCreatedBy(me);
@@ -104,7 +104,7 @@ public class DeviceService {
         device.setPushable(false);
       } else {  // enable device, pushable is set according to Member Info
         device.setValid(true);
-        device.setPushable((me == null) ? true : me.getPushable());
+        device.setPushable(true);
       }
     }
   
@@ -120,13 +120,23 @@ public class DeviceService {
     });
   }
   
+  private boolean isPushable(Device device) {
+    Member member = device.getCreatedBy();
+    
+    if (member == null) {  // guest
+      return device.isPushable();
+    } else {
+      return device.isPushable() && member.getPushable();
+    }
+  }
+  
   public void push(Notification notification) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId())
        .forEach(d -> {
-         if (d.isPushable()) {
+         if (isPushable(d)) {
            push(d, notification);
          } else {
-           log.warn("device pushable false: {}", d.getId());
+           log.info("pushable is false: {}", d);
          }
        });
   }
