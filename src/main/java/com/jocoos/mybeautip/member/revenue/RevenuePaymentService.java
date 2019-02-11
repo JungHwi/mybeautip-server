@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.revenue;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public class RevenuePaymentService {
   
   @Transactional
   public void appendEstimatedAmount(Member member, Date purchaseDate, int price) {
-    String targetDate = LocalDate.from(purchaseDate.toInstant()).toString();
+    String targetDate = LocalDate.from(purchaseDate.toInstant().atZone(ZoneId.systemDefault())).toString();
     Optional<RevenuePayment> optional = revenuePaymentRepository.findByMemberAndTargetDate(member, targetDate);
     RevenuePayment revenuePayment;
     if (optional.isPresent()) {
