@@ -4,7 +4,7 @@
 CREATE TABLE `revenue_payments` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `member_id` BIGINT NOT NULL,
-  `target_date` VARCHAR(6) NOT NULL,  -- YYYYMM
+  `target_date` VARCHAR(10) NOT NULL,  -- YYYYMM
   `state` TINYINT DEFAULT 0,  -- 0: not paid, 1: paid, 2: n/a
   `estimated_amount` INT DEFAULT 0,
   `final_amount` INT DEFAULT 0,
@@ -19,5 +19,5 @@ CREATE TABLE `revenue_payments` (
 
 
 
-DROP TABLE `revenue_payments`;
-delete from flyway_schema_history where version='0098';
+--DROP TABLE `revenue_payments`;
+--delete from flyway_schema_history where version='0098';
