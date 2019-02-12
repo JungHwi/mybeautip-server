@@ -5,6 +5,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.security.Principal;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -603,23 +605,26 @@ public class MemberController {
   public CursorResponse getRevenueSummaries(@RequestParam(defaultValue = "12") int count,
                                             @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
-    memberService.readMemberRevenue(member);
     
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "date"));
     Slice<RevenuePayment>  list;
 
     if (StringUtils.isNotEmpty(cursor)) {
-      list = revenuePaymentRepository.findByMemberAndDateAfter(member, cursor, pageable);
+      list = revenuePaymentRepository.findByMemberAndDateLessThanEqual(member, cursor, pageable);
     } else {
       list = revenuePaymentRepository.findByMember(member, pageable);
     }
     
     List<RevenuePaymentInfo> revenues = Lists.newArrayList();
     list.forEach(r -> revenues.add(new RevenuePaymentInfo(r)));
-
+  
+    
+    memberService.readMemberRevenue(member);
+    
     String nextCursor = null;
     if (revenues.size() > 0) {
-      nextCursor = String.valueOf(revenues.get(revenues.size() - 1).getDate());
+      String date = revenues.get(revenues.size() - 1).getDate() + "-01";
+      nextCursor = YearMonth.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd")).minusMonths(1).toString();
     }
 
     return new CursorResponse.Builder<>("/api/1/members/me/revenues", revenues)
@@ -635,14 +640,14 @@ public class MemberController {
         .orElseThrow(() -> new NotFoundException("revenue_payment_not_found", "RevenuePayment not found: " + revenuePaymentId));
     
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
-    Slice<Revenue> list = revenueRepository.findByRevenuePaymentAndConfirmedAtIsNotNullAndIdAfter(revenuePayment, cursor, pageable);
+    Slice<Revenue> list = revenueRepository.findByRevenuePaymentAndConfirmedAtIsNotNullAndIdGreaterThanEqual(revenuePayment, cursor, pageable);
     
     List<RevenueInfo> revenues = Lists.newArrayList();
     list.forEach(r -> revenues.add(new RevenueInfo(r)));
     
     String nextCursor = null;
     if (revenues.size() > 0) {
-      nextCursor = String.valueOf(revenues.get(revenues.size() - 1).getId());
+      nextCursor = String.valueOf(revenues.get(revenues.size() - 1).getId() + 1);
     }
     
     return new CursorResponse.Builder<>("/api/1/members/me/revenues/" + revenuePaymentId + "/details", revenues)

@@ -13,5 +13,5 @@ public interface RevenuePaymentRepository extends JpaRepository<RevenuePayment, 
   
   Slice<RevenuePayment> findByMember(Member member, Pageable pageable);
   
-  Slice<RevenuePayment> findByMemberAndDateAfter(Member member, String date, Pageable pageable);
+  Slice<RevenuePayment> findByMemberAndDateLessThanEqual(Member member, String date, Pageable pageable);
 }

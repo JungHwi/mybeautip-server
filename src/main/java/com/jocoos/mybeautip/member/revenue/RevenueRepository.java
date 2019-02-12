@@ -18,6 +18,6 @@ public interface RevenueRepository extends JpaRepository<Revenue, Long> {
 
   Slice<Revenue> findByVideoAndCreatedAtBefore(Video video, Date createdAt, Pageable pageable);
 
-  Slice<Revenue> findByRevenuePaymentAndConfirmedAtIsNotNullAndIdAfter(RevenuePayment revenuePayment, long id, Pageable pageable);
+  Slice<Revenue> findByRevenuePaymentAndConfirmedAtIsNotNullAndIdGreaterThanEqual(RevenuePayment revenuePayment, long id, Pageable pageable);
 
 }
