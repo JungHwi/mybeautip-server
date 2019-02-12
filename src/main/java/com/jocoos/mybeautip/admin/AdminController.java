@@ -59,7 +59,6 @@ import com.jocoos.mybeautip.video.report.VideoReportRepository;
 @RequestMapping("/api/admin/manual")
 public class AdminController {
   private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
-  private static final SimpleDateFormat BASE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'");
 
   private final PostRepository postRepository;
   private final BannerRepository bannerRepository;
@@ -140,7 +139,7 @@ public class AdminController {
     post.setEndedAt(getRecommendedDate(request.getEndedAt()));
     postRepository.save(post);
     log.debug("saved post: {}", post);
-  
+
     if (StringUtils.isNotEmpty(request.getDescription())) {
       tagService.increaseRefCount(request.getDescription());
       tagService.addHistory(request.getDescription(), TagService.TAG_POST, post.getId(), post.getCreatedBy());
@@ -151,10 +150,10 @@ public class AdminController {
     List<String> goodsList = post.getGoods();
     for (String info : goodsList) {
       goodsService.generateGoodsInfo(info)
-          .map(goodsInfoList::add)
-          .orElseThrow(() -> new NotFoundException("goodsNo not found", "invalid good no"));
+         .map(goodsInfoList::add)
+         .orElseThrow(() -> new NotFoundException("goodsNo not found", "invalid good no"));
     }
-    
+
     PostController.PostInfo info = new PostController.PostInfo(post, new MemberInfo(me), goodsInfoList);
     return new ResponseEntity<>(info, HttpStatus.OK);
   }
@@ -176,12 +175,12 @@ public class AdminController {
 
     banner = bannerRepository.save(banner);
     log.debug("banner: {}", banner);
-  
+
     if (StringUtils.isNotEmpty(request.getDescription())) {
       tagService.touchRefCount(request.getDescription());
       tagService.addHistory(request.getDescription(), TagService.TAG_BANNER, banner.getId(), banner.getCreatedBy());
     }
-    
+
     BannerInfo info = new BannerInfo();
     BeanUtils.copyProperties(banner, info);
     return new ResponseEntity<>(info, HttpStatus.OK);
@@ -193,7 +192,7 @@ public class AdminController {
        .map(banner -> {
          banner.setDeletedAt(new Date());
          bannerRepository.save(banner);
-  
+
          tagService.removeHistory(banner.getDescription(), TagService.TAG_BANNER, banner.getId(), banner.getCreatedBy());
          return Optional.empty();
        })
@@ -307,7 +306,7 @@ public class AdminController {
 
   @PostMapping("/recommendedMembers")
   public ResponseEntity<RecommendedMemberInfo> createRecommendedMember(
-      @RequestBody CreateRecommendedMemberRequest request) {
+     @RequestBody CreateRecommendedMemberRequest request) {
 
     log.debug("request: {}", request);
 
@@ -387,7 +386,7 @@ public class AdminController {
 
   @PostMapping("/recommendedGoods")
   public ResponseEntity<RecommendedGoodsInfo> createRecommendedGoods(
-      @RequestBody CreateRecommendedGoodsRequest request) {
+     @RequestBody CreateRecommendedGoodsRequest request) {
     log.debug("request: {}", request);
 
     goodsRecommendationRepository.findByGoodsNo(request.getGoodsNo())
@@ -429,13 +428,13 @@ public class AdminController {
   @Transactional
   @PostMapping("/recommendedMotds")
   public ResponseEntity<RecommendationController.RecommendedMotdBaseInfo> createRecommendedMotd(
-    @RequestBody CreateRecommendedMotdRequest request) {
+     @RequestBody CreateRecommendedMotdRequest request) {
     log.debug("request: {}", request);
 
     motdRecommendationRepository.findByVideoId(request.getVideoId())
-      .ifPresent(r -> {
-        throw new BadRequestException("duplicated_motds", "Already motds is recommended");
-      });
+       .ifPresent(r -> {
+         throw new BadRequestException("duplicated_motds", "Already motds is recommended");
+       });
     MotdRecommendation recommendation = new MotdRecommendation();
     recommendation.setSeq(request.getSeq());
 
@@ -445,7 +444,7 @@ public class AdminController {
          recommendation.setStartedAt(getRecommendedDate(request.getStartedAt()));
          recommendation.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
-         Date baseDate = getBaseDate(request.getStartedAt());
+         Date baseDate = getBaseDate(recommendation.getStartedAt());
          log.debug("baseDate: {}", baseDate);
 
          Optional<MotdRecommendationBase> base = motdRecommendationBaseRepository.findByBaseDate(baseDate);
@@ -481,13 +480,13 @@ public class AdminController {
        .map(r -> {
          motdRecommendationRepository.delete(r);
          motdRecommendationBaseRepository.findById(r.getBaseId())
-          .ifPresent(b -> {
-            if (b.getMotdCount() == 1) {
-              motdRecommendationBaseRepository.delete(b);
-            } else {
-              motdRecommendationBaseRepository.updateMotdCount(b.getId(), -1);
-            }
-          });
+            .ifPresent(b -> {
+              if (b.getMotdCount() == 1) {
+                motdRecommendationBaseRepository.delete(b);
+              } else {
+                motdRecommendationBaseRepository.updateMotdCount(b.getId(), -1);
+              }
+            });
          return new ResponseEntity(HttpStatus.NO_CONTENT);
        })
        .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id"));
@@ -510,13 +509,11 @@ public class AdminController {
     }
   }
 
-  private Date getBaseDate(String date) {
-    try {
-      return BASE_DATE_FORMAT.parse(date);
-    } catch (ParseException e) {
-      log.error("invalid base date format", e);
-      throw new BadRequestException("invalid date format", e.getMessage() + " - " + date);
-    }
+  private Date getBaseDate(Date date) {
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(date);
+    cal.set(Calendar.HOUR_OF_DAY, 0);
+    return cal.getTime();
   }
 
 
@@ -567,10 +564,10 @@ public class AdminController {
     Page<MotdDetailInfo> details = videos.map(v -> {
       MotdDetailInfo info = new MotdDetailInfo(v);
       motdRecommendationRepository.findByVideoId(v.getId())
-        .ifPresent(r -> info.setRecommendation(r));
+         .ifPresent(r -> info.setRecommendation(r));
 
       videoReportRepository.findByVideoIdAndCreatedById(v.getId(), me.getId())
-        .ifPresent(r -> info.setVideoReportId(r.getId()));
+         .ifPresent(r -> info.setVideoReportId(r.getId()));
 
       Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getId(), PageRequest.of(0, 1));
       info.setReportCount(reports.getTotalElements());
@@ -606,25 +603,25 @@ public class AdminController {
     Collections.reverse(motds);
     return motds;
   }
-  
+
   @Transactional
   @PostMapping("/recommendedKeywords")
   public void CreateRecommendedKeywordsRequest(@Valid @RequestBody CreateRecommendedKeywordsRequest request) {
-    
+
     log.debug("request: {}", request);
 
     List<RecommendedKeyword> items = request.getItems();
     KeywordRecommendation keyword;
     int seq = 1;
-    
+
     for (RecommendedKeyword item : items) {
       int itemSeq = item.getSeq() != null ? item.getSeq() : seq++;
 
       switch (item.getCategory()) {
         case 1: // Member
           Member member = memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue(item.getWord())
-              .orElseThrow(() -> new MemberNotFoundException(item.getWord()));
-          
+             .orElseThrow(() -> new MemberNotFoundException(item.getWord()));
+
           keyword = keywordRecommendationRepository.findByMember(member).orElse(null);
           if (keyword == null) {
             keywordRecommendationRepository.save(new KeywordRecommendation(member, itemSeq));
@@ -655,11 +652,14 @@ public class AdminController {
   public static class CreatePostRequest {
     @NotNull
     private int category;
-    @NotNull @Size(max = 32)
+    @NotNull
+    @Size(max = 32)
     private String title;
-    @NotNull @Size(max = 2000)
+    @NotNull
+    @Size(max = 2000)
     private String description;
-    @NotNull @Size(max = 255)
+    @NotNull
+    @Size(max = 255)
     private String thumbnailUrl;
     private int progress;
     private boolean opened;
@@ -675,11 +675,14 @@ public class AdminController {
 
   @Data
   public static class CreateBannerRequest {
-    @NotNull @Size(max = 22)
+    @NotNull
+    @Size(max = 22)
     private String title;
-    @NotNull @Size(max = 34)
+    @NotNull
+    @Size(max = 34)
     private String description;
-    @NotNull @Size(max = 255)
+    @NotNull
+    @Size(max = 255)
     private String thumbnailUrl;
     @NotNull
     private int seq;
@@ -752,19 +755,19 @@ public class AdminController {
     private String startedAt;
     private String endedAt;
   }
-  
+
   @Data
   private static class CreateRecommendedKeywordsRequest {
     @Valid
     @NotNull(message = "items must not be null")
     private List<RecommendedKeyword> items;
   }
-  
+
   @Data
   private static class RecommendedKeyword {
     @NotNull(message = "category must not be null")
     private Integer category; // 1: Member, 2: Tag
-    
+
     @NotNull(message = "word must not be null")
     private String word;
 
