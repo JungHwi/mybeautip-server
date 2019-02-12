@@ -7,8 +7,6 @@ import javax.validation.constraints.Size;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -61,7 +59,7 @@ import com.jocoos.mybeautip.video.report.VideoReportRepository;
 @RequestMapping("/api/admin/manual")
 public class AdminController {
   private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
-  private static final SimpleDateFormat BASE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
+  private static final SimpleDateFormat BASE_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'");
 
   private final PostRepository postRepository;
   private final BannerRepository bannerRepository;
