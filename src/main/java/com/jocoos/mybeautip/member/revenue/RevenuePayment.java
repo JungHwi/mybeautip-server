@@ -31,7 +31,7 @@ public class RevenuePayment extends MemberAuditable {
   private Member member;
   
   @Column
-  private String targetDate;  // YYYYMM
+  private String date;  // YYYY-MM
   
   @Column
   private Integer state;  // 0: not paid, 1: paid, 2: n/a
@@ -46,11 +46,11 @@ public class RevenuePayment extends MemberAuditable {
   private String paymentMethod;
   
   @Column
-  private String paymentDate; // YYYYMMDD
+  private String paymentDate; // YYYY-MM-DD
   
-  public RevenuePayment(Member member, String targetDate, int estimatedAmount) {
+  public RevenuePayment(Member member, String date, int estimatedAmount) {
     this.member = member;
-    this.targetDate = targetDate;
+    this.date = date;
     this.estimatedAmount = estimatedAmount;
     this.state = RevenuePaymentService.NOT_PAID;
   }

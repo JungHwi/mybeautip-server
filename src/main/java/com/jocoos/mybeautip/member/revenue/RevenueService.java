@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member.revenue;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -57,11 +58,25 @@ public class RevenueService {
 
   @Transactional
   public Revenue save(Video video, Purchase purchase) {
-    Revenue revenue = revenueRepository.save(new Revenue(video, purchase, getRevenue(purchase.getTotalPrice())));
+    RevenuePayment revenuePayment = revenuePaymentService.getRevenuePayment(video.getMember(), purchase.getCreatedAt());
+    Revenue revenue = revenueRepository.save(new Revenue(video, purchase, getRevenue(purchase.getTotalPrice()), revenuePayment));
     log.debug("revenue: {}", revenue);
 
-    revenuePaymentService.appendEstimatedAmount(video.getMember(), purchase.getCreatedAt(), getRevenue(purchase.getTotalPrice()));
     memberRepository.updateRevenue(video.getMember().getId(), revenue.getRevenue());
     return revenue;
+  }
+  
+  @Transactional
+  public Revenue confirm(Revenue revenue) {
+    log.debug("revenue confirmed: {}", revenue.getId());
+    
+    RevenuePayment revenuePayment = revenue.getRevenuePayment();
+    if (revenuePayment == null) {
+      throw new NotFoundException("revenue_payment_not_found", "Revenue payment is null");
+    }
+    revenuePaymentService.appendEstimatedAmount(revenuePayment, revenue.getRevenue());
+  
+    revenue.setConfirmedAt(new Date());
+    return revenueRepository.save(revenue);
   }
 }

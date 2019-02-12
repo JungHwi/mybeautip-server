@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
@@ -30,10 +31,18 @@ public class Revenue extends CreatedDateAuditable {
 
   @Column
   private int revenue;
+  
+  @Column
+  private Date confirmedAt;
+  
+  @ManyToOne
+  @JoinColumn(name = "revenue_payment_id")
+  private RevenuePayment revenuePayment;
 
-  public Revenue(Video video, Purchase purchase, int revenue) {
+  public Revenue(Video video, Purchase purchase, int revenue, RevenuePayment revenuePayment) {
     this.video = video;
     this.purchase = purchase;
     this.revenue = revenue;
+    this.revenuePayment = revenuePayment;
   }
 }

@@ -3,16 +3,14 @@ package com.jocoos.mybeautip.member.revenue;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
-import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 
 @Slf4j
@@ -30,47 +28,38 @@ public class RevenuePaymentService {
   }
   
   @Transactional
-  public void appendEstimatedAmount(Member member, Date purchaseDate, int price) {
-    String targetDate = LocalDate.from(purchaseDate.toInstant().atZone(ZoneId.systemDefault())).toString();
-    Optional<RevenuePayment> optional = revenuePaymentRepository.findByMemberAndTargetDate(member, targetDate);
-    RevenuePayment revenuePayment;
-    if (optional.isPresent()) {
-      revenuePayment = optional.get();
-      if (revenuePayment.getState() != NOT_PAID) {
-        throw new MybeautipRuntimeException("invalid_state", "Invalid Revenue payment state: " + revenuePayment.getState());
-      }
-      revenuePayment.setEstimatedAmount(revenuePayment.getEstimatedAmount() + price);
-    } else {
-      revenuePayment = new RevenuePayment(member, targetDate, price);
-    }
-    revenuePaymentRepository.save(revenuePayment);
+  public RevenuePayment getRevenuePayment(Member member, Date purchaseDate) {
+    String date = generateDate(purchaseDate);
+    return revenuePaymentRepository.findByMemberAndDate(member, date)
+        .orElseGet(() -> revenuePaymentRepository.save(new RevenuePayment(member, date, 0)));
   }
   
   @Transactional
-  public void addPayment(Member member, String paymentDate, String paymentMethod, int price) {
-    String targetDate = getTargetDate(paymentDate);
-    Optional<RevenuePayment> optional = revenuePaymentRepository.findByMemberAndTargetDate(member, targetDate);
-    
-    if (optional.isPresent()) {
-      RevenuePayment revenuePayment = optional.get();
-      if (!revenuePayment.getEstimatedAmount().equals(price)) {
-        throw new MybeautipRuntimeException("price is not match");
-      }
-      revenuePayment.setState(PAID);
-      revenuePayment.setEstimatedAmount(0);
-      revenuePayment.setFinalAmount(price);
-      revenuePayment.setPaymentMethod(paymentMethod);
-      revenuePayment.setPaymentDate(paymentDate);
-      revenuePaymentRepository.save(revenuePayment);
-    } else {
-      throw new NotFoundException("revenue_returns_not_found", "Revenue returns not found");
+  public RevenuePayment appendEstimatedAmount(RevenuePayment revenuePayment, int revenuePrice) {
+    if (revenuePayment.getState() != NOT_PAID) {
+      throw new MybeautipRuntimeException("invalid_revenue_payments_state", "Invalid Revenue payment state: " + revenuePayment.getState());
     }
+    revenuePayment.setEstimatedAmount(revenuePayment.getEstimatedAmount() + revenuePrice);
+    return revenuePaymentRepository.save(revenuePayment);
   }
   
-  private String getTargetDate(String date) {
-    if (StringUtils.isEmpty(date) || date.length() != 8) {
-      throw new MybeautipRuntimeException("invalid_date", "Valid date format is YYYYMMDD");
+  @Transactional
+  public RevenuePayment pay(RevenuePayment revenuePayment, String paymentMethod, String paymentDate, int finalAmount) {
+    if (revenuePayment.getEstimatedAmount() != finalAmount) {
+      throw new MybeautipRuntimeException(String.format("price not match! estimated: %d final: %d",
+          revenuePayment.getEstimatedAmount(), finalAmount));
     }
-    return StringUtils.substring(date, 0, 5);
+    revenuePayment.setState(PAID);
+    revenuePayment.setEstimatedAmount(0);
+    revenuePayment.setFinalAmount(finalAmount);
+    revenuePayment.setPaymentMethod(paymentMethod);
+    revenuePayment.setPaymentDate(paymentDate);
+    return revenuePaymentRepository.save(revenuePayment);
+  }
+  
+  private String generateDate(Date date) {
+    LocalDate localDate = LocalDate.from(date.toInstant().atZone(ZoneId.systemDefault()));
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM");
+    return localDate.format(formatter);
   }
 }
