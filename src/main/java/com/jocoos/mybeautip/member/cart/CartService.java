@@ -249,6 +249,10 @@ public class CartService {
           || (option != null && "y".equals(goods.getStockFl()) && "n".equals(option.getOptionSellFl()))) {
         this.valid = false;
       }
+      
+      // createdAt and modifiedAt can be null when just calculate cart info without save (/members/me/carts/now API)
+      if (this.getCreatedAt() == null) { this.setCreatedAt(new Date()); }
+      if (this.getModifiedAt() == null) { this.setModifiedAt(new Date()); }
     }
   }
 
