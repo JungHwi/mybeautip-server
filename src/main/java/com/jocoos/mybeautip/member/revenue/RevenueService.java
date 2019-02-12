@@ -76,6 +76,12 @@ public class RevenueService {
     }
     revenuePaymentService.appendEstimatedAmount(revenuePayment, revenue.getRevenue());
   
+    memberRepository.findByIdAndDeletedAtIsNull(revenue.getVideo().getMember().getId())
+        .ifPresent(member -> {
+          member.setRevenueModifiedAt(new Date());
+          memberRepository.save(member);
+        });
+    
     revenue.setConfirmedAt(new Date());
     return revenueRepository.save(revenue);
   }

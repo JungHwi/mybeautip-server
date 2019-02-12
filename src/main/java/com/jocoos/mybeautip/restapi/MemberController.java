@@ -599,10 +599,9 @@ public class MemberController {
         .withCursor(nextCursor).toBuild();
   }
 
-  @Transactional
   @GetMapping("/me/revenues")
-  public CursorResponse getRevenueSummaries(@RequestParam(defaultValue = "6") int count,
-                                    @RequestParam(required = false) String cursor) {
+  public CursorResponse getRevenueSummaries(@RequestParam(defaultValue = "12") int count,
+                                            @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
     memberService.readMemberRevenue(member);
     
@@ -628,7 +627,6 @@ public class MemberController {
        .withCursor(nextCursor).toBuild();
   }
   
-  @Transactional
   @GetMapping("/me/revenues/{revenuePaymentId:.+}/details")
   public CursorResponse getRevenueDetails(@PathVariable Long revenuePaymentId,
                                           @RequestParam(defaultValue = "100") int count,
