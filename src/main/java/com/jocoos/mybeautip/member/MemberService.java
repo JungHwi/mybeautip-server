@@ -161,4 +161,10 @@ public class MemberService {
     reportRepository.save(new Report(me, you, reasonCode, reason, video));
     memberRepository.updateReportCount(you.getId(), 1);
   }
+  
+  @Transactional
+  public void readMemberRevenue(Member member) {
+    member.setRevenueModifiedAt(null);
+    memberRepository.save(member);
+  }
 }
