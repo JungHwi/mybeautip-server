@@ -52,7 +52,7 @@ public class PublicPaymentController {
     }
     
     
-    log.debug("request: {}", request);
+    log.info("payments/notification called: {}", request);
     
     if (request.getImpUid() == null || !StringUtils.isNumeric(request.getMerchantUid())) {
       log.warn("Invalid iamport notification request: ", request.toString());
