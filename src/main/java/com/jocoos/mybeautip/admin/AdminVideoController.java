@@ -86,8 +86,6 @@ public class AdminVideoController {
       }
 
       LocalDateTime endOfDay = startOfDay.plus(Duration.ofSeconds(86399));
-      log.debug("startOfDay: {}", startOfDay);
-      log.debug("endOfDay: {}", endOfDay);
       Date startDate = Date.from(startOfDay.toInstant(ZoneOffset.UTC));
 
       Page<Video> betweens = videoRepository.findByTypeAndStateInAndAndCreatedAtBetweenAndDeletedAtIsNull(
@@ -101,9 +99,6 @@ public class AdminVideoController {
 
       recentVideos.add(new RecentVideoInfo(startDate, videos));
     }
-
-    log.debug("{}", recentVideos);
-//    Collections.reverse(recentVideos);
 
     return new ResponseEntity<>(recentVideos, HttpStatus.OK);
   }
