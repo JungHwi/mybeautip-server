@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.member.Member;
 
 @Data
@@ -21,7 +21,7 @@ import com.jocoos.mybeautip.member.Member;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "revenue_payments")
-public class RevenuePayment extends MemberAuditable {
+public class RevenuePayment extends CreatedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
