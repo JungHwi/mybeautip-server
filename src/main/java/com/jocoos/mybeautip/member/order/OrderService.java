@@ -364,11 +364,6 @@ public class OrderService {
        p -> {
          if (videoGoods.containsKey(p.getGoods())) {
            revenueService.save(videoGoods.get(p.getGoods()), p);
-           memberRepository.findByIdAndDeletedAtIsNull(order.getCreatedBy().getId())
-               .ifPresent(member -> {
-                 member.setRevenueModifiedAt(new Date());
-                 memberRepository.save(member);
-               });
          }
        }
     );

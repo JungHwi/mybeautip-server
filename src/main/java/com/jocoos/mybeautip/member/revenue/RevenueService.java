@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.member.revenue;
 
+import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,15 +26,17 @@ public class RevenueService {
   @Value("${mybeautip.revenue.platform-ratio}")
   private int platformRatio;
 
-
+  private final RevenuePaymentService revenuePaymentService;
   private final RevenueRepository revenueRepository;
   private final VideoRepository videoRepository;
   private final MemberRepository memberRepository;
 
-  public RevenueService(RevenueRepository revenueRepository,
+  public RevenueService(RevenuePaymentService revenuePaymentService,
+                        RevenueRepository revenueRepository,
                         VideoRepository videoRepository,
                         MemberRepository memberRepository) {
     this.revenueRepository = revenueRepository;
+    this.revenuePaymentService = revenuePaymentService;
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
   }
@@ -52,11 +56,33 @@ public class RevenueService {
     return Math.toIntExact(((totalPrice * revenueRatio) / 100));
   }
 
+  @Transactional
   public Revenue save(Video video, Purchase purchase) {
-    Revenue revenue = revenueRepository.save(new Revenue(video, purchase, getRevenue(purchase.getTotalPrice())));
+    RevenuePayment revenuePayment = revenuePaymentService.getRevenuePayment(video.getMember(), purchase.getCreatedAt());
+    Revenue revenue = revenueRepository.save(new Revenue(video, purchase, getRevenue(purchase.getTotalPrice()), revenuePayment));
     log.debug("revenue: {}", revenue);
 
     memberRepository.updateRevenue(video.getMember().getId(), revenue.getRevenue());
     return revenue;
+  }
+  
+  @Transactional
+  public Revenue confirm(Revenue revenue) {
+    log.debug("revenue confirmed: {}", revenue.getId());
+    
+    RevenuePayment revenuePayment = revenue.getRevenuePayment();
+    if (revenuePayment == null) {
+      throw new NotFoundException("revenue_payment_not_found", "Revenue payment is null");
+    }
+    revenuePaymentService.appendEstimatedAmount(revenuePayment, revenue.getRevenue());
+  
+    memberRepository.findByIdAndDeletedAtIsNull(revenue.getVideo().getMember().getId())
+        .ifPresent(member -> {
+          member.setRevenueModifiedAt(new Date());
+          memberRepository.save(member);
+        });
+    
+    revenue.setConfirmedAt(new Date());
+    return revenueRepository.save(revenue);
   }
 }

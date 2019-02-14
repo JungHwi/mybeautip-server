@@ -35,24 +35,7 @@ public class PublicPaymentController {
 
   @PostMapping(value = "/notification", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity notification(@RequestBody CreateNotificationReqeust request) {
-    HttpServletRequest httpServletRequest = ((ServletRequestAttributes)RequestContextHolder
-        .currentRequestAttributes()).getRequest();
-    String ip = httpServletRequest.getHeader("X-FORWARDED-FOR");
-    log.debug("payments/notification request ip is " + ip);
-    if (ip == null) {
-      ip = httpServletRequest.getRemoteAddr();
-      log.debug("payments/notification request remoteAddress is " + ip);
-    }
-    
-    // Ref: https://docs.iamport.kr/tech/webhook
-    String[] iamportWebHookClients = {"52.78.100.19", "52.78.48.223"};
-    if (!StringUtils.containsAny(ip, iamportWebHookClients)) {
-      log.warn("Invalid iamport notification request client ip: ", request.toString());
-      return new ResponseEntity(HttpStatus.BAD_REQUEST);
-    }
-    
-    
-    log.debug("request: {}", request);
+    log.info("payments/notification called: {}", request);
     
     if (request.getImpUid() == null || !StringUtils.isNumeric(request.getMerchantUid())) {
       log.warn("Invalid iamport notification request: ", request.toString());

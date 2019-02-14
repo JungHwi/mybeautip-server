@@ -600,7 +600,9 @@ public class AdminController {
     for (MotdRecommendation m : base.getMotds()) {
       motds.add(new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
     }
-    Collections.reverse(motds);
+    Collections.sort(motds, (RecommendationController.RecommendedMotdInfo m1, RecommendationController.RecommendedMotdInfo m2)
+       -> m1.getSeq() < m2.getSeq() ? 1 : m1.getSeq() > m2.getSeq() ? -1 :
+       m2.getContent().getCreatedAt().after(m1.getContent().getCreatedAt()) ? 1 : m1.getContent().getCreatedAt().after(m2.getContent().getCreatedAt()) ? -1 : 0);
     return motds;
   }
 
@@ -773,4 +775,5 @@ public class AdminController {
 
     private Integer seq;
   }
+
 }

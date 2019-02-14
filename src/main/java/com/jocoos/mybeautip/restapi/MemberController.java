@@ -1,23 +1,74 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.security.Principal;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.jocoos.mybeautip.devices.DeviceRepository;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
-import com.jocoos.mybeautip.member.*;
-import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.FacebookMemberRepository;
+import com.jocoos.mybeautip.member.KakaoMemberRepository;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberMeInfo;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.NaverMemberRepository;
+import com.jocoos.mybeautip.member.PostProcessService;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentInfo;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.Revenue;
 import com.jocoos.mybeautip.member.revenue.RevenueInfo;
+import com.jocoos.mybeautip.member.revenue.RevenuePayment;
+import com.jocoos.mybeautip.member.revenue.RevenuePaymentInfo;
+import com.jocoos.mybeautip.member.revenue.RevenuePaymentRepository;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
@@ -31,28 +82,6 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
 import com.jocoos.mybeautip.video.VideoService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.security.Principal;
-import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -81,7 +110,7 @@ public class MemberController {
   private final CommentLikeRepository commentLikeRepository;
   private final RevenueRepository revenueRepository;
   private final MemberLeaveLogRepository memberLeaveLogRepository;
-  private final DeviceRepository deviceRepository;
+  private final RevenuePaymentRepository revenuePaymentRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
   private String storeImagePrefix;
@@ -121,9 +150,9 @@ public class MemberController {
                           DeviceService deviceService,
                           PostProcessService postProcessService,
                           MessageService messageService,
-                          DeviceRepository deviceRepository,
                           MentionService mentionService,
-                          KeywordService keywordService) {
+                          KeywordService keywordService,
+                          RevenuePaymentRepository revenuePaymentRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -144,9 +173,9 @@ public class MemberController {
     this.deviceService = deviceService;
     this.postProcessService = postProcessService;
     this.messageService = messageService;
-    this.deviceRepository = deviceRepository;
     this.mentionService = mentionService;
     this.keywordService = keywordService;
+    this.revenuePaymentRepository = revenuePaymentRepository;
   }
 
   @GetMapping("/me")
@@ -572,36 +601,58 @@ public class MemberController {
         .withCursor(nextCursor).toBuild();
   }
 
-  @Transactional
   @GetMapping("/me/revenues")
-  public CursorResponse getRevenues(@RequestParam(defaultValue = "20") int count,
-                                    @RequestParam(required = false) String cursor) {
+  public CursorResponse getRevenueSummaries(@RequestParam(defaultValue = "12") int count,
+                                            @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
-    member.setRevenueModifiedAt(null);
-    memberRepository.save(member);
     
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
-    Slice<Revenue>  list;
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "date"));
+    Slice<RevenuePayment>  list;
 
-    if (StringUtils.isNumeric(cursor)) {
-      Date createdAt = new Date(Long.parseLong(cursor));
-      list = revenueRepository.findByVideoMemberAndCreatedAtBefore(member, createdAt, pageable);
+    if (StringUtils.isNotEmpty(cursor)) {
+      list = revenuePaymentRepository.findByMemberAndDateLessThanEqual(member, cursor, pageable);
     } else {
-      list = revenueRepository.findByVideoMember(member, pageable);
+      list = revenuePaymentRepository.findByMember(member, pageable);
     }
-
-    List<RevenueInfo> revenues = Lists.newArrayList();
-
-    list.forEach(r -> revenues.add(new RevenueInfo(r)));
-
+    
+    List<RevenuePaymentInfo> revenues = Lists.newArrayList();
+    list.forEach(r -> revenues.add(new RevenuePaymentInfo(r)));
+  
+    
+    memberService.readMemberRevenue(member);
+    
     String nextCursor = null;
     if (revenues.size() > 0) {
-      nextCursor = String.valueOf(revenues.get(revenues.size() - 1).getCreatedAt());
+      String date = revenues.get(revenues.size() - 1).getDate() + "-01";
+      nextCursor = YearMonth.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd")).minusMonths(1).toString();
     }
 
     return new CursorResponse.Builder<>("/api/1/members/me/revenues", revenues)
        .withCount(count)
        .withCursor(nextCursor).toBuild();
+  }
+  
+  @GetMapping("/me/revenues/{revenuePaymentId:.+}/details")
+  public CursorResponse getRevenueDetails(@PathVariable Long revenuePaymentId,
+                                          @RequestParam(defaultValue = "100") int count,
+                                          @RequestParam(defaultValue = "0") long cursor) {
+    RevenuePayment revenuePayment = revenuePaymentRepository.findById(revenuePaymentId)
+        .orElseThrow(() -> new NotFoundException("revenue_payment_not_found", "RevenuePayment not found: " + revenuePaymentId));
+    
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
+    Slice<Revenue> list = revenueRepository.findByRevenuePaymentAndConfirmedAtIsNotNullAndIdGreaterThanEqual(revenuePayment, cursor, pageable);
+    
+    List<RevenueInfo> revenues = Lists.newArrayList();
+    list.forEach(r -> revenues.add(new RevenueInfo(r)));
+    
+    String nextCursor = null;
+    if (revenues.size() > 0) {
+      nextCursor = String.valueOf(revenues.get(revenues.size() - 1).getId() + 1);
+    }
+    
+    return new CursorResponse.Builder<>("/api/1/members/me/revenues/" + revenuePaymentId + "/details", revenues)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
   }
 
 

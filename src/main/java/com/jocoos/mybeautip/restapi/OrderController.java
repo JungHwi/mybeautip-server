@@ -367,8 +367,6 @@ public class OrderController {
     private String roadAddrPart2;
     private String jibunAddr;
     private String detailAddress;
-    private String carrier;
-    private String invoice;
     private String carrierMessage;
     private Date createdAt;
 
@@ -413,6 +411,8 @@ public class OrderController {
     private Long totalPrice;
     private Long videoId;
     private Long inquireId;
+    private String carrier;
+    private String invoice;
     private Date createdAt;
 
 
