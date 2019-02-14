@@ -594,7 +594,7 @@ public class AdminController {
     }
     Collections.sort(motds, (RecommendationController.RecommendedMotdInfo m1, RecommendationController.RecommendedMotdInfo m2)
        -> m1.getSeq() < m2.getSeq() ? 1 : m1.getSeq() > m2.getSeq() ? -1 :
-       m2.getContent().getCreatedAt().after(m1.getContent().getCreatedAt()) ? 1 : m1.getContent().getCreatedAt().after(m2.getContent().getCreatedAt()) ? -1 : 0);
+       m2.getCreatedAt().after(m1.getCreatedAt()) ? 1 : m1.getCreatedAt().after(m2.getCreatedAt()) ? -1 : 0);
     return motds;
   }
 
