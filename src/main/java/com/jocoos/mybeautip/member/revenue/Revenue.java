@@ -33,7 +33,7 @@ public class Revenue extends CreatedDateAuditable {
   private int revenue;
   
   @Column
-  private Date confirmedAt;
+  private Boolean confirmed;
   
   @ManyToOne
   @JoinColumn(name = "revenue_payment_id")

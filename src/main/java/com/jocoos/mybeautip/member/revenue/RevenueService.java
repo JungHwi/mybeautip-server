@@ -82,7 +82,7 @@ public class RevenueService {
           memberRepository.save(member);
         });
     
-    revenue.setConfirmedAt(new Date());
+    revenue.setConfirmed(true);
     return revenueRepository.save(revenue);
   }
 }

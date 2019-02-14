@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.Video;
 
 public interface RevenueRepository extends JpaRepository<Revenue, Long> {
@@ -18,6 +17,6 @@ public interface RevenueRepository extends JpaRepository<Revenue, Long> {
 
   Slice<Revenue> findByVideoAndCreatedAtBefore(Video video, Date createdAt, Pageable pageable);
 
-  Slice<Revenue> findByRevenuePaymentAndConfirmedAtIsNotNullAndIdGreaterThanEqual(RevenuePayment revenuePayment, long id, Pageable pageable);
+  Slice<Revenue> findByRevenuePaymentAndConfirmedIsFalseAndIdGreaterThanEqual(RevenuePayment revenuePayment, long id, Pageable pageable);
 
 }

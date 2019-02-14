@@ -181,7 +181,7 @@ public class RecommendationController {
     List<RecommendedMotdBaseInfo> result = videos.stream()
        .map(base -> {
          Slice<MotdRecommendation> motds = motdRecommendationRepository.findByBaseIdAndStartedAtBeforeAndEndedAtAfter(base.getId(), now, now,
-            PageRequest.of(0, base.getMotdCount(), Sort.Direction.DESC, "seq"));
+            PageRequest.of(0, base.getMotdCount(), Sort.Direction.DESC, "seq", "createdAt"));
          return new RecommendedMotdBaseInfo(base, createMotdList(motds));
        })
        .filter(i -> i.getExposedCount() > 0)
@@ -369,7 +369,6 @@ public class RecommendationController {
     public RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo content) {
       BeanUtils.copyProperties(recommendation, this);
       this.content = content;
-      this.createdAt = this.startedAt;
     }
   }
 

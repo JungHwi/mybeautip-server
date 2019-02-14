@@ -444,7 +444,7 @@ public class AdminController {
          recommendation.setStartedAt(getRecommendedDate(request.getStartedAt()));
          recommendation.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
-         Date baseDate = getBaseDate(recommendation.getStartedAt());
+         Date baseDate = recommendation.getStartedAt();
          log.debug("baseDate: {}", baseDate);
 
          Optional<MotdRecommendationBase> base = motdRecommendationBaseRepository.findByBaseDate(baseDate);
@@ -508,14 +508,6 @@ public class AdminController {
       throw new BadRequestException("invalid date format", e.getMessage() + " - " + date);
     }
   }
-
-  private Date getBaseDate(Date date) {
-    Calendar cal = Calendar.getInstance();
-    cal.setTime(date);
-    cal.set(Calendar.HOUR_OF_DAY, 0);
-    return cal.getTime();
-  }
-
 
   @GetMapping("/motdDetails")
   public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
@@ -602,7 +594,7 @@ public class AdminController {
     }
     Collections.sort(motds, (RecommendationController.RecommendedMotdInfo m1, RecommendationController.RecommendedMotdInfo m2)
        -> m1.getSeq() < m2.getSeq() ? 1 : m1.getSeq() > m2.getSeq() ? -1 :
-       m2.getContent().getCreatedAt().after(m1.getContent().getCreatedAt()) ? 1 : m1.getContent().getCreatedAt().after(m2.getContent().getCreatedAt()) ? -1 : 0);
+       m2.getCreatedAt().after(m1.getCreatedAt()) ? 1 : m1.getCreatedAt().after(m2.getCreatedAt()) ? -1 : 0);
     return motds;
   }
 
