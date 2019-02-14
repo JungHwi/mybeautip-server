@@ -21,7 +21,7 @@ public class RevenueInfo {
   private String thumbnail;
 
   private int revenue;
-  private Date confirmedAt;
+  private Boolean confirmed;
   private Date createdAt;
 
   public RevenueInfo(Revenue revenue) {
