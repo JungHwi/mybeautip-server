@@ -86,13 +86,13 @@ public class OrderCallbackController {
   
   private String getSuccessHtml(String id) {
     return "<script language=\"javascript\">" +
-        "mybeautip.success(" + id + ");" +
+        "mybeautip.success(\"" + id + "\");" +
         "</script>";
   }
   
   private String getErrorHtml(String id, String message) {
     return "<script language=\"javascript\">" +
-        "mybeautip.fail(" + id + ", \"" + message + "\");" +
+        "mybeautip.fail(\"" + id + "\", \"" + message + "\");" +
         "</script>";
   }
 }
