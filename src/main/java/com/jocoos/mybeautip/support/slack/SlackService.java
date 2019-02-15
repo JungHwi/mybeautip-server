@@ -170,6 +170,12 @@ public class SlackService {
     send(message);
   }
   
+  public void sendForImportMerchantIdFormatException(String merchantId, String impUid) {
+    String message = String.format("*아임포트 확인필요*" +
+        "```merchant_id 확인필요, merchant_id: %s, imp_uid: %s```", merchantId, impUid);
+    send(message);
+  }
+  
   private String getPurchaseInfo(List<Purchase> purchases) {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {
