@@ -50,6 +50,7 @@ public class OrderService {
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String POINT_BAD_REQUEST = "order.point_bad_rqeust";
   private static final String POINT_NOT_ENOUGH = "order.point_not_enough";
+  private final static String MERCHANT_PREFIX = "mybeautip_";
 
   private final SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmssSSS");
   private final OrderRepository orderRepository;
@@ -390,5 +391,9 @@ public class OrderService {
             .ifPresent(cartRepository::delete);
       }
     }
+  }
+  
+  public Long parseOrderId(String merchantId) throws NumberFormatException {
+    return Long.parseLong(StringUtils.substringAfter(merchantId, MERCHANT_PREFIX));
   }
 }
