@@ -97,9 +97,9 @@ public class AdminNotificationController {
 
     Page<Member> members = null;
     if (!Strings.isNullOrEmpty(username)) {
-      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNullAndUsernameContaining(links, true, username, pageable);
+      members = memberRepository.findByVisibleAndPushableAndUsernameContaining(true, true, username, pageable);
     } else {
-      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNull(links, true, pageable);
+      members = memberRepository.findByVisibleAndPushable(true, true, pageable);
     }
 
     String deviceOs = deviceService.getDeviceOs(platform);
