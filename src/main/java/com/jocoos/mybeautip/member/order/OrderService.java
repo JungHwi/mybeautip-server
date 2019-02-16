@@ -319,6 +319,7 @@ public class OrderService {
    */
   @Transactional
   private void saveOrderAndPurchasesStatus(Order order, String status) {
+    log.info("saveOrderAndPurchasesStatus called, id: %d, status: %s", order.getId(), status);
     order.setStatus(status);
     order.getPurchases().forEach(p -> p.setStatus(status));
 

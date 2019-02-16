@@ -78,6 +78,7 @@ public class IamportService implements IamportApi {
     ResponseEntity<PaymentResponse> responseEntity;
     try {
       responseEntity = restTemplate.exchange(tokenUri, HttpMethod.GET, request, PaymentResponse.class);
+      log.info("iamport get payment response: " + responseEntity.getBody());
       return responseEntity.getBody();
     } catch (HttpClientErrorException e) {
       log.error("invalid_iamport_response: Get payment error", e);
