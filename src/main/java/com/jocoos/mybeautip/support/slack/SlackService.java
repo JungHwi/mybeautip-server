@@ -63,11 +63,9 @@ public class SlackService {
         order.getId(),
         order.getCreatedBy().getUsername(),
         order.getCreatedBy().getId(),
-        order.getCreatedBy().getEmail(),
         order.getVideoId(),
         order.getMethod(),
         order.getPrice(),
-        order.getShippingAmount(),
         getPurchaseInfo(order.getPurchases()));
     send(message);
   }
@@ -126,7 +124,6 @@ public class SlackService {
             "탈퇴이유: %s```",
         memberLeaveLog.getMember().getUsername(),
         memberLeaveLog.getMember().getId(),
-        memberLeaveLog.getMember().getEmail(),
         memberLeaveLog.getMember().getLink(),
         memberLeaveLog.getReason());
     send(message);
