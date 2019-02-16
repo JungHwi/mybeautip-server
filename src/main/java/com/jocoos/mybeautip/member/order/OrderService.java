@@ -313,7 +313,10 @@ public class OrderService {
        })
     .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid order id or payment id"));
   }
-
+  
+  /**
+   * Update order status and relative purchases of order
+   */
   @Transactional
   private void saveOrderAndPurchasesStatus(Order order, String status) {
     order.setStatus(status);
@@ -395,5 +398,31 @@ public class OrderService {
   
   public Long parseOrderId(String merchantId) throws NumberFormatException {
     return Long.parseLong(StringUtils.substringAfter(merchantId, MERCHANT_PREFIX));
+  }
+  
+  @Transactional
+  public OrderInquiry cancelOrderInquireByAdmin(Order order, Payment payment, Byte state, String reason) {
+    if (order.getState() != Order.State.PAID.getValue()) {
+      throw new BadRequestException("invalid_order_state", "Invalid order state: " + order.getState());
+    }
+    
+    log.debug("cancel order: {}", order);
+    
+    // 1. Prepare order cancel
+    order.setStatus(Order.Status.ORDER_CANCELLING);
+    orderRepository.save(order);
+    
+    // 2. Create order cancel inquiry
+    OrderInquiry orderInquiry = orderInquiryRepository.save(new OrderInquiry(order, state, reason));
+  
+    // 3. Cancel order and payment without Iamport
+    saveOrderAndPurchasesStatus(order, Order.Status.ORDER_CANCELLED);
+    payment.setState(Payment.STATE_CANCELLED);
+    paymentRepository.save(payment);
+  
+    // 4. Complete order cancel inquiry
+    orderInquiry.setCompleted(true);
+    orderInquiryRepository.save(orderInquiry);
+    return orderInquiry;
   }
 }
