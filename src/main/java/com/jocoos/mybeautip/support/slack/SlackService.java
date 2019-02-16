@@ -38,27 +38,27 @@ public class SlackService {
   }
 
   public void sendForVideo(Video video) {
-    String videoType = "BROADCASTED".equals(video.getType()) ? "Live!" : "MOTD";
-    String message = String.format("*%s*" +
-            "```Id: %d\n" +
-            "User: %s/%d\n" +
-            "Title: %s```",
+    String videoType = "BROADCASTED".equals(video.getType()) ? "라이브!" : "#MOTD";
+    String message = String.format("*%s(%d)*" +
+            "```뷰트리머: %s/%d\n" +
+            "영상제목: %s\n+" +
+            "관련상품: %s```",
         videoType,
         video.getId(),
         video.getMember().getUsername(),
         video.getMember().getId(),
-        video.getTitle());
+        video.getTitle(),
+        video.getData());
     send(message);
   }
 
   public void sendForOrder(Order order) {
-    String message = String.format("*Order*" +
-            "```Id: %d\n" +
-            "User: %s/%d\n" +
-            "Email: %s\n" +
-            "From video: %d\n" +
-            "Payment method: %s\n" +
-            "Payment Price: %d (배송비: %d원 포함)" +
+    String message = String.format("*주문*" +
+            "```order id: %d\n" +
+            "주문자: %s/%d\n" +
+            "관련영상: %d\n" +
+            "결제방식: %s\n" +
+            "결제금액: %d (배송비포함)" +
             "%s```",
         order.getId(),
         order.getCreatedBy().getUsername(),
@@ -73,47 +73,59 @@ public class SlackService {
   }
   
   public void sendForOrderCancel(OrderInquiry orderInquiry) {
-    String message = String.format("*Order Inquiry*```" +
-            "Id: %d\n" +
-            "State: %d (0: CANCEL)\n" +
-            "User: %s/%d\n" +
-            "Reason: %s\n" +
-            "Price: %d" +
-            "%s```",
+    String message = String.format("*주문취소*```" +
+            "order id: %d, order inquiry id: %d\n" +
+            "주문자: %s/%d\n" +
+            "취소이유: %s\n" +
+            "결제금액: %d, 결제방식: %s(%s)```",
+        orderInquiry.getOrder().getId(),
         orderInquiry.getId(),
-        orderInquiry.getState(),
         orderInquiry.getCreatedBy().getUsername(),
         orderInquiry.getCreatedBy().getId(),
         orderInquiry.getReason(),
         orderInquiry.getOrder().getPrice(),
-        getPurchaseInfo(orderInquiry.getOrder().getPurchases()));
+        orderInquiry.getOrder().getPayment().getMethod(),
+        orderInquiry.getOrder().getPayment().getCardName());
+    send(message);
+  }
+  
+  public void sendForOrderCancelByAdmin(OrderInquiry orderInquiry) {
+    String message = String.format("*관리자에의한 주문취소*```" +
+            "order id: %d, order inquiry id: %d\n" +
+            "주문자: %s/%d\n" +
+            "결제금액: %d, 결제방식: %s(%s)```",
+        orderInquiry.getOrder().getId(),
+        orderInquiry.getId(),
+        orderInquiry.getCreatedBy().getUsername(),
+        orderInquiry.getCreatedBy().getId(),
+        orderInquiry.getOrder().getPrice(),
+        orderInquiry.getOrder().getPayment().getMethod(),
+        orderInquiry.getOrder().getPayment().getCardName());
     send(message);
   }
   
   public void SendForOrderExchangeOrReturn(OrderInquiry orderInquiry) {
-    String message = String.format("*Order Inquiry*```" +
-            "Id: %d\n" +
-            "State: %d (1: EXCHANGE, 2: REFUND)\n" +
-            "User: %s/%d\n" +
-            "Reason: %s\n" +
-            "Price: %d" +
-            "%s```",
+    String message = String.format("*주문문의*```" +
+            "order id: %d, order inquiry id: %d\n" +
+            "문의종류: %d (1: EXCHANGE, 2: REFUND)\n" +
+            "주문자: %s/%d\n" +
+            "문의내용: %s\n" +
+            "현재상태: %s```",
+        orderInquiry.getOrder().getId(),
         orderInquiry.getId(),
         orderInquiry.getState(),
         orderInquiry.getCreatedBy().getUsername(),
         orderInquiry.getCreatedBy().getId(),
         orderInquiry.getReason(),
-        orderInquiry.getOrder().getPrice(),
-        getPurchaseInfo(orderInquiry.getOrder().getPurchases()));
+        orderInquiry.getOrder().getStatus());
     send(message);
   }
 
   public void sendForDeleteMember(MemberLeaveLog memberLeaveLog) {
-    String message = String.format("*Delete member*" +
-            "```User: %s/%d\n" +
-            "Email: %s\n" +
+    String message = String.format("*회원탈퇴*" +
+            "```사용자: %s/%d\n" +
             "Link:%d (1:facebook 2:naver 4:kakao)\n" +
-            "Reason: %s```",
+            "탈퇴이유: %s```",
         memberLeaveLog.getMember().getUsername(),
         memberLeaveLog.getMember().getId(),
         memberLeaveLog.getMember().getEmail(),
@@ -123,9 +135,9 @@ public class SlackService {
   }
 
   public void sendForReportVideo(VideoReport report) {
-    String message = String.format("*Video Report*" +
-            "```%s/%d reports video %s/%d\n" +
-            "Reason: %s```",
+    String message = String.format("*영상신고*" +
+            "```%s/%d (이)가 %s/%d 영상을 신고함\n" +
+            "신고이유: %s```",
         report.getCreatedBy().getUsername(),
         report.getCreatedBy().getId(),
         report.getVideo().getTitle(),
@@ -135,9 +147,9 @@ public class SlackService {
   }
 
   public void sendForReportMember(Report report) {
-    String message = String.format("*Member Report*" +
-            "```%s/%d reports member %s/%d\n" +
-            "Reason: %s```",
+    String message = String.format("*회원신고*" +
+            "```%s/%d (이)가 %s/%d 회원을 신고함\n" +
+            "신고이유: %s```",
         report.getMe().getUsername(),
         report.getMe().getId(),
         report.getYou().getUsername(),
@@ -166,7 +178,7 @@ public class SlackService {
   
   public void sendForImportPaymentMismatch(String impUid) {
     String message = String.format("*아임포트 확인필요*" +
-        "```결제금액과 상태 확인필요, payment_id: %s```", impUid);
+        "```결제상태 불일치 - 확인필요, payment_id: %s```", impUid);
     send(message);
   }
   
@@ -179,8 +191,8 @@ public class SlackService {
   private String getPurchaseInfo(List<Purchase> purchases) {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {
-      sb.append(String.format("\n * Goods: %s, Option: %s, Quantity: %d, Price: %d원 ((상품 판매가 + 옵션가) * 수량)",
-          purchase.getGoods().getGoodsNm(),
+      sb.append(String.format("\n - 상품명: %s..., 옵션번호: %s, 수량: %d, 금액: %d원 ((상품판매가+옵션가)x수량)",
+          StringUtils.substring(purchase.getGoods().getGoodsNm(), 0, 10),
           StringUtils.isEmpty(purchase.getOptionValue()) ? "없음" : purchase.getOptionValue(),
           purchase.getQuantity(),
           purchase.getTotalPrice()));
