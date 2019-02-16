@@ -252,7 +252,7 @@ public class OrderService {
 
   @Transactional
   public Order notifyPayment(Order order, String status, String impUid) {
-    log.debug(String.format("notifyPayment called, id: %d, status: %s, impUid: %s ", order.getId(), status, impUid));
+    log.info(String.format("notifyPayment called, id: %d, status: %s, impUid: %s ", order.getId(), status, impUid));
     PaymentResponse response = iamportService.getPayment(iamportService.getToken(), impUid);
     
     if (response.getCode() != 0 || response.getResponse() == null) {
@@ -328,10 +328,10 @@ public class OrderService {
   
   @Transactional
   private void completeOrder(Order order) {
-    log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
+    log.info(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.Status.PAID);
 
-    log.debug(String.format("completeOrder point: %d", order.getPoint()));
+    log.info(String.format("completeOrder point: %d", order.getPoint()));
     if (order.getPoint() >= minimumPoint) {
       Member member = order.getCreatedBy();
       member.setPoint(member.getPoint() - order.getPoint());

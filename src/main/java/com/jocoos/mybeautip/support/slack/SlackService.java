@@ -41,7 +41,7 @@ public class SlackService {
     String videoType = "BROADCASTED".equals(video.getType()) ? "라이브!" : "#MOTD";
     String message = String.format("*%s(%d)*" +
             "```뷰트리머: %s/%d\n" +
-            "영상제목: %s\n+" +
+            "영상제목: %s\n" +
             "관련상품: %s```",
         videoType,
         video.getId(),
@@ -77,15 +77,14 @@ public class SlackService {
             "order id: %d, order inquiry id: %d\n" +
             "주문자: %s/%d\n" +
             "취소이유: %s\n" +
-            "결제금액: %d, 결제방식: %s(%s)```",
+            "결제금액: %d, 결제방식: %s```",
         orderInquiry.getOrder().getId(),
         orderInquiry.getId(),
         orderInquiry.getCreatedBy().getUsername(),
         orderInquiry.getCreatedBy().getId(),
         orderInquiry.getReason(),
         orderInquiry.getOrder().getPrice(),
-        orderInquiry.getOrder().getPayment().getMethod(),
-        orderInquiry.getOrder().getPayment().getCardName());
+        orderInquiry.getOrder().getPayment().getMethod());
     send(message);
   }
   
@@ -93,14 +92,13 @@ public class SlackService {
     String message = String.format("*관리자에의한 주문취소*```" +
             "order id: %d, order inquiry id: %d\n" +
             "주문자: %s/%d\n" +
-            "결제금액: %d, 결제방식: %s(%s)```",
+            "결제금액: %d, 결제방식: %s```",
         orderInquiry.getOrder().getId(),
         orderInquiry.getId(),
         orderInquiry.getCreatedBy().getUsername(),
         orderInquiry.getCreatedBy().getId(),
         orderInquiry.getOrder().getPrice(),
-        orderInquiry.getOrder().getPayment().getMethod(),
-        orderInquiry.getOrder().getPayment().getCardName());
+        orderInquiry.getOrder().getPayment().getMethod());
     send(message);
   }
   

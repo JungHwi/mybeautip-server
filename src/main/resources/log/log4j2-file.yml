@@ -20,7 +20,7 @@ Configutation:
         - ref: FILE
     Logger:
       - name: com.jocoos.mybeautip
-        level: debug
+        level: info
       - name: jdbc
         level: info
       - name: org.springframework.web

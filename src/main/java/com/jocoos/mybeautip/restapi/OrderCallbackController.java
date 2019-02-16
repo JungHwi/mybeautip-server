@@ -46,7 +46,7 @@ public class OrderCallbackController {
     String html;
     if (impUid == null) { // Import payment Id
       html = getErrorHtml(merchantUid, "impUid is null");
-      log.debug("OrderCallbackComplete response: " + html);
+      log.warn("OrderCallbackComplete response: " + html);
       return new ResponseEntity<>(html, HttpStatus.OK);
     }
   
@@ -80,7 +80,7 @@ public class OrderCallbackController {
         })
         .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
   
-    log.debug("OrderCallbackComplete response: " + html);
+    log.info("OrderCallbackComplete response: " + html);
     return new ResponseEntity<>(html, HttpStatus.OK);
   }
   
