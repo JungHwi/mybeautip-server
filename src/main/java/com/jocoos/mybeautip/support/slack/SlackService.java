@@ -187,8 +187,8 @@ public class SlackService {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {
       sb.append(String.format("\n - 상품명: %s..., 옵션번호: %s, 수량: %d, 금액: %d원 ((상품판매가+옵션가)x수량)",
-          StringUtils.substring(purchase.getGoods().getGoodsNm(), 0, 10),
-          StringUtils.isEmpty(purchase.getOptionValue()) ? "없음" : purchase.getOptionValue(),
+          StringUtils.substring(purchase.getGoods().getGoodsNm(), 0, 15),
+          StringUtils.isEmpty(purchase.getOptionValue()) ? "없음" : purchase.getOptionId(),
           purchase.getQuantity(),
           purchase.getTotalPrice()));
     }
