@@ -59,7 +59,7 @@ public class IamportService implements IamportApi {
       log.debug("{}, {}", response.getCode(), response.getResponse());
     }
     if (response == null || response.getCode() != 0) {
-      log.warn("invalid_import_response, GetToken failed");
+      log.warn("invalid_iamport_response, GetToken failed");
       slackService.sendForImportGetTokenFail();
       throw new MybeautipRuntimeException(response.getMessage());
     }
@@ -80,7 +80,7 @@ public class IamportService implements IamportApi {
       responseEntity = restTemplate.exchange(tokenUri, HttpMethod.GET, request, PaymentResponse.class);
       return responseEntity.getBody();
     } catch (HttpClientErrorException e) {
-      log.error("invalid_import_response: Get payment error", e);
+      log.error("invalid_iamport_response: Get payment error", e);
       slackService.sendForImportGetPaymentFail(id);
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         throw new NotFoundException("payment_not_found", "invalid payment id");
@@ -109,7 +109,7 @@ public class IamportService implements IamportApi {
     }
     
     if (response == null || response.getCode() != 0) {
-      log.warn("invalid_import_response, Check payment status, payment_id: {}" +  impUid);
+      log.warn("invalid_iamport_response, Check payment status, payment_id: " + impUid);
       slackService.sendForImportPaymentException(impUid);
       throw new BadRequestException("invalid_payment_request", response.getMessage());
     }

@@ -256,9 +256,9 @@ public class OrderService {
     PaymentResponse response = iamportService.getPayment(iamportService.getToken(), impUid);
     
     if (response.getCode() != 0 || response.getResponse() == null) {
-      log.warn("invalid_import_response, notifyPayment response is not success: " + response.getMessage());
+      log.warn("invalid_iamport_response, notifyPayment response is not success: " + response.getMessage());
       slackService.sendForImportPaymentException(impUid);
-      throw new MybeautipRuntimeException("invalid_import_response", "notifyPayment response is not success");
+      throw new MybeautipRuntimeException("invalid_iamport_response", "notifyPayment response is not success");
     }
     
     Payment payment = checkPaymentAndUpdate(order.getId(), impUid);
@@ -296,7 +296,7 @@ public class OrderService {
              }
            } else {
              String failReason = iamportData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
-             log.warn("invalid_import_response, fail reason: {}", failReason);
+             log.warn("invalid_iamport_response, fail reason: ", failReason);
              slackService.sendForImportPaymentMismatch(paymentId);
              payment.setState(state | Payment.STATE_FAILED);
              payment.setMessage(failReason);
