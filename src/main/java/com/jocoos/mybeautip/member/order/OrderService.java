@@ -413,11 +413,14 @@ public class OrderService {
     orderRepository.save(order);
     
     // 2. Create order cancel inquiry
-    OrderInquiry orderInquiry = orderInquiryRepository.save(new OrderInquiry(order, state, reason));
+    OrderInquiry orderInquiry = new OrderInquiry(order, state, reason);
+    orderInquiry.setCreatedBy(order.getCreatedBy());
+    orderInquiry = orderInquiryRepository.save(orderInquiry);
   
     // 3. Cancel order and payment without Iamport
     saveOrderAndPurchasesStatus(order, Order.Status.ORDER_CANCELLED);
     payment.setState(Payment.STATE_CANCELLED);
+    payment.setMessage(reason);
     paymentRepository.save(payment);
   
     // 4. Complete order cancel inquiry

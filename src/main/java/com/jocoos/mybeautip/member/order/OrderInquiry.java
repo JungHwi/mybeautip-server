@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.member.Member;
 
 @NoArgsConstructor
 @Data
@@ -58,5 +59,12 @@ public class OrderInquiry extends MemberAuditable {
   public OrderInquiry(Order order, Byte state, String reason, Purchase purchase) {
     this(order, state, reason);
     this.purchase = purchase;
+  }
+  
+  /**
+   * This method is used when OrderInquiry by Admin
+   */
+  public void setCreatedBy(Member createdBy) {
+    this.createdBy = createdBy;
   }
 }
