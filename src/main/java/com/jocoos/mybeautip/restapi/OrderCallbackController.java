@@ -51,9 +51,17 @@ public class OrderCallbackController {
     }
   
     // Get payment info from Import Service using REST API
+    // Refer: https://api.iamport.kr/
     String token = iamportService.getToken();
     PaymentResponse response = iamportService.getPayment(token, impUid);
     if (response.getCode() != 0 || response.getResponse() == null) {
+      html = getErrorHtml(merchantUid, response.getMessage());
+      log.warn("invalid_iamport_response, OrderCallbackComplete response: " + html);
+      slackService.sendForImportPaymentException(impUid);
+      return new ResponseEntity<>(html, HttpStatus.OK);
+    }
+    
+    if (response.getCode() == 0 && !response.getResponse().getStatus().equals("paid")) {
       html = getErrorHtml(merchantUid, response.getMessage());
       log.warn("invalid_iamport_response, OrderCallbackComplete response: " + html);
       slackService.sendForImportPaymentException(impUid);
