@@ -423,11 +423,7 @@ public class PostController {
          if (comment.getLocked()) {
            throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
          }
-         
-         tagService.touchRefCount(request.getComment());
-         tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-  
-         comment.setComment(request.getComment());
+         comment = commentService.updateComment(request, comment);
          return new ResponseEntity<>(
             new CommentInfo(commentRepository.save(comment), memberService.getMemberInfo(comment.getCreatedBy())),
             HttpStatus.OK

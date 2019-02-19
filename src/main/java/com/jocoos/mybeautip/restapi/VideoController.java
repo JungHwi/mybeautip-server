@@ -152,46 +152,10 @@ public class VideoController {
     this.goodsRepository = goodsRepository;
   }
   
-  @Transactional
   @PostMapping
-  public VideoInfo createVideo(@Valid @RequestBody CreateVideoRequest request,
-                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+  public VideoInfo createVideo(@Valid @RequestBody CreateVideoRequest request) {
     log.info("callback createVideo: {}", request.toString());
-
-    Video video = new Video(memberService.currentMember());
-    BeanUtils.copyProperties(request, video);
-    Video createdVideo = videoRepository.save(video); // do not notify
-    
-    if (StringUtils.isNotEmpty(createdVideo.getContent())) {
-      tagService.increaseRefCount(createdVideo.getContent());
-      tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());
-    }
-    
-    // Set related goods info
-    if (StringUtils.isNotEmpty(request.getData())) {
-      String[] userData = StringUtils.deleteWhitespace(request.getData()).split(",");
-      List<VideoGoods> videoGoods = new ArrayList<>();
-      for (String goods : userData) {
-        if (goods.length() != 10) { // invalid goodsNo
-          continue;
-        }
-        goodsRepository.findByGoodsNo(goods).map(g -> {
-          videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
-          return Optional.empty();
-        });
-      }
-      
-      if (videoGoods.size() > 0) {
-        videoGoodsRepository.saveAll(videoGoods);
-        
-        // Set related goods count & one thumbnail image
-        String url = videoGoods.get(0).getGoods().getListImageData().toString();
-        createdVideo.setRelatedGoodsThumbnailUrl(url);
-        createdVideo.setRelatedGoodsCount(videoGoods.size());
-        videoRepository.save(createdVideo);
-      }
-    }
-    
+    Video createdVideo = videoService.create(request);
     return videoService.generateVideoInfo(createdVideo);
   }
 
@@ -372,10 +336,10 @@ public class VideoController {
   
   @PatchMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long videoId,
-                                           @PathVariable Long id,
-                                           @RequestBody VideoController.UpdateCommentRequest request,
-                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
-                                           BindingResult bindingResult) {
+                                      @PathVariable Long id,
+                                      @RequestBody VideoController.UpdateCommentRequest request,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
+                                      BindingResult bindingResult) {
 
     if (bindingResult != null && bindingResult.hasErrors()) {
       throw new BadRequestException(bindingResult.getFieldError());
@@ -391,15 +355,8 @@ public class VideoController {
         if (comment.getLocked()) {
           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
         }
-        
-        tagService.touchRefCount(request.getComment());
-        tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-  
-        comment.setComment(request.getComment());
-        return new ResponseEntity<>(
-          new CommentInfo(commentRepository.save(comment)),
-          HttpStatus.OK
-        );
+        comment = commentService.updateComment(request, comment);
+        return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key id or comment id"));
   }
@@ -414,7 +371,6 @@ public class VideoController {
           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
         }
         videoService.deleteComment(comment);
-        tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
         return new ResponseEntity<>(HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));
@@ -556,17 +512,15 @@ public class VideoController {
   @DeleteMapping("/{id:.+}/watches")
   public ResponseEntity<?> leaveWatch(@PathVariable Long id,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    videoRepository.findByIdAndDeletedAtIsNull(id)
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
     Member me = memberService.currentMember();
 
     if (me == null) { // Guest
-      videoWatchRepository.findByVideoIdAndUsername(id, memberService.getGuestUserName())
-        .ifPresent(videoWatchRepository::delete);
+      videoService.removeGuestWatcher(video, memberService.getGuestUserName());
     } else {
-      videoWatchRepository.findByVideoIdAndCreatedById(id, me.getId())
-        .ifPresent(videoWatchRepository::delete);
+      videoService.removeWatcher(video, me);
     }
 
     return new ResponseEntity<>(HttpStatus.OK);
@@ -672,7 +626,6 @@ public class VideoController {
   /**
    * Add Heart
    */
-  @Transactional
   @PostMapping(value = "/{id:.+}/hearts")
   public ResponseEntity<VideoInfo> heartVideo(@PathVariable Long id,
                                               @Valid @RequestBody(required = false) VideoHeartRequest request,
@@ -699,7 +652,6 @@ public class VideoController {
   /**
    * Views
    */
-  @Transactional
   @PostMapping("/{id:.+}/view_count")
   public ResponseEntity<VideoInfo> addView(@PathVariable Long id,
                                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -805,7 +757,7 @@ public class VideoController {
   }
 
   @Data
-  private static class UpdateCommentRequest {
+  public static class UpdateCommentRequest {
     @NotNull
     @Size(max = 500)
     private String comment;
