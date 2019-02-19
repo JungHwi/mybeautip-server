@@ -111,4 +111,9 @@ public class PostService {
     commentLikeRepository.delete(liked);
     commentRepository.updateLikeCount(liked.getComment().getId(), -1);
   }
+  
+  @Transactional
+  public void updateViewCount(Post post, int i) {
+    postRepository.updateViewCount(post.getId(), i);
+  }
 }

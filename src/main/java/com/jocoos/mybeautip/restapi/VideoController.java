@@ -286,6 +286,7 @@ public class VideoController {
       .withTotalCount(totalCount).toBuild();
   }
   
+  @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
@@ -626,6 +627,7 @@ public class VideoController {
   /**
    * Add Heart
    */
+  @Transactional
   @PostMapping(value = "/{id:.+}/hearts")
   public ResponseEntity<VideoInfo> heartVideo(@PathVariable Long id,
                                               @Valid @RequestBody(required = false) VideoHeartRequest request,

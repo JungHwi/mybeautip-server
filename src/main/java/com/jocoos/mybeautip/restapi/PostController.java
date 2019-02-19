@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -253,7 +254,7 @@ public class PostController {
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
-         postRepository.updateViewCount(post.getId(), 1);
+         postService.updateViewCount(post, 1);
          return new ResponseEntity(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
@@ -359,6 +360,7 @@ public class PostController {
       .withTotalCount(totalCount).toBuild();
   }
 
+  @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
