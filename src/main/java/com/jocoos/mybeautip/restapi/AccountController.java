@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.account.Account;
 import com.jocoos.mybeautip.member.account.AccountRepository;
+import com.jocoos.mybeautip.member.account.AccountService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.VbankResponse;
@@ -18,7 +19,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -34,6 +34,7 @@ public class AccountController {
   private final MemberService memberService;
   private final MessageService messageService;
   private final IamportService iamportService;
+  private final AccountService accountService;
   private final AccountRepository accountRepository;
 
   private static final String ACCOUNT_NOT_FOUND = "account.not_found";
@@ -71,10 +72,12 @@ public class AccountController {
   public AccountController(MemberService memberService,
                            MessageService messageService,
                            IamportService iamportService,
+                           AccountService accountService,
                            AccountRepository accountRepository) {
     this.memberService = memberService;
     this.messageService = messageService;
     this.iamportService = iamportService;
+    this.accountService = accountService;
     this.accountRepository = accountRepository;
   }
 
@@ -111,25 +114,13 @@ public class AccountController {
        .map(account -> {
          account.setMemberId(memberId);
          account.setValidity(valid);
-         return saveOrUpdate(updateAccountInfo, account);
+         AccountInfo accountInfo = accountService.saveOrUpdate(updateAccountInfo, account);
+         return new ResponseEntity<>(accountInfo, HttpStatus.OK);
        })
-       .orElseGet(() -> saveOrUpdate(updateAccountInfo, new Account(memberId, valid)));
-  }
-
-  @Transactional
-  private ResponseEntity<AccountInfo> saveOrUpdate(UpdateAccountInfo updateAccountInfo, Account account) {
-    if (updateAccountInfo != null) {
-      BeanUtils.copyProperties(updateAccountInfo, account);
-    }
-
-    accountRepository.save(account);
-    log.debug("account: {}", account);
-
-    AccountInfo accountInfo = new AccountInfo();
-    BeanUtils.copyProperties(account, accountInfo);
-    log.debug("accountInfo: {}", accountInfo);
-
-    return new ResponseEntity<>(accountInfo, HttpStatus.OK);
+       .orElseGet(() -> {
+         AccountInfo accountInfo = accountService.saveOrUpdate(updateAccountInfo, new Account(memberId, valid));
+         return new ResponseEntity<>(accountInfo, HttpStatus.OK);
+       });
   }
   
   private boolean validAccount(UpdateAccountInfo info, String lang) {
