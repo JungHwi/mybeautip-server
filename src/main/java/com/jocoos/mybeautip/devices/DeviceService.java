@@ -96,7 +96,6 @@ public class DeviceService {
   @Transactional
   public Device update(DeviceController.UpdateDeviceRequest request, Device target, Member me) {
     Device device = copyBasicInfo(request, target);
-    device.setCreatedBy(me);
     
     if (request.getPushable() != null) {
       if (!request.getPushable()) {  // disable device
