@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.security;
 
+import javax.transaction.Transactional;
+
 import com.google.common.base.Strings;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.member.Member;
@@ -56,7 +58,8 @@ public class NaverTokenGranter extends AbstractTokenGranter {
     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
     return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
   }
-
+  
+  @Transactional
   private Member createRookie(Map<String, String> params) {
     Member member = memberRepository.save(new Member(params));
     naverMemberRepository.save(new NaverMember(params, member.getId()));
