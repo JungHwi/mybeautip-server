@@ -126,6 +126,12 @@ public class OrderService {
         throw new BadRequestException("point_not_enough", messageService.getMessage(POINT_NOT_ENOUGH, lang));
       }
     }
+    
+    // Modify member phoneNumber with Order buyerPhoneNumber
+    if (!member.getPhoneNumber().equals(request.getBuyerPhoneNumber())) {
+      member.setPhoneNumber(request.getBuyerPhoneNumber());
+      memberRepository.save(member);
+    }
 
     if (request.getCouponId() != null) {
       MemberCoupon memberCoupon = memberCouponRepository.findById(request.getCouponId()).orElseThrow(() -> new BadRequestException("coupon_not_found", "invalid member coupon id"));

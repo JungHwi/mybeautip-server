@@ -59,7 +59,10 @@ public class Member {
 
   @Column(length = 50)
   private String email;
-
+  
+  @Column(length = 20)
+  private String phoneNumber;
+  
   @Column
   private int point;
 
@@ -129,6 +132,7 @@ public class Member {
     this.link = parseLink(params.get("grant_type"));
     this.username = (StringUtils.isBlank(params.get("username"))) ? "" : params.get("username");
     this.email = (StringUtils.isBlank(params.get("email"))) ? "" : params.get("email");
+    this.phoneNumber = (StringUtils.isBlank(params.get("phone_number"))) ? "" : params.get("phone_number");
     this.intro = (StringUtils.isBlank(params.get("intro"))) ? "" : params.get("intro");
     this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? defaultAvatarUrl : params.get("avatar_url");
     this.point = 0;

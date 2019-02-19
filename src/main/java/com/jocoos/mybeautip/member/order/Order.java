@@ -138,7 +138,10 @@ public class Order extends MemberAuditable {
 
   @Column(nullable = false)
   private int state;
-
+  
+  @Column(nullable = false)
+  private String buyerPhoneNumber;
+  
   @Column
   private Long videoId;
 
