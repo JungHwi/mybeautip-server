@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.goods;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -135,6 +136,19 @@ public class GoodsService {
     }
 
     return FILTER.ALL;
+  }
+  
+  @Transactional
+  public GoodsLike addLike(Goods goods) {
+    goodsRepository.updateLikeCount(goods.getGoodsNo(), 1);
+    goods.setLikeCount(goods.getLikeCount() + 1);
+    return goodsLikeRepository.save(new GoodsLike(goods));
+  }
+  
+  @Transactional
+  public void removeLike(GoodsLike liked) {
+    goodsLikeRepository.delete(liked);
+    goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);
   }
   
   public Optional<GoodsInfo> generateGoodsInfo(String goodsNo) {
