@@ -136,9 +136,10 @@ public class PostController {
       PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
       log.debug("post info: {}", info);
 
-      postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
-         .ifPresent(like -> info.setLikeId(like.getId()));
-
+      if (me != null) {
+        postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
+            .ifPresent(like -> info.setLikeId(like.getId()));
+      }
       result.add(info);
     });
   
@@ -200,9 +201,11 @@ public class PostController {
          
          PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
          log.debug("post info: {}", info);
-
-         postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
-            .ifPresent(like -> info.setLikeId(like.getId()));
+      
+         if (memberId != null) {
+           postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
+               .ifPresent(like -> info.setLikeId(like.getId()));
+         }
          return new ResponseEntity<>(info, HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
