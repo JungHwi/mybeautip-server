@@ -29,6 +29,11 @@ public class CommentService {
     comment.setComment(messageService.getMessage(COMMENT_LOCK_MESSAGE, Locale.KOREAN));
     commentRepository.save(comment);
   }
+  
+  @Transactional
+  public void updateCount(Comment comment, int i) {
+    commentRepository.updateCommentCount(comment.getId(), 1);
+  }
 
   /**
    * Wrap method to avoid duplication for notification aspect

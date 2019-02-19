@@ -376,7 +376,7 @@ public class PostController {
     if (request.getParentId() != null) {
       commentRepository.findById(request.getParentId())
          .map(parent -> {
-            commentRepository.updateCommentCount(parent.getId(), 1);
+            commentService.updateCount(parent, 1);
             return Optional.empty();
          })
          .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));

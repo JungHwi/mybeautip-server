@@ -321,8 +321,7 @@ public class VideoController {
       .withCursor(nextCursor)
       .withTotalCount(totalCount).toBuild();
   }
-
-  @Transactional
+  
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
@@ -343,7 +342,7 @@ public class VideoController {
     if (request.getParentId() != null) {
       commentRepository.findById(request.getParentId())
         .map(parent -> {
-          commentRepository.updateCommentCount(parent.getId(), 1);
+          commentService.updateCount(parent, 1);
           return Optional.empty();
         })
         .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
@@ -371,7 +370,6 @@ public class VideoController {
     );
   }
   
-  @Transactional
   @PatchMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long videoId,
                                            @PathVariable Long id,
@@ -406,7 +404,6 @@ public class VideoController {
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key id or comment id"));
   }
 
-  @Transactional
   @DeleteMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long videoId,
                                          @PathVariable Long id,
@@ -482,7 +479,6 @@ public class VideoController {
   /**
    * Comment Likes
    */
-  @Transactional
   @PostMapping("/{videoId:.+}/comments/{commentId:.+}/likes")
   public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long videoId,
                                                         @PathVariable Long commentId,
@@ -500,7 +496,6 @@ public class VideoController {
         .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));
   }
 
-  @Transactional
   @DeleteMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeCommentLike(@PathVariable Long videoId,
                                                  @PathVariable Long commentId,
@@ -522,7 +517,6 @@ public class VideoController {
   /**
    * Watches
    */
-  @Transactional
   @PostMapping(value = "/{id:.+}/watches")
   public ResponseEntity<VideoInfo> joinWatch(@PathVariable Long id,
                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -541,7 +535,6 @@ public class VideoController {
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 
-  @Transactional
   @PatchMapping(value = "/{id:.+}/watches")
   public ResponseEntity<VideoInfo> keepWatch(@PathVariable Long id,
                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -560,7 +553,6 @@ public class VideoController {
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 
-  @Transactional
   @DeleteMapping("/{id:.+}/watches")
   public ResponseEntity<?> leaveWatch(@PathVariable Long id,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
