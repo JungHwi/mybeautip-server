@@ -40,7 +40,7 @@ public class SlackService {
   public void sendForVideo(Video video) {
     String videoType = "BROADCASTED".equals(video.getType()) ? "라이브!" : "#MOTD";
     String message = String.format("*%s(%d)*" +
-            "```뷰트리머: %s/%d\n" +
+            "```사용자: %s/%d\n" +
             "영상제목: %s\n" +
             "관련상품: %s```",
         videoType,
@@ -58,7 +58,7 @@ public class SlackService {
             "주문자: %s/%d\n" +
             "관련영상: %d\n" +
             "결제방식: %s\n" +
-            "결제금액: %d (배송비포함)" +
+            "결제금액: %d (배송비 및 할인 적용)" +
             "%s```",
         order.getId(),
         order.getCreatedBy().getUsername(),
@@ -72,7 +72,7 @@ public class SlackService {
   
   public void sendForOrderCancel(OrderInquiry orderInquiry) {
     String message = String.format("*주문취소*```" +
-            "order id: %d, order inquiry id: %d\n" +
+            "order id: %d, inquiry id: %d\n" +
             "주문자: %s/%d\n" +
             "취소이유: %s\n" +
             "결제금액: %d, 결제방식: %s```",
@@ -88,7 +88,7 @@ public class SlackService {
   
   public void sendForOrderCancelByAdmin(OrderInquiry orderInquiry) {
     String message = String.format("*관리자에의한 주문취소*```" +
-            "order id: %d, order inquiry id: %d\n" +
+            "order id: %d, inquiry id: %d\n" +
             "주문자: %s/%d\n" +
             "결제금액: %d, 결제방식: %s```",
         orderInquiry.getOrder().getId(),
@@ -102,7 +102,7 @@ public class SlackService {
   
   public void SendForOrderExchangeOrReturn(OrderInquiry orderInquiry) {
     String message = String.format("*주문문의*```" +
-            "order id: %d, order inquiry id: %d\n" +
+            "order id: %d, inquiry id: %d\n" +
             "문의종류: %d (1: EXCHANGE, 2: REFUND)\n" +
             "주문자: %s/%d\n" +
             "문의내용: %s\n" +
@@ -186,7 +186,7 @@ public class SlackService {
   private String getPurchaseInfo(List<Purchase> purchases) {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {
-      sb.append(String.format("\n - 상품명: %s..., 옵션번호: %s, 수량: %d, 금액: %d원 ((상품판매가+옵션가)x수량)",
+      sb.append(String.format("\n - 상품명: %s, 옵션번호: %s, 수량: %d, 금액: %d원",
           StringUtils.substring(purchase.getGoods().getGoodsNm(), 0, 15),
           StringUtils.isEmpty(purchase.getOptionValue()) ? "없음" : purchase.getOptionId(),
           purchase.getQuantity(),
