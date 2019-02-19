@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -246,7 +245,6 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
 
-  @Transactional
   @PostMapping("/{id:.+}/view_count")
   public ResponseEntity<?> addViewCount(@PathVariable Long id,
                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -260,8 +258,7 @@ public class PostController {
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
-
-  @Transactional
+  
   @PostMapping("/{id:.+}/likes")
   public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -280,8 +277,7 @@ public class PostController {
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
-
-  @Transactional
+  
   @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removePostLike(@PathVariable Long id,
                                           @PathVariable Long likeId){
@@ -363,7 +359,6 @@ public class PostController {
       .withTotalCount(totalCount).toBuild();
   }
 
-  @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
@@ -407,7 +402,6 @@ public class PostController {
     );
   }
 
-  @Transactional
   @PatchMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long postId,
                                       @PathVariable Long id,
@@ -441,8 +435,7 @@ public class PostController {
        })
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
   }
-
-  @Transactional
+  
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long postId,
                                          @PathVariable Long id,
@@ -459,7 +452,6 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
   }
 
-  @Transactional
   @PostMapping("/{postId:.+}/comments/{commentId:.+}/likes")
   public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long postId,
                                                         @PathVariable Long commentId,
@@ -476,7 +468,6 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
   }
 
-  @Transactional
   @DeleteMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeCommentLike(@PathVariable Long postId,
                                                  @PathVariable Long commentId,

@@ -426,7 +426,6 @@ public class VideoController {
   /**
    * Likes
    */
-  @Transactional
   @PostMapping("/{videoId:.+}/likes")
   public ResponseEntity<VideoLikeInfo> addVideoLike(@PathVariable Long videoId,
                                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -443,8 +442,7 @@ public class VideoController {
       })
       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
   }
-
-  @Transactional
+  
   @DeleteMapping("/{videoId:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeVideoLike(@PathVariable Long videoId,
                                            @PathVariable Long likeId,
