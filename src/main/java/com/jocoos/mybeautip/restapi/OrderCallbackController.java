@@ -62,7 +62,18 @@ public class OrderCallbackController {
     }
     
     if (response.getCode() == 0 && !response.getResponse().getStatus().equals("paid")) {
-      html = getErrorHtml(merchantUid, response.getMessage());
+      String message = response.getMessage();
+      switch (response.getResponse().getStatus()) {
+        case "cancelled":
+          message = response.getResponse().getCancelReason();
+          break;
+        case "failed":
+          message = response.getResponse().getFailReason();
+          break;
+        default:
+          break;
+      }
+      html = getErrorHtml(merchantUid, message);
       log.warn("invalid_iamport_response, OrderCallbackComplete response: " + html);
       slackService.sendForImportPaymentException(impUid);
       return new ResponseEntity<>(html, HttpStatus.OK);
