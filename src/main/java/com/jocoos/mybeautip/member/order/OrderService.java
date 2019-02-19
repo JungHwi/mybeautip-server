@@ -415,7 +415,6 @@ public class OrderService {
     
     // 2. Create order cancel inquiry
     OrderInquiry orderInquiry = new OrderInquiry(order, state, reason);
-    orderInquiry.setCreatedBy(order.getCreatedBy());
     orderInquiry = orderInquiryRepository.save(orderInquiry);
   
     // 3. Cancel order and payment without Iamport
@@ -426,6 +425,7 @@ public class OrderService {
   
     // 4. Complete order cancel inquiry
     orderInquiry.setCompleted(true);
+    orderInquiry.setCreatedBy(order.getCreatedBy());
     orderInquiryRepository.save(orderInquiry);
     return orderInquiry;
   }
