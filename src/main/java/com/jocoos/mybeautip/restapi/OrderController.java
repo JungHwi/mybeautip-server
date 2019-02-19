@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
@@ -256,6 +257,9 @@ public class OrderController {
     private Long couponId;
     @Min(0)
     private int point;
+    
+    @Size(max = 20)
+    private String buyerPhoneNumber = "";
     
     @NotNull
     private CreateDeliveryRequest delivery;
