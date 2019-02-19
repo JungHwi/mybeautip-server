@@ -29,6 +29,8 @@ public class Order extends MemberAuditable {
     public static final String PREPARING = "preparing";
     public static final String DELIVERING = "delivering";
     public static final String DELIVERED = "delivered";
+    
+    public static final String CONFIRMED = "confirmed";
 
     public static final String PAYMENT_CANCELLING = "payment_cancelling";
     public static final String PAYMENT_CANCELLED = "payment_cancelled";
