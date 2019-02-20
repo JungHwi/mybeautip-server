@@ -153,33 +153,32 @@ public class SlackService {
     send(message);
   }
   
-  public void sendForImportGetTokenFail() {
-    String message = String.format("*아임포트 확인필요*" +
-        "```토큰획득 실패```");
+  public void sendForImportGetPaymentException(String impUid, String response) {
+    String message = String.format("*아임포트 결제조회 응답이상, payment_id: %s*" +
+        "```%s```", impUid, response);
     send(message);
   }
   
-  public void sendForImportGetPaymentFail(String impUid) {
-    String message = String.format("*아임포트 확인필요*" +
-        "```결제조회 실패, payment_id: %s```", impUid);
+  public void sendForImportCancelPaymentException(String impUid, String response) {
+    String message = String.format("*아임포트 결제취소 응답이상, payment_id: %s*" +
+        "```%s```", impUid, response);
     send(message);
   }
   
-  public void sendForImportPaymentException(String impUid) {
-    String message = String.format("*아임포트 확인필요*" +
-        "```결제상태 확인필요, payment_id: %s```", impUid);
-    send(message);
-  }
-  
-  public void sendForImportPaymentMismatch(String impUid) {
-    String message = String.format("*아임포트 확인필요*" +
-        "```결제상태 불일치 - 확인필요, payment_id: %s```", impUid);
+  public void sendForImportPaymentMismatch(String impUid, String response) {
+    String message = String.format("*아임포트 결제조회 - 결제상태 불일치, payment_id: %s *" +
+        "```%s```", impUid, response);
     send(message);
   }
   
   public void sendForImportMerchantIdFormatException(String merchantUid, String impUid) {
-    String message = String.format("*아임포트 확인필요*" +
-        "```merchant_uid 확인필요, merchant_uid: %s, imp_uid: %s```", merchantUid, impUid);
+    String message = String.format("*아임포트 merchant_uid 확인필요*" +
+        "```merchant_uid: %s, imp_uid: %s```", merchantUid, impUid);
+    send(message);
+  }
+  
+  public void sendForImportGetTokenFail() {
+    String message = String.format("*아임포트 토큰획득 실패*");
     send(message);
   }
   

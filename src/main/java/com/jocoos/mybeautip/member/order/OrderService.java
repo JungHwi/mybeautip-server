@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.exception.OrderPaymentException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
@@ -263,8 +264,8 @@ public class OrderService {
     
     if (response.getCode() != 0 || response.getResponse() == null) {
       log.warn("invalid_iamport_response, notifyPayment response is not success: " + response.getMessage());
-      slackService.sendForImportPaymentException(impUid);
-      throw new MybeautipRuntimeException("invalid_iamport_response", "notifyPayment response is not success");
+      slackService.sendForImportGetPaymentException(impUid, response.toString());
+      throw new OrderPaymentException();
     }
     
     Payment payment = checkPaymentAndUpdate(order.getId(), impUid);
@@ -303,12 +304,12 @@ public class OrderService {
            } else {
              String failReason = iamportData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
              log.warn("invalid_iamport_response, fail reason: ", failReason);
-             slackService.sendForImportPaymentMismatch(paymentId);
+             slackService.sendForImportPaymentMismatch(paymentId, response.toString());
              payment.setState(state | Payment.STATE_FAILED);
              payment.setMessage(failReason);
            }
          } else {
-           slackService.sendForImportPaymentException(paymentId);
+           slackService.sendForImportGetPaymentException(paymentId, response.toString());
            payment.setMessage(response.getMessage());
            payment.setPaymentId(paymentId);
            payment.setState(state | Payment.STATE_STOPPED);
