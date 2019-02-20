@@ -224,7 +224,7 @@ public class DeviceService {
     notification.put("badge", String.valueOf(badge));
     
     if ("android".equals(os)) {
-      data.put(KEY_DATA, notification);
+      data.put(KEY_DATA, message);
     } else {
       data.put(KEY_NOTIFICATION, notification);
       data.put(KEY_DATA, message);
