@@ -20,7 +20,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.exception.OrderPaymentException;
+import com.jocoos.mybeautip.exception.PaymentConflictException;
 import com.jocoos.mybeautip.restapi.AccountController;
 import com.jocoos.mybeautip.support.slack.SlackService;
 
@@ -118,7 +118,7 @@ public class IamportService implements IamportApi {
     if (response == null || response.getCode() != 0) {
       log.warn("invalid_iamport_response, Check payment status, payment_id: " + impUid);
       slackService.sendForImportCancelPaymentException(impUid, (response == null) ? "" : response.toString());
-      throw new OrderPaymentException();
+      throw new PaymentConflictException();
     }
 
     return response;

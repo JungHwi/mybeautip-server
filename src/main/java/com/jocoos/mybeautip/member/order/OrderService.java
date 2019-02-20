@@ -18,9 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.exception.OrderPaymentException;
+import com.jocoos.mybeautip.exception.PaymentConflictException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
@@ -265,7 +264,7 @@ public class OrderService {
     if (response.getCode() != 0 || response.getResponse() == null) {
       log.warn("invalid_iamport_response, notifyPayment response is not success: " + response.getMessage());
       slackService.sendForImportGetPaymentException(impUid, response.toString());
-      throw new OrderPaymentException();
+      throw new PaymentConflictException();
     }
     
     Payment payment = checkPaymentAndUpdate(order.getId(), impUid);
