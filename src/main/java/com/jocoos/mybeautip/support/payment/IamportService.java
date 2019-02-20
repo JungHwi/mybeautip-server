@@ -1,14 +1,12 @@
 package com.jocoos.mybeautip.support.payment;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.restapi.AccountController;
-import com.jocoos.mybeautip.support.slack.SlackService;
-
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -16,7 +14,15 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
+
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
+
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.exception.OrderPaymentException;
+import com.jocoos.mybeautip.restapi.AccountController;
+import com.jocoos.mybeautip.support.slack.SlackService;
 
 @Slf4j
 @Service
@@ -82,7 +88,7 @@ public class IamportService implements IamportApi {
       return responseEntity.getBody();
     } catch (HttpClientErrorException e) {
       log.error("invalid_iamport_response: Get payment error", e);
-      slackService.sendForImportGetPaymentFail(id);
+      slackService.sendForImportGetPaymentException(id, e.getMessage());
       if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
         throw new NotFoundException("payment_not_found", "invalid payment id");
       }
@@ -111,8 +117,8 @@ public class IamportService implements IamportApi {
     
     if (response == null || response.getCode() != 0) {
       log.warn("invalid_iamport_response, Check payment status, payment_id: " + impUid);
-      slackService.sendForImportPaymentException(impUid);
-      throw new BadRequestException("invalid_payment_request", response.getMessage());
+      slackService.sendForImportCancelPaymentException(impUid, (response == null) ? "" : response.toString());
+      throw new OrderPaymentException();
     }
 
     return response;
