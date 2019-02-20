@@ -330,6 +330,8 @@ public class OrderController {
     private DeliveryInfo delivery;
     private PaymentInfo payment;
     private List<PurchaseInfo> purchases;
+    private String deliveryInfo;
+    private String inquiryInfo;
     private Date createdAt;
     private Date modifiedAt;
 
