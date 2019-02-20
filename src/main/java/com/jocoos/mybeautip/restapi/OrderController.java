@@ -332,6 +332,7 @@ public class OrderController {
     private List<PurchaseInfo> purchases;
     private String deliveryInfo;
     private String inquiryInfo;
+    private String returnPolicy;
     private Date createdAt;
     private Date modifiedAt;
 

@@ -191,6 +191,9 @@ public class Order extends MemberAuditable {
       "구매하신 상품의 구성품(사은품 포함)이 누락된 경우\n" +
       "전자상거래 등에서 소비자보호에 관한 법률이 정하는 청약철회 제한 사유에 해당되는 경우";
   
+  @Transient
+  private String returnPolicy = "배송비 결제 확인 후 상품 교환이 진행 됩니다. 반품 배송비는 각 스토어의 규정을 따르고 있으며 상품 스토어에서 고객님께 별도의 안내를 드리고 있습니다.  문의사항은 해당 스토어 고객센터(010-9482-5590)로 문의해 주세요.";
+  
   public Order() {
     setState(State.READY);
   }
