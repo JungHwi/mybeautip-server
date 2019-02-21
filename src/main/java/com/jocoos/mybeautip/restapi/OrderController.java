@@ -420,6 +420,8 @@ public class OrderController {
     private Long inquireId;
     private String carrier;
     private String invoice;
+    private String returnPolicy;
+    private String inquiryInfo;
     private Date createdAt;
 
 
