@@ -119,7 +119,7 @@ public class DeviceService {
     });
   }
   
-  private boolean isPushable(Device device) {
+  public boolean isPushable(Device device) {
     Member member = device.getCreatedBy();
     
     if (member == null) {  // guest

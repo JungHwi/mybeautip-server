@@ -149,9 +149,12 @@ public class AdminNotificationController {
       }
     }
     
-    devices.forEach(device ->
-      deviceService.push(device, new Notification(device.getCreatedBy(), request.getTitle(),
-          request.getMessage(), request.getResourceType(), request.getResourceIds())));
+    devices.forEach(device -> {
+      if (deviceService.isPushable(device)) {
+        deviceService.push(device, new Notification(device.getCreatedBy(), request.getTitle(),
+            request.getMessage(), request.getResourceType(), request.getResourceIds()));
+      }
+    });
     
     pushMessageRepository.save(new PushMessage(request, devices.getContent().size()));
     return new ResponseEntity(HttpStatus.NO_CONTENT);
