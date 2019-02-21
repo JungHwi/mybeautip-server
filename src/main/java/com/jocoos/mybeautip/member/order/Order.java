@@ -170,9 +170,6 @@ public class Order extends MemberAuditable {
   private Date deliveredAt;
   
   @Transient
-  private String deliveryInfo = "배송기간은 주문일(무통장입금은 결제완료일)로부터 1일(24시간) 에서 5일정도 걸립니다. 배송비는 각 스토어의 규정을 따르고 있습니다.  일부 상품의 경우에는 지역에 따라 추가 배송비용이 발생할 수 있습니다.";
-  
-  @Transient
   private String inquiryInfo = "주문취소 신청 기간\n" +
       "주문 취소는 배송 시작 전에만 가능하며 개별의 상품의 주문 취소는 불가능 합니다. 배송 시작 후에는 교환/반품을 이용해주세요.\n\n" +
       "교환/반품 신청 기간\n" +
@@ -190,9 +187,6 @@ public class Order extends MemberAuditable {
       "고객님의 책임이 있는 사유로 상품등의 가치가 심하게 파손되거나 훼손된 경우\n" +
       "구매하신 상품의 구성품(사은품 포함)이 누락된 경우\n" +
       "전자상거래 등에서 소비자보호에 관한 법률이 정하는 청약철회 제한 사유에 해당되는 경우";
-  
-  @Transient
-  private String returnPolicy = "배송비 결제 확인 후 상품 교환이 진행 됩니다. 반품 배송비는 각 스토어의 규정을 따르고 있으며 상품 스토어에서 고객님께 별도의 안내를 드리고 있습니다.  문의사항은 해당 스토어 고객센터(010-9482-5590)로 문의해 주세요.";
   
   public Order() {
     setState(State.READY);
