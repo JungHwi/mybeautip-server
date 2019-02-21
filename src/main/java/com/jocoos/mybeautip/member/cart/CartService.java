@@ -1,20 +1,40 @@
 package com.jocoos.mybeautip.member.cart;
 
+import javax.transaction.Transactional;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jocoos.mybeautip.goods.*;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.store.StoreRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
-import java.net.URL;
-import java.util.*;
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.DeliveryCharge;
+import com.jocoos.mybeautip.goods.DeliveryChargeDetail;
+import com.jocoos.mybeautip.goods.DeliveryChargeDetailRepository;
+import com.jocoos.mybeautip.goods.DeliveryChargeRepository;
+import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsOption;
+import com.jocoos.mybeautip.goods.GoodsOptionRepository;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.restapi.CartController;
+import com.jocoos.mybeautip.store.Store;
+import com.jocoos.mybeautip.store.StoreRepository;
 
 @Slf4j
 @Service
@@ -24,27 +44,42 @@ public class CartService {
 
   @Value("${mybeautip.shipping.fixed}")
   private int fixedShipping;
+  
+  private static final String CART_TOO_MANY_ITEMS = "cart.too_many_items";
+  private static final String CART_GOODS_SOLD_OUT = "cart.goods_sold_out";
+  private static final String CART_OPTION_SOLD_OUT = "cart.option_sold_out";
+  private static final String CART_INVALID_QUANTITY = "cart.invalid_quantity";
+  private static final String GOODS_NOT_FOUND = "goods.not_found";
+  private static final String OPTION_NOT_FOUND = "option.not_found";
+  private static final String CART_ITEM_NOT_FOUND = "cart.item_not_found";
+  private static final String STORE_NOT_FOUND = "store.not_found";
 
-  private final MemberService memberService;
+  private final MessageService messageService;
+  private final GoodsRepository goodsRepository;
+  private final GoodsOptionRepository goodsOptionRepository;
   private final CartRepository cartRepository;
   private final StoreRepository storeRepository;
   private final DeliveryChargeRepository deliveryChargeRepository;
   private final DeliveryChargeDetailRepository deliveryChargeDetailRepository;
 
-  public CartService(MemberService memberService,
+  public CartService(MessageService messageService,
+                     GoodsRepository goodsRepository,
+                     GoodsOptionRepository goodsOptionRepository,
                      CartRepository cartRepository,
                      StoreRepository storeRepository,
                      DeliveryChargeRepository deliveryChargeRepository,
                      DeliveryChargeDetailRepository deliveryChargeDetailRepository) {
-    this.memberService = memberService;
+    this.messageService = messageService;
+    this.goodsRepository = goodsRepository;
+    this.goodsOptionRepository = goodsOptionRepository;
     this.cartRepository = cartRepository;
     this.storeRepository = storeRepository;
     this.deliveryChargeRepository = deliveryChargeRepository;
     this.deliveryChargeDetailRepository = deliveryChargeDetailRepository;
   }
 
-  public CartInfo getCartItemList() {
-    List<Cart> list = cartRepository.findAllByCreatedByIdOrderByModifiedAtDesc(memberService.currentMemberId());
+  public CartInfo getCartItemList(long memberId) {
+    List<Cart> list = cartRepository.findAllByCreatedByIdOrderByModifiedAtDesc(memberId);
     return getCartItemList(list);
   }
 
@@ -162,7 +197,112 @@ public class CartService {
       .pointRatio(pointRatio)
       .build();
   }
-
+  
+  @Transactional
+  public CartInfo addItems(CartController.AddCartRequest request, long memberId, String lang) {
+    for (CartController.CartItemRequest requestItem : request.getItems()) {
+      Cart item = getValidCartItem(requestItem.getGoodsNo(), requestItem.getOptionNo(), requestItem.getQuantity(), lang);
+    
+      Optional<Cart> optionalCart;
+      if (item.getOption() == null) {
+        optionalCart = cartRepository.findByGoodsGoodsNoAndCreatedById(item.getGoods().getGoodsNo(), memberId);
+      } else {
+        optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
+            item.getGoods().getGoodsNo(), item.getOption().getOptionNo(), memberId);
+      }
+    
+      if (optionalCart.isPresent()) { // Update quantity
+        Cart cart = optionalCart.get();
+        cart.setQuantity(item.getQuantity());
+        update(cart);
+      } else {  // Insert new item
+        save(item);
+      }
+    }
+    return getCartItemList(memberId);
+  }
+  
+  @Transactional
+  public CartInfo updateItem(long id, long memberId, CartController.UpdateCartRequest request, String lang) {
+    Cart item = cartRepository.findByIdAndCreatedById(id, memberId)
+        .map(cart -> {
+          if (request.getQuantity() != null && request.getQuantity() > 0) {
+            cart.setQuantity(request.getQuantity());
+          }
+          if (request.getChecked() != null) {
+            cart.setChecked(request.getChecked());
+          }
+          return cart;
+        })
+        .orElseThrow(() -> new NotFoundException("cart_item_not_found", messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
+  
+    update(item);
+    return getCartItemList(memberId);
+  }
+  
+  @Transactional
+  public CartInfo removeItem(long id, long memberId, String lang) {
+    cartRepository.findByIdAndCreatedById(id, memberId)
+        .map(cart -> {
+          cartRepository.delete(cart);
+          return Optional.empty();
+        })
+        .orElseThrow(() -> new NotFoundException("cart_item_not_found",
+            messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
+    
+    return getCartItemList(memberId);
+  }
+  
+  /**
+   * Update checked value to all cart items (all checked or all unchecked)
+   */
+  @Transactional
+  public CartInfo updateAllItems(CartController.UpdateCartRequest request, Member me) {
+    boolean checked = (request.getChecked() == null) ? true : request.getChecked();
+    cartRepository.updateAllChecked(checked, me);
+    return getCartItemList(me.getId());
+  }
+  
+  private Cart getValidCartItem(String goodsNo, int optionNo, int quantity, String lang) {
+    Goods goods = goodsRepository.findByGoodsNoAndStateLessThanEqual(goodsNo, Goods.GoodsState.NO_SALE.ordinal())
+        .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
+    
+    if ("y".equals(goods.getSoldOutFl())) { // 품절 플래그
+      throw new BadRequestException("goods_sold_out", messageService.getMessage(CART_GOODS_SOLD_OUT, lang));
+    }
+    
+    if ("y".equals(goods.getStockFl()) && quantity > goods.getTotalStock()) { // 재고량에 따름, 총 재고량 추가
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+    }
+    
+    if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity < goods.getMinOrderCnt()) { // 최소구매수량 미만
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+    }
+    
+    if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity > goods.getMaxOrderCnt()) { // 최대구매수량 초과
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+    }
+    
+    GoodsOption option = null;
+    if ("y".equals(goods.getOptionFl())) {
+      option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goodsNo), optionNo)
+          .orElseThrow(() -> new NotFoundException("option_not_found", messageService.getMessage(OPTION_NOT_FOUND, lang)));
+      if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
+        throw new BadRequestException("option_sold_out", messageService.getMessage(CART_OPTION_SOLD_OUT, lang));
+      }
+      if ("y".equals(goods.getStockFl()) && quantity > option.getStockCnt()) { // 재고량에 따름
+        throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+      }
+    } else if (optionNo != 0) {
+      throw new NotFoundException("option_not_found", messageService.getMessage(OPTION_NOT_FOUND, lang));
+    }
+    
+    Store store = storeRepository.findById(goods.getScmNo())
+        .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
+    
+    return new Cart(goods, option, store, quantity);
+  }
+  
   @Data
   @Builder
   @NoArgsConstructor
@@ -301,6 +441,7 @@ public class CartService {
   /**
    * Wrap method to manipulate modifiedAt manually
    */
+  @Transactional
   public Cart save(Cart cart) {
     cart.setModifiedAt(new Date());
     return cartRepository.save(cart);
@@ -310,6 +451,7 @@ public class CartService {
    * Wrap method to manipulate modifiedAt manually
    * This is used when update without modifiedAt change
    */
+  @Transactional
   public Cart update(Cart cart) {
     return cartRepository.save(cart);
   }
