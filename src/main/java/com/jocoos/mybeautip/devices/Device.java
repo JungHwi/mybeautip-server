@@ -59,6 +59,7 @@ public class Device extends MemberAuditable {
 
   public Device(String id) {
     this.id = id;
+    this.valid = true;  // default true
   }
 
   public void setCreatedBy(Member createdBy) {
