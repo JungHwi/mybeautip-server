@@ -28,6 +28,9 @@ import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.point.PointService;
+import com.jocoos.mybeautip.member.revenue.RevenuePayment;
+import com.jocoos.mybeautip.member.revenue.RevenuePaymentService;
+import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.OrderController;
@@ -63,7 +66,9 @@ public class OrderService {
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final CartRepository cartRepository;
+  private final RevenueRepository revenueRepository;
   private final RevenueService revenueService;
+  private final RevenuePaymentService revenuePaymentService;
   private final PointService pointService;
   private final IamportService iamportService;
   private final MessageService messageService;
@@ -80,7 +85,9 @@ public class OrderService {
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
                       CartRepository cartRepository,
+                      RevenueRepository revenueRepository,
                       RevenueService revenueService,
+                      RevenuePaymentService revenuePaymentService,
                       PointService pointService,
                       IamportService iamportService,
                       MessageService messageService,
@@ -96,7 +103,9 @@ public class OrderService {
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.cartRepository = cartRepository;
+    this.revenueRepository = revenueRepository;
     this.revenueService = revenueService;
+    this.revenuePaymentService = revenuePaymentService;
     this.pointService = pointService;
     this.iamportService = iamportService;
     this.messageService = messageService;
@@ -405,6 +414,33 @@ public class OrderService {
   
   public Long parseOrderId(String merchantId) throws NumberFormatException {
     return Long.parseLong(StringUtils.substringAfter(merchantId, MERCHANT_PREFIX));
+  }
+  
+  @Transactional
+  public Purchase confirm(Purchase purchase) {
+    log.debug("purchase confirmed: {}", purchase.getId());
+    
+    // Confirm revenue and Append monthly revenue estimatedAmount if revenue exist
+    revenueRepository.findByPurchaseId(purchase.getId())
+        .ifPresent(revenue -> {
+          RevenuePayment revenuePayment = revenue.getRevenuePayment();
+          if (revenuePayment == null) {
+            throw new NotFoundException("revenue_payment_not_found", "Revenue payment is null");
+          }
+          revenuePaymentService.appendEstimatedAmount(revenuePayment, revenue.getRevenue());
+  
+          memberRepository.findByIdAndDeletedAtIsNull(revenue.getVideo().getMember().getId())
+              .ifPresent(member -> {
+                member.setRevenueModifiedAt(new Date());
+                memberRepository.save(member);
+              });
+  
+          revenue.setConfirmed(true);
+          revenueRepository.save(revenue);
+        });
+  
+    purchase.setConfirmed(true);
+    return purchaseRepository.save(purchase);
   }
   
   @Transactional
