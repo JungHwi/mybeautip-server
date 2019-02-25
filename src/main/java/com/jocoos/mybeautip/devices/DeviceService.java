@@ -148,6 +148,10 @@ public class DeviceService {
       if (disabled(device)) {
         device.setValid(false); // invalidate device
         deviceRepository.save(device);
+        String username = (device.getCreatedBy() == null) ? "Guest" : device.getCreatedBy().getUsername();
+        Long userId = (device.getCreatedBy() == null) ? 0L : device.getCreatedBy().getId();
+        log.info(String.format("AmazonSNSException Device invalidated - name: %s, created_by: %s(%d), arn: %s",
+            device.getName(), username, userId, device.getArn()));
       }
     }
   }
@@ -248,6 +252,10 @@ public class DeviceService {
           if (disabled(device)) {
             device.setValid(false); // invalidate device
             deviceRepository.save(device);
+            String username = (device.getCreatedBy() == null) ? "Guest" : device.getCreatedBy().getUsername();
+            Long userId = (device.getCreatedBy() == null) ? 0L : device.getCreatedBy().getId();
+            log.info(String.format("Device invalidated - name: %s, created_by: %s(%d), arn: %s",
+                device.getName(), username, userId, device.getArn()));
           }
         });
     }
