@@ -546,14 +546,15 @@ public class VideoService {
     }
     
     video.setLocked(true);
-    return update(video);
+    feedService.feedDeletedVideo(video.getId());
+    return videoRepository.save(video);
   }
   
   @Transactional
   public Video unLockVideo(Video video) {
     log.debug("Video unlocked: " + video.getId());
     video.setLocked(false);
-    return update(video);
+    return videoRepository.save(video);
   }
   
   @Transactional
