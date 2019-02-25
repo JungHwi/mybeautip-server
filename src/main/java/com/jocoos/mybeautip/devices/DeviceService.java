@@ -106,9 +106,9 @@ public class DeviceService {
     Member member = device.getCreatedBy();
     
     if (member == null) {  // guest
-      return device.isPushable();
+      return device.isValid() && device.isPushable();
     } else {
-      return device.isPushable() && member.getPushable();
+      return device.isValid() && device.isPushable() && member.getPushable();
     }
   }
   
