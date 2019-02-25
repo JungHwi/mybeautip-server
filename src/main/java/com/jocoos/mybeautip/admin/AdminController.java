@@ -212,6 +212,18 @@ public class AdminController {
     return new ResponseEntity<>(details, HttpStatus.OK);
   }
 
+  @GetMapping(value = "/memberDetails", params = {"isReported=true"})
+  public ResponseEntity<Page<MemberDetailInfo>> getReportedMemberDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size) {
+
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "reportCount"));
+    Page<Member> members = memberRepository.findByVisibleAndReportCountNot(true, 0, pageable);
+
+    Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
   @GetMapping("/memberDetails")
   public ResponseEntity<Page<MemberDetailInfo>> getMemberDetails(
      @RequestParam(defaultValue = "true") boolean visible,
