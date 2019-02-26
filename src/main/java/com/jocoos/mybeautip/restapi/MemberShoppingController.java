@@ -1,23 +1,12 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.google.common.collect.Lists;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberMeInfo;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.coupon.Coupon;
-import com.jocoos.mybeautip.member.coupon.CouponService;
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.order.Order;
-import com.jocoos.mybeautip.member.order.OrderRepository;
-import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.point.MemberPointRepository;
-import com.jocoos.mybeautip.member.point.PointService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -31,8 +20,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.google.common.collect.Lists;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
+
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberMeInfo;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.coupon.Coupon;
+import com.jocoos.mybeautip.member.coupon.CouponService;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.order.OrderRepository;
+import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.point.MemberPointRepository;
+import com.jocoos.mybeautip.member.point.PointService;
 
 @Slf4j
 @RestController
@@ -77,9 +83,7 @@ public class MemberShoppingController {
   @GetMapping("/shoppings")
   public ResponseEntity<ShoppingInfo> getShopping() {
     Member member = memberService.currentMember();
-
-    Date now = new Date();
-    Date weekAgo = getWeekAgo(now);
+    Date weekAgo = DateUtils.addDays(new Date(), -7);
 
     int couponCount = couponService.countByCoupons(member);
     int expectedPoint = pointService.getExpectedPoint(member);
@@ -87,7 +91,9 @@ public class MemberShoppingController {
     PointInfo pointInfo = new PointInfo(member.getPoint(), expectedPoint);
     log.debug("point into: {}", pointInfo);
 
-    List<Order> list = orderRepository.findByCreatedByIdAndStateLessThanEqualAndCreatedAtBetween(member.getId(), 5, weekAgo, now);
+    List<Order> list = orderRepository.findByCreatedByIdAndStateLessThanEqual(member.getId(), 4);
+    List<Order> deliveredList = orderRepository.findByCreatedByIdAndStateAndDeliveredAtAfter(member.getId(), 5, weekAgo);
+    list.addAll(deliveredList);
     if (CollectionUtils.isEmpty(list)) {
       return new ResponseEntity<>(new ShoppingInfo(member, couponCount, pointInfo), HttpStatus.OK);
     }
