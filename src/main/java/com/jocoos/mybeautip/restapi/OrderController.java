@@ -333,6 +333,7 @@ public class OrderController {
     private String deliveryInfo;
     private String inquiryInfo;
     private String returnPolicy;
+    private Date deliveredAt;
     private Date createdAt;
     private Date modifiedAt;
 
@@ -422,6 +423,7 @@ public class OrderController {
     private String invoice;
     private String returnPolicy;
     private String inquiryInfo;
+    private Date deliveredAt;
     private Date createdAt;
 
 
