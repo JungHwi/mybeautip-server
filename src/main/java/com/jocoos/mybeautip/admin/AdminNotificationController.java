@@ -12,7 +12,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -26,8 +31,6 @@ import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.notification.Notification;
-import com.jocoos.mybeautip.notification.event.PushMessage;
 import com.jocoos.mybeautip.notification.event.PushMessageRepository;
 import com.jocoos.mybeautip.restapi.DeviceController;
 
@@ -134,29 +137,31 @@ public class AdminNotificationController {
       throw new BadRequestException(bindingResult.getFieldError());
     }
 
-    Pageable pageable = PageRequest.of(0, request.getSize());
-    Page<Device> devices = null;
+    List<Device> devices;
 
     Long memberId = request.getTarget();
     if (memberId!= null) {
-      devices = deviceRepository.findByCreatedByIdAndPushableAndValid(memberId, true, true, pageable);
+      devices = deviceRepository.findByCreatedByIdAndPushableAndValidAndCreatedByPushable(memberId, true, true, true);
     } else {
       String deviceOs = deviceService.getDeviceOs(request.getPlatform());
       if (deviceOs == null) {
-        devices = deviceRepository.findByPushableAndValid(true, true, pageable);
+        devices = deviceRepository.findByPushableAndValid(true, true);
+        for (Device device : devices) {
+          if (!deviceService.isPushable(device)) {
+            devices.remove(device);
+          }
+        }
       } else {
-        devices = deviceRepository.findByPushableAndValidAndOs(true, true, deviceOs, pageable);
+        devices = deviceRepository.findByPushableAndValidAndOs(true, true, deviceOs);
+        for (Device device : devices) {
+          if (!deviceService.isPushable(device)) {
+            devices.remove(device);
+          }
+        }
       }
     }
     
-    devices.forEach(device -> {
-      if (deviceService.isPushable(device)) {
-        deviceService.push(device, new Notification(device.getCreatedBy(), request.getTitle(),
-            request.getMessage(), request.getResourceType(), request.getResourceIds()));
-      }
-    });
-    
-    pushMessageRepository.save(new PushMessage(request, devices.getContent().size()));
+    deviceService.pushAll(devices, request);
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }
 
@@ -164,8 +169,6 @@ public class AdminNotificationController {
   @Data
   @NoArgsConstructor
   public static class NotificationRequest {
-    int size = 100;
-    
     @NotNull
     Integer platform;
     

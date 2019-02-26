@@ -13,11 +13,11 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
 
   List<Device> findByCreatedByIdAndValidIsTrue(Long created);
 
-  Page<Device> findByPushableAndValid(boolean pushable, boolean vaild, Pageable pageable);
+  List<Device> findByPushableAndValid(boolean pushable, boolean valid);
+  
+  List<Device> findByPushableAndValidAndOs(boolean pushable, boolean valid, String os);
 
-  Page<Device> findByPushableAndValidAndOs(boolean pushable, boolean vaild, String os, Pageable pageable);
-
-  Page<Device> findByCreatedByIdAndPushableAndValid(Long memberId, boolean pushable, boolean vaild, Pageable pageable);
+  List<Device> findByCreatedByIdAndPushableAndValidAndCreatedByPushable(Long memberId, boolean pushable, boolean vaild, boolean memberPushable);
 
   List<Device> findByCreatedByIdAndOs(Long created, String os);
 

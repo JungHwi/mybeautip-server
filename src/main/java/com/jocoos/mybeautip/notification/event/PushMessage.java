@@ -47,9 +47,18 @@ public class PushMessage extends MemberAuditable {
   @Column
   private Integer targetDeviceCount;
   
-  public PushMessage(AdminNotificationController.NotificationRequest request, int count) {
+  @Column
+  private Integer successCount;
+  
+  @Column
+  private Integer failCount;
+  
+  public PushMessage(AdminNotificationController.NotificationRequest request,
+                     int targetDeviceCount, int successCount, int failCount) {
     BeanUtils.copyProperties(request, this);
     this.body = request.getMessage();
-    this.targetDeviceCount = count;
+    this.targetDeviceCount = targetDeviceCount;
+    this.successCount = successCount;
+    this.failCount = failCount;
   }
 }
