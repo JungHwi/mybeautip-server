@@ -19,7 +19,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   Slice<Order> findByCreatedByIdAndCreatedAtBeforeAndStatusContains(Long createdBy, Date createdAt, String status, Pageable pageable);
 
-  List<Order> findByCreatedByIdAndStateLessThanEqualAndCreatedAtBetween(Long createdBy, int state, Date createdAtStart, Date createdAtEnd);
+  List<Order> findByCreatedByIdAndStateLessThanEqual(Long createdBy, int state);
+  
+  List<Order> findByCreatedByIdAndStateAndDeliveredAtAfter(Long createdBy, int state, Date weekAgo);
 
   /**
    * Apis for admin
