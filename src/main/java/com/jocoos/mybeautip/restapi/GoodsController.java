@@ -217,10 +217,7 @@ public class GoodsController {
           if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goodsNo, memberId).isPresent()) {
             throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
           }
-
-          goodsRepository.updateLikeCount(goodsNo, 1);
-          goods.setLikeCount(goods.getLikeCount() + 1);
-          GoodsLike goodsLike = goodsLikeRepository.save(new GoodsLike(goods));
+          GoodsLike goodsLike = goodsService.addLike(goods);
           GoodsLikeInfo info = new GoodsLikeInfo(goodsLike, goodsService.generateGoodsInfo(goods));
           return new ResponseEntity<>(info, HttpStatus.OK);
         })
@@ -232,18 +229,17 @@ public class GoodsController {
   public ResponseEntity<?> removeGoodsLike(@PathVariable String goodsNo,
                                            @PathVariable Long likeId) {
     Long memberId = memberService.currentMemberId();
-    return goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberId)
-        .map(goods -> {
-          Optional<GoodsLike> liked = goodsLikeRepository.findById(likeId);
-          if (!liked.isPresent()) {
-            throw new NotFoundException("like_not_found", "invalid goods like id");
-          }
-
-          goodsLikeRepository.delete(liked.get());
-          goodsRepository.updateLikeCount(goodsNo, -1);
-          return new ResponseEntity(HttpStatus.OK);
+    goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberId)
+        .orElseThrow(() -> new NotFoundException("like_not_found", "invalid goods no or like id"));
+  
+    goodsLikeRepository.findById(likeId)
+        .map(liked -> {
+          goodsService.removeLike(liked);
+          return Optional.empty();
         })
-        .orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no or like id"));
+        .orElseThrow(() -> new NotFoundException("like_not_found", "invalid goods like id"));
+   
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @Data

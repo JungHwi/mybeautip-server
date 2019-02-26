@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.security;
 
+import javax.transaction.Transactional;
 import java.util.Map;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -58,6 +59,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
   }
 
+  @Transactional
   private Member createRookie(Map<String, String> params) {
     Member member1 = new Member(params);
     log.debug("member1: {}", member1);

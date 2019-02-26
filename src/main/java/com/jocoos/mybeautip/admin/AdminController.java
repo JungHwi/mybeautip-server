@@ -201,9 +201,33 @@ public class AdminController {
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
+  @GetMapping(value = "/memberDetails", params = {"isDeleted=true"})
+  public ResponseEntity<Page<MemberDetailInfo>> getDeletedMemberDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size) {
+
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    Page<Member> members = memberRepository.findByDeletedAtIsNotNull(pageable);
+    Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/memberDetails", params = {"isReported=true"})
+  public ResponseEntity<Page<MemberDetailInfo>> getReportedMemberDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size) {
+
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "reportCount"));
+    Page<Member> members = memberRepository.findByVisibleAndReportCountNot(true, 0, pageable);
+
+    Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
   @GetMapping("/memberDetails")
   public ResponseEntity<Page<MemberDetailInfo>> getMemberDetails(
-     @RequestParam List<Integer> links,
+     @RequestParam(defaultValue = "true") boolean visible,
+     @RequestParam(defaultValue = "0") int link,
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "false") boolean isDeleted,
@@ -241,10 +265,10 @@ public class AdminController {
     }
 
     Page<Member> members = null;
-    if (isDeleted) {
-      members = memberRepository.findByLinkInAndEmailIsNotNullAndDeletedAtIsNotNull(links, pageable);
+    if (link > 0) {
+      members = memberRepository.findByLinkAndVisible(link, visible, pageable);
     } else {
-      members = memberRepository.findByLinkInAndDeletedAtIsNull(links, pageable);
+      members = memberRepository.findByVisible(visible, pageable);
     }
 
     Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
@@ -262,9 +286,9 @@ public class AdminController {
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
     Page<Member> members = null;
     if (!Strings.isNullOrEmpty(username)) {
-      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNullAndUsernameContaining(links, pushable, username, pageable);
+      members = memberRepository.findByVisibleAndPushableAndUsernameContaining(true, pushable, username, pageable);
     } else {
-      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNull(links, pushable, pageable);
+      members = memberRepository.findByVisibleAndPushable(true, pushable, pageable);
     }
 
     Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));

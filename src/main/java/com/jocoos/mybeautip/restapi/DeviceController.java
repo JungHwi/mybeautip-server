@@ -55,7 +55,7 @@ public class DeviceController {
     Member me = memberService.currentMember();
     if (me != null) {
     // Check member's devices validity
-      deviceService.validateAlreadyRegisteredDevices(me.getId());
+      deviceService.checkDevicesValidity(me.getId());
     }
 
     log.debug("request: {}, member: {}", request, me);

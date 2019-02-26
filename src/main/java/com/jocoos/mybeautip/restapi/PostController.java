@@ -136,9 +136,10 @@ public class PostController {
       PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
       log.debug("post info: {}", info);
 
-      postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
-         .ifPresent(like -> info.setLikeId(like.getId()));
-
+      if (me != null) {
+        postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
+            .ifPresent(like -> info.setLikeId(like.getId()));
+      }
       result.add(info);
     });
   
@@ -200,9 +201,11 @@ public class PostController {
          
          PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
          log.debug("post info: {}", info);
-
-         postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
-            .ifPresent(like -> info.setLikeId(like.getId()));
+      
+         if (memberId != null) {
+           postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
+               .ifPresent(like -> info.setLikeId(like.getId()));
+         }
          return new ResponseEntity<>(info, HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
@@ -243,7 +246,6 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
 
-  @Transactional
   @PostMapping("/{id:.+}/view_count")
   public ResponseEntity<?> addViewCount(@PathVariable Long id,
                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -252,13 +254,12 @@ public class PostController {
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
-         postRepository.updateViewCount(post.getId(), 1);
+         postService.updateViewCount(post, 1);
          return new ResponseEntity(HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
-
-  @Transactional
+  
   @PostMapping("/{id:.+}/likes")
   public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id,
                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -277,8 +278,7 @@ public class PostController {
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
   }
-
-  @Transactional
+  
   @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removePostLike(@PathVariable Long id,
                                           @PathVariable Long likeId){
@@ -378,7 +378,7 @@ public class PostController {
     if (request.getParentId() != null) {
       commentRepository.findById(request.getParentId())
          .map(parent -> {
-            commentRepository.updateCommentCount(parent.getId(), 1);
+            commentService.updateCount(parent, 1);
             return Optional.empty();
          })
          .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
@@ -404,7 +404,6 @@ public class PostController {
     );
   }
 
-  @Transactional
   @PatchMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long postId,
                                       @PathVariable Long id,
@@ -426,11 +425,7 @@ public class PostController {
          if (comment.getLocked()) {
            throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
          }
-         
-         tagService.touchRefCount(request.getComment());
-         tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-  
-         comment.setComment(request.getComment());
+         comment = commentService.updateComment(request, comment);
          return new ResponseEntity<>(
             new CommentInfo(commentRepository.save(comment), memberService.getMemberInfo(comment.getCreatedBy())),
             HttpStatus.OK
@@ -438,8 +433,7 @@ public class PostController {
        })
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
   }
-
-  @Transactional
+  
   @DeleteMapping("/{postId:.+}/comments/{id:.+}")
   public ResponseEntity<?> removeComment(@PathVariable Long postId,
                                          @PathVariable Long id,
@@ -456,7 +450,6 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
   }
 
-  @Transactional
   @PostMapping("/{postId:.+}/comments/{commentId:.+}/likes")
   public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long postId,
                                                         @PathVariable Long commentId,
@@ -473,7 +466,6 @@ public class PostController {
        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
   }
 
-  @Transactional
   @DeleteMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeCommentLike(@PathVariable Long postId,
                                                  @PathVariable Long commentId,

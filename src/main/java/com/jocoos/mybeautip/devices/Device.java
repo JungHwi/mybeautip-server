@@ -48,7 +48,7 @@ public class Device extends MemberAuditable {
   private String appVersion;
 
   @Column(nullable = false)
-  private boolean valid;
+  private boolean valid = true; // default value
   
   @Column(nullable = false)
   private boolean pushable;
@@ -56,10 +56,6 @@ public class Device extends MemberAuditable {
   @Column
   @LastModifiedDate
   private Date modifiedAt;
-
-  public Device(String id) {
-    this.id = id;
-  }
 
   public void setCreatedBy(Member createdBy) {
     this.createdBy = createdBy;

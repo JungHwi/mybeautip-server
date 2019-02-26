@@ -11,7 +11,7 @@ import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.Payment;
 import com.jocoos.mybeautip.member.order.Purchase;
 
-@Projection(name = "order_detail", types = Order.class)
+@Projection(name = "order_detail", types = {Order.class, Purchase.class})
 public interface OrderExcerpt {
 
   @Value("#{target.purchases}")
@@ -34,6 +34,8 @@ public interface OrderExcerpt {
   int getGoodsCount();
 
   Date getCreatedAt();
+
+  Date getDeliveredAt();
 
   String getOrderTitle();
 

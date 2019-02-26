@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
@@ -81,12 +80,10 @@ public class DeviceService {
   public Device create(DeviceController.UpdateDeviceRequest request, Member me) {
     Device device = copyBasicInfo(request, new Device());
     
-    if (request.getPushable() == null || !request.getPushable()) {  // disable device
-      device.setValid(false);
-      device.setPushable(false);
-    } else {  // enable device, pushable is set according to Member Info
-      device.setValid(true);
-      device.setPushable(true);
+    if (request.getPushable() == null) {
+      device.setPushable(false);  // default
+    } else {
+      device.setPushable(request.getPushable());
     }
   
     device.setCreatedBy(me);
@@ -96,37 +93,22 @@ public class DeviceService {
   @Transactional
   public Device update(DeviceController.UpdateDeviceRequest request, Device target, Member me) {
     Device device = copyBasicInfo(request, target);
-    device.setCreatedBy(me);
     
     if (request.getPushable() != null) {
-      if (!request.getPushable()) {  // disable device
-        device.setValid(false);
-        device.setPushable(false);
-      } else {  // enable device, pushable is set according to Member Info
-        device.setValid(true);
-        device.setPushable(true);
-      }
+      device.setPushable(request.getPushable());
     }
   
     device.setCreatedBy(me);
     return deviceRepository.save(device);
   }
   
-  public void disableAllDevices(Long memberId) {
-    deviceRepository.findByCreatedById(memberId).forEach(device -> {
-      device.setValid(false);
-      device.setPushable(false);
-      deviceRepository.save(device);
-    });
-  }
-  
-  private boolean isPushable(Device device) {
+  public boolean isPushable(Device device) {
     Member member = device.getCreatedBy();
     
     if (member == null) {  // guest
-      return device.isPushable();
+      return device.isValid() && device.isPushable();
     } else {
-      return device.isPushable() && member.getPushable();
+      return device.isValid() && device.isPushable() && member.getPushable();
     }
   }
   
@@ -146,6 +128,7 @@ public class DeviceService {
        platform == 2 ? Device.OS_NAME_ANDROID : null;
   }
 
+  @Transactional
   public void push(Device device, Notification notification) {
     String message = convertToGcmMessage(notification, device.getOs());
     log.debug("gcm message: {}", message);
@@ -161,10 +144,14 @@ public class DeviceService {
     } catch (AmazonSNSException e) {
       log.info("AmazonSNSException: " + e.getMessage());
       
-      if (!isValid(device)) {
-        device.setValid(false);
-        device.setPushable(false);
+      // Check device token validity
+      if (disabled(device)) {
+        device.setValid(false); // invalidate device
         deviceRepository.save(device);
+        String username = (device.getCreatedBy() == null) ? "Guest" : device.getCreatedBy().getUsername();
+        Long userId = (device.getCreatedBy() == null) ? 0L : device.getCreatedBy().getId();
+        log.info(String.format("AmazonSNSException Device invalidated - name: %s, created_by: %s(%d), arn: %s",
+            device.getName(), username, userId, device.getArn()));
       }
     }
   }
@@ -225,7 +212,7 @@ public class DeviceService {
     notification.put("badge", String.valueOf(badge));
     
     if ("android".equals(os)) {
-      data.put(KEY_DATA, notification);
+      data.put(KEY_DATA, message);
     } else {
       data.put(KEY_NOTIFICATION, notification);
       data.put(KEY_DATA, message);
@@ -259,29 +246,29 @@ public class DeviceService {
   }
   
   @Transactional
-  public void validateAlreadyRegisteredDevices(Long memberId) {
+  public void checkDevicesValidity(Long memberId) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(memberId)
         .forEach(device -> {
-          if (!isValid(device)) {
-            device.setValid(false);
-            device.setPushable(false);
+          if (disabled(device)) {
+            device.setValid(false); // invalidate device
             deviceRepository.save(device);
+            String username = (device.getCreatedBy() == null) ? "Guest" : device.getCreatedBy().getUsername();
+            Long userId = (device.getCreatedBy() == null) ? 0L : device.getCreatedBy().getId();
+            log.info(String.format("Device invalidated - name: %s, created_by: %s(%d), arn: %s",
+                device.getName(), username, userId, device.getArn()));
           }
         });
     }
   
-  private boolean isValid(Device device) {
-    boolean valid = true;
+  // Check device token validity through Amazon SNS
+  private boolean disabled(Device device) {
     GetEndpointAttributesRequest request = new GetEndpointAttributesRequest().withEndpointArn(device.getArn());
     GetEndpointAttributesResult result = amazonSNS.getEndpointAttributes(request);
+    
     if (result != null && result.getAttributes() != null) {
       String value = result.getAttributes().get("Enabled");
-      if (StringUtils.isNotEmpty(value)) {
-        if ("false".equalsIgnoreCase(value)) {
-          valid = false;
-        }
-      }
+      return "false".equalsIgnoreCase(value);
     }
-    return valid;
+    return false;
   }
 }

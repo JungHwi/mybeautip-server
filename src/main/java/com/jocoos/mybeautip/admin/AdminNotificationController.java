@@ -97,9 +97,9 @@ public class AdminNotificationController {
 
     Page<Member> members = null;
     if (!Strings.isNullOrEmpty(username)) {
-      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNullAndUsernameContaining(links, true, username, pageable);
+      members = memberRepository.findByVisibleAndPushableAndUsernameContaining(true, true, username, pageable);
     } else {
-      members = memberRepository.findByLinkInAndPushableAndDeletedAtIsNull(links, true, pageable);
+      members = memberRepository.findByVisibleAndPushable(true, true, pageable);
     }
 
     String deviceOs = deviceService.getDeviceOs(platform);
@@ -149,9 +149,12 @@ public class AdminNotificationController {
       }
     }
     
-    devices.forEach(device ->
-      deviceService.push(device, new Notification(device.getCreatedBy(), request.getTitle(),
-          request.getMessage(), request.getResourceType(), request.getResourceIds())));
+    devices.forEach(device -> {
+      if (deviceService.isPushable(device)) {
+        deviceService.push(device, new Notification(device.getCreatedBy(), request.getTitle(),
+            request.getMessage(), request.getResourceType(), request.getResourceIds()));
+      }
+    });
     
     pushMessageRepository.save(new PushMessage(request, devices.getContent().size()));
     return new ResponseEntity(HttpStatus.NO_CONTENT);

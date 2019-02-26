@@ -180,7 +180,7 @@ public class RecommendationController {
     Date now = new Date();
     List<RecommendedMotdBaseInfo> result = videos.stream()
        .map(base -> {
-         Slice<MotdRecommendation> motds = motdRecommendationRepository.findByBaseIdAndStartedAtBeforeAndEndedAtAfter(base.getId(), now, now,
+         Slice<MotdRecommendation> motds = motdRecommendationRepository.findByBaseIdAndStartedAtBeforeAndEndedAtAfterAndVideoDeletedAtIsNull(base.getId(), now, now,
             PageRequest.of(0, base.getMotdCount(), Sort.Direction.DESC, "seq", "createdAt"));
          return new RecommendedMotdBaseInfo(base, createMotdList(motds));
        })

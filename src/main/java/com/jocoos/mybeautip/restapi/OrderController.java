@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
@@ -257,6 +258,9 @@ public class OrderController {
     @Min(0)
     private int point;
     
+    @Size(max = 20)
+    private String buyerPhoneNumber = "";
+    
     @NotNull
     private CreateDeliveryRequest delivery;
     @NotNull
@@ -326,6 +330,9 @@ public class OrderController {
     private DeliveryInfo delivery;
     private PaymentInfo payment;
     private List<PurchaseInfo> purchases;
+    private String deliveryInfo;
+    private String inquiryInfo;
+    private String returnPolicy;
     private Date createdAt;
     private Date modifiedAt;
 
@@ -413,6 +420,8 @@ public class OrderController {
     private Long inquireId;
     private String carrier;
     private String invoice;
+    private String returnPolicy;
+    private String inquiryInfo;
     private Date createdAt;
 
 

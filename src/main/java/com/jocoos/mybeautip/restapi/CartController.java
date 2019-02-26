@@ -1,15 +1,20 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +31,7 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.cart.Cart;
 import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.cart.CartService;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.store.Store;
 import com.jocoos.mybeautip.store.StoreRepository;
 
@@ -75,80 +81,34 @@ public class CartController {
 
   @GetMapping
   public CartService.CartInfo getCartItemList() {
-    return cartService.getCartItemList();
+    return cartService.getCartItemList(memberService.currentMemberId());
   }
-
-  @Transactional
+  
   @PostMapping
   public CartService.CartInfo addCart(@Valid @RequestBody AddCartRequest request,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     if (request.getItems().size() + cartRepository.countByCreatedById(memberService.currentMemberId()) > 100) {
       throw new BadRequestException("too_many_items", messageService.getMessage(CART_TOO_MANY_ITEMS, lang));
     }
-    
-    for (CartItemRequest requestItem : request.getItems()) {
-      Cart item = getValidCartItem(requestItem.getGoodsNo(), requestItem.getOptionNo(), requestItem.getQuantity(), lang);
-      
-      Optional<Cart> optionalCart;
-      if (item.getOption() == null) {
-        optionalCart = cartRepository.findByGoodsGoodsNoAndCreatedById(item.getGoods().getGoodsNo(), memberService.currentMemberId());
-      } else {
-        optionalCart = cartRepository.findByGoodsGoodsNoAndOptionOptionNoAndCreatedById(
-            item.getGoods().getGoodsNo(), item.getOption().getOptionNo(), memberService.currentMemberId());
-      }
-  
-      if (optionalCart.isPresent()) { // Update quantity
-        Cart cart = optionalCart.get();
-        cart.setQuantity(item.getQuantity());
-        cartService.update(cart);
-      } else {  // Insert new item
-        cartService.save(item);
-      }
-    }
-    return cartService.getCartItemList();
+    return cartService.addItems(request, memberService.currentMemberId(), lang);
   }
 
-  @Transactional
   @PatchMapping("/all")
   public CartService.CartInfo updateAllCart(@Valid @RequestBody UpdateCartRequest request) {
-    boolean checked = (request.getChecked() == null) ? true : request.getChecked();
-    cartRepository.updateAllChecked(checked, memberService.currentMember());
-
-    return cartService.getCartItemList();
+    return cartService.updateAllItems(request, memberService.currentMember());
   }
 
-  @Transactional
   @PatchMapping("{id}")
   public CartService.CartInfo updateCart(@PathVariable Long id,
                                          @Valid @RequestBody UpdateCartRequest request,
                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Cart item = cartRepository.findByIdAndCreatedById(id, memberService.currentMemberId())
-        .map(cart -> {
-          if (request.getQuantity() != null && request.getQuantity() > 0) {
-            cart.setQuantity(request.getQuantity());
-          }
-          if (request.getChecked() != null) {
-            cart.setChecked(request.getChecked());
-          }
-          return cart;
-        })
-        .orElseThrow(() -> new NotFoundException("cart_item_not_found", messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
-
-    cartService.update(item);
-    return cartService.getCartItemList();
+    return cartService.updateItem(id, memberService.currentMemberId(), request, lang);
   }
 
-  @Transactional
   @DeleteMapping("{id}")
   public CartService.CartInfo removeCart(@PathVariable Long id,
                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Optional<Cart> optional = cartRepository.findByIdAndCreatedById(id, memberService.currentMemberId());
-    if (optional.isPresent()) {
-      cartRepository.deleteById(id);
-    } else {
-      throw new NotFoundException("cart_item_not_found", messageService.getMessage(CART_ITEM_NOT_FOUND, lang));
-    }
-    return cartService.getCartItemList();
+    return cartService.removeItem(id, memberService.currentMemberId(), lang);
   }
 
   @PostMapping("/now")
@@ -203,13 +163,13 @@ public class CartController {
 
   @Data
   @NoArgsConstructor
-  private static class AddCartRequest {
+  public static class AddCartRequest {
     List<CartItemRequest> items;
   }
 
   @Data
   @NoArgsConstructor
-  private static class CartItemRequest {
+  public static class CartItemRequest {
     @NotNull
     private String goodsNo;
 
@@ -222,7 +182,7 @@ public class CartController {
 
   @Data
   @NoArgsConstructor
-  private static class UpdateCartRequest {
+  public static class UpdateCartRequest {
     private Boolean checked;
     private Integer quantity;
   }

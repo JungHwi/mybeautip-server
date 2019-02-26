@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.security;
 
+import javax.transaction.Transactional;
 import java.util.Map;
 
 import com.google.common.base.Strings;
@@ -53,6 +54,7 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
     return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
   }
 
+  @Transactional
   private Member createRookie(Map<String, String> params) {
     Member member = memberRepository.save(new Member(params));
     kakaoMemberRepository.save(new KakaoMember(params.get("kakao_id"), member.getId()));

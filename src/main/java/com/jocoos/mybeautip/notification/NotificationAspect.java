@@ -142,6 +142,18 @@ public class NotificationAspect {
     }
   }
   
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.cancelOrderInquireByAdmin(..))",
+      returning = "result")
+  public void onAfterReturningOrderCancelByAdmin(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+    
+    if (result instanceof OrderInquiry) {
+      OrderInquiry orderInquiry = (OrderInquiry) result;
+      log.debug("orderInquiry: {}", orderInquiry);
+      slackService.sendForOrderCancelByAdmin(orderInquiry);
+    }
+  }
+  
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.inquiryExchangeOrReturn(..))",
       returning = "result")
   public void onAfterReturningOrderExchangeOrReturn(JoinPoint joinPoint, Object result) {

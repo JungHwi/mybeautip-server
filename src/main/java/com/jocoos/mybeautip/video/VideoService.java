@@ -300,6 +300,57 @@ public class VideoService {
   }
   
   @Transactional
+  public void removeGuestWatcher(Video video, String guestName) {
+    videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestName)
+        .ifPresent(videoWatchRepository::delete);
+  }
+  
+  @Transactional
+  public void removeWatcher(Video video, Member me) {
+    videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId())
+        .ifPresent(videoWatchRepository::delete);
+  }
+  
+  @Transactional
+  public Video create(VideoController.CreateVideoRequest request) {
+    Video video = new Video(memberService.currentMember());
+    BeanUtils.copyProperties(request, video);
+    Video createdVideo = videoRepository.save(video); // do not notify
+  
+    if (StringUtils.isNotEmpty(createdVideo.getContent())) {
+      tagService.increaseRefCount(createdVideo.getContent());
+      tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());
+    }
+  
+    // Set related goods info
+    if (StringUtils.isNotEmpty(request.getData())) {
+      String[] userData = StringUtils.deleteWhitespace(request.getData()).split(",");
+      List<VideoGoods> videoGoods = new ArrayList<>();
+      for (String goods : userData) {
+        if (goods.length() != 10) { // invalid goodsNo
+          continue;
+        }
+        goodsRepository.findByGoodsNo(goods).map(g -> {
+          videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
+          return Optional.empty();
+        });
+      }
+    
+      if (videoGoods.size() > 0) {
+        videoGoodsRepository.saveAll(videoGoods);
+      
+        // Set related goods count & one thumbnail image
+        String url = videoGoods.get(0).getGoods().getListImageData().toString();
+        createdVideo.setRelatedGoodsThumbnailUrl(url);
+        createdVideo.setRelatedGoodsCount(videoGoods.size());
+        videoRepository.save(createdVideo);
+      }
+    }
+    
+    return createdVideo;
+  }
+  
+  @Transactional
   public Video startVideo(CallbackController.CallbackStartVideoRequest request, Member member) {
     // Ignore when videoKey is already exist
     if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
@@ -467,6 +518,8 @@ public class VideoService {
   
   @Transactional
   public void deleteComment(Comment comment) {
+    tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+    
     videoRepository.updateCommentCount(comment.getVideoId(), -1);
     if (comment.getParentId() != null) {
       commentRepository.updateCommentCount(comment.getParentId(), -1);
@@ -493,14 +546,15 @@ public class VideoService {
     }
     
     video.setLocked(true);
-    return update(video);
+    feedService.feedDeletedVideo(video.getId());
+    return videoRepository.save(video);
   }
   
   @Transactional
   public Video unLockVideo(Video video) {
     log.debug("Video unlocked: " + video.getId());
     video.setLocked(false);
-    return update(video);
+    return videoRepository.save(video);
   }
   
   @Transactional

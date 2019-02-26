@@ -19,6 +19,8 @@ public class MemberDetailInfo extends MemberInfo {
   private int link;
   private int point;
   private int revenue;
+  private int publicVideoCount;
+  private int totalVideoCount;
 
   public MemberDetailInfo(Member member) {
     BeanUtils.copyProperties(member, this);

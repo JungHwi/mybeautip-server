@@ -21,6 +21,8 @@ import com.jocoos.mybeautip.store.Store;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.store.StoreRepository;
+import com.jocoos.mybeautip.store.StoreService;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,7 @@ public class StoreController {
   private final MemberService memberService;
   private final GoodsService goodsService;
   private final MessageService messageService;
+  private final StoreService storeService;
   private final StoreRepository storeRepository;
   private final StoreLikeRepository storeLikeRepository;
   private final GoodsRepository goodsRepository;
@@ -52,12 +55,14 @@ public class StoreController {
   public StoreController(MemberService memberService,
                          GoodsService goodsService,
                          MessageService messageService,
+                         StoreService storeService,
                          StoreRepository storeRepository,
                          StoreLikeRepository storeLikeRepository,
                          GoodsRepository goodsRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.messageService = messageService;
+    this.storeService = storeService;
     this.storeRepository = storeRepository;
     this.storeLikeRepository = storeLikeRepository;
     this.goodsRepository = goodsRepository;
@@ -124,8 +129,7 @@ public class StoreController {
       .withCursor(nextCursor)
       .toBuild();
   }
-
-  @Transactional
+  
   @PostMapping("/{id:.+}/likes")
   public ResponseEntity<StoreController.StoreLikeInfo> addStoreLike(@PathVariable Integer id,
                                                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -136,33 +140,27 @@ public class StoreController {
         if (storeLikeRepository.findByStoreIdAndCreatedById(storeId, memberId).isPresent()) {
           throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
         }
-
-        storeRepository.updateLikeCount(id, 1);
-        store.setLikeCount(store.getLikeCount() + 1);
-
-        StoreLike storeLike = storeLikeRepository.save(new StoreLike(store));
+        StoreLike storeLike = storeService.addLike(store);
         return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
   }
-
-  @Transactional
+  
   @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeStoreLike(@PathVariable Integer id,
                                            @PathVariable Long likeId){
     Long memberId = memberService.currentMemberId();
-    return storeLikeRepository.findByIdAndStoreIdAndCreatedById(likeId, id, memberId)
-      .map(store -> {
-        Optional<StoreLike> liked = storeLikeRepository.findById(likeId);
-        if (!liked.isPresent()) {
-          throw new NotFoundException("like_not_found", "invalid store like id");
-        }
-
-        storeLikeRepository.delete(liked.get());
-        storeRepository.updateLikeCount(id, -1);
-        return new ResponseEntity(HttpStatus.OK);
-      })
-      .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id or like id"));
+    storeLikeRepository.findByIdAndStoreIdAndCreatedById(likeId, id, memberId)
+        .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id or like id"));
+   
+    storeLikeRepository.findById(likeId)
+        .map(like -> {
+          storeService.removeLike(like);
+          return Optional.empty();
+        })
+      .orElseThrow(() -> new NotFoundException("like_not_found", "invalid store like id"));
+  
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @PatchMapping("/cover/{id:.+}")

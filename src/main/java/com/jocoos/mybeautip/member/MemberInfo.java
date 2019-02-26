@@ -15,6 +15,7 @@ public class MemberInfo {
   private Long id;
   private String username;
   private String email;
+  private String phoneNumber;
   private String avatarUrl;
   private String intro;
   private PermissionInfo permission;
@@ -31,6 +32,7 @@ public class MemberInfo {
     this.id = member.getId();
     this.username = member.getUsername();
     this.email = member.getEmail();
+    this.phoneNumber = Strings.isNullOrEmpty(member.getPhoneNumber()) ? "" : member.getPhoneNumber();
     this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
     this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
     this.createdAt = member.getCreatedAt();

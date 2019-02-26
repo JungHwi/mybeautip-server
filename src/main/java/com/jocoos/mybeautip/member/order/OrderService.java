@@ -18,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.exception.PaymentConflictException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
@@ -28,6 +28,9 @@ import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.point.PointService;
+import com.jocoos.mybeautip.member.revenue.RevenuePayment;
+import com.jocoos.mybeautip.member.revenue.RevenuePaymentService;
+import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.OrderController;
@@ -50,6 +53,7 @@ public class OrderService {
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String POINT_BAD_REQUEST = "order.point_bad_rqeust";
   private static final String POINT_NOT_ENOUGH = "order.point_not_enough";
+  private final static String MERCHANT_PREFIX = "mybeautip_";
 
   private final SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmssSSS");
   private final OrderRepository orderRepository;
@@ -62,7 +66,9 @@ public class OrderService {
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final CartRepository cartRepository;
+  private final RevenueRepository revenueRepository;
   private final RevenueService revenueService;
+  private final RevenuePaymentService revenuePaymentService;
   private final PointService pointService;
   private final IamportService iamportService;
   private final MessageService messageService;
@@ -79,7 +85,9 @@ public class OrderService {
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
                       CartRepository cartRepository,
+                      RevenueRepository revenueRepository,
                       RevenueService revenueService,
+                      RevenuePaymentService revenuePaymentService,
                       PointService pointService,
                       IamportService iamportService,
                       MessageService messageService,
@@ -95,7 +103,9 @@ public class OrderService {
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.cartRepository = cartRepository;
+    this.revenueRepository = revenueRepository;
     this.revenueService = revenueService;
+    this.revenuePaymentService = revenuePaymentService;
     this.pointService = pointService;
     this.iamportService = iamportService;
     this.messageService = messageService;
@@ -124,6 +134,12 @@ public class OrderService {
       if (member.getPoint() < request.getPoint()) {
         throw new BadRequestException("point_not_enough", messageService.getMessage(POINT_NOT_ENOUGH, lang));
       }
+    }
+    
+    // Modify member phoneNumber with Order buyerPhoneNumber
+    if (!member.getPhoneNumber().equals(request.getBuyerPhoneNumber())) {
+      member.setPhoneNumber(request.getBuyerPhoneNumber());
+      memberRepository.save(member);
     }
 
     if (request.getCouponId() != null) {
@@ -251,13 +267,13 @@ public class OrderService {
 
   @Transactional
   public Order notifyPayment(Order order, String status, String impUid) {
-    log.debug(String.format("notifyPayment called, id: %d, status: %s, impUid: %s ", order.getId(), status, impUid));
+    log.info(String.format("notifyPayment called, id: %d, status: %s, impUid: %s ", order.getId(), status, impUid));
     PaymentResponse response = iamportService.getPayment(iamportService.getToken(), impUid);
     
     if (response.getCode() != 0 || response.getResponse() == null) {
-      log.warn("invalid_import_response, notifyPayment response is not success: " + response.getMessage());
-      slackService.sendForImportPaymentException(impUid);
-      throw new MybeautipRuntimeException("invalid_import_response", "notifyPayment response is not success");
+      log.warn("invalid_iamport_response, notifyPayment response is not success: " + response.getMessage());
+      slackService.sendForImportGetPaymentException(impUid, response.toString());
+      throw new PaymentConflictException();
     }
     
     Payment payment = checkPaymentAndUpdate(order.getId(), impUid);
@@ -295,13 +311,13 @@ public class OrderService {
              }
            } else {
              String failReason = iamportData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
-             log.warn("invalid_import_response, fail reason: {}", failReason);
-             slackService.sendForImportPaymentMismatch(paymentId);
+             log.warn("invalid_iamport_response, fail reason: ", failReason);
+             slackService.sendForImportPaymentMismatch(paymentId, response.toString());
              payment.setState(state | Payment.STATE_FAILED);
              payment.setMessage(failReason);
            }
          } else {
-           slackService.sendForImportPaymentException(paymentId);
+           slackService.sendForImportGetPaymentException(paymentId, response.toString());
            payment.setMessage(response.getMessage());
            payment.setPaymentId(paymentId);
            payment.setState(state | Payment.STATE_STOPPED);
@@ -312,9 +328,13 @@ public class OrderService {
        })
     .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid order id or payment id"));
   }
-
+  
+  /**
+   * Update order status and relative purchases of order
+   */
   @Transactional
   private void saveOrderAndPurchasesStatus(Order order, String status) {
+    log.info(String.format("saveOrderAndPurchasesStatus called, id: %d, status: %s", order.getId(), status));
     order.setStatus(status);
     order.getPurchases().forEach(p -> p.setStatus(status));
 
@@ -324,10 +344,10 @@ public class OrderService {
   
   @Transactional
   private void completeOrder(Order order) {
-    log.debug(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
+    log.info(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.Status.PAID);
 
-    log.debug(String.format("completeOrder point: %d", order.getPoint()));
+    log.info(String.format("completeOrder point: %d", order.getPoint()));
     if (order.getPoint() >= minimumPoint) {
       Member member = order.getCreatedBy();
       member.setPoint(member.getPoint() - order.getPoint());
@@ -390,5 +410,65 @@ public class OrderService {
             .ifPresent(cartRepository::delete);
       }
     }
+  }
+  
+  public Long parseOrderId(String merchantId) throws NumberFormatException {
+    return Long.parseLong(StringUtils.substringAfter(merchantId, MERCHANT_PREFIX));
+  }
+  
+  @Transactional
+  public Purchase confirm(Purchase purchase) {
+    log.debug("purchase confirmed: {}", purchase.getId());
+    
+    // Confirm revenue and Append monthly revenue estimatedAmount if revenue exist
+    revenueRepository.findByPurchaseId(purchase.getId())
+        .ifPresent(revenue -> {
+          RevenuePayment revenuePayment = revenue.getRevenuePayment();
+          if (revenuePayment == null) {
+            throw new NotFoundException("revenue_payment_not_found", "Revenue payment is null");
+          }
+          revenuePaymentService.appendEstimatedAmount(revenuePayment, revenue.getRevenue());
+  
+          memberRepository.findByIdAndDeletedAtIsNull(revenue.getVideo().getMember().getId())
+              .ifPresent(member -> {
+                member.setRevenueModifiedAt(new Date());
+                memberRepository.save(member);
+              });
+  
+          revenue.setConfirmed(true);
+          revenueRepository.save(revenue);
+        });
+  
+    purchase.setConfirmed(true);
+    return purchaseRepository.save(purchase);
+  }
+  
+  @Transactional
+  public OrderInquiry cancelOrderInquireByAdmin(Order order, Payment payment, Byte state, String reason) {
+    if (order.getState() != Order.State.PAID.getValue()) {
+      throw new BadRequestException("invalid_order_state", "Invalid order state: " + order.getState());
+    }
+    
+    log.debug("cancel order: {}", order);
+    
+    // 1. Prepare order cancel
+    order.setStatus(Order.Status.ORDER_CANCELLING);
+    orderRepository.save(order);
+    
+    // 2. Create order cancel inquiry
+    OrderInquiry orderInquiry = new OrderInquiry(order, state, reason);
+    orderInquiry = orderInquiryRepository.save(orderInquiry);
+  
+    // 3. Cancel order and payment without Iamport
+    saveOrderAndPurchasesStatus(order, Order.Status.ORDER_CANCELLED);
+    payment.setState(Payment.STATE_CANCELLED);
+    payment.setMessage(reason);
+    paymentRepository.save(payment);
+  
+    // 4. Complete order cancel inquiry
+    orderInquiry.setCompleted(true);
+    orderInquiry.setCreatedBy(order.getCreatedBy());
+    orderInquiryRepository.save(orderInquiry);
+    return orderInquiry;
   }
 }

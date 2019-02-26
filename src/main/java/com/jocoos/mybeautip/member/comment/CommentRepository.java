@@ -47,6 +47,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
   Slice<Comment> findByCreatedByIdAndParentIdIsNull(Long id, Pageable pageable);
 
-  Page<Comment> findByPostId(Long id, Pageable pageable);
+  Page<Comment> findByPostId(Long postId, Pageable pageable);
 }
 
