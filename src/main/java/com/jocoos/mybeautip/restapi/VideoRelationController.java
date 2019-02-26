@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -19,9 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.recommendation.MotdRecommendation;
 import com.jocoos.mybeautip.recommendation.MotdRecommendationRepository;
-import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @RestController
@@ -101,7 +110,7 @@ public class VideoRelationController {
       return createResponse(Lists.newArrayList(combines), id, count, cursor);
     }
 
-    Slice<MotdRecommendation> recommendations = motdRecommendationRepository.findByVideoCreatedAtBefore(dateCursor, page);
+    Slice<MotdRecommendation> recommendations = motdRecommendationRepository.findByVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNotAndCreatedAtBefore("PUBLIC", "CREATED", dateCursor, page);
     recommendations.stream().forEach(r -> {
       if (combines.size() < count) {
         if (!r.getVideo().getId().equals(id)) {
