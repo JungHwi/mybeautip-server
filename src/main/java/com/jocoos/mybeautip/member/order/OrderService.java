@@ -53,6 +53,8 @@ public class OrderService {
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String POINT_BAD_REQUEST = "order.point_bad_rqeust";
   private static final String POINT_NOT_ENOUGH = "order.point_not_enough";
+  private static final String POINT_BAD_REQUEST_MIN_PRICE_CONDITION= "order.price_not_enough_to_use_point";
+  private static final int MIN_PRICE_TO_USE_POINT= 30000;
   private final static String MERCHANT_PREFIX = "mybeautip_";
 
   private final SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmssSSS");
@@ -133,6 +135,12 @@ public class OrderService {
 
       if (member.getPoint() < request.getPoint()) {
         throw new BadRequestException("point_not_enough", messageService.getMessage(POINT_NOT_ENOUGH, lang));
+      }
+      
+      int price = request.getPriceAmount() + request.getShippingAmount() - request.getDeductionAmount();
+      if (price < MIN_PRICE_TO_USE_POINT) {
+        throw new BadRequestException("point_bad_request",
+            messageService.getMessage(POINT_BAD_REQUEST_MIN_PRICE_CONDITION, lang));
       }
     }
     
@@ -353,11 +361,11 @@ public class OrderService {
       member.setPoint(member.getPoint() - order.getPoint());
       memberRepository.save(member);
 
-      pointService.usePoints(member, order.getPoint());
+      pointService.usePoints(order, order.getPoint());
     }
 
     if (order.getMemberCoupon() == null) {
-      pointService.earnPoints(order.getCreatedBy(), order.getExpectedPoint());
+      pointService.earnPoints(order);
     }
 
     if (order.getVideoId() != null) {
@@ -441,6 +449,18 @@ public class OrderService {
   
     purchase.setConfirmed(true);
     return purchaseRepository.save(purchase);
+  }
+  
+  @Transactional
+  public void completeDelivery(Order order, Date deliveredAt) {
+    List<Purchase> purchases = order.getPurchases();
+    for (Purchase purchase : purchases) {
+      if (purchase.getDeliveredAt() == null) {
+        return; // order can complete delivery after all purchase already had delivered
+      }
+    }
+    order.setDeliveredAt(deliveredAt);
+    orderRepository.save(order);
   }
   
   @Transactional
