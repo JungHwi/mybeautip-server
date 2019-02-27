@@ -452,6 +452,18 @@ public class OrderService {
   }
   
   @Transactional
+  public void completeDelivery(Order order, Date deliveredAt) {
+    List<Purchase> purchases = order.getPurchases();
+    for (Purchase purchase : purchases) {
+      if (purchase.getDeliveredAt() == null) {
+        return; // order can complete delivery after all purchase already had delivered
+      }
+    }
+    order.setDeliveredAt(deliveredAt);
+    orderRepository.save(order);
+  }
+  
+  @Transactional
   public OrderInquiry cancelOrderInquireByAdmin(Order order, Payment payment, Byte state, String reason) {
     if (order.getState() != Order.State.PAID.getValue()) {
       throw new BadRequestException("invalid_order_state", "Invalid order state: " + order.getState());
