@@ -14,14 +14,14 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.admin.AdminNotificationController;
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "push_messages")
-public class PushMessage extends MemberAuditable {
+public class PushMessage extends CreatedDateAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

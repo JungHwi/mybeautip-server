@@ -1,13 +1,22 @@
 package com.jocoos.mybeautip.member.point;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import com.jocoos.mybeautip.member.Member;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import java.util.Date;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.util.Date;
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.order.Order;
 
 @NoArgsConstructor
 @Data
@@ -34,6 +43,10 @@ public class MemberPoint extends CreatedDateAuditable {
   @ManyToOne
   @JoinColumn(name = "member_id")
   private Member member;
+  
+  @ManyToOne
+  @JoinColumn(name = "order_id")
+  private Order order;
 
   @Column
   private Date earnedAt;
@@ -41,12 +54,13 @@ public class MemberPoint extends CreatedDateAuditable {
   @Column
   private Date expiredAt;
 
-  public MemberPoint(Member member, int point) {
-    this(member, point, STATE_WILL_BE_EARNED);
+  public MemberPoint(Member member, Order order, int point) {
+    this(member, order, point, STATE_WILL_BE_EARNED);
   }
 
-  public MemberPoint(Member member, int point, int state) {
+  public MemberPoint(Member member, Order order, int point, int state) {
     this.member = member;
+    this.order = order;
     this.point = point;
     this.state = state;
   }

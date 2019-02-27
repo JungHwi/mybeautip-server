@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.order.Order;
 
 @Slf4j
 @Service
@@ -32,25 +33,25 @@ public class PointService {
     return sum.get();
   }
 
-  public void earnPoints(Member member, Integer point) {
-    if (member == null) {
+  public void earnPoints(Order order) {
+    if (order.getCreatedBy() == null) {
       return;
     }
 
-    log.debug("member id: {}, earned point: {}", member.getId(), point);
+    log.debug("member id: {}, order id: {}, earned point: {}", order.getCreatedBy().getId(), order.getId(), order.getExpectedPoint());
 
-    MemberPoint memberPoint = new MemberPoint(member, point);
+    MemberPoint memberPoint = new MemberPoint(order.getCreatedBy(), order, order.getExpectedPoint());
     memberPointRepository.save(memberPoint);
   }
 
-  public void usePoints(Member member, int point) {
-    if (member == null) {
+  public void usePoints(Order order, int point) {
+    if (order.getCreatedBy() == null) {
       return;
     }
 
-    log.debug("member id: {}, use point: {}", member.getId(), point);
+    log.debug("member id: {}, order id: {}, use point: {}", order.getCreatedBy().getId(), order.getId(), point);
 
-    MemberPoint memberPoint = new MemberPoint(member, point, MemberPoint.STATE_USE_POINT);
+    MemberPoint memberPoint = new MemberPoint(order.getCreatedBy(), order, point, MemberPoint.STATE_USE_POINT);
     memberPointRepository.save(memberPoint);
   }
 }
