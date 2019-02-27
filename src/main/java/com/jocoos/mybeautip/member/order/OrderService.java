@@ -361,11 +361,11 @@ public class OrderService {
       member.setPoint(member.getPoint() - order.getPoint());
       memberRepository.save(member);
 
-      pointService.usePoints(member, order.getPoint());
+      pointService.usePoints(order, order.getPoint());
     }
 
     if (order.getMemberCoupon() == null) {
-      pointService.earnPoints(order.getCreatedBy(), order.getExpectedPoint());
+      pointService.earnPoints(order);
     }
 
     if (order.getVideoId() != null) {

@@ -86,7 +86,7 @@ public class MemberGiftTask {
     memberPoint.setExpiredAt(expiredAt);
     memberPointRepository.save(memberPoint);
 
-    MemberPoint expiredPoint = new MemberPoint(memberPoint.getMember(), memberPoint.getPoint(), MemberPoint.STATE_EXPIRED_POINT);
+    MemberPoint expiredPoint = new MemberPoint(memberPoint.getMember(), null, memberPoint.getPoint(), MemberPoint.STATE_EXPIRED_POINT);
     expiredPoint.setCreatedAt(expiredAt);
     memberPointRepository.save(expiredPoint);
 
