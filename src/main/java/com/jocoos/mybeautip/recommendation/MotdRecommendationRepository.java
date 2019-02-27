@@ -12,8 +12,10 @@ public interface MotdRecommendationRepository extends JpaRepository<MotdRecommen
 
   Optional<MotdRecommendation> findByVideoId(Long id);
 
-  Slice<MotdRecommendation> findByVideoCreatedAtBefore(Date createdAt, Pageable pageable);
+  Slice<MotdRecommendation> findByVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNotAndCreatedAtBefore(String visibility, String state, Date createdAt, Pageable pageable);
 
   Slice<MotdRecommendation> findByBaseIdAndStartedAtBeforeAndEndedAtAfterAndVideoDeletedAtIsNull(Long baseId, Date statedAt, Date endedAt, Pageable pageable);
+
+  Page<MotdRecommendation> findByVideoTypeAndVideoDeletedAtIsNull(String type, Pageable pageable);
 
 }

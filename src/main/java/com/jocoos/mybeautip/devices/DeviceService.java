@@ -2,12 +2,14 @@ package com.jocoos.mybeautip.devices;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.sns.AmazonSNS;
@@ -22,11 +24,14 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.admin.AdminNotificationController;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.Notification;
 import com.jocoos.mybeautip.notification.NotificationRepository;
+import com.jocoos.mybeautip.notification.event.PushMessage;
+import com.jocoos.mybeautip.notification.event.PushMessageRepository;
 import com.jocoos.mybeautip.restapi.DeviceController;
 
 @Slf4j
@@ -41,6 +46,7 @@ public class DeviceService {
   private final MessageService messageService;
   private final DeviceRepository deviceRepository;
   private final NotificationRepository notificationRepository;
+  private final PushMessageRepository pushMessageRepository;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.aws.sns.application.gcm-arn}")
@@ -53,12 +59,14 @@ public class DeviceService {
                        DeviceRepository deviceRepository,
                        MessageService messageService,
                        NotificationRepository notificationRepository,
+                       PushMessageRepository pushMessageRepository,
                        ObjectMapper objectMapper,
                        AmazonSNS amazonSNS) {
     this.memberService = memberService;
     this.deviceRepository = deviceRepository;
     this.messageService = messageService;
     this.notificationRepository = notificationRepository;
+    this.pushMessageRepository = pushMessageRepository;
     this.objectMapper = objectMapper;
     this.amazonSNS = amazonSNS;
   }
@@ -127,9 +135,24 @@ public class DeviceService {
     return platform == 1 ? Device.OS_NAME_IOS :
        platform == 2 ? Device.OS_NAME_ANDROID : null;
   }
+  
+  @Async
+  public void pushAll(List<Device> devices, AdminNotificationController.NotificationRequest request) {
+    int successCount = 0;
+    int failCount = 0;
+    for (Device device : devices) {
+      if (push(device, new Notification(device.getCreatedBy(),
+          request.getTitle(), request.getMessage(), request.getResourceType(), request.getResourceIds()))) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+    }
+    pushMessageRepository.save(new PushMessage(request, devices.size(), successCount, failCount));
+  }
 
   @Transactional
-  public void push(Device device, Notification notification) {
+  public boolean push(Device device, Notification notification) {
     String message = convertToGcmMessage(notification, device.getOs());
     log.debug("gcm message: {}", message);
 
@@ -141,6 +164,7 @@ public class DeviceService {
 
       PublishResult result = amazonSNS.publish(request);
       log.debug("result: {}", result);
+      return true;
     } catch (AmazonSNSException e) {
       log.info("AmazonSNSException: " + e.getMessage());
       
@@ -154,6 +178,7 @@ public class DeviceService {
             device.getName(), username, userId, device.getArn()));
       }
     }
+    return false;
   }
 
   private String convertToGcmMessage(Notification notification, String os) {

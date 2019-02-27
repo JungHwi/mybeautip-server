@@ -379,7 +379,7 @@ public class RecommendationController {
     private List<RecommendedMotdInfo> motds;
     private Date createdAt;
     private int motdCount;
-    private int exposedCount;
+    private int exposedCount = 0;
 
     public RecommendedMotdBaseInfo(MotdRecommendationBase motdRecommendationBase) {
       BeanUtils.copyProperties(motdRecommendationBase, this);

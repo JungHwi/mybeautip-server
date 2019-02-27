@@ -91,7 +91,7 @@ public class CallbackController {
             throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
           }
           
-          if (v.getLocked() && "PUBLIC".equals(v.getVisibility())) {
+          if (v.getLocked() && "PUBLIC".equals(request.getVisibility())) {
             throw new BadRequestException("video_locked", "Video Locked.");
           }
           
