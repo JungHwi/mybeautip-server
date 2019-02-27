@@ -49,19 +49,9 @@ public class MemberGiftTask {
   }
 
   @Scheduled(fixedDelay = 5000)
-  public void earnAndExpiredPoints() {
-    Date daysAgo = getDays(-earnedAfterDays);
-    List<MemberPoint> convertables = memberPointRepository.findByStateAndCreatedAtBeforeAndEarnedAtIsNull(MemberPoint.STATE_WILL_BE_EARNED, daysAgo);
-    if (!CollectionUtils.isEmpty(convertables)) {
-      log.debug("convertable points found: {}", convertables);
-      convertables.stream().forEach(memberPoint -> {
-        convertPoint(memberPoint);
-      });
-    }
-
+  public void removePoints() {
     Date yearAgo = getYears(-1);
-
-
+    
     List<MemberPoint> expires = memberPointRepository.findByStateAndEarnedAtBeforeAndExpiredAtIsNull(MemberPoint.STATE_EARNED_POINT, yearAgo);
     if (!CollectionUtils.isEmpty(expires)) {
       log.debug("expired at : {}", dateFormat.format(yearAgo));
