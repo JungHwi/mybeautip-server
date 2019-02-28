@@ -24,6 +24,8 @@ import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -239,6 +241,7 @@ public class VideoService {
     return comments;
   }
 
+  @Synchronized
   @Transactional
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
