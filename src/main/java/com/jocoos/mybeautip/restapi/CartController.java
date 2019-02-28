@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -164,6 +165,7 @@ public class CartController {
   @Data
   @NoArgsConstructor
   public static class AddCartRequest {
+    @Valid
     List<CartItemRequest> items;
   }
 
@@ -174,10 +176,11 @@ public class CartController {
     private String goodsNo;
 
     @NotNull
-    private int optionNo;
+    private Integer optionNo;
 
     @NotNull
-    private int quantity;
+    @Min(1)
+    private Integer quantity;
   }
 
   @Data
