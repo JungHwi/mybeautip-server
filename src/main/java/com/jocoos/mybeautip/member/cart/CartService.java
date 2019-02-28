@@ -213,7 +213,8 @@ public class CartService {
     
       if (optionalCart.isPresent()) { // Update quantity
         Cart cart = optionalCart.get();
-        cart.setQuantity(item.getQuantity());
+        checkQuantityValidity(cart.getGoods(), cart.getOption(), cart.getQuantity() + item.getQuantity(), lang);
+        cart.setQuantity(cart.getQuantity() + item.getQuantity());
         update(cart);
       } else {  // Insert new item
         save(item);
@@ -301,6 +302,33 @@ public class CartService {
         .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
     
     return new Cart(goods, option, store, quantity);
+  }
+  
+  private void checkQuantityValidity(Goods goods, GoodsOption option, int quantity, String lang) {
+    if ("y".equals(goods.getSoldOutFl())) { // 품절 플래그
+      throw new BadRequestException("goods_sold_out", messageService.getMessage(CART_GOODS_SOLD_OUT, lang));
+    }
+    
+    if ("y".equals(goods.getStockFl()) && quantity > goods.getTotalStock()) { // 재고량에 따름, 총 재고량 추가
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+    }
+  
+    if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity < goods.getMinOrderCnt()) { // 최소구매수량 미만
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+    }
+  
+    if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity > goods.getMaxOrderCnt()) { // 최대구매수량 초과
+      throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+    }
+    
+    if ("y".equals(goods.getOptionFl())) {
+      if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
+        throw new BadRequestException("option_sold_out", messageService.getMessage(CART_OPTION_SOLD_OUT, lang));
+      }
+      if ("y".equals(goods.getStockFl()) && quantity > option.getStockCnt()) { // 재고량에 따름
+        throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+      }
+    }
   }
   
   @Data
