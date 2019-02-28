@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,14 +35,11 @@ public class TagService {
   
   private final TagRepository tagRepository;
   private final TagHistoryRepository tagHistoryRepository;
-  private final ObjectMapper objectMapper;
   
   public TagService(TagRepository tagRepository,
-                    TagHistoryRepository tagHistoryRepository,
-                    ObjectMapper objectMapper) {
+                    TagHistoryRepository tagHistoryRepository) {
     this.tagRepository = tagRepository;
     this.tagHistoryRepository = tagHistoryRepository;
-    this.objectMapper = objectMapper;
   }
   
   // Save tags without increasing refCount
@@ -106,6 +103,7 @@ public class TagService {
     }
   }
   
+  @Synchronized
   @Transactional
   public void addHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
@@ -130,6 +128,7 @@ public class TagService {
     tagHistoryRepository.findByCreatedBy(me).forEach(tagHistoryRepository::delete);
   }
   
+  @Synchronized
   @Transactional
   public void updateHistory(String oldText, String newText, int category, long resourceId, Member me) {
     List<String> oldTagNames = parseHashTag(oldText);
