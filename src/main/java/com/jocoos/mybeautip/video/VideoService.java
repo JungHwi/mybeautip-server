@@ -241,7 +241,6 @@ public class VideoService {
     return comments;
   }
 
-  @Synchronized
   @Transactional
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
