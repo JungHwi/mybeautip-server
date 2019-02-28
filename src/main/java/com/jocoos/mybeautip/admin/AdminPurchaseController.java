@@ -44,50 +44,30 @@ public class AdminPurchaseController {
     this.purchaseRepository = purchaseRepository;
   }
   
-  @PatchMapping("/{id}")
-  public ResponseEntity<OrderController.PurchaseInfo> update(@PathVariable("id") Long id,
-                                                             @RequestBody UpdatePurchaseRequest request) {
+  @PatchMapping("/{id}/delivered")
+  public ResponseEntity<OrderController.PurchaseInfo> completeDelivered(@PathVariable("id") Long id,
+                                                                        @RequestBody UpdatePurchaseRequest request) {
     Purchase purchase = purchaseRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("purchase_not_found", "Purchase not found"));
+    Order order = orderRepository.findById(purchase.getOrderId())
+        .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found"));
     
-    // Complete Delivery
-    if (request.getDeliveredAt() != null) {
-      Order order = orderRepository.findById(purchase.getOrderId())
-          .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found"));
-      
-      if (purchase.getDeliveredAt() != null || order.getDeliveredAt() != null) {
-        throw new BadRequestException("already_delivered", "Already delivered");
-      }
-      
-      // Complete purchase delivery
-      purchase = purchaseService.completeDelivery(purchase, request.getDeliveredAt());
-      
-      // Complete order deliver
-      orderService.completeDelivery(order, request.getDeliveredAt());
-  
-      OrderController.PurchaseInfo info = new OrderController.PurchaseInfo(purchase);
-      return new ResponseEntity<>(info, HttpStatus.OK);
+    if (purchase.isDelivered() || order.getDeliveredAt() != null) {
+      throw new BadRequestException("already_delivered", "Already delivered");
+    }
+    if (!purchase.isDelivering()) {
+      throw new BadRequestException("required purchase status delivering - " + purchase.getStatus());
     }
     
-    // Confirm purchase
-    if (request.getConfirmed() == null || !request.getConfirmed()) {
-      throw new BadRequestException("invalid_request", "Valid 'confirmed' value is true");
-    } else {
-      purchase = purchaseRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException("purchase_not_found", "Purchase not found"));
-      
-      if (purchase.getConfirmed()) {
-        throw new BadRequestException("already_confirmed", "Already confirmed");
-      }
-      purchase = orderService.confirm(purchase);
-      OrderController.PurchaseInfo info = new OrderController.PurchaseInfo(purchase);
-      return new ResponseEntity<>(info, HttpStatus.OK);
-    }
+    // Complete purchase & order delivery
+    Date deliveredAt = (request.getDeliveredAt()) == null ? new Date() : request.getDeliveredAt();
+    purchase = purchaseService.completeDelivery(purchase, order, deliveredAt);
+    OrderController.PurchaseInfo info = new OrderController.PurchaseInfo(purchase);
+    return new ResponseEntity<>(info, HttpStatus.OK);
   }
   
   @Data
   private static class UpdatePurchaseRequest {
-    private Boolean confirmed;
     private Date deliveredAt;
   }
 }

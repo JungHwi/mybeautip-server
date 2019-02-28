@@ -204,7 +204,7 @@ public class OrderService {
     }
 
     String status;
-    if (purchase.isDevlivering() || purchase.isDevlivered()) {
+    if (purchase.isDelivering() || purchase.isDelivered()) {
       switch (state) {
         case 1:
           status = Order.Status.ORDER_EXCHANGING;
@@ -449,18 +449,6 @@ public class OrderService {
   
     purchase.setConfirmed(true);
     return purchaseRepository.save(purchase);
-  }
-  
-  @Transactional
-  public void completeDelivery(Order order, Date deliveredAt) {
-    List<Purchase> purchases = order.getPurchases();
-    for (Purchase purchase : purchases) {
-      if (purchase.getDeliveredAt() == null) {
-        return; // order can complete delivery after all purchase already had delivered
-      }
-    }
-    order.setDeliveredAt(deliveredAt);
-    orderRepository.save(order);
   }
   
   @Transactional

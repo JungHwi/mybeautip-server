@@ -119,11 +119,11 @@ public class Purchase extends CreatedDateAuditable {
     this.state = state.getValue();
   }
 
-  public boolean isDevlivering() {
+  public boolean isDelivering() {
     return Order.State.DELIVERING.getValue() == this.state;
   }
 
-  public boolean isDevlivered() {
+  public boolean isDelivered() {
     return Order.State.DELIVERED.getValue() == this.state;
   }
 
