@@ -1,14 +1,11 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
-import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
-import com.jocoos.mybeautip.search.SearchHistory;
-import com.jocoos.mybeautip.search.SearchHistoryRepository;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +16,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
+import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
+import com.jocoos.mybeautip.search.SearchHistory;
+import com.jocoos.mybeautip.search.SearchHistoryRepository;
 
 @Slf4j
 @RestController
@@ -48,13 +53,14 @@ public class KeywordController {
   
     count = validateRequestAndGetValidCount(count, scope, keyword, method);
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
+    Member me = memberService.currentMember();
     
     switch (scope) {
       case "me":
         if (StringUtils.isBlank(keyword)) {
-          return getMyKeywords(page);
+          return getMyKeywords(me, page);
         } else {
-          return searchMyKeywords(keyword, method, page);
+          return searchMyKeywords(me, keyword, method, page);
         }
       case "all":
         if (StringUtils.isBlank(keyword)) {
@@ -75,36 +81,24 @@ public class KeywordController {
     return new ArrayList<>();
   }
   
-  private List<KeywordInfo> getMyKeywords(Pageable page) {
-    List<SearchHistory> list = searchHistoryRepository.findByCreatedBy(memberService.currentMember(), page);
-    List<KeywordInfo> info = new ArrayList<>();
-    for (SearchHistory history : list) {
-      info.add(new KeywordInfo(history));
-    }
-    return info;
+  private List<KeywordInfo> getMyKeywords(Member me, Pageable page) {
+    List<SearchHistory> list = searchHistoryRepository.findByCreatedBy(me, page);
+    return getDistinctKeywordInfoList(list);
   }
   
-  private List<KeywordInfo> searchMyKeywords(String keyword, String method, Pageable page) {
+  private List<KeywordInfo> searchMyKeywords(Member me, String keyword, String method, Pageable page) {
     List<SearchHistory> list;
     if ("contain".equals(method)) {
-      list = searchHistoryRepository.findByCreatedByAndKeywordContaining(memberService.currentMember(), keyword, page);
+      list = searchHistoryRepository.findByCreatedByAndKeywordContaining(me, keyword, page);
     } else {
       list = searchHistoryRepository.findByCreatedByAndKeywordStartingWith(memberService.currentMember(), keyword, page);
     }
-    List<KeywordInfo> info = new ArrayList<>();
-    for (SearchHistory item : list) {
-      info.add(new KeywordInfo(item));
-    }
-    return info;
+    return getDistinctKeywordInfoList(list);
   }
   
   private List<KeywordInfo> getAllKeywords(Pageable page) {
     Page<SearchHistory> list = searchHistoryRepository.findAll(page);
-    List<KeywordInfo> info = new ArrayList<>();
-    for (SearchHistory item : list) {
-      info.add(new KeywordInfo(item));
-    }
-    return info;
+    return getDistinctKeywordInfoList(list.getContent());
   }
   
   private List<KeywordInfo> searchAllKeywords(String keyword, String method, Pageable page) {
@@ -114,8 +108,18 @@ public class KeywordController {
     } else {
       list = searchHistoryRepository.findByKeywordStartingWith(keyword, page);
     }
+    return getDistinctKeywordInfoList(list);
+  }
+  
+  private List<KeywordInfo> getDistinctKeywordInfoList(List<SearchHistory> list) {
+    Map<String, SearchHistory> map = new HashMap<>();
+    for (SearchHistory history : list) {
+      if (!map.containsKey(history.getKeyword())) {
+        map.put(history.getKeyword(), history);
+      }
+    }
     List<KeywordInfo> info = new ArrayList<>();
-    for (SearchHistory item : list) {
+    for (SearchHistory item : map.values()) {
       info.add(new KeywordInfo(item));
     }
     return info;
@@ -144,7 +148,7 @@ public class KeywordController {
     return info;
   }
   
-  public int validateRequestAndGetValidCount(int count, String scope, String keyword, String method) {
+  private int validateRequestAndGetValidCount(int count, String scope, String keyword, String method) {
     String[] validScopes = {"me", "all", "recommended"};
     String[] validMethods = {"start", "contain"};
 

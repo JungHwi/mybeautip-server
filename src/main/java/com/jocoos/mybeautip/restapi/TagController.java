@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -48,13 +51,14 @@ public class TagController {
   
     count = validateRequestAndGetValidCount(count, scope, keyword, method);
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
+    Member me = memberService.currentMember();
     
     switch (scope) {
       case "me":
         if (StringUtils.isBlank(keyword)) {
-          return getMyTags(page);
+          return getMyTags(me, page);
         } else {
-          return searchMyTags(keyword, method, page);
+          return searchMyTags(me, keyword, method, page);
         }
       case "all":
         if (StringUtils.isBlank(keyword)) {
@@ -75,36 +79,24 @@ public class TagController {
     return new ArrayList<>();
   }
   
-  private List<TagInfo> getMyTags(Pageable page) {
-    List<TagHistory> list = tagHistoryRepository.findByCreatedBy(memberService.currentMember(), page);
-    List<TagInfo> info = new ArrayList<>();
-    for (TagHistory history : list) {
-      info.add(new TagInfo(history));
-    }
-    return info;
+  private List<TagInfo> getMyTags(Member me, Pageable page) {
+    List<TagHistory> list = tagHistoryRepository.findByCreatedBy(me, page);
+    return getDistinctTagInfoList(list);
   }
   
-  private List<TagInfo> searchMyTags(String keyword, String method, Pageable page) {
+  private List<TagInfo> searchMyTags(Member me, String keyword, String method, Pageable page) {
     List<TagHistory> list;
     if ("contain".equals(method)) {
-      list = tagHistoryRepository.findByCreatedByAndTagNameContaining(memberService.currentMember(), keyword, page);
+      list = tagHistoryRepository.findByCreatedByAndTagNameContaining(me, keyword, page);
     } else {
-      list = tagHistoryRepository.findByCreatedByAndTagNameStartingWith(memberService.currentMember(), keyword, page);
+      list = tagHistoryRepository.findByCreatedByAndTagNameStartingWith(me, keyword, page);
     }
-    List<TagInfo> info = new ArrayList<>();
-    for (TagHistory item : list) {
-      info.add(new TagInfo(item));
-    }
-    return info;
+    return getDistinctTagInfoList(list);
   }
   
   private List<TagInfo> getAllTags(Pageable page) {
     Page<TagHistory> list = tagHistoryRepository.findAll(page);
-    List<TagInfo> info = new ArrayList<>();
-    for (TagHistory item : list) {
-      info.add(new TagInfo(item));
-    }
-    return info;
+    return getDistinctTagInfoList(list.getContent());
   }
   
   private List<TagInfo> searchAllTags(String keyword, String method, Pageable page) {
@@ -114,8 +106,18 @@ public class TagController {
     } else {
       list = tagHistoryRepository.findByTagNameStartingWith(keyword, page);
     }
+    return getDistinctTagInfoList(list);
+  }
+  
+  private List<TagInfo> getDistinctTagInfoList(List<TagHistory> list) {
+    Map<String, TagHistory> map = new HashMap<>();
+    for (TagHistory history : list) {
+      if (!map.containsKey(history.getTag().getName())) {
+        map.put(history.getTag().getName(), history);
+      }
+    }
     List<TagInfo> info = new ArrayList<>();
-    for (TagHistory item : list) {
+    for (TagHistory item : map.values()) {
       info.add(new TagInfo(item));
     }
     return info;
@@ -144,7 +146,7 @@ public class TagController {
     return info;
   }
   
-  public int validateRequestAndGetValidCount(int count, String scope, String keyword, String method) {
+  private int validateRequestAndGetValidCount(int count, String scope, String keyword, String method) {
     String[] validScopes = {"me", "all", "recommended"};
     String[] validMethods = {"start", "contain"};
 
