@@ -197,6 +197,7 @@ public class VideoController {
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
   
     if (StringUtils.isNotBlank(keyword)) {
+      keyword = keyword.trim();
       keywordService.updateKeywordCount(keyword);
       keywordService.logHistory(keyword, KeywordService.KeywordCategory.VIDEO, memberService.currentMember());
     }

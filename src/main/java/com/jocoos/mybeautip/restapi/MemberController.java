@@ -253,6 +253,7 @@ public class MemberController {
     }
   
     if (StringUtils.isNotBlank(keyword)) {
+      keyword = keyword.trim();
       keywordService.updateKeywordCount(keyword);
       keywordService.logHistory(keyword, KeywordService.KeywordCategory.MEMBER, memberService.currentMember());
     }
