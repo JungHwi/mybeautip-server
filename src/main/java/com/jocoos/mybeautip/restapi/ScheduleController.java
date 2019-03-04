@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.schedules.ScheduleRepository;
 
@@ -58,10 +59,12 @@ public class ScheduleController {
     private Date startedAt;
     private Date modifiedAt;
     private Date deletedAt;
+    private MemberInfo member;
 
     public ScheduleInfo(Schedule s) {
       BeanUtils.copyProperties(s, this);
       this.createdBy = s.getCreatedBy().getId();
+      this.member = new MemberInfo((s.getCreatedBy()));
     }
   }
 }
