@@ -61,6 +61,7 @@ public class ScheduleController {
 
     public ScheduleInfo(Schedule s) {
       BeanUtils.copyProperties(s, this);
+      this.createdBy = s.getCreatedBy().getId();
     }
   }
 }
