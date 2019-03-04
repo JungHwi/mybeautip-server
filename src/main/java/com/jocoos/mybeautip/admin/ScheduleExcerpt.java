@@ -8,7 +8,7 @@ import org.springframework.data.rest.core.config.Projection;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.schedules.Schedule;
 
-@Projection(name = "reported_member", types = Schedule.class)
+@Projection(name = "schedule_details", types = Schedule.class)
 public interface ScheduleExcerpt {
 
   Long getId();
