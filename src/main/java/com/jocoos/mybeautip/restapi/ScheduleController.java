@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +37,7 @@ public class ScheduleController {
 
   @GetMapping
   public ResponseEntity<ScheduleInfo[]> getSchduels(@RequestParam(defaultValue = "10") int count) {
-    PageRequest pageRequest = PageRequest.of(0, count);
+    PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
 
     Instant instant = Instant.now().minus(LIVE_INTERVAL_MIN, ChronoUnit.MINUTES);
     Date now = Date.from(instant);
