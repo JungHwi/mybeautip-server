@@ -535,6 +535,51 @@ public class OrderService {
     orderInquiry.setCompleted(true);
     orderInquiry.setCreatedBy(order.getCreatedBy());
     orderInquiryRepository.save(orderInquiry);
+  
+    // Revoke used coupon
+    if (order.getMemberCoupon() != null) {
+      log.info("Order canceled - coupon revoked: {}, {}", order.getId(), order.getMemberCoupon());
+      MemberCoupon memberCoupon = order.getMemberCoupon();
+      memberCoupon.setUsedAt(null);
+      memberCouponRepository.save(memberCoupon);
+    }
+  
+    // Revoke used point
+    if (order.getPoint() > 0) {
+      log.info("Order canceled - used point revoked: {}, {}", order.getId(), order.getPoint());
+      Member member = order.getCreatedBy();
+      member.setPoint(member.getPoint() + order.getPoint());
+      memberRepository.save(member);
+    
+      memberPointRepository.findByMemberAndOrderAndPointAndState(
+          order.getCreatedBy(), order, order.getPoint(), MemberPoint.STATE_USE_POINT)
+          .ifPresent(memberPointRepository::delete);
+    }
+  
+    // Remove expected earning point
+    if (order.getExpectedPoint() > 0) {
+      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getMemberCoupon());
+      memberPointRepository.findByMemberAndOrderAndPointAndState(
+          order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
+          .ifPresent(memberPointRepository::delete);
+    }
+  
+    // Revoke video order count & revenues
+    if (order.getVideoId() != null) {
+      videoRepository.findById(order.getVideoId())
+          .ifPresent(video -> {
+            // Update video order count
+            videoRepository.updateOrderCount(order.getVideoId(), -1);
+          
+            // Remove revenues
+            log.info("Order canceled - revenue per purchase removed: {}, {}", order.getId(), order.getMemberCoupon());
+            for (Purchase purchase : order.getPurchases()) {
+              revenueRepository.findByPurchaseId(purchase.getId())
+                  .ifPresent(revenueService::remove);
+            }
+          });
+    }
+    
     return orderInquiry;
   }
 }
