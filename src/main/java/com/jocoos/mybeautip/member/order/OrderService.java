@@ -42,6 +42,7 @@ import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
@@ -70,6 +71,7 @@ public class OrderService {
   private final VideoGoodsRepository videoGoodsRepository;
   private final CartRepository cartRepository;
   private final RevenueRepository revenueRepository;
+  private final VideoRepository videoRepository;
   private final RevenueService revenueService;
   private final RevenuePaymentService revenuePaymentService;
   private final PointService pointService;
@@ -90,6 +92,7 @@ public class OrderService {
                       VideoGoodsRepository videoGoodsRepository,
                       CartRepository cartRepository,
                       RevenueRepository revenueRepository,
+                      VideoRepository videoRepository,
                       RevenueService revenueService,
                       RevenuePaymentService revenuePaymentService,
                       PointService pointService,
@@ -109,6 +112,7 @@ public class OrderService {
     this.videoGoodsRepository = videoGoodsRepository;
     this.cartRepository = cartRepository;
     this.revenueRepository = revenueRepository;
+    this.videoRepository = videoRepository;
     this.revenueService = revenueService;
     this.revenuePaymentService = revenuePaymentService;
     this.pointService = pointService;
@@ -275,6 +279,18 @@ public class OrderService {
     OrderInquiry orderInquiry = orderInquiryRepository.findByOrderAndCreatedBy(order, order.getCreatedBy()).orElseThrow(() -> new NotFoundException("inquire_not_found", "invalid inquire id"));
     orderInquiry.setCompleted(true);
     orderInquiryRepository.save(orderInquiry);
+    
+    if (order.getVideoId() != null) {
+      videoRepository.findById(order.getVideoId())
+          .ifPresent(video -> videoRepository.updateOrderCount(order.getVideoId(), -1));
+    }
+  
+    // TODO: if videoId exists, remove revenue
+  
+    // TODO: remove expected earning point
+    
+    // TODO: revoke coupon, point
+    
   }
 
   @Transactional
@@ -374,7 +390,7 @@ public class OrderService {
 
     if (order.getVideoId() != null) {
       saveRevenuesForSeller(order);
-      videoService.updateOrderCount(order.getVideoId(), 1); // TODO: decrease when order cancelled
+      videoRepository.updateOrderCount(order.getVideoId(), 1);
       notificationService.notifyOrder(order, order.getVideoId());
     }
     
