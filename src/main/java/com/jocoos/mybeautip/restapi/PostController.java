@@ -1,8 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.transaction.Transactional;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +32,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.comment.CreateCommentRequest;
+import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
@@ -51,7 +51,6 @@ import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.comment.CommentService;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostContent;
@@ -66,7 +65,6 @@ import com.jocoos.mybeautip.tag.TagService;
 @RestController
 @RequestMapping(path = "/api/1/posts", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PostController {
-  
   private final PostService postService;
   private final PostRepository postRepository;
   private final PostLikeRepository postLikeRepository;
@@ -378,31 +376,11 @@ public class PostController {
 
     if (request.getParentId() != null) {
       commentRepository.findById(request.getParentId())
-         .map(parent -> {
-            commentService.updateCount(parent, 1);
-            return Optional.empty();
-         })
          .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
     }
-
-    Comment comment = new Comment();
-    comment.setPostId(id);
-    BeanUtils.copyProperties(request, comment);
-    postRepository.updateCommentCount(id, 1);
-    comment = commentService.save(comment);
   
-    tagService.touchRefCount(comment.getComment());
-    tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-
-    List<MentionTag> mentionTags = request.getMentionTags();
-    if (mentionTags != null && mentionTags.size() > 0) {
-      mentionService.updatePostCommentWithMention(comment, mentionTags);
-    }
-
-    return new ResponseEntity<>(
-       new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy())),
-       HttpStatus.OK
-    );
+    Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_POST, id);
+    return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
   }
 
   @PatchMapping("/{postId:.+}/comments/{id:.+}")
@@ -553,22 +531,6 @@ public class PostController {
       BeanUtils.copyProperties(post, this);
       this.createdBy = createdBy;
     }
-  }
-
-  @Data
-  public static class CreateCommentRequest {
-    @NotNull @Size(max = 500)
-    private String comment;
-
-    private Long parentId;
-
-    private List<MentionTag> mentionTags;
-  }
-
-  @Data
-  public static class UpdateCommentRequest {
-    @NotNull @Size(max = 500)
-    private String comment;
   }
 
   @Data

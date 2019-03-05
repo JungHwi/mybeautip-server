@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -35,6 +34,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.comment.CreateCommentRequest;
+import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -52,7 +53,6 @@ import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.comment.CommentService;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.member.revenue.Revenue;
 import com.jocoos.mybeautip.member.revenue.RevenueInfo;
 import com.jocoos.mybeautip.member.revenue.RevenueOverview;
@@ -287,7 +287,6 @@ public class VideoController {
       .withTotalCount(totalCount).toBuild();
   }
   
-  @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
@@ -304,42 +303,20 @@ public class VideoController {
     
     videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-
+  
     if (request.getParentId() != null) {
       commentRepository.findById(request.getParentId())
-        .map(parent -> {
-          commentService.updateCount(parent, 1);
-          return Optional.empty();
-        })
-        .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+          .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
     }
-
-    Comment comment = new Comment();
-    comment.setVideoId(id);
-    BeanUtils.copyProperties(request, comment);
-    videoRepository.updateCommentCount(id, 1);
-    comment = commentService.save(comment);
     
-    tagService.touchRefCount(comment.getComment());
-    tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-    
-    List<MentionTag> mentionTags = request.getMentionTags();
-    if (mentionTags != null && mentionTags.size() > 0) {
-      mentionService.updateVideoCommentWithMention(comment, mentionTags);
-    } else {
-      notificationService.notifyAddComment(comment);
-    }
-
-    return new ResponseEntity<>(
-      new CommentInfo(comment),
-      HttpStatus.OK
-    );
+    Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_VIDEO, id);
+    return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
   }
   
   @PatchMapping("/{videoId:.+}/comments/{id:.+}")
   public ResponseEntity updateComment(@PathVariable Long videoId,
                                       @PathVariable Long id,
-                                      @RequestBody VideoController.UpdateCommentRequest request,
+                                      @RequestBody UpdateCommentRequest request,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
                                       BindingResult bindingResult) {
 
@@ -628,7 +605,6 @@ public class VideoController {
   /**
    * Add Heart
    */
-  @Transactional
   @PostMapping(value = "/{id:.+}/hearts")
   public ResponseEntity<VideoInfo> heartVideo(@PathVariable Long id,
                                               @Valid @RequestBody(required = false) VideoHeartRequest request,
@@ -746,24 +722,6 @@ public class VideoController {
     String data = "";
     Boolean muted = false;
     Boolean locked = false;
-  }
-
-  @Data
-  private static class CreateCommentRequest {
-    @NotNull
-    @Size(max = 500)
-    private String comment;
-
-    private Long parentId;
-
-    private List<MentionTag> mentionTags;
-  }
-
-  @Data
-  public static class UpdateCommentRequest {
-    @NotNull
-    @Size(max = 500)
-    private String comment;
   }
 
   @Data
