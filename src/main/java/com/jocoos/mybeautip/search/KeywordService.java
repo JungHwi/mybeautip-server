@@ -35,6 +35,7 @@ public class KeywordService {
     }
   }
   
+  @Synchronized
   @Transactional
   public void logHistory(String keyword, KeywordCategory category, Member member) {
     Optional<SearchHistory> optional = searchHistoryRepository.findByKeywordAndCategoryAndCreatedBy(
