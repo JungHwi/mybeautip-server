@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.recommendation.MemberRecommendation;
+import com.jocoos.mybeautip.schedules.Schedule;
 
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
@@ -21,6 +22,7 @@ public class MemberDetailInfo extends MemberInfo {
   private int revenue;
   private int publicVideoCount;
   private int totalVideoCount;
+  private Schedule schedule;
 
   public MemberDetailInfo(Member member) {
     BeanUtils.copyProperties(member, this);

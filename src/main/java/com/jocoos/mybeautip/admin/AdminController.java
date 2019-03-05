@@ -44,6 +44,8 @@ import com.jocoos.mybeautip.post.PostContent;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
 import com.jocoos.mybeautip.restapi.PostController;
+import com.jocoos.mybeautip.schedules.Schedule;
+import com.jocoos.mybeautip.schedules.ScheduleRepository;
 import com.jocoos.mybeautip.store.StoreRepository;
 import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.tag.TagRepository;
@@ -73,6 +75,7 @@ public class AdminController {
   private final StoreRepository storeRepository;
   private final VideoRepository videoRepository;
   private final VideoReportRepository videoReportRepository;
+  private final ScheduleRepository scheduleRepository;
   private final TagRepository tagRepository;
   private final VideoService videoService;
   private final TagService tagService;
@@ -92,7 +95,7 @@ public class AdminController {
                          StoreRepository storeRepository,
                          VideoRepository videoRepository,
                          VideoReportRepository videoReportRepository,
-                         TagRepository tagRepository,
+                         ScheduleRepository scheduleRepository, TagRepository tagRepository,
                          VideoService videoService,
                          TagService tagService,
                          GoodsService goodsService, MemberService memberService) {
@@ -109,6 +112,7 @@ public class AdminController {
     this.storeRepository = storeRepository;
     this.videoRepository = videoRepository;
     this.videoReportRepository = videoReportRepository;
+    this.scheduleRepository = scheduleRepository;
     this.tagRepository = tagRepository;
     this.tagService = tagService;
     this.videoService = videoService;
@@ -304,6 +308,8 @@ public class AdminController {
     if (reports != null) {
       info.setReportCount(reports.getTotalElements());
     }
+
+    info.setSchedule(findScheduleByMember(m.getId()));
     return info;
   }
 
@@ -322,10 +328,20 @@ public class AdminController {
         info.setReportCount(reports.getTotalElements());
       }
 
+      info.setSchedule(findScheduleByMember(m.getMemberId()));
       return info;
     });
 
     return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  private Schedule findScheduleByMember(Long memberId) {
+    List<Schedule> schedules = scheduleRepository.findByCreatedByIdOrderByStartedAt(memberId);
+    if (!CollectionUtils.isEmpty(schedules)) {
+      return schedules.get(0);
+    }
+
+    return null;
   }
 
   @PostMapping("/recommendedMembers")

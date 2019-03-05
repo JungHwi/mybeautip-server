@@ -1,19 +1,23 @@
 package com.jocoos.mybeautip.schedules;
 
 import javax.persistence.*;
-
 import java.util.Date;
 
 import org.springframework.data.annotation.LastModifiedDate;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.member.Member;
 
+@NoArgsConstructor
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "schedules")
-public class Schedule extends MemberAuditable  {
+public class Schedule extends CreatedDateAuditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +28,10 @@ public class Schedule extends MemberAuditable  {
 
   @Column
   private String thumbnailUrl;
+
+  @ManyToOne
+  @JoinColumn(name = "created_by")
+  protected Member createdBy;
 
   @Column
   private Date startedAt;
