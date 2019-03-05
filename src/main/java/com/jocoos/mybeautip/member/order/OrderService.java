@@ -196,7 +196,8 @@ public class OrderService {
       .map(goods -> {
         Purchase purchase = new Purchase(order.getId(), goods);
         BeanUtils.copyProperties(p, purchase);
-
+        
+        purchase.setVideoId(order.getVideoId());
         purchase.setTotalPrice((long) (p.getQuantity() * p.getGoodsPrice()));
         purchases.add(purchase);
         return Optional.empty();
