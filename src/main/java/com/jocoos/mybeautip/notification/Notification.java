@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
@@ -38,6 +39,7 @@ public class Notification {
   public static final String COMMENT_REPLY = "comment_reply";
   public static final String COMMENT_LIKE = "comment_like";
   public static final String MENTION = "mention";
+  public static final String ORDER = "order";
   
   private static final String RESOURCE_TYPE_MEMBER = "member";
   private static final String RESOURCE_TYPE_VIDEO = "video";
@@ -45,6 +47,7 @@ public class Notification {
   private static final String RESOURCE_TYPE_POST_COMMENT = "post_comment";
   private static final String RESOURCE_TYPE_VIDEO_COMMENT_REPLY = "video_comment_reply";
   private static final String RESOURCE_TYPE_POST_COMMENT_REPLY = "post_comment_reply";
+  private static final String RESOURCE_TYPE_ORDER = "order";
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -248,6 +251,18 @@ public class Notification {
     this.resourceOwner = videoComment.getCreatedBy();
     this.imageUrl = video.getThumbnailUrl();
     this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
+  }
+  
+  public Notification(Order order, Video video) {
+    this.type = ORDER;
+    this.targetMember = video.getMember();
+    this.read = false;
+    this.resourceType = RESOURCE_TYPE_VIDEO;
+    this.resourceId = video.getId();  // Deprecated
+    this.resourceIds = StringUtils.joinWith(",", video.getId());
+    this.resourceOwner = order.getCreatedBy();
+    this.imageUrl = video.getThumbnailUrl();
+    this.args = Lists.newArrayList(order.getCreatedBy().getUsername());
   }
 
   public Notification(Member target, String title, String message, String resourceType, String resourceIds, String imageUrl) {
