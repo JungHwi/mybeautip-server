@@ -140,9 +140,10 @@ public class DeviceService {
   public void pushAll(List<Device> devices, AdminNotificationController.NotificationRequest request) {
     int successCount = 0;
     int failCount = 0;
+    
     for (Device device : devices) {
       if (push(device, new Notification(device.getCreatedBy(),
-          request.getTitle(), request.getMessage(), request.getResourceType(), request.getResourceIds()))) {
+          request.getTitle(), request.getMessage(), request.getResourceType(), request.getResourceIds(), request.getImageUrl()))) {
         successCount++;
       } else {
         failCount++;

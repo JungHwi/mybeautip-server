@@ -250,12 +250,13 @@ public class Notification {
     this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
   }
 
-  public Notification(Member target, String title, String message, String resourceType, String resourceIds) {
+  public Notification(Member target, String title, String message, String resourceType, String resourceIds, String imageUrl) {
     this.type = INSTANT;
     this.targetMember = target;
     this.instantMessageTitle = title;
     this.instantMessageBody = message;
     this.resourceType = resourceType;
     this.resourceIds = resourceIds;
+    this.imageUrl = imageUrl;
   }
 }
