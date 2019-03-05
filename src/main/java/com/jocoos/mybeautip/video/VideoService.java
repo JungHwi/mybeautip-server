@@ -240,8 +240,7 @@ public class VideoService {
     }
     return comments;
   }
-
-  @Transactional
+  
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
     boolean blocked = false;
