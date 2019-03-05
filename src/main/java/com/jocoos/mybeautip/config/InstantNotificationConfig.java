@@ -13,4 +13,6 @@ public class InstantNotificationConfig {
   private int delay;
 
   private int platform;
+
+  private int interval;
 }
