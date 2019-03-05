@@ -33,6 +33,7 @@ import com.jocoos.mybeautip.member.revenue.RevenuePaymentService;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentData;
@@ -76,6 +77,7 @@ public class OrderService {
   private final MessageService messageService;
   private final VideoService videoService;
   private final SlackService slackService;
+  private final NotificationService notificationService;
 
   public OrderService(OrderRepository orderRepository,
                       MemberRepository memberRepository,
@@ -94,7 +96,8 @@ public class OrderService {
                       IamportService iamportService,
                       MessageService messageService,
                       VideoService videoService,
-                      SlackService slackService) {
+                      SlackService slackService,
+                      NotificationService notificationService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
     this.deliveryRepository = deliveryRepository;
@@ -113,6 +116,7 @@ public class OrderService {
     this.messageService = messageService;
     this.videoService = videoService;
     this.slackService = slackService;
+    this.notificationService = notificationService;
   }
 
   @Transactional
@@ -371,6 +375,7 @@ public class OrderService {
     if (order.getVideoId() != null) {
       saveRevenuesForSeller(order);
       videoService.updateOrderCount(order.getVideoId(), 1); // TODO: decrease when order cancelled
+      notificationService.notifyOrder(order, order.getVideoId());
     }
     
     deleteCartItems(order);

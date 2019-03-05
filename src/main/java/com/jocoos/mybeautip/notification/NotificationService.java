@@ -11,6 +11,7 @@ import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionTag;
+import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
@@ -333,5 +334,16 @@ public class NotificationService {
     log.debug("original comment: {}", comment);
     mentionResult.setComment(comment);
     return mentionResult;
+  }
+  
+  public void notifyOrder(Order order, long videoId) {
+    videoRepository.findById(videoId)
+        .ifPresent(video -> {
+          Notification notification = new Notification(order, video);
+          log.debug("notification: {}", notification);
+  
+          notificationRepository.save(notification);
+          deviceService.push(notification);
+        });
   }
 }
