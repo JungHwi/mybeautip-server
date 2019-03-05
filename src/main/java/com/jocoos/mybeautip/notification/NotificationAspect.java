@@ -1,11 +1,16 @@
 package com.jocoos.mybeautip.notification;
 
+import java.util.Date;
+
+import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.video.report.VideoReport;
+
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +20,6 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 
-import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.video.Video;
@@ -28,11 +32,16 @@ public class NotificationAspect {
 
   private final NotificationService notificationService;
   private final SlackService slackService;
+  private final InstantMessageService instantMessageService;
 
   public NotificationAspect(NotificationService notificationService,
-                            SlackService slackService) {
+                            SlackService slackService,
+                            InstantNotificationConfig instantNotificationConfig,
+                            ThreadPoolTaskScheduler taskScheduler,
+                            InstantMessageService instantMessageService) {
     this.notificationService = notificationService;
     this.slackService = slackService;
+    this.instantMessageService = instantMessageService;
   }
 
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.startVideo(..))",
@@ -57,6 +66,8 @@ public class NotificationAspect {
       if ("UPLOADED".equals(video.getType()) && "VOD".equals(video.getState())) {
         notificationService.notifyUploadedMyVideo(video);
       }
+
+      instantMessageService.instantPushMessage(video);
     }
   }
 

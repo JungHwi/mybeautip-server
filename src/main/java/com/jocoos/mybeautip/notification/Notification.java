@@ -40,9 +40,9 @@ public class Notification {
   public static final String COMMENT_LIKE = "comment_like";
   public static final String MENTION = "mention";
   public static final String ORDER = "order";
-  
+
   private static final String RESOURCE_TYPE_MEMBER = "member";
-  private static final String RESOURCE_TYPE_VIDEO = "video";
+  public static final String RESOURCE_TYPE_VIDEO = "video";
   private static final String RESOURCE_TYPE_VIDEO_COMMENT = "video_comment";
   private static final String RESOURCE_TYPE_POST_COMMENT = "post_comment";
   private static final String RESOURCE_TYPE_VIDEO_COMMENT_REPLY = "video_comment_reply";
