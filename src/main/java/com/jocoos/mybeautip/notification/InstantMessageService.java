@@ -5,9 +5,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
@@ -17,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.devices.DeviceService;
-import com.jocoos.mybeautip.exception.NotificationException;
-import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.schedules.ScheduleRepository;
 import com.jocoos.mybeautip.video.Video;
 
@@ -53,19 +48,18 @@ public class InstantMessageService {
     Instant instant = Instant.now().minus(config.getInterval(), ChronoUnit.MINUTES);
     Date now = Date.from(instant);
 
-    Schedule schedule = scheduleRepository.findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(video.getMember().getId(), now)
-       .orElseThrow(() -> new NotificationException("schedule is unknown"));
+    scheduleRepository.findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(video.getMember().getId(), now)
+      .ifPresent(s -> {
+         log.debug("{}", s);
+         String title = !Strings.isNullOrEmpty(s.getInstantTitle()) ? s.getInstantTitle() : video.getTitle();
+         String message = !Strings.isNullOrEmpty(s.getInstantMessage()) ? s.getInstantMessage() : getDefaultMessage(INSTANT_VIDEO_START_MESSAGE, null);
+         log.debug("title: {}, message: {}", title, message);
 
-    log.debug("{}", schedule);
-
-    String title = !Strings.isNullOrEmpty(schedule.getInstantTitle()) ? schedule.getInstantTitle() : video.getTitle();
-    String message = !Strings.isNullOrEmpty(schedule.getInstantMessage()) ? schedule.getInstantMessage() : getDefaultMessage(INSTANT_VIDEO_START_MESSAGE, null);
-
-    log.debug("title: {}, message: {}", title, message);
-
-    taskScheduler.schedule(new InstantNotificationTask(
-       deviceService, video, message, title),
-       new Date(System.currentTimeMillis() + config.getDelay()));
+         taskScheduler.schedule(new InstantNotificationTask(
+               deviceService, video, message, title),
+            new Date(System.currentTimeMillis() + config.getDelay()));
+       }
+    );
   }
 
   private String getDefaultMessage(String code, String ...args) {

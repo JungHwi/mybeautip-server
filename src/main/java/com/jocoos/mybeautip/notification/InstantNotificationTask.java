@@ -39,11 +39,11 @@ public class InstantNotificationTask implements Runnable {
     log.debug("video: {}", video);
 
     List<Device> devices = deviceService.getDevices(platform);
-    AdminNotificationController.NotificationRequest request = createRequest(video);
+    AdminNotificationController.NotificationRequest request = createRequest();
     deviceService.pushAll(devices, request);
   }
 
-  private AdminNotificationController.NotificationRequest createRequest(Video video) {
+  private AdminNotificationController.NotificationRequest createRequest() {
     AdminNotificationController.NotificationRequest request = new AdminNotificationController.NotificationRequest();
     request.setTitle(title);
     request.setMessage(message);

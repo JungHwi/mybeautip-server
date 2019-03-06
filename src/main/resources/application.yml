@@ -116,7 +116,7 @@ mybeautip:
     duplicate-limit-duration: 600000 # 10 min (milliseconds)
     instant-message:
       interval: 10 # min
-      delay: 30000 # .5 min (milliseconds)
+      delay: 60000 # 1 min (milliseconds)
       platform: 0 # 0:All, 1:iOs, 2:Android
 
 
