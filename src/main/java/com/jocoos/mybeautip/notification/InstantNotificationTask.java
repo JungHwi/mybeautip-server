@@ -45,6 +45,8 @@ public class InstantNotificationTask implements Runnable {
 
   private AdminNotificationController.NotificationRequest createRequest() {
     AdminNotificationController.NotificationRequest request = new AdminNotificationController.NotificationRequest();
+    request.setPlatform(platform);
+    request.setCategory(1);
     request.setTitle(title);
     request.setMessage(message);
     request.setResourceType(Notification.RESOURCE_TYPE_VIDEO);
