@@ -577,6 +577,7 @@ public class VideoService {
   @Transactional
   public VideoLike likeVideo(Video video) {
     videoRepository.updateLikeCount(video.getId(), 1);
+    video.setLikeCount(video.getLikeCount() + 1);
     return videoLikeRepository.save(new VideoLike(video));
   }
   
