@@ -91,6 +91,7 @@ public class PostService {
   @Transactional
   public PostLike likePost(Post post) {
     postRepository.updateLikeCount(post.getId(), 1);
+    post.setLikeCount(post.getLikeCount() + 1);
     return postLikeRepository.save(new PostLike(post));
   }
   
