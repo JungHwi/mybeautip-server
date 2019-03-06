@@ -61,9 +61,17 @@ public class RevenueService {
     RevenuePayment revenuePayment = revenuePaymentService.getRevenuePayment(video.getMember(), purchase.getCreatedAt());
     Revenue revenue = revenueRepository.save(new Revenue(video, purchase, getRevenue(purchase.getTotalPrice()), revenuePayment));
     log.debug("revenue: {}", revenue);
-
+    
     memberRepository.updateRevenue(video.getMember().getId(), revenue.getRevenue());
     return revenue;
+  }
+  
+  @Transactional
+  public void remove(Revenue revenue) {
+    log.debug("remove revenue: {}", revenue);
+    
+    revenueRepository.delete(revenue);
+    memberRepository.updateRevenue(revenue.getVideo().getMember().getId(), -(revenue.getRevenue()));
   }
   
   @Transactional

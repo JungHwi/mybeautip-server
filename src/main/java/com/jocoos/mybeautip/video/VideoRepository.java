@@ -107,6 +107,10 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   @Query("update Video v set v.totalWatchCount = v.totalWatchCount + ?2, v.modifiedAt = now() where v.id = ?1")
   void updateTotalWatchCount(Long id, int i);
   
+  @Modifying
+  @Query("update Video v set v.orderCount = v.orderCount + ?2, v.modifiedAt = now() where v.id = ?1")
+  void updateOrderCount(Long id, int i);
+  
   List<Video> findByMemberAndDeletedAtIsNull(Member member);
 
   Page<Video> findByTypeAndStateInAndDeletedAtIsNull(String type, Collection<String> state, Pageable pageable);
