@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.search;
 
 import com.jocoos.mybeautip.member.Member;
+
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ public class KeywordService {
     this.keywordRepository = keywordRepository;
   }
   
+  @Synchronized
   @Transactional
   public void updateKeywordCount(String keyword) {
     Optional<Keyword> optional = keywordRepository.findByKeyword(keyword);
@@ -32,6 +35,7 @@ public class KeywordService {
     }
   }
   
+  @Synchronized
   @Transactional
   public void logHistory(String keyword, KeywordCategory category, Member member) {
     Optional<SearchHistory> optional = searchHistoryRepository.findByKeywordAndCategoryAndCreatedBy(

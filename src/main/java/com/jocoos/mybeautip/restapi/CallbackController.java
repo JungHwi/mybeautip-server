@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,6 +38,8 @@ import com.jocoos.mybeautip.video.VideoService;
 @RestController
 @RequestMapping(value = "/api/1/callbacks/video", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CallbackController {
+  private static final String VIDEO_LOCKED = "video.locked";
+
   private final VideoService videoService;
   private final TagService tagService;
   private final MessageService messageService;
@@ -92,7 +95,7 @@ public class CallbackController {
           }
           
           if (v.getLocked() && "PUBLIC".equals(request.getVisibility())) {
-            throw new BadRequestException("video_locked", "Video Locked.");
+            throw new BadRequestException("video_locked", messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
           }
           
           return updateVideoProperties(request, v);})

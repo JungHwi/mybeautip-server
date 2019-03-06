@@ -44,5 +44,6 @@ public class Revenue extends CreatedDateAuditable {
     this.purchase = purchase;
     this.revenue = revenue;
     this.revenuePayment = revenuePayment;
+    this.confirmed = false;
   }
 }

@@ -112,6 +112,7 @@ public class GoodsController {
     }
   
     if (StringUtils.isNotBlank(keyword)) {
+      keyword = keyword.trim();
       keywordService.updateKeywordCount(keyword);
       keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, memberService.currentMember());
     }

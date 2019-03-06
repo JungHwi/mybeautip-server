@@ -51,7 +51,7 @@ public class AdminCommentController {
   }
   
   @Data
-  public static class UpdateCommentRequest {
+  private static class UpdateCommentRequest {
     private Boolean locked;
   }
 }

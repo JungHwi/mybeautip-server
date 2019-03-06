@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.point;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.order.Order;
 
 public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> {
 
@@ -23,4 +25,6 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
   Page<MemberPoint> findByMemberId(Long memberId, Pageable pageable);
 
   Page<MemberPoint> findByMemberIdAndState(Long memberId, int state, Pageable pageable);
+  
+  Optional<MemberPoint> findByMemberAndOrderAndPointAndState(Member member, Order order, int point, int state);
 }

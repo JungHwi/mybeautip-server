@@ -176,8 +176,10 @@ public class AdminNotificationController {
   
     @Size(max=30)
     String title;
+    
     String resourceType;
     String resourceIds;
+    String imageUrl;
     Long target;
     
     @NotNull

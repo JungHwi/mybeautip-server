@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.jocoos.mybeautip.admin.AdminNotificationController;
 import com.jocoos.mybeautip.member.Member;
@@ -135,14 +136,33 @@ public class DeviceService {
     return platform == 1 ? Device.OS_NAME_IOS :
        platform == 2 ? Device.OS_NAME_ANDROID : null;
   }
-  
+
+  public List<Device> getDevices(int platform) {
+    List<Device> devices;
+
+    switch (platform) {
+      case 1:
+        devices = deviceRepository.findByPushableAndValidAndOs(true, true, Device.OS_NAME_IOS);
+        break;
+      case 2:
+        devices = deviceRepository.findByPushableAndValidAndOs(true, true, Device.OS_NAME_ANDROID);
+        break;
+      default:
+        devices = deviceRepository.findByPushableAndValid(true, true);
+    }
+
+    return devices.stream().filter(d -> isPushable(d)).collect(Collectors.toList());
+  }
+
+
   @Async
   public void pushAll(List<Device> devices, AdminNotificationController.NotificationRequest request) {
     int successCount = 0;
     int failCount = 0;
+    
     for (Device device : devices) {
       if (push(device, new Notification(device.getCreatedBy(),
-          request.getTitle(), request.getMessage(), request.getResourceType(), request.getResourceIds()))) {
+          request.getTitle(), request.getMessage(), request.getResourceType(), request.getResourceIds(), request.getImageUrl()))) {
         successCount++;
       } else {
         failCount++;

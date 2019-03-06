@@ -27,12 +27,15 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
+import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.point.MemberPointRepository;
 import com.jocoos.mybeautip.member.point.PointService;
 import com.jocoos.mybeautip.member.revenue.RevenuePayment;
 import com.jocoos.mybeautip.member.revenue.RevenuePaymentService;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentData;
@@ -41,6 +44,7 @@ import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
@@ -69,6 +73,8 @@ public class OrderService {
   private final VideoGoodsRepository videoGoodsRepository;
   private final CartRepository cartRepository;
   private final RevenueRepository revenueRepository;
+  private final VideoRepository videoRepository;
+  private final MemberPointRepository memberPointRepository;
   private final RevenueService revenueService;
   private final RevenuePaymentService revenuePaymentService;
   private final PointService pointService;
@@ -76,6 +82,7 @@ public class OrderService {
   private final MessageService messageService;
   private final VideoService videoService;
   private final SlackService slackService;
+  private final NotificationService notificationService;
 
   public OrderService(OrderRepository orderRepository,
                       MemberRepository memberRepository,
@@ -88,13 +95,16 @@ public class OrderService {
                       VideoGoodsRepository videoGoodsRepository,
                       CartRepository cartRepository,
                       RevenueRepository revenueRepository,
+                      VideoRepository videoRepository,
+                      MemberPointRepository memberPointRepository,
                       RevenueService revenueService,
                       RevenuePaymentService revenuePaymentService,
                       PointService pointService,
                       IamportService iamportService,
                       MessageService messageService,
                       VideoService videoService,
-                      SlackService slackService) {
+                      SlackService slackService,
+                      NotificationService notificationService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
     this.deliveryRepository = deliveryRepository;
@@ -106,6 +116,8 @@ public class OrderService {
     this.videoGoodsRepository = videoGoodsRepository;
     this.cartRepository = cartRepository;
     this.revenueRepository = revenueRepository;
+    this.videoRepository = videoRepository;
+    this.memberPointRepository = memberPointRepository;
     this.revenueService = revenueService;
     this.revenuePaymentService = revenuePaymentService;
     this.pointService = pointService;
@@ -113,6 +125,7 @@ public class OrderService {
     this.messageService = messageService;
     this.videoService = videoService;
     this.slackService = slackService;
+    this.notificationService = notificationService;
   }
 
   @Transactional
@@ -183,7 +196,8 @@ public class OrderService {
       .map(goods -> {
         Purchase purchase = new Purchase(order.getId(), goods);
         BeanUtils.copyProperties(p, purchase);
-
+        
+        purchase.setVideoId(order.getVideoId());
         purchase.setTotalPrice((long) (p.getQuantity() * p.getGoodsPrice()));
         purchases.add(purchase);
         return Optional.empty();
@@ -204,7 +218,7 @@ public class OrderService {
     }
 
     String status;
-    if (purchase.isDevlivering() || purchase.isDevlivered()) {
+    if (purchase.isDelivering() || purchase.isDelivered()) {
       switch (state) {
         case 1:
           status = Order.Status.ORDER_EXCHANGING;
@@ -271,6 +285,50 @@ public class OrderService {
     OrderInquiry orderInquiry = orderInquiryRepository.findByOrderAndCreatedBy(order, order.getCreatedBy()).orElseThrow(() -> new NotFoundException("inquire_not_found", "invalid inquire id"));
     orderInquiry.setCompleted(true);
     orderInquiryRepository.save(orderInquiry);
+  
+    // Revoke used coupon
+    if (order.getMemberCoupon() != null) {
+      log.info("Order canceled - coupon revoked: {}, {}", order.getId(), order.getMemberCoupon());
+      MemberCoupon memberCoupon = order.getMemberCoupon();
+      memberCoupon.setUsedAt(null);
+      memberCouponRepository.save(memberCoupon);
+    }
+  
+    // Revoke used point
+    if (order.getPoint() > 0) {
+      log.info("Order canceled - used point revoked: {}, {}", order.getId(), order.getPoint());
+      Member member = order.getCreatedBy();
+      member.setPoint(member.getPoint() + order.getPoint());
+      memberRepository.save(member);
+    
+      memberPointRepository.findByMemberAndOrderAndPointAndState(
+          order.getCreatedBy(), order, order.getPoint(), MemberPoint.STATE_USE_POINT)
+          .ifPresent(memberPointRepository::delete);
+    }
+  
+    // Remove expected earning point
+    if (order.getExpectedPoint() > 0) {
+      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getMemberCoupon());
+      memberPointRepository.findByMemberAndOrderAndPointAndState(
+          order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
+          .ifPresent(memberPointRepository::delete);
+    }
+    
+    // Revoke video order count & revenues
+    if (order.getVideoId() != null) {
+      videoRepository.findById(order.getVideoId())
+          .ifPresent(video -> {
+            // Update video order count
+            videoRepository.updateOrderCount(order.getVideoId(), -1);
+            
+            // Remove revenues
+            log.info("Order canceled - revenue per purchase removed: {}, {}", order.getId(), order.getMemberCoupon());
+            for (Purchase purchase : order.getPurchases()) {
+              revenueRepository.findByPurchaseId(purchase.getId())
+                  .ifPresent(revenueService::remove);
+            }
+          });
+    }
   }
 
   @Transactional
@@ -370,7 +428,8 @@ public class OrderService {
 
     if (order.getVideoId() != null) {
       saveRevenuesForSeller(order);
-      videoService.updateOrderCount(order.getVideoId(), 1); // TODO: decrease when order cancelled
+      videoRepository.updateOrderCount(order.getVideoId(), 1);
+      notificationService.notifyOrder(order, order.getVideoId());
     }
     
     deleteCartItems(order);
@@ -452,18 +511,6 @@ public class OrderService {
   }
   
   @Transactional
-  public void completeDelivery(Order order, Date deliveredAt) {
-    List<Purchase> purchases = order.getPurchases();
-    for (Purchase purchase : purchases) {
-      if (purchase.getDeliveredAt() == null) {
-        return; // order can complete delivery after all purchase already had delivered
-      }
-    }
-    order.setDeliveredAt(deliveredAt);
-    orderRepository.save(order);
-  }
-  
-  @Transactional
   public OrderInquiry cancelOrderInquireByAdmin(Order order, Payment payment, Byte state, String reason) {
     if (order.getState() != Order.State.PAID.getValue()) {
       throw new BadRequestException("invalid_order_state", "Invalid order state: " + order.getState());
@@ -489,6 +536,51 @@ public class OrderService {
     orderInquiry.setCompleted(true);
     orderInquiry.setCreatedBy(order.getCreatedBy());
     orderInquiryRepository.save(orderInquiry);
+  
+    // Revoke used coupon
+    if (order.getMemberCoupon() != null) {
+      log.info("Order canceled - coupon revoked: {}, {}", order.getId(), order.getMemberCoupon());
+      MemberCoupon memberCoupon = order.getMemberCoupon();
+      memberCoupon.setUsedAt(null);
+      memberCouponRepository.save(memberCoupon);
+    }
+  
+    // Revoke used point
+    if (order.getPoint() > 0) {
+      log.info("Order canceled - used point revoked: {}, {}", order.getId(), order.getPoint());
+      Member member = order.getCreatedBy();
+      member.setPoint(member.getPoint() + order.getPoint());
+      memberRepository.save(member);
+    
+      memberPointRepository.findByMemberAndOrderAndPointAndState(
+          order.getCreatedBy(), order, order.getPoint(), MemberPoint.STATE_USE_POINT)
+          .ifPresent(memberPointRepository::delete);
+    }
+  
+    // Remove expected earning point
+    if (order.getExpectedPoint() > 0) {
+      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getMemberCoupon());
+      memberPointRepository.findByMemberAndOrderAndPointAndState(
+          order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
+          .ifPresent(memberPointRepository::delete);
+    }
+  
+    // Revoke video order count & revenues
+    if (order.getVideoId() != null) {
+      videoRepository.findById(order.getVideoId())
+          .ifPresent(video -> {
+            // Update video order count
+            videoRepository.updateOrderCount(order.getVideoId(), -1);
+          
+            // Remove revenues
+            log.info("Order canceled - revenue per purchase removed: {}, {}", order.getId(), order.getMemberCoupon());
+            for (Purchase purchase : order.getPurchases()) {
+              revenueRepository.findByPurchaseId(purchase.getId())
+                  .ifPresent(revenueService::remove);
+            }
+          });
+    }
+    
     return orderInquiry;
   }
 }
