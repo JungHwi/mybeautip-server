@@ -127,7 +127,7 @@ public class DeviceService {
          if (isPushable(d)) {
            push(d, notification);
          } else {
-           log.info("pushable is false: {}", d);
+           log.debug("pushable is false: {}", d);
          }
        });
   }
