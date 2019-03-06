@@ -59,5 +59,7 @@ public class AdminScheduleController extends AdminDateController {
 
     @NotNull
     private Long memberId;
+    private String instantTitle;
+    private String instantMessage;
   }
 }

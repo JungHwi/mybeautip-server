@@ -23,4 +23,8 @@ public interface ScheduleExcerpt {
   Date getCreatedAt();
 
   Date getStartedAt();
+
+  String getInstantTitle();
+
+  String getInstantMessage();
 }

@@ -41,4 +41,10 @@ public class Schedule extends CreatedDateAuditable {
 
   @Column
   private Date deletedAt;
+
+  @Column
+  private String instantTitle;
+
+  @Column
+  private String instantMessage;
 }
