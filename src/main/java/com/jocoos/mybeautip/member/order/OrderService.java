@@ -583,4 +583,18 @@ public class OrderService {
     
     return orderInquiry;
   }
+  
+  @Transactional
+  public Order confirmOrder(Order order) {
+    // Convert earning point state
+    memberPointRepository.findByMemberAndOrderAndPointAndState(
+        order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
+        .ifPresent(pointService::convertPoint);
+  
+    // Update order state
+    order.setState(Order.State.CONFIRMED);
+    order.setStatus(Order.State.CONFIRMED.name());
+    
+    return orderRepository.save(order);
+  }
 }

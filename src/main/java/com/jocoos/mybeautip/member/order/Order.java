@@ -54,7 +54,7 @@ public class Order extends MemberAuditable {
     PREPARING(3),
     DELIVERING(4),
     DELIVERED(5),
-    CONFIRMED(6), // TODO: implement order confirmed
+    CONFIRMED(6),
     ORDER_CANCELLING(11),
     ORDER_CANCELLED(12),
     PAYMENT_CANCELLING(21),
@@ -225,5 +225,13 @@ public class Order extends MemberAuditable {
 
   public int getTotalShippingAmount() {
     return shippingAmount;
+  }
+  
+  public boolean isConfirmed() {
+    return State.CONFIRMED.getValue() == this.state;
+  }
+  
+  public boolean isDelivered() {
+    return Order.State.DELIVERED.getValue() == this.state;
   }
 }
