@@ -308,7 +308,7 @@ public class OrderService {
   
     // Remove expected earning point
     if (order.getExpectedPoint() > 0) {
-      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getMemberCoupon());
+      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getExpectedPoint());
       memberPointRepository.findByMemberAndOrderAndPointAndState(
           order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
           .ifPresent(memberPointRepository::delete);
@@ -562,7 +562,7 @@ public class OrderService {
   
     // Remove expected earning point
     if (order.getExpectedPoint() > 0) {
-      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getMemberCoupon());
+      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getExpectedPoint());
       memberPointRepository.findByMemberAndOrderAndPointAndState(
           order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
           .ifPresent(memberPointRepository::delete);

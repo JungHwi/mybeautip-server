@@ -63,7 +63,7 @@ public class AdminBatchController {
     }
     
     if (!order.isDelivered()) {
-      throw new BadRequestException("invalid_state", "Current order state is not 'delivered'" + order.getState());
+      throw new BadRequestException("invalid_state", "Current order state is not 'delivered', current state: " + order.getState());
     }
     
     order = orderService.confirmOrder(order);
