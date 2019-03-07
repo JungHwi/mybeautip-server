@@ -45,7 +45,6 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @Service
@@ -80,7 +79,6 @@ public class OrderService {
   private final PointService pointService;
   private final IamportService iamportService;
   private final MessageService messageService;
-  private final VideoService videoService;
   private final SlackService slackService;
   private final NotificationService notificationService;
 
@@ -102,7 +100,6 @@ public class OrderService {
                       PointService pointService,
                       IamportService iamportService,
                       MessageService messageService,
-                      VideoService videoService,
                       SlackService slackService,
                       NotificationService notificationService) {
     this.orderRepository = orderRepository;
@@ -123,7 +120,6 @@ public class OrderService {
     this.pointService = pointService;
     this.iamportService = iamportService;
     this.messageService = messageService;
-    this.videoService = videoService;
     this.slackService = slackService;
     this.notificationService = notificationService;
   }
@@ -266,7 +262,7 @@ public class OrderService {
   }
 
   @Transactional
-  public void cancelPayment(Order order) {
+  private void cancelPayment(Order order) {
     if (order.getState() >= Order.State.ORDER_CANCELLED.getValue()) {
       throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
     }
@@ -286,7 +282,7 @@ public class OrderService {
     orderInquiry.setCompleted(true);
     orderInquiryRepository.save(orderInquiry);
   
-    revokeResourceWhenOrderCanceled(order);
+    revokeResourcesBeforeCancelOrder(order);
   }
 
   @Transactional
@@ -498,7 +494,7 @@ public class OrderService {
     orderInquiry.setCreatedBy(order.getCreatedBy());
     orderInquiryRepository.save(orderInquiry);
   
-    revokeResourceWhenOrderCanceled(order);
+    revokeResourcesBeforeCancelOrder(order);
     return orderInquiry;
   }
   
@@ -517,7 +513,7 @@ public class OrderService {
   }
   
   @Transactional
-  public void revokeResourceWhenOrderCanceled(Order order) {
+  private void revokeResourcesBeforeCancelOrder(Order order) {
     // Revoke used coupon
     if (order.getMemberCoupon() != null) {
       log.info("Order canceled - coupon revoked: {}, {}", order.getId(), order.getMemberCoupon());

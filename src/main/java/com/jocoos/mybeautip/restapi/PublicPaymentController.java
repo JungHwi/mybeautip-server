@@ -35,7 +35,7 @@ public class PublicPaymentController {
   }
 
   @PostMapping(value = "/notification", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity notification(@RequestBody CreateNotificationReqeust request) {
+  public ResponseEntity notification(@RequestBody CreateNotificationRequest request) {
     log.info("payments/notification called: {}", request);
     
     if (request.getImpUid() == null || request.getMerchantUid() == null) {
@@ -63,7 +63,7 @@ public class PublicPaymentController {
 
   @NoArgsConstructor
   @Data
-  static class CreateNotificationReqeust {
+  private static class CreateNotificationRequest {
     private String impUid;
     private String merchantUid;
     private String status;
