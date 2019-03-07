@@ -484,7 +484,7 @@ public class OrderService {
   }
   
   @Transactional
-  public Purchase confirm(Purchase purchase) {
+  public Purchase confirmPurchase(Purchase purchase) {
     log.debug("purchase confirmed: {}", purchase.getId());
     
     // Confirm revenue and Append monthly revenue estimatedAmount if revenue exist
@@ -506,7 +506,10 @@ public class OrderService {
           revenueRepository.save(revenue);
         });
   
-    purchase.setConfirmed(true);
+    // Update purchase state
+    purchase.setState(Order.State.CONFIRMED);
+    purchase.setStatus(Order.State.CONFIRMED.name());
+    purchase.setConfirmed(true);  // FIXME: duplicate with state 'CONFIRMED', should be deprecated...?
     return purchaseRepository.save(purchase);
   }
   

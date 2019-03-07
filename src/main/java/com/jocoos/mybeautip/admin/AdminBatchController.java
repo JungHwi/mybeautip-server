@@ -40,11 +40,15 @@ public class AdminBatchController {
     Purchase purchase = purchaseRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("purchase_not_found", "Purchase not found"));
     
-    if (purchase.getConfirmed()) {
+    if (purchase.isConfirmed()) {
       throw new BadRequestException("already_confirmed", "Already confirmed");
     }
+  
+    if (!purchase.isDelivered()) {
+      throw new BadRequestException("invalid_state", "Current order state is not 'delivered'" + purchase.getState());
+    }
     
-    purchase = orderService.confirm(purchase);
+    purchase = orderService.confirmPurchase(purchase);
     OrderController.PurchaseInfo info = new OrderController.PurchaseInfo(purchase);
     return new ResponseEntity<>(info, HttpStatus.OK);
   }
@@ -55,11 +59,11 @@ public class AdminBatchController {
         .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found"));
     
     if (order.isConfirmed()) {
-      throw new BadRequestException("Invalid state", "Already confirmed");
+      throw new BadRequestException("already_confirmed", "Already confirmed");
     }
     
     if (!order.isDelivered()) {
-      throw new BadRequestException("Invalid state", "Current order state is not 'delivered'" + order.getState());
+      throw new BadRequestException("invalid_state", "Current order state is not 'delivered'" + order.getState());
     }
     
     order = orderService.confirmOrder(order);
