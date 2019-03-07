@@ -63,21 +63,6 @@ public class MemberGiftTask {
   }
 
   @Transactional
-  private void convertPoint(MemberPoint memberPoint) {
-    if (memberPoint == null) {
-      return;
-    }
-
-    memberPoint.setEarnedAt(new Date());
-    memberPoint.setState(MemberPoint.STATE_EARNED_POINT);
-    memberPointRepository.save(memberPoint);
-
-    Member member = memberPoint.getMember();
-    member.setPoint(member.getPoint() + memberPoint.getPoint());
-    memberRepository.save(member);
-  }
-
-  @Transactional
   private void expiredPoint(MemberPoint memberPoint, Date expiredAt) {
     if (memberPoint == null) {
       return;

@@ -122,7 +122,11 @@ public class Purchase extends CreatedDateAuditable {
   public boolean isDelivering() {
     return Order.State.DELIVERING.getValue() == this.state;
   }
-
+  
+  public boolean isConfirmed() {
+    return Order.State.CONFIRMED.getValue() == this.state;
+  }
+  
   public boolean isDelivered() {
     return Order.State.DELIVERED.getValue() == this.state;
   }

@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.member.point;
 
+import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.order.Order;
 
 @Slf4j
@@ -17,9 +20,12 @@ public class PointService {
   @Value("${mybeautip.point.earn-ratio}")
   private int pointRatio;
 
+  private final MemberRepository memberRepository;
   private final MemberPointRepository memberPointRepository;
 
-  public PointService(MemberPointRepository memberPointRepository) {
+  public PointService(MemberRepository memberRepository,
+                      MemberPointRepository memberPointRepository) {
+    this.memberRepository = memberRepository;
     this.memberPointRepository = memberPointRepository;
   }
 
@@ -53,5 +59,20 @@ public class PointService {
 
     MemberPoint memberPoint = new MemberPoint(order.getCreatedBy(), order, point, MemberPoint.STATE_USE_POINT);
     memberPointRepository.save(memberPoint);
+  }
+  
+  @Transactional
+  public void convertPoint(MemberPoint memberPoint) {
+    if (memberPoint == null) {
+      return;
+    }
+    
+    memberPoint.setEarnedAt(new Date());
+    memberPoint.setState(MemberPoint.STATE_EARNED_POINT);
+    memberPointRepository.save(memberPoint);
+    
+    Member member = memberPoint.getMember();
+    member.setPoint(member.getPoint() + memberPoint.getPoint());
+    memberRepository.save(member);
   }
 }
