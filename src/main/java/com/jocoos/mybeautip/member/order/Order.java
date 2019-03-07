@@ -234,4 +234,8 @@ public class Order extends MemberAuditable {
   public boolean isDelivered() {
     return Order.State.DELIVERED.getValue() == this.state;
   }
+  
+  public boolean isDelivering() {
+    return Order.State.DELIVERING.getValue() == this.state;
+  }
 }
