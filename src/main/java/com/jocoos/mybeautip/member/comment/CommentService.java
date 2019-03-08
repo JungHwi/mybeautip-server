@@ -63,8 +63,6 @@ public class CommentService {
           .ifPresent(parent -> commentRepository.updateCommentCount(parent.getId(), 1));
     }
     
-    videoRepository.updateCommentCount(id, 1);
-    
     Comment comment = new Comment();
     if (type == COMMENT_TYPE_VIDEO) {
       comment.setVideoId(id);
