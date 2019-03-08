@@ -8,6 +8,8 @@ import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,9 +35,12 @@ public class SlackService {
   @Value("${mybeautip.slack.channel}")
   private String slackChannel;
 
+  private final VideoGoodsRepository videoGoodsRepository;
   private final RestTemplate restTemplate;
 
-  public SlackService(RestTemplate restTemplate) {
+  public SlackService(VideoGoodsRepository videoGoodsRepository,
+                      RestTemplate restTemplate) {
+    this.videoGoodsRepository = videoGoodsRepository;
     this.restTemplate = restTemplate;
   }
 
@@ -44,14 +49,28 @@ public class SlackService {
     String message = String.format("*%s(%d)*" +
             "```사용자: %s/%d\n" +
             "영상제목: %s\n" +
-            "관련상품: %s```",
+            "%s```",
         videoType,
         video.getId(),
         video.getMember().getUsername(),
         video.getMember().getId(),
         video.getTitle(),
-        video.getData());
+        generateRelatedGoodsInfo(video));
     send(message);
+  }
+  
+  private String generateRelatedGoodsInfo(Video video) {
+    if (video.getRelatedGoodsCount() == null || video.getRelatedGoodsCount() == 0) {
+      return "관련상품: 없음";
+    }
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append("관련상품: ").append(video.getRelatedGoodsCount()).append("개");
+    List<VideoGoods> goodsList =  videoGoodsRepository.findAllByVideoId(video.getId());
+    for (VideoGoods vGoods : goodsList) {
+      sb.append("\n - ").append(StringUtils.substring(vGoods.getGoods().getGoodsNm(), 0, 40));
+    }
+    return sb.toString();
   }
 
   public void sendForOrder(Order order) {
@@ -80,11 +99,11 @@ public class SlackService {
         getPurchaseInfo(order.getPurchases()),
         me.getUsername(),
         StringUtils.isEmpty(me.getPhoneNumber()) ? delivery.getPhone() : me.getPhoneNumber(),
-        delivery.getRoadAddrPart1() + delivery.getRoadAddrPart2(),
+        delivery.getRoadAddrPart1() + " " + delivery.getRoadAddrPart2() + ", " + delivery.getDetailAddress(),
         me.getEmail(),
         delivery.getRecipient(),
         delivery.getPhone(),
-        delivery.getRoadAddrPart1() + delivery.getRoadAddrPart2(),
+        delivery.getRoadAddrPart1() + " " + delivery.getRoadAddrPart2() + ", " + delivery.getDetailAddress(),
         delivery.getCarrierMessage());
     send(message);
   }
