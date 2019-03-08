@@ -45,11 +45,21 @@ public class InstantMessageService {
 
   @Async
   public void instantPushMessage(Video video) {
+    if (!"BROADCASTED".equals(video.getType())) {
+      return;
+    }
+    
     Instant instant = Instant.now().minus(config.getInterval(), ChronoUnit.MINUTES);
     Date now = Date.from(instant);
 
     scheduleRepository.findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(video.getMember().getId(), now)
       .ifPresent(s -> {
+        long current = System.currentTimeMillis();
+        long startPlus10min = s.getStartedAt().getTime() + config.getInterval() * 1000;
+        if (current > startPlus10min) {
+          log.debug("too late to send push, current: {}, startedAt: {}", current, s.getStartedAt().getTime());
+          return;
+        }
          log.debug("{}", s);
          String title = !Strings.isNullOrEmpty(s.getInstantTitle()) ? s.getInstantTitle() : video.getTitle();
          String message = !Strings.isNullOrEmpty(s.getInstantMessage()) ? s.getInstantMessage() : getDefaultMessage(INSTANT_VIDEO_START_MESSAGE, null);
