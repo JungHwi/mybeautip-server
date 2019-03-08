@@ -56,8 +56,9 @@ public class InstantMessageService {
       .ifPresent(s -> {
         long current = System.currentTimeMillis();
         long startPlus10min = s.getStartedAt().getTime() + config.getInterval() * 1000;
-        if (current > startPlus10min) {
-          log.debug("too late to send push, current: {}, startedAt: {}", current, s.getStartedAt().getTime());
+        long startMinus10min = s.getStartedAt().getTime() - config.getInterval() * 1000;
+        if (current > startPlus10min || current < startMinus10min) {
+          log.debug("too late or early to send push, current: {}, startedAt: {}", current, s.getStartedAt().getTime());
           return;
         }
          log.debug("{}", s);
