@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.support.slack;
 
 import com.jocoos.mybeautip.log.MemberLeaveLog;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.order.Delivery;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
@@ -53,20 +55,37 @@ public class SlackService {
   }
 
   public void sendForOrder(Order order) {
+    Member me = order.getCreatedBy();
+    Delivery delivery = order.getDelivery();
     String message = String.format("*주문*" +
-            "```order id: %d\n" +
-            "주문자: %s/%d\n" +
-            "관련영상: %d\n" +
+            "```order id: %d, member id: %d\n" +
+            "관련영상: %s\n" +
             "결제방식: %s\n" +
             "결제금액: %d (배송비 및 할인 적용)" +
-            "%s```",
-        order.getId(),
-        order.getCreatedBy().getUsername(),
-        order.getCreatedBy().getId(),
-        order.getVideoId(),
+            "%s\n" +
+            "주문자 정보\n" +
+            " - 주문자명: %s\n" +
+            " - 휴대폰번호: %s\n" +
+            " - 주소: %s\n" +
+            " - 이메일: %s\n" +
+            "수령자 정보\n" +
+            " - 수령자명: %s\n" +
+            " - 휴대폰번호: %s\n" +
+            " - 주소: %s\n" +
+            " - 배송 메세지: %s```",
+        order.getId(), order.getCreatedBy().getId(),
+        order.getVideoId() == null ? "없음" : order.getVideoId().toString(),
         order.getMethod(),
         order.getPrice(),
-        getPurchaseInfo(order.getPurchases()));
+        getPurchaseInfo(order.getPurchases()),
+        me.getUsername(),
+        StringUtils.isEmpty(me.getPhoneNumber()) ? delivery.getPhone() : me.getPhoneNumber(),
+        delivery.getRoadAddrPart1() + delivery.getRoadAddrPart2(),
+        me.getEmail(),
+        delivery.getRecipient(),
+        delivery.getPhone(),
+        delivery.getRoadAddrPart1() + delivery.getRoadAddrPart2(),
+        delivery.getCarrierMessage());
     send(message);
   }
   
