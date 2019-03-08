@@ -35,7 +35,7 @@ public class RevenueInfo {
         this.quantity = p.getQuantity();
         this.goodsPrice = p.getGoodsPrice();
         this.optionValue = p.getOptionValue();
-        this.thumbnail = p.getGoods().getListImageData().toString();
+        this.thumbnail = revenue.getVideo().getThumbnailUrl();
       }
     );
   }

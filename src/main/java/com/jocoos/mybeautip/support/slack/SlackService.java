@@ -1,11 +1,15 @@
 package com.jocoos.mybeautip.support.slack;
 
 import com.jocoos.mybeautip.log.MemberLeaveLog;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.order.Delivery;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,9 +35,12 @@ public class SlackService {
   @Value("${mybeautip.slack.channel}")
   private String slackChannel;
 
+  private final VideoGoodsRepository videoGoodsRepository;
   private final RestTemplate restTemplate;
 
-  public SlackService(RestTemplate restTemplate) {
+  public SlackService(VideoGoodsRepository videoGoodsRepository,
+                      RestTemplate restTemplate) {
+    this.videoGoodsRepository = videoGoodsRepository;
     this.restTemplate = restTemplate;
   }
 
@@ -42,31 +49,62 @@ public class SlackService {
     String message = String.format("*%s(%d)*" +
             "```사용자: %s/%d\n" +
             "영상제목: %s\n" +
-            "관련상품: %s```",
+            "%s```",
         videoType,
         video.getId(),
         video.getMember().getUsername(),
         video.getMember().getId(),
         video.getTitle(),
-        video.getData());
+        generateRelatedGoodsInfo(video));
     send(message);
+  }
+  
+  private String generateRelatedGoodsInfo(Video video) {
+    if (video.getRelatedGoodsCount() == null || video.getRelatedGoodsCount() == 0) {
+      return "관련상품: 없음";
+    }
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append("관련상품: ").append(video.getRelatedGoodsCount()).append("개");
+    List<VideoGoods> goodsList =  videoGoodsRepository.findAllByVideoId(video.getId());
+    for (VideoGoods vGoods : goodsList) {
+      sb.append("\n - ").append(StringUtils.substring(vGoods.getGoods().getGoodsNm(), 0, 40));
+    }
+    return sb.toString();
   }
 
   public void sendForOrder(Order order) {
+    Member me = order.getCreatedBy();
+    Delivery delivery = order.getDelivery();
     String message = String.format("*주문*" +
-            "```order id: %d\n" +
-            "주문자: %s/%d\n" +
-            "관련영상: %d\n" +
+            "```order id: %d, member id: %d\n" +
+            "관련영상: %s\n" +
             "결제방식: %s\n" +
             "결제금액: %d (배송비 및 할인 적용)" +
-            "%s```",
-        order.getId(),
-        order.getCreatedBy().getUsername(),
-        order.getCreatedBy().getId(),
-        order.getVideoId(),
+            "%s\n" +
+            "주문자 정보\n" +
+            " - 주문자명: %s\n" +
+            " - 휴대폰번호: %s\n" +
+            " - 주소: %s\n" +
+            " - 이메일: %s\n" +
+            "수령자 정보\n" +
+            " - 수령자명: %s\n" +
+            " - 휴대폰번호: %s\n" +
+            " - 주소: %s\n" +
+            " - 배송 메세지: %s```",
+        order.getId(), order.getCreatedBy().getId(),
+        order.getVideoId() == null ? "없음" : order.getVideoId().toString(),
         order.getMethod(),
         order.getPrice(),
-        getPurchaseInfo(order.getPurchases()));
+        getPurchaseInfo(order.getPurchases()),
+        me.getUsername(),
+        StringUtils.isEmpty(me.getPhoneNumber()) ? delivery.getPhone() : me.getPhoneNumber(),
+        delivery.getRoadAddrPart1() + " " + delivery.getRoadAddrPart2() + ", " + delivery.getDetailAddress(),
+        me.getEmail(),
+        delivery.getRecipient(),
+        delivery.getPhone(),
+        delivery.getRoadAddrPart1() + " " + delivery.getRoadAddrPart2() + ", " + delivery.getDetailAddress(),
+        delivery.getCarrierMessage());
     send(message);
   }
   

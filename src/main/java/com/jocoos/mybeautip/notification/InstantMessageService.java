@@ -45,6 +45,10 @@ public class InstantMessageService {
 
   @Async
   public void instantPushMessage(Video video) {
+    if (!"BROADCASTED".equals(video.getType())) {
+      return;
+    }
+    
     Instant instant = Instant.now().minus(config.getInterval(), ChronoUnit.MINUTES);
     Date now = Date.from(instant);
 

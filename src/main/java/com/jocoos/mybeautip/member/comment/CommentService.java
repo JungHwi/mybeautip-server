@@ -13,6 +13,7 @@ import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
+import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoRepository;
 
@@ -29,19 +30,22 @@ public class CommentService {
   private final NotificationService notificationService;
   private final CommentRepository commentRepository;
   private final VideoRepository videoRepository;
+  private final PostRepository postRepository;
   
   public CommentService(TagService tagService,
                         MessageService messageService,
                         MentionService mentionService,
                         NotificationService notificationService,
                         CommentRepository commentRepository,
-                        VideoRepository videoRepository) {
+                        VideoRepository videoRepository,
+                        PostRepository postRepository) {
     this.tagService = tagService;
     this.messageService = messageService;
     this.mentionService = mentionService;
     this.notificationService = notificationService;
     this.commentRepository = commentRepository;
     this.videoRepository = videoRepository;
+    this.postRepository = postRepository;
   }
   
   @Transactional
@@ -58,17 +62,18 @@ public class CommentService {
       commentRepository.findById(request.getParentId())
           .ifPresent(parent -> commentRepository.updateCommentCount(parent.getId(), 1));
     }
-  
+    
     Comment comment = new Comment();
     if (type == COMMENT_TYPE_VIDEO) {
       comment.setVideoId(id);
+      videoRepository.updateCommentCount(id, 1);
     }
     if (type == COMMENT_TYPE_POST) {
       comment.setPostId(id);
+      postRepository.updateCommentCount(id, 1);
     }
-    
+  
     BeanUtils.copyProperties(request, comment);
-    videoRepository.updateCommentCount(id, 1);
     comment = commentRepository.save(comment);
     
     tagService.touchRefCount(comment.getComment());

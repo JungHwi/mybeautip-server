@@ -24,6 +24,8 @@ public class PurchaseService {
   @Transactional
   public Purchase completeDelivery(Purchase purchase, Order order, Date deliveredAt) {
     purchase.setDeliveredAt(deliveredAt);
+    purchase.setState(Order.State.DELIVERED);
+    purchase.setStatus(Order.State.DELIVERED.name());
     purchase = purchaseRepository.save(purchase);
     
     // Complete delivery of Order after when all purchases related order are already had delivered
@@ -35,6 +37,8 @@ public class PurchaseService {
     }
     
     order.setDeliveredAt(deliveredAt);
+    order.setState(Order.State.DELIVERED);
+    order.setStatus(Order.State.DELIVERED.name());
     orderRepository.save(order);
     return purchase;
   }

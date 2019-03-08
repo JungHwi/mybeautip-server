@@ -52,11 +52,15 @@ public class AdminPurchaseController {
     Order order = orderRepository.findById(purchase.getOrderId())
         .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found"));
     
-    if (purchase.isDelivered() || order.getDeliveredAt() != null) {
+    if (purchase.isDelivered()) {
       throw new BadRequestException("already_delivered", "Already delivered");
     }
     if (!purchase.isDelivering()) {
-      throw new BadRequestException("required purchase status delivering - " + purchase.getStatus());
+      throw new BadRequestException("required purchase status - delivering");
+    }
+    if (order.isDelivering()) {
+      log.warn("something wrong", "Order state cannot be 'delivered' until all state of purchases has been 'delivered'.");
+      throw new BadRequestException("invalid_order_state", "required order status - delivering");
     }
     
     // Complete purchase & order delivery

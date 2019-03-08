@@ -45,7 +45,6 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @Service
@@ -80,7 +79,6 @@ public class OrderService {
   private final PointService pointService;
   private final IamportService iamportService;
   private final MessageService messageService;
-  private final VideoService videoService;
   private final SlackService slackService;
   private final NotificationService notificationService;
 
@@ -102,7 +100,6 @@ public class OrderService {
                       PointService pointService,
                       IamportService iamportService,
                       MessageService messageService,
-                      VideoService videoService,
                       SlackService slackService,
                       NotificationService notificationService) {
     this.orderRepository = orderRepository;
@@ -123,7 +120,6 @@ public class OrderService {
     this.pointService = pointService;
     this.iamportService = iamportService;
     this.messageService = messageService;
-    this.videoService = videoService;
     this.slackService = slackService;
     this.notificationService = notificationService;
   }
@@ -206,6 +202,8 @@ public class OrderService {
 
     log.debug("purchases: {}", purchases);
     order.setPurchases(purchases);
+    order.setDelivery(delivery);
+    order.setPayment(payment);
     orderRepository.save(order);
 
     return order;
@@ -266,7 +264,7 @@ public class OrderService {
   }
 
   @Transactional
-  public void cancelPayment(Order order) {
+  private void cancelPayment(Order order) {
     if (order.getState() >= Order.State.ORDER_CANCELLED.getValue()) {
       throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
     }
@@ -286,49 +284,7 @@ public class OrderService {
     orderInquiry.setCompleted(true);
     orderInquiryRepository.save(orderInquiry);
   
-    // Revoke used coupon
-    if (order.getMemberCoupon() != null) {
-      log.info("Order canceled - coupon revoked: {}, {}", order.getId(), order.getMemberCoupon());
-      MemberCoupon memberCoupon = order.getMemberCoupon();
-      memberCoupon.setUsedAt(null);
-      memberCouponRepository.save(memberCoupon);
-    }
-  
-    // Revoke used point
-    if (order.getPoint() > 0) {
-      log.info("Order canceled - used point revoked: {}, {}", order.getId(), order.getPoint());
-      Member member = order.getCreatedBy();
-      member.setPoint(member.getPoint() + order.getPoint());
-      memberRepository.save(member);
-    
-      memberPointRepository.findByMemberAndOrderAndPointAndState(
-          order.getCreatedBy(), order, order.getPoint(), MemberPoint.STATE_USE_POINT)
-          .ifPresent(memberPointRepository::delete);
-    }
-  
-    // Remove expected earning point
-    if (order.getExpectedPoint() > 0) {
-      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getMemberCoupon());
-      memberPointRepository.findByMemberAndOrderAndPointAndState(
-          order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
-          .ifPresent(memberPointRepository::delete);
-    }
-    
-    // Revoke video order count & revenues
-    if (order.getVideoId() != null) {
-      videoRepository.findById(order.getVideoId())
-          .ifPresent(video -> {
-            // Update video order count
-            videoRepository.updateOrderCount(order.getVideoId(), -1);
-            
-            // Remove revenues
-            log.info("Order canceled - revenue per purchase removed: {}, {}", order.getId(), order.getMemberCoupon());
-            for (Purchase purchase : order.getPurchases()) {
-              revenueRepository.findByPurchaseId(purchase.getId())
-                  .ifPresent(revenueService::remove);
-            }
-          });
-    }
+    revokeResourcesBeforeCancelOrder(order);
   }
 
   @Transactional
@@ -484,7 +440,7 @@ public class OrderService {
   }
   
   @Transactional
-  public Purchase confirm(Purchase purchase) {
+  public Purchase confirmPurchase(Purchase purchase) {
     log.debug("purchase confirmed: {}", purchase.getId());
     
     // Confirm revenue and Append monthly revenue estimatedAmount if revenue exist
@@ -506,7 +462,10 @@ public class OrderService {
           revenueRepository.save(revenue);
         });
   
-    purchase.setConfirmed(true);
+    // Update purchase state
+    purchase.setState(Order.State.CONFIRMED);
+    purchase.setStatus(Order.State.CONFIRMED.name());
+    purchase.setConfirmed(true);  // FIXME: duplicate with state 'CONFIRMED', should be deprecated...?
     return purchaseRepository.save(purchase);
   }
   
@@ -537,6 +496,26 @@ public class OrderService {
     orderInquiry.setCreatedBy(order.getCreatedBy());
     orderInquiryRepository.save(orderInquiry);
   
+    revokeResourcesBeforeCancelOrder(order);
+    return orderInquiry;
+  }
+  
+  @Transactional
+  public Order confirmOrder(Order order) {
+    // Convert earning point state
+    memberPointRepository.findByMemberAndOrderAndPointAndState(
+        order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
+        .ifPresent(pointService::convertPoint);
+  
+    // Update order state
+    order.setState(Order.State.CONFIRMED);
+    order.setStatus(Order.State.CONFIRMED.name());
+    
+    return orderRepository.save(order);
+  }
+  
+  @Transactional
+  private void revokeResourcesBeforeCancelOrder(Order order) {
     // Revoke used coupon
     if (order.getMemberCoupon() != null) {
       log.info("Order canceled - coupon revoked: {}, {}", order.getId(), order.getMemberCoupon());
@@ -559,7 +538,7 @@ public class OrderService {
   
     // Remove expected earning point
     if (order.getExpectedPoint() > 0) {
-      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getMemberCoupon());
+      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getExpectedPoint());
       memberPointRepository.findByMemberAndOrderAndPointAndState(
           order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
           .ifPresent(memberPointRepository::delete);
@@ -580,7 +559,5 @@ public class OrderService {
             }
           });
     }
-    
-    return orderInquiry;
   }
 }
