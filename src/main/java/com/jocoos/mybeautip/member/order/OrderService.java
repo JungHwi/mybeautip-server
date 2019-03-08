@@ -202,6 +202,8 @@ public class OrderService {
 
     log.debug("purchases: {}", purchases);
     order.setPurchases(purchases);
+    order.setDelivery(delivery);
+    order.setPayment(payment);
     orderRepository.save(order);
 
     return order;
