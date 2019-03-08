@@ -54,13 +54,6 @@ public class InstantMessageService {
 
     scheduleRepository.findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(video.getMember().getId(), now)
       .ifPresent(s -> {
-        long current = System.currentTimeMillis();
-        long startPlus10min = s.getStartedAt().getTime() + config.getInterval() * 1000;
-        long startMinus10min = s.getStartedAt().getTime() - config.getInterval() * 1000;
-        if (current > startPlus10min || current < startMinus10min) {
-          log.debug("too late or early to send push, current: {}, startedAt: {}", current, s.getStartedAt().getTime());
-          return;
-        }
          log.debug("{}", s);
          String title = !Strings.isNullOrEmpty(s.getInstantTitle()) ? s.getInstantTitle() : video.getTitle();
          String message = !Strings.isNullOrEmpty(s.getInstantMessage()) ? s.getInstantMessage() : getDefaultMessage(INSTANT_VIDEO_START_MESSAGE, null);
