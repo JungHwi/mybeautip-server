@@ -465,7 +465,6 @@ public class OrderService {
     // Update purchase state
     purchase.setState(Order.State.CONFIRMED);
     purchase.setStatus(Order.State.CONFIRMED.name());
-    purchase.setConfirmed(true);  // FIXME: duplicate with state 'CONFIRMED', should be deprecated...?
     return purchaseRepository.save(purchase);
   }
   
