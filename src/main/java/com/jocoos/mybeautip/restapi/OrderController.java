@@ -254,6 +254,7 @@ public class OrderController {
     @Min(0)
     private int expectedPoint;
     private Long videoId;
+    private Boolean onLive;
     private Long couponId;
     @Min(0)
     private int point;
@@ -308,7 +309,8 @@ public class OrderController {
     private String optionValue;
     @NotNull
     private int quantity;
-    private Long videoId;
+    private Long videoId; // FIXME: not yet used, videoId refer order's videoId
+    private Boolean onLive; // FIXME: not yet used, onLive refer order's onLive
   }
 
   @NoArgsConstructor
@@ -327,6 +329,7 @@ public class OrderController {
     private int expectedPoint;
     private int state;
     private Long videoId;
+    private Boolean onLive;
     private DeliveryInfo delivery;
     private PaymentInfo payment;
     private List<PurchaseInfo> purchases;
@@ -418,6 +421,7 @@ public class OrderController {
     private int quantity;
     private Long totalPrice;
     private Long videoId;
+    private Boolean onLive;
     private Long inquireId;
     private String carrier;
     private String invoice;

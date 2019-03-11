@@ -59,6 +59,9 @@ public class Purchase extends CreatedDateAuditable {
 
   @Column
   private Long videoId;
+  
+  @Column
+  private Boolean onLive;
 
   @Column
   private String carrier;
