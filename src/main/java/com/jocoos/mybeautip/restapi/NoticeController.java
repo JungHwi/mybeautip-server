@@ -23,8 +23,11 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/api/1/notices", produces = MediaType.APPLICATION_JSON_VALUE)
 public class NoticeController {
   
-  @Value("${mybeautip.revenue.revenue-ratio}")
-  private int revenueRatio;
+  @Value("${mybeautip.revenue.revenue-ratio-live}")
+  private int revenueRatioForLive;
+  
+  @Value("${mybeautip.revenue.revenue-ratio-vod}")
+  private int revenueRatioForVod;
   
   private final NoticeService noticeService;
   private final MessageService messageService;
@@ -52,7 +55,9 @@ public class NoticeController {
     PageRequest pageable = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "createdAt"));
     List<AppInfo> list = appInfoRepository.findByOs(deviceOs, pageable);
     response.setLatestVersion((list.size() > 0) ? list.get(0).getVersion() : "");
-    response.setRevenueRatio(revenueRatio);
+    response.setRevenueRatio(revenueRatioForLive);  // Deprecated
+    response.setRevenueRatioForLive(revenueRatioForLive);
+    response.setRevenueRatioForVod(revenueRatioForVod);
     response.setContent(notices);
     return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -61,7 +66,9 @@ public class NoticeController {
   @Data
   public static class NoticeResponse {
     private String latestVersion;
-    private Integer revenueRatio;
+    private Integer revenueRatio; // Deprecated
+    private Integer revenueRatioForLive;
+    private Integer revenueRatioForVod;
     private List<NoticeInfo> content;
   }
   

@@ -105,7 +105,8 @@ mybeautip:
     scheduler-prefix: member-gift-task-pool-
     scheduler-pool-size: 10
   revenue:
-    revenue-ratio: 3    # %
+    revenue-ratio-live: 3    # %
+    revenue-ratio-vod: 2    # %
     platform-ratio: 10  # %
   shipping:
     fixed: 2500 # 원(₩)

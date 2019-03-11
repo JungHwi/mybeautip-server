@@ -20,9 +20,12 @@ import com.jocoos.mybeautip.video.VideoRepository;
 @Service
 public class RevenueService {
 
-  @Value("${mybeautip.revenue.revenue-ratio}")
-  private int revenueRatio;
-
+  @Value("${mybeautip.revenue.revenue-ratio-live}")
+  private int revenueRatioForLive;
+  
+  @Value("${mybeautip.revenue.revenue-ratio-vod}")
+  private int revenueRatioForVod;
+  
   @Value("${mybeautip.revenue.platform-ratio}")
   private int platformRatio;
 
@@ -52,14 +55,18 @@ public class RevenueService {
     return overview;
   }
 
-  private int getRevenue(Long totalPrice) {
-    return Math.toIntExact(((totalPrice * revenueRatio) / 100));
+  public int getRevenueForLive(Long totalPrice) {
+    return Math.toIntExact(((totalPrice * revenueRatioForLive) / 100));
+  }
+  
+  public int getRevenueForVOD(Long totalPrice) {
+    return Math.toIntExact(((totalPrice * revenueRatioForVod) / 100));
   }
 
   @Transactional
-  public Revenue save(Video video, Purchase purchase) {
+  public Revenue save(Video video, Purchase purchase, int revenueAmount) {
     RevenuePayment revenuePayment = revenuePaymentService.getRevenuePayment(video.getMember(), purchase.getCreatedAt());
-    Revenue revenue = revenueRepository.save(new Revenue(video, purchase, getRevenue(purchase.getTotalPrice()), revenuePayment));
+    Revenue revenue = revenueRepository.save(new Revenue(video, purchase, revenueAmount, revenuePayment));
     log.debug("revenue: {}", revenue);
     
     memberRepository.updateRevenue(video.getMember().getId(), revenue.getRevenue());

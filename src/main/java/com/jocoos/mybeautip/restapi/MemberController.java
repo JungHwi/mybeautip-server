@@ -122,10 +122,10 @@ public class MemberController {
   private String storeImageThumbnailSuffix;
 
   @Value("${mybeautip.point.earn-ratio}")
-  private int pointRatio;
+  private int pointRatio; // Deprecated
 
-  @Value("${mybeautip.revenue.revenue-ratio}")
-  private int revenueRatio;
+  @Value("${mybeautip.revenue.revenue-ratio-live}")
+  private int revenueRatio; // Deprecated
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";
   private final String defaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
