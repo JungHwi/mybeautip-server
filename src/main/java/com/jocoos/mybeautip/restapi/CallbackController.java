@@ -167,6 +167,10 @@ public class CallbackController {
       if (StringUtils.containsAny(source.getState(), "LIVE", "VOD")) {
         target.setState(source.getState());
       }
+      
+      if ("VOD".equals(source.getState())) {
+        target.setEndedAt(new Date());
+      }
     }
     
     if (source.getVisibility() != null) {
