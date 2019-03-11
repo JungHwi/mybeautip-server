@@ -32,10 +32,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
   Page<Order> findByPurchasesGoodsScmNo(int scmNo, Pageable page);
 
-  Page<Order> findByCreatedById(Long memberId, Pageable page);
-
   Page<Order> findByCreatedByIdAndState(Long memberId, int state, Pageable page);
 
   Page<Order> findByStateLessThanEqual(int state, Pageable page);
+
+  Page<Order> findByStateLessThanEqualAndCreatedById(int state, Long memberId, Pageable page);
   
 }
