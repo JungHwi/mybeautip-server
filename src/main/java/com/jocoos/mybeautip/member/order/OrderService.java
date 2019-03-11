@@ -388,7 +388,7 @@ public class OrderService {
       videoRepository.updateOrderCount(order.getVideoId(), 1);
     }
 
-    if (checkAndUpdateOnLiveOrder(order)) {
+    if (isOrderOnLive(order)) {
       log.info("Order on Live - order_id: {}, video_id: {}" , order.getId(), order.getVideoId());
       saveRevenuesForSeller(order);
       notificationService.notifyOrder(order, order.getVideoId());
@@ -400,7 +400,7 @@ public class OrderService {
     // TODO: Send email ?
   }
   
-  private boolean checkAndUpdateOnLiveOrder(Order order) {
+  private boolean isOrderOnLive(Order order) {
     if (order.getVideoId() == null) {
       return false;
     }
