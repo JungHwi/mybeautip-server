@@ -144,6 +144,9 @@ public class Order extends MemberAuditable {
   
   @Column
   private Long videoId;
+  
+  @Column
+  private Boolean onLive;
 
   @ManyToOne
   @JoinColumn(name = "coupon_id")

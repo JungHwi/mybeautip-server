@@ -58,6 +58,7 @@ public class OrderService {
   private static final String POINT_NOT_ENOUGH = "order.point_not_enough";
   private static final String POINT_BAD_REQUEST_MIN_PRICE_CONDITION= "order.price_not_enough_to_use_point";
   private static final int MIN_PRICE_TO_USE_POINT= 30000;
+  private static final int REVENUE_DURATION_AFTER_LIVE_ENDED = 300 * 1000;  // 5 min
   private final static String MERCHANT_PREFIX = "mybeautip_";
 
   private final SimpleDateFormat df = new SimpleDateFormat("yyMMddHHmmssSSS");
@@ -194,6 +195,7 @@ public class OrderService {
         BeanUtils.copyProperties(p, purchase);
         
         purchase.setVideoId(order.getVideoId());
+        purchase.setOnLive(order.getOnLive());
         purchase.setTotalPrice((long) (p.getQuantity() * p.getGoodsPrice()));
         purchases.add(purchase);
         return Optional.empty();
@@ -383,8 +385,12 @@ public class OrderService {
     }
 
     if (order.getVideoId() != null) {
-      saveRevenuesForSeller(order);
       videoRepository.updateOrderCount(order.getVideoId(), 1);
+    }
+
+    if (isOrderOnLive(order)) {
+      log.info("Order on Live - order_id: {}, video_id: {}" , order.getId(), order.getVideoId());
+      saveRevenuesForSeller(order);
       notificationService.notifyOrder(order, order.getVideoId());
     }
     
@@ -392,6 +398,33 @@ public class OrderService {
 
     // TODO: Notify ?
     // TODO: Send email ?
+  }
+  
+  private boolean isOrderOnLive(Order order) {
+    if (order.getVideoId() == null) {
+      return false;
+    }
+    
+    Video video = videoRepository.findById(order.getVideoId()).orElse(null);
+    if (video == null) {
+      log.warn("Something wrong! Not found video: " + order.getVideoId());
+      return false;
+    }
+    
+    if (!"BROADCASTED".equals(video.getType())) { // only broadcasted type video order grant revenue
+      return false;
+    }
+
+    if ("LIVE".equals(video.getState()) || video.getEndedAt() == null) {
+      return true;
+    } else {  // VOD
+      if (video.getEndedAt() == null) {
+        log.warn("Something wrong! Video state is not LIVE, but endedAt is null: " + video.getId());
+        return false;
+      }
+      
+      return order.getCreatedAt().getTime() <= (video.getEndedAt().getTime() + REVENUE_DURATION_AFTER_LIVE_ENDED);
+    }
   }
 
   /**
@@ -465,7 +498,6 @@ public class OrderService {
     // Update purchase state
     purchase.setState(Order.State.CONFIRMED);
     purchase.setStatus(Order.State.CONFIRMED.name());
-    purchase.setConfirmed(true);  // FIXME: duplicate with state 'CONFIRMED', should be deprecated...?
     return purchaseRepository.save(purchase);
   }
   
