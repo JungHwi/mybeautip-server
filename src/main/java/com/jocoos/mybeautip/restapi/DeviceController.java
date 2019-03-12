@@ -43,7 +43,6 @@ public class DeviceController {
     this.deviceRepository = deviceRepository;
   }
 
-  @Transactional
   @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<DeviceInfo> register(@Valid @RequestBody DeviceController.UpdateDeviceRequest request,
                                              BindingResult bindingResult) {
