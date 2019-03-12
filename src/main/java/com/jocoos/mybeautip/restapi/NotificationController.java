@@ -114,8 +114,9 @@ public class NotificationController {
        .withCount(count)
        .withCursor(nextCursor).toBuild();
   }
-
-  @PatchMapping("/{id:.+}") // Deprecated
+  
+  @Deprecated
+  @PatchMapping("/{id:.+}")
   public ResponseEntity readNotification(@PathVariable Long id) {
     Long memberId = memberService.currentMemberId();
     return notificationRepository.findByIdAndTargetMemberId(id, memberId)

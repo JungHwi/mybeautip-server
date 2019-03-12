@@ -729,7 +729,8 @@ public class VideoController {
   @Data
   public static class VideoLikeInfo {
     private Long id;
-    private Long createdBy; // deprecated
+    @Deprecated
+    private Long createdBy;
     private Date createdAt;
     private VideoInfo video;
 
@@ -742,7 +743,8 @@ public class VideoController {
   @Data
   public static class CommentLikeInfo {
     private Long id;
-    private MemberInfo createdBy; // deprecated
+    @Deprecated
+    private MemberInfo createdBy;
     private Date createdAt;
     private CommentInfo comment;
 

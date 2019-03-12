@@ -85,7 +85,7 @@ public class GoodsInfo {
 
     this.deliveryInfo = StringUtils.isBlank(deliveryInfo) ? "" : deliveryInfo;
     this.refundInfo = StringUtils.isBlank(refundInfo) ? "" : refundInfo;
-    this.asInfo = ""; // deprecated
+    this.asInfo = "";
     this.companyInfo = StringUtils.isBlank(companyInfo) ? "" : companyInfo;
   }
   
