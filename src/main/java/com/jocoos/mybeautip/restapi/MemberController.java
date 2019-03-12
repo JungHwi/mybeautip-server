@@ -121,10 +121,12 @@ public class MemberController {
   @Value("${mybeautip.store.image-path.thumbnail-suffix}")
   private String storeImageThumbnailSuffix;
 
+  @Deprecated
   @Value("${mybeautip.point.earn-ratio}")
   private int pointRatio;
-
-  @Value("${mybeautip.revenue.revenue-ratio}")
+  
+  @Deprecated
+  @Value("${mybeautip.revenue.revenue-ratio-live}")
   private int revenueRatio;
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";

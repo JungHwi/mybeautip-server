@@ -296,8 +296,10 @@ public class RecommendationController {
     MemberInfo member;
     TagInfo tag;
     Integer seq;
-    Date startedAt; // Deprecated
-    Date endedAt; // Deprecated
+    @Deprecated
+    Date startedAt;
+    @Deprecated
+    Date endedAt;
     Date createdAt;
     Date modifiedAt;
     

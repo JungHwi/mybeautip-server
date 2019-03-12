@@ -385,12 +385,15 @@ public class OrderService {
     }
 
     if (order.getVideoId() != null) {
+      if (isOrderOnLive(order)) {
+        log.info("Order on Live - order_id: {}, video_id: {}", order.getId(), order.getVideoId());
+        saveRevenuesForSeller(order, "LIVE");
+      } else {
+        log.info("Order on VOD - order_id: {}, video_id: {}", order.getId(), order.getVideoId());
+        saveRevenuesForSeller(order, "VOD");
+      }
+  
       videoRepository.updateOrderCount(order.getVideoId(), 1);
-    }
-
-    if (isOrderOnLive(order)) {
-      log.info("Order on Live - order_id: {}, video_id: {}" , order.getId(), order.getVideoId());
-      saveRevenuesForSeller(order);
       notificationService.notifyOrder(order, order.getVideoId());
     }
     
@@ -431,7 +434,7 @@ public class OrderService {
    * Save revenues for seller
    */
   @Transactional
-  private void saveRevenuesForSeller(Order order) {
+  private void saveRevenuesForSeller(Order order, String videoState) {
     Map<Goods, Video> videoGoods = videoGoodsRepository.findAllByVideoId(order.getVideoId())
        .stream().collect(Collectors.toMap(VideoGoods::getGoods, VideoGoods::getVideo));
 
@@ -439,7 +442,14 @@ public class OrderService {
     order.getPurchases().forEach(
        p -> {
          if (videoGoods.containsKey(p.getGoods())) {
-           revenueService.save(videoGoods.get(p.getGoods()), p);
+           int revenueAmount = 0;
+           if ("LIVE".equals(videoState)) {
+             revenueAmount = revenueService.getRevenueForLive(p.getTotalPrice());
+           }
+           if ("VOD".equals(videoState)) {
+             revenueAmount = revenueService.getRevenueForVOD(p.getTotalPrice());
+           }
+           revenueService.save(videoGoods.get(p.getGoods()), p, revenueAmount);
          }
        }
     );

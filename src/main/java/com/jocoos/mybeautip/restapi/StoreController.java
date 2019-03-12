@@ -214,7 +214,8 @@ public class StoreController {
   @Data
   public static class StoreLikeInfo {
     private Long id;
-    private Long createdBy; // deprecated
+    @Deprecated
+    private Long createdBy;
     private Date createdAt;
     private StoreInfo store;
 

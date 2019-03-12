@@ -258,7 +258,7 @@ public class Notification {
     this.targetMember = video.getMember();
     this.read = false;
     this.resourceType = RESOURCE_TYPE_VIDEO;
-    this.resourceId = video.getId();  // Deprecated
+    this.resourceId = video.getId();
     this.resourceIds = StringUtils.joinWith(",", video.getId());
     this.resourceOwner = order.getCreatedBy();
     this.imageUrl = video.getThumbnailUrl();
