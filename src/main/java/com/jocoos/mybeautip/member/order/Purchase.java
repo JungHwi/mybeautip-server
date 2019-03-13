@@ -25,6 +25,18 @@ public class Purchase extends CreatedDateAuditable {
 
   @Column(nullable = false)
   private Long orderId;
+  
+  /**
+   * Order number from Godomall
+   */
+  @Column(nullable = false)
+  private String mallOrderId;
+  
+  /**
+   * Order Goods sno from Godomall
+   */
+  @Column(nullable = false)
+  private Integer mallOrderGoodsId;
 
   @ManyToOne
   @JoinColumn(name = "goods_no")
