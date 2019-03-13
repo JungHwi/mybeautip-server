@@ -27,12 +27,6 @@ public class Purchase extends CreatedDateAuditable {
   private Long orderId;
   
   /**
-   * Order number from Godomall
-   */
-  @Column(nullable = false)
-  private String mallOrderId;
-  
-  /**
    * Order Goods sno from Godomall
    */
   @Column(nullable = false)

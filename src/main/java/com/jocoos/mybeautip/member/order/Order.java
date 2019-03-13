@@ -108,9 +108,6 @@ public class Order extends MemberAuditable {
    */
   @Column(nullable = false)
   private String mallOrderId;
-  
-  @Column(nullable = false)
-  private String name;
 
   @Column(nullable = false)
   private int goodsCount;
