@@ -99,12 +99,15 @@ public class Order extends MemberAuditable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
+  
+  @Column(nullable = false)
+  private String number;
+  
   /**
    * Order number from Godomall
    */
   @Column(nullable = false)
-  private String number;
+  private String mallOrderId;
 
   @Column(nullable = false)
   private int goodsCount;
