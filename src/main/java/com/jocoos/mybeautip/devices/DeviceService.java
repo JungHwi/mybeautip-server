@@ -86,6 +86,10 @@ public class DeviceService {
   }
   
   @Synchronized
+  public Device getDevice(String deviceId) {
+    return deviceRepository.findById(deviceId).orElse(null);
+  }
+  
   @Transactional
   public Device create(DeviceController.UpdateDeviceRequest request, Member me) {
     Device device = copyBasicInfo(request, new Device());
