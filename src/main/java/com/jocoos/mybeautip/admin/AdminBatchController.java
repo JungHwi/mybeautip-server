@@ -43,10 +43,6 @@ public class AdminBatchController {
     if (purchase.isConfirmed()) {
       throw new BadRequestException("already_confirmed", "Already confirmed");
     }
-  
-    if (!purchase.isDelivered()) {
-      throw new BadRequestException("invalid_state", "Current order state is not 'delivered', current state: " + purchase.getState());
-    }
     
     purchase = orderService.confirmPurchase(purchase);
     OrderController.PurchaseInfo info = new OrderController.PurchaseInfo(purchase);
@@ -60,10 +56,6 @@ public class AdminBatchController {
     
     if (order.isConfirmed()) {
       throw new BadRequestException("already_confirmed", "Already confirmed");
-    }
-    
-    if (!order.isDelivered()) {
-      throw new BadRequestException("invalid_state", "Current order state is not 'delivered', current state: " + order.getState());
     }
     
     order = orderService.confirmOrder(order);
