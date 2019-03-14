@@ -99,11 +99,11 @@ public class SlackService {
         getPurchaseInfo(order.getPurchases()),
         me.getUsername(),
         StringUtils.isEmpty(me.getPhoneNumber()) ? delivery.getPhone() : me.getPhoneNumber(),
-        delivery.getRoadAddrPart1() + " " + delivery.getRoadAddrPart2(),
+        delivery.getRoadAddrPart1() + ", " + delivery.getRoadAddrPart2(),
         me.getEmail(),
         delivery.getRecipient(),
         delivery.getPhone(),
-        delivery.getRoadAddrPart1() + " " + delivery.getRoadAddrPart2(),
+        delivery.getRoadAddrPart1() + ", " + delivery.getRoadAddrPart2(),
         delivery.getCarrierMessage());
     send(message);
   }
