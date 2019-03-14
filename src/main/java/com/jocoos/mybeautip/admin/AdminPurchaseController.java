@@ -44,6 +44,7 @@ public class AdminPurchaseController {
     this.purchaseRepository = purchaseRepository;
   }
   
+  // TODO: Remove when unused (This job replaced with Batch order sync)
   @PatchMapping("/{id}/delivered")
   public ResponseEntity<OrderController.PurchaseInfo> completeDelivered(@PathVariable("id") Long id,
                                                                         @RequestBody UpdatePurchaseRequest request) {
