@@ -50,12 +50,12 @@ public class InstantMessageService {
     }
     
     Instant instant = Instant.now().minus(config.getInterval(), ChronoUnit.MINUTES);
-    Date now = Date.from(instant);
+    Date minus10min = Date.from(instant);
   
     instant = Instant.now().plus(config.getInterval(), ChronoUnit.MINUTES);
     Date after10min = Date.from(instant);
 
-    scheduleRepository.findByCreatedByIdAndStartedAtAfterAndStartedAtBeforeAndDeletedAtIsNull(video.getMember().getId(), now, after10min)
+    scheduleRepository.findByCreatedByIdAndStartedAtBetweenAndDeletedAtIsNull(video.getMember().getId(), minus10min, after10min)
       .ifPresent(s -> {
          log.debug("{}", s);
          String title = !Strings.isNullOrEmpty(s.getInstantTitle()) ? s.getInstantTitle() : video.getTitle();
