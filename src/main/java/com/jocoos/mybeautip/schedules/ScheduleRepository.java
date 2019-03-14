@@ -13,5 +13,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
   List<Schedule> findByCreatedByIdOrderByStartedAt(Long id);
 
-  Optional<Schedule> findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(Long id, Date startedAt);
+  Optional<Schedule> findByCreatedByIdAndStartedAtAfterAndStartedAtBeforeAndDeletedAtIsNull(Long id, Date minStartedAt, Date maxStartedAt);
 }
