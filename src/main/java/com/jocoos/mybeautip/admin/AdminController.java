@@ -259,6 +259,9 @@ public class AdminController {
         case "report":
           pagingSort = new Sort(Sort.Direction.DESC, "reportCount");
           break;
+        case "order":
+          pagingSort = new Sort(Sort.Direction.DESC, "orderCount");
+          break;
         default:
           pagingSort = new Sort(Sort.Direction.DESC, "id");
       }
@@ -624,6 +627,20 @@ public class AdminController {
       return info;
     });
 
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  @GetMapping("/recommendedLiveDetails")
+  public ResponseEntity<Page<RecommendationController.RecommendedMotdInfo>> getRecommendedLiveDetails(
+     @RequestParam(defaultValue = "BROADCASTED") String type,
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "desc") String direction) {
+
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "seq", "createdAt"));
+    Page<MotdRecommendation> bases = motdRecommendationRepository.findByVideoTypeAndVideoDeletedAtIsNull(type, pageable);
+
+    Page<RecommendationController.RecommendedMotdInfo> details = bases.map(m -> new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
     return new ResponseEntity<>(details, HttpStatus.OK);
   }
 

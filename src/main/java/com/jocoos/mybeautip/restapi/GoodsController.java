@@ -246,7 +246,8 @@ public class GoodsController {
   @Data
   public static class GoodsLikeInfo {
     private Long id;
-    private Long createdBy; // deprecated
+    @Deprecated
+    private Long createdBy;
     private Date createdAt;
     private GoodsInfo goods;
 

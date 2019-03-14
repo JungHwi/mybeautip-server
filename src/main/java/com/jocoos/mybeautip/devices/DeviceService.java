@@ -22,8 +22,8 @@ import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 
 import com.jocoos.mybeautip.admin.AdminNotificationController;
 import com.jocoos.mybeautip.member.Member;
@@ -83,6 +83,11 @@ public class DeviceService {
     target.setTimezone(src.getDeviceTimezone());
     target.setArn(createARN(src.getDeviceId(), src.getDeviceOs()));
     return target;
+  }
+  
+  @Synchronized
+  public Device getDevice(String deviceId) {
+    return deviceRepository.findById(deviceId).orElse(null);
   }
   
   @Transactional

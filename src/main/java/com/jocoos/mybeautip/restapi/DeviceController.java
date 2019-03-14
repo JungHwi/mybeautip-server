@@ -43,7 +43,6 @@ public class DeviceController {
     this.deviceRepository = deviceRepository;
   }
 
-  @Transactional
   @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<DeviceInfo> register(@Valid @RequestBody DeviceController.UpdateDeviceRequest request,
                                              BindingResult bindingResult) {
@@ -60,7 +59,7 @@ public class DeviceController {
 
     log.debug("request: {}, member: {}", request, me);
     
-    Device device = deviceRepository.findById(request.getDeviceId()).orElse(null);
+    Device device = deviceService.getDevice(request.getDeviceId());
     Device result;
     if (device == null) {
       result = deviceService.create(request, me);

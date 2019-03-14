@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.order.Delivery;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.Payment;
@@ -42,4 +43,7 @@ public interface OrderExcerpt {
   int getTotalShippingAmount();
 
   int getTotalGoodsAmount();
+
+  @Value("#{target.createdBy}")
+  Member getCreatedBy();
 }

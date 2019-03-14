@@ -476,7 +476,8 @@ public class PostController {
     private int category;
     private int progress;
     private Set<PostContent> contents;
-    private List<String> goods; // deprecated
+    @Deprecated
+    private List<String> goods;
     private List<GoodsInfo> goodsInfo;
     private Set<Long> winners;
     private int likeCount;
@@ -503,7 +504,8 @@ public class PostController {
   @Data
   public static class PostLikeInfo {
     private Long id;
-    private MemberInfo createdBy; // deprecated
+    @Deprecated
+    private MemberInfo createdBy;
     private Date createdAt;
     private PostBasicInfo post;
 
@@ -536,7 +538,8 @@ public class PostController {
   @Data
   public static class CommentLikeInfo {
     private Long id;
-    private MemberInfo createdBy; // deprecated
+    @Deprecated
+    private MemberInfo createdBy;
     private Date createdAt;
     private CommentInfo comment;
 

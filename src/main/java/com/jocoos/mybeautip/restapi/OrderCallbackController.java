@@ -39,7 +39,7 @@ public class OrderCallbackController {
   @GetMapping("/complete")
   public ResponseEntity<String> orderComplete(@RequestParam(name = "imp_uid") String impUid,
                                               @RequestParam(name = "merchant_uid") String merchantUid,
-                                              @RequestParam(name = "imp_success") Boolean impSuccess, // Deprecated
+                                              @RequestParam(name = "imp_success") Boolean impSuccess,
                                               @RequestParam(name = "error_msg", required = false) String errorMsg) {
 
     log.info(String.format("OrderCallbackComplete called: impUid=%s, merchantUid=%s", impUid, merchantUid));

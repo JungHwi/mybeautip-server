@@ -105,7 +105,10 @@ public class Video {
   @Column
   @LastModifiedDate
   public Date modifiedAt;
-
+  
+  @Column
+  public Date endedAt;
+  
   @Column
   public Date deletedAt;
   
