@@ -121,6 +121,8 @@ public class MemberService {
   }
 
   public void checkUsernameValidation(@RequestParam String username, String lang) {
+    Member me = currentMember();
+    
     if (username.length() < 2 || username.length() > 25) {
       throw new BadRequestException("invalid_length", messageService.getMessage(USERNAME_INVALID_LENGTH, lang));
     }
@@ -134,7 +136,13 @@ public class MemberService {
       throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
     }
 
-    if (!currentMember().getUsername().equals(username)) {
+    if (me.isVisible()) { // Already registered member
+      if (!me.getUsername().equals(username)) {
+        if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
+          throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+        }
+      }
+    } else {
       if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
         throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
       }
