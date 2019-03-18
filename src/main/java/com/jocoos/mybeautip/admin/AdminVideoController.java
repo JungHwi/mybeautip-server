@@ -1,25 +1,39 @@
 package com.jocoos.mybeautip.admin;
 
-import java.time.*;
-import java.util.Collections;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.recoding.ViewRecoding;
+import com.jocoos.mybeautip.recoding.ViewRecodingRepository;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
@@ -30,12 +44,18 @@ import com.jocoos.mybeautip.video.VideoService;
 @RequestMapping("/api/admin/manual/videos")
 public class AdminVideoController {
   private final VideoService videoService;
+  private final MemberService memberService;
   private final VideoRepository videoRepository;
+  private final ViewRecodingRepository viewRecodingRepository;
   
   public AdminVideoController(VideoService videoService,
-                              VideoRepository videoRepository) {
+                              MemberService memberService,
+                              VideoRepository videoRepository,
+                              ViewRecodingRepository viewRecodingRepository) {
     this.videoService = videoService;
+    this.memberService = memberService;
     this.videoRepository = videoRepository;
+    this.viewRecodingRepository = viewRecodingRepository;
   }
   
   
@@ -101,6 +121,36 @@ public class AdminVideoController {
     }
 
     return new ResponseEntity<>(recentVideos, HttpStatus.OK);
+  }
+  
+  
+  /**
+   * This API is not for retrieve realtime watcher list
+   * @param video_id
+   * @return watcher list who have watched a video when on streaming
+   */
+  @GetMapping("/{id:.+}/on-live-watchers")
+  public ResponseEntity<Page<MemberInfo>> getOnLiveWatcherList(@PathVariable Long id,
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "100") int size) {
+    Video video = videoRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + id));
+    
+    if (!"BROADCASTED".equals(video.getType())) {
+      throw new BadRequestException("invalid_video_type", "Valid video type is BROADCASTED");
+    }
+    
+    Date endedAt = video.getEndedAt();
+    if (endedAt == null) {
+      endedAt = new Date(video.getCreatedAt().getTime() + video.getDuration());
+    }
+  
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.ASC, "createdAt"));
+    Page<ViewRecoding> viewRecodings = viewRecodingRepository.findByItemIdAndCategoryAndCreatedAtLessThanEqual(
+        video.getId().toString(), ViewRecoding.CATEGORY_VIDEO, endedAt, pageable);
+    Page<MemberInfo> watchers = viewRecodings.map(m -> memberService.getMemberInfo(m.getCreatedBy()));
+    
+    return new ResponseEntity<>(watchers, HttpStatus.OK);
   }
 
 
