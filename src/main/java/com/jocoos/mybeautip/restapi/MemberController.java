@@ -188,12 +188,20 @@ public class MemberController {
               .map(m -> new Resource<>(new MemberMeInfo(m, pointRatio, revenueRatio)))
               .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
-
-  @Transactional
+  
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
                                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("member id: {}", memberService.currentMemberId());
+  
+    Member me = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    
+    if (!me.isVisible()) { // when first called
+      if (StringUtils.isEmpty(updateMemberRequest.getUsername())) {
+        throw new BadRequestException("username_required", "Username required.");
+      }
+    }
     
     if (updateMemberRequest.getUsername() != null) {
       memberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
@@ -202,38 +210,13 @@ public class MemberController {
     if (updateMemberRequest.getEmail() != null) {
       memberService.checkEmailValidation(updateMemberRequest.getEmail(), lang);
     }
-
-    return memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
-        .map(m -> {
-          if (updateMemberRequest.getUsername() != null) {
-            m.setUsername(updateMemberRequest.getUsername());
-          }
-          if (updateMemberRequest.getEmail() != null) {
-            m.setEmail(updateMemberRequest.getEmail());
-          }
-          if (updateMemberRequest.getAvatarUrl() != null) {
-            if ("".equals(updateMemberRequest.getAvatarUrl())) {
-              m.setAvatarUrl(defaultAvatarUrl);
-            } else {
-              m.setAvatarUrl(updateMemberRequest.getAvatarUrl());
-            }
-          }
-          if (updateMemberRequest.getIntro() != null) {
-            tagService.touchRefCount(updateMemberRequest.getIntro());
-            tagService.updateHistory(m.getIntro(), updateMemberRequest.getIntro(), TagService.TAG_MEMBER, m.getId(), m);
-            m.setIntro(updateMemberRequest.getIntro());
-          }
-  
-          if (updateMemberRequest.getPushable() != null) {
-            m.setPushable(updateMemberRequest.getPushable());
-          }
-  
-          m.setVisible(true);
-          memberRepository.save(m);
-
-          return new ResponseEntity<>(memberService.getMemberInfo(m), HttpStatus.OK);
-        })
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    
+    if (updateMemberRequest.getAvatarUrl() != null && "".equals(updateMemberRequest.getAvatarUrl())) {
+      updateMemberRequest.setAvatarUrl(defaultAvatarUrl);
+    }
+    
+    Member member = memberService.updateMember(updateMemberRequest, me);
+    return new ResponseEntity<>(memberService.getMemberInfo(member), HttpStatus.OK);
   }
   
   @GetMapping
@@ -460,49 +443,14 @@ public class MemberController {
     postProcessService.deleteMember(member);
   }
   
-  @Transactional
   @PutMapping("/me/delete")
-  public void deleteMember(@Valid @RequestBody DeleteMemberRequest request,
+  public ResponseEntity deleteMember(@Valid @RequestBody DeleteMemberRequest request,
                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
-    int link = member.getLink();
-    switch (link) {
-      case 1:
-        facebookMemberRepository.findByMemberId(member.getId()).ifPresent(facebookMemberRepository::delete);
-        break;
-      
-      case 2:
-        naverMemberRepository.findByMemberId(member.getId()).ifPresent(naverMemberRepository::delete);
-        break;
-      
-      case 4:
-        kakaoMemberRepository.findByMemberId(member.getId()).ifPresent(kakaoMemberRepository::delete);
-        break;
-      
-      default:
-        throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
-    }
-    
-    member.setIntro("");
-    member.setAvatarUrl("https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_deleted.png");
-    member.setVisible(false);
-    member.setFollowingCount(0);
-    member.setFollowerCount(0);
-    member.setPublicVideoCount(0);
-    member.setTotalVideoCount(0);
-    member.setDeletedAt(new Date());
-    memberRepository.saveAndFlush(member);
-    
-    log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
-    
-    // Sync processing before response
-    notificationService.readAllNotification(member.getId());
-    memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
-    
-    // Async processing after response
-    postProcessService.deleteMember(member);
+    memberService.deleteMember(request, member);
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @GetMapping(value = "/me/comments")
