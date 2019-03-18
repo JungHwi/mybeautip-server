@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.recoding;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -16,4 +17,6 @@ public interface ViewRecodingRepository extends JpaRepository<ViewRecoding, Long
   Slice<ViewRecoding> findByCategoryAndCreatedByIdAndModifiedAtBeforeAndModifiedAtAfter(Integer category, Long memberId, Date now, Date weekAgo, Pageable pageable);
   
   Optional<ViewRecoding> findByItemIdAndCategoryAndCreatedBy(String itemId, int category, Member createdBy);
+  
+  List<ViewRecoding> findByItemIdAndCategoryAndCreatedAtLessThanEqual(String itemId, int category, Date createdAt);
 }
