@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -606,7 +605,6 @@ public class VideoController {
   /**
    * Add Heart
    */
-  @Transactional
   @PostMapping(value = "/{id:.+}/hearts")
   public ResponseEntity<VideoInfo> heartVideo(@PathVariable Long id,
                                               @Valid @RequestBody(required = false) VideoHeartRequest request,
@@ -623,8 +621,7 @@ public class VideoController {
 
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-
-    videoRepository.updateHeartCount(id, count);
+    videoService.increaseHeart(video, count);
     video.setHeartCount(video.getHeartCount() + count);
 
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);

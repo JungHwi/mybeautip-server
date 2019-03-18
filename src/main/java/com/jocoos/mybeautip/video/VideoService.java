@@ -594,6 +594,11 @@ public class VideoService {
     commentRepository.updateLikeCount(liked.getComment().getId(), -1);
   }
   
+  @Transactional
+  public void increaseHeart(Video video, int count) {
+    videoRepository.updateHeartCount(video.getId(), count);
+  }
+  
   /**
    * Wrap method to avoid duplication for feed aspect
    * @param video
