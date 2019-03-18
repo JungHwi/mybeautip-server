@@ -1,17 +1,26 @@
 package com.jocoos.mybeautip.admin;
 
-import java.time.*;
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -121,32 +130,27 @@ public class AdminVideoController {
    * @return watcher list who have watched a video when on streaming
    */
   @GetMapping("/{id:.+}/on-live-watchers")
-  public ResponseEntity<OnLiveWatcherInfo> getOnLiveWatcherList(@PathVariable Long id) {
+  public ResponseEntity<Page<MemberInfo>> getOnLiveWatcherList(@PathVariable Long id,
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "100") int size) {
     Video video = videoRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + id));
     
     if (!"BROADCASTED".equals(video.getType())) {
       throw new BadRequestException("invalid_video_type", "Valid video type is BROADCASTED");
     }
-  
-    List<MemberInfo> watchers = new ArrayList<>();
-    if ("LIVE".equals(video.getState())) {
-      return new ResponseEntity<>(new OnLiveWatcherInfo(watchers), HttpStatus.OK);
-    }
     
     Date endedAt = video.getEndedAt();
     if (endedAt == null) {
       endedAt = new Date(video.getCreatedAt().getTime() + video.getDuration());
     }
-    
-    List<ViewRecoding> viewRecodings = viewRecodingRepository.findByItemIdAndCategoryAndCreatedAtLessThanEqual(
-        video.getId().toString(), ViewRecoding.CATEGORY_VIDEO, endedAt);
   
-    for (ViewRecoding viewRecoding : viewRecodings) {
-      watchers.add(memberService.getMemberInfo(viewRecoding.getCreatedBy()));
-    }
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.ASC, "createdAt"));
+    Page<ViewRecoding> viewRecodings = viewRecodingRepository.findByItemIdAndCategoryAndCreatedAtLessThanEqual(
+        video.getId().toString(), ViewRecoding.CATEGORY_VIDEO, endedAt, pageable);
+    Page<MemberInfo> watchers = viewRecodings.map(m -> memberService.getMemberInfo(m.getCreatedBy()));
     
-    return new ResponseEntity<>(new OnLiveWatcherInfo(watchers), HttpStatus.OK);
+    return new ResponseEntity<>(watchers, HttpStatus.OK);
   }
 
 
