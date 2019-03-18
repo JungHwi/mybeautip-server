@@ -35,8 +35,6 @@ public class MemberService {
   private final BannedWordService bannedWordService;
   private final MessageService messageService;
   private final TagService tagService;
-  private final NotificationService notificationService;
-  private final PostProcessService postProcessService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
   private final ReportRepository reportRepository;
@@ -46,6 +44,7 @@ public class MemberService {
   private final MemberLeaveLogRepository memberLeaveLogRepository;
   
   private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
+  private final String defaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
   
   private static final String USERNAME_INVALID_LENGTH = "username.invalid_length";
   private static final String USERNAME_INVALID_FORMAT = "username.invalid_format";
@@ -57,8 +56,6 @@ public class MemberService {
   public MemberService(BannedWordService bannedWordService,
                        MessageService messageService,
                        TagService tagService,
-                       NotificationService notificationService,
-                       PostProcessService postProcessService,
                        MemberRepository memberRepository,
                        FollowingRepository followingRepository,
                        ReportRepository reportRepository,
@@ -69,8 +66,6 @@ public class MemberService {
     this.bannedWordService = bannedWordService;
     this.messageService = messageService;
     this.tagService = tagService;
-    this.notificationService = notificationService;
-    this.postProcessService = postProcessService;
     this.memberRepository = memberRepository;
     this.followingRepository = followingRepository;
     this.reportRepository = reportRepository;
@@ -207,12 +202,30 @@ public class MemberService {
   
   @Transactional
   public Member updateMember(MemberController.UpdateMemberRequest request, Member member) {
-    BeanUtils.copyProperties(request, member);
+    if (request.getUsername() != null) {
+      member.setUsername(request.getUsername());
+    }
+    
+    if (request.getEmail() != null) {
+      member.setEmail(request.getEmail());
+    }
+  
+    if (request.getAvatarUrl() != null) {
+      if ("".equals(request.getAvatarUrl())) {
+        member.setAvatarUrl(defaultAvatarUrl);
+      } else {
+        member.setAvatarUrl(request.getAvatarUrl());
+      }
+    }
     
     if (request.getIntro() != null) {
       tagService.touchRefCount(request.getIntro());
       tagService.updateHistory(member.getIntro(), request.getIntro(), TagService.TAG_MEMBER, member.getId(), member);
       member.setIntro(request.getIntro());
+    }
+  
+    if (request.getPushable() != null) {
+      member.setPushable(request.getPushable());
     }
   
     member.setVisible(true);
@@ -250,12 +263,6 @@ public class MemberService {
     memberRepository.saveAndFlush(member);
   
     log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
-  
-    // Sync processing before response
-    notificationService.readAllNotification(member.getId());
     memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
-  
-    // Async processing after response
-    postProcessService.deleteMember(member);
   }
 }
