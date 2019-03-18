@@ -2,6 +2,11 @@ package com.jocoos.mybeautip.member;
 
 import javax.transaction.Transactional;
 
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.notification.NotificationRepository;
@@ -9,11 +14,7 @@ import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -21,7 +22,6 @@ public class PostProcessService {
   
   private final VideoService videoService;
   private final TagService tagService;
-  private final VideoRepository videoRepository;
   private final FollowingRepository followingRepository;
   private final CartRepository cartRepository;
   private final MemberRepository memberRepository;
@@ -32,7 +32,6 @@ public class PostProcessService {
   
   public PostProcessService(VideoService videoService,
                             TagService tagService,
-                            VideoRepository videoRepository,
                             FollowingRepository followingRepository,
                             CartRepository cartRepository,
                             MemberRepository memberRepository,
@@ -42,7 +41,6 @@ public class PostProcessService {
                             KeywordRecommendationRepository keywordRecommendationRepository) {
     this.videoService = videoService;
     this.tagService = tagService;
-    this.videoRepository = videoRepository;
     this.followingRepository = followingRepository;
     this.cartRepository = cartRepository;
     this.memberRepository = memberRepository;
