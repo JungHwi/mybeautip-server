@@ -174,16 +174,4 @@ public class AdminVideoController {
       }
     }
   }
-  
-  @Data
-  @NoArgsConstructor
-  private static class OnLiveWatcherInfo {
-    private Integer count;
-    private List<MemberInfo> watchers;
-    
-    private OnLiveWatcherInfo(List<MemberInfo> watchers) {
-      this.count = watchers.size();
-      this.watchers = watchers;
-    }
-  }
 }
