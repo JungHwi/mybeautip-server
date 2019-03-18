@@ -44,6 +44,8 @@ public interface OrderExcerpt {
 
   int getTotalGoodsAmount();
 
+  String getMallOrderId();
+
   @Value("#{target.createdBy}")
   Member getCreatedBy();
 }
