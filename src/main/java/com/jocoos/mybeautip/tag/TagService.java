@@ -43,6 +43,7 @@ public class TagService {
   }
   
   // Save tags without increasing refCount
+  @Synchronized
   @Transactional
   public void touchRefCount(String text) {
     List<String> tags = parseHashTag(text);
@@ -58,6 +59,7 @@ public class TagService {
     }
   }
   
+  @Synchronized
   @Transactional
   public void increaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
@@ -80,6 +82,7 @@ public class TagService {
     }
   }
   
+  @Synchronized
   @Transactional
   public void updateRefCount(String oldText, String newText) {
     List<String> oldTagNames = parseHashTag(oldText);
