@@ -16,8 +16,4 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
   void updateViewCount(Long id, Long count);
 
   Slice<Banner> findByStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(Date statedAt, Date endedAt, Pageable pageable);
-
-  Page<Banner> findByDeletedAtIsNull(Pageable pageable);
-
-  Page<Banner> findByDeletedAtIsNotNull(Pageable pageable);
 }
