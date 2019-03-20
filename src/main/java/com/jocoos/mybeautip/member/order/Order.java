@@ -22,7 +22,6 @@ public class Order extends MemberAuditable {
    * Sharing status value with Purchase status
    */
 
-  @Deprecated
   public static class Status {
     public static final String ORDERED = "ordered";
     public static final String PAID = "paid";

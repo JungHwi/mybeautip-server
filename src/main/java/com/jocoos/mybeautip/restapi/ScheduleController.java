@@ -39,7 +39,7 @@ public class ScheduleController {
   }
 
   @GetMapping
-  public ResponseEntity<ScheduleInfo[]> getSchduels(@RequestParam(defaultValue = "10") int count) {
+  public ResponseEntity<List<ScheduleInfo>> getSchduels(@RequestParam(defaultValue = "10") int count) {
     PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
 
     Instant instant = Instant.now().minus(config.getInterval(), ChronoUnit.MINUTES);
@@ -47,10 +47,10 @@ public class ScheduleController {
 
     List<ScheduleInfo> result = scheduleRepository.findByStartedAtAfterAndDeletedAtIsNull(now, pageRequest)
        .stream()
-       .map(s -> new ScheduleInfo(s))
+       .map(ScheduleInfo::new)
        .collect(Collectors.toList());
 
-    return new ResponseEntity(result, HttpStatus.OK);
+    return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
   @Data
