@@ -13,6 +13,16 @@ Configutation:
             interval: 1
             modulate: true
 
+      - name: ERROR_FILE
+        fileName: ./logs/error.log
+        filePattern: "./logs/error-%d{yyyy-MM-dd}-%i.log.gz"
+        PatternLayout:
+          Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${sys:PID} --- [%25.25t] %-40.40c{1.} : %m%n%wEx"
+        policies:
+          TimeBasedTriggeringPolicy:
+            interval: 1
+            modulate: true
+
   Loggers:
     Root:
       level: info
@@ -31,3 +41,8 @@ Configutation:
         level: info
       - name: org.hibernate.SQL
         level: info
+      - name: com.jocoos.mybeautip
+        level: warn
+        AppenderRef:
+          - ref: ERROR_FILE
+
