@@ -22,7 +22,6 @@ import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.admin.AdminNotificationController;
@@ -85,8 +84,7 @@ public class DeviceService {
     return target;
   }
   
-  @Synchronized
-  public Device getDevice(String deviceId) {
+  public synchronized Device getDevice(String deviceId) {
     return deviceRepository.findById(deviceId).orElse(null);
   }
   
