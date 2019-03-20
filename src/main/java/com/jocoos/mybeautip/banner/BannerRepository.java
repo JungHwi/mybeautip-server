@@ -8,7 +8,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+@RepositoryRestResource(collectionResourceRel = "headers", path = "headers")
 public interface BannerRepository extends JpaRepository<Banner, Long> {
 
   @Modifying
@@ -16,4 +18,9 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
   void updateViewCount(Long id, Long count);
 
   Slice<Banner> findByStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(Date statedAt, Date endedAt, Pageable pageable);
+
+  Page<Banner> findByDeletedAtIsNull(Pageable pageable);
+
+  Page<Banner> findByDeletedAtIsNotNull(Pageable pageable);
+
 }
