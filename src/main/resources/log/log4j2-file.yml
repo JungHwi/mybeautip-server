@@ -12,6 +12,8 @@ Configutation:
           TimeBasedTriggeringPolicy:
             interval: 1
             modulate: true
+        ThresholdFilter:
+          level: INFO
 
       - name: ERROR_FILE
         fileName: ./logs/error.log
@@ -22,12 +24,16 @@ Configutation:
           TimeBasedTriggeringPolicy:
             interval: 1
             modulate: true
+        ThresholdFilter:
+          level: WARN
 
   Loggers:
     Root:
       level: info
       AppenderRef:
         - ref: FILE
+        - ref: ERROR_FILE
+
     Logger:
       - name: com.jocoos.mybeautip
         level: info
@@ -41,8 +47,3 @@ Configutation:
         level: info
       - name: org.hibernate.SQL
         level: info
-      - name: com.jocoos.mybeautip
-        level: warn
-        AppenderRef:
-          - ref: ERROR_FILE
-
