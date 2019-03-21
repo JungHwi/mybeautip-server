@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,8 +31,11 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.recoding.ViewRecoding;
+import com.jocoos.mybeautip.recoding.ViewRecodingRepository;
 import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
@@ -47,6 +51,7 @@ public class VideoService {
   private final MemberService memberService;
   private final TagService tagService;
   private final FeedService feedService;
+  private final SlackService slackService;
   private final VideoRepository videoRepository;
   private final CommentRepository commentRepository;
   private final VideoLikeRepository videoLikeRepository;
@@ -58,6 +63,7 @@ public class VideoService {
   private final VideoViewRepository videoViewRepository;
   private final CommentLikeRepository commentLikeRepository;
   private final VideoReportRepository videoReportRepository;
+  private final ViewRecodingRepository viewRecodingRepository;
   private final ObjectMapper objectMapper;
 
   @Value("${mybeautip.video.watch-duration}")
@@ -68,6 +74,7 @@ public class VideoService {
   public VideoService(MemberService memberService,
                       TagService tagService,
                       FeedService feedService,
+                      SlackService slackService,
                       VideoRepository videoRepository,
                       CommentRepository commentRepository,
                       VideoLikeRepository videoLikeRepository,
@@ -79,10 +86,12 @@ public class VideoService {
                       VideoViewRepository videoViewRepository,
                       CommentLikeRepository commentLikeRepository,
                       VideoReportRepository videoReportRepository,
+                      ViewRecodingRepository viewRecodingRepository,
                       ObjectMapper objectMapper) {
     this.memberService = memberService;
     this.tagService = tagService;
     this.feedService = feedService;
+    this.slackService = slackService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
     this.videoLikeRepository = videoLikeRepository;
@@ -94,6 +103,7 @@ public class VideoService {
     this.videoViewRepository = videoViewRepository;
     this.commentLikeRepository = commentLikeRepository;
     this.videoReportRepository = videoReportRepository;
+    this.viewRecodingRepository = viewRecodingRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -597,6 +607,20 @@ public class VideoService {
   @Transactional
   public void increaseHeart(Video video, int count) {
     videoRepository.updateHeartCount(video.getId(), count);
+  }
+  
+  @Async
+  public void sendOnLiveWatcher(Video video) {
+    List<ViewRecoding> viewRecodings = viewRecodingRepository.findByItemIdAndCategoryAndCreatedAtLessThanEqual(
+        video.getId().toString(), ViewRecoding.CATEGORY_VIDEO, video.getEndedAt());
+  
+    StringBuilder sb = new StringBuilder();
+    for (ViewRecoding viewRecoding : viewRecodings) {
+      sb.append(viewRecoding.getCreatedBy().getUsername()).append(", ");
+    }
+  
+    slackService.sendOnLiveWatcherList(video.getId(), viewRecodings.size(),
+        StringUtils.left(sb.toString(), sb.toString().length() - 2));
   }
   
   /**

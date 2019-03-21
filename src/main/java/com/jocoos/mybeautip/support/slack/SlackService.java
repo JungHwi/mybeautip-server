@@ -203,6 +203,12 @@ public class SlackService {
     send(message);
   }
   
+  public void sendOnLiveWatcherList(long videoId, int count, String watchers) {
+    String message = String.format("*라이브 중 시청자 목록(방송 ID: %d, 전체: %d명)*" +
+            "```%s```", videoId, count, watchers);
+    send(message);
+  }
+  
   private String getPurchaseInfo(List<Purchase> purchases) {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {
