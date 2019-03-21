@@ -80,7 +80,7 @@ public class SlackService {
     String message = String.format("*주문(%d)*" +
             "```주문자: %s/%d\n" +
             "관련영상: %s\n" +
-            "결제금액: %d, 결제방식: %s\n" +
+            "결제금액: %d, 결제방식: %s" +
             "%s```",
         order.getId(),
         order.getCreatedBy().getUsername(), order.getCreatedBy().getId(),

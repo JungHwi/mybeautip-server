@@ -618,9 +618,9 @@ public class VideoService {
     for (ViewRecoding viewRecoding : viewRecodings) {
       sb.append(viewRecoding.getCreatedBy().getUsername()).append(", ");
     }
-  
-    slackService.sendOnLiveWatcherList(video.getId(), viewRecodings.size(),
-        StringUtils.left(sb.toString(), sb.toString().length() - 2));
+    
+    String message = viewRecodings.size() == 0 ? " " : StringUtils.left(sb.toString(), sb.toString().length() - 2);
+    slackService.sendOnLiveWatcherList(video.getId(), viewRecodings.size(), message);
   }
   
   /**
