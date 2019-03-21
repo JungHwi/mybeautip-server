@@ -619,7 +619,7 @@ public class VideoService {
       sb.append(viewRecoding.getCreatedBy().getUsername()).append(", ");
     }
     
-    String message = viewRecodings.size() == 0 ? " " : StringUtils.left(sb.toString(), sb.toString().length() - 2);
+    String message = viewRecodings.size() == 0 ? "N/A" : StringUtils.left(sb.toString(), sb.toString().length() - 2);
     slackService.sendOnLiveWatcherList(video.getId(), viewRecodings.size(), message);
   }
   
