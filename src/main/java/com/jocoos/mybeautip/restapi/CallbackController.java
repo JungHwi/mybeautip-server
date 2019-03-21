@@ -104,7 +104,13 @@ public class CallbackController {
           throw new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey());
         });
     
-    return videoService.update(video);
+    video = videoService.update(video);
+    
+    // Send on-live watcher list using slack when LIVE ended
+    if ("BROADCASTED".equals(video.getType()) && "VOD".equals(video.getState())) {
+      videoService.sendOnLiveWatcher(video);
+    }
+    return video;
   }
   
   @Transactional

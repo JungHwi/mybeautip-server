@@ -77,37 +77,17 @@ public class SlackService {
   }
 
   public void sendForOrder(Order order) {
-    Member me = order.getCreatedBy();
-    Delivery delivery = order.getDelivery();
-    String message = String.format("*주문*" +
-            "```order id: %d, member id: %d\n" +
+    String message = String.format("*주문(%d)*" +
+            "```주문자: %s/%d\n" +
             "관련영상: %s\n" +
-            "결제방식: %s\n" +
-            "결제금액: %d (배송비 및 할인 적용)" +
-            "%s\n" +
-            "주문자 정보\n" +
-            " - 주문자명: %s\n" +
-            " - 휴대폰번호: %s\n" +
-            " - 주소: %s\n" +
-            " - 이메일: %s\n" +
-            "수령자 정보\n" +
-            " - 수령자명: %s\n" +
-            " - 휴대폰번호: %s\n" +
-            " - 주소: %s\n" +
-            " - 배송 메세지: %s```",
-        order.getId(), order.getCreatedBy().getId(),
+            "결제금액: %d, 결제방식: %s\n" +
+            "%s```",
+        order.getId(),
+        order.getCreatedBy().getUsername(), order.getCreatedBy().getId(),
         order.getVideoId() == null ? "없음" : order.getVideoId().toString(),
-        order.getMethod(),
         order.getPrice(),
-        getPurchaseInfo(order.getPurchases()),
-        me.getUsername(),
-        StringUtils.isEmpty(me.getPhoneNumber()) ? delivery.getPhone() : me.getPhoneNumber(),
-        delivery.getRoadAddrPart1() + ", " + delivery.getRoadAddrPart2(),
-        me.getEmail(),
-        delivery.getRecipient(),
-        delivery.getPhone(),
-        delivery.getRoadAddrPart1() + ", " + delivery.getRoadAddrPart2(),
-        delivery.getCarrierMessage());
+        order.getMethod(),
+        getPurchaseInfo(order.getPurchases()));
     send(message);
   }
   
@@ -220,6 +200,12 @@ public class SlackService {
   
   public void sendForImportGetTokenFail() {
     String message = String.format("*아임포트 토큰획득 실패*");
+    send(message);
+  }
+  
+  public void sendOnLiveWatcherList(long videoId, int count, String watchers) {
+    String message = String.format("*라이브 중 시청자 목록(방송 ID: %d, 전체: %d명)*" +
+            "```%s```", videoId, count, watchers);
     send(message);
   }
   
