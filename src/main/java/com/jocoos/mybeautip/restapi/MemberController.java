@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -38,7 +37,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -46,16 +44,11 @@ import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsLike;
 import com.jocoos.mybeautip.goods.GoodsLikeRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.log.MemberLeaveLog;
-import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
-import com.jocoos.mybeautip.member.FacebookMemberRepository;
-import com.jocoos.mybeautip.member.KakaoMemberRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberMeInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.NaverMemberRepository;
 import com.jocoos.mybeautip.member.PostProcessService;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentInfo;
@@ -77,7 +70,6 @@ import com.jocoos.mybeautip.post.PostLikeRepository;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
-import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
@@ -91,17 +83,12 @@ public class MemberController {
   private final MemberService memberService;
   private final GoodsService goodsService;
   private final VideoService videoService;
-  private final TagService tagService;
-  private final NotificationService notificationService;
-  private final DeviceService deviceService;
   private final PostProcessService postProcessService;
   private final MessageService messageService;
   private final MentionService mentionService;
   private final KeywordService keywordService;
+  private final NotificationService notificationService;
   private final MemberRepository memberRepository;
-  private final FacebookMemberRepository facebookMemberRepository;
-  private final NaverMemberRepository naverMemberRepository;
-  private final KakaoMemberRepository kakaoMemberRepository;
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
@@ -109,7 +96,6 @@ public class MemberController {
   private final CommentRepository commentRepository;
   private final CommentLikeRepository commentLikeRepository;
   private final RevenueRepository revenueRepository;
-  private final MemberLeaveLogRepository memberLeaveLogRepository;
   private final RevenuePaymentRepository revenuePaymentRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
@@ -130,16 +116,11 @@ public class MemberController {
   private int revenueRatio;
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";
-  private final String defaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
 
   public MemberController(MemberService memberService,
                           GoodsService goodsService,
                           VideoService videoService,
-                          TagService tagService,
                           MemberRepository memberRepository,
-                          FacebookMemberRepository facebookMemberRepository,
-                          NaverMemberRepository naverMemberRepository,
-                          KakaoMemberRepository kakaoMemberRepository,
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
                           StoreLikeRepository storeLikeRepository,
@@ -147,22 +128,16 @@ public class MemberController {
                           CommentRepository commentRepository,
                           CommentLikeRepository commentLikeRepository,
                           RevenueRepository revenueRepository,
-                          MemberLeaveLogRepository memberLeaveLogRepository,
-                          NotificationService notificationService,
-                          DeviceService deviceService,
                           PostProcessService postProcessService,
                           MessageService messageService,
                           MentionService mentionService,
                           KeywordService keywordService,
+                          NotificationService notificationService,
                           RevenuePaymentRepository revenuePaymentRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
-    this.tagService = tagService;
     this.memberRepository = memberRepository;
-    this.facebookMemberRepository = facebookMemberRepository;
-    this.naverMemberRepository = naverMemberRepository;
-    this.kakaoMemberRepository = kakaoMemberRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeLikeRepository = storeLikeRepository;
@@ -170,13 +145,11 @@ public class MemberController {
     this.commentRepository = commentRepository;
     this.commentLikeRepository = commentLikeRepository;
     this.revenueRepository = revenueRepository;
-    this.memberLeaveLogRepository = memberLeaveLogRepository;
-    this.notificationService = notificationService;
-    this.deviceService = deviceService;
     this.postProcessService = postProcessService;
     this.messageService = messageService;
     this.mentionService = mentionService;
     this.keywordService = keywordService;
+    this.notificationService = notificationService;
     this.revenuePaymentRepository = revenuePaymentRepository;
   }
 
@@ -188,12 +161,20 @@ public class MemberController {
               .map(m -> new Resource<>(new MemberMeInfo(m, pointRatio, revenueRatio)))
               .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
-
-  @Transactional
+  
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
                                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("member id: {}", memberService.currentMemberId());
+  
+    Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
+        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    
+    if (!member.isVisible()) { // when first called
+      if (StringUtils.isEmpty(updateMemberRequest.getUsername())) {
+        throw new BadRequestException("username_required", "Username required.");
+      }
+    }
     
     if (updateMemberRequest.getUsername() != null) {
       memberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
@@ -202,38 +183,9 @@ public class MemberController {
     if (updateMemberRequest.getEmail() != null) {
       memberService.checkEmailValidation(updateMemberRequest.getEmail(), lang);
     }
-
-    return memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
-        .map(m -> {
-          if (updateMemberRequest.getUsername() != null) {
-            m.setUsername(updateMemberRequest.getUsername());
-          }
-          if (updateMemberRequest.getEmail() != null) {
-            m.setEmail(updateMemberRequest.getEmail());
-          }
-          if (updateMemberRequest.getAvatarUrl() != null) {
-            if ("".equals(updateMemberRequest.getAvatarUrl())) {
-              m.setAvatarUrl(defaultAvatarUrl);
-            } else {
-              m.setAvatarUrl(updateMemberRequest.getAvatarUrl());
-            }
-          }
-          if (updateMemberRequest.getIntro() != null) {
-            tagService.touchRefCount(updateMemberRequest.getIntro());
-            tagService.updateHistory(m.getIntro(), updateMemberRequest.getIntro(), TagService.TAG_MEMBER, m.getId(), m);
-            m.setIntro(updateMemberRequest.getIntro());
-          }
-  
-          if (updateMemberRequest.getPushable() != null) {
-            m.setPushable(updateMemberRequest.getPushable());
-          }
-  
-          m.setVisible(true);
-          memberRepository.save(m);
-
-          return new ResponseEntity<>(memberService.getMemberInfo(m), HttpStatus.OK);
-        })
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    
+    member = memberService.updateMember(updateMemberRequest, member);
+    return new ResponseEntity<>(memberService.getMemberInfo(member), HttpStatus.OK);
   }
   
   @GetMapping
@@ -413,96 +365,34 @@ public class MemberController {
       .withCount(count)
       .withCursor(nextCursor).toBuild();
   }
-
+  
   @Deprecated
-  @Transactional
   @DeleteMapping("/me")
-  public void deleteMe(@Valid @RequestBody DeleteMemberRequest request,
-                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+  public ResponseEntity deleteMe(@Valid @RequestBody DeleteMemberRequest request,
+                                 @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
-    int link = member.getLink();
-    switch (link) {
-      case 1:
-        facebookMemberRepository.findByMemberId(member.getId()).ifPresent(facebookMemberRepository::delete);
-        break;
-
-      case 2:
-        naverMemberRepository.findByMemberId(member.getId()).ifPresent(naverMemberRepository::delete);
-        break;
-
-      case 4:
-        kakaoMemberRepository.findByMemberId(member.getId()).ifPresent(kakaoMemberRepository::delete);
-        break;
-
-      default:
-        throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
-    }
-    
-    member.setIntro("");
-    member.setAvatarUrl("https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_deleted.png");
-    member.setVisible(false);
-    member.setFollowingCount(0);
-    member.setFollowerCount(0);
-    member.setPublicVideoCount(0);
-    member.setTotalVideoCount(0);
-    member.setDeletedAt(new Date());
-    memberRepository.saveAndFlush(member);
-    
-    log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
-    
-    // Sync processing before response
+    memberService.deleteMember(request, member);
     notificationService.readAllNotification(member.getId());
-    memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
     
     // Async processing after response
     postProcessService.deleteMember(member);
+    return new ResponseEntity(HttpStatus.OK);
   }
   
-  @Transactional
   @PutMapping("/me/delete")
-  public void deleteMember(@Valid @RequestBody DeleteMemberRequest request,
+  public ResponseEntity deleteMember(@Valid @RequestBody DeleteMemberRequest request,
                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
-    int link = member.getLink();
-    switch (link) {
-      case 1:
-        facebookMemberRepository.findByMemberId(member.getId()).ifPresent(facebookMemberRepository::delete);
-        break;
-      
-      case 2:
-        naverMemberRepository.findByMemberId(member.getId()).ifPresent(naverMemberRepository::delete);
-        break;
-      
-      case 4:
-        kakaoMemberRepository.findByMemberId(member.getId()).ifPresent(kakaoMemberRepository::delete);
-        break;
-      
-      default:
-        throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
-    }
-    
-    member.setIntro("");
-    member.setAvatarUrl("https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_deleted.png");
-    member.setVisible(false);
-    member.setFollowingCount(0);
-    member.setFollowerCount(0);
-    member.setPublicVideoCount(0);
-    member.setTotalVideoCount(0);
-    member.setDeletedAt(new Date());
-    memberRepository.saveAndFlush(member);
-    
-    log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
-    
-    // Sync processing before response
+    memberService.deleteMember(request, member);
     notificationService.readAllNotification(member.getId());
-    memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
     
     // Async processing after response
     postProcessService.deleteMember(member);
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @GetMapping(value = "/me/comments")

@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -143,24 +144,9 @@ public class AdminNotificationController {
     if (memberId!= null) {
       devices = deviceRepository.findByCreatedByIdAndPushableAndValidAndCreatedByPushable(memberId, true, true, true);
     } else {
-      String deviceOs = deviceService.getDeviceOs(request.getPlatform());
-      if (deviceOs == null) {
-        devices = deviceRepository.findByPushableAndValid(true, true);
-        for (Device device : devices) {
-          if (!deviceService.isPushable(device)) {
-            devices.remove(device);
-          }
-        }
-      } else {
-        devices = deviceRepository.findByPushableAndValidAndOs(true, true, deviceOs);
-        for (Device device : devices) {
-          if (!deviceService.isPushable(device)) {
-            devices.remove(device);
-          }
-        }
-      }
+      devices = deviceService.getDevices(request.getPlatform());
     }
-    
+
     deviceService.pushAll(devices, request);
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }

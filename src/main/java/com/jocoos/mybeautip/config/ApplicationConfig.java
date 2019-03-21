@@ -18,7 +18,7 @@ import org.h2.server.web.WebServlet;
 @Configuration
 public class ApplicationConfig {
 
-  private static final int CONNECTION_TIMEOUT = 30 * 1000;
+  private static final int CONNECTION_TIMEOUT = 60 * 1000;
 
   @Bean
   public MappingJackson2XmlHttpMessageConverter xmlHttpMessageConverter() {

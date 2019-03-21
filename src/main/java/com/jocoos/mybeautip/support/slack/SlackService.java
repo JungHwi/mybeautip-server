@@ -1,5 +1,21 @@
 package com.jocoos.mybeautip.support.slack;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.order.Delivery;
@@ -11,19 +27,6 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.report.VideoReport;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -243,6 +246,11 @@ public class SlackService {
     body.put("text", message);
 
     HttpEntity<String> request = new HttpEntity<>(body.toString(), headers);
-    restTemplate.exchange(uriComponents.toString(), HttpMethod.POST, request, String.class);
+    try {
+      restTemplate.exchange(uriComponents.toString(), HttpMethod.POST, request, String.class);
+    } catch (RestClientException e) {
+      log.warn("Send slack message throws exception: " + e.getMessage());
+      // Do not throw exception
+    }
   }
 }

@@ -1,7 +1,23 @@
 package com.jocoos.mybeautip.video;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.feed.FeedService;
@@ -14,7 +30,6 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.tag.TagService;
@@ -25,29 +40,11 @@ import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 
-import lombok.Synchronized;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
 @Slf4j
 @Service
 public class VideoService {
 
   private final MemberService memberService;
-  private final MessageService messageService;
   private final TagService tagService;
   private final FeedService feedService;
   private final VideoRepository videoRepository;
@@ -69,7 +66,6 @@ public class VideoService {
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   
   public VideoService(MemberService memberService,
-                      MessageService messageService,
                       TagService tagService,
                       FeedService feedService,
                       VideoRepository videoRepository,
@@ -85,7 +81,6 @@ public class VideoService {
                       VideoReportRepository videoReportRepository,
                       ObjectMapper objectMapper) {
     this.memberService = memberService;
-    this.messageService = messageService;
     this.tagService = tagService;
     this.feedService = feedService;
     this.videoRepository = videoRepository;
@@ -597,6 +592,11 @@ public class VideoService {
   public void unLikeVideoComment(CommentLike liked) {
     commentLikeRepository.delete(liked);
     commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+  }
+  
+  @Transactional
+  public void increaseHeart(Video video, int count) {
+    videoRepository.updateHeartCount(video.getId(), count);
   }
   
   /**

@@ -4,22 +4,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
-import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.exception.PaymentConflictException;
 import com.jocoos.mybeautip.restapi.AccountController;
 import com.jocoos.mybeautip.support.slack.SlackService;
@@ -60,16 +56,22 @@ public class IamportService implements IamportApi {
 
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-    PaymentTokenResponse response = restTemplate.postForObject(tokenUri, request, PaymentTokenResponse.class);
-    if (response != null) {
-      log.debug("{}, {}", response.getCode(), response.getResponse());
+    PaymentTokenResponse response;
+    try {
+      response = restTemplate.postForObject(tokenUri, request, PaymentTokenResponse.class);
+    } catch (RestClientException e) {
+      log.error("invalid_iamport_response, GetToken failed");
+      slackService.sendForImportGetTokenFail();
+      throw new PaymentConflictException();
     }
+    
     if (response == null || response.getCode() != 0) {
       log.warn("invalid_iamport_response, GetToken failed");
       slackService.sendForImportGetTokenFail();
-      throw new MybeautipRuntimeException(response.getMessage());
+      throw new PaymentConflictException();
     }
-
+    
+    log.debug("{}, {}", response.getCode(), response.getResponse());
     return response.getResponse().getAccessToken();
   }
 
@@ -86,16 +88,11 @@ public class IamportService implements IamportApi {
       responseEntity = restTemplate.exchange(tokenUri, HttpMethod.GET, request, PaymentResponse.class);
       log.info("iamport get payment response: " + responseEntity.getBody());
       return responseEntity.getBody();
-    } catch (HttpClientErrorException e) {
+    } catch (RestClientException e) {
       log.error("invalid_iamport_response: Get payment error", e);
       slackService.sendForImportGetPaymentException(id, e.getMessage());
-      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        throw new NotFoundException("payment_not_found", "invalid payment id");
-      }
-      // TODO: Catch more error cases
+      throw new PaymentConflictException();
     }
-
-    return null;
   }
 
   @Override
@@ -110,9 +107,13 @@ public class IamportService implements IamportApi {
 
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-    PaymentResponse response = restTemplate.postForObject(tokenUri, request, PaymentResponse.class);
-    if (response != null) {
-      log.debug("{}, {}", response.getCode(), response.getResponse());
+    PaymentResponse response;
+    try {
+       response = restTemplate.postForObject(tokenUri, request, PaymentResponse.class);
+    } catch (RestClientException e) {
+      log.error("invalid_iamport_response, Check payment status, payment_id: " + impUid);
+      slackService.sendForImportCancelPaymentException(impUid, e.getMessage());
+      throw new PaymentConflictException();
     }
     
     if (response == null || response.getCode() != 0) {
@@ -121,11 +122,11 @@ public class IamportService implements IamportApi {
       throw new PaymentConflictException();
     }
 
+    log.debug("{}, {}", response.getCode(), response.getResponse());
     return response;
   }
   
-  public ResponseEntity<VbankResponse> validAccountInfo(AccountController.UpdateAccountInfo info)
-      throws HttpStatusCodeException {
+  public ResponseEntity<VbankResponse> validAccountInfo(AccountController.UpdateAccountInfo info) {
     String accessToken = getToken();
     String requestUri = fromUriString(api).path("/vbanks/holder")
         .queryParam("bank_code", info.getBankCode())
@@ -134,8 +135,14 @@ public class IamportService implements IamportApi {
   
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.AUTHORIZATION, accessToken);
-  
+
     HttpEntity<Object> request = new HttpEntity<>(headers);
-    return restTemplate.exchange(requestUri, HttpMethod.GET, request, VbankResponse.class);
+
+    try {
+      return restTemplate.exchange(requestUri, HttpMethod.GET, request, VbankResponse.class);
+    } catch (RestClientException e) {
+      log.warn("account_info_validation_iamport_fail", e.getMessage());
+      return null;  // Do not throw exception
+    }
   }
 }

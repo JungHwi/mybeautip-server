@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,8 +42,7 @@ public class TagService {
   }
   
   // Save tags without increasing refCount
-  @Transactional
-  public void touchRefCount(String text) {
+  public synchronized void touchRefCount(String text) {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
       Optional<Tag> optional = tagRepository.findByName(name);
@@ -59,7 +57,7 @@ public class TagService {
   }
   
   @Transactional
-  public void increaseRefCount(String text) {
+  public synchronized void increaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
       Optional<Tag> optional = tagRepository.findByName(name);
@@ -81,7 +79,7 @@ public class TagService {
   }
   
   @Transactional
-  public void updateRefCount(String oldText, String newText) {
+  public synchronized void updateRefCount(String oldText, String newText) {
     List<String> oldTagNames = parseHashTag(oldText);
     List<String> newTagNames = parseHashTag(newText);
   
@@ -103,9 +101,8 @@ public class TagService {
     }
   }
   
-  @Synchronized
   @Transactional
-  public void addHistory(String text, int category, long resourceId, Member me) {
+  public synchronized void addHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
     for (String name : uniqueTagNames) {
       tagRepository.findByName(name).ifPresent(tag -> tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
@@ -128,9 +125,8 @@ public class TagService {
     tagHistoryRepository.findByCreatedBy(me).forEach(tagHistoryRepository::delete);
   }
   
-  @Synchronized
   @Transactional
-  public void updateHistory(String oldText, String newText, int category, long resourceId, Member me) {
+  public synchronized void updateHistory(String oldText, String newText, int category, long resourceId, Member me) {
     List<String> oldTagNames = parseHashTag(oldText);
     List<String> newTagNames = parseHashTag(newText);
     
