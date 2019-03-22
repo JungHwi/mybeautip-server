@@ -421,6 +421,13 @@ public class OrderService {
       }
   
       if ("LIVE".equals(video.getState()) || video.getEndedAt() == null) {
+        // FIXME: Remove when on_live in request is mandatory
+        order.setOnLive(true);
+        orderRepository.save(order);
+        for (Purchase purchase : order.getPurchases()) {
+          purchase.setOnLive(true);
+        }
+        
         return true;
       } else {  // VOD
         if (video.getEndedAt() == null) {
@@ -429,12 +436,11 @@ public class OrderService {
         }
     
         boolean isOnLive = order.getCreatedAt().getTime() <= (video.getEndedAt().getTime() + REVENUE_DURATION_AFTER_LIVE_ENDED);
-        
         // FIXME: Remove when on_live in request is mandatory
-        order.setOnLive(isOnLive);
+        order.setOnLive(true);
         orderRepository.save(order);
         for (Purchase purchase : order.getPurchases()) {
-          purchase.setOnLive(isOnLive);
+          purchase.setOnLive(true);
         }
         
         return isOnLive;
