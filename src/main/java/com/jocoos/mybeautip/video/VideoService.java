@@ -484,12 +484,12 @@ public class VideoService {
     }
     
     if (source.getState() != null) {
-      if (StringUtils.containsAny(source.getState(), "LIVE", "VOD")) {
-        target.setState(source.getState());
-      }
-      
       if ("BROADCASTED".equals(target.getType()) && "LIVE".equals(target.getState()) && "VOD".equals(source.getState())) {
         target.setEndedAt(new Date());
+      }
+      
+      if (StringUtils.containsAny(source.getState(), "LIVE", "VOD")) {
+        target.setState(source.getState());
       }
     }
     
