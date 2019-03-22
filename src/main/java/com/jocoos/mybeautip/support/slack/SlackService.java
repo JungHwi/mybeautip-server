@@ -17,8 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import com.jocoos.mybeautip.log.MemberLeaveLog;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.order.Delivery;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
