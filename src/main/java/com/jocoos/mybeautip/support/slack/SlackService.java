@@ -211,8 +211,7 @@ public class SlackService {
   public void sendStatsForLiveEnded(long videoId, String statMessage) {
     String message = String.format("*라이브(%d) 종료*" +
         "```%s```", videoId, statMessage);
-//    send(message);
-    log.info(message);
+    send(message);
   }
   
   private String getPurchaseInfo(List<Purchase> purchases) {
