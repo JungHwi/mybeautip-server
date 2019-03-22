@@ -102,12 +102,13 @@ public class CallbackController {
   
     String oldState = video.getState();
     video = videoService.updateVideoProperties(request, video);
+    video = videoService.update(video);
     
     // Send on-live stats using slack when LIVE ended
     if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(oldState) && "VOD".equals(request.getState())) {
       videoService.sendStats(video);
     }
-    return videoService.update(video);
+    return video;
   }
   
   @DeleteMapping
