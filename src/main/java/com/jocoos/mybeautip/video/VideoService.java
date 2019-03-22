@@ -31,6 +31,8 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
 import com.jocoos.mybeautip.recoding.ViewRecodingRepository;
 import com.jocoos.mybeautip.restapi.CallbackController;
@@ -64,7 +66,7 @@ public class VideoService {
   private final CommentLikeRepository commentLikeRepository;
   private final VideoReportRepository videoReportRepository;
   private final ViewRecodingRepository viewRecodingRepository;
-  private final ObjectMapper objectMapper;
+  private final OrderRepository orderRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -87,7 +89,7 @@ public class VideoService {
                       CommentLikeRepository commentLikeRepository,
                       VideoReportRepository videoReportRepository,
                       ViewRecodingRepository viewRecodingRepository,
-                      ObjectMapper objectMapper) {
+                      OrderRepository orderRepository) {
     this.memberService = memberService;
     this.tagService = tagService;
     this.feedService = feedService;
@@ -104,7 +106,7 @@ public class VideoService {
     this.commentLikeRepository = commentLikeRepository;
     this.videoReportRepository = videoReportRepository;
     this.viewRecodingRepository = viewRecodingRepository;
-    this.objectMapper = objectMapper;
+    this.orderRepository = orderRepository;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -610,17 +612,47 @@ public class VideoService {
   }
   
   @Async
-  public void sendOnLiveWatcher(Video video) {
+  public void sendStats(Video video) {
+    String statMessage;
+    
+    // On-live watchers
+    String onLiveWatchers;
     List<ViewRecoding> viewRecodings = viewRecodingRepository.findByItemIdAndCategoryAndCreatedAtLessThanEqual(
         video.getId().toString(), ViewRecoding.CATEGORY_VIDEO, video.getEndedAt());
   
-    StringBuilder sb = new StringBuilder();
-    for (ViewRecoding viewRecoding : viewRecodings) {
-      sb.append(viewRecoding.getCreatedBy().getUsername()).append(", ");
+    if (viewRecodings.size() > 0) {
+      StringBuilder sb = new StringBuilder();
+      for (ViewRecoding viewRecoding : viewRecodings) {
+        sb.append(viewRecoding.getCreatedBy().getUsername()).append(", ");
+      }
+      onLiveWatchers = String.format("시청(%d): %s",
+          viewRecodings.size(), StringUtils.left(sb.toString(), sb.toString().length() - 2));
+    } else {
+      onLiveWatchers = String.format("시청(0명)");
     }
+    statMessage = onLiveWatchers;
     
-    String message = viewRecodings.size() == 0 ? "N/A" : StringUtils.left(sb.toString(), sb.toString().length() - 2);
-    slackService.sendOnLiveWatcherList(video.getId(), viewRecodings.size(), message);
+    // On-live order summary
+    if (video.getRelatedGoodsCount() > 0) {
+      List<Order> onLiveOrders = orderRepository.findByStateLessThanAndVideoIdAndOnLiveIsTrue(
+          Order.State.READY.getValue(), video.getId());
+      String orderSummary;
+      if (onLiveOrders.size() > 0) {
+        int amount = 0;
+        StringBuilder sb = new StringBuilder();
+        for (Order onLiveOrder : onLiveOrders) {
+          amount += onLiveOrder.getPrice();
+          sb.append(onLiveOrder.getCreatedBy().getUsername()).append(", ");
+        }
+        orderSummary = String.format("\n주문(%d건, %d원): %s",
+            onLiveOrders.size(), amount, StringUtils.left(sb.toString(), sb.toString().length() - 2));
+      } else {
+        orderSummary = String.format("\n주문(0건)");
+      }
+      statMessage = statMessage + orderSummary;
+    }
+  
+    slackService.sendStatsForLiveEnded(video.getId(), statMessage);
   }
   
   /**

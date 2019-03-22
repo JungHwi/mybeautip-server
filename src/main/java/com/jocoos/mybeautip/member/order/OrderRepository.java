@@ -23,6 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   
   List<Order> findByCreatedByIdAndStateAndDeliveredAtAfter(Long createdBy, int state, Date weekAgo);
 
+  List<Order> findByStateLessThanAndVideoIdAndOnLiveIsTrue(int state, long videoId);
   /**
    * Apis for admin
    */

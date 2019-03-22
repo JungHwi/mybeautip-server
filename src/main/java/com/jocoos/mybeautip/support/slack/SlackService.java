@@ -48,13 +48,18 @@ public class SlackService {
   }
 
   public void sendForVideo(Video video) {
-    String videoType = "BROADCASTED".equals(video.getType()) ? "라이브!" : "#MOTD";
-    String message = String.format("*%s(%d)*" +
+    String header;
+    if ("BROADCASTED".equals(video.getType())) {
+      header = "라이브(" + video.getId() + ") 시작";
+    } else {
+      header = "#MOTD(" + video.getId() + ") 업로드 완료";
+    }
+    
+    String message = String.format("*%s*" +
             "```사용자: %s/%d\n" +
             "영상제목: %s\n" +
             "%s```",
-        videoType,
-        video.getId(),
+        header,
         video.getMember().getUsername(),
         video.getMember().getId(),
         video.getTitle(),
@@ -199,14 +204,15 @@ public class SlackService {
   }
   
   public void sendForImportGetTokenFail() {
-    String message = String.format("*아임포트 토큰획득 실패*");
+    String message = "*아임포트 토큰획득 실패*";
     send(message);
   }
   
-  public void sendOnLiveWatcherList(long videoId, int count, String watchers) {
-    String message = String.format("*라이브 중 시청자 목록(방송 ID: %d, 전체: %d명)*" +
-            "```%s```", videoId, count, watchers);
-    send(message);
+  public void sendStatsForLiveEnded(long videoId, String statMessage) {
+    String message = String.format("*라이브(%d) 종료*" +
+        "```%s```", videoId, statMessage);
+//    send(message);
+    log.info(message);
   }
   
   private String getPurchaseInfo(List<Purchase> purchases) {

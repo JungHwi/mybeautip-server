@@ -106,9 +106,9 @@ public class CallbackController {
     
     video = videoService.update(video);
     
-    // Send on-live watcher list using slack when LIVE ended
+    // Send on-live stats using slack when LIVE ended
     if ("BROADCASTED".equals(video.getType()) && "VOD".equals(video.getState())) {
-      videoService.sendOnLiveWatcher(video);
+      videoService.sendStats(video);
     }
     return video;
   }
