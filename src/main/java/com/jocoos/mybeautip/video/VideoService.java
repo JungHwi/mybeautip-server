@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,8 +31,13 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.order.OrderRepository;
+import com.jocoos.mybeautip.recoding.ViewRecoding;
+import com.jocoos.mybeautip.recoding.ViewRecodingRepository;
 import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
@@ -47,6 +53,7 @@ public class VideoService {
   private final MemberService memberService;
   private final TagService tagService;
   private final FeedService feedService;
+  private final SlackService slackService;
   private final VideoRepository videoRepository;
   private final CommentRepository commentRepository;
   private final VideoLikeRepository videoLikeRepository;
@@ -58,7 +65,8 @@ public class VideoService {
   private final VideoViewRepository videoViewRepository;
   private final CommentLikeRepository commentLikeRepository;
   private final VideoReportRepository videoReportRepository;
-  private final ObjectMapper objectMapper;
+  private final ViewRecodingRepository viewRecodingRepository;
+  private final OrderRepository orderRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -68,6 +76,7 @@ public class VideoService {
   public VideoService(MemberService memberService,
                       TagService tagService,
                       FeedService feedService,
+                      SlackService slackService,
                       VideoRepository videoRepository,
                       CommentRepository commentRepository,
                       VideoLikeRepository videoLikeRepository,
@@ -79,10 +88,12 @@ public class VideoService {
                       VideoViewRepository videoViewRepository,
                       CommentLikeRepository commentLikeRepository,
                       VideoReportRepository videoReportRepository,
-                      ObjectMapper objectMapper) {
+                      ViewRecodingRepository viewRecodingRepository,
+                      OrderRepository orderRepository) {
     this.memberService = memberService;
     this.tagService = tagService;
     this.feedService = feedService;
+    this.slackService = slackService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
     this.videoLikeRepository = videoLikeRepository;
@@ -94,7 +105,8 @@ public class VideoService {
     this.videoViewRepository = videoViewRepository;
     this.commentLikeRepository = commentLikeRepository;
     this.videoReportRepository = videoReportRepository;
-    this.objectMapper = objectMapper;
+    this.viewRecodingRepository = viewRecodingRepository;
+    this.orderRepository = orderRepository;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -597,6 +609,50 @@ public class VideoService {
   @Transactional
   public void increaseHeart(Video video, int count) {
     videoRepository.updateHeartCount(video.getId(), count);
+  }
+  
+  @Async
+  public void sendStats(Video video) {
+    String statMessage;
+    
+    // On-live watchers
+    String onLiveWatchers;
+    List<ViewRecoding> viewRecodings = viewRecodingRepository.findByItemIdAndCategoryAndCreatedAtLessThanEqual(
+        video.getId().toString(), ViewRecoding.CATEGORY_VIDEO, video.getEndedAt());
+  
+    if (viewRecodings.size() > 0) {
+      StringBuilder sb = new StringBuilder();
+      for (ViewRecoding viewRecoding : viewRecodings) {
+        sb.append(viewRecoding.getCreatedBy().getUsername()).append(", ");
+      }
+      onLiveWatchers = String.format("시청(%d명): %s",
+          viewRecodings.size(), StringUtils.left(sb.toString(), sb.toString().length() - 2));
+    } else {
+      onLiveWatchers = String.format("시청(0명)");
+    }
+    statMessage = onLiveWatchers;
+    
+    // On-live order summary
+    if (video.getRelatedGoodsCount() > 0) {
+      List<Order> onLiveOrders = orderRepository.findByStateLessThanAndVideoIdAndOnLiveIsTrue(
+          Order.State.READY.getValue(), video.getId());
+      String orderSummary;
+      if (onLiveOrders.size() > 0) {
+        int amount = 0;
+        StringBuilder sb = new StringBuilder();
+        for (Order onLiveOrder : onLiveOrders) {
+          amount += onLiveOrder.getPrice();
+          sb.append(onLiveOrder.getCreatedBy().getUsername()).append(", ");
+        }
+        orderSummary = String.format("\n주문(%d건, %d원): %s",
+            onLiveOrders.size(), amount, StringUtils.left(sb.toString(), sb.toString().length() - 2));
+      } else {
+        orderSummary = String.format("\n주문(0건)");
+      }
+      statMessage = statMessage + orderSummary;
+    }
+  
+    slackService.sendStatsForLiveEnded(video.getId(), statMessage);
   }
   
   /**

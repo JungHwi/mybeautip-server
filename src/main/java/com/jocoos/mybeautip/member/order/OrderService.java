@@ -403,30 +403,50 @@ public class OrderService {
     // TODO: Send email ?
   }
   
+  @Transactional
   private boolean isOrderOnLive(Order order) {
     if (order.getVideoId() == null) {
       return false;
     }
     
-    Video video = videoRepository.findById(order.getVideoId()).orElse(null);
-    if (video == null) {
-      log.warn("Something wrong! Not found video: " + order.getVideoId());
-      return false;
-    }
-    
-    if (!"BROADCASTED".equals(video.getType())) { // only broadcasted type video order grant revenue
-      return false;
-    }
-
-    if ("LIVE".equals(video.getState()) || video.getEndedAt() == null) {
-      return true;
-    } else {  // VOD
-      if (video.getEndedAt() == null) {
-        log.warn("Something wrong! Video state is not LIVE, but endedAt is null: " + video.getId());
+    if (order.getOnLive() == null) {
+      Video video = videoRepository.findById(order.getVideoId()).orElse(null);
+      if (video == null) {
+        log.warn("Something wrong! Not found video: " + order.getVideoId());
         return false;
       }
-      
-      return order.getCreatedAt().getTime() <= (video.getEndedAt().getTime() + REVENUE_DURATION_AFTER_LIVE_ENDED);
+  
+      if (!"BROADCASTED".equals(video.getType())) { // only broadcasted type video order grant revenue
+        return false;
+      }
+  
+      if ("LIVE".equals(video.getState()) || video.getEndedAt() == null) {
+        // FIXME: Remove when on_live in request is mandatory
+        order.setOnLive(true);
+        orderRepository.save(order);
+        for (Purchase purchase : order.getPurchases()) {
+          purchase.setOnLive(true);
+        }
+        
+        return true;
+      } else {  // VOD
+        if (video.getEndedAt() == null) {
+          log.warn("Something wrong! Video state is not LIVE, but endedAt is null: " + video.getId());
+          return false;
+        }
+    
+        boolean isOnLive = order.getCreatedAt().getTime() <= (video.getEndedAt().getTime() + REVENUE_DURATION_AFTER_LIVE_ENDED);
+        // FIXME: Remove when on_live in request is mandatory
+        order.setOnLive(true);
+        orderRepository.save(order);
+        for (Purchase purchase : order.getPurchases()) {
+          purchase.setOnLive(true);
+        }
+        
+        return isOnLive;
+      }
+    } else {
+      return order.getOnLive();
     }
   }
 
