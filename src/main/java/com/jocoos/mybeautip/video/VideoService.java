@@ -435,6 +435,87 @@ public class VideoService {
   }
   
   @Transactional
+  public Video updateVideoProperties(CallbackController.CallbackUpdateVideoRequest source, Video target) {
+    // immutable properties: video_id, video_key, type, owner, likecount, commentcount, relatedgoodscount, relatedgoodsurl
+    // mutable properties: title, content, url, thumbnail_url, chatroomid, data, state, duration, visibility, banned, watchcount, heartcount, viewcount
+    
+    // Can be modified with empty string
+    if (source.getContent() != null) {
+      tagService.updateRefCount(target.getContent(), source.getContent());
+      tagService.updateHistory(target.getContent(), source.getContent(), TagService.TAG_VIDEO, target.getId(), target.getMember());
+      target.setContent(source.getContent());
+    }
+    
+    if (source.getData() != null) {
+      target.setData(source.getData());
+    }
+    
+    if (source.getDuration() != null) {
+      target.setDuration(source.getDuration());
+    }
+    
+    if (source.getChatRoomId() != null) {
+      target.setChatRoomId(source.getChatRoomId());
+    }
+    
+    // Cannot be modified with empty string
+    if (source.getTitle() != null) {
+      if (StringUtils.strip(source.getTitle()).length() > 0) {
+        target.setTitle(source.getTitle());
+      }
+    }
+    
+    if (source.getUrl() != null) {
+      if (StringUtils.strip(source.getUrl()).length() > 0) {
+        target.setUrl(source.getUrl());
+      }
+    }
+    
+    if (source.getThumbnailPath() != null) {
+      if (StringUtils.strip(source.getThumbnailPath()).length() > 0) {
+        target.setThumbnailPath(source.getThumbnailPath());
+      }
+    }
+    
+    if (source.getThumbnailUrl() != null) {
+      if (StringUtils.strip(source.getThumbnailUrl()).length() > 0) {
+        target.setThumbnailUrl(source.getThumbnailUrl());
+      }
+    }
+    
+    if (source.getState() != null) {
+      if (StringUtils.containsAny(source.getState(), "LIVE", "VOD")) {
+        target.setState(source.getState());
+      }
+      
+      if ("BROADCASTED".equals(target.getType()) && "LIVE".equals(target.getState()) && "VOD".equals(source.getState())) {
+        target.setEndedAt(new Date());
+      }
+    }
+    
+    if (source.getVisibility() != null) {
+      String prevState = target.getVisibility();
+      String newState = source.getVisibility();
+      
+      Member member = target.getMember();
+      if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
+        member.setPublicVideoCount(member.getPublicVideoCount() - 1);
+        log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
+        target.setVisibility(newState);
+      }
+      
+      if ("PRIVATE".equalsIgnoreCase(prevState) && "PUBLIC".equalsIgnoreCase(newState)) {
+        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
+        log.debug("Video state will be changed PRIVATE to PUBLIC: {}", target.getId());
+        target.setVisibility(newState);
+      }
+      memberRepository.save(member);
+    }
+    
+    return target;
+  }
+  
+  @Transactional
   public Video deleteVideo(long memberId, Long videoId) {
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
         .map(v -> {
