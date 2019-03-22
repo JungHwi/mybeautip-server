@@ -625,7 +625,7 @@ public class VideoService {
       for (ViewRecoding viewRecoding : viewRecodings) {
         sb.append(viewRecoding.getCreatedBy().getUsername()).append(", ");
       }
-      onLiveWatchers = String.format("시청(%d): %s",
+      onLiveWatchers = String.format("시청(%d명): %s",
           viewRecodings.size(), StringUtils.left(sb.toString(), sb.toString().length() - 2));
     } else {
       onLiveWatchers = String.format("시청(0명)");
