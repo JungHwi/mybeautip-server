@@ -104,10 +104,12 @@ public class CallbackController {
           throw new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey());
         });
     
+    String oldState = video.getState();
     video = videoService.update(video);
+    String newState = video.getState();
     
     // Send on-live stats using slack when LIVE ended
-    if ("BROADCASTED".equals(video.getType()) && "VOD".equals(video.getState())) {
+    if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(oldState) && "VOD".equals(newState)) {
       videoService.sendStats(video);
     }
     return video;
