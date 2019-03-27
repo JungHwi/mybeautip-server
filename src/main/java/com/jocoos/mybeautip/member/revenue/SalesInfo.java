@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class RevenueInfo {
-
+public class SalesInfo {
+  
   private Long id;
   private Long videoId;
   private String goodsNo;
@@ -21,24 +21,24 @@ public class RevenueInfo {
   private int quantity;
   private int goodsPrice;
   private String thumbnail;
-
+  
   private int revenue;
   private Boolean confirmed;
   private Date createdAt;
-
-  public RevenueInfo(Revenue revenue) {
+  
+  public SalesInfo(Revenue revenue) {
     BeanUtils.copyProperties(revenue, this);
     this.videoId = revenue.getVideo().getId();
     
     Optional.of(revenue.getPurchase()).ifPresent(p -> {
-        this.goodsNo = p.getGoods().getGoodsNo();
-        this.state = p.getGoods().getState();
-        this.goodsNm = p.getGoods().getGoodsNm();
-        this.quantity = p.getQuantity();
-        this.goodsPrice = p.getGoodsPrice();
-        this.optionValue = p.getOptionValue();
-        this.thumbnail = revenue.getVideo().getThumbnailUrl();
-      }
+          this.goodsNo = p.getGoods().getGoodsNo();
+          this.state = p.getGoods().getState();
+          this.goodsNm = p.getGoods().getGoodsNm();
+          this.quantity = p.getQuantity();
+          this.goodsPrice = p.getGoodsPrice();
+          this.optionValue = p.getOptionValue();
+          this.thumbnail = p.getGoods().getListImageData().toString();
+        }
     );
   }
 }

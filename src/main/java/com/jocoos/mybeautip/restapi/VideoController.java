@@ -54,10 +54,10 @@ import com.jocoos.mybeautip.member.comment.CommentService;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.Revenue;
-import com.jocoos.mybeautip.member.revenue.RevenueInfo;
 import com.jocoos.mybeautip.member.revenue.RevenueOverview;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
+import com.jocoos.mybeautip.member.revenue.SalesInfo;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.search.KeywordService;
@@ -567,9 +567,9 @@ public class VideoController {
       list = revenueRepository.findByVideo(video, pageable);
     }
 
-    List<RevenueInfo> revenues = Lists.newArrayList();
+    List<SalesInfo> revenues = Lists.newArrayList();
 
-    list.forEach(r -> revenues.add(new RevenueInfo(r)));
+    list.forEach(r -> revenues.add(new SalesInfo(r)));
 
     String nextCursor = null;
     if (revenues.size() > 0) {
