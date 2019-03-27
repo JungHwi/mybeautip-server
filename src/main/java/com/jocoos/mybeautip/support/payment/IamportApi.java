@@ -12,5 +12,5 @@ public interface IamportApi {
 
   PaymentResponse cancelPayment(String accessToken, String impUid);
   
-  ResponseEntity<VbankResponse> validAccountInfo(AccountController.UpdateAccountInfo info) throws HttpStatusCodeException;
+  ResponseEntity<VbankResponse> validAccountInfo(AccountController.UpdateAccountInfo info, String lang);
 }

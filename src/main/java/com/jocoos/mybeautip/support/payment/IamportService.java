@@ -4,11 +4,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,15 +18,19 @@ import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.PaymentConflictException;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.AccountController;
 import com.jocoos.mybeautip.support.slack.SlackService;
 
 @Slf4j
 @Service
 public class IamportService implements IamportApi {
-  private final SlackService slackService;
   
+  private final SlackService slackService;
+  private final MessageService messageService;
+
   @Value("${mybeautip.iamport.api}")
   private String api;
 
@@ -38,8 +44,10 @@ public class IamportService implements IamportApi {
   private final RestTemplate restTemplate;
 
   public IamportService(SlackService slackService,
+                        MessageService messageService,
                         RestTemplate restTemplate) {
     this.slackService = slackService;
+    this.messageService = messageService;
     this.restTemplate = restTemplate;
   }
 
@@ -126,7 +134,9 @@ public class IamportService implements IamportApi {
     return response;
   }
   
-  public ResponseEntity<VbankResponse> validAccountInfo(AccountController.UpdateAccountInfo info) {
+  public ResponseEntity<VbankResponse> validAccountInfo(AccountController.UpdateAccountInfo info, String lang) {
+    String ACCOUNT_INVALID_INFO = "account.invalid_info";
+    
     String accessToken = getToken();
     String requestUri = fromUriString(api).path("/vbanks/holder")
         .queryParam("bank_code", info.getBankCode())
@@ -140,8 +150,14 @@ public class IamportService implements IamportApi {
 
     try {
       return restTemplate.exchange(requestUri, HttpMethod.GET, request, VbankResponse.class);
-    } catch (RestClientException e) {
-      log.warn("account_info_validation_iamport_fail", e.getMessage());
+    } catch (HttpClientErrorException httpClientErrorException) {
+      if (httpClientErrorException.getStatusCode() == HttpStatus.NOT_FOUND) {
+        throw new BadRequestException("invalid_account", messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
+      }
+      log.warn("account_info_validation_iamport_fail", httpClientErrorException.getMessage());
+      return null;  // Do not throw exception
+    } catch (RestClientException restClientException) {
+      log.warn("account_info_validation_iamport_fail", restClientException.getMessage());
       return null;  // Do not throw exception
     }
   }
