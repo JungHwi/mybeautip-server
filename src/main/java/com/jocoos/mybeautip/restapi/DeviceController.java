@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -10,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +23,7 @@ import com.jocoos.mybeautip.devices.Device;
 import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 
@@ -71,6 +72,14 @@ public class DeviceController {
     log.debug("result device: {}", info);
     return new ResponseEntity<>(new DeviceInfo(result), HttpStatus.OK);
   }
+  
+  @DeleteMapping
+  public ResponseEntity releaseDevice(@Valid @RequestBody ReleaseDeviceRequest request) {
+    deviceRepository.findById(request.getDeviceId())
+        .map(deviceService::releaseDevice)
+        .orElseThrow(() -> new NotFoundException("device_not_found", "Device not found: " + request.getDeviceId()));
+    return new ResponseEntity(HttpStatus.OK);
+  }
 
   @Data
   public static class UpdateDeviceRequest {
@@ -97,6 +106,13 @@ public class DeviceController {
     private String deviceTimezone;
 
     private Boolean pushable;
+  }
+  
+  @Data
+  public static class ReleaseDeviceRequest {
+    @NotNull
+    @Size(max = 500)
+    private String deviceId;
   }
 
   @NoArgsConstructor

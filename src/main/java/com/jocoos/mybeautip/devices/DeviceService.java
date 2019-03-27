@@ -124,6 +124,12 @@ public class DeviceService {
     }
   }
   
+  @Transactional
+  public Device releaseDevice(Device device) {
+    device.setCreatedBy(null);
+    return deviceRepository.save(device);
+  }
+  
   public void push(Notification notification) {
     deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId())
        .forEach(d -> {
