@@ -143,26 +143,18 @@ public class AccountController {
       throw new BadRequestException("invalid_bank_code", messageService.getMessage(ACCOUNT_INVALID_BANK_CODE, lang));
     }
     
-    try {
-      ResponseEntity<VbankResponse> response = iamportService.validAccountInfo(info);
-      if (response == null) {
-        return false;
-      }
-      log.debug("{}, {}", response.getStatusCode(), response.getBody());
+    ResponseEntity<VbankResponse> response = iamportService.validAccountInfo(info, lang);
+    if (response == null) {
+      return false;
+    }
+    
+    log.debug("{}, {}", response.getStatusCode(), response.getBody());
 
-      if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null && response.getBody().getCode() == 0) {
-        if (info.getBankDepositor().equalsIgnoreCase(response.getBody().getResponse().getBankHolder())) {
-          return true;
-        } else {
-          throw new BadRequestException("invalid_account", messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
-        }
-      }
-    } catch (HttpStatusCodeException e) {
-      if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-        throw new BadRequestException("invalid_account", messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
+    if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null && response.getBody().getCode() == 0) {
+      if (info.getBankDepositor().equalsIgnoreCase(response.getBody().getResponse().getBankHolder())) {
+        return true;
       } else {
-        log.warn("invalid_iamport_response, GET /vbank/holder API returns exception", e.getStatusCode());
-        return false;
+        throw new BadRequestException("invalid_account", messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
       }
     }
     return false;
