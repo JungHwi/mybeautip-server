@@ -144,7 +144,7 @@ public class CartController {
     
     GoodsOption option = null;
     if ("y".equals(goods.getOptionFl())) {
-      option = goodsOptionRepository.findByGoodsNoAndOptionNo(Integer.parseInt(goodsNo), optionNo)
+      option = goodsOptionRepository.findByGoodsNoAndOptionNoAndOptionViewFl(Integer.parseInt(goodsNo), optionNo, "y")
         .orElseThrow(() -> new NotFoundException("option_not_found", messageService.getMessage(OPTION_NOT_FOUND, lang)));
       if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
         throw new BadRequestException("option_sold_out", messageService.getMessage(CART_OPTION_SOLD_OUT, lang));

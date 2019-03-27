@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface GoodsOptionRepository extends JpaRepository<GoodsOption, Integer> {
   List<GoodsOption> findByGoodsNo(int goodsNo);
 
-  Optional<GoodsOption> findByGoodsNoAndOptionNo(Integer goodsNo, Integer optionNo);
+  Optional<GoodsOption> findByGoodsNoAndOptionNoAndOptionViewFl(Integer goodsNo, Integer optionNo, String optionViewFl);
 }
