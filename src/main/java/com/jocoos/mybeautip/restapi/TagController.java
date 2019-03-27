@@ -5,11 +5,17 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
+import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.tag.TagHistory;
 import com.jocoos.mybeautip.tag.TagHistoryRepository;
+import com.jocoos.mybeautip.tag.TagRepository;
+
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,13 +38,16 @@ import java.util.Map;
 public class TagController {
   
   private final MemberService memberService;
+  private final TagRepository tagRepository;
   private final TagHistoryRepository tagHistoryRepository;
   private final KeywordRecommendationRepository keywordRecommendationRepository;
   
   public TagController(MemberService memberService,
+                       TagRepository tagRepository,
                        TagHistoryRepository tagHistoryRepository,
                        KeywordRecommendationRepository keywordRecommendationRepository) {
     this.memberService = memberService;
+    this.tagRepository = tagRepository;
     this.tagHistoryRepository = tagHistoryRepository;
     this.keywordRecommendationRepository = keywordRecommendationRepository;
   }
@@ -77,6 +86,29 @@ public class TagController {
     }
     
     return new ArrayList<>();
+  }
+  
+  @GetMapping("/all")
+  public CursorResponse getAllTags(@RequestParam(defaultValue = "20") int count,
+                                  @RequestParam(required = false) String keyword) {
+    if (count > 100) {
+      count = 100;
+    }
+    
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "refCount"));
+    List<Tag> tags;
+    if (StringUtils.isBlank(keyword)) {
+      tags = tagRepository.findAll(page).getContent();
+    } else {
+      tags = tagRepository.findByNameStartingWith(keyword, page);
+    }
+
+    List<TagInfo> info = new ArrayList<>();
+    for (Tag t : tags) {
+      info.add(new TagInfo(t));
+    }
+  
+    return new CursorResponse.Builder<>(null, info).toBuild();
   }
   
   private List<TagInfo> getMyTags(Member me, Pageable page) {
@@ -173,10 +205,15 @@ public class TagController {
   }
   
   @Data
+  @NoArgsConstructor
   public static class TagInfo {
     private String name;
     private Integer refCount;
     private Date modifiedAt;
+    
+    public TagInfo(Tag tag) {
+      BeanUtils.copyProperties(tag, this);
+    }
     
     public TagInfo(TagHistory history) {
       this.name = history.getTag().getName();
