@@ -21,7 +21,9 @@ public interface FollowingRepository extends CrudRepository<Following, Long> {
 
   List<Following> findByMemberYouId(Long you);
   
-  List<Following> findByMemberMeIdOrMemberYouId(Long me, Long you, Pageable pageable);
+  List<Following> findByMemberMeId(Long me, Pageable pageable);
+  
+  List<Following> findByMemberYouId(Long me, Pageable pageable);
   
   List<Following> findByMemberMeIdAndMemberYouUsernameStartingWith(Long me, String keyword, Pageable pageable);
  

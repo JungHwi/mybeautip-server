@@ -394,11 +394,13 @@ public class MemberController {
         info.add(memberService.getMemberInfo(member));
       }
     } else {
-      for (Following f : followingRepository.findByMemberMeIdOrMemberYouId(me, me, pageable)) {
-        members.add(f.getMemberMe());
+      for (Following f : followingRepository.findByMemberMeId(me, pageable)) {
         members.add(f.getMemberYou());
       }
-      
+      for (Following f : followingRepository.findByMemberYouId(me, pageable)) {
+        members.add(f.getMemberMe());
+      }
+  
       for (Member member : members) {
         info.add(memberService.getMemberInfo(member));
       }
