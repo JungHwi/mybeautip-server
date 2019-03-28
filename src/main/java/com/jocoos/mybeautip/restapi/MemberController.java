@@ -6,8 +6,11 @@ import javax.validation.constraints.Size;
 import java.security.Principal;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +58,8 @@ import com.jocoos.mybeautip.member.comment.CommentInfo;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.Revenue;
@@ -89,6 +94,7 @@ public class MemberController {
   private final KeywordService keywordService;
   private final NotificationService notificationService;
   private final MemberRepository memberRepository;
+  private final FollowingRepository followingRepository;
   private final PostLikeRepository postLikeRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreLikeRepository storeLikeRepository;
@@ -121,6 +127,7 @@ public class MemberController {
                           GoodsService goodsService,
                           VideoService videoService,
                           MemberRepository memberRepository,
+                          FollowingRepository followingRepository,
                           PostLikeRepository postLikeRepository,
                           GoodsLikeRepository goodsLikeRepository,
                           StoreLikeRepository storeLikeRepository,
@@ -138,6 +145,7 @@ public class MemberController {
     this.goodsService = goodsService;
     this.videoService = videoService;
     this.memberRepository = memberRepository;
+    this.followingRepository = followingRepository;
     this.postLikeRepository = postLikeRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeLikeRepository = storeLikeRepository;
@@ -364,6 +372,41 @@ public class MemberController {
       .withState(state)
       .withCount(count)
       .withCursor(nextCursor).toBuild();
+  }
+  
+  @GetMapping(value = "/me/members")
+  public CursorResponse getMyMembers(@RequestParam(required = false) String keyword) {
+    long me = memberService.currentMemberId();
+    PageRequest pageable = PageRequest.of(0, 200, new Sort(Sort.Direction.DESC, "createdAt"));
+    
+    Set<Member> members = new HashSet<>();
+    List<MemberInfo> info = new ArrayList<>();
+    
+    if (StringUtils.isNotEmpty(keyword)) {
+      for (Following f : followingRepository.findByMemberMeIdAndMemberYouUsernameStartingWith(me, keyword, pageable)) {
+        members.add(f.getMemberYou());
+      }
+      for (Following f : followingRepository.findByMemberYouIdAndMemberMeUsernameStartingWith(me, keyword, pageable)) {
+        members.add(f.getMemberMe());
+      }
+  
+      for (Member member : members) {
+        info.add(memberService.getMemberInfo(member));
+      }
+    } else {
+      for (Following f : followingRepository.findByMemberMeId(me, pageable)) {
+        members.add(f.getMemberYou());
+      }
+      for (Following f : followingRepository.findByMemberYouId(me, pageable)) {
+        members.add(f.getMemberMe());
+      }
+  
+      for (Member member : members) {
+        info.add(memberService.getMemberInfo(member));
+      }
+    }
+    
+    return new CursorResponse.Builder<>(null, info).toBuild();
   }
   
   @Deprecated

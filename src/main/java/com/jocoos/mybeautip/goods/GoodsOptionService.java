@@ -44,6 +44,9 @@ public class GoodsOptionService {
     Map<String, List<OptionData>> map = new LinkedHashMap<>();
     List<OptionData> subOptions;
     for (GoodsOption option : options) {
+      if ("n".equalsIgnoreCase(option.getOptionViewFl())) {
+        continue;
+      }
       String name = option.getOptionValue1();
       if (StringUtils.isNotEmpty(option.getOptionValue2())) {
         if (map.containsKey(name)) {
@@ -62,6 +65,9 @@ public class GoodsOptionService {
       info.setLevel(1);
       List<OptionData> list = new ArrayList<>();
       for (GoodsOption option : options) {
+        if ("n".equalsIgnoreCase(option.getOptionViewFl())) {
+          continue;
+        }
         list.add(new OptionData(option.getOptionValue1(), isSoldOut(goods, option), option));
       }
       info.setContent(list);
