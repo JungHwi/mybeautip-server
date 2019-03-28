@@ -289,7 +289,6 @@ public class VideoService {
     if (watch == null) {
       videoWatchRepository.save(new VideoWatch(video, guestUsername));
       video.setTotalWatchCount(video.getTotalWatchCount() + 1);
-      video.setViewCount(video.getViewCount() + 1);
     } else {
       watch.setModifiedAt(new Date());
       videoWatchRepository.save(watch);
@@ -317,7 +316,6 @@ public class VideoService {
     if (watch == null) {
       videoWatchRepository.save(new VideoWatch(video, guestUsername));
       video.setTotalWatchCount(video.getTotalWatchCount() + 1);
-      video.setViewCount(video.getViewCount() + 1);
     } else {
       watch.setModifiedAt(new Date());
       videoWatchRepository.save(watch);
@@ -594,7 +592,6 @@ public class VideoService {
   
   @Transactional
   public Video addViewWithGuest(Video video, String guestName) {
-    // Guest can add view_count, but can not be inserted into viewer list
     VideoView view = videoViewRepository.findByVideoIdAndGuestName(video.getId(), guestName).orElse(null);
     if (view == null) {
       videoViewRepository.save(new VideoView(video, guestName));
