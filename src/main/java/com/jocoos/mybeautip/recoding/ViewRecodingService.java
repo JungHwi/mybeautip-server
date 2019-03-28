@@ -69,7 +69,7 @@ public class ViewRecodingService {
     viewRecodingRepository.findByItemIdAndCategoryAndCreatedBy(itemId, category, me)
         .map(recoding -> {
           recoding.setViewCount(recoding.getViewCount() + 1);
-          viewRecodingRepository.saveAndFlush(recoding);
+          viewRecodingRepository.save(recoding);
           return Optional.empty();
         })
         .orElseGet(() -> {

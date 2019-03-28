@@ -270,41 +270,59 @@ public class VideoService {
 
   @Transactional
   public Video setWatcher(Video video, Member me) {
-    if ("live".equalsIgnoreCase(video.getState())) {
-      videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId())
-          .map(watch -> {
-            watch.setModifiedAt(new Date());
-            videoWatchRepository.save(watch);
-            return Optional.empty();
-          })
-          .orElseGet(() -> {
-            videoWatchRepository.save(new VideoWatch(video, me));
-            video.setTotalWatchCount(video.getTotalWatchCount() + 1);
-            return Optional.empty();
-          });
-      return videoRepository.saveAndFlush(video);
+    VideoWatch watch = videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId()).orElse(null);
+    if (watch == null) {
+      videoWatchRepository.save(new VideoWatch(video, me));
+      video.setTotalWatchCount(video.getTotalWatchCount() + 1);
+    } else {
+      watch.setModifiedAt(new Date());
+      videoWatchRepository.save(watch);
     }
-    return video;
+    
+    video = addView(video, me);
+    return videoRepository.save(video);
   }
 
   @Transactional
   public Video setWatcherWithGuest(Video video, String guestUsername) {
-    if ("live".equalsIgnoreCase(video.getState())) {
-      videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestUsername)
-          .map(watch -> {
-            watch.setModifiedAt(new Date());
-            videoWatchRepository.save(watch);
-            return Optional.empty();
-          })
-          .orElseGet(() -> {
-            videoWatchRepository.save(new VideoWatch(video, guestUsername));
-            video.setTotalWatchCount(video.getTotalWatchCount() + 1);
-            video.setViewCount(video.getViewCount() + 1);
-            return Optional.empty();
-          });
-      return videoRepository.saveAndFlush(video);
+    VideoWatch watch = videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestUsername).orElse(null);
+    if (watch == null) {
+      videoWatchRepository.save(new VideoWatch(video, guestUsername));
+      video.setTotalWatchCount(video.getTotalWatchCount() + 1);
+      video.setViewCount(video.getViewCount() + 1);
+    } else {
+      watch.setModifiedAt(new Date());
+      videoWatchRepository.save(watch);
     }
-    return video;
+    video = addViewWithGuest(video, guestUsername);
+    return videoRepository.save(video);
+  }
+  
+  @Transactional
+  public Video updateWatcher(Video video, Member me) {
+    VideoWatch watch = videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId()).orElse(null);
+    if (watch == null) {
+      videoWatchRepository.save(new VideoWatch(video, me));
+      video.setTotalWatchCount(video.getTotalWatchCount() + 1);
+    } else {
+      watch.setModifiedAt(new Date());
+      videoWatchRepository.save(watch);
+    }
+    return videoRepository.save(video);
+  }
+  
+  @Transactional
+  public Video updateWatcherWithGuest(Video video, String guestUsername) {
+    VideoWatch watch = videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestUsername).orElse(null);
+    if (watch == null) {
+      videoWatchRepository.save(new VideoWatch(video, guestUsername));
+      video.setTotalWatchCount(video.getTotalWatchCount() + 1);
+      video.setViewCount(video.getViewCount() + 1);
+    } else {
+      watch.setModifiedAt(new Date());
+      videoWatchRepository.save(watch);
+    }
+    return videoRepository.save(video);
   }
   
   @Transactional
@@ -575,34 +593,32 @@ public class VideoService {
   }
   
   @Transactional
-  public Video addView(Video video, Member me) {
-    if (me != null) {
-      videoViewRepository.findByVideoIdAndCreatedById(video.getId(), me.getId())
-          .map(view -> {
-            view.setViewCount(view.getViewCount() + 1);
-            videoViewRepository.save(view);
-            return Optional.empty();
-          })
-          .orElseGet(() -> {
-            videoViewRepository.save(new VideoView(video, me));
-            return Optional.empty();
-          });
-    } else {  // Guest can add view_count, but can not be inserted into viewer list
-      String guestName = memberService.getGuestUserName();
-      videoViewRepository.findByVideoIdAndGuestName(video.getId(), guestName)
-          .map(view -> {
-            view.setViewCount(view.getViewCount() + 1);
-            videoViewRepository.save(view);
-            return Optional.empty();
-          })
-          .orElseGet(() -> {
-            videoViewRepository.save(new VideoView(video, guestName));
-            return Optional.empty();
-          });
+  public Video addViewWithGuest(Video video, String guestName) {
+    // Guest can add view_count, but can not be inserted into viewer list
+    VideoView view = videoViewRepository.findByVideoIdAndGuestName(video.getId(), guestName).orElse(null);
+    if (view == null) {
+      videoViewRepository.save(new VideoView(video, guestName));
+    } else {
+      view.setViewCount(view.getViewCount() + 1);
+      videoViewRepository.save(view);
     }
     
     video.setViewCount(video.getViewCount() + 1);
-    return videoRepository.saveAndFlush(video);
+    return videoRepository.save(video);
+  }
+  
+  @Transactional
+  public Video addView(Video video, Member me) {
+    VideoView view = videoViewRepository.findByVideoIdAndCreatedById(video.getId(), me.getId()).orElse(null);
+    if (view == null) {
+      videoViewRepository.save(new VideoView(video, me));
+    } else {
+      view.setViewCount(view.getViewCount() + 1);
+      videoViewRepository.save(view);
+    }
+  
+    video.setViewCount(video.getViewCount() + 1);
+    return videoRepository.save(video);
   }
   
   @Transactional
