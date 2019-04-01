@@ -173,7 +173,7 @@ public class NotificationService {
             if (original.contains("@")) {
               MentionResult mentionResult = createMentionComment(original);
               if (mentionResult != null) {
-                n.getArgs().set(1, mentionResult.getComment());
+                n.getArgs().set(1, commentLike.getComment().getComment());
               }
             }
           }
@@ -200,7 +200,7 @@ public class NotificationService {
             if (original.contains("@")) {
               MentionResult mentionResult = createMentionComment(original);
               if (mentionResult != null) {
-                n.getArgs().set(1, mentionResult.getComment());
+                n.getArgs().set(1, commentLike.getComment().getComment());
               }
             }
           }
@@ -253,7 +253,7 @@ public class NotificationService {
                  if (original.contains("@")) {
                    MentionResult mentionResult = createMentionComment(original);
                    if (mentionResult != null) {
-                     n.getArgs().set(1, mentionResult.getComment());
+                     n.getArgs().set(1, comment.getComment());
                    }
                  }
                }
@@ -280,7 +280,7 @@ public class NotificationService {
                  if (original.contains("@")) {
                    MentionResult mentionResult = createMentionComment(original);
                    if (mentionResult != null) {
-                     n.getArgs().set(1, mentionResult.getComment());
+                     n.getArgs().set(1, comment.getComment());
                    }
                  }
                }
