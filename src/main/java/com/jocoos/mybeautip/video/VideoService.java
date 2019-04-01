@@ -116,6 +116,13 @@ public class VideoService {
     return videoRepository.searchVideos(keyword, startCursor, page);
   }
 
+  public Slice<Video> findVideosWithTag(String keyword, String cursor, int count) {
+    Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+
+    return videoRepository.searchVideosWithTag(keyword, startCursor, page);
+  }
+
 
   public Slice<Video> findVideos(String type, String state, String cursor, int count) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));

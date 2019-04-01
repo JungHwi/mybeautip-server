@@ -106,7 +106,9 @@ public class VideoController {
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_LOCKED = "comment.locked";
-  
+
+  private static final String HASHTAG_SIGN = "#";
+
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
   
@@ -192,10 +194,15 @@ public class VideoController {
   public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      @RequestParam String keyword) {
-    Slice<Video> list = videoService.findVideosWithKeyword(keyword, cursor, count);
+    Slice<Video> list;
+    if (StringUtils.isNotEmpty(keyword) && keyword.startsWith(HASHTAG_SIGN)) {
+      list = videoService.findVideosWithTag(keyword, cursor, count);
+    } else {
+      list = videoService.findVideosWithKeyword(keyword, cursor, count);
+    }
     List<VideoInfo> videos = Lists.newArrayList();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
-  
+
     if (StringUtils.isNotBlank(keyword)) {
       keyword = keyword.trim();
       keywordService.updateKeywordCount(keyword);
