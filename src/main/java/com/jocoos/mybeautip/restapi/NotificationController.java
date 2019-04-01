@@ -89,6 +89,7 @@ public class NotificationController {
         if (StringUtils.equalsAny(n.getType(), typeWithComment)) {
           if (n.getArgs().size() > 1) {
             MentionResult mentionResult = mentionService.createMentionComment(n.getArgs().get(1));
+            n.getArgs().set(1, mentionResult.getComment());
             mentionInfo = mentionResult.getMentionInfo();
           }
         }
