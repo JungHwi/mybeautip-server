@@ -18,8 +18,6 @@ import com.jocoos.mybeautip.store.Store;
 public class GoodsDetailInfo extends GoodsInfo {
   private GoodsRecommendation recommendation;
   private StoreController.StoreInfo store;
-  private int hitCnt;
-  private int orderCnt;
 
   public GoodsDetailInfo(Goods goods) {
     BeanUtils.copyProperties(goods, this);

@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.goods;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +18,6 @@ import static org.springframework.data.domain.PageRequest.of;
 
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.restapi.CursorResponse;
 import com.jocoos.mybeautip.store.Store;
 import com.jocoos.mybeautip.store.StoreRepository;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -55,7 +53,7 @@ public class GoodsService {
     return goodsRepository.findRelatedGoods(category, goodsNo, pageable);
   }
 
-  private enum FILTER {ALL, CATEGORY, KEYWORD, CATEGORY_AND_KEYWORD}
+  private enum FILTER {ALL, CATEGORY, SORT, CATEGORY_AND_SORT}
   
   public GoodsService(MemberService memberService,
                       MessageService messageService,
@@ -71,68 +69,119 @@ public class GoodsService {
     this.storeRepository = storeRepository;
   }
   
-  public CursorResponse getGoodsList(int count, String cursor, String keyword, String category) {
-    Date startCursor = (Strings.isBlank(cursor)) ?
-        new Date() : new Date(Long.parseLong(cursor));
-    
-    List<GoodsInfo> result = new ArrayList<>();
-    Slice<Goods> slice = null;
-    
-    FILTER filter  = getRequestFilter(keyword, category);
+  public Slice<Goods> getGoodsList(int count, String cursor, String sort, String category) {
+    FILTER filter  = getRequestFilter(category, sort);
     log.debug("GetGoodsList filter by: " + filter.toString());
-    switch (filter) {
-      case ALL:
-        slice = goodsRepository.getGoodsList(startCursor,
-            of(0, count));
-        break;
-      case CATEGORY:
-        slice = goodsRepository.findAllByCategory(
-            generateSearchableCategory(category), startCursor, of(0, count));
-        break;
-        
-      case KEYWORD:
-        slice = goodsRepository.findAllByKeyword(keyword, startCursor, of(0, count));
-        break;
-        
-      case CATEGORY_AND_KEYWORD:
-        slice = goodsRepository.findAllByCategoryAndKeyword(
-            generateSearchableCategory(category), keyword, startCursor, of(0, count));
-        break;
-      
-      default:
-        break;
-    }
   
-    if (slice != null && slice.hasContent()) {
-      for (Goods goods : slice.getContent()) {
-        result.add(generateGoodsInfo(goods));
-      }
+    Date dateCursor = (Strings.isBlank(cursor)) ? new Date() : new Date(Long.parseLong(cursor));
+  
+    Slice<Goods> slice;
+    switch (filter) {
+      case CATEGORY:
+        slice = goodsRepository.findAllByCategory(generateSearchableCategory(category), dateCursor, of(0, count));
+        break;
+        
+      case SORT:
+        slice = getGoodsBySort(sort, cursor, count);
+        break;
+        
+      case CATEGORY_AND_SORT:
+        slice = getGoodsBySortAndCategory(sort, category, cursor, count);
+        break;
+        
+      case ALL:
+      default:
+        slice = goodsRepository.getGoodsList(dateCursor, of(0, count));
+        break;
     }
-
-    String nextCursor = null;
-    if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+    return slice;
+  }
+  
+  private Slice<Goods> getGoodsBySort(String sort, String cursor, int count) {
+    int descCursor = (Strings.isBlank(cursor)) ? Integer.MAX_VALUE : Integer.parseInt(cursor);
+    int ascCursor = (Strings.isBlank(cursor)) ? Integer.MIN_VALUE : Integer.parseInt(cursor);
+    
+    Slice<Goods> slice;
+    switch (sort) {
+      case "like":
+        slice = goodsRepository.getGoodsListOrderByLikeCountDesc(descCursor, of(0, count));
+        break;
+      case "order":
+        slice = goodsRepository.getGoodsListOrderByOrderCountDesc(descCursor, of(0, count));
+        break;
+      case "hit":
+        slice = goodsRepository.getGoodsListOrderByHitCntDesc(descCursor, of(0, count));
+        break;
+      case "review":
+        slice = goodsRepository.getGoodsListOrderByReviewCntDesc(descCursor, of(0, count));
+        break;
+      case "high-price":
+        slice = goodsRepository.getGoodsListOrderByGoodsPriceDesc(descCursor, of(0, count));
+        break;
+      case "low-price":
+        slice = goodsRepository.getGoodsListOrderByGoodsPriceAsc(ascCursor, of(0, count));
+        break;
+      case "latest":
+      default:
+        Date dateCursor = (Strings.isBlank(cursor)) ? new Date() : new Date(Long.parseLong(cursor));
+        slice = goodsRepository.getGoodsListOrderByCreatedAtDesc(dateCursor, of(0, count));
+        break;
     }
-
-    return new CursorResponse.Builder<>("/api/1/goods", result)
-      .withCount(count)
-      .withCursor(nextCursor)
-      .withCategory(category)
-      .withKeyword(keyword).toBuild();
+    return slice;
+  }
+  
+  private Slice<Goods> getGoodsBySortAndCategory(String sort, String category, String cursor, int count) {
+    int descCursor = (Strings.isBlank(cursor)) ? Integer.MAX_VALUE : Integer.parseInt(cursor);
+    int ascCursor = (Strings.isBlank(cursor)) ? Integer.MIN_VALUE : Integer.parseInt(cursor);
+    
+    Slice<Goods> slice;
+    switch (sort) {
+      case "like":
+        slice = goodsRepository.getGoodsListCategoryAndOrderByLikeCountDesc(
+            generateSearchableCategory(category), descCursor, of(0, count));
+        break;
+      case "order":
+        slice = goodsRepository.getGoodsListCategoryAndOrderByOrderCountDesc(
+            generateSearchableCategory(category), descCursor, of(0, count));
+        break;
+      case "hit":
+        slice = goodsRepository.getGoodsListCategoryAndOrderByHitCntDesc(
+            generateSearchableCategory(category), descCursor, of(0, count));
+        break;
+      case "review":
+        slice = goodsRepository.getGoodsListCategoryAndOrderByReviewCntDesc(
+            generateSearchableCategory(category), descCursor, of(0, count));
+        break;
+      case "high-price":
+        slice = goodsRepository.getGoodsListCategoryAndOrderByGoodsPriceDesc(
+            generateSearchableCategory(category), descCursor, of(0, count));
+        break;
+      case "low-price":
+        slice = goodsRepository.getGoodsListCategoryAndOrderByGoodsPriceAsc(
+            generateSearchableCategory(category), ascCursor, of(0, count));
+        break;
+      case "latest":
+      default:
+        Date dateCursor = (Strings.isBlank(cursor)) ? new Date() : new Date(Long.parseLong(cursor));
+        slice = goodsRepository.getGoodsListCategoryAndOrderByCreatedAtDesc(
+            generateSearchableCategory(category), dateCursor, of(0, count));
+        break;
+    }
+    return slice;
   }
 
-  private FILTER getRequestFilter(String keyword, String category) {
-    if (Strings.isEmpty(category) && Strings.isEmpty(keyword)) {
+  private FILTER getRequestFilter(String category, String sort) {
+    if (Strings.isEmpty(category) && Strings.isEmpty(sort)) {
       return FILTER.ALL;
     }
-    if (Strings.isNotEmpty(category) && Strings.isEmpty(keyword)) {
+    if (Strings.isNotEmpty(category) && Strings.isEmpty(sort)) {
       return FILTER.CATEGORY;
     }
-    if (Strings.isNotEmpty(keyword) && Strings.isEmpty(category)) {
-      return FILTER.KEYWORD;
+    if (Strings.isNotEmpty(sort) && Strings.isEmpty(category)) {
+      return FILTER.SORT;
     }
-    if (Strings.isNotEmpty(keyword) && Strings.isNotEmpty(category)) {
-      return FILTER.CATEGORY_AND_KEYWORD;
+    if (Strings.isNotEmpty(sort) && Strings.isNotEmpty(category)) {
+      return FILTER.CATEGORY_AND_SORT;
     }
 
     return FILTER.ALL;
