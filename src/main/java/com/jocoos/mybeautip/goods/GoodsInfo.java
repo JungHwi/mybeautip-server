@@ -56,6 +56,9 @@ public class GoodsInfo {
   private String optionRef;   // 상품 옵션 데이터를 볼 수 있는 주소
   private String relatedGoodsRef;   // 관련 상품을 볼 수 있는 주소
   private String relatedVideoRef;   // 관련 방송(동영상 리뷰)를 볼 수 있는 주소
+  private Integer orderCnt;
+  private Integer hitCnt;
+  private Integer reviewCnt;
 
   @JsonIgnore
   private Date createdAt;
