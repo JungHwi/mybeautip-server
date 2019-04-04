@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,6 +80,7 @@ public class PostController {
   private final KeywordService keywordService;
 
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
+  private static final String LIKE_NOT_FOUND = "like.not_found";
   private static final String POST_NOT_FOUND = "post.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
@@ -280,14 +280,15 @@ public class PostController {
   
   @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removePostLike(@PathVariable Long id,
-                                          @PathVariable Long likeId){
+                                          @PathVariable Long likeId,
+                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
        .map(liked -> {
          postService.unLikePost(liked);
          return Optional.empty();
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or like id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
   
     return new ResponseEntity(HttpStatus.OK);
   }
@@ -359,7 +360,6 @@ public class PostController {
       .withTotalCount(totalCount).toBuild();
   }
 
-  @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
@@ -447,18 +447,19 @@ public class PostController {
 
   @DeleteMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeCommentLike(@PathVariable Long postId,
-                                                 @PathVariable Long commentId,
-                                                 @PathVariable Long likeId){
+                                             @PathVariable Long commentId,
+                                             @PathVariable Long likeId,
+                                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member me = memberService.currentMember();
     Comment comment = commentRepository.findByIdAndPostId(commentId, postId)
-       .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id or comment id"));
+       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
 
     commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
        .map(liked -> {
          postService.unLikeCommentPost(liked);
          return Optional.empty();
        })
-       .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post comment like id"));
+       .orElseThrow(() -> new NotFoundException("comment_like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
   
     return new ResponseEntity(HttpStatus.OK);
   }

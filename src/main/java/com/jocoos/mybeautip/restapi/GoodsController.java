@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +15,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+
+import static org.springframework.data.domain.PageRequest.of;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -69,8 +72,11 @@ public class GoodsController {
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
+  private static final String LIKE_NOT_FOUND = "like.not_found";
   
   private static final int MAX_REVIEWER_COUNT = 6;
+  private static final List<String> validSort
+      = Arrays.asList("like", "order", "hit", "review", "high-price", "low-price", "latest");
 
   public GoodsController(MemberService memberService,
                          GoodsService goodsService,
@@ -96,19 +102,21 @@ public class GoodsController {
   
   @GetMapping
   public CursorResponse getGoodsList(@RequestParam(defaultValue = "20") int count,
+                                     @RequestParam(required = false) String sort,
                                      @RequestParam(required = false) String cursor,
                                      @RequestParam(required = false) String keyword,
                                      @RequestParam(required = false) String category) {
     if (count > 100) {
       count = 100;
     }
-    
     if (keyword != null && keyword.length() > 255) {
       throw new BadRequestException("invalid_keyword", "Valid keyword size is between 1 to 255.");
     }
-  
     if (category != null && category.length() > 6) {
       throw new BadRequestException("invalid_category", "Valid category size is between 1 to 6.");
+    }
+    if (sort != null && !validSort.contains(sort)) {
+      throw new BadRequestException("invalid_sort", "Valid sort value is one of 'like', 'order', 'hit', 'review', 'high-price', 'low-price' or 'latest'.");
     }
   
     if (StringUtils.isNotBlank(keyword)) {
@@ -117,7 +125,72 @@ public class GoodsController {
       keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, memberService.currentMember());
     }
     
-    return goodsService.getGoodsList(count, cursor, keyword, category);
+    Slice<Goods> slice;
+    if (StringUtils.isNotEmpty(keyword)) {
+      category = sort = null;
+      Date startCursor = (Strings.isBlank(cursor)) ? new Date() : new Date(Long.parseLong(cursor));
+      slice = goodsRepository.findAllByKeyword(keyword, startCursor, of(0, count));
+    } else {
+      slice = goodsService.getGoodsList(count, cursor, sort, category);
+    }
+  
+    List<GoodsInfo> result = new ArrayList<>();
+    for (Goods goods : slice.getContent()) {
+      result.add(goodsService.generateGoodsInfo(goods));
+    }
+  
+    String nextCursor = null;
+    if (sort == null) {
+      if (result.size() > 0) {
+        nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      }
+    } else {
+      switch (sort) {
+        case "like":
+          if (result.size() > 0) {
+            nextCursor = String.valueOf(result.get(result.size() - 1).getLikeCount());
+          }
+          break;
+        case "order":
+          if (result.size() > 0) {
+            nextCursor = String.valueOf(result.get(result.size() - 1).getOrderCnt());
+          }
+          break;
+        case "hit":
+          if (result.size() > 0) {
+            nextCursor = String.valueOf(result.get(result.size() - 1).getHitCnt());
+          }
+          break;
+        case "review":
+          if (result.size() > 0) {
+            nextCursor = String.valueOf(result.get(result.size() - 1).getReviewCnt());
+          }
+          break;
+        case "high-price":
+          if (result.size() > 0) {
+            nextCursor = String.valueOf(result.get(result.size() - 1).getGoodsPrice());
+          }
+          break;
+        case "low-price":
+          if (result.size() > 0) {
+            nextCursor = String.valueOf(result.get(result.size() - 1).getGoodsPrice());
+          }
+          break;
+        case "latest":
+        default:
+          if (result.size() > 0) {
+            nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
+          }
+          break;
+      }
+    }
+  
+    return new CursorResponse.Builder<>("/api/1/goods", result)
+        .withCount(count)
+        .withSort(sort)
+        .withCursor(nextCursor)
+        .withCategory(category)
+        .withKeyword(keyword).toBuild();
   }
 
   @GetMapping("/{goodsNo}")
@@ -228,18 +301,11 @@ public class GoodsController {
   @Transactional
   @DeleteMapping("/{goodsNo:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeGoodsLike(@PathVariable String goodsNo,
-                                           @PathVariable Long likeId) {
-    Long memberId = memberService.currentMemberId();
-    goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberId)
-        .orElseThrow(() -> new NotFoundException("like_not_found", "invalid goods no or like id"));
-  
-    goodsLikeRepository.findById(likeId)
-        .map(liked -> {
-          goodsService.removeLike(liked);
-          return Optional.empty();
-        })
-        .orElseThrow(() -> new NotFoundException("like_not_found", "invalid goods like id"));
-   
+                                           @PathVariable Long likeId,
+                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    GoodsLike like = goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberService.currentMemberId())
+        .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+    goodsService.removeLike(like);
     return new ResponseEntity(HttpStatus.OK);
   }
 
@@ -261,7 +327,7 @@ public class GoodsController {
     Date startCursor = (Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(
         startCursor, goodsNo, "PUBLIC", "CREATED", pageable);
     List<VideoController.VideoInfo> result = new ArrayList<>();

@@ -1,11 +1,11 @@
 package com.jocoos.mybeautip.member.comment;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;

@@ -74,6 +74,13 @@ public class CursorResponse<E> {
       }
       return this;
     }
+  
+    public Builder withSort(String sort) {
+      if (!Strings.isNullOrEmpty(sort)) {
+        this.properties.add("sort", sort);
+      }
+      return this;
+    }
 
     public Builder withState(String state) {
       if (!Strings.isNullOrEmpty(state)) {

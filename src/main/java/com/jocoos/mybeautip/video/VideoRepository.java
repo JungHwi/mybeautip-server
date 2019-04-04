@@ -79,6 +79,11 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     "and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < :cursor order by v.createdAt desc")
   Slice<Video> searchVideos(@Param("keyword") String keyword, @Param("cursor") Date cursor, Pageable pageable);
 
+  @Query("select v from Video v where v.visibility = 'PUBLIC' and v.deletedAt is null " +
+      "and v.content like concat('%',:keyword,'%') " +
+      "and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < :cursor order by v.createdAt desc")
+  Slice<Video> searchVideosWithTag(@Param("keyword") String keyword, @Param("cursor") Date cursor, Pageable pageable);
+
   Optional<Video> findByIdAndDeletedAtIsNull(Long id);
   
   Optional<Video> findByVideoKey(String videoKey);

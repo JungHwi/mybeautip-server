@@ -7,24 +7,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpStatusCodeException;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.account.Account;
 import com.jocoos.mybeautip.member.account.AccountRepository;
@@ -32,6 +17,14 @@ import com.jocoos.mybeautip.member.account.AccountService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.VbankResponse;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -90,12 +83,13 @@ public class AccountController {
 
   @GetMapping
   public ResponseEntity<AccountInfo> getAccount(@RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Long memberId = memberService.currentMemberId();
-    return accountRepository.findById(memberId)
+    Member me = memberService.currentMember();
+    return accountRepository.findById(me.getId())
        .map(account -> {
          log.debug("account: {}", account);
          AccountInfo accountInfo = new AccountInfo();
          BeanUtils.copyProperties(account, accountInfo);
+         accountInfo.setEmail(me.getEmail());
          log.debug("accountInfo: {}", accountInfo);
 
          return new ResponseEntity<>(accountInfo, HttpStatus.OK);
@@ -113,19 +107,20 @@ public class AccountController {
       throw new BadRequestException(bindingResult.getFieldError());
     }
   
-    memberService.checkEmailValidation(updateAccountInfo.getEmail(), lang);
     boolean valid = validAccount(updateAccountInfo, lang);
 
-    Long memberId = memberService.currentMemberId();
-    return accountRepository.findById(memberId)
+    Member me = memberService.currentMember();
+    return accountRepository.findById(me.getId())
        .map(account -> {
-         account.setMemberId(memberId);
+         account.setMemberId(me.getId());
          account.setValidity(valid);
          AccountInfo accountInfo = accountService.saveOrUpdate(updateAccountInfo, account);
+         accountInfo.setEmail(me.getEmail());
          return new ResponseEntity<>(accountInfo, HttpStatus.OK);
        })
        .orElseGet(() -> {
-         AccountInfo accountInfo = accountService.saveOrUpdate(updateAccountInfo, new Account(memberId, valid));
+         AccountInfo accountInfo = accountService.saveOrUpdate(updateAccountInfo, new Account(me.getId(), valid));
+         accountInfo.setEmail(me.getEmail());
          return new ResponseEntity<>(accountInfo, HttpStatus.OK);
        });
   }
@@ -164,9 +159,6 @@ public class AccountController {
   @Data
   @NoArgsConstructor
   public static class UpdateAccountInfo {
-
-    @NotNull @Size(max = 50)
-    private String email;
 
     @NotNull @Size(max = 50)
     private String bankName;

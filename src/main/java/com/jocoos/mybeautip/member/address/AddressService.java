@@ -1,12 +1,11 @@
 package com.jocoos.mybeautip.member.address;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Optional;
 
-import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,8 +13,8 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.DeliveryChargeArea;
 import com.jocoos.mybeautip.goods.DeliveryChargeAreaRepository;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.AddressController;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 @Service
 public class AddressService {

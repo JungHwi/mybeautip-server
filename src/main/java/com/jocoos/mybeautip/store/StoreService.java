@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.store;
 
-import javax.transaction.Transactional;
-
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,14 +24,14 @@ public class StoreService {
     this.storeLikeRepository = storeLikeRepository;
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public StoreLike addLike(Store store) {
     storeRepository.updateLikeCount(store.getId(), 1);
     store.setLikeCount(store.getLikeCount() + 1);
     return storeLikeRepository.save(new StoreLike(store));
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeLike(StoreLike like) {
     storeLikeRepository.delete(like);
     storeRepository.updateLikeCount(like.getStore().getId(), -1);

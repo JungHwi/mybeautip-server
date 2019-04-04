@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
@@ -39,6 +41,7 @@ public class NotificationController {
 
   private final NotificationRepository notificationRepository;
   private final FollowingRepository followingRepository;
+  private final CommentRepository commentRepository;
   private final MemberService memberService;
   private final MessageService messageService;
   private final NotificationService notificationService;
@@ -47,12 +50,14 @@ public class NotificationController {
 
   public NotificationController(NotificationRepository notificationRepository,
                                 FollowingRepository followingRepository,
+                                CommentRepository commentRepository,
                                 MemberService memberService,
                                 MessageService messageService,
                                 NotificationService notificationService,
                                 MentionService mentionService) {
     this.notificationRepository = notificationRepository;
     this.followingRepository = followingRepository;
+    this.commentRepository = commentRepository;
     this.memberService = memberService;
     this.messageService = messageService;
     this.notificationService = notificationService;
@@ -88,9 +93,16 @@ public class NotificationController {
         List<MentionTag> mentionInfo = null;
         if (StringUtils.equalsAny(n.getType(), typeWithComment)) {
           if (n.getArgs().size() > 1) {
-            MentionResult mentionResult = mentionService.createMentionComment(n.getArgs().get(1));
-            n.getArgs().set(1, mentionResult.getComment());
-            mentionInfo = mentionResult.getMentionInfo();
+            String[] resources = n.getResourceIds().split(",");
+            
+            if (resources.length >=2) {
+              long commentId = Long.parseLong(resources[resources.length - 1]);
+              Comment comment = commentRepository.findById(commentId).orElse(null);
+              if (comment != null) {
+                MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+                mentionInfo = mentionResult.getMentionInfo();
+              }
+            }
           }
         }
         

@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +59,6 @@ public class BannerController {
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
 
-  @Transactional
   @PostMapping("/{id:.+}/view_count")
   public ResponseEntity<?> addBannerViewCount(@PathVariable Long id,
                                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {

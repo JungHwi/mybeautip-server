@@ -1,8 +1,35 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.exception.AccessDeniedException;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -10,23 +37,6 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.notification.MessageService;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,6 +49,7 @@ public class BlockController {
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";
   private static final String MEMBER_REPORT_BAD_REQUEST = "member.report_bad_request";
+  private static final String MEMBER_BLOCK_NOT_FOUND = "member_block.not_found";
   
   public BlockController(MemberService memberService,
                          MessageService messageService,
@@ -81,13 +92,11 @@ public class BlockController {
   }
   
   @DeleteMapping("/me/blocks/{id:.+}")
-  public void unblockMember(@PathVariable("id") String id) {
-    Optional<Block> optional = blockRepository.findById(Long.parseLong(id));
-    if (!optional.isPresent()) {
-      throw new AccessDeniedException("Can't unblock");
-    } else {
-      blockRepository.delete(optional.get());
-    }
+  public void unblockMember(@PathVariable("id") Long id,
+                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    Block block = blockRepository.findById(id)
+        .orElseThrow(() ->  new NotFoundException("block_not_found", messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
+    blockRepository.delete(block);
   }
   
   @GetMapping("/me/blocks")

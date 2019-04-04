@@ -102,11 +102,14 @@ public class VideoController {
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
+  private static final String LIKE_NOT_FOUND = "like.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_LOCKED = "comment.locked";
-  
+
+  private static final String HASHTAG_SIGN = "#";
+
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
   
@@ -192,10 +195,15 @@ public class VideoController {
   public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      @RequestParam String keyword) {
-    Slice<Video> list = videoService.findVideosWithKeyword(keyword, cursor, count);
+    Slice<Video> list;
+    if (StringUtils.isNotEmpty(keyword) && keyword.startsWith(HASHTAG_SIGN)) {
+      list = videoService.findVideosWithTag(keyword, cursor, count);
+    } else {
+      list = videoService.findVideosWithKeyword(keyword, cursor, count);
+    }
     List<VideoInfo> videos = Lists.newArrayList();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
-  
+
     if (StringUtils.isNotBlank(keyword)) {
       keyword = keyword.trim();
       keywordService.updateKeywordCount(keyword);
@@ -386,7 +394,7 @@ public class VideoController {
         videoService.unLikeVideo(liked);
         return Optional.empty();
       })
-      .orElseThrow(() -> new NotFoundException("like_not_found", "invalid video like id"));
+      .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
   
     return new ResponseEntity(HttpStatus.OK);
   }
@@ -433,19 +441,20 @@ public class VideoController {
 
   @DeleteMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeCommentLike(@PathVariable Long videoId,
-                                                 @PathVariable Long commentId,
-                                                 @PathVariable Long likeId){
+                                             @PathVariable Long commentId,
+                                             @PathVariable Long likeId,
+                                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member me = memberService.currentMember();
     
     Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
-        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video id or comment " + "id"));
+        .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
 
     commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
         .map(liked -> {
           videoService.unLikeVideoComment(liked);
           return Optional.empty();
         })
-        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid video " + "comment like id"));
+        .orElseThrow(() -> new NotFoundException("comment_like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
     return new ResponseEntity(HttpStatus.OK);
   }
 
@@ -455,17 +464,17 @@ public class VideoController {
   @PostMapping(value = "/{id:.+}/watches")
   public ResponseEntity<VideoInfo> joinWatch(@PathVariable Long id,
                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Member me = memberService.currentMember();
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-        .map(v -> {
-          if (me == null) { // Guest
-            videoService.setWatcherWithGuest(v, memberService.getGuestUserName());
-          } else {
-            videoService.setWatcher(v, me);
-          }
-          return videoService.addView(v, me);
-        })
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+    
+    if ("LIVE".equalsIgnoreCase(video.getState())) {
+      Member me = memberService.currentMember();
+      if (me == null) { // Guest
+        video = videoService.setWatcherWithGuest(video, memberService.getGuestUserName());
+      } else {
+        video = videoService.setWatcher(video, me);
+      }
+    }
     
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
@@ -473,18 +482,19 @@ public class VideoController {
   @PatchMapping(value = "/{id:.+}/watches")
   public ResponseEntity<VideoInfo> keepWatch(@PathVariable Long id,
                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Member me = memberService.currentMember();
+    
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-        .map(v -> {
-          if (me == null) { // Guest
-            videoService.setWatcherWithGuest(v, memberService.getGuestUserName());
-          } else {
-            videoService.setWatcher(v, me);
-          }
-          return v;
-        })
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
   
+    if ("LIVE".equalsIgnoreCase(video.getState())) {
+      Member me = memberService.currentMember();
+      if (me == null) {
+        video = videoService.updateWatcherWithGuest(video, memberService.getGuestUserName());
+      } else {
+        video = videoService.updateWatcher(video, me);
+      }
+    }
+    
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 
@@ -634,9 +644,14 @@ public class VideoController {
   public ResponseEntity<VideoInfo> addView(@PathVariable Long id,
                                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-        .map(v -> videoService.addView(v, memberService.currentMember()))
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
     
+    Member me = memberService.currentMember();
+    if (me == null) {
+      video = videoService.addViewWithGuest(video, memberService.getGuestUserName());
+    } else {
+      video = videoService.addView(video, me);
+    }
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
 
@@ -645,12 +660,12 @@ public class VideoController {
                                       @RequestParam(defaultValue = "100") int count,
                                       @RequestParam(required = false) String cursor,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    videoRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+    
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
-
-    Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
-       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-
+    
     Slice<VideoView> list = videoViewRepository.findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(id, startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
     list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));

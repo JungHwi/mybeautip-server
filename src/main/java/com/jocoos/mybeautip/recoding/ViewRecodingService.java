@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.recoding;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Optional;
 
@@ -8,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +69,7 @@ public class ViewRecodingService {
     viewRecodingRepository.findByItemIdAndCategoryAndCreatedBy(itemId, category, me)
         .map(recoding -> {
           recoding.setViewCount(recoding.getViewCount() + 1);
-          viewRecodingRepository.saveAndFlush(recoding);
+          viewRecodingRepository.save(recoding);
           return Optional.empty();
         })
         .orElseGet(() -> {
