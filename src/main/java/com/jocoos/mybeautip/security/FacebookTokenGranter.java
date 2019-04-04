@@ -1,12 +1,12 @@
 package com.jocoos.mybeautip.security;
 
-import javax.transaction.Transactional;
 import java.util.Map;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;

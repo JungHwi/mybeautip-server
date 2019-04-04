@@ -1,11 +1,11 @@
 package com.jocoos.mybeautip.member.point;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
