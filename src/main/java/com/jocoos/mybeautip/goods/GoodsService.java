@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -187,14 +188,14 @@ public class GoodsService {
     return FILTER.ALL;
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public GoodsLike addLike(Goods goods) {
     goodsRepository.updateLikeCount(goods.getGoodsNo(), 1);
     goods.setLikeCount(goods.getLikeCount() + 1);
     return goodsLikeRepository.save(new GoodsLike(goods));
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeLike(GoodsLike liked) {
     goodsLikeRepository.delete(liked);
     goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);

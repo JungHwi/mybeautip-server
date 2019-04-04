@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.member.comment.CommentRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -88,26 +89,26 @@ public class PostService {
     commentRepository.delete(comment);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public PostLike likePost(Post post) {
     postRepository.updateLikeCount(post.getId(), 1);
     post.setLikeCount(post.getLikeCount() + 1);
     return postLikeRepository.save(new PostLike(post));
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikePost(PostLike liked) {
     postLikeRepository.delete(liked);
     postRepository.updateLikeCount(liked.getPost().getId(), -1);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public CommentLike likeCommentPost(Comment comment) {
     commentRepository.updateLikeCount(comment.getId(), 1);
     return commentLikeRepository.save(new CommentLike(comment));
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeCommentPost(CommentLike liked) {
     commentLikeRepository.delete(liked);
     commentRepository.updateLikeCount(liked.getComment().getId(), -1);

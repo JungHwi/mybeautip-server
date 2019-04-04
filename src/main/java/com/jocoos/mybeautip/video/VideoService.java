@@ -7,12 +7,14 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -665,42 +667,33 @@ public class VideoService {
     return videoRepository.save(video);
   }
   
-  @Transactional
-  public void updateOrderCount(long videoId, int count) {
-    videoRepository.findByIdAndDeletedAtIsNull(videoId)
-        .ifPresent(video -> {
-          video.setOrderCount(video.getOrderCount() + 1);
-          videoRepository.save(video);
-        });
-  }
-  
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public Video reportVideo(Video video, Member me, int reasonCode, String reason) {
     videoReportRepository.save(new VideoReport(video, me, reasonCode, reason));
     video.setReportCount(video.getReportCount() + 1);
     return videoRepository.save(video);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public VideoLike likeVideo(Video video) {
     videoRepository.updateLikeCount(video.getId(), 1);
     video.setLikeCount(video.getLikeCount() + 1);
     return videoLikeRepository.save(new VideoLike(video));
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeVideo(VideoLike liked) {
     videoLikeRepository.delete(liked);
     videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public CommentLike likeVideoComment(Comment comment) {
     commentRepository.updateLikeCount(comment.getId(), 1);
     return commentLikeRepository.save(new CommentLike(comment));
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeVideoComment(CommentLike liked) {
     commentLikeRepository.delete(liked);
     commentRepository.updateLikeCount(liked.getComment().getId(), -1);
@@ -708,7 +701,11 @@ public class VideoService {
   
   @Transactional
   public void increaseHeart(Video video, int count) {
-    videoRepository.updateHeartCount(video.getId(), count);
+    try {
+      videoRepository.updateHeartCount(video.getId(), count);
+    } catch (ConcurrencyFailureException e) {
+      // ignore ConcurrencyFailureException
+    }
   }
   
   @Async

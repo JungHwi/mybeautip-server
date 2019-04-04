@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -265,14 +266,14 @@ public class MemberService {
     memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public Following followMember(Member me, Member you) {
     memberRepository.updateFollowingCount(me.getId(), 1);
     memberRepository.updateFollowerCount(you.getId(), 1);
     return followingRepository.save(new Following(me, you));
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unFollowMember(Following following) {
     followingRepository.delete(following);
     memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
