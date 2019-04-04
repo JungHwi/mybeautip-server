@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -361,7 +360,6 @@ public class PostController {
       .withTotalCount(totalCount).toBuild();
   }
 
-  @Transactional
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
