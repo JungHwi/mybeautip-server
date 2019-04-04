@@ -72,7 +72,7 @@ public class GoodsController {
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
-  private static final String LIKE_NOT_FOUND = "like_not_found";
+  private static final String LIKE_NOT_FOUND = "like.not_found";
   
   private static final int MAX_REVIEWER_COUNT = 6;
   private static final List<String> validSort

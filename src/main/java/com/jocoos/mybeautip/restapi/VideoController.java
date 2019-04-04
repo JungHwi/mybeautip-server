@@ -102,7 +102,7 @@ public class VideoController {
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
-  private static final String LIKE_NOT_FOUND = "like_not_found";
+  private static final String LIKE_NOT_FOUND = "like.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
