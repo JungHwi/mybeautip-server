@@ -72,6 +72,7 @@ public class GoodsController {
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
+  private static final String LIKE_NOT_FOUND = "like_not_found";
   
   private static final int MAX_REVIEWER_COUNT = 6;
   private static final List<String> validSort
@@ -300,18 +301,11 @@ public class GoodsController {
   @Transactional
   @DeleteMapping("/{goodsNo:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeGoodsLike(@PathVariable String goodsNo,
-                                           @PathVariable Long likeId) {
-    Long memberId = memberService.currentMemberId();
-    goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberId)
-        .orElseThrow(() -> new NotFoundException("like_not_found", "invalid goods no or like id"));
-  
-    goodsLikeRepository.findById(likeId)
-        .map(liked -> {
-          goodsService.removeLike(liked);
-          return Optional.empty();
-        })
-        .orElseThrow(() -> new NotFoundException("like_not_found", "invalid goods like id"));
-   
+                                           @PathVariable Long likeId,
+                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    GoodsLike like = goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberService.currentMemberId())
+        .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+    goodsService.removeLike(like);
     return new ResponseEntity(HttpStatus.OK);
   }
 

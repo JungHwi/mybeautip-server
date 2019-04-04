@@ -102,6 +102,7 @@ public class VideoController {
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
+  private static final String LIKE_NOT_FOUND = "like_not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
@@ -393,7 +394,7 @@ public class VideoController {
         videoService.unLikeVideo(liked);
         return Optional.empty();
       })
-      .orElseThrow(() -> new NotFoundException("like_not_found", "invalid video like id"));
+      .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
   
     return new ResponseEntity(HttpStatus.OK);
   }
@@ -440,19 +441,20 @@ public class VideoController {
 
   @DeleteMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeCommentLike(@PathVariable Long videoId,
-                                                 @PathVariable Long commentId,
-                                                 @PathVariable Long likeId){
+                                             @PathVariable Long commentId,
+                                             @PathVariable Long likeId,
+                                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member me = memberService.currentMember();
     
     Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
-        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video id or comment " + "id"));
+        .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
 
     commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
         .map(liked -> {
           videoService.unLikeVideoComment(liked);
           return Optional.empty();
         })
-        .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid video " + "comment like id"));
+        .orElseThrow(() -> new NotFoundException("comment_like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
     return new ResponseEntity(HttpStatus.OK);
   }
 

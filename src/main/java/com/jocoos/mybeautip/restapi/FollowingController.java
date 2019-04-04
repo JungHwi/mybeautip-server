@@ -42,6 +42,7 @@ public class FollowingController {
 
   private static final String MEMBER_NOT_FOUND = "member.not_found";
   private static final String MEMBER_FOLLOWING_BAD_REQUEST = "member.following_bad_request";
+  private static final String FOLLOWING_NOT_FOUND = "following.not_found";
   
   public FollowingController(MemberService memberService,
                              MessageService messageService,
@@ -89,7 +90,8 @@ public class FollowingController {
 
   @Transactional
   @DeleteMapping("/me/followings/{id}")
-  public void unFollowMember(@PathVariable("id") Long id) {
+  public void unFollowMember(@PathVariable("id") Long id,
+                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Optional<Following> optional = followingRepository.findById(id);
 
     if (optional.isPresent()) {
@@ -100,7 +102,7 @@ public class FollowingController {
       memberRepository.updateFollowingCount(memberService.currentMemberId(), -1);
       memberRepository.updateFollowerCount(optional.get().getMemberYou().getId(), -1);
     } else {
-      throw new NotFoundException("following_not_found", "following not found, id: " + id);
+      throw new NotFoundException("following_not_found", messageService.getMessage(FOLLOWING_NOT_FOUND, lang));
     }
   }
   
