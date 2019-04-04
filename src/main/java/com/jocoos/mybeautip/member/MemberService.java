@@ -4,6 +4,14 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
@@ -13,20 +21,11 @@ import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.restapi.MemberController;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.word.BannedWordService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @Service
@@ -264,5 +263,19 @@ public class MemberService {
   
     log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
     memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
+  }
+  
+  @Transactional
+  public Following followMember(Member me, Member you) {
+    memberRepository.updateFollowingCount(me.getId(), 1);
+    memberRepository.updateFollowerCount(you.getId(), 1);
+    return followingRepository.save(new Following(me, you));
+  }
+  
+  @Transactional
+  public void unFollowMember(Following following) {
+    followingRepository.delete(following);
+    memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
+    memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
   }
 }

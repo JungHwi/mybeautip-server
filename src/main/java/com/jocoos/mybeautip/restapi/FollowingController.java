@@ -1,20 +1,24 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,12 +28,14 @@ import org.apache.logging.log4j.util.Strings;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingMemberRequest;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.notification.MessageService;
 
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -54,56 +60,37 @@ public class FollowingController {
     this.followingRepository = followingRepository;
   }
 
-  @Transactional
   @PostMapping("/me/followings")
   public FollowingResponse followMember(@Valid @RequestBody FollowingMemberRequest followingMemberRequest,
-                                        BindingResult bindingResult,
                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    if (bindingResult.hasErrors()) {
-      log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid followings request");
-    }
-
-    long me = memberService.currentMemberId();
-    long you = followingMemberRequest.getMemberId();
-    
-    if (me == you) {
+    Member me = memberService.currentMember();
+    if (me.getId().equals(followingMemberRequest.getMemberId())) {
       throw new BadRequestException("following_bad_request", messageService.getMessage(MEMBER_FOLLOWING_BAD_REQUEST, lang));
     }
-
-    memberRepository.findByIdAndDeletedAtIsNull(you)
+    
+    Member you = memberRepository.findByIdAndDeletedAtIsNull(followingMemberRequest.getMemberId())
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    Following following = followingRepository.findByMemberMeIdAndMemberYouId(me.getId(), you.getId()).orElse(null);
     
-    Optional<Following> optional = followingRepository.findByMemberMeIdAndMemberYouId(me, you);
-    
-    if (optional.isPresent()) {
-      log.debug("Already followed");
-      return new FollowingResponse(optional.get().getId());
-    } else {
-      Following following = followingRepository.save(
-        new Following(memberRepository.getOne(me), memberRepository.getOne(you)));
-      memberRepository.updateFollowingCount(me, 1);
-      memberRepository.updateFollowerCount(you, 1);
+    if (following == null) {
+      return new FollowingResponse(memberService.followMember(me, you).getId());
+    } else {  // Already followed
       return new FollowingResponse(following.getId());
     }
   }
 
-  @Transactional
   @DeleteMapping("/me/followings/{id}")
   public void unFollowMember(@PathVariable("id") Long id,
                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Optional<Following> optional = followingRepository.findById(id);
-
-    if (optional.isPresent()) {
-      if (!memberService.currentMemberId().equals(optional.get().getMemberMe().getId())) {
-        throw new BadRequestException("Invalid following id: " + id);
-      }
-      followingRepository.delete(optional.get());
-      memberRepository.updateFollowingCount(memberService.currentMemberId(), -1);
-      memberRepository.updateFollowerCount(optional.get().getMemberYou().getId(), -1);
-    } else {
-      throw new NotFoundException("following_not_found", messageService.getMessage(FOLLOWING_NOT_FOUND, lang));
+    Member me = memberService.currentMember();
+    Following following = followingRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("following_not_found", messageService.getMessage(FOLLOWING_NOT_FOUND, lang)));
+    
+    if (!me.equals(following.getMemberMe())) {
+      throw new BadRequestException("following_not_found", messageService.getMessage(FOLLOWING_NOT_FOUND, lang));
     }
+    
+    memberService.unFollowMember(following);
   }
   
   @GetMapping("/me/followings")
