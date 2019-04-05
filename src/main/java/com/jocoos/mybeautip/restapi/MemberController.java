@@ -8,9 +8,8 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -377,9 +376,9 @@ public class MemberController {
   @GetMapping(value = "/me/members")
   public CursorResponse getMyMembers(@RequestParam(required = false) String keyword) {
     long me = memberService.currentMemberId();
-    PageRequest pageable = PageRequest.of(0, 200, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, 100, new Sort(Sort.Direction.DESC, "createdAt"));
     
-    Set<Member> members = new HashSet<>();
+    LinkedHashSet<Member> members = new LinkedHashSet<>();
     List<MemberInfo> info = new ArrayList<>();
     
     if (StringUtils.isNotEmpty(keyword)) {
