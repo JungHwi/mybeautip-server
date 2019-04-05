@@ -177,6 +177,7 @@ public class Notification {
     this.resourceType = RESOURCE_TYPE_POST_COMMENT;
     this.resourceId = comment.getId();
     this.resourceIds = StringUtils.joinWith(",", post.getId(), comment.getId());
+    this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
     this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
