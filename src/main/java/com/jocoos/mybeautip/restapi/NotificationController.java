@@ -101,6 +101,7 @@ public class NotificationController {
               if (comment != null) {
                 MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
                 mentionInfo = mentionResult.getMentionInfo();
+                n.getArgs().set(1, mentionResult.getComment());
               }
             }
           }
