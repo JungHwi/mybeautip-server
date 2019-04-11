@@ -59,7 +59,13 @@ public class MentionService {
         if (token.startsWith(MENTION_TAG)) {
           String username = token.substring(MENTION_TAG.length());
           if (mentionTagMap.containsKey(username)) {
-            sb.append(MENTION_TAG).append(mentionTagMap.get(username)).append(" ");
+            Member member = memberRepository.findById(mentionTagMap.get(username)).orElse(null);
+            if (member != null) {
+              sb.append(MENTION_TAG).append(mentionTagMap.get(username)).append(" ");
+              notificationService.notifyAddCommentWithMention(comment, member);
+            } else {
+              sb.append(token).append(" ");
+            }
           } else {
             sb.append(token).append(" ");
           }
