@@ -46,7 +46,7 @@ public class MentionService {
       mentionTagMap.put(tag.getUsername(), tag.getMemberId());
     }
 
-    String commentMessage = comment.getComment();
+    String commentMessage = comment.getComment().trim();
     log.debug("comment originals: {}", commentMessage);
     StringBuilder sb = new StringBuilder();
   
