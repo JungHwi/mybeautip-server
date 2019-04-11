@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.member.mention;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Data
 public class MentionResult {
   private String comment;
-  private List<MentionTag> mentionInfo;
+  private Set<MentionTag> mentionInfo;
 
   public void add(MentionTag mentionTag) {
     if (mentionInfo == null) {
-      mentionInfo = Lists.newArrayList();
+      mentionInfo = new HashSet<>();
     }
 
     this.mentionInfo.add(mentionTag);
