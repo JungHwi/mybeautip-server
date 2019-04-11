@@ -1,21 +1,25 @@
 package com.jocoos.mybeautip.member.mention;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.notification.NotificationService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,6 +49,8 @@ public class MentionService {
     for (MentionTag tag : mentionTags) {
       mentionTagMap.put(tag.getUsername(), tag.getMemberId());
     }
+    
+    Set<Member> notifyTargetMember = new HashSet<>();
 
     String commentMessage = comment.getComment().trim();
     log.debug("comment originals: {}", commentMessage);
@@ -62,7 +68,7 @@ public class MentionService {
             Member member = memberRepository.findById(mentionTagMap.get(username)).orElse(null);
             if (member != null) {
               sb.append(MENTION_TAG).append(mentionTagMap.get(username)).append(" ");
-              notificationService.notifyAddCommentWithMention(comment, member);
+              notifyTargetMember.add(member);
             } else {
               sb.append(token).append(" ");
             }
@@ -75,7 +81,11 @@ public class MentionService {
         target = StringUtils.substringAfter(target, token);
       }
     } while (target.length() > 0);
-    
+  
+    for (Member member : notifyTargetMember) {
+      notificationService.notifyAddCommentWithMention(comment, member);
+    }
+  
     log.debug("comment with mention: {}", sb.toString().trim());
     comment.setComment(sb.toString().trim());
 
