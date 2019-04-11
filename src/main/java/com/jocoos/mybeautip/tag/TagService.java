@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,8 @@ public class TagService {
   }
   
   // Save tags without increasing refCount
-  public synchronized void touchRefCount(String text) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public void touchRefCount(String text) {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
       Optional<Tag> optional = tagRepository.findByName(name);
@@ -56,8 +58,8 @@ public class TagService {
     }
   }
   
-  @Transactional
-  public synchronized void increaseRefCount(String text) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public void increaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
       Optional<Tag> optional = tagRepository.findByName(name);
@@ -69,7 +71,7 @@ public class TagService {
     }
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void decreaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
@@ -78,8 +80,8 @@ public class TagService {
     }
   }
   
-  @Transactional
-  public synchronized void updateRefCount(String oldText, String newText) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public void updateRefCount(String oldText, String newText) {
     List<String> oldTagNames = parseHashTag(oldText);
     List<String> newTagNames = parseHashTag(newText);
   
@@ -101,8 +103,8 @@ public class TagService {
     }
   }
   
-  @Transactional
-  public synchronized void addHistory(String text, int category, long resourceId, Member me) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public void addHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
     for (String name : uniqueTagNames) {
       tagRepository.findByName(name).ifPresent(tag -> tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
@@ -110,7 +112,7 @@ public class TagService {
     }
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
     for (String name : uniqueTagNames) {
@@ -120,13 +122,13 @@ public class TagService {
     }
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeAllHistory(Member me) {
     tagHistoryRepository.findByCreatedBy(me).forEach(tagHistoryRepository::delete);
   }
   
-  @Transactional
-  public synchronized void updateHistory(String oldText, String newText, int category, long resourceId, Member me) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public void updateHistory(String oldText, String newText, int category, long resourceId, Member me) {
     List<String> oldTagNames = parseHashTag(oldText);
     List<String> newTagNames = parseHashTag(newText);
     

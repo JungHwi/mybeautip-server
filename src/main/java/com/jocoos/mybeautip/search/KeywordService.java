@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.search;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +25,8 @@ public class KeywordService {
     this.keywordRepository = keywordRepository;
   }
   
-  @Transactional
-  public synchronized void updateKeywordCount(String keyword) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public void updateKeywordCount(String keyword) {
     Optional<Keyword> optional = keywordRepository.findByKeyword(keyword);
     if (optional.isPresent()) {
       keywordRepository.updateCount(optional.get().getId(), 1);
@@ -34,7 +35,8 @@ public class KeywordService {
     }
   }
   
-  public synchronized void logHistory(String keyword, KeywordCategory category, Member member) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public void logHistory(String keyword, KeywordCategory category, Member member) {
     Optional<SearchHistory> optional = searchHistoryRepository.findByKeywordAndCategoryAndCreatedBy(
         keyword, category.ordinal(), member);
     

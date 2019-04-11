@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.amazonaws.services.sns.AmazonSNS;
@@ -84,7 +85,8 @@ public class DeviceService {
     return target;
   }
   
-  public synchronized Device getDevice(String deviceId) {
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public Device getDevice(String deviceId) {
     return deviceRepository.findById(deviceId).orElse(null);
   }
   

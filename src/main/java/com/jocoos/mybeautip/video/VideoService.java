@@ -276,7 +276,7 @@ public class VideoService {
     return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
   }
 
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public Video setWatcher(Video video, Member me) {
     VideoWatch watch = videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId()).orElse(null);
     if (watch == null) {
@@ -291,7 +291,7 @@ public class VideoService {
     return videoRepository.save(video);
   }
 
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public Video setWatcherWithGuest(Video video, String guestUsername) {
     VideoWatch watch = videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestUsername).orElse(null);
     if (watch == null) {
@@ -305,7 +305,7 @@ public class VideoService {
     return videoRepository.save(video);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public Video updateWatcher(Video video, Member me) {
     VideoWatch watch = videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId()).orElse(null);
     if (watch == null) {
@@ -318,7 +318,7 @@ public class VideoService {
     return videoRepository.save(video);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public Video updateWatcherWithGuest(Video video, String guestUsername) {
     VideoWatch watch = videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestUsername).orElse(null);
     if (watch == null) {
@@ -331,13 +331,13 @@ public class VideoService {
     return videoRepository.save(video);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeGuestWatcher(Video video, String guestName) {
     videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestName)
         .ifPresent(videoWatchRepository::delete);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeWatcher(Video video, Member me) {
     videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId())
         .ifPresent(videoWatchRepository::delete);
