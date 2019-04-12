@@ -81,13 +81,7 @@ public class CommentService {
   
     List<MentionTag> mentionTags = request.getMentionTags();
     if (mentionTags != null && mentionTags.size() > 0) {
-      if (type == COMMENT_TYPE_VIDEO) {
-        mentionService.updateVideoCommentWithMention(comment, mentionTags);
-      }
-      
-      if (type == COMMENT_TYPE_POST) {
-        mentionService.updatePostCommentWithMention(comment, mentionTags);
-      }
+      mentionService.updateCommentWithMention(comment, mentionTags);
     } else {
       notificationService.notifyAddComment(comment);
     }

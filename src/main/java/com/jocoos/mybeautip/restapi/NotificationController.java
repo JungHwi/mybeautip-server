@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,7 +91,7 @@ public class NotificationController {
           }
         }
         
-        List<MentionTag> mentionInfo = null;
+        Set<MentionTag> mentionInfo = null;
         if (StringUtils.equalsAny(n.getType(), typeWithComment)) {
           if (n.getArgs().size() > 1) {
             String[] resources = n.getResourceIds().split(",");
@@ -101,6 +102,7 @@ public class NotificationController {
               if (comment != null) {
                 MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
                 mentionInfo = mentionResult.getMentionInfo();
+                n.getArgs().set(1, mentionResult.getComment());
               }
             }
           }
@@ -154,10 +156,10 @@ public class NotificationController {
     private String message;
     private Date createdAt;
     private Long followId;
-    private List<MentionTag> mentionInfo;
+    private Set<MentionTag> mentionInfo;
 
     public NotificationInfo(Notification notification, String message,
-                            MemberInfo targetMember, MemberInfo resourceOwner, List<MentionTag> mentionInfo) {
+                            MemberInfo targetMember, MemberInfo resourceOwner, Set<MentionTag> mentionInfo) {
       BeanUtils.copyProperties(notification, this);
       this.resourceIds = Stream.of(notification.getResourceIds().split(","))
           .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
@@ -168,7 +170,7 @@ public class NotificationController {
     }
 
     public NotificationInfo(Notification notification, String message, Long followId,
-                            MemberInfo targetMember, MemberInfo resourceOwner, List<MentionTag> mentionInfo) {
+                            MemberInfo targetMember, MemberInfo resourceOwner, Set<MentionTag> mentionInfo) {
       this(notification, message, targetMember, resourceOwner, mentionInfo);
       this.resourceIds = Stream.of(notification.getResourceIds().split(","))
           .map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());

@@ -103,7 +103,7 @@ public class GoodsController {
   @GetMapping
   public CursorResponse getGoodsList(@RequestParam(defaultValue = "20") int count,
                                      @RequestParam(required = false) String sort,
-                                     @RequestParam(required = false) String cursor,
+                                     @RequestParam(required = false) Long cursor,
                                      @RequestParam(required = false) String keyword,
                                      @RequestParam(required = false) String category) {
     if (count > 100) {
@@ -118,7 +118,12 @@ public class GoodsController {
     if (sort != null && !validSort.contains(sort)) {
       throw new BadRequestException("invalid_sort", "Valid sort value is one of 'like', 'order', 'hit', 'review', 'high-price', 'low-price' or 'latest'.");
     }
-  
+    if (cursor!= null && sort != null && !"latest".equals(sort)) {
+      if (cursor > Integer.MAX_VALUE) {
+        throw new BadRequestException("invalid_cursor", "Invalid cursor");
+      }
+    }
+
     if (StringUtils.isNotBlank(keyword)) {
       keyword = keyword.trim();
       keywordService.updateKeywordCount(keyword);
@@ -128,7 +133,7 @@ public class GoodsController {
     Slice<Goods> slice;
     if (StringUtils.isNotEmpty(keyword)) {
       category = sort = null;
-      Date startCursor = (Strings.isBlank(cursor)) ? new Date() : new Date(Long.parseLong(cursor));
+      Date startCursor = (cursor == null) ? new Date() : new Date(cursor);
       slice = goodsRepository.findAllByKeyword(keyword, startCursor, of(0, count));
     } else {
       slice = goodsService.getGoodsList(count, cursor, sort, category);

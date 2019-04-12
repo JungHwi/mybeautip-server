@@ -1,18 +1,25 @@
 package com.jocoos.mybeautip.member.mention;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.notification.NotificationService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,70 +39,57 @@ public class MentionService {
     this.commentRepository = commentRepository;
   }
 
-  public void updatePostCommentWithMention(Comment postComment, List<MentionTag> mentionTags) {
+  public void updateCommentWithMention(Comment comment, List<MentionTag> mentionTags) {
     if (mentionTags == null || mentionTags.size() == 0) {
       return;
     }
-
-    String comment = postComment.getComment();
-    log.debug("post comment originals: {}", comment);
-
+    
+    // FIXME: Uncheck my username and username in following list
+    Map<String, Long> mentionTagMap = new HashMap<>();
     for (MentionTag tag : mentionTags) {
-      log.debug("comment: {}", comment);
+      mentionTagMap.put(tag.getUsername(), tag.getMemberId());
+    }
+    
+    Set<Member> notifyTargetMember = new HashSet<>();
 
-      List<String> mentions = findMentionTags(comment);
-      for (String mentioned : mentions) {
-        if (mentioned.equals(tag.getUsername())) {
-          // FIXME: Uncheck my username and username in following list
-
-          Optional<Member> member = memberRepository.findById(tag.getMemberId());
-          if (member.isPresent()) {
-            comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
-            postComment.setComment(comment);
-            notificationService.notifyAddCommentWithMention(postComment, member.get());
-            log.debug("mentioned comment: {}", comment);
+    String commentMessage = comment.getComment().trim();
+    log.debug("comment originals: {}", commentMessage);
+    StringBuilder sb = new StringBuilder();
+  
+    String target = commentMessage;
+    StringTokenizer tokenizer;
+    do {
+      tokenizer = new StringTokenizer(target);
+      if (tokenizer.hasMoreTokens()) {
+        String token = tokenizer.nextToken();
+        if (token.startsWith(MENTION_TAG)) {
+          String username = token.substring(MENTION_TAG.length());
+          if (mentionTagMap.containsKey(username)) {
+            Member member = memberRepository.findById(mentionTagMap.get(username)).orElse(null);
+            if (member != null) {
+              sb.append(MENTION_TAG).append(mentionTagMap.get(username)).append(" ");
+              notifyTargetMember.add(member);
+            } else {
+              sb.append(token).append(" ");
+            }
+          } else {
+            sb.append(token).append(" ");
           }
+        } else {
+          sb.append(token).append(" ");
         }
+        target = StringUtils.substringAfter(target, token);
       }
+    } while (target.length() > 0);
+  
+    for (Member member : notifyTargetMember) {
+      notificationService.notifyAddCommentWithMention(comment, member);
     }
+  
+    log.debug("comment with mention: {}", sb.toString().trim());
+    comment.setComment(sb.toString().trim());
 
-    log.debug("post comment with mention: {}", comment);
-    postComment.setComment(comment);
-
-    commentRepository.save(postComment);
-  }
-
-  public void updateVideoCommentWithMention(Comment videoComment, List<MentionTag> mentionTags) {
-    if (mentionTags == null || mentionTags.size() == 0) {
-      return;
-    }
-
-    String comment = videoComment.getComment();
-    log.debug("video comment originals: {}", comment);
-
-    for (MentionTag tag : mentionTags) {
-      log.debug("comment: {}", comment);
-
-      List<String> mentions = findMentionTags(comment);
-      for (String mentioned : mentions) {
-        if (mentioned.equals(tag.getUsername())) {
-          // FIXME: Uncheck my username and username in following list
-
-          Optional<Member> member = memberRepository.findById(tag.getMemberId());
-          if (member.isPresent()) {
-            comment = comment.replaceAll(createMentionTag(tag.getUsername()), createMentionTag(tag.getMemberId()));
-            videoComment.setComment(comment);
-            notificationService.notifyAddCommentWithMention(videoComment, member.get());
-            log.debug("mentioned comment: {}", comment);
-          }
-        }
-      }
-    }
-
-    log.debug("video comment with mention: {}", comment);
-    videoComment.setComment(comment);
-
-    commentRepository.save(videoComment);
+    commentRepository.save(comment);
   }
 
   private String createMentionTag(Object username) {

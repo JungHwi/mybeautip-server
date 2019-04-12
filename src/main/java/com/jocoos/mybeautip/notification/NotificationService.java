@@ -1,5 +1,17 @@
 package com.jocoos.mybeautip.notification;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
@@ -17,16 +29,6 @@ import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -306,18 +308,18 @@ public class NotificationService {
     return sb.append(username).toString();
   }
   
-  private List<String> findMentionTags(String comment) {
+  private Set<String> findMentionTags(String comment) {
     return Arrays.stream(comment.split(" "))
         .filter(c -> c.startsWith("@"))
         .map(c -> c.substring(1))
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
   }
   
   private MentionResult createMentionComment(String original) {
     MentionResult mentionResult = new MentionResult();
     
     String comment = original;
-    List<String> mentions = findMentionTags(original);
+    Set<String> mentions = findMentionTags(original);
     for (String memberId : mentions) {
       log.debug("member: {}", memberId);
       

@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.member.comment;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 
@@ -25,7 +25,7 @@ public class CommentInfo {
   private String commentRef;
   private Long likeId;
   private Integer likeCount;
-  private List<MentionTag> mentionInfo;
+  private Set<MentionTag> mentionInfo;
 
   public CommentInfo(Comment comment) {
     BeanUtils.copyProperties(comment, this);
@@ -38,7 +38,7 @@ public class CommentInfo {
     this.createdBy = createdBy;
   }
 
-  public CommentInfo(Comment comment, MemberInfo createdBy, List<MentionTag> mentionInfo) {
+  public CommentInfo(Comment comment, MemberInfo createdBy, Set<MentionTag> mentionInfo) {
     this(comment, createdBy);
     this.mentionInfo = mentionInfo;
   }

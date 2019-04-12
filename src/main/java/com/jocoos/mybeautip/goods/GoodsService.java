@@ -70,11 +70,11 @@ public class GoodsService {
     this.storeRepository = storeRepository;
   }
   
-  public Slice<Goods> getGoodsList(int count, String cursor, String sort, String category) {
+  public Slice<Goods> getGoodsList(int count, Long cursor, String sort, String category) {
     FILTER filter  = getRequestFilter(category, sort);
     log.debug("GetGoodsList filter by: " + filter.toString());
   
-    Date dateCursor = (Strings.isBlank(cursor)) ? new Date() : new Date(Long.parseLong(cursor));
+    Date dateCursor = (cursor == null) ? new Date() : new Date(cursor);
   
     Slice<Goods> slice;
     switch (filter) {
@@ -98,10 +98,10 @@ public class GoodsService {
     return slice;
   }
   
-  private Slice<Goods> getGoodsBySort(String sort, String cursor, int count) {
-    int descCursor = (Strings.isBlank(cursor)) ? Integer.MAX_VALUE : Integer.parseInt(cursor);
-    int ascCursor = (Strings.isBlank(cursor)) ? Integer.MIN_VALUE : Integer.parseInt(cursor);
-    
+  private Slice<Goods> getGoodsBySort(String sort, Long cursor, int count) {
+    int descCursor = (cursor == null) ? Integer.MAX_VALUE : cursor.intValue();
+    int ascCursor = (cursor == null) ? Integer.MIN_VALUE : cursor.intValue();
+
     Slice<Goods> slice;
     switch (sort) {
       case "like":
@@ -124,17 +124,17 @@ public class GoodsService {
         break;
       case "latest":
       default:
-        Date dateCursor = (Strings.isBlank(cursor)) ? new Date() : new Date(Long.parseLong(cursor));
+        Date dateCursor = (cursor == null) ? new Date() : new Date(cursor);
         slice = goodsRepository.getGoodsListOrderByCreatedAtDesc(dateCursor, of(0, count));
         break;
     }
     return slice;
   }
   
-  private Slice<Goods> getGoodsBySortAndCategory(String sort, String category, String cursor, int count) {
-    int descCursor = (Strings.isBlank(cursor)) ? Integer.MAX_VALUE : Integer.parseInt(cursor);
-    int ascCursor = (Strings.isBlank(cursor)) ? Integer.MIN_VALUE : Integer.parseInt(cursor);
-    
+  private Slice<Goods> getGoodsBySortAndCategory(String sort, String category, Long cursor, int count) {
+    int descCursor = (cursor == null) ? Integer.MAX_VALUE : cursor.intValue();
+    int ascCursor = (cursor == null) ? Integer.MIN_VALUE : cursor.intValue();
+
     Slice<Goods> slice;
     switch (sort) {
       case "like":
@@ -163,7 +163,7 @@ public class GoodsService {
         break;
       case "latest":
       default:
-        Date dateCursor = (Strings.isBlank(cursor)) ? new Date() : new Date(Long.parseLong(cursor));
+        Date dateCursor = (cursor == null) ? new Date() : new Date(cursor);
         slice = goodsRepository.getGoodsListCategoryAndOrderByCreatedAtDesc(
             generateSearchableCategory(category), dateCursor, of(0, count));
         break;
