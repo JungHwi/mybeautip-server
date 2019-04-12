@@ -184,7 +184,7 @@ public class GoodsController {
         case "latest":
         default:
           if (result.size() > 0) {
-            nextCursor = String.valueOf(result.get(result.size() - 1).getModifiedAt().getTime());
+            nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
           }
           break;
       }
