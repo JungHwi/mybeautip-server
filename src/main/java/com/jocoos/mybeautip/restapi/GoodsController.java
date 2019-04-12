@@ -74,6 +74,7 @@ public class GoodsController {
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String LIKE_NOT_FOUND = "like.not_found";
   
+  private static final String HASHTAG_SIGN = "#";
   private static final int MAX_REVIEWER_COUNT = 6;
   private static final List<String> validSort
       = Arrays.asList("like", "order", "hit", "review", "high-price", "low-price", "latest");
@@ -126,6 +127,9 @@ public class GoodsController {
 
     if (StringUtils.isNotBlank(keyword)) {
       keyword = keyword.trim();
+      if (keyword.startsWith(HASHTAG_SIGN)) {
+        keyword = keyword.substring(HASHTAG_SIGN.length());
+      }
       keywordService.updateKeywordCount(keyword);
       keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, memberService.currentMember());
     }
