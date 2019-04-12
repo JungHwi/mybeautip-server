@@ -40,7 +40,6 @@ public class AccountController {
   private static final String ACCOUNT_NOT_FOUND = "account.not_found";
   private static final String ACCOUNT_BANK_NOT_SUPPORTED = "account.not_supported_bank_code";
   private static final String ACCOUNT_INVALID_INFO = "account.invalid_info";
-  private static final String ACCOUNT_INVALID_BANK_CODE = "account.invalid_bank_code";
   
   private static final String BANK_CODE_ETC = "000";
   
@@ -132,10 +131,6 @@ public class AccountController {
     
     if (!bankCodeMap.containsKey(info.getBankCode())) {  // Not supported bank code
       throw new BadRequestException("not_supported_bank_code", messageService.getMessage(ACCOUNT_BANK_NOT_SUPPORTED, lang));
-    }
-  
-    if (!info.getBankName().equals(bankCodeMap.get(info.getBankCode()))) {  // BadRequest, bank code and name does not match
-      throw new BadRequestException("invalid_bank_code", messageService.getMessage(ACCOUNT_INVALID_BANK_CODE, lang));
     }
     
     ResponseEntity<VbankResponse> response = iamportService.validAccountInfo(info, lang);
