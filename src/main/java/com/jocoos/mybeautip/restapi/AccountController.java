@@ -133,6 +133,8 @@ public class AccountController {
       throw new BadRequestException("not_supported_bank_code", messageService.getMessage(ACCOUNT_BANK_NOT_SUPPORTED, lang));
     }
     
+    info.setBankDepositor(info.getBankDepositor().trim());
+    
     ResponseEntity<VbankResponse> response = iamportService.validAccountInfo(info, lang);
     if (response == null) {
       return false;
