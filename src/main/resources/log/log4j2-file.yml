@@ -13,7 +13,7 @@ Configutation:
             interval: 1
             modulate: true
         ThresholdFilter:
-          level: INFO
+          level: DEBUG
 
       - name: ERROR_FILE
         fileName: ./logs/error.log
@@ -29,14 +29,14 @@ Configutation:
 
   Loggers:
     Root:
-      level: info
+      level: debug
       AppenderRef:
         - ref: FILE
         - ref: ERROR_FILE
 
     Logger:
       - name: com.jocoos.mybeautip
-        level: info
+        level: debug
       - name: jdbc
         level: info
       - name: org.springframework.web
