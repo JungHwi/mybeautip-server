@@ -180,8 +180,10 @@ public class RecommendationController {
     Date now = new Date();
     List<RecommendedMotdBaseInfo> result = videos.stream()
        .map(base -> {
-         Slice<MotdRecommendation> motds = motdRecommendationRepository.findByBaseIdAndStartedAtBeforeAndEndedAtAfterAndVideoDeletedAtIsNull(base.getId(), now, now,
-            PageRequest.of(0, base.getMotdCount(), Sort.Direction.DESC, "seq", "createdAt"));
+         Slice<MotdRecommendation> motds = motdRecommendationRepository
+             .findByBaseIdAndStartedAtBeforeAndEndedAtAfterAndVideoVisibilityAndVideoDeletedAtIsNull(
+                 base.getId(), now, now, "PUBLIC",
+                 PageRequest.of(0, base.getMotdCount(), Sort.Direction.DESC, "seq", "createdAt"));
          return new RecommendedMotdBaseInfo(base, createMotdList(motds));
        })
        .filter(i -> i.getExposedCount() > 0)
