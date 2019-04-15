@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -130,8 +131,13 @@ public class GoodsController {
       if (keyword.startsWith(HASHTAG_SIGN)) {
         keyword = keyword.substring(HASHTAG_SIGN.length());
       }
-      keywordService.updateKeywordCount(keyword);
-      keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, memberService.currentMember());
+      
+      try {
+        keywordService.updateKeywordCount(keyword);
+        keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, memberService.currentMember());
+      } catch (ConcurrencyFailureException e) { // Ignore
+        log.warn("getGoods throws ConcurrencyFailureException: " + keyword);
+      }
     }
     
     Slice<Goods> slice;

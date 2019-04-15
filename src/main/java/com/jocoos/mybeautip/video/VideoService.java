@@ -699,13 +699,9 @@ public class VideoService {
     commentRepository.updateLikeCount(liked.getComment().getId(), -1);
   }
   
-  @Transactional
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void increaseHeart(Video video, int count) {
-    try {
-      videoRepository.updateHeartCount(video.getId(), count);
-    } catch (ConcurrencyFailureException e) {
-      // ignore ConcurrencyFailureException
-    }
+    videoRepository.updateHeartCount(video.getId(), count);
   }
   
   @Async

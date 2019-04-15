@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -143,8 +144,12 @@ public class PostController {
   
     if (StringUtils.isNotBlank(keyword)) {
       keyword = keyword.trim();
-      keywordService.updateKeywordCount(keyword);
-      keywordService.logHistory(keyword, KeywordService.KeywordCategory.POST, me);
+      try {
+        keywordService.updateKeywordCount(keyword);
+        keywordService.logHistory(keyword, KeywordService.KeywordCategory.POST, me);
+      } catch (CannotAcquireLockException e) { // Ignore
+        log.warn("getPosts throws ConcurrencyFailureException: " + keyword);
+      }
     }
 
     String nextCursor = null;
