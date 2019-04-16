@@ -1,5 +1,7 @@
 server:
   port: ${port:8080}
+  http2:
+    enabled: true
 
 spring:
   data:
@@ -124,8 +126,8 @@ mybeautip:
 cloud:
   aws:
     credentials:
-      accessKey: AKIAIV3IWTDTFUA4GYSQ
-      secretKey: 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
+      accessKey: AKIA3JYLF6P2AOO7IAKN
+      secretKey: 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
     region:
       static: ap-northeast-2
 

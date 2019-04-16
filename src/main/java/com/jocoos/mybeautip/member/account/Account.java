@@ -21,9 +21,6 @@ public class Account {
   private Long memberId;
 
   @Column
-  private String email;
-
-  @Column
   private String bankName;
   
   @Transient

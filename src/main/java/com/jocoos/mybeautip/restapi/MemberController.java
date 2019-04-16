@@ -12,6 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -215,8 +216,12 @@ public class MemberController {
   
     if (StringUtils.isNotBlank(keyword)) {
       keyword = keyword.trim();
-      keywordService.updateKeywordCount(keyword);
-      keywordService.logHistory(keyword, KeywordService.KeywordCategory.MEMBER, memberService.currentMember());
+      try {
+        keywordService.updateKeywordCount(keyword);
+        keywordService.logHistory(keyword, KeywordService.KeywordCategory.MEMBER, memberService.currentMember());
+      } catch (ConcurrencyFailureException e) { // Ignore
+        log.warn("getMembers throws ConcurrencyFailureException: " + keyword);
+      }
     }
 
     return new CursorResponse.Builder<>("/api/1/members", members)

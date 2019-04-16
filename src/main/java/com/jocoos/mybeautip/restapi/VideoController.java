@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -206,8 +207,13 @@ public class VideoController {
 
     if (StringUtils.isNotBlank(keyword)) {
       keyword = keyword.trim();
-      keywordService.updateKeywordCount(keyword);
-      keywordService.logHistory(keyword, KeywordService.KeywordCategory.VIDEO, memberService.currentMember());
+      
+      try {
+        keywordService.updateKeywordCount(keyword);
+        keywordService.logHistory(keyword, KeywordService.KeywordCategory.VIDEO, memberService.currentMember());
+      } catch (ConcurrencyFailureException e) { // Ignore
+        log.warn("getVideos throws ConcurrencyFailureException: " + keyword);
+      }
     }
 
     String nextCursor = null;
@@ -466,14 +472,18 @@ public class VideoController {
                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+    Member me = memberService.currentMember();
     
-    if ("LIVE".equalsIgnoreCase(video.getState())) {
-      Member me = memberService.currentMember();
-      if (me == null) { // Guest
-        video = videoService.setWatcherWithGuest(video, memberService.getGuestUserName());
-      } else {
-        video = videoService.setWatcher(video, me);
+    try {
+      if ("LIVE".equalsIgnoreCase(video.getState())) {
+        if (me == null) { // Guest
+          video = videoService.setWatcherWithGuest(video, memberService.getGuestUserName());
+        } else {
+          video = videoService.setWatcher(video, me);
+        }
       }
+    } catch (ConcurrencyFailureException e) { // Ignore
+      log.warn("joinWatch throws ConcurrencyFailureException");
     }
     
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
@@ -485,14 +495,18 @@ public class VideoController {
     
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+    Member me = memberService.currentMember();
   
-    if ("LIVE".equalsIgnoreCase(video.getState())) {
-      Member me = memberService.currentMember();
-      if (me == null) {
-        video = videoService.updateWatcherWithGuest(video, memberService.getGuestUserName());
-      } else {
-        video = videoService.updateWatcher(video, me);
+    try {
+      if ("LIVE".equalsIgnoreCase(video.getState())) {
+        if (me == null) {
+          video = videoService.updateWatcherWithGuest(video, memberService.getGuestUserName());
+        } else {
+          video = videoService.updateWatcher(video, me);
+        }
       }
+    } catch (ConcurrencyFailureException e) { // Ignore
+      log.warn("keepWatch throws ConcurrencyFailureException");
     }
     
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
@@ -506,10 +520,14 @@ public class VideoController {
 
     Member me = memberService.currentMember();
 
-    if (me == null) { // Guest
-      videoService.removeGuestWatcher(video, memberService.getGuestUserName());
-    } else {
-      videoService.removeWatcher(video, me);
+    try {
+      if (me == null) { // Guest
+        videoService.removeGuestWatcher(video, memberService.getGuestUserName());
+      } else {
+        videoService.removeWatcher(video, me);
+      }
+    } catch (ConcurrencyFailureException e) { // Ignore
+      log.warn("leaveWatch throws ConcurrencyFailureException");
     }
 
     return new ResponseEntity<>(HttpStatus.OK);
@@ -631,8 +649,12 @@ public class VideoController {
 
     Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
       .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-    videoService.increaseHeart(video, count);
-    video.setHeartCount(video.getHeartCount() + count);
+    try {
+      videoService.increaseHeart(video, count);
+      video.setHeartCount(video.getHeartCount() + count);
+    } catch (ConcurrencyFailureException e) { // Ignore
+      log.warn("heartVideo throws ConcurrencyFailureException");
+    }
 
     return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
   }
