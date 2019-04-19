@@ -30,7 +30,7 @@ public class TagService {
   public static final int TAG_COMMENT = 5;
   
   private static final String startSign = "#";
-  private static final String regex = "^[\\p{L}\\p{N}_]+";  // letters, numbers, underscore(_)
+  private static final String regex = "[#]\\w\\S*\\b";  // letters, numbers, underscore(_)
   private static final int MAX_TAG_LENGTH = 25;
   
   private final TagRepository tagRepository;
@@ -157,11 +157,6 @@ public class TagService {
     
     while (tokenizer.hasMoreTokens()) {
       String token = tokenizer.nextToken();
-      if (!token.startsWith(startSign) || StringUtils.countMatches(token, startSign) > 1) {
-        continue;
-      }
-      token = StringUtils.substringAfter(token, startSign);
-      
       Pattern pattern = Pattern.compile(regex);
       Matcher matcher = pattern.matcher(token);
       
@@ -171,11 +166,9 @@ public class TagService {
           throw new BadRequestException("invalid_tag", "Valid tag length is between 1 to 25: " + tag);
         }
         
-        if (StringUtils.removeAll(tag, "_").length() > 0) {
-          offset = offset + temp.indexOf(startSign + tag) + token.length();
-          temp = text.substring(offset);
-          tags.add(tag);
-        }
+        offset = offset + temp.indexOf(tag) + token.length();
+        temp = text.substring(offset);
+        tags.add(tag.substring(startSign.length()));
       }
     }
     
