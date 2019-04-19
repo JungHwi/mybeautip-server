@@ -162,12 +162,18 @@ public class MemberService {
 
     if (me.isVisible()) { // Already registered member
       if (!me.getUsername().equals(username)) {
-        if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
+        if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
+          throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+        }
+        if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
           throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
         }
       }
     } else {
-      if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
+      if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
+        throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+      }
+      if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
         throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
       }
     }
