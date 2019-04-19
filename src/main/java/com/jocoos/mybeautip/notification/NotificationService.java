@@ -304,8 +304,7 @@ public class NotificationService {
   }
   
   private String createMentionTag(Object username) {
-    StringBuilder sb = new StringBuilder("@");
-    return sb.append(username).toString();
+    return "@" + username + " ";
   }
   
   private Set<String> findMentionTags(String comment) {
@@ -318,7 +317,7 @@ public class NotificationService {
   private MentionResult createMentionComment(String original) {
     MentionResult mentionResult = new MentionResult();
     
-    String comment = original;
+    String comment = original + " ";
     Set<String> mentions = findMentionTags(original);
     for (String memberId : mentions) {
       log.debug("member: {}", memberId);
@@ -331,6 +330,7 @@ public class NotificationService {
           comment = comment.replaceAll(createMentionTag(m.getId()), createMentionTag(m.getUsername()));
         }
       }
+      comment = comment.trim();
     }
     
     log.debug("original comment: {}", comment);
