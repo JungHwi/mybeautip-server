@@ -10,6 +10,8 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
   List<Address> findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(Long memberId);
 
   Long countByCreatedByIdAndDeletedAtIsNull(Long memberId);
+  
+  int countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(Long memberId);
 
   Optional<Address> findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(Long memberId);
   
