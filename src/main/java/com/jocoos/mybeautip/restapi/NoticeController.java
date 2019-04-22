@@ -46,6 +46,8 @@ public class NoticeController {
                                                    @RequestParam("app_version") String appVersion,
                                                    @RequestParam(defaultValue = "ko") String lang,
                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String language) {
+    deviceOs = deviceOs.trim();
+    
     List<NoticeInfo> notices = noticeService.findByOs(deviceOs, appVersion)
        .stream().map(input -> new NoticeInfo(input.getType(),
             messageService.getMessage(input.getMessage(), language)))
