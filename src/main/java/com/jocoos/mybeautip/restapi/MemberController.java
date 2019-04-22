@@ -204,6 +204,10 @@ public class MemberController {
                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     List<MemberInfo> members = Lists.newArrayList();
     String nextCursor = null;
+    
+    if (StringUtils.isNotBlank(keyword)) {
+      keyword = keyword.trim();
+    }
 
     if (keyword == null || (!StringUtils.containsWhitespace(keyword) && StringUtils.isNotEmpty(keyword))) {
       Slice<Member> list = findMembers(keyword, cursor, count);

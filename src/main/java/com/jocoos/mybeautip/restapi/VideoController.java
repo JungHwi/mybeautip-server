@@ -196,6 +196,8 @@ public class VideoController {
   public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
                                      @RequestParam(required = false) String cursor,
                                      @RequestParam String keyword) {
+    keyword = keyword.trim();
+    
     Slice<Video> list;
     if (StringUtils.isNotEmpty(keyword) && keyword.startsWith(HASHTAG_SIGN)) {
       list = videoService.findVideosWithTag(keyword, cursor, count);
