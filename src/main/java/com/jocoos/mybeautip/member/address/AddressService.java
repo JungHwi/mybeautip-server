@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.member.address;
 
-import java.util.Date;
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -86,13 +85,21 @@ public class AddressService {
 
   @Transactional
   public void delete(Long id, String lang) {
-    Optional<Address> optional = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId());
-    if (optional.isPresent()) {
-      Address address = optional.get();
-      address.setDeletedAt(new Date());
-      addressRepository.save(address);
-    } else {
+    Address address = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId()).orElse(null);
+    if (address == null) {
       throw new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang));
+    }
+    boolean deletedAddressIsBase = address.getBase();
+    addressRepository.delete(address);
+    
+    if (deletedAddressIsBase) {
+      List<Address> addressList = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(id);
+      long baseCount = addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(id);
+      if (baseCount == 0 && addressList.size() > 0) {
+        Address newBaseAddress = addressList.get(0);
+        newBaseAddress.setBase(true);
+        addressRepository.save(newBaseAddress);
+      }
     }
   }
   
