@@ -90,8 +90,7 @@ public class AddressController {
   public ResponseEntity<?> deleteAddress(@PathVariable Long id,
                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("id to delete: {}", id);
-    addressService.delete(id, lang);
-
+    addressService.delete(id, lang, memberService.currentMemberId());
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

@@ -85,19 +85,17 @@ public class AddressService {
   }
 
   @Transactional
-  public void delete(Long id, String lang) {
-    Address address = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId()).orElse(null);
-    if (address == null) {
-      throw new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang));
-    }
-    boolean deletedAddressIsBase = address.getBase();
-    address.setDeletedAt(new Date());
-    addressRepository.save(address);
-    
-    if (deletedAddressIsBase) {
-      List<Address> addressList = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(id);
-      long baseCount = addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(id);
-      if (baseCount == 0 && addressList.size() > 0) {
+  public void delete(Long id, String lang, Long memberId) {
+    addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId())
+        .map(address -> {
+          address.setDeletedAt(new Date());
+          return addressRepository.save(address);
+        }).orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
+  
+    long baseCount = addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberId);
+    if (baseCount == 0) {
+      List<Address> addressList = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(memberId);
+      if (addressList.size() > 0) {
         Address newBaseAddress = addressList.get(0);
         newBaseAddress.setBase(true);
         addressRepository.save(newBaseAddress);
