@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member.address;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
@@ -90,7 +91,8 @@ public class AddressService {
       throw new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang));
     }
     boolean deletedAddressIsBase = address.getBase();
-    addressRepository.delete(address);
+    address.setDeletedAt(new Date());
+    addressRepository.save(address);
     
     if (deletedAddressIsBase) {
       List<Address> addressList = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(id);
