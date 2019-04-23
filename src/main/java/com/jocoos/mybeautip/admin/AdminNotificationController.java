@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.admin;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,7 +173,8 @@ public class AdminNotificationController {
         for (Following follower : followers) {
           map.remove(follower.getMemberMe());
         }
-        targetDevices = (List<Device>) map.values();
+        map.remove(video.getMember());
+        targetDevices = new ArrayList<>(map.values());
       }
     }
     
@@ -180,6 +182,7 @@ public class AdminNotificationController {
       devices = targetDevices;
     }
 
+    log.info("instant push send start, count: {}", devices.size());
     deviceService.pushAll(devices, request);
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }
