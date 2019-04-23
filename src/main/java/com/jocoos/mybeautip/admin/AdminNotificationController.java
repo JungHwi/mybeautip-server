@@ -3,8 +3,9 @@ package com.jocoos.mybeautip.admin;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,8 +33,11 @@ import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.notification.event.PushMessageRepository;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.restapi.DeviceController;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @RestController
@@ -43,16 +47,19 @@ public class AdminNotificationController {
   private final DeviceService deviceService;
   private final MemberRepository memberRepository;
   private final DeviceRepository deviceRepository;
-  private final PushMessageRepository pushMessageRepository;
+  private final VideoRepository videoRepository;
+  private final FollowingRepository followingRepository;
 
   public AdminNotificationController(DeviceService deviceService,
                                      MemberRepository memberRepository,
                                      DeviceRepository deviceRepository,
-                                     PushMessageRepository pushMessageRepository) {
+                                     VideoRepository videoRepository,
+                                     FollowingRepository followingRepository) {
     this.deviceService = deviceService;
     this.memberRepository = memberRepository;
     this.deviceRepository = deviceRepository;
-    this.pushMessageRepository = pushMessageRepository;
+    this.videoRepository = videoRepository;
+    this.followingRepository = followingRepository;
   }
 
 
@@ -145,6 +152,32 @@ public class AdminNotificationController {
       devices = deviceRepository.findByCreatedByIdAndPushableAndValidAndCreatedByPushable(memberId, true, true, true);
     } else {
       devices = deviceService.getDevices(request.getPlatform());
+    }
+  
+    // Remove follower devices to avoid duplicated notification when resource_type is video
+    List<Device> targetDevices = null;
+    if ("video".equalsIgnoreCase(request.getResourceType())) {
+      Video video = videoRepository.findByIdAndDeletedAtIsNull(Long.valueOf(request.getResourceIds())).orElse(null);
+  
+      List<Following> followers = null;
+      if (video != null) {
+         followers = followingRepository.findByMemberYouId(video.getMember().getId());
+      }
+      
+      if (followers != null) {
+        Map<Member, Device> map = new HashMap<>();
+        for (Device device : devices) {
+          map.put(device.getCreatedBy(), device);
+        }
+        for (Following follower : followers) {
+          map.remove(follower.getMemberMe());
+        }
+        targetDevices = (List<Device>) map.values();
+      }
+    }
+    
+    if (targetDevices != null) {
+      devices = targetDevices;
     }
 
     deviceService.pushAll(devices, request);
