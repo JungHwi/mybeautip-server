@@ -616,7 +616,7 @@ public class MemberController {
   }
 
   private CursorResponse createPostLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<PostLike> postLikes;
     List<PostController.PostLikeInfo> result = Lists.newArrayList();
 
@@ -646,7 +646,7 @@ public class MemberController {
   }
 
   private CursorResponse createGoodsLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<GoodsLike> goodsLikes;
     List<GoodsInfo> result = Lists.newArrayList();
 
@@ -673,7 +673,7 @@ public class MemberController {
   }
 
   private CursorResponse createStoreLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<StoreLike> storeLikes;
     List<StoreController.StoreInfo> result = Lists.newArrayList();
 
@@ -704,7 +704,7 @@ public class MemberController {
   }
 
   private CursorResponse createVideoLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<VideoLike> videoLikes;
     List<VideoController.VideoInfo> result = Lists.newArrayList();
 

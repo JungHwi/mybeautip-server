@@ -117,9 +117,9 @@ public class MemberShoppingController {
 
   @GetMapping("/points")
   public CursorResponse getPoints(@RequestParam(defaultValue = "50") int count,
-                                                   @RequestParam(required = false) Long cursor) {
+                                  @RequestParam(required = false) Long cursor) {
     Member me = memberService.currentMember();
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
 
     Date createdAt;
     if (cursor != null) {
@@ -128,7 +128,7 @@ public class MemberShoppingController {
       createdAt = new Date();
     }
 
-    Slice<MemberPoint> points = memberPointRepository.findByMemberAndCreatedAtBefore(me, createdAt, page);
+    Slice<MemberPoint> points = memberPointRepository.findByMemberAndCreatedAtBefore(me, createdAt, pageable);
     List<PointDetailInfo> details = Lists.newArrayList();
 
     if (points != null) {
