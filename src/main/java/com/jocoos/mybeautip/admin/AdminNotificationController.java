@@ -155,34 +155,8 @@ public class AdminNotificationController {
       devices = deviceService.getDevices(request.getPlatform());
     }
   
-    // Remove follower devices to avoid duplicated notification when resource_type is video
-    List<Device> targetDevices = null;
-    if ("video".equalsIgnoreCase(request.getResourceType())) {
-      Video video = videoRepository.findByIdAndDeletedAtIsNull(Long.valueOf(request.getResourceIds())).orElse(null);
-  
-      List<Following> followers = null;
-      if (video != null) {
-         followers = followingRepository.findByMemberYouId(video.getMember().getId());
-      }
-      
-      if (followers != null) {
-        Map<Member, Device> map = new HashMap<>();
-        for (Device device : devices) {
-          map.put(device.getCreatedBy(), device);
-        }
-        for (Following follower : followers) {
-          map.remove(follower.getMemberMe());
-        }
-        map.remove(video.getMember());
-        targetDevices = new ArrayList<>(map.values());
-      }
-    }
-    
-    if (targetDevices != null) {
-      devices = targetDevices;
-    }
-
     log.info("instant push send start, count: {}", devices.size());
+    
     deviceService.pushAll(devices, request);
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }
