@@ -235,7 +235,16 @@ public class MemberService {
     }
   
     member.setVisible(true);
-    return memberRepository.save(member);
+    Member finalMember = memberRepository.save(member);
+    
+    // Follow Admin member as default
+    memberRepository.findByUsernameAndLinkAndDeletedAtIsNull("마이뷰팁", 0)
+        .ifPresent(adminMember -> {
+          followMember(finalMember, adminMember);
+          finalMember.setFollowingCount(1); // for response view
+        });
+    
+    return finalMember;
   }
   
   @Transactional

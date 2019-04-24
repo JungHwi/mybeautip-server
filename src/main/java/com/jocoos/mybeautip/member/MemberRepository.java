@@ -16,6 +16,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Optional<Member> findByIdAndDeletedAtIsNull(Long id);
   
   Optional<Member> findByUsernameAndDeletedAtIsNullAndVisibleIsTrue(String username);
+  
+  Optional<Member> findByUsernameAndLinkAndDeletedAtIsNull(String username, int link);
 
   Slice<Member> findByDeletedAtIsNullAndVisibleIsTrue(Pageable pageable);
 
