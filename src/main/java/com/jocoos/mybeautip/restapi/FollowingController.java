@@ -130,7 +130,7 @@ public class FollowingController {
     Date startCursor = (Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<Following> slice = followingRepository.findByCreatedAtBeforeAndMemberMeId(startCursor, me, pageable);
 
     List<MemberInfo> result = new ArrayList<>();
@@ -142,7 +142,7 @@ public class FollowingController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      nextCursor = String.valueOf(slice.getContent().get(slice.getContent().size() - 1).getCreatedAt().getTime());
     }
     return new CursorResponse.Builder<>(requestUri, result)
       .withCount(count)
@@ -153,7 +153,7 @@ public class FollowingController {
     Date startCursor = (Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<Following> slice = followingRepository.findByCreatedAtBeforeAndMemberYouId(startCursor, you, pageable);
 
     List<MemberInfo> result = new ArrayList<>();
@@ -165,7 +165,7 @@ public class FollowingController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      nextCursor = String.valueOf(slice.getContent().get(slice.getContent().size() - 1).getCreatedAt().getTime());
     }
     return new CursorResponse.Builder<>(requestUri, result)
       .withCount(count)
