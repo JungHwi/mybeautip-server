@@ -28,20 +28,20 @@ public class TagService {
   public static final int TAG_POST = 3;
   public static final int TAG_BANNER = 4;
   public static final int TAG_COMMENT = 5;
-  
+
   private static final String startSign = "#";
   private static final String regex = "^[\\p{L}\\p{N}_]+";  // letters, numbers, underscore(_)
   private static final int MAX_TAG_LENGTH = 25;
-  
+
   private final TagRepository tagRepository;
   private final TagHistoryRepository tagHistoryRepository;
-  
+
   public TagService(TagRepository tagRepository,
                     TagHistoryRepository tagHistoryRepository) {
     this.tagRepository = tagRepository;
     this.tagHistoryRepository = tagHistoryRepository;
   }
-  
+
   // Save tags without increasing refCount
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void touchRefCount(String text) {
@@ -57,7 +57,7 @@ public class TagService {
       }
     }
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void increaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
@@ -70,7 +70,7 @@ public class TagService {
       }
     }
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void decreaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
@@ -79,20 +79,20 @@ public class TagService {
           .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
     }
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void updateRefCount(String oldText, String newText) {
     List<String> oldTagNames = parseHashTag(oldText);
     List<String> newTagNames = parseHashTag(newText);
-  
+
     List<String> removeTagNames = (List<String>) CollectionUtils.removeAll(oldTagNames, newTagNames);
     List<String> addTagNames = (List<String>) CollectionUtils.removeAll(newTagNames, oldTagNames);
-  
+
     for (String name : removeTagNames) {
       tagRepository.findByName(name)
           .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
     }
-  
+
     for (String name : addTagNames) {
       Optional<Tag> optional = tagRepository.findByName(name);
       if (optional.isPresent()) {
@@ -102,7 +102,7 @@ public class TagService {
       }
     }
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void addHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
@@ -111,7 +111,7 @@ public class TagService {
           .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me))));
     }
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
@@ -121,56 +121,56 @@ public class TagService {
               .ifPresent(tagHistoryRepository::delete));
     }
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeAllHistory(Member me) {
     tagHistoryRepository.findByCreatedBy(me).forEach(tagHistoryRepository::delete);
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void updateHistory(String oldText, String newText, int category, long resourceId, Member me) {
     List<String> oldTagNames = parseHashTag(oldText);
     List<String> newTagNames = parseHashTag(newText);
-    
+
     List<String> removeTagNames = (List<String>) CollectionUtils.removeAll(oldTagNames, newTagNames);
     List<String> addTagNames = (List<String>) CollectionUtils.removeAll(newTagNames, oldTagNames);
-  
+
     for (String name : removeTagNames) {
       tagRepository.findByName(name)
           .ifPresent(t -> tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(t, category, resourceId, me)
               .ifPresent(tagHistoryRepository::delete));
     }
-  
+
     for (String name : addTagNames) {
       tagRepository.findByName(name).ifPresent(tag -> tagHistoryRepository.findByTagAndCategoryAndResourceIdAndCreatedBy(tag, category, resourceId, me)
           .orElseGet(() -> tagHistoryRepository.save(new TagHistory(tag, category, resourceId, me))));
     }
   }
-  
+
   private List<String> parseHashTag(String text) {
     List<String> tags = new ArrayList<>();
     String delimiters = " \n\r\t"; // space, new line, tab
     StringTokenizer tokenizer = new StringTokenizer(text, delimiters);
-    
+
     int offset = 0;
     String temp = text;
-    
+
     while (tokenizer.hasMoreTokens()) {
       String token = tokenizer.nextToken();
       if (!token.startsWith(startSign) || StringUtils.countMatches(token, startSign) > 1) {
         continue;
       }
       token = StringUtils.substringAfter(token, startSign);
-      
+
       Pattern pattern = Pattern.compile(regex);
       Matcher matcher = pattern.matcher(token);
-      
+
       if (matcher.find()) {
         String tag = matcher.group();
         if (tag.length() > MAX_TAG_LENGTH) {
           throw new BadRequestException("invalid_tag", "Valid tag length is between 1 to 25: " + tag);
         }
-        
+
         if (StringUtils.removeAll(tag, "_").length() > 0) {
           offset = offset + temp.indexOf(startSign + tag) + token.length();
           temp = text.substring(offset);
@@ -178,7 +178,7 @@ public class TagService {
         }
       }
     }
-    
+
     List<String> uniqueTagNames = new ArrayList<>();
     for (String name : tags) {
       if (!uniqueTagNames.contains(name)) {

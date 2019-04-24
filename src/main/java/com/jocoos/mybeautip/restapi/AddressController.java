@@ -66,25 +66,8 @@ public class AddressController {
     if (addressRepository.countByCreatedByIdAndDeletedAtIsNull(memberService.currentMemberId()) >= 10) {
       throw new BadRequestException("too_many_addresses", messageService.getMessage(ADDRESS_TOO_MANY_ADDRESS, lang));
     }
-
-    if (request.getBase() != null && request.getBase()) {
-      addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
-        .ifPresent(prevBaseAddress -> {
-          prevBaseAddress.setBase(false);
-          addressRepository.save(prevBaseAddress);
-        });
-    }
-
-    Address address = new Address();
-    log.debug("CreateAddressRequest: {}", request);
-
-    BeanUtils.copyProperties(request, address);
-    if (request.getBase() == null) {
-      address.setBase(false);
-    }
-    log.debug("address: {}", address);
-
-    return new ResponseEntity<>(new AddressInfo(addressService.insert(address)), HttpStatus.OK);
+    
+    return new ResponseEntity<>(new AddressInfo(addressService.create(request, memberService.currentMember())), HttpStatus.OK);
   }
 
   @PatchMapping("/{id:.+}")
@@ -107,8 +90,7 @@ public class AddressController {
   public ResponseEntity<?> deleteAddress(@PathVariable Long id,
                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("id to delete: {}", id);
-    addressService.delete(id, lang);
-
+    addressService.delete(id, lang, memberService.currentMemberId());
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

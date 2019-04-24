@@ -16,6 +16,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Optional<Member> findByIdAndDeletedAtIsNull(Long id);
   
   Optional<Member> findByUsernameAndDeletedAtIsNullAndVisibleIsTrue(String username);
+  
+  Optional<Member> findByUsernameAndLinkAndDeletedAtIsNull(String username, int link);
 
   Slice<Member> findByDeletedAtIsNullAndVisibleIsTrue(Pageable pageable);
 
@@ -37,7 +39,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   @Query("update Member m set m.reportCount = m.reportCount + ?2, m.modifiedAt = now() where m.id = ?1")
   void updateReportCount(Long id, Integer count);
 
-  int countByUsernameAndDeletedAtIsNull(String username);
+  int countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(String username);
+  
+  int countByUsernameAndLinkAndDeletedAtIsNull(String username, int link);
 
   @Modifying
   @Query("update Member m set m.revenue = m.revenue + ?2, m.modifiedAt = now() where m.id = ?1")

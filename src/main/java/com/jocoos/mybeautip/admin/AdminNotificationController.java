@@ -3,8 +3,10 @@ package com.jocoos.mybeautip.admin;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,8 +34,11 @@ import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.notification.event.PushMessageRepository;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.restapi.DeviceController;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoRepository;
 
 @Slf4j
 @RestController
@@ -43,16 +48,19 @@ public class AdminNotificationController {
   private final DeviceService deviceService;
   private final MemberRepository memberRepository;
   private final DeviceRepository deviceRepository;
-  private final PushMessageRepository pushMessageRepository;
+  private final VideoRepository videoRepository;
+  private final FollowingRepository followingRepository;
 
   public AdminNotificationController(DeviceService deviceService,
                                      MemberRepository memberRepository,
                                      DeviceRepository deviceRepository,
-                                     PushMessageRepository pushMessageRepository) {
+                                     VideoRepository videoRepository,
+                                     FollowingRepository followingRepository) {
     this.deviceService = deviceService;
     this.memberRepository = memberRepository;
     this.deviceRepository = deviceRepository;
-    this.pushMessageRepository = pushMessageRepository;
+    this.videoRepository = videoRepository;
+    this.followingRepository = followingRepository;
   }
 
 
@@ -146,7 +154,9 @@ public class AdminNotificationController {
     } else {
       devices = deviceService.getDevices(request.getPlatform());
     }
-
+  
+    log.info("instant push send start, count: {}", devices.size());
+    
     deviceService.pushAll(devices, request);
     return new ResponseEntity(HttpStatus.NO_CONTENT);
   }

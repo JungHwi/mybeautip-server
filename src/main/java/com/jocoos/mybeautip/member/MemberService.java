@@ -162,12 +162,18 @@ public class MemberService {
 
     if (me.isVisible()) { // Already registered member
       if (!me.getUsername().equals(username)) {
-        if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
+        if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
+          throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+        }
+        if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
           throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
         }
       }
     } else {
-      if (memberRepository.countByUsernameAndDeletedAtIsNull(username) > 0) {
+      if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
+        throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+      }
+      if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
         throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
       }
     }
@@ -202,6 +208,8 @@ public class MemberService {
   
   @Transactional
   public Member updateMember(MemberController.UpdateMemberRequest request, Member member) {
+    boolean isFirstUpdate = !member.isVisible();
+    
     if (request.getUsername() != null) {
       member.setUsername(request.getUsername());
     }
@@ -229,7 +237,18 @@ public class MemberService {
     }
   
     member.setVisible(true);
-    return memberRepository.save(member);
+    Member finalMember = memberRepository.save(member);
+    
+    if (isFirstUpdate) { // when first called
+      // Follow Admin member as default
+      memberRepository.findByUsernameAndLinkAndDeletedAtIsNull("마이뷰팁", 0)
+          .ifPresent(adminMember -> {
+            followMember(finalMember, adminMember);
+            finalMember.setFollowingCount(1); // for response view
+          });
+    }
+    
+    return finalMember;
   }
   
   @Transactional

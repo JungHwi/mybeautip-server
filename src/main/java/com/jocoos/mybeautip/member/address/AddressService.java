@@ -1,21 +1,24 @@
 package com.jocoos.mybeautip.member.address;
 
 import java.util.Date;
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.DeliveryChargeArea;
 import com.jocoos.mybeautip.goods.DeliveryChargeAreaRepository;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.AddressController;
 
+@Slf4j
 @Service
 public class AddressService {
 
@@ -35,38 +38,68 @@ public class AddressService {
     this.messageService = messageService;
     this.deliveryChargeAreaRepository = deliveryChargeAreaRepository;
   }
-
-  public Address insert(Address address) {
+  
+  @Transactional
+  public Address create(AddressController.CreateAddressRequest request, Member member) {
+    if (request.getBase() != null && request.getBase()) {
+      addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId())
+          .ifPresent(prevBaseAddress -> {
+            prevBaseAddress.setBase(false);
+            addressRepository.save(prevBaseAddress);
+          });
+    }
+  
+    Address address = new Address();
+    log.debug("CreateAddressRequest: {}", request);
+  
+    BeanUtils.copyProperties(request, address);
+    if (request.getBase() == null) {
+      address.setBase(false);
+    }
+    
+    if (addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId()) == 0) {
+      address.setBase(true);
+    }
+    
     address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
+    log.debug("address: {}", address);
     return addressRepository.save(address);
   }
 
   @Transactional
   public Address update(Long id, AddressController.UpdateAddressRequest update, String lang) {
-    Optional<Address> optional = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId());
-    if (optional.isPresent()) {
-      Address address = optional.get();
-      boolean originalBase = address.getBase();
-      BeanUtils.copyProperties(update, address);
-      if (update.getBase() == null) {
-        address.setBase(originalBase);
-      }
-      address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
-      return addressRepository.save(address);
-    } else {
-      throw new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang));
-    }
+    return addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId())
+        .map(address -> {
+          boolean originalBase = address.getBase();
+          BeanUtils.copyProperties(update, address);
+          if (update.getBase() == null) {
+            address.setBase(originalBase);
+          }
+          if (addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(id) == 0) {
+            address.setBase(true);
+          }
+          address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
+          return addressRepository.save(address);
+        })
+        .orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
   }
 
   @Transactional
-  public void delete(Long id, String lang) {
-    Optional<Address> optional = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId());
-    if (optional.isPresent()) {
-      Address address = optional.get();
-      address.setDeletedAt(new Date());
-      addressRepository.save(address);
-    } else {
-      throw new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang));
+  public void delete(Long id, String lang, Long memberId) {
+    addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId())
+        .map(address -> {
+          address.setDeletedAt(new Date());
+          return addressRepository.save(address);
+        }).orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
+  
+    long baseCount = addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberId);
+    if (baseCount == 0) {
+      List<Address> addressList = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(memberId);
+      if (addressList.size() > 0) {
+        Address newBaseAddress = addressList.get(0);
+        newBaseAddress.setBase(true);
+        addressRepository.save(newBaseAddress);
+      }
     }
   }
   
