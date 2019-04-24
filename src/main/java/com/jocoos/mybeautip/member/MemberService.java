@@ -208,6 +208,8 @@ public class MemberService {
   
   @Transactional
   public Member updateMember(MemberController.UpdateMemberRequest request, Member member) {
+    boolean isFirstUpdate = !member.isVisible();
+    
     if (request.getUsername() != null) {
       member.setUsername(request.getUsername());
     }
@@ -237,12 +239,14 @@ public class MemberService {
     member.setVisible(true);
     Member finalMember = memberRepository.save(member);
     
-    // Follow Admin member as default
-    memberRepository.findByUsernameAndLinkAndDeletedAtIsNull("마이뷰팁", 0)
-        .ifPresent(adminMember -> {
-          followMember(finalMember, adminMember);
-          finalMember.setFollowingCount(1); // for response view
-        });
+    if (isFirstUpdate) { // when first called
+      // Follow Admin member as default
+      memberRepository.findByUsernameAndLinkAndDeletedAtIsNull("마이뷰팁", 0)
+          .ifPresent(adminMember -> {
+            followMember(finalMember, adminMember);
+            finalMember.setFollowingCount(1); // for response view
+          });
+    }
     
     return finalMember;
   }
