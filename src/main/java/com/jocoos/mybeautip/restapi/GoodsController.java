@@ -342,7 +342,7 @@ public class GoodsController {
     Date startCursor = (Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
-    PageRequest pageable = of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(
         startCursor, goodsNo, "PUBLIC", "CREATED", pageable);
     List<VideoController.VideoInfo> result = new ArrayList<>();
@@ -353,7 +353,7 @@ public class GoodsController {
 
     String nextCursor = null;
     if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+      nextCursor = String.valueOf(slice.getContent().get(slice.getContent().size() - 1).getCreatedAt().getTime());
     }
     return new CursorResponse.Builder<>(requestUri, result)
       .withCount(count)

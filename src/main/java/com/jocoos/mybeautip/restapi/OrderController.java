@@ -105,7 +105,7 @@ public class OrderController {
                                   @RequestParam(defaultValue = "") String category,
                                   @RequestParam(required = false) Long cursor) {
     Long memberId = memberService.currentMemberId();
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<Order> orders;
     List<OrderInfo> result = Lists.newArrayList();
 
@@ -185,7 +185,7 @@ public class OrderController {
                                     @RequestParam(required = false) Long cursor) {
 
     Long me = memberService.currentMemberId();
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<OrderInquiry> inquiries;
     switch (category) {
       case "cancel": {
