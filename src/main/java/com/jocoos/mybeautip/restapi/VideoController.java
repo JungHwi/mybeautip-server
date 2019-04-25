@@ -413,13 +413,13 @@ public class VideoController {
                                            @RequestParam(required = false) String cursor) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
-    Slice<VideoLike> list = videoLikeRepository.findByVideoIdAndCreatedAtBeforeAndVideoDeletedAtIsNull(id, startCursor, pageable);
+    Slice<VideoLike> slice = videoLikeRepository.findByVideoIdAndCreatedAtBeforeAndVideoDeletedAtIsNull(id, startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
-    list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
+    slice.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
     String nextCursor = null;
     if (members.size() > 0) {
-      nextCursor = String.valueOf(list.getContent().get(list.getContent().size() - 1).getCreatedAt().getTime());
+      nextCursor = String.valueOf(slice.getContent().get(slice.getContent().size() - 1).getCreatedAt().getTime());
     }
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/likes", members)
@@ -542,15 +542,15 @@ public class VideoController {
     Long startCursor = StringUtils.isBlank(cursor) ? 0 : Long.parseLong(cursor);  // "createdBy" is used for cursor
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
     long duration = new Date().getTime() - watchDuration;
-    Slice<VideoWatch> list = videoWatchRepository.findByVideoIdAndIsGuestIsFalseAndModifiedAtAfterAndCreatedByIdAfter(id, new Date(duration), startCursor, pageable);
+    Slice<VideoWatch> slice = videoWatchRepository.findByVideoIdAndIsGuestIsFalseAndModifiedAtAfterAndCreatedByIdAfter(id, new Date(duration), startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
-    list.stream().forEach(watch -> members.add(memberService.getMemberInfo(watch.getCreatedBy())));
+    slice.stream().forEach(watch -> members.add(memberService.getMemberInfo(watch.getCreatedBy())));
 
     int guestCount = videoWatchRepository.countByVideoIdAndIsGuestIsTrueAndModifiedAtAfter(id, new Date(duration));
 
     String nextCursor = null;
     if (members.size() > 0) {
-      nextCursor = String.valueOf(members.get(members.size() - 1).getId());
+      nextCursor = String.valueOf(slice.getContent().get(slice.getContent().size() - 1).getId());
     }
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/watches", members)
@@ -587,19 +587,19 @@ public class VideoController {
       throw new AccessDeniedException("Invalid member id");
     }
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
-    Slice<Revenue>  list;
+    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdAt"));
+    Slice<Revenue> slice;
 
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
-      list = revenueRepository.findByVideoAndCreatedAtBefore(video, createdAt, pageable);
+      slice = revenueRepository.findByVideoAndCreatedAtBefore(video, createdAt, pageable);
     } else {
-      list = revenueRepository.findByVideo(video, pageable);
+      slice = revenueRepository.findByVideo(video, pageable);
     }
 
     List<SalesInfo> revenues = Lists.newArrayList();
 
-    list.forEach(r -> revenues.add(new SalesInfo(r)));
+    slice.getContent().forEach(r -> revenues.add(new SalesInfo(r)));
 
     String nextCursor = null;
     if (revenues.size() > 0) {
@@ -690,14 +690,14 @@ public class VideoController {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
     
-    Slice<VideoView> list = videoViewRepository.findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(id, startCursor, pageable);
+    Slice<VideoView> slice = videoViewRepository.findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(id, startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
-    list.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
+    slice.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
     String nextCursor = null;
 
     if (members.size() > 0) {
-      nextCursor = String.valueOf(list.getContent().get(list.getContent().size() - 1).getModifiedAt().getTime());
+      nextCursor = String.valueOf(slice.getContent().get(slice.getContent().size() - 1).getModifiedAt().getTime());
     }
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/views", members)

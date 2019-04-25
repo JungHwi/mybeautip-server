@@ -114,10 +114,10 @@ public class AdminMemberController {
   
   @PostMapping("/members/followings")
   public void followMember(@Valid @RequestBody AdminFollowingMemberRequest request) {
-    Member me = memberRepository.findByIdAndDeletedAtIsNull(request.getMe())
+    Member me = memberRepository.findByIdAndVisibleIsTrue(request.getMe())
         .orElseThrow(() -> new MemberNotFoundException(request.getMe()));
   
-    Member you = memberRepository.findByIdAndDeletedAtIsNull(request.getYou())
+    Member you = memberRepository.findByIdAndVisibleIsTrue(request.getYou())
         .orElseThrow(() -> new MemberNotFoundException(request.getYou()));
     
     if (request.getMe().equals(request.getYou())) {
