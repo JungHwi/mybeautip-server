@@ -577,7 +577,7 @@ public class OrderService {
     return orderRepository.save(order);
   }
   
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   private void revokeResourcesBeforeCancelOrder(Order order) {
     // Revoke used coupon
     if (order.getMemberCoupon() != null) {
@@ -615,7 +615,7 @@ public class OrderService {
             try {
               videoRepository.updateOrderCount(order.getVideoId(), -1);
             } catch (DataIntegrityViolationException e) {
-              log.warn("DataException throws updateVideoOrderCount: order: {}, exception: {}", order, e.getMessage());
+              log.warn("Exception throws updateVideoOrderCount: order: {}, exception: {}", order, e.getMessage());
             }
           
             // Remove revenues

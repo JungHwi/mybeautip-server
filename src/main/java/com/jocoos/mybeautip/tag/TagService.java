@@ -72,7 +72,7 @@ public class TagService {
     }
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void decreaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
@@ -80,12 +80,12 @@ public class TagService {
         tagRepository.findByName(name)
             .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
       } catch (DataIntegrityViolationException e) {
-        log.warn("DataException throws decreaseTagCount: tagName: {}, exception: {}", name, e);
+        log.warn("Exception throws decreaseTagCount: tagName: {}, exception: {}", name, e);
       }
     }
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void updateRefCount(String oldText, String newText) {
     List<String> oldTagNames = parseHashTag(oldText);
     List<String> newTagNames = parseHashTag(newText);
@@ -98,7 +98,7 @@ public class TagService {
         tagRepository.findByName(name)
             .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
       } catch (DataIntegrityViolationException e) {
-        log.warn("DataException throws updateTagRefCount: tagName: {}, exception: {}", name, e.getMessage());
+        log.warn("Exception throws updateTagRefCount: tagName: {}, exception: {}", name, e.getMessage());
       }
     }
 
@@ -112,7 +112,7 @@ public class TagService {
     }
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
   public void addHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
     for (String name : uniqueTagNames) {

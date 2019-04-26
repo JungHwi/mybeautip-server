@@ -196,13 +196,13 @@ public class GoodsService {
     return goodsLikeRepository.save(new GoodsLike(goods));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void removeLike(GoodsLike liked) {
     goodsLikeRepository.delete(liked);
     try {
       goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);
     } catch (DataIntegrityViolationException e) {
-      log.warn("DataException throws updateGoodsLikeCount: goodsLike: {}, exception: {}", liked, e.getMessage());
+      log.warn("Exception throws updateGoodsLikeCount: goodsLike: {}, exception: {}", liked, e.getMessage());
     }
   }
   

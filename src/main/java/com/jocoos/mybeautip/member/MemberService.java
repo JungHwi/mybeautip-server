@@ -293,19 +293,19 @@ public class MemberService {
     return followingRepository.save(new Following(me, you));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void unFollowMember(Following following) {
     followingRepository.delete(following);
     try {
       memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
     } catch (DataIntegrityViolationException e) {
-      log.warn("DataException throws updateFollowingCount: following: {}, exception: {}", following, e.getMessage());
+      log.warn("Exception throws updateFollowingCount: following: {}, exception: {}", following, e.getMessage());
     }
     
     try {
       memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
     } catch (DataIntegrityViolationException e) {
-      log.warn("DataException throws updateFollowerCount: following: {}, exception: {}", following, e.getMessage());
+      log.warn("Exception throws updateFollowerCount: following: {}, exception: {}", following, e.getMessage());
     }
   }
 }

@@ -51,7 +51,7 @@ public class PostProcessService {
   }
   
   @Async
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   public void deleteMember(Member member) {
     // 1. Delete member's all videos (using videoService)
     // 2. Delete all followings related members (followings/followers)
@@ -68,7 +68,7 @@ public class PostProcessService {
           try {
             memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
           } catch (DataIntegrityViolationException e) {   // This exception can occur when already deleting member
-            log.warn("DataException throws during Async job: following: {}, exception: {}", following, e.getMessage());
+            log.warn("Exception throws during Async job: following: {}, exception: {}", following, e.getMessage());
           }
         });
 
@@ -78,7 +78,7 @@ public class PostProcessService {
           try {
             memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
           } catch (DataIntegrityViolationException e) {   // This exception can occur when already deleting member
-            log.warn("DataException throws during Async job: following: {}, exception: {}", following, e.getMessage());
+            log.warn("Exception throws during Async job: following: {}, exception: {}", following, e.getMessage());
           }
         });
 

@@ -32,13 +32,13 @@ public class StoreService {
     return storeLikeRepository.save(new StoreLike(store));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void removeLike(StoreLike like) {
     storeLikeRepository.delete(like);
     try {
       storeRepository.updateLikeCount(like.getStore().getId(), -1);
     } catch (DataIntegrityViolationException e) {
-      log.warn("DataException throws updateStoreLikeCount: videoLike: {}, exception: {}", like, e.getMessage());
+      log.warn("Exception throws updateStoreLikeCount: videoLike: {}, exception: {}", like, e.getMessage());
     }
   }
 }

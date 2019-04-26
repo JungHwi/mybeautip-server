@@ -2,11 +2,6 @@ package com.jocoos.mybeautip.post;
 
 import java.util.List;
 
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -15,7 +10,11 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.DataException;
+
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 
 @Slf4j
 @Service
@@ -83,18 +82,18 @@ public class PostService {
     }
   }
   
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   public void deleteComment(Comment comment) {
     try {
       postRepository.updateCommentCount(comment.getPostId(), -1);
     } catch (DataIntegrityViolationException e) {
-      log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
+      log.warn("Exception throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
     }
     if (comment.getParentId() != null) {
       try {
         commentRepository.updateCommentCount(comment.getParentId(), -1);
       } catch (DataIntegrityViolationException e) {
-        log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
+        log.warn("Exception throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
       }
     }
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
@@ -109,13 +108,13 @@ public class PostService {
     return postLikeRepository.save(new PostLike(post));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void unLikePost(PostLike liked) {
     postLikeRepository.delete(liked);
     try {
       postRepository.updateLikeCount(liked.getPost().getId(), -1);
-    } catch (DataException e) {
-      log.warn("DataException throws updatePostLikeCount: postLike: {}, exception: {}", liked, e.getMessage());
+    } catch (DataIntegrityViolationException e) {
+      log.warn("Exception throws updatePostLikeCount: postLike: {}, exception: {}", liked, e.getMessage());
     }
   }
   
@@ -125,13 +124,13 @@ public class PostService {
     return commentLikeRepository.save(new CommentLike(comment));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void unLikeCommentPost(CommentLike liked) {
     commentLikeRepository.delete(liked);
     try {
       commentRepository.updateLikeCount(liked.getComment().getId(), -1);
-    } catch (DataException e) {
-      log.warn("DataException throws updateCommentLikeCount: comment: {}, exception: {}", liked, e.getMessage());
+    } catch (DataIntegrityViolationException e) {
+      log.warn("Exception throws updateCommentLikeCount: comment: {}, exception: {}", liked, e.getMessage());
     }
   }
   

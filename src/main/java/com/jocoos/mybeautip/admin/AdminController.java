@@ -515,7 +515,7 @@ public class AdminController {
   }
 
 
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   @DeleteMapping("/recommendedMotds/{videoId:.+}")
   public ResponseEntity deleteRecommendedMotds(@PathVariable Long videoId) {
     log.debug("deleted motd video id: {}", videoId);
@@ -531,7 +531,7 @@ public class AdminController {
                 try {
                   motdRecommendationBaseRepository.updateMotdCount(b.getId(), -1);
                 } catch (DataIntegrityViolationException e) {
-                  log.warn("DataException throws updateMotdCount: video_id: {}, exception: {}", videoId, e.getMessage());
+                  log.warn("Exception throws updateMotdCount: video_id: {}, exception: {}", videoId, e.getMessage());
                 }
               }
             });

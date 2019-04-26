@@ -456,7 +456,7 @@ public class VideoService {
     }
   }
   
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   public Video updateVideoProperties(CallbackController.CallbackUpdateVideoRequest source, Video target) {
     // immutable properties: video_id, video_key, type, owner, likecount, commentcount, relatedgoodscount, relatedgoodsurl
     // mutable properties: title, content, url, thumbnail_url, chatroomid, data, state, duration, visibility, banned, watchcount, heartcount, viewcount
@@ -524,7 +524,7 @@ public class VideoService {
         try {
           memberRepository.updatePublicVideoCount(member.getId(), -1);
         } catch (DataIntegrityViolationException e) {
-          log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", target.getId(), e.getMessage());
+          log.warn("Exception throws when updatePublicVideoCount: video_id: {}, e: {}", target.getId(), e.getMessage());
         }
         log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
         target.setVisibility(newState);
@@ -541,7 +541,7 @@ public class VideoService {
     return target;
   }
   
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   public Video deleteVideo(long memberId, Long videoId) {
     return videoRepository.findByIdAndDeletedAtIsNull(videoId)
         .map(v -> {
@@ -557,21 +557,21 @@ public class VideoService {
             try {
               memberRepository.updatePublicVideoCount(member.getId(), -1);
             } catch (DataIntegrityViolationException e) {
-              log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
+              log.warn("Exception throws when updatePublicVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
             }
           }
 
           try {
             memberRepository.updateTotalVideoCount(member.getId(), -1);
           } catch (DataIntegrityViolationException e) {
-            log.warn("DataException throws when updateTotalVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
+            log.warn("Exception throws when updateTotalVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
           }
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoId: " + videoId));
   }
   
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   public Video deleteVideo(long memberId, String videoKey) {
     return videoRepository.findByVideoKeyAndDeletedAtIsNull(videoKey)
         .map(v -> {
@@ -587,13 +587,13 @@ public class VideoService {
             try {
               memberRepository.updatePublicVideoCount(member.getId(), -1);
             } catch (DataIntegrityViolationException e) {
-              log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
+              log.warn("Exception throws when updatePublicVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
             }
           }
           try {
             memberRepository.updateTotalVideoCount(member.getId(), -1);
           } catch (DataIntegrityViolationException e) {
-            log.warn("DataException throws when updateTotalVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
+            log.warn("Exception throws when updateTotalVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
           }
           return v;
         })
@@ -642,21 +642,21 @@ public class VideoService {
     return videoRepository.save(video);
   }
   
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   public void deleteComment(Comment comment) {
     tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
     
     try {
       videoRepository.updateCommentCount(comment.getVideoId(), -1);
     } catch (DataIntegrityViolationException e) {
-      log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
+      log.warn("Exception throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
     }
     
     if (comment.getParentId() != null) {
       try {
         commentRepository.updateCommentCount(comment.getParentId(), -1);
       } catch (DataIntegrityViolationException e) {
-        log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
+        log.warn("Exception throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
       }
     }
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
@@ -665,7 +665,7 @@ public class VideoService {
   }
   
   
-  @Transactional
+  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
   public Video lockVideo(Video video) {
     if (video.getLocked()) {  // Already locked
       return video;
@@ -678,7 +678,7 @@ public class VideoService {
       try {
         memberRepository.updatePublicVideoCount(member.getId(), -1);
       } catch (DataIntegrityViolationException e) {
-        log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", video.getId(), e.getMessage());
+        log.warn("Exception throws when updatePublicVideoCount: video_id: {}, e: {}", video.getId(), e.getMessage());
       }
       video.setVisibility("PRIVATE");
     }
@@ -709,13 +709,13 @@ public class VideoService {
     return videoLikeRepository.save(new VideoLike(video));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void unLikeVideo(VideoLike liked) {
     videoLikeRepository.delete(liked);
     try {
       videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
     } catch (DataIntegrityViolationException e) {
-      log.warn("DataException throws updateVideoLikeCount: videoLike: {}, exception: {}", liked, e.getMessage());
+      log.warn("Exception throws updateVideoLikeCount: videoLike: {}, exception: {}", liked, e.getMessage());
     }
   }
   
@@ -725,13 +725,13 @@ public class VideoService {
     return commentLikeRepository.save(new CommentLike(comment));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
   public void unLikeVideoComment(CommentLike liked) {
     commentLikeRepository.delete(liked);
     try {
       commentRepository.updateLikeCount(liked.getComment().getId(), -1);
     } catch (DataIntegrityViolationException e) {
-      log.warn("DataException throws updateCommentLikeCount: videoLike: {}, exception: {}", liked, e.getMessage());
+      log.warn("Exception throws updateCommentLikeCount: videoLike: {}, exception: {}", liked, e.getMessage());
     }
   }
   
