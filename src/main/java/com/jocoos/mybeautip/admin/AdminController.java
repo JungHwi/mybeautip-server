@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
@@ -530,7 +530,7 @@ public class AdminController {
               } else {
                 try {
                   motdRecommendationBaseRepository.updateMotdCount(b.getId(), -1);
-                } catch (DataException e) {
+                } catch (DataIntegrityViolationException e) {
                   log.warn("DataException throws updateMotdCount: video_id: {}, exception: {}", videoId, e.getMessage());
                 }
               }

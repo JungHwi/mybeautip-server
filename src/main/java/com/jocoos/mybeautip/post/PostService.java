@@ -6,6 +6,8 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -85,13 +87,13 @@ public class PostService {
   public void deleteComment(Comment comment) {
     try {
       postRepository.updateCommentCount(comment.getPostId(), -1);
-    } catch (DataException e) {
+    } catch (DataIntegrityViolationException e) {
       log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
     }
     if (comment.getParentId() != null) {
       try {
         commentRepository.updateCommentCount(comment.getParentId(), -1);
-      } catch (DataException e) {
+      } catch (DataIntegrityViolationException e) {
         log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
       }
     }

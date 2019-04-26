@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -614,7 +614,7 @@ public class OrderService {
             // Update video order count
             try {
               videoRepository.updateOrderCount(order.getVideoId(), -1);
-            } catch (DataException e) {
+            } catch (DataIntegrityViolationException e) {
               log.warn("DataException throws updateVideoOrderCount: order: {}, exception: {}", order, e.getMessage());
             }
           

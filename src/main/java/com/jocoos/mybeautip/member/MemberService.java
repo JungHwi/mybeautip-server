@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
@@ -298,13 +298,13 @@ public class MemberService {
     followingRepository.delete(following);
     try {
       memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
-    } catch (DataException e) {
+    } catch (DataIntegrityViolationException e) {
       log.warn("DataException throws updateFollowingCount: following: {}, exception: {}", following, e.getMessage());
     }
     
     try {
       memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
-    } catch (DataException e) {
+    } catch (DataIntegrityViolationException e) {
       log.warn("DataException throws updateFollowerCount: following: {}, exception: {}", following, e.getMessage());
     }
   }

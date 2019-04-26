@@ -1,11 +1,11 @@
 package com.jocoos.mybeautip.member;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.member.cart.CartRepository;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
@@ -67,7 +67,7 @@ public class PostProcessService {
           followingRepository.delete(following);
           try {
             memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
-          } catch (DataException e) {   // This exception can occur when already deleting member
+          } catch (DataIntegrityViolationException e) {   // This exception can occur when already deleting member
             log.warn("DataException throws during Async job: following: {}, exception: {}", following, e.getMessage());
           }
         });
@@ -77,7 +77,7 @@ public class PostProcessService {
           followingRepository.delete(following);
           try {
             memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
-          } catch (DataException e) {   // This exception can occur when already deleting member
+          } catch (DataIntegrityViolationException e) {   // This exception can occur when already deleting member
             log.warn("DataException throws during Async job: following: {}, exception: {}", following, e.getMessage());
           }
         });

@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -79,7 +79,7 @@ public class TagService {
       try {
         tagRepository.findByName(name)
             .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
-      } catch (DataException e) {
+      } catch (DataIntegrityViolationException e) {
         log.warn("DataException throws decreaseTagCount: tagName: {}, exception: {}", name, e);
       }
     }
@@ -97,7 +97,7 @@ public class TagService {
       try {
         tagRepository.findByName(name)
             .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
-      } catch (DataException e) {
+      } catch (DataIntegrityViolationException e) {
         log.warn("DataException throws updateTagRefCount: tagName: {}, exception: {}", name, e.getMessage());
       }
     }

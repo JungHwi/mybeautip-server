@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -524,7 +523,7 @@ public class VideoService {
       if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
         try {
           memberRepository.updatePublicVideoCount(member.getId(), -1);
-        } catch (DataException e) {
+        } catch (DataIntegrityViolationException e) {
           log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", target.getId(), e.getMessage());
         }
         log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
@@ -557,14 +556,14 @@ public class VideoService {
           if ("PUBLIC".equals(v.getVisibility())) {
             try {
               memberRepository.updatePublicVideoCount(member.getId(), -1);
-            } catch (DataException e) {
+            } catch (DataIntegrityViolationException e) {
               log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
             }
           }
 
           try {
             memberRepository.updateTotalVideoCount(member.getId(), -1);
-          } catch (DataException e) {
+          } catch (DataIntegrityViolationException e) {
             log.warn("DataException throws when updateTotalVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
           }
           return v;
@@ -587,13 +586,13 @@ public class VideoService {
           if ("PUBLIC".equals(v.getVisibility())) {
             try {
               memberRepository.updatePublicVideoCount(member.getId(), -1);
-            } catch (DataException e) {
+            } catch (DataIntegrityViolationException e) {
               log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
             }
           }
           try {
             memberRepository.updateTotalVideoCount(member.getId(), -1);
-          } catch (DataException e) {
+          } catch (DataIntegrityViolationException e) {
             log.warn("DataException throws when updateTotalVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
           }
           return v;
@@ -649,14 +648,14 @@ public class VideoService {
     
     try {
       videoRepository.updateCommentCount(comment.getVideoId(), -1);
-    } catch (DataException e) {
+    } catch (DataIntegrityViolationException e) {
       log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
     }
     
     if (comment.getParentId() != null) {
       try {
         commentRepository.updateCommentCount(comment.getParentId(), -1);
-      } catch (DataException e) {
+      } catch (DataIntegrityViolationException e) {
         log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
       }
     }
@@ -678,7 +677,7 @@ public class VideoService {
       Member member = video.getMember();
       try {
         memberRepository.updatePublicVideoCount(member.getId(), -1);
-      } catch (DataException e) {
+      } catch (DataIntegrityViolationException e) {
         log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", video.getId(), e.getMessage());
       }
       video.setVisibility("PRIVATE");
@@ -715,7 +714,7 @@ public class VideoService {
     videoLikeRepository.delete(liked);
     try {
       videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
-    } catch (DataException e) {
+    } catch (DataIntegrityViolationException e) {
       log.warn("DataException throws updateVideoLikeCount: videoLike: {}, exception: {}", liked, e.getMessage());
     }
   }
@@ -731,7 +730,7 @@ public class VideoService {
     commentLikeRepository.delete(liked);
     try {
       commentRepository.updateLikeCount(liked.getComment().getId(), -1);
-    } catch (DataException e) {
+    } catch (DataIntegrityViolationException e) {
       log.warn("DataException throws updateCommentLikeCount: videoLike: {}, exception: {}", liked, e.getMessage());
     }
   }

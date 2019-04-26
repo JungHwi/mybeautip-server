@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -14,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.hibernate.exception.DataException;
 
 import static org.springframework.data.domain.PageRequest.of;
 
@@ -201,7 +201,7 @@ public class GoodsService {
     goodsLikeRepository.delete(liked);
     try {
       goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);
-    } catch (DataException e) {
+    } catch (DataIntegrityViolationException e) {
       log.warn("DataException throws updateGoodsLikeCount: goodsLike: {}, exception: {}", liked, e.getMessage());
     }
   }
