@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.goods.GoodsRepository;
 
@@ -34,6 +35,10 @@ public class StoreService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeLike(StoreLike like) {
     storeLikeRepository.delete(like);
-    storeRepository.updateLikeCount(like.getStore().getId(), -1);
+    try {
+      storeRepository.updateLikeCount(like.getStore().getId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateStoreLikeCount: videoLike: {}, exception: {}", like, e.getMessage());
+    }
   }
 }

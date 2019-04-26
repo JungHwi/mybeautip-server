@@ -68,8 +68,7 @@ public class PostProcessService {
           try {
             memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
           } catch (DataException e) {   // This exception can occur when already deleting member
-            log.warn("DataException throws during Async job: member_id: {}, exception: {}",
-                following.getMemberYou().getId(), e);
+            log.warn("DataException throws during Async job: following: {}, exception: {}", following, e.getMessage());
           }
         });
 
@@ -79,8 +78,7 @@ public class PostProcessService {
           try {
             memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
           } catch (DataException e) {   // This exception can occur when already deleting member
-            log.warn("DataException throws during Async job: member_id: {}, exception: {}",
-                following.getMemberYou().getId(), e);
+            log.warn("DataException throws during Async job: following: {}, exception: {}", following, e.getMessage());
           }
         });
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
@@ -295,7 +296,16 @@ public class MemberService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unFollowMember(Following following) {
     followingRepository.delete(following);
-    memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
-    memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+    try {
+      memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateFollowingCount: following: {}, exception: {}", following, e.getMessage());
+    }
+    
+    try {
+      memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateFollowerCount: following: {}, exception: {}", following, e.getMessage());
+    }
   }
 }

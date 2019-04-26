@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -630,9 +631,18 @@ public class VideoService {
   public void deleteComment(Comment comment) {
     tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
     
-    videoRepository.updateCommentCount(comment.getVideoId(), -1);
+    try {
+      videoRepository.updateCommentCount(comment.getVideoId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
+    }
+    
     if (comment.getParentId() != null) {
-      commentRepository.updateCommentCount(comment.getParentId(), -1);
+      try {
+        commentRepository.updateCommentCount(comment.getParentId(), -1);
+      } catch (DataException e) {
+        log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
+      }
     }
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
@@ -684,7 +694,11 @@ public class VideoService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeVideo(VideoLike liked) {
     videoLikeRepository.delete(liked);
-    videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
+    try {
+      videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateVideoLikeCount: videoLike: {}, exception: {}", liked, e.getMessage());
+    }
   }
   
   @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -696,7 +710,11 @@ public class VideoService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeVideoComment(CommentLike liked) {
     commentLikeRepository.delete(liked);
-    commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+    try {
+      commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateCommentLikeCount: videoLike: {}, exception: {}", liked, e.getMessage());
+    }
   }
   
   @Transactional(isolation = Isolation.SERIALIZABLE)

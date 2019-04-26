@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.DataException;
 
+@Slf4j
 @Service
 public class PostService {
 
@@ -80,9 +83,17 @@ public class PostService {
   
   @Transactional
   public void deleteComment(Comment comment) {
-    postRepository.updateCommentCount(comment.getPostId(), -1);
+    try {
+      postRepository.updateCommentCount(comment.getPostId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
+    }
     if (comment.getParentId() != null) {
-      commentRepository.updateCommentCount(comment.getParentId(), -1);
+      try {
+        commentRepository.updateCommentCount(comment.getParentId(), -1);
+      } catch (DataException e) {
+        log.warn("DataException throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
+      }
     }
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
@@ -99,7 +110,11 @@ public class PostService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikePost(PostLike liked) {
     postLikeRepository.delete(liked);
-    postRepository.updateLikeCount(liked.getPost().getId(), -1);
+    try {
+      postRepository.updateLikeCount(liked.getPost().getId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updatePostLikeCount: postLike: {}, exception: {}", liked, e.getMessage());
+    }
   }
   
   @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -111,7 +126,11 @@ public class PostService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeCommentPost(CommentLike liked) {
     commentLikeRepository.delete(liked);
-    commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+    try {
+      commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateCommentLikeCount: comment: {}, exception: {}", liked, e.getMessage());
+    }
   }
   
   @Transactional

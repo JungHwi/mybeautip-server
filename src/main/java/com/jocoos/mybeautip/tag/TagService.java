@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -75,8 +76,12 @@ public class TagService {
   public void decreaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
-      tagRepository.findByName(name)
-          .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+      try {
+        tagRepository.findByName(name)
+            .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+      } catch (DataException e) {
+        log.warn("DataException throws decreaseTagCount: tagName: {}, exception: {}", name, e);
+      }
     }
   }
 
@@ -89,8 +94,12 @@ public class TagService {
     List<String> addTagNames = (List<String>) CollectionUtils.removeAll(newTagNames, oldTagNames);
 
     for (String name : removeTagNames) {
-      tagRepository.findByName(name)
-          .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+      try {
+        tagRepository.findByName(name)
+            .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+      } catch (DataException e) {
+        log.warn("DataException throws updateTagRefCount: tagName: {}, exception: {}", name, e.getMessage());
+      }
     }
 
     for (String name : addTagNames) {

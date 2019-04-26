@@ -23,6 +23,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
@@ -527,7 +528,11 @@ public class AdminController {
               if (b.getMotdCount() == 1) {
                 motdRecommendationBaseRepository.delete(b);
               } else {
-                motdRecommendationBaseRepository.updateMotdCount(b.getId(), -1);
+                try {
+                  motdRecommendationBaseRepository.updateMotdCount(b.getId(), -1);
+                } catch (DataException e) {
+                  log.warn("DataException throws updateMotdCount: video_id: {}, exception: {}", videoId, e.getMessage());
+                }
               }
             });
          return new ResponseEntity(HttpStatus.NO_CONTENT);

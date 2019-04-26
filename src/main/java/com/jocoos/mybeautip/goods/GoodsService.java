@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.hibernate.exception.DataException;
 
 import static org.springframework.data.domain.PageRequest.of;
 
@@ -198,7 +199,11 @@ public class GoodsService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeLike(GoodsLike liked) {
     goodsLikeRepository.delete(liked);
-    goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);
+    try {
+      goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);
+    } catch (DataException e) {
+      log.warn("DataException throws updateGoodsLikeCount: goodsLike: {}, exception: {}", liked, e.getMessage());
+    }
   }
   
   public Optional<GoodsInfo> generateGoodsInfo(String goodsNo) {

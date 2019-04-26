@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.DataException;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -611,7 +612,11 @@ public class OrderService {
       videoRepository.findById(order.getVideoId())
           .ifPresent(video -> {
             // Update video order count
-            videoRepository.updateOrderCount(order.getVideoId(), -1);
+            try {
+              videoRepository.updateOrderCount(order.getVideoId(), -1);
+            } catch (DataException e) {
+              log.warn("DataException throws updateVideoOrderCount: order: {}, exception: {}", order, e.getMessage());
+            }
           
             // Remove revenues
             log.info("Order canceled - revenue per purchase removed: {}, {}", order.getId(), order.getMemberCoupon());
