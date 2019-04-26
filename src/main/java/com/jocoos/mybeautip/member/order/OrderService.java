@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -577,7 +576,7 @@ public class OrderService {
     return orderRepository.save(order);
   }
   
-  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional
   private void revokeResourcesBeforeCancelOrder(Order order) {
     // Revoke used coupon
     if (order.getMemberCoupon() != null) {
@@ -612,10 +611,8 @@ public class OrderService {
       videoRepository.findById(order.getVideoId())
           .ifPresent(video -> {
             // Update video order count
-            try {
-              videoRepository.updateOrderCount(order.getVideoId(), -1);
-            } catch (DataIntegrityViolationException e) {
-              log.warn("Exception throws updateVideoOrderCount: order: {}, exception: {}", order, e.getMessage());
+            if (video.getOrderCount() > 0) {
+              videoRepository.updateOrderCount(video.getId(), -1);
             }
           
             // Remove revenues

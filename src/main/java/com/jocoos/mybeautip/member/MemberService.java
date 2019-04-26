@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.member;
 import java.util.Date;
 import java.util.Optional;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -293,19 +292,15 @@ public class MemberService {
     return followingRepository.save(new Following(me, you));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional
   public void unFollowMember(Following following) {
     followingRepository.delete(following);
-    try {
+    if (following.getMemberMe().getFollowingCount() > 0) {
       memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
-    } catch (DataIntegrityViolationException e) {
-      log.warn("Exception throws updateFollowingCount: following: {}, exception: {}", following, e.getMessage());
     }
     
-    try {
+    if (following.getMemberYou().getFollowerCount() > 0) {
       memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
-    } catch (DataIntegrityViolationException e) {
-      log.warn("Exception throws updateFollowerCount: following: {}, exception: {}", following, e.getMessage());
     }
   }
 }

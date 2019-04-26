@@ -5,10 +5,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +20,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -43,7 +54,17 @@ import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostContent;
 import com.jocoos.mybeautip.post.PostRepository;
-import com.jocoos.mybeautip.recommendation.*;
+import com.jocoos.mybeautip.recommendation.GoodsRecommendation;
+import com.jocoos.mybeautip.recommendation.GoodsRecommendationRepository;
+import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
+import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
+import com.jocoos.mybeautip.recommendation.MemberRecommendation;
+import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
+import com.jocoos.mybeautip.recommendation.MotdRecommendation;
+import com.jocoos.mybeautip.recommendation.MotdRecommendationBase;
+import com.jocoos.mybeautip.recommendation.MotdRecommendationBaseRepository;
+import com.jocoos.mybeautip.recommendation.MotdRecommendationRepository;
+import com.jocoos.mybeautip.recommendation.RecommendationController;
 import com.jocoos.mybeautip.restapi.PostController;
 import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.schedules.ScheduleRepository;
@@ -515,7 +536,7 @@ public class AdminController {
   }
 
 
-  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional
   @DeleteMapping("/recommendedMotds/{videoId:.+}")
   public ResponseEntity deleteRecommendedMotds(@PathVariable Long videoId) {
     log.debug("deleted motd video id: {}", videoId);
@@ -528,10 +549,8 @@ public class AdminController {
               if (b.getMotdCount() == 1) {
                 motdRecommendationBaseRepository.delete(b);
               } else {
-                try {
+                if (b.getMotdCount() > 0) {
                   motdRecommendationBaseRepository.updateMotdCount(b.getId(), -1);
-                } catch (DataIntegrityViolationException e) {
-                  log.warn("Exception throws updateMotdCount: video_id: {}, exception: {}", videoId, e.getMessage());
                 }
               }
             });

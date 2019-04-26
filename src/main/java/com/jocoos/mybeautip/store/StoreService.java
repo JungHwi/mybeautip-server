@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.store;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,13 +31,11 @@ public class StoreService {
     return storeLikeRepository.save(new StoreLike(store));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeLike(StoreLike like) {
     storeLikeRepository.delete(like);
-    try {
+    if (like.getStore().getLikeCount() > 0) {
       storeRepository.updateLikeCount(like.getStore().getId(), -1);
-    } catch (DataIntegrityViolationException e) {
-      log.warn("Exception throws updateStoreLikeCount: videoLike: {}, exception: {}", like, e.getMessage());
     }
   }
 }

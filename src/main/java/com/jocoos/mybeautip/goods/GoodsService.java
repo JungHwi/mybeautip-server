@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -196,13 +195,11 @@ public class GoodsService {
     return goodsLikeRepository.save(new GoodsLike(goods));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeLike(GoodsLike liked) {
     goodsLikeRepository.delete(liked);
-    try {
+    if (liked.getGoods().getLikeCount() > 0) {
       goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);
-    } catch (DataIntegrityViolationException e) {
-      log.warn("Exception throws updateGoodsLikeCount: goodsLike: {}, exception: {}", liked, e.getMessage());
     }
   }
   

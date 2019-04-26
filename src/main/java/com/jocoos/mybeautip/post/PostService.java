@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.post;
 
 import java.util.List;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -82,20 +81,26 @@ public class PostService {
     }
   }
   
-  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional
   public void deleteComment(Comment comment) {
-    try {
-      postRepository.updateCommentCount(comment.getPostId(), -1);
-    } catch (DataIntegrityViolationException e) {
-      log.warn("Exception throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
-    }
+    postRepository.findById(comment.getPostId()).ifPresent(
+        post -> {
+          if (post.getCommentCount() > 0) {
+            postRepository.updateCommentCount(comment.getPostId(), -1);
+          }
+        }
+    );
+    
     if (comment.getParentId() != null) {
-      try {
-        commentRepository.updateCommentCount(comment.getParentId(), -1);
-      } catch (DataIntegrityViolationException e) {
-        log.warn("Exception throws updateCommentCount: comment: {}, exception: {}", comment, e.getMessage());
-      }
+      postRepository.findById(comment.getParentId()).ifPresent(
+          parentComment -> {
+            if (parentComment.getCommentCount() > 0) {
+              commentRepository.updateCommentCount(parentComment.getId(), -1);
+            }
+          }
+      );
     }
+    
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
     commentRepository.delete(comment);
@@ -108,13 +113,11 @@ public class PostService {
     return postLikeRepository.save(new PostLike(post));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikePost(PostLike liked) {
     postLikeRepository.delete(liked);
-    try {
+    if (liked.getPost().getLikeCount() > 0) {
       postRepository.updateLikeCount(liked.getPost().getId(), -1);
-    } catch (DataIntegrityViolationException e) {
-      log.warn("Exception throws updatePostLikeCount: postLike: {}, exception: {}", liked, e.getMessage());
     }
   }
   
@@ -124,13 +127,11 @@ public class PostService {
     return commentLikeRepository.save(new CommentLike(comment));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeCommentPost(CommentLike liked) {
     commentLikeRepository.delete(liked);
-    try {
+    if (liked.getComment().getCommentCount() > 0) {
       commentRepository.updateLikeCount(liked.getComment().getId(), -1);
-    } catch (DataIntegrityViolationException e) {
-      log.warn("Exception throws updateCommentLikeCount: comment: {}, exception: {}", liked, e.getMessage());
     }
   }
   

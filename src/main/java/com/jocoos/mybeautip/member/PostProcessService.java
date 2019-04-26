@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.member;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +50,7 @@ public class PostProcessService {
   }
   
   @Async
-  @Transactional(noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional
   public void deleteMember(Member member) {
     // 1. Delete member's all videos (using videoService)
     // 2. Delete all followings related members (followings/followers)
@@ -65,20 +64,16 @@ public class PostProcessService {
     followingRepository.findByMemberMeId(member.getId())
         .forEach(following -> {
           followingRepository.delete(following);
-          try {
+          if (following.getMemberYou().getFollowerCount() > 0) {
             memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
-          } catch (DataIntegrityViolationException e) {   // This exception can occur when already deleting member
-            log.warn("Exception throws during Async job: following: {}, exception: {}", following, e.getMessage());
           }
         });
 
     followingRepository.findByMemberYouId(member.getId())
         .forEach(following -> {
           followingRepository.delete(following);
-          try {
+          if (following.getMemberMe().getFollowingCount() > 0) {
             memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
-          } catch (DataIntegrityViolationException e) {   // This exception can occur when already deleting member
-            log.warn("Exception throws during Async job: following: {}, exception: {}", following, e.getMessage());
           }
         });
 

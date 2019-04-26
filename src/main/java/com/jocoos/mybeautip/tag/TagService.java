@@ -8,7 +8,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,20 +71,20 @@ public class TagService {
     }
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void decreaseRefCount(String text) {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
-      try {
-        tagRepository.findByName(name)
-            .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
-      } catch (DataIntegrityViolationException e) {
-        log.warn("Exception throws decreaseTagCount: tagName: {}, exception: {}", name, e);
-      }
+      tagRepository.findByName(name)
+          .ifPresent(tag -> {
+            if (tag.getRefCount() > 0) {
+              tagRepository.updateTagRefCount(tag.getId(), -1);
+            }
+          });
     }
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE, noRollbackFor = DataIntegrityViolationException.class)
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public void updateRefCount(String oldText, String newText) {
     List<String> oldTagNames = parseHashTag(oldText);
     List<String> newTagNames = parseHashTag(newText);
@@ -94,12 +93,12 @@ public class TagService {
     List<String> addTagNames = (List<String>) CollectionUtils.removeAll(newTagNames, oldTagNames);
 
     for (String name : removeTagNames) {
-      try {
-        tagRepository.findByName(name)
-            .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
-      } catch (DataIntegrityViolationException e) {
-        log.warn("Exception throws updateTagRefCount: tagName: {}, exception: {}", name, e.getMessage());
-      }
+      tagRepository.findByName(name)
+          .ifPresent(tag -> {
+            if (tag.getRefCount() > 0) {
+              tagRepository.updateTagRefCount(tag.getId(), -1);
+            }
+          });
     }
 
     for (String name : addTagNames) {
