@@ -427,10 +427,9 @@ public class VideoService {
       }
     
       if ("PUBLIC".equals(request.getVisibility())) {
-        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
+        memberRepository.updatePublicVideoCount(member.getId(), 1);
       }
-      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
-      memberRepository.save(member);
+      memberRepository.updateTotalVideoCount(member.getId(), 1);
   
       video = videoRepository.save(video);
       if ("PUBLIC".equals(video.getVisibility())) {
@@ -446,10 +445,9 @@ public class VideoService {
       BeanUtils.copyProperties(request, video);
     
       if ("PUBLIC".equals(request.getVisibility())) {
-        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
+        memberRepository.updatePublicVideoCount(member.getId(), 1);
       }
-      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
-      memberRepository.save(member);
+      memberRepository.updateTotalVideoCount(member.getId(), 1);
     
       video = videoRepository.save(video);
       if ("PUBLIC".equals(video.getVisibility())) {
@@ -524,13 +522,17 @@ public class VideoService {
       
       Member member = target.getMember();
       if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
-        member.setPublicVideoCount(member.getPublicVideoCount() - 1);
+        try {
+          memberRepository.updatePublicVideoCount(member.getId(), -1);
+        } catch (DataException e) {
+          log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", target.getId(), e.getMessage());
+        }
         log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
         target.setVisibility(newState);
       }
       
       if ("PRIVATE".equalsIgnoreCase(prevState) && "PUBLIC".equalsIgnoreCase(newState)) {
-        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
+        memberRepository.updatePublicVideoCount(member.getId(), 1);
         log.debug("Video state will be changed PRIVATE to PUBLIC: {}", target.getId());
         target.setVisibility(newState);
       }
@@ -553,11 +555,18 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            member.setPublicVideoCount(member.getPublicVideoCount() - 1);
+            try {
+              memberRepository.updatePublicVideoCount(member.getId(), -1);
+            } catch (DataException e) {
+              log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
+            }
           }
 
-          member.setTotalVideoCount(member.getTotalVideoCount() - 1);
-          memberRepository.save(member);
+          try {
+            memberRepository.updateTotalVideoCount(member.getId(), -1);
+          } catch (DataException e) {
+            log.warn("DataException throws when updateTotalVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
+          }
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoId: " + videoId));
@@ -576,10 +585,17 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            member.setPublicVideoCount(member.getPublicVideoCount() - 1);
+            try {
+              memberRepository.updatePublicVideoCount(member.getId(), -1);
+            } catch (DataException e) {
+              log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
+            }
           }
-          member.setTotalVideoCount(member.getTotalVideoCount() - 1);
-          memberRepository.save(member);
+          try {
+            memberRepository.updateTotalVideoCount(member.getId(), -1);
+          } catch (DataException e) {
+            log.warn("DataException throws when updateTotalVideoCount: video_id: {}, e: {}", v.getId(), e.getMessage());
+          }
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
@@ -660,8 +676,11 @@ public class VideoService {
   
     if ("PUBLIC".equals(video.getVisibility())) {
       Member member = video.getMember();
-      member.setPublicVideoCount(member.getPublicVideoCount() - 1);
-      memberRepository.save(member);
+      try {
+        memberRepository.updatePublicVideoCount(member.getId(), -1);
+      } catch (DataException e) {
+        log.warn("DataException throws when updatePublicVideoCount: video_id: {}, e: {}", video.getId(), e.getMessage());
+      }
       video.setVisibility("PRIVATE");
     }
     
