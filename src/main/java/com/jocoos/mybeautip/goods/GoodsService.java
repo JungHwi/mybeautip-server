@@ -198,7 +198,9 @@ public class GoodsService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeLike(GoodsLike liked) {
     goodsLikeRepository.delete(liked);
-    goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);
+    if (liked.getGoods().getLikeCount() > 0) {
+      goodsRepository.updateLikeCount(liked.getGoods().getGoodsNo(), -1);
+    }
   }
   
   public Optional<GoodsInfo> generateGoodsInfo(String goodsNo) {

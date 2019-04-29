@@ -611,7 +611,9 @@ public class OrderService {
       videoRepository.findById(order.getVideoId())
           .ifPresent(video -> {
             // Update video order count
-            videoRepository.updateOrderCount(order.getVideoId(), -1);
+            if (video.getOrderCount() > 0) {
+              videoRepository.updateOrderCount(video.getId(), -1);
+            }
           
             // Remove revenues
             log.info("Order canceled - revenue per purchase removed: {}, {}", order.getId(), order.getMemberCoupon());

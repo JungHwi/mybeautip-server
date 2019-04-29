@@ -76,7 +76,11 @@ public class TagService {
     List<String> tags = parseHashTag(text);
     for (String name : tags) {
       tagRepository.findByName(name)
-          .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+          .ifPresent(tag -> {
+            if (tag.getRefCount() > 0) {
+              tagRepository.updateTagRefCount(tag.getId(), -1);
+            }
+          });
     }
   }
 
@@ -90,7 +94,11 @@ public class TagService {
 
     for (String name : removeTagNames) {
       tagRepository.findByName(name)
-          .ifPresent(tag -> tagRepository.updateTagRefCount(tag.getId(), -1));
+          .ifPresent(tag -> {
+            if (tag.getRefCount() > 0) {
+              tagRepository.updateTagRefCount(tag.getId(), -1);
+            }
+          });
     }
 
     for (String name : addTagNames) {
@@ -103,7 +111,7 @@ public class TagService {
     }
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
   public void addHistory(String text, int category, long resourceId, Member me) {
     List<String> uniqueTagNames = parseHashTag(text);
     for (String name : uniqueTagNames) {

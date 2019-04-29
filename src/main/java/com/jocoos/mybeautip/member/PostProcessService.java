@@ -64,13 +64,17 @@ public class PostProcessService {
     followingRepository.findByMemberMeId(member.getId())
         .forEach(following -> {
           followingRepository.delete(following);
-          memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+          if (following.getMemberYou().getFollowerCount() > 0) {
+            memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+          }
         });
 
     followingRepository.findByMemberYouId(member.getId())
         .forEach(following -> {
           followingRepository.delete(following);
-          memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
+          if (following.getMemberMe().getFollowingCount() > 0) {
+            memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
+          }
         });
 
     log.debug("Member {} deleted: cart items will be deleted", member.getId());

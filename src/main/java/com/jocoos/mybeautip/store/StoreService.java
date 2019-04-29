@@ -34,6 +34,8 @@ public class StoreService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void removeLike(StoreLike like) {
     storeLikeRepository.delete(like);
-    storeRepository.updateLikeCount(like.getStore().getId(), -1);
+    if (like.getStore().getLikeCount() > 0) {
+      storeRepository.updateLikeCount(like.getStore().getId(), -1);
+    }
   }
 }

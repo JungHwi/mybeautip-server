@@ -292,10 +292,15 @@ public class MemberService {
     return followingRepository.save(new Following(me, you));
   }
   
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional
   public void unFollowMember(Following following) {
     followingRepository.delete(following);
-    memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
-    memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+    if (following.getMemberMe().getFollowingCount() > 0) {
+      memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
+    }
+    
+    if (following.getMemberYou().getFollowerCount() > 0) {
+      memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+    }
   }
 }

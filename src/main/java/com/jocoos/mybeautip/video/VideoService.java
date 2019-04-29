@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -426,10 +425,9 @@ public class VideoService {
       }
     
       if ("PUBLIC".equals(request.getVisibility())) {
-        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
+        memberRepository.updatePublicVideoCount(member.getId(), 1);
       }
-      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
-      memberRepository.save(member);
+      memberRepository.updateTotalVideoCount(member.getId(), 1);
   
       video = videoRepository.save(video);
       if ("PUBLIC".equals(video.getVisibility())) {
@@ -445,10 +443,9 @@ public class VideoService {
       BeanUtils.copyProperties(request, video);
     
       if ("PUBLIC".equals(request.getVisibility())) {
-        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
+        memberRepository.updatePublicVideoCount(member.getId(), 1);
       }
-      member.setTotalVideoCount(member.getTotalVideoCount() + 1);
-      memberRepository.save(member);
+      memberRepository.updateTotalVideoCount(member.getId(), 1);
     
       video = videoRepository.save(video);
       if ("PUBLIC".equals(video.getVisibility())) {
@@ -523,13 +520,15 @@ public class VideoService {
       
       Member member = target.getMember();
       if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
-        member.setPublicVideoCount(member.getPublicVideoCount() - 1);
+        if (member.getPublicVideoCount() > 0) {
+          memberRepository.updatePublicVideoCount(member.getId(), -1);
+        }
         log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
         target.setVisibility(newState);
       }
       
       if ("PRIVATE".equalsIgnoreCase(prevState) && "PUBLIC".equalsIgnoreCase(newState)) {
-        member.setPublicVideoCount(member.getPublicVideoCount() + 1);
+        memberRepository.updatePublicVideoCount(member.getId(), 1);
         log.debug("Video state will be changed PRIVATE to PUBLIC: {}", target.getId());
         target.setVisibility(newState);
       }
@@ -552,11 +551,14 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            member.setPublicVideoCount(member.getPublicVideoCount() - 1);
+            if (member.getPublicVideoCount() > 0) {
+              memberRepository.updatePublicVideoCount(member.getId(), -1);
+            }
           }
 
-          member.setTotalVideoCount(member.getTotalVideoCount() - 1);
-          memberRepository.save(member);
+          if (member.getTotalVideoCount() > 0) {
+            memberRepository.updateTotalVideoCount(member.getId(), -1);
+          }
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoId: " + videoId));
@@ -575,10 +577,14 @@ public class VideoService {
           videoLikeRepository.deleteByVideoId(v.getId());
           Member member = v.getMember();
           if ("PUBLIC".equals(v.getVisibility())) {
-            member.setPublicVideoCount(member.getPublicVideoCount() - 1);
+            if (member.getPublicVideoCount() > 0) {
+              memberRepository.updatePublicVideoCount(member.getId(), -1);
+            }
           }
-          member.setTotalVideoCount(member.getTotalVideoCount() - 1);
-          memberRepository.save(member);
+          
+          if (member.getTotalVideoCount() > 0) {
+            memberRepository.updateTotalVideoCount(member.getId(), -1);
+          }
           return v;
         })
         .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
@@ -630,9 +636,22 @@ public class VideoService {
   public void deleteComment(Comment comment) {
     tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
     
-    videoRepository.updateCommentCount(comment.getVideoId(), -1);
+    videoRepository.findById(comment.getVideoId()).ifPresent(
+        video -> {
+          if (video.getCommentCount() > 0) {
+            videoRepository.updateCommentCount(video.getId(), -1);
+          }
+        }
+    );
+    
     if (comment.getParentId() != null) {
-      commentRepository.updateCommentCount(comment.getParentId(), -1);
+      commentRepository.findById(comment.getParentId()).ifPresent(
+          parentComment -> {
+            if (parentComment.getCommentCount() > 0) {
+              commentRepository.updateCommentCount(parentComment.getId(), -1);
+            }
+          }
+      );
     }
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
@@ -650,8 +669,9 @@ public class VideoService {
   
     if ("PUBLIC".equals(video.getVisibility())) {
       Member member = video.getMember();
-      member.setPublicVideoCount(member.getPublicVideoCount() - 1);
-      memberRepository.save(member);
+      if (member.getPublicVideoCount() > 0) {
+        memberRepository.updatePublicVideoCount(member.getId(), -1);
+      }
       video.setVisibility("PRIVATE");
     }
     
@@ -684,7 +704,9 @@ public class VideoService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeVideo(VideoLike liked) {
     videoLikeRepository.delete(liked);
-    videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
+    if (liked.getVideo().getLikeCount() > 0) {
+      videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
+    }
   }
   
   @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -696,7 +718,9 @@ public class VideoService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeVideoComment(CommentLike liked) {
     commentLikeRepository.delete(liked);
-    commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+    if (liked.getComment().getLikeCount() > 0) {
+      commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+    }
   }
   
   @Transactional(isolation = Isolation.SERIALIZABLE)

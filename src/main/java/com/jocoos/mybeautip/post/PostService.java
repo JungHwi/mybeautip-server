@@ -2,17 +2,20 @@ package com.jocoos.mybeautip.post;
 
 import java.util.List;
 
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+
+@Slf4j
 @Service
 public class PostService {
 
@@ -80,10 +83,24 @@ public class PostService {
   
   @Transactional
   public void deleteComment(Comment comment) {
-    postRepository.updateCommentCount(comment.getPostId(), -1);
+    postRepository.findById(comment.getPostId()).ifPresent(
+        post -> {
+          if (post.getCommentCount() > 0) {
+            postRepository.updateCommentCount(comment.getPostId(), -1);
+          }
+        }
+    );
+    
     if (comment.getParentId() != null) {
-      commentRepository.updateCommentCount(comment.getParentId(), -1);
+      postRepository.findById(comment.getParentId()).ifPresent(
+          parentComment -> {
+            if (parentComment.getCommentCount() > 0) {
+              commentRepository.updateCommentCount(parentComment.getId(), -1);
+            }
+          }
+      );
     }
+    
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
     commentRepository.delete(comment);
@@ -99,7 +116,9 @@ public class PostService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikePost(PostLike liked) {
     postLikeRepository.delete(liked);
-    postRepository.updateLikeCount(liked.getPost().getId(), -1);
+    if (liked.getPost().getLikeCount() > 0) {
+      postRepository.updateLikeCount(liked.getPost().getId(), -1);
+    }
   }
   
   @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -111,7 +130,9 @@ public class PostService {
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikeCommentPost(CommentLike liked) {
     commentLikeRepository.delete(liked);
-    commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+    if (liked.getComment().getCommentCount() > 0) {
+      commentRepository.updateLikeCount(liked.getComment().getId(), -1);
+    }
   }
   
   @Transactional
