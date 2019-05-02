@@ -104,7 +104,7 @@ public class GoodsController {
   
   @GetMapping
   public CursorResponse getGoodsList(@RequestParam(defaultValue = "20") int count,
-                                     @RequestParam(required = false) String sort,
+                                     @RequestParam(required = false, defaultValue = "order") String sort,
                                      @RequestParam(required = false) Long cursor,
                                      @RequestParam(required = false) String keyword,
                                      @RequestParam(required = false) String category) {
