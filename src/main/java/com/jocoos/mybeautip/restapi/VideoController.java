@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.goods.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -40,9 +41,6 @@ import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
@@ -100,6 +98,7 @@ public class VideoController {
   private final KeywordService keywordService;
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
+  private final TimeSaleService timeSaleService;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
@@ -133,7 +132,8 @@ public class VideoController {
                          NotificationService notificationService,
                          KeywordService keywordService,
                          RevenueRepository revenueRepository,
-                         GoodsRepository goodsRepository) {
+                         GoodsRepository goodsRepository,
+                         TimeSaleService timeSaleService) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.messageService = messageService;
@@ -154,6 +154,7 @@ public class VideoController {
     this.keywordService = keywordService;
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
+    this.timeSaleService = timeSaleService;
   }
   
   @PostMapping
@@ -230,12 +231,13 @@ public class VideoController {
   }
 
   @GetMapping("/{id}/goods")
-  public List<GoodsInfo> getRelatedGoods(@PathVariable("id") Long id) {
+  public List<GoodsInfo> getRelatedGoods(@PathVariable("id") Long id,
+                                         @RequestParam(name = "broker", required = false) Long broker) {
     List<VideoGoods> list = videoGoodsRepository.findAllByVideoId(id);
 
     List<GoodsInfo> relatedGoods = new ArrayList<>();
     for (VideoGoods video : list) {
-      relatedGoods.add(goodsService.generateGoodsInfo(video.getGoods()));
+      relatedGoods.add(goodsService.generateGoodsInfo(video.getGoods(), TimeSaleCondition.createWithBroker(broker)));
     }
     return relatedGoods;
   }

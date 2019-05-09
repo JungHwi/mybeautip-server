@@ -28,6 +28,7 @@ import com.jocoos.mybeautip.video.VideoGoodsRepository;
 public class GoodsService {
   private final MemberService memberService;
   private final MessageService messageService;
+  private final TimeSaleService timeSaleService;
   private final GoodsRepository goodsRepository;
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
@@ -58,12 +59,14 @@ public class GoodsService {
   
   public GoodsService(MemberService memberService,
                       MessageService messageService,
+                      TimeSaleService timeSaleService,
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
                       GoodsLikeRepository goodsLikeRepository,
                       StoreRepository storeRepository) {
     this.memberService = memberService;
     this.messageService = messageService;
+    this.timeSaleService = timeSaleService;
     this.goodsRepository = goodsRepository;
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsLikeRepository = goodsLikeRepository;
@@ -208,6 +211,12 @@ public class GoodsService {
   }
 
   public GoodsInfo generateGoodsInfo(Goods goods) {
+    return generateGoodsInfo(goods, TimeSaleCondition.createGeneral());
+  }
+
+  public GoodsInfo generateGoodsInfo(Goods goods, TimeSaleCondition timeSaleCondition) {
+    timeSaleService.applyTimeSale(goods, timeSaleCondition);
+
     // Set like ID if exist
     Long likeId = null;
     Long me = memberService.currentMemberId();
@@ -217,7 +226,7 @@ public class GoodsService {
     }
     // Set total count of related videos
     int relatedVideoTotalCount = videoGoodsRepository
-        .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(goods.getGoodsNo(), "PUBLIC", "CREATED");
+            .countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(goods.getGoodsNo(), "PUBLIC", "CREATED");
     String deliveryInfo = "";
     String refundInfo = "";
     String asInfo = "";

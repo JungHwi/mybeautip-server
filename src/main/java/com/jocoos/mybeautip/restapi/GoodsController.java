@@ -1,6 +1,9 @@
 package com.jocoos.mybeautip.restapi;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -9,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.jocoos.mybeautip.goods.*;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
@@ -17,14 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,14 +35,6 @@ import static org.springframework.data.domain.PageRequest.of;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.godo.GoodsDetailService;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsLike;
-import com.jocoos.mybeautip.goods.GoodsLikeRepository;
-import com.jocoos.mybeautip.goods.GoodsOption;
-import com.jocoos.mybeautip.goods.GoodsOptionService;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
@@ -104,10 +94,11 @@ public class GoodsController {
   
   @GetMapping
   public CursorResponse getGoodsList(@RequestParam(defaultValue = "20") int count,
-                                     @RequestParam(required = false) String sort,
+                                     @RequestParam(required = false, defaultValue = "order") String sort,
                                      @RequestParam(required = false) Long cursor,
                                      @RequestParam(required = false) String keyword,
-                                     @RequestParam(required = false) String category) {
+                                     @RequestParam(required = false) String category,
+                                     @RequestParam(name = "broker", required = false) Long broker) {
     if (count > 100) {
       count = 100;
     }
@@ -151,7 +142,7 @@ public class GoodsController {
   
     List<GoodsInfo> result = new ArrayList<>();
     for (Goods goods : slice.getContent()) {
-      result.add(goodsService.generateGoodsInfo(goods));
+      result.add(goodsService.generateGoodsInfo(goods, TimeSaleCondition.createWithBroker(broker)));
     }
   
     String nextCursor = null;
@@ -210,10 +201,11 @@ public class GoodsController {
 
   @GetMapping("/{goodsNo}")
   public GoodsInfo getGoods(@PathVariable("goodsNo") String goodsNo,
-                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
+                            @RequestParam(name = "broker", required = false) Long broker) {
     Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
     if (optional.isPresent()) {
-      return goodsService.generateGoodsInfo(optional.get());
+      return goodsService.generateGoodsInfo(optional.get(), TimeSaleCondition.createWithBroker(broker));
     } else {
       throw new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang));
     }
@@ -275,8 +267,9 @@ public class GoodsController {
   
   @GetMapping("/{goodsNo}/option_data")
   public GoodsOptionService.GoodsOptionInfo getGoodsOptionData(@PathVariable Integer goodsNo,
-                                                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    return goodsOptionService.getGoodsOptionData(goodsNo, lang);
+                                                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
+                                                               @RequestParam(name = "broker", required = false) Long broker) {
+    return goodsOptionService.getGoodsOptionData(goodsNo, lang, TimeSaleCondition.createWithBroker(broker));
   }
   
   private boolean isSoldOut(Goods goods, GoodsOption option) {

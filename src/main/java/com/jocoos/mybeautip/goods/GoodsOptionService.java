@@ -9,30 +9,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
 public class GoodsOptionService {
 
   private final MessageService messageService;
+  private final TimeSaleService timeSaleService;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   
   public GoodsOptionService(MessageService messageService,
+                            TimeSaleService timeSaleService,
                             GoodsRepository goodsRepository,
                             GoodsOptionRepository goodsOptionRepository) {
     this.messageService = messageService;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
+    this.timeSaleService = timeSaleService;
   }
   
-  public GoodsOptionInfo getGoodsOptionData(int goodsNo, String lang) {
+  public GoodsOptionInfo getGoodsOptionData(int goodsNo, String lang, TimeSaleCondition timeSaleCondition) {
     Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
         .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
   
@@ -40,6 +40,8 @@ public class GoodsOptionService {
     if (options.size() == 0) {
       return new GoodsOptionInfo(0, new ArrayList<>());
     }
+
+    timeSaleService.applyTimeSaleOptions(goodsNo, options, timeSaleCondition);
   
     Map<String, List<OptionData>> map = new LinkedHashMap<>();
     List<OptionData> subOptions;
@@ -83,6 +85,7 @@ public class GoodsOptionService {
       }
       info.setContent(list);
     }
+
     return info;
   }
   

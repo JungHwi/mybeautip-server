@@ -6,16 +6,9 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jocoos.mybeautip.goods.*;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,10 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsOption;
-import com.jocoos.mybeautip.goods.GoodsOptionRepository;
-import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.cart.Cart;
 import com.jocoos.mybeautip.member.cart.CartRepository;
@@ -103,7 +92,8 @@ public class CartController {
   public CartService.CartInfo updateCart(@PathVariable Long id,
                                          @Valid @RequestBody UpdateCartRequest request,
                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    return cartService.updateItem(id, memberService.currentMemberId(), request, lang);
+    return cartService.updateItem(id, memberService.currentMemberId
+            (), request, lang);
   }
 
   @DeleteMapping("{id}")
@@ -114,12 +104,14 @@ public class CartController {
 
   @PostMapping("/now")
   public CartService.CartInfo calculateInstantCartInfo(@Valid @RequestBody AddCartRequest request,
-                                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+                                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
+                                                       @RequestParam(name = "broker", required = false) Long broker) {
     List<Cart> list = new ArrayList<>();
     for (CartItemRequest item : request.getItems()) {
       list.add(getValidCartItem(item.getGoodsNo(), item.getOptionNo(), item.getQuantity(), lang));
     }
-    return cartService.getCartItemList(list);
+
+    return cartService.getCartItemList(list, TimeSaleCondition.createWithBroker(broker));
   }
 
   private Cart getValidCartItem(String goodsNo, int optionNo, int quantity, String lang) {

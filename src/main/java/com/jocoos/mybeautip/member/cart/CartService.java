@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.jocoos.mybeautip.goods.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,14 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.DeliveryCharge;
-import com.jocoos.mybeautip.goods.DeliveryChargeDetail;
-import com.jocoos.mybeautip.goods.DeliveryChargeDetailRepository;
-import com.jocoos.mybeautip.goods.DeliveryChargeRepository;
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsOption;
-import com.jocoos.mybeautip.goods.GoodsOptionRepository;
-import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.CartController;
@@ -55,6 +48,7 @@ public class CartService {
   private static final String STORE_NOT_FOUND = "store.not_found";
 
   private final MessageService messageService;
+  private final TimeSaleService timeSaleService;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
   private final CartRepository cartRepository;
@@ -63,6 +57,7 @@ public class CartService {
   private final DeliveryChargeDetailRepository deliveryChargeDetailRepository;
 
   public CartService(MessageService messageService,
+                     TimeSaleService timeSaleService,
                      GoodsRepository goodsRepository,
                      GoodsOptionRepository goodsOptionRepository,
                      CartRepository cartRepository,
@@ -70,6 +65,7 @@ public class CartService {
                      DeliveryChargeRepository deliveryChargeRepository,
                      DeliveryChargeDetailRepository deliveryChargeDetailRepository) {
     this.messageService = messageService;
+    this.timeSaleService = timeSaleService;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
     this.cartRepository = cartRepository;
@@ -84,6 +80,12 @@ public class CartService {
   }
 
   public CartInfo getCartItemList(List<Cart> list) {
+    return getCartItemList(list, TimeSaleCondition.createGeneral());
+  }
+
+  public CartInfo getCartItemList(List<Cart> list, TimeSaleCondition timeSaleCondition) {
+    timeSaleService.applyTimeSaleForCart(list, timeSaleCondition);
+
     Map<Integer, List<CartDelivery>> storeMap = new LinkedHashMap<>();  // key: storeId
     Map<Integer, List<CartItem>> deliveryMap = new LinkedHashMap<>();   // key: deliverySno
 
