@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import com.jocoos.mybeautip.goods.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
@@ -43,10 +44,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsLike;
-import com.jocoos.mybeautip.goods.GoodsLikeRepository;
-import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberMeInfo;
@@ -321,8 +318,9 @@ public class MemberController {
   @GetMapping(value = "/me/likes")
   public CursorResponse getMyLikes(@RequestParam String category,
                                    @RequestParam(defaultValue = "20") int count,
-                                   @RequestParam(required = false) Long cursor) {
-    return createLikeResponse(memberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes");
+                                   @RequestParam(required = false) Long cursor,
+                                   @RequestParam(name = "broker", required = false) Long broker) {
+    return createLikeResponse(memberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes", broker);
   }
 
   @GetMapping(value = "/{id:.+}/likes")
@@ -332,7 +330,7 @@ public class MemberController {
                                        @RequestParam(required = false) Long cursor,
                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
-    return createLikeResponse(id, category, count, cursor, String.format("/api/1/members/%d/likes", id));
+    return createLikeResponse(id, category, count, cursor, String.format("/api/1/members/%d/likes", id), null);
   }
 
   @GetMapping(value = "/me/videos")
@@ -599,13 +597,12 @@ public class MemberController {
         .withCursor(nextCursor).toBuild();
   }
 
-
-  private CursorResponse createLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
+  private CursorResponse createLikeResponse(Long memberId, String category, int count, Long cursor, String uri, Long broker) {
     switch (category) {
       case "post":
         return createPostLikeResponse(memberId, category, count, cursor, uri);
       case "goods":
-        return createGoodsLikeResponse(memberId, category, count, cursor, uri);
+        return createGoodsLikeResponse(memberId, category, count, cursor, uri, TimeSaleCondition.createWithBroker(broker));
       case "store":
         return createStoreLikeResponse(memberId, category, count, cursor, uri);
       case "video":
@@ -645,7 +642,7 @@ public class MemberController {
        .withCount(count).toBuild();
   }
 
-  private CursorResponse createGoodsLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
+  private CursorResponse createGoodsLikeResponse(Long memberId, String category, int count, Long cursor, String uri, TimeSaleCondition timeSaleCondition) {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Slice<GoodsLike> goodsLikes;
     List<GoodsInfo> result = Lists.newArrayList();
@@ -658,7 +655,7 @@ public class MemberController {
     }
 
     for (GoodsLike like : goodsLikes) {
-      result.add(goodsService.generateGoodsInfo(like.getGoods()));
+      result.add(goodsService.generateGoodsInfo(like.getGoods(), timeSaleCondition));
     }
 
     String nextCursor = null;

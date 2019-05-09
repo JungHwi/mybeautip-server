@@ -214,6 +214,10 @@ public class GoodsService {
     return generateGoodsInfo(goods, TimeSaleCondition.createGeneral());
   }
 
+  public Optional<GoodsInfo> generateGoodsInfo(String goodsNo, TimeSaleCondition timeSaleCondition) {
+    return goodsRepository.findByGoodsNo(goodsNo).map(g -> generateGoodsInfo(g, timeSaleCondition));
+  }
+
   public GoodsInfo generateGoodsInfo(Goods goods, TimeSaleCondition timeSaleCondition) {
     timeSaleService.applyTimeSale(goods, timeSaleCondition);
 
