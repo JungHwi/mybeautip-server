@@ -57,7 +57,7 @@ public class OrderService {
   private static final String POINT_BAD_REQUEST = "order.point_bad_rqeust";
   private static final String POINT_NOT_ENOUGH = "order.point_not_enough";
   private static final String POINT_BAD_REQUEST_MIN_PRICE_CONDITION= "order.price_not_enough_to_use_point";
-  private static final int MIN_PRICE_TO_USE_POINT= 10;
+  private static final int MIN_PRICE_TO_USE_POINT= 0;
   private static final int REVENUE_DURATION_AFTER_LIVE_ENDED = 300 * 1000;  // 5 min
   private final static String MERCHANT_PREFIX = "mybeautip_";
 
