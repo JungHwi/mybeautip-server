@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 
@@ -26,20 +27,17 @@ public class MemberPointService {
   }
 
   @Transactional
-  public void presentPoint(Long memberId, int point, Date expired) {
+  public MemberPoint presentPoint(Long memberId, int point, Date expired) {
 
     if (point <= 0) {
       throw new BadRequestException("The point must be grater than 0");
     }
 
-    memberRepository.findById(memberId)
-       .ifPresent(m -> {
+    Member m = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException());
+    m.setPoint(m.getPoint() + point);
+    memberRepository.save(m);
 
-         memberPointRepository.save(createPresentPoint(m, point, expired));
-
-         m.setPoint(m.getPoint() + point);
-         memberRepository.save(m);
-       });
+    return memberPointRepository.save(createPresentPoint(m, point, expired));
   }
 
 

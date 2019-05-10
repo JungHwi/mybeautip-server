@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
@@ -40,6 +41,7 @@ public class Notification {
   public static final String COMMENT_LIKE = "comment_like";
   public static final String MENTION = "mention";
   public static final String ORDER = "order";
+  public static final String POINT = "point";
 
   private static final String RESOURCE_TYPE_MEMBER = "member";
   public static final String RESOURCE_TYPE_VIDEO = "video";
@@ -48,6 +50,8 @@ public class Notification {
   private static final String RESOURCE_TYPE_VIDEO_COMMENT_REPLY = "video_comment_reply";
   private static final String RESOURCE_TYPE_POST_COMMENT_REPLY = "post_comment_reply";
   private static final String RESOURCE_TYPE_ORDER = "order";
+  private static final String RESOURCE_TYPE_POINT = "point";
+
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -274,5 +278,17 @@ public class Notification {
     this.resourceType = resourceType;
     this.resourceIds = resourceIds;
     this.imageUrl = imageUrl;
+  }
+
+  // Point
+  public Notification(MemberPoint memberPoint, Member from) {
+    this.type = POINT;
+    this.targetMember = memberPoint.getMember();
+    this.resourceType = RESOURCE_TYPE_POINT;
+    this.resourceId = from.getId();
+    this.resourceIds = StringUtils.joinWith(",", from.getId());
+    this.resourceOwner = from;
+    this.imageUrl = from.getAvatarUrl();
+    this.args = Lists.newArrayList(String.valueOf(memberPoint.getPoint()));
   }
 }
