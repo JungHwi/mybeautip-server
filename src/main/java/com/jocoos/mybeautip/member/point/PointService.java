@@ -4,12 +4,15 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.admin.Dates;
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.order.Order;
@@ -70,10 +73,10 @@ public class PointService {
     }
 
     Date now = new Date();
-    Date expired = Dates.afterMonths(now, 12);
+    Date expiry = Dates.afterMonths(now, 12);
 
     memberPoint.setEarnedAt(now);
-    memberPoint.setExpiredAt(expired);
+    memberPoint.setExpiryAt(expiry);
     memberPoint.setState(MemberPoint.STATE_EARNED_POINT);
     memberPointRepository.save(memberPoint);
 

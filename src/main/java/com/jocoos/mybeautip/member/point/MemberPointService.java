@@ -27,7 +27,7 @@ public class MemberPointService {
   }
 
   @Transactional
-  public MemberPoint presentPoint(Long memberId, int point, Date expired) {
+  public MemberPoint presentPoint(Long memberId, int point, Date expiryAt) {
 
     if (point <= 0) {
       throw new BadRequestException("The point must be grater than 0");
@@ -37,11 +37,10 @@ public class MemberPointService {
     m.setPoint(m.getPoint() + point);
     memberRepository.save(m);
 
-    return memberPointRepository.save(createPresentPoint(m, point, expired));
+    return memberPointRepository.save(createPresentPoint(m, point, expiryAt));
   }
 
-
-  private MemberPoint createPresentPoint(Member member, int point, Date expired) {
-    return new MemberPoint(member, null, point, MemberPoint.STATE_PRESENT_POINT, expired);
+  private MemberPoint createPresentPoint(Member member, int point, Date expiryAt) {
+    return new MemberPoint(member, null, point, MemberPoint.STATE_PRESENT_POINT, expiryAt);
   }
 }

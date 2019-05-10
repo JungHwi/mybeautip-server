@@ -52,6 +52,18 @@ public class MemberPoint extends CreatedDateAuditable {
   @Column
   private Date earnedAt;
 
+  /**
+   * Expiry At is Expiration Date of Present point to bj.
+   * Maybe Expiry At is 1 month or something.
+   */
+  @Column
+  private Date expiryAt;
+
+  /**
+   * Don't confuse this.
+   * This is generally null.
+   * This has date if point is expired like deleted at.
+   */
   @Column
   private Date expiredAt;
 
@@ -66,10 +78,10 @@ public class MemberPoint extends CreatedDateAuditable {
     this.state = state;
   }
 
-  public MemberPoint(Member member, Order order, int point, int state, Date expiredAt) {
+  public MemberPoint(Member member, Order order, int point, int state, Date expiryAt) {
     this(member, order, point, state);
     this.earnedAt = new Date();
-    this.expiredAt = expiredAt;
+    this.expiryAt = expiryAt;
   }
 
   public void setCreatedAt(Date date) {

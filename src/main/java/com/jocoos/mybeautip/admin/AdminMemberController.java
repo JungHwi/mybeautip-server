@@ -145,15 +145,15 @@ public class AdminMemberController {
       throw new BadRequestException(result.getFieldError());
     }
 
-    Date expired = null;
-    if (Strings.isNullOrEmpty(request.getExpiredAt())) {
-      expired = Dates.afterMonthsFromNow(1);
+    Date expiryAt = null;
+    if (Strings.isNullOrEmpty(request.getExpiryAt())) {
+      expiryAt = Dates.afterMonthsFromNow(1);
     } else {
-      expired = Dates.getRecommendedDate(request.getExpiredAt());
+      expiryAt = Dates.getRecommendedDate(request.getExpiryAt());
     }
 
-    log.debug("point: {}, expired: {}", request.getPoint(), expired);
-    memberPointService.presentPoint(request.getMemberId(), request.getPoint(), expired);
+    log.debug("point: {}, expiry date: {}", request.getPoint(), expiryAt);
+    memberPointService.presentPoint(request.getMemberId(), request.getPoint(), expiryAt);
     return new ResponseEntity(HttpStatus.CREATED);
   }
 
@@ -186,6 +186,6 @@ public class AdminMemberController {
     @NotNull
     private int point;
 
-    private String expiredAt;
+    private String expiryAt;
   }
 }

@@ -217,7 +217,7 @@ public class SlackService {
   public void sendPointToMember(MemberPoint memberPoint) {
     String message = String.format("*멤버(%d, %s) 에게 (%d)포인트 지급, 유효기간(%s)*"
        , memberPoint.getMember().getId(), memberPoint.getMember().getUsername(),
-       memberPoint.getPoint(), Dates.toString(memberPoint.getExpiredAt()));
+       memberPoint.getPoint(), Dates.toString(memberPoint.getExpiryAt()));
     log.debug("{}", message);
     send(message);
   }
