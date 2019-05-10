@@ -147,8 +147,7 @@ public class AdminMemberController {
 
     Date expired = null;
     if (Strings.isNullOrEmpty(request.getExpiredAt())) {
-      LocalDateTime month = LocalDateTime.now().plusMonths(1);
-      expired = Date.from(month.atZone(ZoneId.systemDefault()).toInstant());
+      expired = Dates.afterMonthsFromNow(1);
     } else {
       expired = Dates.getRecommendedDate(request.getExpiredAt());
     }

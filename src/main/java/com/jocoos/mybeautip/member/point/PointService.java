@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.admin.Dates;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.order.Order;
@@ -60,17 +61,22 @@ public class PointService {
     MemberPoint memberPoint = new MemberPoint(order.getCreatedBy(), order, point, MemberPoint.STATE_USE_POINT);
     memberPointRepository.save(memberPoint);
   }
-  
+
+  // Using from confirmOrder in AdminBatchController
   @Transactional
   public void convertPoint(MemberPoint memberPoint) {
     if (memberPoint == null) {
       return;
     }
-    
-    memberPoint.setEarnedAt(new Date());
+
+    Date now = new Date();
+    Date expired = Dates.afterMonths(now, 12);
+
+    memberPoint.setEarnedAt(now);
+    memberPoint.setExpiredAt(expired);
     memberPoint.setState(MemberPoint.STATE_EARNED_POINT);
     memberPointRepository.save(memberPoint);
-    
+
     Member member = memberPoint.getMember();
     member.setPoint(member.getPoint() + memberPoint.getPoint());
     memberRepository.save(member);

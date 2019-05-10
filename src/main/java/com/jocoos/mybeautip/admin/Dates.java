@@ -27,4 +27,18 @@ public class Dates {
   public static String toString(Date date) {
     return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
   }
+
+  public static Date afterMonths(Date date, int months) {
+    LocalDateTime localDateTime = getLocalDateTime(date).plusMonths(months);
+    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+  }
+
+  public static Date afterMonthsFromNow(int months) {
+    LocalDateTime localDateTime = LocalDateTime.now().plusMonths(months);
+    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+  }
+
+  public static LocalDateTime getLocalDateTime(Date date) {
+    return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+  }
 }
