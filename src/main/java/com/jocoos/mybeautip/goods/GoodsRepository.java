@@ -85,9 +85,8 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
     "or g.goodsDescription like concat('%',:keyword,'%') " +
     "or g.goodsSearchWord like concat('%',:keyword,'%')) " +
     "and g.state <=2 " +
-    "and g.createdAt < :cursor order by g.createdAt desc")
+    "order by g.orderCnt desc")
   Slice<Goods> findAllByKeyword(@Param("keyword")String keyword,
-                                @Param("cursor")Date cursor,
                                 Pageable of);
 
   @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
