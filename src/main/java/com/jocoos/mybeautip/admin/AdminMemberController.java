@@ -3,8 +3,6 @@ package com.jocoos.mybeautip.admin;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 
 import org.springframework.beans.BeanUtils;
