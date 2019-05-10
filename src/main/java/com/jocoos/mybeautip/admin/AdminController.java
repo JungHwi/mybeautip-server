@@ -82,7 +82,6 @@ import com.jocoos.mybeautip.video.report.VideoReportRepository;
 @RestController
 @RequestMapping("/api/admin/manual")
 public class AdminController {
-  private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
 
   private final PostRepository postRepository;
   private final BannerRepository bannerRepository;
@@ -568,12 +567,7 @@ public class AdminController {
   }
 
   private Date getRecommendedDate(String date) {
-    try {
-      return RECOMMENDED_DATE_FORMAT.parse(date);
-    } catch (ParseException e) {
-      log.error("invalid recommended date format", e);
-      throw new BadRequestException("invalid date format", e.getMessage() + " - " + date);
-    }
+    return Dates.getRecommendedDate(date);
   }
 
   @GetMapping("/motdDetails")
