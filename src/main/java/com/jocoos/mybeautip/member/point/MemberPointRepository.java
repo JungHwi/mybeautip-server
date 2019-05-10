@@ -27,4 +27,7 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
   Page<MemberPoint> findByMemberIdAndState(Long memberId, int state, Pageable pageable);
   
   Optional<MemberPoint> findByMemberAndOrderAndPointAndState(Member member, Order order, int point, int state);
+
+  // admin api
+  Page<MemberPoint> findByStateAndOrderIsNull(int state, Pageable pageable);
 }
