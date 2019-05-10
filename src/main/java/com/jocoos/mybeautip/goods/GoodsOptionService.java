@@ -31,18 +31,22 @@ public class GoodsOptionService {
     this.goodsOptionRepository = goodsOptionRepository;
     this.timeSaleService = timeSaleService;
   }
-  
+
   public GoodsOptionInfo getGoodsOptionData(int goodsNo, String lang, TimeSaleCondition timeSaleCondition) {
     Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
-        .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
-  
+            .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
+
     List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
     if (options.size() == 0) {
       return new GoodsOptionInfo(0, new ArrayList<>());
     }
 
     timeSaleService.applyTimeSaleOptions(goodsNo, options, timeSaleCondition);
+
+    return getGoodsOptionData0(goods, options);
+  }
   
+  private GoodsOptionInfo getGoodsOptionData0(Goods goods, List<GoodsOption> options) {
     Map<String, List<OptionData>> map = new LinkedHashMap<>();
     List<OptionData> subOptions;
     for (GoodsOption option : options) {

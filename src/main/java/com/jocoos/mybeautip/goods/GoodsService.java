@@ -220,7 +220,10 @@ public class GoodsService {
 
   public GoodsInfo generateGoodsInfo(Goods goods, TimeSaleCondition timeSaleCondition) {
     timeSaleService.applyTimeSale(goods, timeSaleCondition);
+    return generateGoodsInfo0(goods);
+  }
 
+  private GoodsInfo generateGoodsInfo0(Goods goods) {
     // Set like ID if exist
     Long likeId = null;
     Long me = memberService.currentMemberId();
