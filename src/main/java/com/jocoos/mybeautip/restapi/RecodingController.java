@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.jocoos.mybeautip.goods.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,12 +22,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsInfo;
-import com.jocoos.mybeautip.goods.GoodsLike;
-import com.jocoos.mybeautip.goods.GoodsLikeRepository;
-import com.jocoos.mybeautip.goods.GoodsRepository;
-import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.Post;
@@ -144,14 +139,15 @@ public class RecodingController {
   
   @GetMapping("/views/goods")
   public CursorResponse findAllMyViewsLogForGoods(@RequestParam(defaultValue = "20") int count,
-                                                  @RequestParam(required = false) String cursor) {
+                                                  @RequestParam(required = false) String cursor,
+                                                  @RequestParam(name = "broker", required = false) Long broker) {
     Long memberId = memberService.currentMemberId();
     
     Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(memberId, count, cursor, 2);
     List<GoodsInfo> result = new ArrayList<>();
   
     for (ViewRecoding recoding : recodings) {
-      goodsService.generateGoodsInfo(recoding.getItemId()).ifPresent(result::add);
+      goodsService.generateGoodsInfo(recoding.getItemId(), TimeSaleCondition.createWithBroker(broker)).ifPresent(result::add);
     }
     
     log.debug("{}", result);
