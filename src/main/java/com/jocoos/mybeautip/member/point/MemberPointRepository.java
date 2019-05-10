@@ -20,13 +20,14 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
 
   List<MemberPoint> findByStateAndCreatedAtBeforeAndEarnedAtIsNull(int state, Date createdAt);
 
-  List<MemberPoint> findByStateAndEarnedAtBeforeAndExpiredAtIsNull(int state, Date earnedAt);
+  List<MemberPoint> findByStateInAndExpiryAtBeforeAndExpiredAtIsNull(List<Integer> states, Date earnedAt);
 
   Page<MemberPoint> findByMemberId(Long memberId, Pageable pageable);
 
   Page<MemberPoint> findByMemberIdAndState(Long memberId, int state, Pageable pageable);
   
   Optional<MemberPoint> findByMemberAndOrderAndPointAndState(Member member, Order order, int point, int state);
+
 
   // admin api
   Page<MemberPoint> findByStateAndOrderIsNull(int state, Pageable pageable);
