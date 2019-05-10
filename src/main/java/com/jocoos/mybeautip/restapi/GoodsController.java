@@ -95,7 +95,7 @@ public class GoodsController {
   @GetMapping
   public CursorResponse getGoodsList(@RequestParam(defaultValue = "20") int count,
                                      @RequestParam(required = false, defaultValue = "order") String sort,
-                                     @RequestParam(required = false) Long cursor,
+                                     @RequestParam(required = false, defaultValue = "0") Long cursor,
                                      @RequestParam(required = false) String keyword,
                                      @RequestParam(required = false) String category,
                                      @RequestParam(name = "broker", required = false) Long broker) {
@@ -134,8 +134,7 @@ public class GoodsController {
     Slice<Goods> slice;
     if (StringUtils.isNotEmpty(keyword)) {
       category = sort = null;
-      Date startCursor = (cursor == null) ? new Date() : new Date(cursor);
-      slice = goodsRepository.findAllByKeyword(keyword, startCursor, of(0, count));
+      slice = goodsRepository.findAllByKeyword(keyword, of(cursor.intValue(), count));
     } else {
       slice = goodsService.getGoodsList(count, cursor, sort, category);
     }
@@ -148,7 +147,7 @@ public class GoodsController {
     String nextCursor = null;
     if (sort == null) {
       if (result.size() > 0) {
-        nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+        nextCursor = String.valueOf(cursor + 1);
       }
     } else {
       switch (sort) {
