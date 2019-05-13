@@ -16,10 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
+import com.jocoos.mybeautip.admin.Dates;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
@@ -211,7 +213,15 @@ public class SlackService {
         "```%s```", videoId, statMessage);
     send(message);
   }
-  
+
+  public void sendPointToMember(MemberPoint memberPoint) {
+    String message = String.format("*멤버(%d, %s) 에게 (%d)포인트 지급, 유효기간(%s)*"
+       , memberPoint.getMember().getId(), memberPoint.getMember().getUsername(),
+       memberPoint.getPoint(), Dates.toString(memberPoint.getExpiryAt()));
+    log.debug("{}", message);
+    send(message);
+  }
+
   private String getPurchaseInfo(List<Purchase> purchases) {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {

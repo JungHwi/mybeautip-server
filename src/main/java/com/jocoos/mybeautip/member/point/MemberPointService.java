@@ -4,18 +4,22 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.admin.Dates;
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.order.Order;
 
 @Slf4j
 @Service
-public class PointService {
+public class MemberPointService {
 
   @Value("${mybeautip.point.earn-ratio}")
   private int pointRatio;
@@ -23,8 +27,8 @@ public class PointService {
   private final MemberRepository memberRepository;
   private final MemberPointRepository memberPointRepository;
 
-  public PointService(MemberRepository memberRepository,
-                      MemberPointRepository memberPointRepository) {
+  public MemberPointService(MemberRepository memberRepository,
+                            MemberPointRepository memberPointRepository) {
     this.memberRepository = memberRepository;
     this.memberPointRepository = memberPointRepository;
   }
@@ -60,19 +64,42 @@ public class PointService {
     MemberPoint memberPoint = new MemberPoint(order.getCreatedBy(), order, point, MemberPoint.STATE_USE_POINT);
     memberPointRepository.save(memberPoint);
   }
-  
+
+  // Using from confirmOrder in AdminBatchController
   @Transactional
   public void convertPoint(MemberPoint memberPoint) {
     if (memberPoint == null) {
       return;
     }
-    
-    memberPoint.setEarnedAt(new Date());
+
+    Date now = new Date();
+    Date expiry = Dates.afterMonths(now, 12);
+
+    memberPoint.setEarnedAt(now);
+    memberPoint.setExpiryAt(expiry);
     memberPoint.setState(MemberPoint.STATE_EARNED_POINT);
     memberPointRepository.save(memberPoint);
-    
+
     Member member = memberPoint.getMember();
     member.setPoint(member.getPoint() + memberPoint.getPoint());
     memberRepository.save(member);
+  }
+
+  @Transactional
+  public MemberPoint presentPoint(Long memberId, int point, Date expiryAt) {
+
+    if (point <= 0) {
+      throw new BadRequestException("The point must be grater than 0");
+    }
+
+    Member m = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException());
+    m.setPoint(m.getPoint() + point);
+    memberRepository.save(m);
+
+    return memberPointRepository.save(createPresentPoint(m, point, expiryAt));
+  }
+
+  private MemberPoint createPresentPoint(Member member, int point, Date expiryAt) {
+    return new MemberPoint(member, null, point, MemberPoint.STATE_PRESENT_POINT, expiryAt);
   }
 }

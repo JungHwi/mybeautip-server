@@ -16,6 +16,7 @@ import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
@@ -24,6 +25,7 @@ import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
@@ -40,7 +42,8 @@ public class NotificationService {
   private final FollowingRepository followingRepository;
   private final NotificationRepository notificationRepository;
   private final MemberRepository memberRepository;
-  
+  private final MemberService memberService;
+
   @Value("${mybeautip.notification.duplicate-limit-duration}")
   private int duration;
 
@@ -50,7 +53,8 @@ public class NotificationService {
                              PostRepository postRepository,
                              FollowingRepository followingRepository,
                              NotificationRepository notificationRepository,
-                             MemberRepository memberRepository) {
+                             MemberRepository memberRepository,
+                             MemberService memberService) {
     this.deviceService = deviceService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
@@ -58,6 +62,7 @@ public class NotificationService {
     this.followingRepository = followingRepository;
     this.notificationRepository = notificationRepository;
     this.memberRepository = memberRepository;
+    this.memberService = memberService;
   }
 
   public void notifyCreateVideo(Video video) {
@@ -347,5 +352,14 @@ public class NotificationService {
           notificationRepository.save(notification);
           deviceService.push(notification);
         });
+  }
+
+  public void notifyMemberPoint(MemberPoint memberPoint) {
+    Member admin = memberService.currentMember();
+    Notification notification = new Notification(memberPoint, admin);
+    log.debug("notification: {}", notification);
+
+    notificationRepository.save(notification);
+    deviceService.push(notification);
   }
 }

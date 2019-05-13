@@ -38,7 +38,7 @@ import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointRepository;
-import com.jocoos.mybeautip.member.point.PointService;
+import com.jocoos.mybeautip.member.point.MemberPointService;
 
 @Slf4j
 @RestController
@@ -49,19 +49,19 @@ public class MemberShoppingController {
 
   private final MemberService memberService;
   private final CouponService couponService;
-  private final PointService pointService;
+  private final MemberPointService memberPointService;
 
   private final OrderRepository orderRepository;
   private final MemberPointRepository memberPointRepository;
 
   public MemberShoppingController(MemberService memberService,
                                   CouponService couponService,
-                                  PointService pointService,
+                                  MemberPointService memberPointService,
                                   OrderRepository orderRepository,
                                   MemberPointRepository memberPointRepository) {
     this.memberService = memberService;
     this.couponService = couponService;
-    this.pointService = pointService;
+    this.memberPointService = memberPointService;
     this.orderRepository = orderRepository;
     this.memberPointRepository = memberPointRepository;
   }
@@ -86,7 +86,7 @@ public class MemberShoppingController {
     Date weekAgo = DateUtils.addDays(new Date(), -7);
 
     int couponCount = couponService.countByCoupons(member);
-    int expectedPoint = pointService.getExpectedPoint(member);
+    int expectedPoint = memberPointService.getExpectedPoint(member);
 
     PointInfo pointInfo = new PointInfo(member.getPoint(), expectedPoint);
     log.debug("point into: {}", pointInfo);
