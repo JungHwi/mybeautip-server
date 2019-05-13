@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.support.slack;
 
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -215,9 +216,11 @@ public class SlackService {
   }
 
   public void sendPointToMember(MemberPoint memberPoint) {
-    String message = String.format("*멤버(%d, %s) 에게 (%d)포인트 지급, 유효기간(%s)*"
-       , memberPoint.getMember().getId(), memberPoint.getMember().getUsername(),
-       memberPoint.getPoint(), Dates.toString(memberPoint.getExpiryAt()));
+    String details = String.format("%s/%d - 포인트: %d, 유효기간: %s", memberPoint.getMember().getUsername(), memberPoint.getMember().getId(),
+       memberPoint.getPoint(), Dates.toString(memberPoint.getExpiryAt(), ZoneId.of("Asia/Seoul")));
+    String message = String.format("*포인트(%d) 지급*" +
+       "```%s```", memberPoint.getPoint(), details);
+
     log.debug("{}", message);
     send(message);
   }

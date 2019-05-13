@@ -28,6 +28,10 @@ public class Dates {
     return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
   }
 
+  public static String toString(Date date, ZoneId zoneId) {
+    return LocalDateTime.ofInstant(date.toInstant(), zoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+  }
+
   public static Date afterMonths(Date date, int months) {
     LocalDateTime localDateTime = getLocalDateTime(date).plusMonths(months);
     return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());

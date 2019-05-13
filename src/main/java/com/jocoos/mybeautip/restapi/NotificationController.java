@@ -80,7 +80,7 @@ public class NotificationController {
       notifications = notificationRepository.findByTargetMemberId(memberId, page);
     }
     
-    String[] typeWithUsername = {FOLLOWING, VIDEO_STARTED, VIDEO_UPLOADED, VIDEO_LIKE, COMMENT, COMMENT_REPLY, COMMENT_LIKE, MENTION};
+    String[] typeWithUsername = {FOLLOWING, VIDEO_STARTED, VIDEO_UPLOADED, VIDEO_LIKE, COMMENT, COMMENT_REPLY, COMMENT_LIKE, MENTION, POINT};
     String[] typeWithComment = {COMMENT, COMMENT_REPLY, COMMENT_LIKE, MENTION};
     
     notifications

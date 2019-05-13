@@ -50,7 +50,7 @@ public class Notification {
   private static final String RESOURCE_TYPE_VIDEO_COMMENT_REPLY = "video_comment_reply";
   private static final String RESOURCE_TYPE_POST_COMMENT_REPLY = "post_comment_reply";
   private static final String RESOURCE_TYPE_ORDER = "order";
-  private static final String RESOURCE_TYPE_POINT = "point";
+  private static final String RESOURCE_TYPE_MY_SHOPPING= "my_shopping";
 
 
   @Id
@@ -284,11 +284,12 @@ public class Notification {
   public Notification(MemberPoint memberPoint, Member from) {
     this.type = POINT;
     this.targetMember = memberPoint.getMember();
-    this.resourceType = RESOURCE_TYPE_POINT;
-    this.resourceId = from.getId();
-    this.resourceIds = StringUtils.joinWith(",", from.getId());
+//    this.resourceType = RESOURCE_TYPE_MY_SHOPPING;
+    this.resourceType = RESOURCE_TYPE_MEMBER;
+    this.resourceId = memberPoint.getMember().getId();
+    this.resourceIds = StringUtils.joinWith(",", memberPoint.getMember().getId());
     this.resourceOwner = from;
     this.imageUrl = from.getAvatarUrl();
-    this.args = Lists.newArrayList(String.valueOf(memberPoint.getPoint()));
+    this.args = Lists.newArrayList(from.getUsername(), String.valueOf(memberPoint.getPoint()));
   }
 }

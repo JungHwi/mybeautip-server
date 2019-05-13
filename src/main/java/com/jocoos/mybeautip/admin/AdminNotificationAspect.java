@@ -40,8 +40,17 @@ public class AdminNotificationAspect {
       MemberPoint point = (MemberPoint) result;
       log.debug("point: {}", point);
 
-      notificationService.notifyMemberPoint(point);
-      slackService.sendPointToMember(point);
+      try {
+        notificationService.notifyMemberPoint(point);
+      } catch (Exception e) {
+        log.error("{}", e);
+      }
+
+      try {
+        slackService.sendPointToMember(point);
+      } catch (Exception e) {
+        log.error("{}", e);
+      }
     }
   }
 }
