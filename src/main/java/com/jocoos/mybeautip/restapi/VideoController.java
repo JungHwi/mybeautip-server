@@ -161,7 +161,9 @@ public class VideoController {
   public VideoInfo createVideo(@Valid @RequestBody CreateVideoRequest request) {
     log.info("callback createVideo: {}", request.toString());
     Video createdVideo = videoService.create(request);
-    return videoService.generateVideoInfo(createdVideo);
+    VideoInfo videoInfo = videoService.generateVideoInfo(createdVideo);
+    videoInfo.setVideoKey(String.valueOf(videoInfo.getId()));
+    return videoInfo;
   }
 
   @GetMapping("{id}")
