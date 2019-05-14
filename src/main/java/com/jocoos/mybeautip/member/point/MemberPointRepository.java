@@ -22,6 +22,8 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
 
   List<MemberPoint> findByStateInAndExpiryAtBeforeAndExpiredAtIsNull(List<Integer> states, Date earnedAt);
 
+  List<MemberPoint> findByStateInAndExpiryAtBeforeAndRemindIsFalseAndExpiredAtIsNull(List<Integer> states, Date earnedAt);
+
   Page<MemberPoint> findByMemberId(Long memberId, Pageable pageable);
 
   Page<MemberPoint> findByMemberIdAndState(Long memberId, int state, Pageable pageable);

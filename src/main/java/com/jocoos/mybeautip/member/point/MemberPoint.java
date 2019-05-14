@@ -71,6 +71,9 @@ public class MemberPoint extends CreatedDateAuditable {
   @Column
   private Date expiredAt;
 
+  @Column
+  private boolean remind;
+
   public MemberPoint(Member member, Order order, int point) {
     this(member, order, point, STATE_WILL_BE_EARNED);
   }

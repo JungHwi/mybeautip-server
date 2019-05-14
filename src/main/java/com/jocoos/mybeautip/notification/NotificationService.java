@@ -371,4 +371,11 @@ public class NotificationService {
     deviceService.push(notification);
   }
 
+  public void notifyReminderMemberPoint(MemberPoint memberPoint) {
+    Member admin = memberService.getAdmin();
+    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "remind_point"));
+    log.info("notification: {}", notification);
+
+    deviceService.push(notification);
+  }
 }

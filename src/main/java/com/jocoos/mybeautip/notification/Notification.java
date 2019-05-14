@@ -305,6 +305,9 @@ public class Notification {
       case "deduct_point":
         setDeductPointMessage(memberPoint.getFormattedPoint());
         break;
+      case "remind_point":
+        this.args = Lists.newArrayList();
+        break;
       default:
         throw new IllegalArgumentException("Unknown detail type - " + detail);
     }

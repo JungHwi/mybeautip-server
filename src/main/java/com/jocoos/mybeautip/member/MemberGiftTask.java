@@ -35,6 +35,9 @@ public class MemberGiftTask {
   @Value("${mybeautip.point.earn-after-days}")
   private int earnedAfterDays;
 
+  @Value("${mybeautip.point.remind-expiring-point}")
+  private int reminder;
+
   public MemberGiftTask(MemberRepository memberRepository,
                         MemberCouponRepository memberCouponRepository,
                         MemberPointRepository memberPointRepository,
@@ -67,6 +70,21 @@ public class MemberGiftTask {
       log.debug("expired points found: {}", expires);
       expires.stream().forEach(memberPoint -> {
         memberPointService.expiredPoint(memberPoint, now);
+      });
+    }
+  }
+
+  @Scheduled(fixedDelay = 60 * 1000)
+  public void remindPoints() {
+    Date before = getDays(reminder);
+    List<MemberPoint> reminders = memberPointRepository.findByStateInAndExpiryAtBeforeAndRemindIsFalseAndExpiredAtIsNull(Lists.newArrayList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT), before);
+    if (!CollectionUtils.isEmpty(reminders)) {
+      log.debug("reminder before 3 days : {}", dateFormat.format(reminder));
+      log.debug("expired points found: {}", reminders);
+      reminders.stream().forEach(memberPoint -> {
+        notificationService.notifyReminderMemberPoint(memberPoint);
+        memberPoint.setRemind(true);
+        memberPointRepository.save(memberPoint);
       });
     }
   }
