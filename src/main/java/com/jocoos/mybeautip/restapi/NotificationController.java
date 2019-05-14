@@ -65,7 +65,8 @@ public class NotificationController {
 
   @GetMapping
   public CursorResponse getNotifications(@RequestParam(defaultValue = "20") int count,
-                                         @RequestParam(required = false) String cursor) {
+                                         @RequestParam(required = false) String cursor,
+                                         @RequestParam(defaultValue = "0") int step) {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Long memberId = memberService.currentMemberId();
     List<NotificationInfo> result = Lists.newArrayList();
@@ -73,9 +74,18 @@ public class NotificationController {
     Slice<Notification> notifications;
 
     if (StringUtils.isNumeric(cursor)) {
-      notifications = notificationRepository.findByTargetMemberIdAndCreatedAtBefore(memberId, new Date(Long.parseLong(cursor)), page);
+      if (step > 0) {
+        notifications = notificationRepository.findByTargetMemberIdAndCreatedAtBefore(memberId, new Date(Long.parseLong(cursor)), page);
+      } else {
+        notifications = notificationRepository.findByTargetMemberIdAndCreatedAtBeforeAndTypeNot(memberId, new Date(Long.parseLong(cursor)), Notification.SYSTEM_MESSAGE, page);
+      }
+
     } else {
-      notifications = notificationRepository.findByTargetMemberId(memberId, page);
+      if (step > 0) {
+        notifications = notificationRepository.findByTargetMemberId(memberId, page);
+      } else {
+        notifications = notificationRepository.findByTargetMemberIdAndTypeNot(memberId, Notification.SYSTEM_MESSAGE, page);
+      }
     }
     
     String[] typeWithUsername = {FOLLOWING, VIDEO_STARTED, VIDEO_UPLOADED, VIDEO_LIKE, COMMENT, COMMENT_REPLY, COMMENT_LIKE, MENTION};
