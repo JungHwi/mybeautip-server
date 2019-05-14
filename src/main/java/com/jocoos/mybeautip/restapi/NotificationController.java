@@ -164,6 +164,9 @@ public class NotificationController {
       this.targetMember = targetMember;
       this.resourceOwner = resourceOwner;
       this.mentionInfo = mentionInfo;
+      if (notification.getImageUrl() == null) {
+        this.imageUrl = "";
+      }
     }
 
     public NotificationInfo(Notification notification, String message, Long followId,
