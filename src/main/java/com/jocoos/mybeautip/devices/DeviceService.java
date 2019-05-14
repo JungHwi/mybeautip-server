@@ -43,7 +43,6 @@ public class DeviceService {
   private static final String KEY_NOTIFICATION = "notification";
   private static final String KEY_DATA = "data";
 
-  private final MemberService memberService;
   private final MessageService messageService;
   private final DeviceRepository deviceRepository;
   private final NotificationRepository notificationRepository;
@@ -56,14 +55,12 @@ public class DeviceService {
   @Autowired
   private AmazonSNS amazonSNS;
 
-  public DeviceService(MemberService memberService,
-                       DeviceRepository deviceRepository,
+  public DeviceService(DeviceRepository deviceRepository,
                        MessageService messageService,
                        NotificationRepository notificationRepository,
                        PushMessageRepository pushMessageRepository,
                        ObjectMapper objectMapper,
                        AmazonSNS amazonSNS) {
-    this.memberService = memberService;
     this.deviceRepository = deviceRepository;
     this.messageService = messageService;
     this.notificationRepository = notificationRepository;
@@ -214,8 +211,8 @@ public class DeviceService {
 
   private String convertToGcmMessage(Notification notification, String os) {
     String message = !Strings.isNullOrEmpty(notification.getInstantMessageBody()) ?
-       notification.getInstantMessageBody() : messageService.getNotificationMessage(
-       notification.getType(), notification.getArgs().toArray());
+       notification.getInstantMessageBody() :
+       messageService.getMessage(notification);
 
     Map<String, String> data = Maps.newHashMap();
     data.put("id", String.valueOf(notification.getId()));

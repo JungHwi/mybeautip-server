@@ -28,6 +28,7 @@ import java.util.Map;
 @Entity
 @Table(name = "notifications")
 public class Notification {
+  private static final String NOTICE_IMG = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_notice.png";
 
   public static final String INSTANT = "instant";
   public static final String MY_VIDEO_UPLOADED= "my_video_uploaded";
@@ -41,7 +42,7 @@ public class Notification {
   public static final String COMMENT_LIKE = "comment_like";
   public static final String MENTION = "mention";
   public static final String ORDER = "order";
-  public static final String POINT = "point";
+  public static final String SYSTEM_MESSAGE = "system_message";
 
   private static final String RESOURCE_TYPE_MEMBER = "member";
   public static final String RESOURCE_TYPE_VIDEO = "video";
@@ -50,7 +51,11 @@ public class Notification {
   private static final String RESOURCE_TYPE_VIDEO_COMMENT_REPLY = "video_comment_reply";
   private static final String RESOURCE_TYPE_POST_COMMENT_REPLY = "post_comment_reply";
   private static final String RESOURCE_TYPE_ORDER = "order";
-  private static final String RESOURCE_TYPE_MY_SHOPPING= "my_shopping";
+
+  private static final String RESOURCE_TYPE_MY_COUPON = "my_coupon";
+  private static final String RESOURCE_TYPE_MY_POINT = "my_point";
+  private static final String RESOURCE_TYPE_SETTINGS = "settings";
+  private static final String RESOURCE_TYPE_SETTLE_LIST = "settle_list";
 
 
   @Id
@@ -280,16 +285,20 @@ public class Notification {
     this.imageUrl = imageUrl;
   }
 
-  // Point
   public Notification(MemberPoint memberPoint, Member from) {
-    this.type = POINT;
+    this.type = SYSTEM_MESSAGE;
     this.targetMember = memberPoint.getMember();
-//    this.resourceType = RESOURCE_TYPE_MY_SHOPPING;
-    this.resourceType = RESOURCE_TYPE_MEMBER;
+    this.resourceType = RESOURCE_TYPE_MY_POINT;
     this.resourceId = memberPoint.getMember().getId();
     this.resourceIds = StringUtils.joinWith(",", memberPoint.getMember().getId());
     this.resourceOwner = from;
-    this.imageUrl = from.getAvatarUrl();
+    from.setAvatarUrl(NOTICE_IMG);
     this.args = Lists.newArrayList(from.getUsername(), String.valueOf(memberPoint.getPoint()));
+    this.custom = Maps.newHashMap();
+    this.custom.put("system_detail", "point");
+  }
+
+  public boolean isSystemMessage() {
+    return SYSTEM_MESSAGE.equals(this.type);
   }
 }

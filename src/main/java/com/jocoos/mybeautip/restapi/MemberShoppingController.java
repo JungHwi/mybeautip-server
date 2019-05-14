@@ -39,6 +39,7 @@ import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointRepository;
 import com.jocoos.mybeautip.member.point.MemberPointService;
+import com.jocoos.mybeautip.notification.MessageService;
 
 @Slf4j
 @RestController
@@ -53,17 +54,20 @@ public class MemberShoppingController {
 
   private final OrderRepository orderRepository;
   private final MemberPointRepository memberPointRepository;
+  private final MessageService messageService;
 
   public MemberShoppingController(MemberService memberService,
                                   CouponService couponService,
                                   MemberPointService memberPointService,
                                   OrderRepository orderRepository,
-                                  MemberPointRepository memberPointRepository) {
+                                  MemberPointRepository memberPointRepository,
+                                  MessageService messageService) {
     this.memberService = memberService;
     this.couponService = couponService;
     this.memberPointService = memberPointService;
     this.orderRepository = orderRepository;
     this.memberPointRepository = memberPointRepository;
+    this.messageService = messageService;
   }
 
   @GetMapping("/coupons")
@@ -132,7 +136,16 @@ public class MemberShoppingController {
     List<PointDetailInfo> details = Lists.newArrayList();
 
     if (points != null) {
-      points.stream().forEach(point -> details.add(new PointDetailInfo(point)));
+      points.stream().forEach(point -> {
+        if (point.getState() == 9) {
+          point.setState(MemberPoint.STATE_EARNED_POINT);
+
+          String message = messageService.getMessage("point.by_admin", "ko");
+          details.add(new PointDetailInfo(point, message));
+        } else {
+          details.add(new PointDetailInfo(point));
+        }
+      });
     }
 
     String nextCursor = null;
@@ -292,9 +305,15 @@ public class MemberShoppingController {
     private Date createdAt;
     private Date earnedAt;
     private Date expiredAt;
+    private String message = "";
 
     public PointDetailInfo(MemberPoint memberPoint) {
       BeanUtils.copyProperties(memberPoint, this);
+    }
+
+    public PointDetailInfo(MemberPoint memberPoint, String message) {
+      this(memberPoint);
+      this.message = message;
     }
   }
 }

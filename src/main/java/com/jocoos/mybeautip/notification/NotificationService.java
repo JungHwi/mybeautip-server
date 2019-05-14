@@ -356,14 +356,9 @@ public class NotificationService {
 
   public void notifyMemberPoint(MemberPoint memberPoint) {
     Member admin = memberService.currentMember();
-    Notification notification = new Notification(memberPoint, admin);
-    log.info("notification: {}", notification);
 
-    try {
-      notificationRepository.save(notification);
-    } catch (Exception e) {
-      log.error("{}", e);
-    }
+    Notification notification = notificationRepository.save(new Notification(memberPoint, admin));
+    log.info("notification: {}", notification);
 
     deviceService.push(notification);
   }
