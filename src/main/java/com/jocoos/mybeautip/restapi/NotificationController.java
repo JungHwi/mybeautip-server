@@ -37,6 +37,7 @@ import static com.jocoos.mybeautip.notification.Notification.*;
 @RestController
 @RequestMapping("/api/1/members/me/notifications")
 public class NotificationController {
+  private static final String NOTICE_IMG = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_notice.png";
 
   private final NotificationRepository notificationRepository;
   private final FollowingRepository followingRepository;
@@ -166,6 +167,10 @@ public class NotificationController {
       this.mentionInfo = mentionInfo;
       if (notification.getImageUrl() == null) {
         this.imageUrl = "";
+      }
+
+      if (Notification.SYSTEM_MESSAGE.equals(notification.getType())) {
+        this.resourceOwner.setAvatarUrl(NOTICE_IMG);
       }
     }
 

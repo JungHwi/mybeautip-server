@@ -30,7 +30,6 @@ import com.jocoos.mybeautip.video.VideoLike;
 @Entity
 @Table(name = "notifications")
 public class Notification {
-  private static final String NOTICE_IMG = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_notice.png";
 
   public static final String INSTANT = "instant";
   public static final String MY_VIDEO_UPLOADED= "my_video_uploaded";
@@ -298,7 +297,6 @@ public class Notification {
     this.resourceId = memberPoint.getMember().getId();
     this.resourceIds = StringUtils.joinWith(",", memberPoint.getMember().getId());
     this.resourceOwner = from;
-    from.setAvatarUrl(NOTICE_IMG);
 
     switch (detail) {
       case "point":
