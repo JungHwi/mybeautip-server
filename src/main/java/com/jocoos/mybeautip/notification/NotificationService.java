@@ -357,9 +357,18 @@ public class NotificationService {
   public void notifyMemberPoint(MemberPoint memberPoint) {
     Member admin = memberService.currentMember();
 
-    Notification notification = notificationRepository.save(new Notification(memberPoint, admin));
+    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "point"));
     log.info("notification: {}", notification);
 
     deviceService.push(notification);
   }
+
+  public void notifyDeductMemberPoint(MemberPoint memberPoint) {
+    Member admin = memberService.getAdmin();
+    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "deduct_point"));
+    log.info("notification: {}", notification);
+
+    deviceService.push(notification);
+  }
+
 }

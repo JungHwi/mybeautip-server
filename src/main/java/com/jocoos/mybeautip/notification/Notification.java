@@ -1,7 +1,19 @@
 package com.jocoos.mybeautip.notification;
 
+import javax.persistence.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
@@ -11,16 +23,6 @@ import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 @NoArgsConstructor
 @Data
@@ -286,6 +288,10 @@ public class Notification {
   }
 
   public Notification(MemberPoint memberPoint, Member from) {
+    this(memberPoint, from, "point");
+  }
+
+  public Notification(MemberPoint memberPoint, Member from, String detail) {
     this.type = SYSTEM_MESSAGE;
     this.targetMember = memberPoint.getMember();
     this.resourceType = RESOURCE_TYPE_MY_POINT;
@@ -293,10 +299,29 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", memberPoint.getMember().getId());
     this.resourceOwner = from;
     from.setAvatarUrl(NOTICE_IMG);
-    this.args = Lists.newArrayList(from.getUsername(), String.valueOf(memberPoint.getPoint()));
+
+    switch (detail) {
+      case "point":
+        setSendPointMessage(memberPoint.getFormattedPoint(), from.getUsername());
+        break;
+      case "deduct_point":
+        setDeductPointMessage(memberPoint.getFormattedPoint());
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown detail type - " + detail);
+    }
     this.custom = Maps.newHashMap();
-    this.custom.put("system_detail", "point");
+    this.custom.put("system_detail", detail);
   }
+
+  private void setSendPointMessage(String point, String username) {
+    this.args = Lists.newArrayList(username, point);
+  }
+
+  private void setDeductPointMessage(String point) {
+    this.args = Lists.newArrayList(point);
+  }
+
 
   public boolean isSystemMessage() {
     return SYSTEM_MESSAGE.equals(this.type);

@@ -102,4 +102,28 @@ public class MemberPointService {
   private MemberPoint createPresentPoint(Member member, int point, Date expiryAt) {
     return new MemberPoint(member, null, point, MemberPoint.STATE_PRESENT_POINT, expiryAt);
   }
+
+  @Transactional
+  public MemberPoint expiredPoint(MemberPoint memberPoint, Date expiredAt) {
+    if (memberPoint == null) {
+      return null;
+    }
+
+    memberPoint.setExpiredAt(expiredAt);
+    memberPointRepository.save(memberPoint);
+
+    MemberPoint expiredPoint = new MemberPoint(memberPoint.getMember(), null, memberPoint.getPoint(), MemberPoint.STATE_EXPIRED_POINT);
+    expiredPoint.setCreatedAt(expiredAt);
+    memberPointRepository.save(expiredPoint);
+
+    Member member = memberPoint.getMember();
+    if (memberPoint.getPoint() > member.getPoint()) {
+      member.setPoint(0);
+    } else {
+      member.setPoint(member.getPoint() - memberPoint.getPoint());
+    }
+
+    memberRepository.save(member);
+    return memberPoint;
+  }
 }

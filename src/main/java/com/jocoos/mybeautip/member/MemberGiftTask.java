@@ -1,22 +1,24 @@
 package com.jocoos.mybeautip.member;
 
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
-import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.point.MemberPointRepository;
-
-import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
+import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.point.MemberPointRepository;
+import com.jocoos.mybeautip.member.point.MemberPointService;
+import com.jocoos.mybeautip.notification.NotificationService;
 
 @Slf4j
 @Component
@@ -27,16 +29,22 @@ public class MemberGiftTask {
   private final MemberRepository memberRepository;
   private final MemberCouponRepository memberCouponRepository;
   private final MemberPointRepository memberPointRepository;
+  private final NotificationService notificationService;
+  private final MemberPointService memberPointService;
 
   @Value("${mybeautip.point.earn-after-days}")
   private int earnedAfterDays;
 
   public MemberGiftTask(MemberRepository memberRepository,
                         MemberCouponRepository memberCouponRepository,
-                        MemberPointRepository memberPointRepository) {
+                        MemberPointRepository memberPointRepository,
+                        NotificationService notificationService,
+                        MemberPointService memberPointService) {
     this.memberRepository = memberRepository;
     this.memberCouponRepository = memberCouponRepository;
     this.memberPointRepository = memberPointRepository;
+    this.notificationService = notificationService;
+    this.memberPointService = memberPointService;
   }
 
   @Scheduled(fixedDelay = 60 * 1000)
@@ -58,32 +66,9 @@ public class MemberGiftTask {
       log.debug("expired at : {}", dateFormat.format(now));
       log.debug("expired points found: {}", expires);
       expires.stream().forEach(memberPoint -> {
-        expiredPoint(memberPoint, now);
+        memberPointService.expiredPoint(memberPoint, now);
       });
     }
-  }
-
-  @Transactional
-  private void expiredPoint(MemberPoint memberPoint, Date expiredAt) {
-    if (memberPoint == null) {
-      return;
-    }
-
-    memberPoint.setExpiredAt(expiredAt);
-    memberPointRepository.save(memberPoint);
-
-    MemberPoint expiredPoint = new MemberPoint(memberPoint.getMember(), null, memberPoint.getPoint(), MemberPoint.STATE_EXPIRED_POINT);
-    expiredPoint.setCreatedAt(expiredAt);
-    memberPointRepository.save(expiredPoint);
-
-    Member member = memberPoint.getMember();
-    if (memberPoint.getPoint() > member.getPoint()) {
-      member.setPoint(0);
-    } else {
-      member.setPoint(member.getPoint() - memberPoint.getPoint());
-    }
-
-    memberRepository.save(member);
   }
 
   private Date getDays(int amount) {

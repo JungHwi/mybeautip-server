@@ -99,6 +99,11 @@ public class MemberService {
     return null;
   }
 
+  public Member getAdmin() {
+    return memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue("마이뷰팁")
+       .orElseThrow(() -> new MemberNotFoundException("Cann't find admin"));
+  }
+
   private Object currentPrincipal() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null || !authentication.isAuthenticated()) {

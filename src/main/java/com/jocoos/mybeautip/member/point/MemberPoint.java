@@ -8,7 +8,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Date;
+import java.util.Locale;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,6 +27,7 @@ import com.jocoos.mybeautip.member.order.Order;
 @Entity
 @Table(name = "member_points")
 public class MemberPoint extends CreatedDateAuditable {
+  private static DecimalFormat POINT_FORMAT = new DecimalFormat("#,###", new DecimalFormatSymbols(Locale.KOREA));
 
   public static final int STATE_WILL_BE_EARNED = 0;
   public static final int STATE_EARNED_POINT = 1;
@@ -86,5 +90,9 @@ public class MemberPoint extends CreatedDateAuditable {
 
   public void setCreatedAt(Date date) {
     super.createdAt = date;
+  }
+
+  public String getFormattedPoint() {
+    return POINT_FORMAT.format(this.point);
   }
 }

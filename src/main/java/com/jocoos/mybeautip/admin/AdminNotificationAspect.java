@@ -53,4 +53,33 @@ public class AdminNotificationAspect {
       }
     }
   }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.point.MemberPointService.expiredPoint(..))",
+     returning = "result")
+  public void onAfterReturningExpiredPoint(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    // Ignore when duplicate createVideo
+    if (result == null) {
+      return;
+    }
+
+    if (result instanceof MemberPoint) {
+      MemberPoint point = (MemberPoint) result;
+      log.debug("point: {}", point);
+
+      try {
+        notificationService.notifyDeductMemberPoint(point);
+      } catch (Exception e) {
+        log.error("{}", e);
+      }
+
+      try {
+        slackService.sendDeductPoint(point);
+      } catch (Exception e) {
+        log.error("{}", e);
+      }
+    }
+  }
+
 }

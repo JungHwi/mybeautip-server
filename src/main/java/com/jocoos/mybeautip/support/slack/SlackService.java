@@ -216,9 +216,19 @@ public class SlackService {
   }
 
   public void sendPointToMember(MemberPoint memberPoint) {
-    String details = String.format("%s/%d - 포인트: %d, 유효기간: %s", memberPoint.getMember().getUsername(), memberPoint.getMember().getId(),
-       memberPoint.getPoint(), Dates.toString(memberPoint.getExpiryAt(), ZoneId.of("Asia/Seoul")));
+    String details = String.format("%s/%d - 포인트: +%s, 유효기간: %s", memberPoint.getMember().getUsername(), memberPoint.getMember().getId(),
+       memberPoint.getFormattedPoint(), Dates.toString(memberPoint.getExpiryAt(), ZoneId.of("Asia/Seoul")));
     String message = String.format("*포인트(%d) 지급*" +
+       "```%s```", memberPoint.getPoint(), details);
+
+    log.debug("{}", message);
+    send(message);
+  }
+
+  public void sendDeductPoint(MemberPoint memberPoint) {
+    String details = String.format("%s/%d - 포인트: -%s, 유효기간: %s", memberPoint.getMember().getUsername(), memberPoint.getMember().getId(),
+       memberPoint.getFormattedPoint(), Dates.toString(memberPoint.getExpiryAt(), ZoneId.of("Asia/Seoul")));
+    String message = String.format("*포인트(%d) 차감*" +
        "```%s```", memberPoint.getPoint(), details);
 
     log.debug("{}", message);
