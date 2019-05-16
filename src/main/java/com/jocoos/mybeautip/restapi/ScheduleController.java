@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.recommendation.MemberRecommendation;
@@ -64,15 +65,15 @@ public class ScheduleController {
   }
 
   @GetMapping("/schedules")
-  public ResponseEntity<List<ScheduleInfo>> getSchedules(@RequestParam(defaultValue = "10") int count) {
+  public ResponseEntity<List<DeprecatedScheduleInfo>> getSchedules(@RequestParam(defaultValue = "10") int count) {
     PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
 
     Instant instant = Instant.now().minus(LIVE_INTERVAL_MIN, ChronoUnit.MINUTES);
     Date now = Date.from(instant);
 
-    List<ScheduleInfo> result = scheduleService.getSchedules(now, pageRequest)
+    List<DeprecatedScheduleInfo> result = scheduleService.getSchedules(now, pageRequest)
             .stream()
-            .map(ScheduleInfo::new)
+            .map(DeprecatedScheduleInfo::new)
             .collect(Collectors.toList());
 
     return new ResponseEntity<>(result, HttpStatus.OK);
@@ -214,6 +215,25 @@ public class ScheduleController {
   public static class UpdateScheduleRequest {
     private String title;
     private Date startedAt;
+  }
+
+  @Data
+  static class DeprecatedScheduleInfo {
+    private Long id;
+    private String title;
+    private String thumbnailUrl;
+    private Long createdBy;
+    private Date createdAt;
+    private Date startedAt;
+    private Date modifiedAt;
+    private Date deletedAt;
+    private MemberInfo member;
+
+    public DeprecatedScheduleInfo(Schedule s) {
+      BeanUtils.copyProperties(s, this);
+      this.createdBy = s.getCreatedBy().getId();
+      this.member = new MemberInfo((s.getCreatedBy()));
+    }
   }
 
   @Data
