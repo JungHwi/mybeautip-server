@@ -131,4 +131,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   Page<Video> findByTypeAndStateInAndReportCountGreaterThanAndDeletedAtIsNotNull(String type, Collection<String> state, Long reportCount, Pageable pageable);
 
   Page<Video> findByTypeAndStateInAndAndCreatedAtBetweenAndDeletedAtIsNull(String type, Collection<String> state, Date from, Date now, Pageable pageable);
+
+  Optional<Video> findTopByMemberIdAndCreatedAtBetweenAndDeletedAtIsNullOrderByCreatedAtDesc(Long owner, Date from, Date to);
 }
