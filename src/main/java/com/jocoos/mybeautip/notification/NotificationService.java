@@ -1,11 +1,9 @@
 package com.jocoos.mybeautip.notification;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +41,8 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final MemberRepository memberRepository;
   private final MemberService memberService;
+  private final MemberRecommendationRepository memberRecommendationRepository;
+  private final InstantMessageService instantMessageService;
 
   @Value("${mybeautip.notification.duplicate-limit-duration}")
   private int duration;
@@ -54,7 +54,9 @@ public class NotificationService {
                              FollowingRepository followingRepository,
                              NotificationRepository notificationRepository,
                              MemberRepository memberRepository,
-                             MemberService memberService) {
+                             MemberService memberService,
+                             MemberRecommendationRepository memberRecommendationRepository,
+                             InstantMessageService instantMessageService) {
     this.deviceService = deviceService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
@@ -63,11 +65,15 @@ public class NotificationService {
     this.notificationRepository = notificationRepository;
     this.memberRepository = memberRepository;
     this.memberService = memberService;
+    this.memberRecommendationRepository = memberRecommendationRepository;
+    this.instantMessageService = instantMessageService;
   }
 
   public void notifyCreateVideo(Video video) {
     Long creator = video.getMember().getId();
-    followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator)
+
+    List<Following> followingList = followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator);
+    followingList
        .forEach(f -> {
          Notification notification = new Notification(video, video.getThumbnailUrl(), f.getMemberMe());
          log.debug("notification: {}", notification);
@@ -75,6 +81,12 @@ public class NotificationService {
          notificationRepository.save(notification);
          deviceService.push(notification);
        });
+
+    // if creator is recommended member
+    List<Member> excludes = followingList.stream().map(Following::getMemberMe).collect(Collectors.toList());
+    excludes.add(video.getMember());
+    memberRecommendationRepository.findByMemberId(creator)
+            .ifPresent(r -> instantMessageService.instantPushMessage(video, excludes));
   }
 
   public void notifyUploadedMyVideo(Video video) {

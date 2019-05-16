@@ -1,9 +1,10 @@
 package com.jocoos.mybeautip.notification;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.schedules.ScheduleService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.devices.DeviceService;
-import com.jocoos.mybeautip.schedules.ScheduleRepository;
 import com.jocoos.mybeautip.video.Video;
 
 @Slf4j
@@ -26,7 +26,7 @@ public class InstantMessageService {
   private final DeviceService deviceService;
   private final MessageService messageService;
   private final InstantNotificationConfig config;
-  private final ScheduleRepository scheduleRepository;
+  private final ScheduleService scheduleService;
 
   @Qualifier("instantMessageTaskScheduler")
   private final ThreadPoolTaskScheduler taskScheduler;
@@ -34,28 +34,22 @@ public class InstantMessageService {
   public InstantMessageService(DeviceService deviceService,
                                MessageService messageService,
                                InstantNotificationConfig instantNotificationConfig,
-                               ScheduleRepository scheduleRepository,
+                               ScheduleService scheduleService,
                                ThreadPoolTaskScheduler taskScheduler) {
     this.deviceService = deviceService;
     this.messageService = messageService;
     this.config = instantNotificationConfig;
-    this.scheduleRepository = scheduleRepository;
+    this.scheduleService = scheduleService;
     this.taskScheduler = taskScheduler;
   }
 
   @Async
-  public void instantPushMessage(Video video) {
+  public void instantPushMessage(Video video, List<Member> excludes) {
     if (!"BROADCASTED".equals(video.getType())) {
       return;
     }
-    
-    Instant instant = Instant.now().minus(config.getInterval(), ChronoUnit.MINUTES);
-    Date minus10min = Date.from(instant);
-  
-    instant = Instant.now().plus(config.getInterval(), ChronoUnit.MINUTES);
-    Date after10min = Date.from(instant);
 
-    scheduleRepository.findByCreatedByIdAndStartedAtBetweenAndDeletedAtIsNull(video.getMember().getId(), minus10min, after10min)
+    scheduleService.getSchedule(video)
       .ifPresent(s -> {
          log.debug("{}", s);
          String title = !Strings.isNullOrEmpty(s.getInstantTitle()) ? s.getInstantTitle() : video.getTitle();
@@ -63,7 +57,7 @@ public class InstantMessageService {
          log.debug("title: {}, message: {}", title, message);
 
          taskScheduler.schedule(new InstantNotificationTask(
-               deviceService, video, message, title),
+               deviceService, video, message, title, excludes),
             new Date(System.currentTimeMillis() + config.getDelay()));
        }
     );

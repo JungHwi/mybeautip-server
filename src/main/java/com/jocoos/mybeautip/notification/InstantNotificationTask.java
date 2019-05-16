@@ -1,7 +1,9 @@
 package com.jocoos.mybeautip.notification;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.jocoos.mybeautip.member.Member;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -25,12 +27,14 @@ public class InstantNotificationTask implements Runnable {
   private Video video;
   private String title;
   private String message;
+  private List<Member> excludes;
 
-  public InstantNotificationTask(DeviceService deviceService, Video video, String message, String title) {
+  public InstantNotificationTask(DeviceService deviceService, Video video, String message, String title, List<Member> excludes) {
     this.deviceService = deviceService;
     this.video = checkNotNull(video);
     this.message = checkNotNull(message);
     this.title = title;
+    this.excludes = excludes;
   }
 
   @Override
@@ -38,7 +42,8 @@ public class InstantNotificationTask implements Runnable {
     log.debug("platform: {}", platform);
     log.debug("video: {}", video);
 
-    List<Device> devices = deviceService.getDevices(platform);
+    List<Device> devices = deviceService.getDevices(platform).stream()
+            .filter(device -> !excludes.contains(device.getCreatedBy())).collect(Collectors.toList());
     AdminNotificationController.NotificationRequest request = createRequest();
     deviceService.pushAll(devices, request);
   }
