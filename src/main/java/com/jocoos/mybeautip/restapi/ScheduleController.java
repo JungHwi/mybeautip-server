@@ -228,6 +228,8 @@ public class ScheduleController {
     private Date modifiedAt;
     private Date deletedAt;
     private MemberInfo member;
+    private String instantTitle;
+    private String instantMessage;
 
     public DeprecatedScheduleInfo(Schedule s) {
       BeanUtils.copyProperties(s, this);
