@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +40,7 @@ import static com.jocoos.mybeautip.schedules.ScheduleService.*;
 @RestController
 @RequestMapping(value = "/api/1")
 public class ScheduleController {
+  private static final int LIVE_INTERVAL_MIN = 10; //mins
 
   private final MemberService memberService;
   private final MessageService messageService;
@@ -61,6 +64,21 @@ public class ScheduleController {
   }
 
   @GetMapping("/schedules")
+  public ResponseEntity<List<ScheduleInfo>> getSchedules(@RequestParam(defaultValue = "10") int count) {
+    PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
+
+    Instant instant = Instant.now().minus(LIVE_INTERVAL_MIN, ChronoUnit.MINUTES);
+    Date now = Date.from(instant);
+
+    List<ScheduleInfo> result = scheduleService.getSchedules(now, pageRequest)
+            .stream()
+            .map(ScheduleInfo::new)
+            .collect(Collectors.toList());
+
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+
+  @GetMapping("/schedules2")
   public CursorResponse getSchedules(@RequestParam(defaultValue = "10") int count,
                                      @RequestParam(required = false, defaultValue = GO_FUTURE) String go,
                                      @RequestParam(required = false, defaultValue = "Asia/Seoul") String timeZone,

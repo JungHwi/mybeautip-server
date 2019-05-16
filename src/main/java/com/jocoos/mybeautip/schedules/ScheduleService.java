@@ -38,6 +38,11 @@ public class ScheduleService {
         this.config = instantNotificationConfig;
     }
 
+    @Deprecated
+    public Page<Schedule> getSchedules(Date now, Pageable pageable) {
+        return scheduleRepository.findByStartedAtAfterAndDeletedAtIsNull(now, pageable);
+    }
+
     public Slice<Schedule> getSchedules(int count, String go, String timeZone, String base, Long cursor) {
         Date startCursor;
         if (cursor != null) {
