@@ -742,6 +742,7 @@ public class VideoController {
     private MemberInfo owner;
     private Boolean blocked;
     private Date createdAt;
+    private Date deletedAt;
 
     public VideoInfo(Video video, MemberInfo owner, Long likeId, Boolean blocked) {
       BeanUtils.copyProperties(video, this);

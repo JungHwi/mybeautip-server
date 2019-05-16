@@ -249,6 +249,23 @@ public class AdminController {
     return new ResponseEntity<>(details, HttpStatus.OK);
   }
 
+  @GetMapping(value = "/memberDetails", params = {"pushable", "visible", "username"})
+  public ResponseEntity<Page<MemberDetailInfo>> searchMemberDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "true") boolean visible,
+     @RequestParam(defaultValue = "true") boolean pushable,
+     @RequestParam String username) {
+
+    log.debug("username: {}", username);
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "reportCount"));
+    Page<Member> members = memberRepository.findByVisibleAndPushableAndUsernameContaining(visible, pushable, username, pageable);
+
+    Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+
   @GetMapping("/memberDetails")
   public ResponseEntity<Page<MemberDetailInfo>> getMemberDetails(
      @RequestParam(defaultValue = "true") boolean visible,
@@ -570,18 +587,17 @@ public class AdminController {
     return Dates.getRecommendedDate(date);
   }
 
-  @GetMapping("/motdDetails")
-  public ResponseEntity<Page<MotdDetailInfo>> getMotdDetails(
+  @GetMapping("/videoDetails")
+  public ResponseEntity<Page<MotdDetailInfo>> getVideoDetails(
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "id") String sort,
-     @RequestParam(defaultValue = "false") boolean isDeleted,
-     @RequestParam(required = false) Long memberId) {
+     @RequestParam String type,
+     @RequestParam List<String> states,
+     @RequestParam(defaultValue = "false") boolean isDeleted) {
 
-    Member me = memberService.currentMember();
-
-
-    Pageable pageable;
+    log.debug("sort: {}, deleted: {}", sort, isDeleted);
+    Pageable pageable = null;
     switch (sort) {
       case "views":
         pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "viewCount"));
@@ -595,31 +611,34 @@ public class AdminController {
       case "watch":
         pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "totalWatchCount"));
         break;
+      case "heart":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "heartCount"));
+        break;
       default:
         pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
     }
 
     Page<Video> videos = null;
-    if (memberId != null) {
-      if (isDeleted) {
-        videos = videoRepository.findByMemberIdAndTypeAndStateAndDeletedAtIsNotNull(memberId, "UPLOADED", "VOD", pageable);
-      } else {
-        videos = videoRepository.findByMemberIdAndTypeAndStateAndDeletedAtIsNull(memberId, "UPLOADED", "VOD", pageable);
-      }
+    if (isDeleted) {
+      videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNotNull(type, states, pageable);
     } else {
-      if (isDeleted) {
-        videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNotNull("UPLOADED", Lists.newArrayList("VOD"), pageable);
-      } else {
-        videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNull("UPLOADED", Lists.newArrayList("VOD"), pageable);
-      }
+      videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNull(type, states, pageable);
     }
 
+    return responseVideos(videos);
+  }
+
+  private ResponseEntity<Page<MotdDetailInfo>> responseVideos(Page<Video> videos) {
+
+    Member admin = memberService.currentMember();
     Page<MotdDetailInfo> details = videos.map(v -> {
       MotdDetailInfo info = new MotdDetailInfo(v);
       motdRecommendationRepository.findByVideoId(v.getId())
          .ifPresent(r -> info.setRecommendation(r));
 
-      videoReportRepository.findByVideoIdAndCreatedById(v.getId(), me.getId())
+
+      // FIXME: Video is reported by admin?
+      videoReportRepository.findByVideoIdAndCreatedById(v.getId(), admin.getId())
          .ifPresent(r -> info.setVideoReportId(r.getId()));
 
       Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getId(), PageRequest.of(0, 1));
@@ -629,6 +648,47 @@ public class AdminController {
     });
 
     return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/videoDetails", params = "memberId")
+  public ResponseEntity<Page<MotdDetailInfo>> getVideoDetails(
+     @RequestParam(defaultValue = "0") int page,
+     @RequestParam(defaultValue = "10") int size,
+     @RequestParam(defaultValue = "id") String sort,
+     @RequestParam String type,
+     @RequestParam List<String> states,
+     @RequestParam(defaultValue = "false") boolean isDeleted,
+     @RequestParam Long memberId) {
+
+    Pageable pageable = null;
+    switch (sort) {
+      case "views":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "viewCount"));
+        break;
+      case "like":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "likeCount"));
+        break;
+      case "comments":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "commentCount"));
+        break;
+      case "watch":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "totalWatchCount"));
+        break;
+      case "heart":
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "heartCount"));
+        break;
+      default:
+        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    }
+
+    Page<Video> videos = null;
+    if (isDeleted) {
+      videos = videoRepository.findByMemberIdAndTypeAndStateInAndDeletedAtIsNotNull(memberId, type, states, pageable);
+    } else {
+      videos = videoRepository.findByMemberIdAndTypeAndStateInAndDeletedAtIsNull(memberId, type, states, pageable);
+    }
+
+    return responseVideos(videos);
   }
 
   @GetMapping("/recommendedMotdDetails")
