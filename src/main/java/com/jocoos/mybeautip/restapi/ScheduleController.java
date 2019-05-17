@@ -10,7 +10,6 @@ import com.google.common.base.Strings;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.recommendation.MemberRecommendation;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
@@ -61,15 +60,15 @@ public class ScheduleController {
   }
 
   @GetMapping("/schedules")
-  public ResponseEntity<List<AdminScheduleInfo>> getSchedules(@RequestParam(defaultValue = "10") int count) {
+  public ResponseEntity<List<ScheduleInfo>> getSchedules(@RequestParam(defaultValue = "10") int count) {
     PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
 
     Instant instant = Instant.now().minus(LIVE_INTERVAL_MIN, ChronoUnit.MINUTES);
     Date now = Date.from(instant);
 
-    List<AdminScheduleInfo> result = scheduleService.getSchedules(now, pageRequest)
+    List<ScheduleInfo> result = scheduleService.getSchedules(now, pageRequest)
             .stream()
-            .map(AdminScheduleInfo::new)
+            .map(ScheduleInfo::new)
             .collect(Collectors.toList());
 
     return new ResponseEntity<>(result, HttpStatus.OK);
@@ -201,27 +200,6 @@ public class ScheduleController {
   public static class UpdateScheduleRequest {
     private String title;
     private Date startedAt;
-  }
-
-  @Data
-  static class AdminScheduleInfo {
-    private Long id;
-    private String title;
-    private String thumbnailUrl;
-    private Long createdBy;
-    private Date createdAt;
-    private Date startedAt;
-    private Date modifiedAt;
-    private Date deletedAt;
-    private MemberInfo member;
-    private String instantTitle;
-    private String instantMessage;
-
-    public AdminScheduleInfo(Schedule s) {
-      BeanUtils.copyProperties(s, this);
-      this.createdBy = s.getCreatedBy().getId();
-      this.member = new MemberInfo((s.getCreatedBy()));
-    }
   }
 
   @Data
