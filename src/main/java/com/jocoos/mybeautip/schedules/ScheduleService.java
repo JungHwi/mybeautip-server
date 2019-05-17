@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Optional;
@@ -21,10 +20,8 @@ import java.util.Optional;
 public class ScheduleService {
     private static final String SCHEDULE_ITEM_NOT_FOUND = "schedule.item_not_found";
 
-    public static final String GO_FUTURE = "future";
-    public static final String GO_PAST = "past";
-    public static final String BASE_NOW = "now";
-    public static final String BASE_MIDNIGHT = "midnight";
+    public static final String DIRECTION_PREV = "prev";
+    public static final String DIRECTION_NEXT = "next";
 
     private final MessageService messageService;
     private final ScheduleRepository scheduleRepository;
@@ -38,25 +35,27 @@ public class ScheduleService {
         this.config = instantNotificationConfig;
     }
 
-    @Deprecated
     public Page<Schedule> getSchedules(Date now, Pageable pageable) {
         return scheduleRepository.findByStartedAtAfterAndDeletedAtIsNull(now, pageable);
     }
 
-    public Slice<Schedule> getSchedules(int count, String go, String timeZone, String base, Long cursor) {
+    public Slice<Schedule> getSchedules(int count, String direction, boolean includeCursor, Long cursor) {
         Date startCursor;
         if (cursor != null) {
+            if (includeCursor) {
+                if (DIRECTION_PREV.equals(direction)) {
+                    cursor += 1;
+                } else {
+                    cursor -= 1;
+                }
+            }
             startCursor = new Date(cursor);
         } else {
-            if (base.equals(BASE_MIDNIGHT)) {
-                startCursor = Date.from(Instant.now().atZone(ZoneId.of(timeZone)).truncatedTo(ChronoUnit.DAYS).toInstant());
-            } else {
-                startCursor = Date.from(Instant.now().minus(config.getInterval(), ChronoUnit.MINUTES));
-            }
+            startCursor = getFutureDate();
         }
 
         Page<Schedule> schedules;
-        if (go.equals(GO_PAST)) {
+        if (DIRECTION_PREV.equals(direction)) {
             PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "startedAt"));
             schedules = scheduleRepository.findByStartedAtBeforeAndDeletedAtIsNull(startCursor, pageRequest);
         } else {
@@ -66,9 +65,22 @@ public class ScheduleService {
         return schedules;
     }
 
-    public Page<Schedule> getSchedulesByMember(Long memberId, Date startedAt, Pageable pageable) {
+    public Page<Schedule> getSchedulesByMember(Long memberId, int count, Long cursor) {
+        Date startCursor;
+        if (cursor != null) {
+            startCursor = new Date(cursor);
+        } else {
+            startCursor = getFutureDate();
+        }
+        PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
         return scheduleRepository
-                .findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(memberId, startedAt, pageable);
+                .findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(memberId, startCursor, pageRequest);
+    }
+
+    private Date getFutureDate() {
+        // to be used as a start cursor
+        Instant instant = Instant.now().plus(36500, ChronoUnit.DAYS); // 100 years after
+        return Date.from(instant);
     }
 
     public Optional<Schedule> getSchedule(Video video) {
