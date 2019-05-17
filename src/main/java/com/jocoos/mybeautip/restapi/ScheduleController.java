@@ -10,9 +10,7 @@ import com.google.common.base.Strings;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.recommendation.MemberRecommendation;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import com.jocoos.mybeautip.schedules.ScheduleRoughTime;
@@ -44,20 +42,17 @@ public class ScheduleController {
   private static final int LIVE_INTERVAL_MIN = 10; //mins
 
   private final MemberService memberService;
-  private final MessageService messageService;
   private final ScheduleService scheduleService;
   private final MemberRecommendationRepository memberRecommendationRepository;
   private final VideoRepository videoRepository;
   private final InstantNotificationConfig config;
 
   public ScheduleController(MemberService memberService,
-                            MessageService messageService,
                             ScheduleService scheduleService,
                             MemberRecommendationRepository memberRecommendationRepository,
                             VideoRepository videoRepository,
                             InstantNotificationConfig config) {
     this.memberService = memberService;
-    this.messageService = messageService;
     this.scheduleService = scheduleService;
     this.videoRepository = videoRepository;
     this.memberRecommendationRepository = memberRecommendationRepository;
@@ -65,15 +60,15 @@ public class ScheduleController {
   }
 
   @GetMapping("/schedules")
-  public ResponseEntity<List<DeprecatedScheduleInfo>> getSchedules(@RequestParam(defaultValue = "10") int count) {
+  public ResponseEntity<List<ScheduleInfo>> getSchedules(@RequestParam(defaultValue = "10") int count) {
     PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
 
     Instant instant = Instant.now().minus(LIVE_INTERVAL_MIN, ChronoUnit.MINUTES);
     Date now = Date.from(instant);
 
-    List<DeprecatedScheduleInfo> result = scheduleService.getSchedules(now, pageRequest)
+    List<ScheduleInfo> result = scheduleService.getSchedules(now, pageRequest)
             .stream()
-            .map(DeprecatedScheduleInfo::new)
+            .map(ScheduleInfo::new)
             .collect(Collectors.toList());
 
     return new ResponseEntity<>(result, HttpStatus.OK);
@@ -81,11 +76,10 @@ public class ScheduleController {
 
   @GetMapping("/schedules2")
   public CursorResponse getSchedules(@RequestParam(defaultValue = "10") int count,
-                                     @RequestParam(required = false, defaultValue = GO_FUTURE) String go,
-                                     @RequestParam(required = false, defaultValue = "Asia/Seoul") String timeZone,
-                                     @RequestParam(required = false, defaultValue = BASE_NOW) String base,
+                                     @RequestParam(required = false, defaultValue = DIRECTION_PREV) String direction,
+                                     @RequestParam(required = false, name="include_cursor", defaultValue = "false") boolean includeCursor,
                                      @RequestParam(required = false) Long cursor) {
-    Slice<Schedule> schedules = scheduleService.getSchedules(count, go, timeZone, base, cursor);
+    Slice<Schedule> schedules = scheduleService.getSchedules(count, direction, includeCursor, cursor);
 
     // fetch all of recommended members
     List<MemberRecommendation> recommendedMembers = memberRecommendationRepository.findAll();
@@ -125,7 +119,7 @@ public class ScheduleController {
       nextCursor = String.valueOf(result.get(result.size() - 1).getStartedAt().getTime());
     }
 
-    return new CursorResponse.Builder<>("/api/1/schedules", result)
+    return new CursorResponse.Builder<>("/api/1/schedules2", result)
             .withCount(count)
             .withCursor(nextCursor)
             .toBuild();
@@ -135,17 +129,8 @@ public class ScheduleController {
   @GetMapping("/members/me/schedules")
   public CursorResponse getMySchedules(@RequestParam(defaultValue = "10") int count,
                                        @RequestParam(required = false) Long cursor) {
-    PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
-
-    Date startedAt;
-    if (cursor != null) {
-      startedAt = new Date(cursor);
-    } else {
-      startedAt = new Date();
-    }
-
     List<ScheduleInfo> result = scheduleService
-            .getSchedulesByMember(memberService.currentMemberId(), startedAt, pageRequest)
+            .getSchedulesByMember(memberService.currentMemberId(), count, cursor)
             .stream()
             .map(ScheduleInfo::new)
             .collect(Collectors.toList());
@@ -218,38 +203,17 @@ public class ScheduleController {
   }
 
   @Data
-  static class DeprecatedScheduleInfo {
-    private Long id;
-    private String title;
-    private String thumbnailUrl;
-    private Long createdBy;
-    private Date createdAt;
-    private Date startedAt;
-    private Date modifiedAt;
-    private Date deletedAt;
-    private MemberInfo member;
-    private String instantTitle;
-    private String instantMessage;
-
-    public DeprecatedScheduleInfo(Schedule s) {
-      BeanUtils.copyProperties(s, this);
-      this.createdBy = s.getCreatedBy().getId();
-      this.member = new MemberInfo((s.getCreatedBy()));
-    }
-  }
-
-  @Data
   static class ScheduleInfo {
     private Long id;
     private String title;
     private String thumbnailUrl;
     private Long createdBy;
-    private String username;
     private Date createdAt;
     private Date startedAt;
     private Date modifiedAt;
     private Date deletedAt;
 
+    private String username;
     private Long followingId;
     private Long videoId;
     private String videoState;
