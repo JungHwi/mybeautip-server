@@ -126,6 +126,27 @@ public class ScheduleController {
   }
 
   // member specific
+  @GetMapping("/members/{id}/schedules")
+  public CursorResponse getMemberSchedules(@PathVariable Long id,
+                                           @RequestParam(defaultValue = "10") int count,
+                                           @RequestParam(required = false) Long cursor) {
+    List<ScheduleInfo> result = scheduleService
+            .getSchedulesByMember(id, count, cursor)
+            .stream()
+            .map(ScheduleInfo::new)
+            .collect(Collectors.toList());
+
+    String nextCursor = null;
+    if (!CollectionUtils.isEmpty(result)) {
+      nextCursor = String.valueOf(result.get(result.size() - 1).getStartedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/members/me/schedules", result)
+            .withCount(count)
+            .withCursor(nextCursor)
+            .toBuild();
+  }
+
   @GetMapping("/members/me/schedules")
   public CursorResponse getMySchedules(@RequestParam(defaultValue = "10") int count,
                                        @RequestParam(required = false) Long cursor) {
@@ -134,7 +155,6 @@ public class ScheduleController {
             .stream()
             .map(ScheduleInfo::new)
             .collect(Collectors.toList());
-
 
     String nextCursor = null;
     if (!CollectionUtils.isEmpty(result)) {
