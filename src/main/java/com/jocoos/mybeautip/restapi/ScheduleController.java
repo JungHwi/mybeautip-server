@@ -183,8 +183,11 @@ public class ScheduleController {
     schedule.setThumbnailUrl(member.getAvatarUrl());
 
     scheduleService.save(schedule);
-    log.debug("{}", schedule);
-    return new ResponseEntity<>(schedule, HttpStatus.OK);
+
+    ScheduleInfo scheduleInfo = new ScheduleInfo(schedule);
+    scheduleInfo.recommended = null;
+    log.debug("{}", scheduleInfo);
+    return new ResponseEntity<>(scheduleInfo, HttpStatus.OK);
   }
 
   @PatchMapping("/members/me/schedules/{id}")
