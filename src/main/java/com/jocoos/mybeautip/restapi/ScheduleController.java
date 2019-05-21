@@ -200,7 +200,11 @@ public class ScheduleController {
     }
 
     Schedule schedule = scheduleService.updateSchedule(id, memberService.currentMemberId(), request, lang);
-    return new ResponseEntity<>(schedule, HttpStatus.OK);
+
+    ScheduleInfo scheduleInfo = new ScheduleInfo(schedule);
+    scheduleInfo.recommended = null;
+    log.debug("{}", scheduleInfo);
+    return new ResponseEntity<>(scheduleInfo, HttpStatus.OK);
   }
 
   @DeleteMapping("/members/me/schedules/{id}")
