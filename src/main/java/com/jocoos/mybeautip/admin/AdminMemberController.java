@@ -12,12 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +26,7 @@ import com.jocoos.mybeautip.member.MemberRoleInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.member.point.MemberPointService;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 
 @Slf4j
@@ -41,17 +39,20 @@ public class AdminMemberController {
   private final AdminMemberRepository adminMemberRepository;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
+  private final MemberPointService memberPointService;
 
   public AdminMemberController(MemberService memberService,
                                PasswordEncoder passwordEncoder,
                                AdminMemberRepository adminMemberRepository,
                                MemberRepository memberRepository,
-                               FollowingRepository followingRepository) {
+                               FollowingRepository followingRepository,
+                               MemberPointService memberPointService) {
     this.memberService = memberService;
     this.passwordEncoder = passwordEncoder;
     this.adminMemberRepository = adminMemberRepository;
     this.memberRepository = memberRepository;
     this.followingRepository = followingRepository;
+    this.memberPointService = memberPointService;
   }
 
   @GetMapping("/me")
@@ -132,7 +133,29 @@ public class AdminMemberController {
       throw new BadRequestException("bad_request", "Already follow");
     }
   }
-  
+
+
+  @PostMapping("/members/points")
+  public ResponseEntity presentPoint(@Valid @RequestBody CreateMemberPointRequest request,
+                           BindingResult result) {
+
+    if (result.hasErrors()) {
+      throw new BadRequestException(result.getFieldError());
+    }
+
+    Date expiryAt = null;
+    if (Strings.isNullOrEmpty(request.getExpiryAt())) {
+      expiryAt = Dates.afterMonthsFromNow(1);
+    } else {
+      expiryAt = Dates.getRecommendedDate(request.getExpiryAt());
+    }
+
+    log.debug("point: {}, expiry date: {}", request.getPoint(), expiryAt);
+    memberPointService.presentPoint(request.getMemberId(), request.getPoint(), expiryAt);
+    return new ResponseEntity(HttpStatus.CREATED);
+  }
+
+
   @Data
   public static class AdminFollowingMemberRequest {
     @NotNull
@@ -153,4 +176,14 @@ public class AdminMemberController {
     private Long memberId;
   }
 
+  @Data
+  public static class CreateMemberPointRequest {
+    @NotNull
+    private Long memberId;
+
+    @NotNull
+    private int point;
+
+    private String expiryAt;
+  }
 }

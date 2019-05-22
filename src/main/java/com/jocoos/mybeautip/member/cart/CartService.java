@@ -85,7 +85,10 @@ public class CartService {
 
   public CartInfo getCartItemList(List<Cart> list, TimeSaleCondition timeSaleCondition) {
     timeSaleService.applyTimeSaleForCart(list, timeSaleCondition);
+    return getCartItemList0(list);
+  }
 
+  private CartInfo getCartItemList0(List<Cart> list) {
     Map<Integer, List<CartDelivery>> storeMap = new LinkedHashMap<>();  // key: storeId
     Map<Integer, List<CartItem>> deliveryMap = new LinkedHashMap<>();   // key: deliverySno
 

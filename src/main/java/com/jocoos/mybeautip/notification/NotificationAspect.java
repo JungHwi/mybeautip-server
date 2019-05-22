@@ -1,7 +1,5 @@
 package com.jocoos.mybeautip.notification;
 
-import java.util.Date;
-
 import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.order.Order;
@@ -32,16 +30,13 @@ public class NotificationAspect {
 
   private final NotificationService notificationService;
   private final SlackService slackService;
-  private final InstantMessageService instantMessageService;
 
   public NotificationAspect(NotificationService notificationService,
                             SlackService slackService,
                             InstantNotificationConfig instantNotificationConfig,
-                            ThreadPoolTaskScheduler taskScheduler,
-                            InstantMessageService instantMessageService) {
+                            ThreadPoolTaskScheduler taskScheduler) {
     this.notificationService = notificationService;
     this.slackService = slackService;
-    this.instantMessageService = instantMessageService;
   }
 
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.startVideo(..))",
@@ -66,8 +61,6 @@ public class NotificationAspect {
       if ("UPLOADED".equals(video.getType()) && "VOD".equals(video.getState())) {
         notificationService.notifyUploadedMyVideo(video);
       }
-
-      instantMessageService.instantPushMessage(video);
     }
   }
 

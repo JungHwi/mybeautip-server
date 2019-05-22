@@ -134,8 +134,10 @@ public class GoodsController {
     Slice<Goods> slice;
     if (StringUtils.isNotEmpty(keyword)) {
       category = sort = null;
-      Date startCursor = (cursor == null) ? new Date() : new Date(cursor);
-      slice = goodsRepository.findAllByKeyword(keyword, startCursor, of(0, count));
+      if (cursor == null) {
+        cursor = 0L;
+      }
+      slice = goodsRepository.findAllByKeyword(keyword, of(cursor.intValue(), count));
     } else {
       slice = goodsService.getGoodsList(count, cursor, sort, category);
     }
@@ -148,7 +150,7 @@ public class GoodsController {
     String nextCursor = null;
     if (sort == null) {
       if (result.size() > 0) {
-        nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+        nextCursor = String.valueOf(cursor.intValue() + 1);
       }
     } else {
       switch (sort) {

@@ -16,7 +16,11 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
   Slice<Notification> findByTargetMemberId(Long targetMember, Pageable pageable);
 
+  Slice<Notification> findByTargetMemberIdAndTypeNot(Long targetMember, String type, Pageable pageable);
+
   Slice<Notification> findByTargetMemberIdAndCreatedAtBefore(Long targetMember, Date createdAt, Pageable pageable);
+
+  Slice<Notification> findByTargetMemberIdAndCreatedAtBeforeAndTypeNot(Long targetMember, Date createdAt, String type, Pageable pageable);
 
   int countByTargetMemberAndReadIsFalse(Member member);
   

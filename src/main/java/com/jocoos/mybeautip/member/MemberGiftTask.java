@@ -1,20 +1,24 @@
 package com.jocoos.mybeautip.member;
 
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
-import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.point.MemberPointRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
+import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.point.MemberPointRepository;
+import com.jocoos.mybeautip.member.point.MemberPointService;
+import com.jocoos.mybeautip.notification.NotificationService;
 
 @Slf4j
 @Component
@@ -25,19 +29,28 @@ public class MemberGiftTask {
   private final MemberRepository memberRepository;
   private final MemberCouponRepository memberCouponRepository;
   private final MemberPointRepository memberPointRepository;
+  private final NotificationService notificationService;
+  private final MemberPointService memberPointService;
 
   @Value("${mybeautip.point.earn-after-days}")
   private int earnedAfterDays;
 
+  @Value("${mybeautip.point.remind-expiring-point}")
+  private int reminder;
+
   public MemberGiftTask(MemberRepository memberRepository,
                         MemberCouponRepository memberCouponRepository,
-                        MemberPointRepository memberPointRepository) {
+                        MemberPointRepository memberPointRepository,
+                        NotificationService notificationService,
+                        MemberPointService memberPointService) {
     this.memberRepository = memberRepository;
     this.memberCouponRepository = memberCouponRepository;
     this.memberPointRepository = memberPointRepository;
+    this.notificationService = notificationService;
+    this.memberPointService = memberPointService;
   }
 
-  @Scheduled(fixedDelay = 5000)
+  @Scheduled(fixedDelay = 60 * 1000)
   public void removeNotUsedCouponIsExpired() {
     List<MemberCoupon> expiredCoupons = memberCouponRepository.findByUsedAtIsNullAndCouponEndedAtBefore(new Date());
     if (!CollectionUtils.isEmpty(expiredCoupons)) {
@@ -48,41 +61,32 @@ public class MemberGiftTask {
     }
   }
 
-  @Scheduled(fixedDelay = 5000)
-  public void removePoints() {
-    Date yearAgo = getYears(-1);
-    
-    List<MemberPoint> expires = memberPointRepository.findByStateAndEarnedAtBeforeAndExpiredAtIsNull(MemberPoint.STATE_EARNED_POINT, yearAgo);
+  @Scheduled(fixedDelay = 60 * 1000)
+  public void expirePoints() {
+    Date now = new Date();
+    List<MemberPoint> expires = memberPointRepository.findByStateInAndExpiryAtBeforeAndExpiredAtIsNull(Lists.newArrayList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT), now);
     if (!CollectionUtils.isEmpty(expires)) {
-      log.debug("expired at : {}", dateFormat.format(yearAgo));
+      log.debug("expired at : {}", dateFormat.format(now));
       log.debug("expired points found: {}", expires);
       expires.stream().forEach(memberPoint -> {
-        expiredPoint(memberPoint, yearAgo);
+        memberPointService.expiredPoint(memberPoint, now);
       });
     }
   }
 
-  @Transactional
-  private void expiredPoint(MemberPoint memberPoint, Date expiredAt) {
-    if (memberPoint == null) {
-      return;
+  @Scheduled(fixedDelay = 60 * 1000)
+  public void remindPoints() {
+    Date before = getDays(reminder);
+    List<MemberPoint> reminders = memberPointRepository.findByStateInAndExpiryAtBeforeAndRemindIsFalseAndExpiredAtIsNull(Lists.newArrayList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT), before);
+    if (!CollectionUtils.isEmpty(reminders)) {
+      log.debug("reminder before 3 days : {}", dateFormat.format(reminder));
+      log.debug("expired points found: {}", reminders);
+      reminders.stream().forEach(memberPoint -> {
+        notificationService.notifyReminderMemberPoint(memberPoint);
+        memberPoint.setRemind(true);
+        memberPointRepository.save(memberPoint);
+      });
     }
-
-    memberPoint.setExpiredAt(expiredAt);
-    memberPointRepository.save(memberPoint);
-
-    MemberPoint expiredPoint = new MemberPoint(memberPoint.getMember(), null, memberPoint.getPoint(), MemberPoint.STATE_EXPIRED_POINT);
-    expiredPoint.setCreatedAt(expiredAt);
-    memberPointRepository.save(expiredPoint);
-
-    Member member = memberPoint.getMember();
-    if (memberPoint.getPoint() > member.getPoint()) {
-      member.setPoint(0);
-    } else {
-      member.setPoint(member.getPoint() - memberPoint.getPoint());
-    }
-
-    memberRepository.save(member);
   }
 
   private Date getDays(int amount) {

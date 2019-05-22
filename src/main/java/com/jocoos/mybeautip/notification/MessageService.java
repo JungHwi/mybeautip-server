@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class MessageService {
+  private static final String JOIN_DELIMITER = ".";
   private static final String NOTIFICATION_NAME_FORMAT = "notification.%s";
   private static final String GOODS_COMPANY_TEXT = "goods.company_text";
 
@@ -26,7 +27,6 @@ public class MessageService {
   private String getNotificationMessage(String code, Object[] args, Locale locale) {
     String message = messageSource.getMessage(
        String.format(NOTIFICATION_NAME_FORMAT, code), args, locale);
-    log.debug("message: {}", message);
     return message;
   }
 
@@ -50,5 +50,19 @@ public class MessageService {
       default:
         return Locale.ENGLISH;
     }
+  }
+
+  public String getSystemMessage(Notification n) {
+    String type = Notification.SYSTEM_MESSAGE.equals(n.getType()) && n.getCustom() != null ?
+       String.join(JOIN_DELIMITER, n.getType(), n.getCustom().get("system_detail")):
+       n.getType();
+
+    return getNotificationMessage(type, n.getArgs().toArray());
+  }
+
+  public String getMessage(Notification n) {
+    return n.isSystemMessage() ?
+       getSystemMessage(n) :
+       getNotificationMessage(n.getType(), n.getArgs().toArray());
   }
 }

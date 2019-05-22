@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.support.slack;
 
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -16,10 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
+import com.jocoos.mybeautip.admin.Dates;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
@@ -211,7 +214,27 @@ public class SlackService {
         "```%s```", videoId, statMessage);
     send(message);
   }
-  
+
+  public void sendPointToMember(MemberPoint memberPoint) {
+    String details = String.format("%s/%d - 포인트: +%s, 유효기간: %s", memberPoint.getMember().getUsername(), memberPoint.getMember().getId(),
+       memberPoint.getFormattedPoint(), Dates.toString(memberPoint.getExpiryAt(), ZoneId.of("Asia/Seoul")));
+    String message = String.format("*포인트(%d) 지급*" +
+       "```%s```", memberPoint.getPoint(), details);
+
+    log.debug("{}", message);
+    send(message);
+  }
+
+  public void sendDeductPoint(MemberPoint memberPoint) {
+    String details = String.format("%s/%d - 포인트: -%s, 유효기간: %s", memberPoint.getMember().getUsername(), memberPoint.getMember().getId(),
+       memberPoint.getFormattedPoint(), Dates.toString(memberPoint.getExpiryAt(), ZoneId.of("Asia/Seoul")));
+    String message = String.format("*포인트(%d) 차감*" +
+       "```%s```", memberPoint.getPoint(), details);
+
+    log.debug("{}", message);
+    send(message);
+  }
+
   private String getPurchaseInfo(List<Purchase> purchases) {
     StringBuilder sb = new StringBuilder();
     for (Purchase purchase : purchases) {

@@ -29,7 +29,7 @@ import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointRepository;
-import com.jocoos.mybeautip.member.point.PointService;
+import com.jocoos.mybeautip.member.point.MemberPointService;
 import com.jocoos.mybeautip.member.revenue.RevenuePayment;
 import com.jocoos.mybeautip.member.revenue.RevenuePaymentService;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
@@ -77,7 +77,7 @@ public class OrderService {
   private final MemberPointRepository memberPointRepository;
   private final RevenueService revenueService;
   private final RevenuePaymentService revenuePaymentService;
-  private final PointService pointService;
+  private final MemberPointService memberPointService;
   private final IamportService iamportService;
   private final MessageService messageService;
   private final SlackService slackService;
@@ -98,7 +98,7 @@ public class OrderService {
                       MemberPointRepository memberPointRepository,
                       RevenueService revenueService,
                       RevenuePaymentService revenuePaymentService,
-                      PointService pointService,
+                      MemberPointService memberPointService,
                       IamportService iamportService,
                       MessageService messageService,
                       SlackService slackService,
@@ -118,7 +118,7 @@ public class OrderService {
     this.memberPointRepository = memberPointRepository;
     this.revenueService = revenueService;
     this.revenuePaymentService = revenuePaymentService;
-    this.pointService = pointService;
+    this.memberPointService = memberPointService;
     this.iamportService = iamportService;
     this.messageService = messageService;
     this.slackService = slackService;
@@ -377,11 +377,11 @@ public class OrderService {
       member.setPoint(member.getPoint() - order.getPoint());
       memberRepository.save(member);
 
-      pointService.usePoints(order, order.getPoint());
+      memberPointService.usePoints(order, order.getPoint());
     }
 
     if (order.getMemberCoupon() == null) {
-      pointService.earnPoints(order);
+      memberPointService.earnPoints(order);
     }
 
     if (order.getVideoId() != null) {
@@ -567,7 +567,7 @@ public class OrderService {
     // Convert earning point state
     memberPointRepository.findByMemberAndOrderAndPointAndState(
         order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
-        .ifPresent(pointService::convertPoint);
+        .ifPresent(memberPointService::convertPoint);
   
     // Update order state
     order.setState(Order.State.CONFIRMED);

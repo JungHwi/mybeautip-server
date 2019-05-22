@@ -11,10 +11,8 @@ import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
-import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.Notification;
-import com.jocoos.mybeautip.notification.NotificationRepository;
-import com.jocoos.mybeautip.notification.NotificationService;
+import com.jocoos.mybeautip.notification.*;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +37,7 @@ import static com.jocoos.mybeautip.notification.Notification.*;
 @RestController
 @RequestMapping("/api/1/members/me/notifications")
 public class NotificationController {
+  private static final String NOTICE_IMG = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_notice.png";
 
   private final NotificationRepository notificationRepository;
   private final FollowingRepository followingRepository;
@@ -47,7 +46,6 @@ public class NotificationController {
   private final MessageService messageService;
   private final NotificationService notificationService;
   private final MentionService mentionService;
-  
 
   public NotificationController(NotificationRepository notificationRepository,
                                 FollowingRepository followingRepository,
@@ -67,7 +65,8 @@ public class NotificationController {
 
   @GetMapping
   public CursorResponse getNotifications(@RequestParam(defaultValue = "20") int count,
-                                         @RequestParam(required = false) String cursor) {
+                                         @RequestParam(required = false) String cursor,
+                                         @RequestParam(defaultValue = "0") int step) {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Long memberId = memberService.currentMemberId();
     List<NotificationInfo> result = Lists.newArrayList();
@@ -75,9 +74,18 @@ public class NotificationController {
     Slice<Notification> notifications;
 
     if (StringUtils.isNumeric(cursor)) {
-      notifications = notificationRepository.findByTargetMemberIdAndCreatedAtBefore(memberId, new Date(Long.parseLong(cursor)), page);
+      if (step > 0) {
+        notifications = notificationRepository.findByTargetMemberIdAndCreatedAtBefore(memberId, new Date(Long.parseLong(cursor)), page);
+      } else {
+        notifications = notificationRepository.findByTargetMemberIdAndCreatedAtBeforeAndTypeNot(memberId, new Date(Long.parseLong(cursor)), Notification.SYSTEM_MESSAGE, page);
+      }
+
     } else {
-      notifications = notificationRepository.findByTargetMemberId(memberId, page);
+      if (step > 0) {
+        notifications = notificationRepository.findByTargetMemberId(memberId, page);
+      } else {
+        notifications = notificationRepository.findByTargetMemberIdAndTypeNot(memberId, Notification.SYSTEM_MESSAGE, page);
+      }
     }
     
     String[] typeWithUsername = {FOLLOWING, VIDEO_STARTED, VIDEO_UPLOADED, VIDEO_LIKE, COMMENT, COMMENT_REPLY, COMMENT_LIKE, MENTION};
@@ -90,7 +98,7 @@ public class NotificationController {
             n.getArgs().set(0, n.getResourceOwner().getUsername());
           }
         }
-        
+
         Set<MentionTag> mentionInfo = null;
         if (StringUtils.equalsAny(n.getType(), typeWithComment)) {
           if (n.getArgs().size() > 1) {
@@ -107,8 +115,8 @@ public class NotificationController {
             }
           }
         }
-        
-        String message = messageService.getNotificationMessage(n.getType(), n.getArgs().toArray());
+
+        String message = messageService.getMessage(n);
         Optional<Following> following = followingRepository.findByMemberMeIdAndMemberYouId(n.getTargetMember().getId(), n.getResourceOwner().getId());
         if (following.isPresent()) {
           result.add(new NotificationInfo(n, message, following.get().getId(), memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner()), mentionInfo));
@@ -167,6 +175,13 @@ public class NotificationController {
       this.targetMember = targetMember;
       this.resourceOwner = resourceOwner;
       this.mentionInfo = mentionInfo;
+      if (notification.getImageUrl() == null) {
+        this.imageUrl = "";
+      }
+
+      if (Notification.SYSTEM_MESSAGE.equals(notification.getType())) {
+        this.resourceOwner.setAvatarUrl(NOTICE_IMG);
+      }
     }
 
     public NotificationInfo(Notification notification, String message, Long followId,

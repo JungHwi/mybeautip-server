@@ -11,7 +11,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
   Page<Schedule> findByStartedAtAfterAndDeletedAtIsNull(Date startedAt, Pageable pageable);
 
+  Page<Schedule> findByStartedAtBeforeAndDeletedAtIsNull(Date startedAt, Pageable pageable);
+
   List<Schedule> findByCreatedByIdOrderByStartedAt(Long id);
 
-  Optional<Schedule> findByCreatedByIdAndStartedAtBetweenAndDeletedAtIsNull(Long id, Date from, Date to);
+  Optional<Schedule> findTopByCreatedByIdAndStartedAtBetweenAndDeletedAtIsNull(Long id, Date from, Date to);
+
+  Page<Schedule> findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(Long id, Date startedAt, Pageable pageable);
+
+  Optional<Schedule> findByIdAndCreatedById(Long id, Long memberId);
 }

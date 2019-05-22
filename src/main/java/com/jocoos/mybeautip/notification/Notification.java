@@ -1,25 +1,28 @@
 package com.jocoos.mybeautip.notification;
 
+import javax.persistence.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 @NoArgsConstructor
 @Data
@@ -40,6 +43,7 @@ public class Notification {
   public static final String COMMENT_LIKE = "comment_like";
   public static final String MENTION = "mention";
   public static final String ORDER = "order";
+  public static final String SYSTEM_MESSAGE = "system_message";
 
   private static final String RESOURCE_TYPE_MEMBER = "member";
   public static final String RESOURCE_TYPE_VIDEO = "video";
@@ -48,6 +52,12 @@ public class Notification {
   private static final String RESOURCE_TYPE_VIDEO_COMMENT_REPLY = "video_comment_reply";
   private static final String RESOURCE_TYPE_POST_COMMENT_REPLY = "post_comment_reply";
   private static final String RESOURCE_TYPE_ORDER = "order";
+
+  private static final String RESOURCE_TYPE_MY_COUPON = "my_coupon";
+  private static final String RESOURCE_TYPE_MY_POINT = "my_point";
+  private static final String RESOURCE_TYPE_SETTINGS = "settings";
+  private static final String RESOURCE_TYPE_SETTLE_LIST = "settle_list";
+
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -274,5 +284,47 @@ public class Notification {
     this.resourceType = resourceType;
     this.resourceIds = resourceIds;
     this.imageUrl = imageUrl;
+  }
+
+  public Notification(MemberPoint memberPoint, Member from) {
+    this(memberPoint, from, "point");
+  }
+
+  public Notification(MemberPoint memberPoint, Member from, String detail) {
+    this.type = SYSTEM_MESSAGE;
+    this.targetMember = memberPoint.getMember();
+    this.resourceType = RESOURCE_TYPE_MY_POINT;
+    this.resourceId = memberPoint.getMember().getId();
+    this.resourceIds = StringUtils.joinWith(",", memberPoint.getMember().getId());
+    this.resourceOwner = from;
+
+    switch (detail) {
+      case "point":
+        setSendPointMessage(memberPoint.getFormattedPoint(), from.getUsername());
+        break;
+      case "deduct_point":
+        setDeductPointMessage(memberPoint.getFormattedPoint());
+        break;
+      case "remind_point":
+        this.args = Lists.newArrayList();
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown detail type - " + detail);
+    }
+    this.custom = Maps.newHashMap();
+    this.custom.put("system_detail", detail);
+  }
+
+  private void setSendPointMessage(String point, String username) {
+    this.args = Lists.newArrayList(username, point);
+  }
+
+  private void setDeductPointMessage(String point) {
+    this.args = Lists.newArrayList(point);
+  }
+
+
+  public boolean isSystemMessage() {
+    return SYSTEM_MESSAGE.equals(this.type);
   }
 }

@@ -1,11 +1,9 @@
 package com.jocoos.mybeautip.notification;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +14,7 @@ import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
@@ -24,6 +23,7 @@ import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.video.Video;
@@ -40,7 +40,10 @@ public class NotificationService {
   private final FollowingRepository followingRepository;
   private final NotificationRepository notificationRepository;
   private final MemberRepository memberRepository;
-  
+  private final MemberService memberService;
+  private final MemberRecommendationRepository memberRecommendationRepository;
+  private final InstantMessageService instantMessageService;
+
   @Value("${mybeautip.notification.duplicate-limit-duration}")
   private int duration;
 
@@ -50,7 +53,10 @@ public class NotificationService {
                              PostRepository postRepository,
                              FollowingRepository followingRepository,
                              NotificationRepository notificationRepository,
-                             MemberRepository memberRepository) {
+                             MemberRepository memberRepository,
+                             MemberService memberService,
+                             MemberRecommendationRepository memberRecommendationRepository,
+                             InstantMessageService instantMessageService) {
     this.deviceService = deviceService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
@@ -58,11 +64,16 @@ public class NotificationService {
     this.followingRepository = followingRepository;
     this.notificationRepository = notificationRepository;
     this.memberRepository = memberRepository;
+    this.memberService = memberService;
+    this.memberRecommendationRepository = memberRecommendationRepository;
+    this.instantMessageService = instantMessageService;
   }
 
   public void notifyCreateVideo(Video video) {
     Long creator = video.getMember().getId();
-    followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator)
+
+    List<Following> followingList = followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator);
+    followingList
        .forEach(f -> {
          Notification notification = new Notification(video, video.getThumbnailUrl(), f.getMemberMe());
          log.debug("notification: {}", notification);
@@ -70,6 +81,12 @@ public class NotificationService {
          notificationRepository.save(notification);
          deviceService.push(notification);
        });
+
+    // if creator is recommended member
+    List<Member> excludes = followingList.stream().map(Following::getMemberMe).collect(Collectors.toList());
+    excludes.add(video.getMember());
+    memberRecommendationRepository.findByMemberId(creator)
+            .ifPresent(r -> instantMessageService.instantPushMessage(video, excludes));
   }
 
   public void notifyUploadedMyVideo(Video video) {
@@ -347,5 +364,30 @@ public class NotificationService {
           notificationRepository.save(notification);
           deviceService.push(notification);
         });
+  }
+
+  public void notifyMemberPoint(MemberPoint memberPoint) {
+    Member admin = memberService.currentMember();
+
+    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "point"));
+    log.info("notification: {}", notification);
+
+    deviceService.push(notification);
+  }
+
+  public void notifyDeductMemberPoint(MemberPoint memberPoint) {
+    Member admin = memberService.getAdmin();
+    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "deduct_point"));
+    log.info("notification: {}", notification);
+
+    deviceService.push(notification);
+  }
+
+  public void notifyReminderMemberPoint(MemberPoint memberPoint) {
+    Member admin = memberService.getAdmin();
+    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "remind_point"));
+    log.info("notification: {}", notification);
+
+    deviceService.push(notification);
   }
 }
