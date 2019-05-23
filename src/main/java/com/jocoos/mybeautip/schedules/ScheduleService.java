@@ -51,7 +51,8 @@ public class ScheduleService {
             }
             startCursor = new Date(cursor);
         } else {
-            startCursor = getFutureDate();
+            ScheduleRoughTime srt = ScheduleRoughTime.now(config.getInterval());
+            startCursor = srt.getAheadTime();
         }
 
         Page<Schedule> schedules;
