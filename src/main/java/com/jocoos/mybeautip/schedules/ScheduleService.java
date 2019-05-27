@@ -51,7 +51,8 @@ public class ScheduleService {
             }
             startCursor = new Date(cursor);
         } else {
-            startCursor = getFutureDate();
+            ScheduleRoughTime srt = ScheduleRoughTime.now(config.getInterval());
+            startCursor = srt.getAheadTime();
         }
 
         Page<Schedule> schedules;
@@ -72,9 +73,9 @@ public class ScheduleService {
         } else {
             startCursor = getFutureDate();
         }
-        PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
+        PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "startedAt"));
         return scheduleRepository
-                .findByCreatedByIdAndStartedAtAfterAndDeletedAtIsNull(memberId, startCursor, pageRequest);
+                .findByCreatedByIdAndStartedAtBeforeAndDeletedAtIsNull(memberId, startCursor, pageRequest);
     }
 
     private Date getFutureDate() {
