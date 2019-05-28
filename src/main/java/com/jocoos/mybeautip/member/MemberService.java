@@ -197,12 +197,14 @@ public class MemberService {
   }
   
   @Transactional
-  public void reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {
+  public Report reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {
     Member you = memberRepository.findByIdAndDeletedAtIsNull(targetId)
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
-    reportRepository.save(new Report(me, you, reasonCode, reason, video));
+    Report report = reportRepository.save(new Report(me, you, reasonCode, reason, video));
     memberRepository.updateReportCount(you.getId(), 1);
+
+    return report;
   }
   
   @Transactional
