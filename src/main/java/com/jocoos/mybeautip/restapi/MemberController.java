@@ -301,9 +301,9 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
     Long me = memberService.currentMemberId();
-    reportRepository.findByMeIdAndYouId(memberService.currentMemberId(), id)
+    reportRepository.findByMeIdAndYouId(me, id)
             .ifPresent(report -> memberInfo.setReported(true));
-    blockRepository.findByMeAndMemberYouId(id, me)
+    blockRepository.findByMeAndMemberYouId(me, id)
             .ifPresent(block -> memberInfo.setBlocked(true));
 
     return memberInfo;
