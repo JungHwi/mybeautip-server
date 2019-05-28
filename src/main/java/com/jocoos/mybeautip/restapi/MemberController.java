@@ -302,9 +302,9 @@ public class MemberController {
 
     Long me = memberService.currentMemberId();
     reportRepository.findByMeIdAndYouId(me, id)
-            .ifPresent(report -> memberInfo.setReported(true));
+            .ifPresent(report -> memberInfo.setReported(report.getId()));
     blockRepository.findByMeAndMemberYouId(me, id)
-            .ifPresent(block -> memberInfo.setBlocked(true));
+            .ifPresent(block -> memberInfo.setBlocked(block.getId()));
 
     return memberInfo;
   }
