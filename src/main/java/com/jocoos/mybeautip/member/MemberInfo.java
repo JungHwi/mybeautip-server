@@ -22,8 +22,8 @@ public class MemberInfo {
   private Integer followerCount;
   private Integer followingCount;
   private Long followingId;
-  private Long reported;
-  private Long blocked;
+  private Long reportedId;
+  private Long blockedId;
   private Integer videoCount;
   private List<VideoController.VideoInfo> videos;
   private Date createdAt;
