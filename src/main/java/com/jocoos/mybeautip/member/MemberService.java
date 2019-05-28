@@ -44,7 +44,7 @@ public class MemberService {
   private final MemberLeaveLogRepository memberLeaveLogRepository;
   
   private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
-  private final String defaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
+  private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
   
   private static final String USERNAME_INVALID_LENGTH = "username.invalid_length";
   private static final String USERNAME_INVALID_FORMAT = "username.invalid_format";
@@ -287,7 +287,7 @@ public class MemberService {
     }
   
     member.setIntro("");
-    member.setAvatarUrl("https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_deleted.png");
+    member.setAvatarUrl("https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_deleted.png");
     member.setVisible(false);
     member.setFollowingCount(0);
     member.setFollowerCount(0);
