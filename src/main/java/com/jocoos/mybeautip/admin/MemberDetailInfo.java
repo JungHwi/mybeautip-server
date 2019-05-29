@@ -25,6 +25,7 @@ public class MemberDetailInfo extends MemberInfo {
   private Schedule schedule;
 
   public MemberDetailInfo(Member member) {
+    super(member);
     BeanUtils.copyProperties(member, this);
   }
 
