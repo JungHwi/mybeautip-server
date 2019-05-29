@@ -301,10 +301,12 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
     Long me = memberService.currentMemberId();
-    reportRepository.findByMeIdAndYouId(me, id)
-            .ifPresent(report -> memberInfo.setReportedId(report.getId()));
-    blockRepository.findByMeAndMemberYouId(me, id)
-            .ifPresent(block -> memberInfo.setBlockedId(block.getId()));
+    if (me != null) {
+      reportRepository.findByMeIdAndYouId(me, id)
+              .ifPresent(report -> memberInfo.setReportedId(report.getId()));
+      blockRepository.findByMeAndMemberYouId(me, id)
+              .ifPresent(block -> memberInfo.setBlockedId(block.getId()));
+    }
 
     return memberInfo;
   }
