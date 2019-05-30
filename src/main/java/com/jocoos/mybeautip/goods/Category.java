@@ -18,7 +18,10 @@ public class Category {
   
   @Column(name = "parent_code")
   private String group;
-  
+
+  @Column
+  private int seq;
+
   @Column(name = "category_name")
   private String name;
 
