@@ -141,11 +141,19 @@ public class MemberService {
     return optional.map(Following::getId).orElse(null);
   }
 
+  public MemberExtraInfo getMemberExtraInfo(Member member) {
+    if (currentMemberId() == null) {
+      return null;
+    }
+    Optional<MemberExtraInfo> optional = memberRepository.findMemberExtraInfo(currentMemberId(), member.getId());
+    return optional.orElse(null);
+  }
+
   public MemberInfo getMemberInfo(Member member) {
     if (currentMember() != null && member.getId().equals(currentMember().getId())) {
       return new MemberMeInfo(member);
     } else {
-      return new MemberInfo(member, getFollowingId(member));
+      return new MemberInfo(member, getMemberExtraInfo(member));
     }
   }
 

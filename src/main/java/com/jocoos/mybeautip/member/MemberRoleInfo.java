@@ -10,7 +10,7 @@ public class MemberRoleInfo extends MemberInfo {
   private int storeId;
 
   public MemberRoleInfo(Member member, int role) {
-    super(member, null);
+    super(member);
     this.role = role;
   }
 }
