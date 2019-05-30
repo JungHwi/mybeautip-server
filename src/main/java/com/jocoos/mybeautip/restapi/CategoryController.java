@@ -5,6 +5,8 @@ import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,9 @@ public class CategoryController {
   @GetMapping
   public ResponseEntity<List<CategoryGroup>> getAllCategories() {
     List<CategoryGroup> groups = new ArrayList<>();
-    Iterable<Category> iterable = categoryRepository.findByGroup(GOODS_CATEGORY_TOP);
+
+    Sort sort = Sort.by(Sort.Direction.DESC, "seq");
+    Iterable<Category> iterable = categoryRepository.findByGroup(GOODS_CATEGORY_TOP, sort);
     List<Category> subCategories;
     CategoryGroup categoryGroup;
     Iterable<Category> subIterable;
