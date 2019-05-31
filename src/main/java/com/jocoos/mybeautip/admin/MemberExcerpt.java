@@ -35,6 +35,10 @@ public interface MemberExcerpt {
 
   int getTotalVideoCount();
 
+  int getOrderCount();
+
+  int getReportCount();
+
   int getRevenue();
 
   MemberInfo.PermissionInfo getPermission();

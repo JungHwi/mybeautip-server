@@ -16,7 +16,7 @@ import com.jocoos.mybeautip.schedules.Schedule;
 @Data
 public class MemberDetailInfo extends MemberInfo {
   private MemberRecommendation recommendation;
-  private Long reportCount;
+  private int reportCount;
   private int link;
   private int point;
   private int revenue;
@@ -24,6 +24,7 @@ public class MemberDetailInfo extends MemberInfo {
   private int totalVideoCount;
   private Schedule schedule;
   private boolean pushable;
+  private int orderCount;
 
   public MemberDetailInfo(Member member) {
     super(member);

@@ -38,5 +38,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
   Page<Order> findByStateLessThanEqual(int state, Pageable page);
 
   Page<Order> findByStateLessThanEqualAndCreatedById(int state, Long memberId, Pageable page);
-  
+
+  int countByCreatedByIdAndStateLessThanEqual(Long createdBy, int state);
 }
