@@ -23,6 +23,7 @@ public class MemberDetailInfo extends MemberInfo {
   private int publicVideoCount;
   private int totalVideoCount;
   private Schedule schedule;
+  private boolean pushable;
 
   public MemberDetailInfo(Member member) {
     super(member);
