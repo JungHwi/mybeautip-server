@@ -297,18 +297,8 @@ public class MemberController {
   @GetMapping("/{id:.+}")
   public MemberInfo getMember(@PathVariable Long id,
                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    MemberInfo memberInfo = memberRepository.findByIdAndDeletedAtIsNull(id).map(memberService::getMemberInfo)
+    return memberRepository.findByIdAndDeletedAtIsNull(id).map(memberService::getMemberInfo)
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
-
-    Long me = memberService.currentMemberId();
-    if (me != null) {
-      reportRepository.findByMeIdAndYouId(me, id)
-              .ifPresent(report -> memberInfo.setReportedId(report.getId()));
-      blockRepository.findByMeAndMemberYouId(me, id)
-              .ifPresent(block -> memberInfo.setBlockedId(block.getId()));
-    }
-
-    return memberInfo;
   }
 
   @GetMapping(value = "/me/like_count")
