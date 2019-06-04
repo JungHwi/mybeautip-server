@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.goods;
 
 import com.jocoos.mybeautip.member.cart.Cart;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,14 +22,18 @@ public class TimeSaleService {
 
     public void applyTimeSale(Goods goods, TimeSaleCondition timeSaleCondition) {
         Date now = new Date();
-        timeSaleRepository.findByGoodsNoAndStartedAtBeforeAndEndedAtAfterAndBrokerAndDeletedAtIsNull(goods.getGoodsNo(), now, now, timeSaleCondition.getBroker())
-                .ifPresent(sale -> updateGoods(goods, sale));
+        Slice<TimeSale> timeSales = timeSaleRepository
+                .getTopTimeSale(goods.getGoodsNo(), now, now, timeSaleCondition.getBroker(), PageRequest.of(0, 1));
+        if (timeSales.hasContent()) {
+            TimeSale timeSale = timeSales.getContent().get(0);
+            updateGoods(goods, timeSale);
+        }
     }
 
     public void applyTimeSaleOptions(int goodsNo, List<GoodsOption> goodsOptions, TimeSaleCondition timeSaleCondition) {
         Date now = new Date();
         List<TimeSaleOption> timeSaleOptions =
-                timeSaleOptionRepository.findByGoodsNoAndStartedAtBeforeAndEndedAtAfterAndBrokerAndDeletedAtIsNull(goodsNo, now, now, timeSaleCondition.getBroker());
+                timeSaleOptionRepository.getTimeSaleOptionByGoodsNo(goodsNo, now, now, timeSaleCondition.getBroker());
         if (timeSaleOptions.size() <= 0) {
             return;
         }
@@ -67,11 +73,11 @@ public class TimeSaleService {
     }
 
     private List<TimeSale> getTimeSales(Date now, TimeSaleCondition timeSaleCondition) {
-        return timeSaleRepository.findByBrokerAndStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(timeSaleCondition.getBroker(), now, now);
+        return timeSaleRepository.getTimeSaleList(now, now, timeSaleCondition.getBroker());
     }
 
     private List<TimeSaleOption> getTimeSaleOptions(Date now, TimeSaleCondition timeSaleCondition) {
-        return timeSaleOptionRepository.findByStartedAtBeforeAndEndedAtAfterAndBrokerAndDeletedAtIsNull(now, now, timeSaleCondition.getBroker());
+        return timeSaleOptionRepository.getTimeSaleOptionList(now, now, timeSaleCondition.getBroker());
     }
 
     private void updateGoods(Goods goods, TimeSale timeSale) {

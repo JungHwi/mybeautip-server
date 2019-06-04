@@ -291,7 +291,6 @@ public class GoodsController {
     return "y".equals(goods.getStockFl()) && option.getStockCnt() <= 0;
   }
 
-  @Transactional
   @PostMapping("/{goodsNo:.+}/likes")
   public ResponseEntity<GoodsLikeInfo> addGoodsLike(@PathVariable String goodsNo,
                                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -308,7 +307,6 @@ public class GoodsController {
         .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
   }
 
-  @Transactional
   @DeleteMapping("/{goodsNo:.+}/likes/{likeId:.+}")
   public ResponseEntity<?> removeGoodsLike(@PathVariable String goodsNo,
                                            @PathVariable Long likeId,
