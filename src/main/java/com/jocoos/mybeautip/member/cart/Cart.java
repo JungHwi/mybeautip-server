@@ -24,12 +24,12 @@ public class Cart extends MemberAuditable {
   @Column(nullable = false)
   private Boolean checked;
 
-  @ManyToOne
-  @JoinColumn(name = "goods_no")
+  @ManyToOne(cascade = CascadeType.DETACH)
+  @JoinColumn(name = "goods_no", updatable = false)
   private Goods goods;
 
-  @ManyToOne
-  @JoinColumn(name = "option_id")
+  @ManyToOne(cascade = CascadeType.DETACH)
+  @JoinColumn(name = "option_id", updatable = false)
   private GoodsOption option;
 
   @ManyToOne
