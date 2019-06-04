@@ -80,7 +80,8 @@ public class CartController {
     if (request.getItems().size() + cartRepository.countByCreatedById(memberService.currentMemberId()) > 100) {
       throw new BadRequestException("too_many_items", messageService.getMessage(CART_TOO_MANY_ITEMS, lang));
     }
-    return cartService.addItems(request, memberService.currentMemberId(), lang);
+    cartService.addItems(request, memberService.currentMemberId(), lang);
+    return cartService.getCartItemList(memberService.currentMemberId());
   }
 
   @PatchMapping("/all")

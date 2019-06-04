@@ -204,7 +204,7 @@ public class CartService {
   }
   
   @Transactional
-  public CartInfo addItems(CartController.AddCartRequest request, long memberId, String lang) {
+  public void addItems(CartController.AddCartRequest request, long memberId, String lang) {
     for (CartController.CartItemRequest requestItem : request.getItems()) {
       Cart item = getValidCartItem(requestItem.getGoodsNo(), requestItem.getOptionNo(), requestItem.getQuantity(), lang);
     
@@ -225,7 +225,6 @@ public class CartService {
         save(item);
       }
     }
-    return getCartItemList(memberId);
   }
   
   @Transactional
