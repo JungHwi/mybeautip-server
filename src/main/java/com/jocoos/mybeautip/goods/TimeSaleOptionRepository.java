@@ -20,4 +20,6 @@ public interface TimeSaleOptionRepository extends JpaRepository<TimeSaleOption, 
             "        tso.deletedAt is null" +
             "  order by tso.broker")
     List<TimeSaleOption> getTimeSaleOptionList(Date startedAt, Date endedAt, Long memberId);
+
+    List<TimeSaleOption> findByGoodsNoAndBroker(Integer goodsNo, Long memberId);
 }

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.goods;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,8 @@ public interface TimeSaleRepository extends JpaRepository<TimeSale, Long> {
             "        ts.deletedAt is null" +
             "  order by ts.broker")
     List<TimeSale> getTimeSaleList(Date startedAt, Date endedAt, Long memberId);
+
+    Page<TimeSale> findByDeletedAtIsNull(Pageable pageable);
+
+    Page<TimeSale> findByDeletedAtIsNotNull(Pageable pageable);
 }
