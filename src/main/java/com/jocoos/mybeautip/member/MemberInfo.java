@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.base.Strings;
 import lombok.Data;
@@ -22,6 +23,8 @@ public class MemberInfo {
   private Integer followerCount;
   private Integer followingCount;
   private Long followingId;
+  private Long reportedId;
+  private Long blockedId;
   private Integer videoCount;
   private List<VideoController.VideoInfo> videos;
   private Date createdAt;
@@ -47,6 +50,15 @@ public class MemberInfo {
   public MemberInfo(Member member, Long followingId) {
     this(member);
     this.followingId = followingId;
+  }
+
+  public MemberInfo(Member member, MemberExtraInfo extraInfo) {
+    this(member);
+    if (extraInfo != null) {
+      this.followingId = extraInfo.getFollowingId();
+      this.reportedId = extraInfo.getReportedId();
+      this.blockedId = extraInfo.getBlockedId();
+    }
   }
   
   @Data

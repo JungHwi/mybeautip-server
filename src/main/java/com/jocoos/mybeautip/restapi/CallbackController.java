@@ -91,11 +91,11 @@ public class CallbackController {
       log.error("Invalid UserID: " + request.getUserId());
       throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
     }
-    
-    if (video.getLocked() && "PUBLIC".equals(request.getVisibility())) {
+
+    if (video.getLocked() && "VOD".equals(video.getState()) && "PUBLIC".equals(request.getVisibility())) {
       throw new BadRequestException("video_locked", messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
     }
-  
+
     String oldState = video.getState();
     video = videoService.updateVideoProperties(request, video);
     video = videoService.update(video);

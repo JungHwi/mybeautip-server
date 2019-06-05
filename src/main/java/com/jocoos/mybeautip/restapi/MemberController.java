@@ -12,6 +12,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.block.BlockRepository;
+import com.jocoos.mybeautip.member.report.ReportRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
@@ -100,6 +102,8 @@ public class MemberController {
   private final CommentLikeRepository commentLikeRepository;
   private final RevenueRepository revenueRepository;
   private final RevenuePaymentRepository revenuePaymentRepository;
+  private final ReportRepository reportRepository;
+  private final BlockRepository blockRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
   private String storeImagePrefix;
@@ -137,7 +141,9 @@ public class MemberController {
                           MentionService mentionService,
                           KeywordService keywordService,
                           NotificationService notificationService,
-                          RevenuePaymentRepository revenuePaymentRepository) {
+                          RevenuePaymentRepository revenuePaymentRepository,
+                          ReportRepository reportRepository,
+                          BlockRepository blockRepository) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -156,6 +162,8 @@ public class MemberController {
     this.keywordService = keywordService;
     this.notificationService = notificationService;
     this.revenuePaymentRepository = revenuePaymentRepository;
+    this.reportRepository = reportRepository;
+    this.blockRepository = blockRepository;
   }
 
   @GetMapping("/me")

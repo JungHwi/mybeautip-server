@@ -80,26 +80,29 @@ public class CartController {
     if (request.getItems().size() + cartRepository.countByCreatedById(memberService.currentMemberId()) > 100) {
       throw new BadRequestException("too_many_items", messageService.getMessage(CART_TOO_MANY_ITEMS, lang));
     }
-    return cartService.addItems(request, memberService.currentMemberId(), lang);
+    cartService.addItems(request, memberService.currentMemberId(), lang);
+    return cartService.getCartItemList(memberService.currentMemberId());
   }
 
   @PatchMapping("/all")
   public CartService.CartInfo updateAllCart(@Valid @RequestBody UpdateCartRequest request) {
-    return cartService.updateAllItems(request, memberService.currentMember());
+    cartService.updateAllItems(request, memberService.currentMember());
+    return cartService.getCartItemList(memberService.currentMember().getId());
   }
 
   @PatchMapping("{id}")
   public CartService.CartInfo updateCart(@PathVariable Long id,
                                          @Valid @RequestBody UpdateCartRequest request,
                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    return cartService.updateItem(id, memberService.currentMemberId
-            (), request, lang);
+    cartService.updateItem(id, memberService.currentMemberId(), request, lang);
+    return cartService.getCartItemList(memberService.currentMemberId());
   }
 
   @DeleteMapping("{id}")
   public CartService.CartInfo removeCart(@PathVariable Long id,
                                          @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    return cartService.removeItem(id, memberService.currentMemberId(), lang);
+    cartService.removeItem(id, memberService.currentMemberId(), lang);
+    return cartService.getCartItemList(memberService.currentMemberId());
   }
 
   @PostMapping("/now")

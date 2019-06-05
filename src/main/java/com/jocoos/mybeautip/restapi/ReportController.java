@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.jocoos.mybeautip.member.report.Report;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +48,7 @@ public class ReportController {
   }
   
   @PutMapping
-  public void reportMember(@Valid @RequestBody ReportRequest request,
+  public ReportResponse reportMember(@Valid @RequestBody ReportRequest request,
                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
     
@@ -60,8 +61,10 @@ public class ReportController {
       throw new BadRequestException("already_reported", messageService.getMessage(MEMBER_ALREADY_REPORTED, lang));
     }
     
-    memberService.reportMember(memberService.currentMember(), request.getMemberId(), reasonCode,
+    Report report = memberService.reportMember(memberService.currentMember(), request.getMemberId(), reasonCode,
         request.getReason(), video, lang);
+
+    return new ReportResponse(report.getId());
   }
 
   @GetMapping("/{id:.+}")
@@ -89,6 +92,15 @@ public class ReportController {
   @Data
   @AllArgsConstructor
   class ReportResponse {
+    Long id;
     Boolean reported;
+
+    ReportResponse(Long id) {
+      this.id = id;
+    }
+
+    ReportResponse(Boolean reported) {
+      this.reported = reported;
+    }
   }
 }

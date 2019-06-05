@@ -3,14 +3,7 @@ package com.jocoos.mybeautip.admin;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -20,14 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -49,22 +35,13 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.report.Report;
+import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostContent;
 import com.jocoos.mybeautip.post.PostRepository;
-import com.jocoos.mybeautip.recommendation.GoodsRecommendation;
-import com.jocoos.mybeautip.recommendation.GoodsRecommendationRepository;
-import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
-import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
-import com.jocoos.mybeautip.recommendation.MemberRecommendation;
-import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
-import com.jocoos.mybeautip.recommendation.MotdRecommendation;
-import com.jocoos.mybeautip.recommendation.MotdRecommendationBase;
-import com.jocoos.mybeautip.recommendation.MotdRecommendationBaseRepository;
-import com.jocoos.mybeautip.recommendation.MotdRecommendationRepository;
-import com.jocoos.mybeautip.recommendation.RecommendationController;
+import com.jocoos.mybeautip.recommendation.*;
 import com.jocoos.mybeautip.restapi.PostController;
 import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.schedules.ScheduleRepository;
@@ -97,6 +74,7 @@ public class AdminController {
   private final VideoRepository videoRepository;
   private final VideoReportRepository videoReportRepository;
   private final ScheduleRepository scheduleRepository;
+  private final OrderRepository orderRepository;
   private final TagRepository tagRepository;
   private final VideoService videoService;
   private final TagService tagService;
@@ -116,7 +94,7 @@ public class AdminController {
                          StoreRepository storeRepository,
                          VideoRepository videoRepository,
                          VideoReportRepository videoReportRepository,
-                         ScheduleRepository scheduleRepository, TagRepository tagRepository,
+                         ScheduleRepository scheduleRepository, OrderRepository orderRepository, TagRepository tagRepository,
                          VideoService videoService,
                          TagService tagService,
                          GoodsService goodsService, MemberService memberService) {
@@ -134,6 +112,7 @@ public class AdminController {
     this.videoRepository = videoRepository;
     this.videoReportRepository = videoReportRepository;
     this.scheduleRepository = scheduleRepository;
+    this.orderRepository = orderRepository;
     this.tagRepository = tagRepository;
     this.tagService = tagService;
     this.videoService = videoService;
@@ -345,10 +324,8 @@ public class AdminController {
     Optional<MemberRecommendation> recommendation = memberRecommendationRepository.findByMemberId(m.getId());
     recommendation.ifPresent(r -> info.setRecommendation(r));
 
-    Page<Report> reports = reportRepository.findByYouId(m.getId(), PageRequest.of(1, 1));
-    if (reports != null) {
-      info.setReportCount(reports.getTotalElements());
-    }
+    int orderCount = orderRepository.countByCreatedByIdAndStateLessThanEqual(m.getId(), Order.State.CONFIRMED.getValue());
+    info.setOrderCount(orderCount);
 
     info.setSchedule(findScheduleByMember(m.getId()));
     return info;
@@ -364,10 +341,9 @@ public class AdminController {
 
     Page<MemberDetailInfo> details = members.map(m -> {
       MemberDetailInfo info = new MemberDetailInfo(m.getMember(), m);
-      Page<Report> reports = reportRepository.findByYouId(m.getMemberId(), PageRequest.of(1, 1));
-      if (reports != null) {
-        info.setReportCount(reports.getTotalElements());
-      }
+
+      int orderCount = orderRepository.countByCreatedByIdAndStateLessThanEqual(m.getMemberId(), Order.State.CONFIRMED.getValue());
+      info.setOrderCount(orderCount);
 
       info.setSchedule(findScheduleByMember(m.getMemberId()));
       return info;

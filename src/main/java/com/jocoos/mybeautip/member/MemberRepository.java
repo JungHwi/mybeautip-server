@@ -70,4 +70,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Page<Member> findByVisibleAndPushableAndUsernameContaining(boolean visible, boolean pushable, String username, Pageable pageable);
 
   Page<Member> findByVisibleAndPushable(boolean visible, boolean pushable, Pageable pageable);
+
+  @Query("select f.id as followingId, r.id as reportedId, b.id as blockedId from Member m" +
+          "  left outer join Following f on m.id=f.memberMe.id and f.memberYou.id=?2" +
+          "  left outer join Report r on m.id=r.me.id and r.you.id=?2" +
+          "  left outer join Block b on m.id=b.me and b.memberYou.id=?2" +
+          "  where m.id=?1")
+  Optional<MemberExtraInfo> findMemberExtraInfo(Long me, Long you);
 }

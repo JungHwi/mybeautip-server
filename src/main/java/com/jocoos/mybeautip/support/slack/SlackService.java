@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.support.slack;
 import java.time.ZoneId;
 import java.util.List;
 
+import com.jocoos.mybeautip.member.block.Block;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -177,6 +178,15 @@ public class SlackService {
         report.getYou().getUsername(),
         report.getYou().getId(),
         report.getReason());
+    send(message);
+  }
+
+  public void sendForBlockMember(Block block) {
+    String message = String.format("*회원차단*" +
+                    "```%d (이)가 %s/%d 회원을 차단함```",
+            block.getMe(),
+            block.getMemberYou().getUsername(),
+            block.getMemberYou().getId());
     send(message);
   }
   

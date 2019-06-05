@@ -204,7 +204,7 @@ public class CartService {
   }
   
   @Transactional
-  public CartInfo addItems(CartController.AddCartRequest request, long memberId, String lang) {
+  public void addItems(CartController.AddCartRequest request, long memberId, String lang) {
     for (CartController.CartItemRequest requestItem : request.getItems()) {
       Cart item = getValidCartItem(requestItem.getGoodsNo(), requestItem.getOptionNo(), requestItem.getQuantity(), lang);
     
@@ -225,11 +225,10 @@ public class CartService {
         save(item);
       }
     }
-    return getCartItemList(memberId);
   }
   
   @Transactional
-  public CartInfo updateItem(long id, long memberId, CartController.UpdateCartRequest request, String lang) {
+  public void updateItem(long id, long memberId, CartController.UpdateCartRequest request, String lang) {
     Cart item = cartRepository.findByIdAndCreatedById(id, memberId)
         .map(cart -> {
           if (request.getQuantity() != null && request.getQuantity() > 0) {
@@ -243,11 +242,10 @@ public class CartService {
         .orElseThrow(() -> new NotFoundException("cart_item_not_found", messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
   
     update(item);
-    return getCartItemList(memberId);
   }
   
   @Transactional
-  public CartInfo removeItem(long id, long memberId, String lang) {
+  public void removeItem(long id, long memberId, String lang) {
     cartRepository.findByIdAndCreatedById(id, memberId)
         .map(cart -> {
           cartRepository.delete(cart);
@@ -255,18 +253,15 @@ public class CartService {
         })
         .orElseThrow(() -> new NotFoundException("cart_item_not_found",
             messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
-    
-    return getCartItemList(memberId);
   }
   
   /**
    * Update checked value to all cart items (all checked or all unchecked)
    */
   @Transactional
-  public CartInfo updateAllItems(CartController.UpdateCartRequest request, Member me) {
+  public void updateAllItems(CartController.UpdateCartRequest request, Member me) {
     boolean checked = (request.getChecked() == null) ? true : request.getChecked();
     cartRepository.updateAllChecked(checked, me);
-    return getCartItemList(me.getId());
   }
   
   private Cart getValidCartItem(String goodsNo, int optionNo, int quantity, String lang) {
