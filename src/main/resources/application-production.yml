@@ -24,6 +24,8 @@ mybeautip:
   slack:
     key: T02GN94AU/BE58JHXSP/gX7G3sOlHhDVQTfWqFYQ8ue8
     channel: "#z-mybeautip-prod"
+    order-key: T02GN94AU/BKB98G20Z/mula9sD6NE9rpxIhuRWUePwH
+    order-channel: "#z-mybeautip-order"
   iamport:
     api: https://api.iamport.kr
     key: 3621612290867148

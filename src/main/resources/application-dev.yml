@@ -14,6 +14,8 @@ mybeautip:
   slack:
     key: T02GN94AU/BJA6YDJPJ/7L197lsrvR2X5yBsZpA2wdH0
     channel: "#z-mybeautip-dev"
+    order-key: T02GN94AU/BJA6YDJPJ/7L197lsrvR2X5yBsZpA2wdH0
+    order-channel: "#z-mybeautip-dev"
 
 logging:
   config: classpath:log/log4j2-file.yml
