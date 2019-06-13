@@ -40,6 +40,12 @@ public class SlackService {
   @Value("${mybeautip.slack.channel}")
   private String slackChannel;
 
+  @Value("${mybeautip.slack.order-key}")
+  private String orderSlackKey;
+
+  @Value("${mybeautip.slack.order-channel}")
+  private String orderSlackChannel;
+
   private final VideoGoodsRepository videoGoodsRepository;
   private final RestTemplate restTemplate;
 
@@ -95,7 +101,7 @@ public class SlackService {
         order.getPrice(),
         order.getMethod(),
         getPurchaseInfo(order.getPurchases()));
-    send(message);
+    sendToOrderChannel(message);
   }
   
   public void sendForOrderCancel(OrderInquiry orderInquiry) {
@@ -111,7 +117,7 @@ public class SlackService {
         orderInquiry.getReason(),
         orderInquiry.getOrder().getPrice(),
         orderInquiry.getOrder().getPayment().getMethod());
-    send(message);
+    sendToOrderChannel(message);
   }
   
   public void sendForOrderCancelByAdmin(OrderInquiry orderInquiry) {
@@ -125,7 +131,7 @@ public class SlackService {
         orderInquiry.getCreatedBy().getId(),
         orderInquiry.getOrder().getPrice(),
         orderInquiry.getOrder().getPayment().getMethod());
-    send(message);
+    sendToOrderChannel(message);
   }
   
   public void SendForOrderExchangeOrReturn(OrderInquiry orderInquiry) {
@@ -142,7 +148,7 @@ public class SlackService {
         orderInquiry.getCreatedBy().getId(),
         orderInquiry.getReason(),
         orderInquiry.getOrder().getStatus());
-    send(message);
+    sendToOrderChannel(message);
   }
 
   public void sendForDeleteMember(MemberLeaveLog memberLeaveLog) {
@@ -260,6 +266,25 @@ public class SlackService {
   private void send(String message) {
     UriComponents uriComponents = UriComponentsBuilder.newInstance()
         .scheme("https").host("hooks.slack.com").path("services/").path(slackKey).build(true);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+
+    JSONObject body = new JSONObject();
+    body.put("text", message);
+
+    HttpEntity<String> request = new HttpEntity<>(body.toString(), headers);
+    try {
+      restTemplate.exchange(uriComponents.toString(), HttpMethod.POST, request, String.class);
+    } catch (RestClientException e) {
+      log.warn("Send slack message throws exception: " + e.getMessage());
+      // Do not throw exception
+    }
+  }
+
+  private void sendToOrderChannel(String message) {
+    UriComponents uriComponents = UriComponentsBuilder.newInstance()
+            .scheme("https").host("hooks.slack.com").path("services/").path(orderSlackKey).build(true);
 
     HttpHeaders headers = new HttpHeaders();
     headers.add(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
