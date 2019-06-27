@@ -85,14 +85,14 @@ mybeautip:
       token-validity-duration-seconds: 129600 # 30days
   store:
     image-path:
-      prefix: "https://s3.ap-northeast-2.amazonaws.com/mybeautip/store/"
+      prefix: "https://mybeautip.s3.ap-northeast-2.amazonaws.com/store/"
       cover-suffix: "_cover.png"
       thumbnail-suffix: "_thumbnail.png"
       refund-suffix: "_refund.png"
       as-suffix: "_as.png"
   category:
     image-path:
-      prefix: "https://s3.ap-northeast-2.amazonaws.com/mybeautip/category/"
+      prefix: "https://mybeautip.s3.ap-northeast-2.amazonaws.com/category/"
       suffix: ".png"
   iamport:
     api: https://api.iamport.kr
