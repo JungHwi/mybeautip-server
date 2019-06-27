@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.member.point;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,6 +25,9 @@ public class MemberPointService {
 
   @Value("${mybeautip.point.earn-ratio}")
   private int pointRatio;
+
+  @Value("${mybeautip.point.remind-expiring-point}")
+  private int reminder;
 
   private final MemberRepository memberRepository;
   private final MemberPointRepository memberPointRepository;
@@ -96,11 +101,16 @@ public class MemberPointService {
     m.setPoint(m.getPoint() + point);
     memberRepository.save(m);
 
-    return memberPointRepository.save(createPresentPoint(m, point, expiryAt));
+    boolean remind = false;
+    if (Date.from(Instant.now().plus(reminder, ChronoUnit.DAYS)).after(expiryAt)) {
+      // no need to remind
+      remind = true;
+    }
+    return memberPointRepository.save(createPresentPoint(m, point, expiryAt, remind));
   }
 
-  private MemberPoint createPresentPoint(Member member, int point, Date expiryAt) {
-    return new MemberPoint(member, null, point, MemberPoint.STATE_PRESENT_POINT, expiryAt);
+  private MemberPoint createPresentPoint(Member member, int point, Date expiryAt, boolean remind) {
+    return new MemberPoint(member, null, point, MemberPoint.STATE_PRESENT_POINT, expiryAt, remind);
   }
 
   @Transactional

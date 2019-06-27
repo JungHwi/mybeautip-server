@@ -91,6 +91,13 @@ public class MemberPoint extends CreatedDateAuditable {
     this.expiryAt = expiryAt;
   }
 
+  public MemberPoint(Member member, Order order, int point, int state, Date expiryAt, boolean remind) {
+    this(member, order, point, state);
+    this.earnedAt = new Date();
+    this.expiryAt = expiryAt;
+    this.remind = remind;
+  }
+
   public void setCreatedAt(Date date) {
     super.createdAt = date;
   }
