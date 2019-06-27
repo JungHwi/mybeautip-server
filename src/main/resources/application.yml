@@ -116,6 +116,8 @@ mybeautip:
   slack:
     key:
     channel:
+    order-key:
+    order-channel:
   notification:
     duplicate-limit-duration: 600000 # 10 min (milliseconds)
     instant-message:
