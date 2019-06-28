@@ -33,8 +33,8 @@ public class MemberInfo {
 
   public MemberInfo(Member member) {
     this.id = member.getId();
-    this.username = member.getUsername();
-    this.email = member.getEmail();
+    this.username = Strings.isNullOrEmpty(member.getUsername()) ? "" : member.getUsername();
+    this.email = Strings.isNullOrEmpty(member.getEmail()) ? "" : member.getEmail();
     this.phoneNumber = Strings.isNullOrEmpty(member.getPhoneNumber()) ? "" : member.getPhoneNumber();
     this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
     this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
