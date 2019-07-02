@@ -585,26 +585,8 @@ public class OrderService {
       memberCoupon.setUsedAt(null);
       memberCouponRepository.save(memberCoupon);
     }
-  
-    // Revoke used point
-    if (order.getPoint() > 0) {
-      log.info("Order canceled - used point revoked: {}, {}", order.getId(), order.getPoint());
-      Member member = order.getCreatedBy();
-      member.setPoint(member.getPoint() + order.getPoint());
-      memberRepository.save(member);
-    
-      memberPointRepository.findByMemberAndOrderAndPointAndState(
-          order.getCreatedBy(), order, order.getPoint(), MemberPoint.STATE_USE_POINT)
-          .ifPresent(memberPointRepository::delete);
-    }
-  
-    // Remove expected earning point
-    if (order.getExpectedPoint() > 0) {
-      log.info("Order canceled - expected earning point removed: {}, {}", order.getId(), order.getExpectedPoint());
-      memberPointRepository.findByMemberAndOrderAndPointAndState(
-          order.getCreatedBy(), order, order.getExpectedPoint(), MemberPoint.STATE_WILL_BE_EARNED)
-          .ifPresent(memberPointRepository::delete);
-    }
+
+    memberPointService.revokePoints(order);
   
     // Revoke video order count & revenues
     if (order.getVideoId() != null) {
