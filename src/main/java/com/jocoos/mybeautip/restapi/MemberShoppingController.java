@@ -135,13 +135,21 @@ public class MemberShoppingController {
 
     if (points != null) {
       points.stream().forEach(point -> {
-        if (point.getState() == 9) {
-          point.setState(MemberPoint.STATE_EARNED_POINT);
+        switch (point.getState()) {
+          case MemberPoint.STATE_PRESENT_POINT:
+            point.setState(MemberPoint.STATE_EARNED_POINT);
 
-          String message = messageService.getMessage("point.by_admin", lang);
-          details.add(new PointDetailInfo(point, message));
-        } else {
-          details.add(new PointDetailInfo(point));
+            String adminMessage = messageService.getMessage("point.by_admin", lang);
+            details.add(new PointDetailInfo(point, adminMessage));
+            break;
+          case MemberPoint.STATE_REFUNDED_POINT:
+            point.setState(MemberPoint.STATE_EARNED_POINT);
+
+            String refundMessage = messageService.getMessage("point.refunded_by_cancel", lang);
+            details.add(new PointDetailInfo(point, refundMessage));
+            break;
+          default:
+            details.add(new PointDetailInfo(point));
         }
       });
     }

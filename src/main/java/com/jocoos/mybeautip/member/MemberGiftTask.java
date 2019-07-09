@@ -64,7 +64,7 @@ public class MemberGiftTask {
   @Scheduled(fixedDelay = 60 * 1000)
   public void expirePoints() {
     Date now = new Date();
-    List<MemberPoint> expires = memberPointRepository.findByStateInAndExpiryAtBeforeAndExpiredAtIsNull(Lists.newArrayList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT), now);
+    List<MemberPoint> expires = memberPointRepository.findByStateInAndExpiryAtBeforeAndExpiredAtIsNull(getTotalEarnedStates(), now);
     if (!CollectionUtils.isEmpty(expires)) {
       log.debug("expired at : {}", dateFormat.format(now));
       log.debug("expired points found: {}", expires);
@@ -77,7 +77,7 @@ public class MemberGiftTask {
   @Scheduled(fixedDelay = 60 * 1000)
   public void remindPoints() {
     Date before = getDays(reminder);
-    List<MemberPoint> reminders = memberPointRepository.findByStateInAndExpiryAtBeforeAndRemindIsFalseAndExpiredAtIsNull(Lists.newArrayList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT), before);
+    List<MemberPoint> reminders = memberPointRepository.findByStateInAndExpiryAtBeforeAndRemindIsFalseAndExpiredAtIsNull(getTotalEarnedStates(), before);
     if (!CollectionUtils.isEmpty(reminders)) {
       log.debug("reminder before 3 days : {}", dateFormat.format(reminder));
       log.debug("expired points found: {}", reminders);
@@ -101,5 +101,9 @@ public class MemberGiftTask {
     calendar.setTime(new Date());
     calendar.add(Calendar.YEAR, amount);
     return calendar.getTime();
+  }
+
+  private List<Integer> getTotalEarnedStates() {
+    return Lists.newArrayList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT, MemberPoint.STATE_REFUNDED_POINT);
   }
 }
