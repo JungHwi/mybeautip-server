@@ -24,6 +24,8 @@ mybeautip:
   slack:
     key: T02GN94AU/BE58JHXSP/gX7G3sOlHhDVQTfWqFYQ8ue8
     channel: "#z-mybeautip-prod"
+    order-key: T02GN94AU/BKB98G20Z/mula9sD6NE9rpxIhuRWUePwH
+    order-channel: "#z-mybeautip-order"
   iamport:
     api: https://api.iamport.kr
     key: 3621612290867148
@@ -32,7 +34,7 @@ mybeautip:
 flipflop:
   app-key: 9z27htVnKe
   video:
-    thumbnail-format: https://s3.ap-northeast-2.amazonaws.com/flipflop-prod/${flipflop.app-key}/videos/%s/thumbnail.jpg
+    thumbnail-format: https://flipflop-prod.s3.ap-northeast-2.amazonaws.com/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 redis:
   host: 13.209.183.3

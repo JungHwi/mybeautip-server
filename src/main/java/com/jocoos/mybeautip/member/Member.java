@@ -43,7 +43,7 @@ public class Member {
 
   @Transient
   @JsonIgnore
-  private final String defaultAvatarUrl = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/avatar/img_profile_default.png";
+  private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

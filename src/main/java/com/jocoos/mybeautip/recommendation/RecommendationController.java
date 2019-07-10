@@ -53,7 +53,7 @@ public class RecommendationController {
   private final int MAX_RECOMMENDED_KEYWORD_COUNT = 100;
   private static final String RESOURCE_TYPE_MEMBER = "member";
   private static final String RESOURCE_TYPE_TAG = "tag";
-  private static final String DEFAULT_HASHTAG_IMG_URL = "https://s3.ap-northeast-2.amazonaws.com/mybeautip/app/img_hashtag_default.png";
+  private static final String DEFAULT_HASHTAG_IMG_URL = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/app/img_hashtag_default.png";
 
   public RecommendationController(GoodsService goodsService,
                                   MemberService memberService,

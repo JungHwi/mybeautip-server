@@ -15,10 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
@@ -121,7 +118,8 @@ public class MemberShoppingController {
 
   @GetMapping("/points")
   public CursorResponse getPoints(@RequestParam(defaultValue = "50") int count,
-                                  @RequestParam(required = false) Long cursor) {
+                                  @RequestParam(required = false) Long cursor,
+                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member me = memberService.currentMember();
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
 
@@ -137,13 +135,21 @@ public class MemberShoppingController {
 
     if (points != null) {
       points.stream().forEach(point -> {
-        if (point.getState() == 9) {
-          point.setState(MemberPoint.STATE_EARNED_POINT);
+        switch (point.getState()) {
+          case MemberPoint.STATE_PRESENT_POINT:
+            point.setState(MemberPoint.STATE_EARNED_POINT);
 
-          String message = messageService.getMessage("point.by_admin", "ko");
-          details.add(new PointDetailInfo(point, message));
-        } else {
-          details.add(new PointDetailInfo(point));
+            String adminMessage = messageService.getMessage("point.by_admin", lang);
+            details.add(new PointDetailInfo(point, adminMessage));
+            break;
+          case MemberPoint.STATE_REFUNDED_POINT:
+            point.setState(MemberPoint.STATE_EARNED_POINT);
+
+            String refundMessage = messageService.getMessage("point.refunded_by_cancel", lang);
+            details.add(new PointDetailInfo(point, refundMessage));
+            break;
+          default:
+            details.add(new PointDetailInfo(point));
         }
       });
     }
