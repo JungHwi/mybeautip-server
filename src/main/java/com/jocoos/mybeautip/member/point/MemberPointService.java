@@ -142,7 +142,7 @@ public class MemberPointService {
           int usedPoint = -detail.getPoint();
 
           totalPoint += usedPoint;
-          pointList.add(createPresentPoint(order.getCreatedBy(), usedPoint, detail.getExpiryAt(), true));
+          pointList.add(createRefundedPoint(order.getCreatedBy(), usedPoint, detail.getExpiryAt(), true));
         }
 
         List<MemberPoint> savedList = memberPointRepository.saveAll(pointList);
@@ -220,6 +220,10 @@ public class MemberPointService {
 
   private MemberPoint createPresentPoint(Member member, int point, Date expiryAt, boolean remind) {
     return new MemberPoint(member, null, point, MemberPoint.STATE_PRESENT_POINT, expiryAt, remind);
+  }
+
+  private MemberPoint createRefundedPoint(Member member, int point, Date expiryAt, boolean remind) {
+    return new MemberPoint(member, null, point, MemberPoint.STATE_REFUNDED_POINT, expiryAt, remind);
   }
 
   @Transactional
