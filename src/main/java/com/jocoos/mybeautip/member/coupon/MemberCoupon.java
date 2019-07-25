@@ -31,4 +31,9 @@ public class MemberCoupon extends CreatedDateAuditable {
 
   @Column
   private Date usedAt;
+
+  public MemberCoupon(Member member, Coupon coupon) {
+    this.member = member;
+    this.coupon = coupon;
+  }
 }
