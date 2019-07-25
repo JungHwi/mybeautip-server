@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.notification;
 import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.member.coupon.Coupon;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.report.Report;
@@ -194,4 +196,18 @@ public class NotificationAspect {
       slackService.sendForDeleteMember(memberLeaveLog);
     }
   }
+
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.coupon.CouponService.sendWelcomeCoupon(..))",
+     returning = "result")
+  public void onAfterReturningSendWelcomeCoupon(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    if (result instanceof MemberCoupon) {
+      MemberCoupon memberCoupon = (MemberCoupon) result;
+      log.debug("memberCoupon: {}", memberCoupon);
+
+      notificationService.notifyWelcomeCoupon(memberCoupon);
+    }
+  }
+
 }

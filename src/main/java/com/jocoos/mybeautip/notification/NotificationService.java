@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.notification;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -386,6 +387,13 @@ public class NotificationService {
   public void notifyReminderMemberPoint(MemberPoint memberPoint) {
     Member admin = memberService.getAdmin();
     Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "remind_point"));
+    log.info("notification: {}", notification);
+
+    deviceService.push(notification);
+  }
+
+  public void notifyWelcomeCoupon(MemberCoupon memberCoupon) {
+    Notification notification = notificationRepository.save(new Notification(memberCoupon));
     log.info("notification: {}", notification);
 
     deviceService.push(notification);
