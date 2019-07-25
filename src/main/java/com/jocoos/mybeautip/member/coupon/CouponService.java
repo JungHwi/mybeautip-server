@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member.coupon;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,9 @@ public class CouponService {
   private final CouponRepository couponRepository;
   private final MemberCouponRepository memberCouponRepository;
 
+  @Value("${mybeautip.coupon.welcome-usage-days}")
+  private int welcomeCouponUsageDays;
+
   public CouponService(CouponRepository couponRepository,
                        MemberCouponRepository memberCouponRepository) {
     this.couponRepository = couponRepository;
@@ -25,7 +29,7 @@ public class CouponService {
 
   public List<MemberCoupon> findMemberCouponsByMember(Member member) {
     Date now = new Date();
-    return memberCouponRepository.findByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfterAndUsedAtIsNull(member, now, now);
+    return memberCouponRepository.findByMemberAndCreatedAtBeforeAndExpiryAtAfterAndUsedAtIsNull(member, now, now);
   }
 
   public int countByCoupons(Member member) {
@@ -38,6 +42,6 @@ public class CouponService {
     Coupon coupon = couponRepository.findByCategoryAndStartedAtBeforeAndEndedAtAfter(Coupon.CATEGORY_WELCOME_COUPON, now, now)
        .orElseThrow(() -> new MybeautipRuntimeException("coupon not found"));
 
-    return memberCouponRepository.save(new MemberCoupon(member, coupon));
+    return memberCouponRepository.save(new MemberCoupon(member, coupon, welcomeCouponUsageDays));
   }
 }

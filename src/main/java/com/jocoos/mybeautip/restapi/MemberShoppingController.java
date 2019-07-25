@@ -1,11 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -271,7 +267,11 @@ public class MemberShoppingController {
 
     public MemberCouponInfo(MemberCoupon memberCoupon) {
       BeanUtils.copyProperties(memberCoupon, this);
-      this.coupon = new CouponInfo(memberCoupon.getCoupon());
+      CouponInfo couponInfo = new CouponInfo(memberCoupon.getCoupon());
+      couponInfo.setStartedAt(memberCoupon.getCreatedAt());
+      couponInfo.setEndedAt(memberCoupon.getExpiryAt());
+
+      this.coupon = couponInfo;
     }
   }
 

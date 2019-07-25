@@ -92,7 +92,7 @@ public class MemberGiftTask {
   private Date getDays(int amount) {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(new Date());
-    calendar.add(Calendar.DAY_OF_YEAR,amount);
+    calendar.add(Calendar.DAY_OF_YEAR, amount);
     return calendar.getTime();
   }
 
