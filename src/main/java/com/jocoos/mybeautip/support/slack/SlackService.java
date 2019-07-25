@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import com.jocoos.mybeautip.admin.Dates;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
@@ -247,6 +248,15 @@ public class SlackService {
     String message = String.format("*포인트(%d) 차감*" +
        "```%s```", memberPoint.getPoint(), details);
 
+    log.debug("{}", message);
+    send(message);
+  }
+
+  public void sendUsedCouponUse(MemberCoupon memberCoupon) {
+    String details = String.format("%s/%d - 쿠폰: -%s, 유효기간: %s", memberCoupon.getMember().getUsername(), memberCoupon.getMember().getId(),
+       memberCoupon.getCoupon().getDescription(), Dates.toString(memberCoupon.getExpiryAt(), ZoneId.of("Asia/Seoul")));
+    String message = String.format("*사용한 쿠폰(%d)을 사용함 *" +
+       "```%s```", memberCoupon.getId(), details);
     log.debug("{}", message);
     send(message);
   }
