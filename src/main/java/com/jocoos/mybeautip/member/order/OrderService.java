@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.exception.PaymentConflictException;
 import com.jocoos.mybeautip.goods.Goods;
@@ -163,8 +164,6 @@ public class OrderService {
     if (request.getCouponId() != null) {
       MemberCoupon memberCoupon = memberCouponRepository.findById(request.getCouponId()).orElseThrow(() -> new BadRequestException("coupon_not_found", "invalid member coupon id"));
       order.setMemberCoupon(memberCoupon);
-      memberCoupon.setUsedAt(new Date());
-      memberCouponRepository.save(memberCoupon);
     }
 
     // remove PurchaseRequest
@@ -306,6 +305,17 @@ public class OrderService {
       order.setStatus(Order.Status.PAYMENT_CANCELLED);
       orderRepository.save(order);
     } else if ((payment.getState() & Payment.STATE_PAID) == Payment.STATE_PAID) {
+      if (order.getMemberCoupon() != null) {
+        MemberCoupon memberCoupon = order.getMemberCoupon();
+        if (memberCouponRepository.countByIdAndUsedAtIsNull(memberCoupon.getId()) == 0) {
+          log.warn("{}", memberCoupon);
+          cancelOrderInquire(order, OrderInquiry.STATE_CANCEL_ORDER, "쿠폰 중복 사용으로 인한 취소");
+
+          slackService.sendUsedCouponUse(memberCoupon);
+          throw new MybeautipRuntimeException("Used coupon used Error");
+        }
+      }
+
       completeOrder(order);
     } else if ((payment.getState() & Payment.STATE_FAILED) == Payment.STATE_FAILED) {
       order.setStatus(Order.Status.PAYMENT_FAILED);
@@ -382,6 +392,10 @@ public class OrderService {
 
     if (order.getMemberCoupon() == null) {
       memberPointService.earnPoints(order);
+    } else {
+      MemberCoupon memberCoupon = order.getMemberCoupon();
+      memberCoupon.setUsedAt(new Date());
+      memberCouponRepository.save(memberCoupon);
     }
 
     if (order.getVideoId() != null) {

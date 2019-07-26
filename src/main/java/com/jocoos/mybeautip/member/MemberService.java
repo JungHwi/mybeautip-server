@@ -17,6 +17,7 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
+import com.jocoos.mybeautip.member.coupon.CouponService;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.report.Report;
@@ -42,6 +43,7 @@ public class MemberService {
   private final KakaoMemberRepository kakaoMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
   private final MemberLeaveLogRepository memberLeaveLogRepository;
+  private final CouponService couponService;
   
   private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
   private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
@@ -62,7 +64,8 @@ public class MemberService {
                        FacebookMemberRepository facebookMemberRepository,
                        KakaoMemberRepository kakaoMemberRepository,
                        NaverMemberRepository naverMemberRepository,
-                       MemberLeaveLogRepository memberLeaveLogRepository) {
+                       MemberLeaveLogRepository memberLeaveLogRepository,
+                       CouponService couponService) {
     this.bannedWordService = bannedWordService;
     this.messageService = messageService;
     this.tagService = tagService;
@@ -73,6 +76,7 @@ public class MemberService {
     this.kakaoMemberRepository = kakaoMemberRepository;
     this.naverMemberRepository = naverMemberRepository;
     this.memberLeaveLogRepository = memberLeaveLogRepository;
+    this.couponService = couponService;
   }
 
   public Long currentMemberId() {
@@ -261,6 +265,8 @@ public class MemberService {
             followMember(finalMember, adminMember);
             finalMember.setFollowingCount(1); // for response view
           });
+
+      couponService.sendWelcomeCoupon(member);
     }
     
     return finalMember;

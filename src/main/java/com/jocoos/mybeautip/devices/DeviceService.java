@@ -130,8 +130,10 @@ public class DeviceService {
   }
   
   public void push(Notification notification) {
-    deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId())
-       .forEach(d -> {
+    List<Device> devices = deviceRepository.findByCreatedByIdAndValidIsTrue(notification.getTargetMember().getId());
+    log.debug("{}", devices);
+
+    devices.forEach(d -> {
          if (isPushable(d)) {
            push(d, notification);
          } else {
