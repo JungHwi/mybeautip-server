@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberPointDetailRepository extends JpaRepository<MemberPointDetail, Long> {
-    Optional<MemberPointDetail> findTopByMemberIdAndStateOrderByIdDesc(Long memberId, int state);
+    Optional<MemberPointDetail> findTopByMemberIdAndStateAndExpiryAtAfterOrderByIdDesc(Long memberId, int state, Date now);
 
     @Query("select sum(mpd.point) as pointSum from MemberPointDetail mpd where mpd.parentId = ?1 group by mpd.parentId")
     Optional<MemberPointSum> getSumByParentId(Long parentId);
@@ -18,7 +18,7 @@ public interface MemberPointDetailRepository extends JpaRepository<MemberPointDe
 
     Optional<MemberPointDetail> findByMemberPointId(Long memberPointId);
 
-    @Query("select mpd from MemberPointDetail mpd where mpd.memberId = ?1 and mpd.state = ?2 and mpd.id > ?3 order by mpd.createdAt asc")
+    @Query("select mpd from MemberPointDetail mpd where mpd.memberId = ?1 and mpd.state = ?2 and mpd.id > ?3 and expiry_at >= now() order by mpd.createdAt asc")
     List<MemberPointDetail> getAllEarnedPoints(Long memberId, int state, Long cursor);
 
     List<MemberPointDetail> findByOrderIdAndStateAndExpiryAtAfter(Long orderId, int state, Date now);

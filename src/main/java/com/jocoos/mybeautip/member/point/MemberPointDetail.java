@@ -46,17 +46,17 @@ public class MemberPointDetail extends CreatedDateAuditable {
     private Date expiryAt;
 
     public MemberPointDetail(MemberPoint memberPoint, int state) {
-        this(memberPoint, state, memberPoint.getPoint());
+        this(memberPoint, state, memberPoint.getPoint(), memberPoint.getId());
     }
 
-    public MemberPointDetail(MemberPoint memberPoint, int state, int point) {
-        this(memberPoint, state, point, memberPoint.getId());
+    public MemberPointDetail(MemberPoint memberPoint, int state, int point, long parentId) {
+        this(memberPoint, state, point, parentId, memberPoint.getId());
     }
 
-    public MemberPointDetail(MemberPoint memberPoint, int state, int point, long memberPointId) {
+    public MemberPointDetail(MemberPoint memberPoint, int state, int point, long parentId, long memberPointId) {
         this.memberId = memberPoint.getMember().getId();
         setPointAndState(point, state);
-        this.parentId = memberPoint.getId();
+        this.parentId = parentId;
         this.memberPointId = memberPointId;
         if (memberPoint.getOrder() != null) {
             this.orderId = memberPoint.getOrder().getId();

@@ -81,21 +81,24 @@ public class MemberPointService {
     List<MemberPointDetail> detailList = new ArrayList<>();
 
     Optional<MemberPointDetail> optional = memberPointDetailRepository
-            .findTopByMemberIdAndStateOrderByIdDesc(memberPoint.getMember().getId(), MemberPoint.STATE_USE_POINT);
+            .findTopByMemberIdAndStateAndExpiryAtAfterOrderByIdDesc(
+                    memberPoint.getMember().getId(), MemberPoint.STATE_USE_POINT, Date.from(Instant.now()));
     if (optional.isPresent()) {
+      long parentId = optional.get().getParentId();
       // check point used from parent id
-      Optional<MemberPointSum> optSum = memberPointDetailRepository.getSumByParentId(optional.get().getParentId());
+      Optional<MemberPointSum> optSum = memberPointDetailRepository.getSumByParentId(parentId);
       if (optSum.isPresent()) {
         int remainingPoint = optSum.get().getPointSum();
+
         if (remainingPoint >= point) {
           // point can be consumed by remaining point
-          MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, point);
+          MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, point, parentId);
           memberPointDetailRepository.save(detail);
           return;
         }
 
         if (remainingPoint > 0) {
-          detailList.add(new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, remainingPoint));
+          detailList.add(new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, remainingPoint, parentId));
           usedPoint += remainingPoint;
         }
 
@@ -252,7 +255,7 @@ public class MemberPointService {
     expiredPoint.setExpiryAt(memberPoint.getExpiryAt());
     memberPointRepository.save(expiredPoint);
 
-    MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_EXPIRED_POINT, remainingPoint, expiredPoint.getId());
+    MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_EXPIRED_POINT, remainingPoint, memberPoint.getId(), expiredPoint.getId());
     memberPointDetailRepository.save(detail);
 
     Member member = memberPoint.getMember();
