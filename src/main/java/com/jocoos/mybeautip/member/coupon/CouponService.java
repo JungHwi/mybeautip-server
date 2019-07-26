@@ -34,7 +34,7 @@ public class CouponService {
 
   public int countByCoupons(Member member) {
     Date now = new Date();
-    return memberCouponRepository.countByMemberAndCouponStartedAtBeforeAndCouponEndedAtAfterAndUsedAtIsNull(member, now, now);
+    return memberCouponRepository.countByMemberAndCreatedAtBeforeAndExpiryAtAfterAndUsedAtIsNull(member, now, now);
   }
 
   public MemberCoupon sendWelcomeCoupon(Member member) {
