@@ -37,6 +37,8 @@ Configutation:
     Logger:
       - name: com.jocoos.mybeautip
         level: info
+      - name: com.jocoos.mybeautip.devices.DeviceService
+        level: debug
       - name: jdbc
         level: info
       - name: org.springframework.web

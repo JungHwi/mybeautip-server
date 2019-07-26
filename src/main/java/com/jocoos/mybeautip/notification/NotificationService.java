@@ -1,11 +1,13 @@
 package com.jocoos.mybeautip.notification;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,8 @@ public class NotificationService {
   @Value("${mybeautip.notification.duplicate-limit-duration}")
   private int duration;
 
+  private final TaskScheduler taskScheduler;
+
   public NotificationService(DeviceService deviceService,
                              VideoRepository videoRepository,
                              CommentRepository commentRepository,
@@ -57,7 +61,8 @@ public class NotificationService {
                              MemberRepository memberRepository,
                              MemberService memberService,
                              MemberRecommendationRepository memberRecommendationRepository,
-                             InstantMessageService instantMessageService) {
+                             InstantMessageService instantMessageService,
+                             TaskScheduler taskScheduler) {
     this.deviceService = deviceService;
     this.videoRepository = videoRepository;
     this.commentRepository = commentRepository;
@@ -68,6 +73,7 @@ public class NotificationService {
     this.memberService = memberService;
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.instantMessageService = instantMessageService;
+    this.taskScheduler = taskScheduler;
   }
 
   public void notifyCreateVideo(Video video) {
@@ -396,6 +402,7 @@ public class NotificationService {
     Notification notification = notificationRepository.save(new Notification(memberCoupon));
     log.info("notification: {}", notification);
 
-    deviceService.push(notification);
+    taskScheduler.schedule(() -> deviceService.push(notification),
+       new Date().toInstant().plusSeconds(10));
   }
 }
