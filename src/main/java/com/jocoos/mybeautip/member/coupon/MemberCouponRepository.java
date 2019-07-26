@@ -19,6 +19,8 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
 
   List<MemberCoupon> findByUsedAtIsNullAndCouponEndedAtBefore(Date date);
 
+  List<MemberCoupon> findByUsedAtIsNullAndExpiryAtBefore(Date date);
+
   Page<MemberCoupon> findByMemberId(Long memberId, Pageable pageable);
 
   Page<MemberCoupon> findByMemberIdAndUsedAtIsNull(Long memberId, Pageable pageable);
