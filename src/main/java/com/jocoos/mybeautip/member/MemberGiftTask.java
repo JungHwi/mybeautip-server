@@ -50,14 +50,27 @@ public class MemberGiftTask {
     this.memberPointService = memberPointService;
   }
 
+  /**
+   * Remove member coupons based on coupon ended date at every hour
+   */
   @Scheduled(fixedDelay = 60 * 1000)
   public void removeNotUsedCouponIsExpired() {
     List<MemberCoupon> expiredCoupons = memberCouponRepository.findByUsedAtIsNullAndCouponEndedAtBefore(new Date());
     if (!CollectionUtils.isEmpty(expiredCoupons)) {
       log.debug("expired coupons found: {}", expiredCoupons);
-      expiredCoupons.stream().forEach(memberCoupon -> {
-        memberCouponRepository.delete(memberCoupon);
-      });
+      memberCouponRepository.deleteAll(expiredCoupons);
+    }
+  }
+
+  /**
+   * Remove member coupons based on expiry date at midnight
+   */
+  @Scheduled(cron = "0 0 0 * * *")
+  public void removeMemberCouponIsExpired() {
+    List<MemberCoupon> expiredCoupons = memberCouponRepository.findByUsedAtIsNullAndExpiryAtBefore(new Date());
+    if (!CollectionUtils.isEmpty(expiredCoupons)) {
+      log.debug("expired member coupons found: {}", expiredCoupons);
+      memberCouponRepository.deleteAll(expiredCoupons);
     }
   }
 
@@ -92,7 +105,7 @@ public class MemberGiftTask {
   private Date getDays(int amount) {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(new Date());
-    calendar.add(Calendar.DAY_OF_YEAR,amount);
+    calendar.add(Calendar.DAY_OF_YEAR, amount);
     return calendar.getTime();
   }
 

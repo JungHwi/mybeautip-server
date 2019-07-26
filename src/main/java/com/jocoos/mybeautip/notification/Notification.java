@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.notification;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.point.MemberPoint;
@@ -44,6 +46,7 @@ public class Notification {
   public static final String MENTION = "mention";
   public static final String ORDER = "order";
   public static final String SYSTEM_MESSAGE = "system_message";
+  public static final String SYSTEM_MESSAGE_COUPON = "system_message.coupon";
 
   private static final String RESOURCE_TYPE_MEMBER = "member";
   public static final String RESOURCE_TYPE_VIDEO = "video";
@@ -313,6 +316,16 @@ public class Notification {
     }
     this.custom = Maps.newHashMap();
     this.custom.put("system_detail", detail);
+  }
+
+  public Notification(MemberCoupon memberCoupon) {
+    this.type = SYSTEM_MESSAGE_COUPON;
+    this.targetMember = memberCoupon.getMember();
+    this.resourceType = RESOURCE_TYPE_MY_COUPON;
+    this.resourceId = memberCoupon.getMember().getId();
+    this.resourceIds = StringUtils.joinWith(",", memberCoupon.getMember().getId());
+    this.resourceOwner = memberCoupon.getMember();
+    this.args = Lists.newArrayList(memberCoupon.getCoupon().getDescription());
   }
 
   private void setSendPointMessage(String point, String username) {
