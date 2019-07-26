@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.coupon;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,9 +40,13 @@ public class CouponService {
 
   public MemberCoupon sendWelcomeCoupon(Member member) {
     Date now = new Date();
-    Coupon coupon = couponRepository.findByCategoryAndStartedAtBeforeAndEndedAtAfter(Coupon.CATEGORY_WELCOME_COUPON, now, now)
-       .orElseThrow(() -> new MybeautipRuntimeException("coupon not found"));
+    Optional<Coupon> coupon = couponRepository.findByCategoryAndStartedAtBeforeAndEndedAtAfter(Coupon.CATEGORY_WELCOME_COUPON, now, now);
+    log.info("coupon: {}", coupon);
 
-    return memberCouponRepository.save(new MemberCoupon(member, coupon, welcomeCouponUsageDays));
+    if (coupon.isPresent()) {
+      return memberCouponRepository.save(new MemberCoupon(member, coupon.get(), welcomeCouponUsageDays));
+    }
+
+    return null;
   }
 }

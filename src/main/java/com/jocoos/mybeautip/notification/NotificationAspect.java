@@ -200,7 +200,7 @@ public class NotificationAspect {
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.coupon.CouponService.sendWelcomeCoupon(..))",
      returning = "result")
   public void onAfterReturningSendWelcomeCoupon(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    log.debug("joinPoint: {}, result:{}", joinPoint.toLongString(), result);
 
     if (result instanceof MemberCoupon) {
       MemberCoupon memberCoupon = (MemberCoupon) result;

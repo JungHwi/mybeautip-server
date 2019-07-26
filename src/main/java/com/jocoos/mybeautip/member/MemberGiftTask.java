@@ -51,18 +51,6 @@ public class MemberGiftTask {
   }
 
   /**
-   * Remove member coupons based on coupon ended date at every hour
-   */
-  @Scheduled(fixedDelay = 60 * 1000)
-  public void removeNotUsedCouponIsExpired() {
-    List<MemberCoupon> expiredCoupons = memberCouponRepository.findByUsedAtIsNullAndCouponEndedAtBefore(new Date());
-    if (!CollectionUtils.isEmpty(expiredCoupons)) {
-      log.debug("expired coupons found: {}", expiredCoupons);
-      memberCouponRepository.deleteAll(expiredCoupons);
-    }
-  }
-
-  /**
    * Remove member coupons based on expiry date at midnight
    */
   @Scheduled(cron = "0 0 0 * * *")
