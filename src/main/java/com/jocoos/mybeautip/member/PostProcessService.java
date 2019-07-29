@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.member;
 
+import java.util.List;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.member.cart.CartRepository;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.notification.NotificationRepository;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
@@ -28,6 +32,7 @@ public class PostProcessService {
   private final VideoGoodsRepository videoGoodsRepository;
   private final NotificationRepository notificationRepository;
   private final KeywordRecommendationRepository keywordRecommendationRepository;
+  private final MemberCouponRepository memberCouponRepository;
   
   public PostProcessService(VideoService videoService,
                             TagService tagService,
@@ -37,7 +42,8 @@ public class PostProcessService {
                             MemberRecommendationRepository memberRecommendationRepository,
                             VideoGoodsRepository videoGoodsRepository,
                             NotificationRepository notificationRepository,
-                            KeywordRecommendationRepository keywordRecommendationRepository) {
+                            KeywordRecommendationRepository keywordRecommendationRepository,
+                            MemberCouponRepository memberCouponRepository) {
     this.videoService = videoService;
     this.tagService = tagService;
     this.followingRepository = followingRepository;
@@ -47,6 +53,7 @@ public class PostProcessService {
     this.videoGoodsRepository = videoGoodsRepository;
     this.notificationRepository = notificationRepository;
     this.keywordRecommendationRepository = keywordRecommendationRepository;
+    this.memberCouponRepository = memberCouponRepository;
   }
   
   @Async
@@ -98,7 +105,11 @@ public class PostProcessService {
     log.debug("Member {} deleted: recommended keyword will be deleted", member.getId());
     keywordRecommendationRepository.findByMember(member)
         .ifPresent(keywordRecommendationRepository::delete);
-    
+
+    List<MemberCoupon> coupons = memberCouponRepository.findAllByMemberId(member.getId());
+    log.info("Member coupons are deleted: {}", coupons);
+    memberCouponRepository.deleteAll(coupons);
+
     tagService.removeAllHistory(member);
   }
 }
