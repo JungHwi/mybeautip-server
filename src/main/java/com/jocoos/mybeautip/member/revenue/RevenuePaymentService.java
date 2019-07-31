@@ -22,7 +22,7 @@ public class RevenuePaymentService {
   public static final int NOT_AVAILABLE = 2;
   
   private final RevenuePaymentRepository revenuePaymentRepository;
-  
+
   public RevenuePaymentService(RevenuePaymentRepository revenuePaymentRepository) {
     this.revenuePaymentRepository = revenuePaymentRepository;
   }
@@ -44,7 +44,7 @@ public class RevenuePaymentService {
   }
   
   @Transactional
-  public RevenuePayment pay(RevenuePayment revenuePayment, String paymentMethod, String paymentDate, int finalAmount) {
+  public RevenuePayment pay(RevenuePayment revenuePayment, String paymentMethod, Date paymentDate, int finalAmount) {
     if (revenuePayment.getEstimatedAmount() != finalAmount) {
       throw new MybeautipRuntimeException(String.format("price not match! estimated: %d final: %d",
           revenuePayment.getEstimatedAmount(), finalAmount));

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.revenue;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,6 @@ public interface RevenuePaymentRepository extends JpaRepository<RevenuePayment, 
   Slice<RevenuePayment> findByMember(Member member, Pageable pageable);
   
   Slice<RevenuePayment> findByMemberAndDateLessThanEqual(Member member, String date, Pageable pageable);
+
+  Page<RevenuePayment> findByState(int state, Pageable pageable);
 }
