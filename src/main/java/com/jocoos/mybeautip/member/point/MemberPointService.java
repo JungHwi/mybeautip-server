@@ -92,17 +92,17 @@ public class MemberPointService {
 
         if (remainingPoint >= point) {
           // point can be consumed by remaining point
-          MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, point, parentId);
+          MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, point, parentId, memberPoint.getId(), optSum.get().getExpiryAt());
           memberPointDetailRepository.save(detail);
           return;
         }
 
         if (remainingPoint > 0) {
-          detailList.add(new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, remainingPoint, parentId));
+          detailList.add(new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, remainingPoint, parentId, memberPoint.getId(), optSum.get().getExpiryAt()));
           usedPoint += remainingPoint;
         }
 
-        cursor = optional.get().getId();
+        cursor = optSum.get().getId();
       }
     }
 
@@ -255,7 +255,7 @@ public class MemberPointService {
     expiredPoint.setExpiryAt(memberPoint.getExpiryAt());
     memberPointRepository.save(expiredPoint);
 
-    MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_EXPIRED_POINT, remainingPoint, memberPoint.getId(), expiredPoint.getId());
+    MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_EXPIRED_POINT, remainingPoint, memberPoint.getId(), expiredPoint.getId(), memberPoint.getExpiryAt());
     memberPointDetailRepository.save(detail);
 
     Member member = memberPoint.getMember();
