@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
 
 @Slf4j
 @Service
@@ -22,9 +23,12 @@ public class RevenuePaymentService {
   public static final int NOT_AVAILABLE = 2;
   
   private final RevenuePaymentRepository revenuePaymentRepository;
+  private final MemberRepository memberRepository;
 
-  public RevenuePaymentService(RevenuePaymentRepository revenuePaymentRepository) {
+  public RevenuePaymentService(RevenuePaymentRepository revenuePaymentRepository,
+                               MemberRepository memberRepository) {
     this.revenuePaymentRepository = revenuePaymentRepository;
+    this.memberRepository = memberRepository;
   }
   
   @Transactional
@@ -49,11 +53,18 @@ public class RevenuePaymentService {
       throw new MybeautipRuntimeException(String.format("price not match! estimated: %d final: %d",
           revenuePayment.getEstimatedAmount(), finalAmount));
     }
+
+    Member member = revenuePayment.getMember();
+    log.info("Member revenue is set subtract {} from {}", finalAmount, member.getRevenue());
+
+    memberRepository.updateRevenue(member.getId(), -(finalAmount));
+
     revenuePayment.setState(PAID);
     revenuePayment.setEstimatedAmount(0);
     revenuePayment.setFinalAmount(finalAmount);
     revenuePayment.setPaymentMethod(paymentMethod);
     revenuePayment.setPaymentDate(paymentDate);
+
     return revenuePaymentRepository.save(revenuePayment);
   }
   
