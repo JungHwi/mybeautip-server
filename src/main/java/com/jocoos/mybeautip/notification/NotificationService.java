@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.revenue.RevenuePayment;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
@@ -404,5 +405,12 @@ public class NotificationService {
 
     taskScheduler.schedule(() -> deviceService.push(notification),
        new Date().toInstant().plusSeconds(10));
+  }
+
+  public void notifyRevenuePayment(RevenuePayment revenuePayment) {
+    Notification notification = notificationRepository.save(new Notification(revenuePayment));
+    log.info("notification: {}", notification);
+
+    deviceService.push(notification);
   }
 }
