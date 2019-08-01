@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.notification;
 
 import com.jocoos.mybeautip.config.InstantNotificationConfig;
+import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.block.Block;
-import com.jocoos.mybeautip.member.coupon.Coupon;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
@@ -32,14 +32,17 @@ import com.jocoos.mybeautip.video.VideoLike;
 public class NotificationAspect {
 
   private final NotificationService notificationService;
+  private final FeedService feedService;
   private final SlackService slackService;
 
   public NotificationAspect(NotificationService notificationService,
                             SlackService slackService,
                             InstantNotificationConfig instantNotificationConfig,
-                            ThreadPoolTaskScheduler taskScheduler) {
+                            ThreadPoolTaskScheduler taskScheduler,
+                            FeedService feedService) {
     this.notificationService = notificationService;
     this.slackService = slackService;
+    this.feedService = feedService;
   }
 
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.startVideo(..))",
@@ -57,6 +60,7 @@ public class NotificationAspect {
       log.debug("video: {}", video);
       if ("PUBLIC".equals(video.getVisibility())) {
         notificationService.notifyCreateVideo(video);
+        feedService.feedVideo(video);
       }
 
       slackService.sendForVideo(video);

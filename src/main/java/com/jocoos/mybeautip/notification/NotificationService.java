@@ -1,14 +1,11 @@
 package com.jocoos.mybeautip.notification;
 
-import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.revenue.RevenuePayment;
-import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +19,17 @@ import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.revenue.RevenuePayment;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
+import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
@@ -77,6 +77,7 @@ public class NotificationService {
     this.taskScheduler = taskScheduler;
   }
 
+  @Async
   public void notifyCreateVideo(Video video) {
     Long creator = video.getMember().getId();
 

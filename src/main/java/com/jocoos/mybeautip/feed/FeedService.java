@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -67,6 +68,7 @@ public class FeedService {
     return videos;
   }
 
+  @Async
   public void feedVideo(Video video) {
     Long creator = video.getMember().getId();
     List<Following> followers = followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator);
@@ -206,11 +208,7 @@ public class FeedService {
     try {
       jedis = jedisPool.getResource();
       for(String key: keys) {
-        long startedTime = System.currentTimeMillis();
-
         jedis.zadd(key, video.getCreatedAt().getTime(), video.getVideoKey());
-
-        log.debug("key: {}, videoKey: {}, elapsed: {} ms", key, video.getVideoKey(), System.currentTimeMillis() - startedTime);
       }
     } finally {
       if (jedis != null) {
