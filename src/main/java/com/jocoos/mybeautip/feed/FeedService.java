@@ -206,8 +206,11 @@ public class FeedService {
     try {
       jedis = jedisPool.getResource();
       for(String key: keys) {
-        log.debug("key: {}, videoKey: {}", key, video.getVideoKey() );
+        long startedTime = System.currentTimeMillis();
+
         jedis.zadd(key, video.getCreatedAt().getTime(), video.getVideoKey());
+
+        log.debug("key: {}, videoKey: {}, elapsed: {} ms", key, video.getVideoKey(), System.currentTimeMillis() - startedTime);
       }
     } finally {
       if (jedis != null) {
