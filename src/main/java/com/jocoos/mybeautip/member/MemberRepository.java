@@ -69,6 +69,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   Page<Member> findByVisibleAndPushableAndUsernameContaining(boolean visible, boolean pushable, String username, Pageable pageable);
 
+  Page<Member> findByVisibleAndUsernameContaining(boolean visible, String username, Pageable pageable);
+
   Page<Member> findByVisibleAndPushable(boolean visible, boolean pushable, Pageable pageable);
 
   @Query("select f.id as followingId, r.id as reportedId, b.id as blockedId from Member m" +

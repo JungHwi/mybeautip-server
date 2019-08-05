@@ -228,17 +228,16 @@ public class AdminController {
     return new ResponseEntity<>(details, HttpStatus.OK);
   }
 
-  @GetMapping(value = "/memberDetails", params = {"pushable", "visible", "username"})
+  @GetMapping(value = "/memberDetails", params = {"visible", "username"})
   public ResponseEntity<Page<MemberDetailInfo>> searchMemberDetails(
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "true") boolean visible,
-     @RequestParam(defaultValue = "true") boolean pushable,
      @RequestParam String username) {
 
-    log.debug("username: {}", username);
+    log.debug("visible: {}, username: {}", visible, username);
     Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "reportCount"));
-    Page<Member> members = memberRepository.findByVisibleAndPushableAndUsernameContaining(visible, pushable, username, pageable);
+    Page<Member> members = memberRepository.findByVisibleAndUsernameContaining(visible, username, pageable);
 
     Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
     return new ResponseEntity<>(details, HttpStatus.OK);
