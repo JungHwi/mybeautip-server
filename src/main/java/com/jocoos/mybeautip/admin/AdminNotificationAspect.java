@@ -8,6 +8,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 
 import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.revenue.RevenuePayment;
 import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.support.slack.SlackService;
 
@@ -82,4 +83,25 @@ public class AdminNotificationAspect {
     }
   }
 
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.revenue.RevenuePaymentService.pay(..))",
+     returning = "result")
+  public void onAfterReturningRevenuePayment(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
+
+    // Ignore when duplicate createVideo
+    if (result == null) {
+      return;
+    }
+
+    if (result instanceof RevenuePayment) {
+      RevenuePayment revenuePayment = (RevenuePayment) result;
+      log.debug("revenuePayment: {}", revenuePayment);
+
+      try {
+        notificationService.notifyRevenuePayment(revenuePayment);
+      } catch (Exception e) {
+        log.error("{}", e);
+      }
+    }
+  }
 }

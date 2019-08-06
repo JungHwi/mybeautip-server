@@ -50,10 +50,10 @@ public class MemberPointDetail extends CreatedDateAuditable {
     }
 
     public MemberPointDetail(MemberPoint memberPoint, int state, int point, long parentId) {
-        this(memberPoint, state, point, parentId, memberPoint.getId());
+        this(memberPoint, state, point, parentId, memberPoint.getId(), memberPoint.getExpiryAt());
     }
 
-    public MemberPointDetail(MemberPoint memberPoint, int state, int point, long parentId, long memberPointId) {
+    public MemberPointDetail(MemberPoint memberPoint, int state, int point, long parentId, long memberPointId, Date expiryAt) {
         this.memberId = memberPoint.getMember().getId();
         setPointAndState(point, state);
         this.parentId = parentId;
@@ -63,7 +63,7 @@ public class MemberPointDetail extends CreatedDateAuditable {
         } else {
             this.orderId = null;
         }
-        this.expiryAt = memberPoint.getExpiryAt();
+        this.expiryAt = expiryAt;
     }
 
     public MemberPointDetail(MemberPointDetail parent, int state, long memberPointId, int point, Long orderId) {

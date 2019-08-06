@@ -15,6 +15,10 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 public class Dates {
   private static final SimpleDateFormat RECOMMENDED_DATE_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
 
+  public static Date parse(String date) {
+    return getRecommendedDate(date);
+  }
+
   public static Date getRecommendedDate(String date) {
     try {
       return RECOMMENDED_DATE_FORMAT.parse(date);

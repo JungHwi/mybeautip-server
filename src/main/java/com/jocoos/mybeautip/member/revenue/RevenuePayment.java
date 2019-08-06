@@ -9,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import java.util.Date;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -46,7 +48,7 @@ public class RevenuePayment extends CreatedDateAuditable {
   private String paymentMethod;
   
   @Column
-  private String paymentDate; // YYYY-MM-DD
+  private Date paymentDate;
   
   public RevenuePayment(Member member, String date, int estimatedAmount) {
     this.member = member;

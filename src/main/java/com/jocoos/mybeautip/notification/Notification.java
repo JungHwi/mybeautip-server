@@ -22,6 +22,7 @@ import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.revenue.RevenuePayment;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
@@ -47,6 +48,7 @@ public class Notification {
   public static final String ORDER = "order";
   public static final String SYSTEM_MESSAGE = "system_message";
   public static final String SYSTEM_MESSAGE_COUPON = "system_message.coupon";
+  public static final String SYSTEM_MESSAGE_REVENUE_PAYMENT = "system_message.revenue_payment";
 
   private static final String RESOURCE_TYPE_MEMBER = "member";
   public static final String RESOURCE_TYPE_VIDEO = "video";
@@ -326,6 +328,17 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", memberCoupon.getMember().getId());
     this.resourceOwner = memberCoupon.getMember();
     this.args = Lists.newArrayList(memberCoupon.getCoupon().getDescription());
+  }
+
+  public Notification(RevenuePayment revenuePayment) {
+    this.type = SYSTEM_MESSAGE_REVENUE_PAYMENT;
+    this.targetMember = revenuePayment.getMember();
+    this.resourceType = RESOURCE_TYPE_MY_COUPON;
+    this.resourceId = revenuePayment.getMember().getId();
+    this.resourceIds = StringUtils.joinWith(",", revenuePayment.getMember().getId());
+    this.resourceOwner = revenuePayment.getMember();
+    this.args = Lists.newArrayList(revenuePayment.getDate().split("-")[1],
+       String.valueOf(revenuePayment.getFinalAmount()));
   }
 
   private void setSendPointMessage(String point, String username) {

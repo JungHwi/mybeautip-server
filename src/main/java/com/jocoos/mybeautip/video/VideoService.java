@@ -423,17 +423,6 @@ public class VideoService {
           videoRepository.save(createdVideo);
         }
       }
-    
-      if ("PUBLIC".equals(request.getVisibility())) {
-        memberRepository.updatePublicVideoCount(member.getId(), 1);
-      }
-      memberRepository.updateTotalVideoCount(member.getId(), 1);
-  
-      video = videoRepository.save(video);
-      if ("PUBLIC".equals(video.getVisibility())) {
-        feedService.feedVideo(video);
-      }
-      return video;
     } else {
       video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
           .orElseGet(() -> {
@@ -441,18 +430,14 @@ public class VideoService {
             throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
           });
       BeanUtils.copyProperties(request, video);
-    
-      if ("PUBLIC".equals(request.getVisibility())) {
-        memberRepository.updatePublicVideoCount(member.getId(), 1);
-      }
-      memberRepository.updateTotalVideoCount(member.getId(), 1);
-    
-      video = videoRepository.save(video);
-      if ("PUBLIC".equals(video.getVisibility())) {
-        feedService.feedVideo(video);
-      }
-      return video;
     }
+
+    if ("PUBLIC".equals(request.getVisibility())) {
+      memberRepository.updatePublicVideoCount(member.getId(), 1);
+    }
+
+    memberRepository.updateTotalVideoCount(member.getId(), 1);
+    return videoRepository.save(video);
   }
   
   @Transactional

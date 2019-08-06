@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.admin;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import java.util.Date;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -52,9 +54,10 @@ public class AdminRevenuePaymentController {
     if (revenuePayment.getState() != NOT_PAID) {
       throw new BadRequestException("invalid_state", "Invalid Revenue Payment state: " + revenuePayment.getState());
     }
-    
+
+    Date paymentDate = Dates.parse(request.getPaymentDate());
     RevenuePaymentInfo info = new RevenuePaymentInfo(revenuePaymentService.pay(
-        revenuePayment, request.getPaymentMethod(), request.getPaymentDate(), request.getAmount()));
+        revenuePayment, request.getPaymentMethod(), paymentDate, request.getAmount()));
     return new ResponseEntity<>(info, HttpStatus.OK);
   }
   

@@ -10,10 +10,10 @@ import java.util.Optional;
 public interface MemberPointDetailRepository extends JpaRepository<MemberPointDetail, Long> {
     Optional<MemberPointDetail> findTopByMemberIdAndStateAndExpiryAtAfterOrderByIdDesc(Long memberId, int state, Date now);
 
-    @Query("select sum(mpd.point) as pointSum from MemberPointDetail mpd where mpd.parentId = ?1 group by mpd.parentId")
+    @Query("select min(mpd.id) as id, sum(mpd.point) as pointSum, max(mpd.expiryAt) as expiryAt from MemberPointDetail mpd where mpd.parentId = ?1 group by mpd.parentId")
     Optional<MemberPointSum> getSumByParentId(Long parentId);
 
-    @Query("select sum(mpd.point) as pointSum from MemberPointDetail mpd where mpd.memberPointId = ?1 group by mpd.memberPointId")
+    @Query("select sum(mpd.point) as pointSum, max(mpd.expiryAt) as expiryAt from MemberPointDetail mpd where mpd.memberPointId = ?1 group by mpd.memberPointId")
     Optional<MemberPointSum> getSumByMemberPointId(Long memberPointId);
 
     Optional<MemberPointDetail> findByMemberPointId(Long memberPointId);

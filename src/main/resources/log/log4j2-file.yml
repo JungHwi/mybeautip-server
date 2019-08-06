@@ -35,10 +35,12 @@ Configutation:
         - ref: ERROR_FILE
 
     Logger:
-      - name: com.jocoos.mybeautip
-        level: info
+      - name: com.jocoos.mybeautip.feed.FeedService
+        level: debug
       - name: com.jocoos.mybeautip.devices.DeviceService
         level: debug
+      - name: com.jocoos.mybeautip
+        level: info
       - name: jdbc
         level: info
       - name: org.springframework.web
