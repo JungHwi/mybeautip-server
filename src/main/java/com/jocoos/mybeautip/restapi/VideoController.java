@@ -180,8 +180,10 @@ public class VideoController {
                                   @RequestParam(required = false) String type,
                                   @RequestParam(required = false) String state) {
     Slice<Video> list = videoService.findVideos(type, state, cursor, count);
+
     List<VideoInfo> videos = Lists.newArrayList();
-    list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+    list.filter(video -> "live".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+    list.filter(video -> "vod".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
     if (videos.size() > 0) {
