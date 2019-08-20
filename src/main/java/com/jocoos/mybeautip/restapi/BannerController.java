@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.jocoos.mybeautip.notification.MessageService;
 import org.springframework.beans.BeanUtils;
@@ -41,7 +42,8 @@ public class BannerController {
   }
 
   @GetMapping
-  public ResponseEntity<List<BannerInfo>> getBanners(@RequestParam(defaultValue = "20") int count) {
+  public ResponseEntity<List<BannerInfo>> getBanners(@RequestParam(defaultValue = "20") int count,
+                                                     @RequestParam(required = false) Set<Integer> categories) {
     PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "seq", "createdAt"));
     Date now = new Date();
     Slice<Banner> banners = bannerRepository.findByStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(now, now, pageRequest);
@@ -49,12 +51,15 @@ public class BannerController {
     log.debug("now: {}", now);
 
     banners.stream()
-       .forEach(b -> {
-         postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(b.getPost().getId(), now, now)
-         .ifPresent(p ->
-            result.add(new BannerInfo(b, new PostController.PostInfo(p))));
-          }
-       );
+            .forEach(b -> {
+                      postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(b.getPost().getId(), now, now)
+                              .ifPresent(p -> {
+                                if (categories == null || categories.contains(p.getCategory())) {
+                                  result.add(new BannerInfo(b, new PostController.PostInfo(p)));
+                                }
+                              });
+                    }
+            );
 
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
