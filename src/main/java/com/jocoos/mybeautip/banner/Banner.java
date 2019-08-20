@@ -31,6 +31,9 @@ public class Banner extends MemberAuditable {
   @Column(nullable = false)
   private String thumbnailUrl;
 
+  @Column(nullable = false)
+  private String slimThumbnailUrl;
+
   @Deprecated
   @Column(nullable = false)
   private int category;

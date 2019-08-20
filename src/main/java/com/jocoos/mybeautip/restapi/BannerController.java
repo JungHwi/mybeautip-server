@@ -44,6 +44,16 @@ public class BannerController {
   @GetMapping
   public ResponseEntity<List<BannerInfo>> getBanners(@RequestParam(defaultValue = "20") int count,
                                                      @RequestParam(required = false) Set<Integer> categories) {
+    return getBanners0(count, categories, false);
+  }
+
+  @GetMapping("/slim")
+  public ResponseEntity<List<BannerInfo>> getSlimBanners(@RequestParam(defaultValue = "20") int count,
+                                                         @RequestParam(required = false) Set<Integer> categories) {
+    return getBanners0(count, categories, true);
+  }
+
+  private ResponseEntity<List<BannerInfo>> getBanners0(int count, Set<Integer> categories, boolean isSlim) {
     PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "seq", "createdAt"));
     Date now = new Date();
     Slice<Banner> banners = bannerRepository.findByStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(now, now, pageRequest);
@@ -55,7 +65,11 @@ public class BannerController {
                       postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(b.getPost().getId(), now, now)
                               .ifPresent(p -> {
                                 if (categories == null || categories.contains(p.getCategory())) {
-                                  result.add(new BannerInfo(b, new PostController.PostInfo(p)));
+                                  if (isSlim && b.getSlimThumbnailUrl() != null) {
+                                    result.add(new BannerInfo(b, new PostController.PostInfo(p), b.getSlimThumbnailUrl()));
+                                  } else {
+                                    result.add(new BannerInfo(b, new PostController.PostInfo(p)));
+                                  }
                                 }
                               });
                     }
@@ -101,6 +115,11 @@ public class BannerController {
     public BannerInfo(Banner banner, PostController.PostInfo post) {
       this(banner);
       this.post = post;
+    }
+
+    public BannerInfo(Banner banner, PostController.PostInfo post, String slimThumbnailUrl) {
+      this(banner, post);
+      this.thumbnailUrl = slimThumbnailUrl;
     }
   }
 }
