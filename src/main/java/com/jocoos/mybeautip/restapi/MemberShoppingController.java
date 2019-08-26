@@ -310,6 +310,7 @@ public class MemberShoppingController {
     private int point;
     private Date createdAt;
     private Date earnedAt;
+    private Date expiryAt;
     private Date expiredAt;
     private String message = "";
 
