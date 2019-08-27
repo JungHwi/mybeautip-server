@@ -39,12 +39,12 @@ public class FeedController {
                                  @RequestParam(required = false) String cursor) {
     Member me = memberService.currentMember();
   
-    if (me.getFollowingCount() == 0) {
-      List<VideoController.VideoInfo> videos = Lists.newArrayList();
-      videoService.findVideos(null, null, null, count)
-          .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
-      return new CursorResponse.Builder<>(null, videos).toBuild();
-    }
+//    if (me.getFollowingCount() == 0) {
+//      List<VideoController.VideoInfo> videos = Lists.newArrayList();
+//      videoService.findVideos(null, null, null, count)
+//          .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+//      return new CursorResponse.Builder<>(null, videos).toBuild();
+//    }
     
     List<Video> videos = feedService.getVideoKeys(me.getId(), cursor, count);
     

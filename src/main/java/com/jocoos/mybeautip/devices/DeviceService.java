@@ -265,6 +265,7 @@ public class DeviceService {
     notification.put("title", message.get("title"));
     notification.put("body", message.get("body"));
     notification.put("badge", String.valueOf(badge));
+    notification.put("image", message.get("image"));
     
     if ("android".equals(os)) {
       data.put(KEY_DATA, message);

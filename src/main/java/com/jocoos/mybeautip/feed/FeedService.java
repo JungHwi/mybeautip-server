@@ -59,6 +59,9 @@ public class FeedService {
         videoRepository.findByVideoKeyAndDeletedAtIsNull(t.getElement())
            .ifPresent(videos::add);
       }
+      if (tuples.size() != videos.size()) {
+        log.warn("incorrect feed data - memberId: {}, video size: {}, tuples size: {}", memberId, videos.size(), tuples.size());
+      }
     } finally {
       if (jedis != null) {
         jedis.disconnect();
