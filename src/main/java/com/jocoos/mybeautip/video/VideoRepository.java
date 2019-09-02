@@ -35,6 +35,13 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
   @Query("select v from Video v where v.visibility = 'PUBLIC' and v.state = 'VOD' and v.createdAt < ?1 and v.deletedAt is null order by v.createdAt desc")
   Slice<Video> getAnyoneVodAndMotdVideos(Date cursor, Pageable pageable);
 
+  // sort
+  @Query("select v from Video v where v.visibility = 'PUBLIC' and (v.state = 'LIVE' or v.state = 'VOD') and v.viewCount < ?1 and v.deletedAt is null order by v.viewCount desc")
+  Slice<Video> getAnyoneAllVideosOrderByViewCount(int cursor, Pageable pageable);
+
+  @Query("select v from Video v where v.visibility = 'PUBLIC' and (v.state = 'LIVE' or v.state = 'VOD') and v.likeCount < ?1 and v.deletedAt is null order by v.likeCount desc")
+  Slice<Video> getAnyoneAllVideosOrderByLikeCount(int cursor, Pageable pageable);
+
   // Get My Videos
   @Query("select v from Video v where v.member = ?1 and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < ?2 and v.deletedAt is null order by v.createdAt desc")
   Slice<Video> getMyAllVideos(Member me, Date cursor, Pageable pageable);
