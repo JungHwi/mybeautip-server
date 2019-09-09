@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.ScheduleController;
+import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.video.Video;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -24,13 +25,16 @@ public class ScheduleService {
     public static final String DIRECTION_NEXT = "next";
 
     private final MessageService messageService;
+    private final SlackService slackService;
     private final ScheduleRepository scheduleRepository;
     private final InstantNotificationConfig config;
 
     public ScheduleService(MessageService messageService,
+                           SlackService slackService,
                            ScheduleRepository scheduleRepository,
                            InstantNotificationConfig instantNotificationConfig) {
         this.messageService = messageService;
+        this.slackService = slackService;
         this.scheduleRepository = scheduleRepository;
         this.config = instantNotificationConfig;
     }
@@ -91,12 +95,15 @@ public class ScheduleService {
     }
 
     @Transactional
-    public Schedule updateSchedule(Long id, Long memberId,
-                                             ScheduleController.UpdateScheduleRequest request,
-                                             String lang) {
+    public Schedule updateSchedule(Long id,
+                                   Long memberId,
+                                   ScheduleController.UpdateScheduleRequest request,
+                                   String lang) {
         Schedule schedule = scheduleRepository.findByIdAndCreatedById(id, memberId)
                 .orElseThrow(() -> new NotFoundException("schedule_item_not_found",
                         messageService.getMessage(SCHEDULE_ITEM_NOT_FOUND, lang)));
+
+        slackService.sendForUpadtingSchedule(schedule, request);
 
         if (request.getTitle() != null) {
             schedule.setTitle(request.getTitle());
@@ -109,6 +116,7 @@ public class ScheduleService {
     }
 
     public Schedule save(Schedule schedule) {
+        slackService.sendForSchedule(schedule);
         return scheduleRepository.save(schedule);
     }
 
