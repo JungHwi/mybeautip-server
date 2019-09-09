@@ -123,13 +123,25 @@ public class VideoService {
     return videoRepository.searchVideosWithTag(keyword, startCursor, page);
   }
 
-
   public Slice<Video> findVideos(String type, String state, String cursor, int count) {
+    return findVideos(type, state, cursor, count, null);
+  }
+
+  public Slice<Video> findVideos(String type, String state, String cursor, int count, String sort) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
 
     switch (getRequestFilter(type, state)) {
       case "all":
-        return videoRepository.getAnyoneAllVideos(startCursor, PageRequest.of(0, count));
+        if (sort == null) {
+          return videoRepository.getAnyoneAllVideos(startCursor, PageRequest.of(0, count));
+        }
+
+        try {
+          int descCursor = (cursor == null) ? Integer.MAX_VALUE : Integer.parseInt(cursor);
+          return findVideosBySort(descCursor, count, sort);
+        } catch (NumberFormatException e) {
+          return videoRepository.getAnyoneAllVideos(startCursor, PageRequest.of(0, count));
+        }
       case "live":
         return videoRepository.getAnyoneLiveVideos(startCursor, PageRequest.of(0, count));
       case "vod":
@@ -142,6 +154,16 @@ public class VideoService {
         return videoRepository.getAnyoneLiveAndVodVideos(startCursor, PageRequest.of(0, count));
       default:
         return null;
+    }
+  }
+
+  private Slice<Video> findVideosBySort(int cursor, int count, String sort) {
+    switch (sort) {
+      case "like":
+        return videoRepository.getAnyoneAllVideosOrderByLikeCount(cursor, PageRequest.of(0, count));
+      case "view":
+      default:
+        return videoRepository.getAnyoneAllVideosOrderByViewCount(cursor, PageRequest.of(0, count));
     }
   }
 
