@@ -4,6 +4,8 @@ import java.time.ZoneId;
 import java.util.List;
 
 import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.restapi.ScheduleController;
+import com.jocoos.mybeautip.schedules.Schedule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -258,6 +260,32 @@ public class SlackService {
     String message = String.format("*사용한 쿠폰(%d)을 사용함 *" +
        "```%s```", memberCoupon.getId(), details);
     log.debug("{}", message);
+    send(message);
+  }
+
+  public void sendForSchedule(Schedule schedule) {
+    String message = String.format("*스케줄 등록*" +
+                    "```사용자: %s/%d\n" +
+                    "제목: %s\n" +
+                    "시간: %s```",
+            schedule.getCreatedBy().getUsername(),
+            schedule.getCreatedBy().getId(),
+            schedule.getTitle(),
+            Dates.toString(schedule.getStartedAt(), ZoneId.of("Asia/Seoul")));
+    send(message);
+  }
+
+  public void sendForUpadtingSchedule(Schedule prevSchedule, ScheduleController.UpdateScheduleRequest updatedSchedule) {
+    String message = String.format("*스케줄 변경*" +
+                    "```사용자: %s/%d\n" +
+                    "제목: %s -> %s\n" +
+                    "시간: %s -> %s```",
+            prevSchedule.getCreatedBy().getUsername(),
+            prevSchedule.getCreatedBy().getId(),
+            prevSchedule.getTitle(),
+            updatedSchedule.getTitle(),
+            Dates.toString(prevSchedule.getStartedAt(), ZoneId.of("Asia/Seoul")),
+            Dates.toString(updatedSchedule.getStartedAt(), ZoneId.of("Asia/Seoul")));
     send(message);
   }
 

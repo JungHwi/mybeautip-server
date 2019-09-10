@@ -178,8 +178,9 @@ public class VideoController {
   public CursorResponse getVideos(@RequestParam(defaultValue = "50") int count,
                                   @RequestParam(required = false) String cursor,
                                   @RequestParam(required = false) String type,
-                                  @RequestParam(required = false) String state) {
-    Slice<Video> list = videoService.findVideos(type, state, cursor, count);
+                                  @RequestParam(required = false) String state,
+                                  @RequestParam(required = false) String sort) {
+    Slice<Video> list = videoService.findVideos(type, state, cursor, count, sort);
 
     List<VideoInfo> videos = Lists.newArrayList();
     list.filter(video -> "live".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(videoService.generateVideoInfo(v)));
@@ -187,12 +188,25 @@ public class VideoController {
 
     String nextCursor = null;
     if (videos.size() > 0) {
-      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+        if (sort == null) {
+            nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+        } else {
+            switch (sort) {
+                case "like":
+                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getViewCount());
+                    break;
+                case "view":
+                default:
+                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getLikeCount());
+                    break;
+            }
+        }
     }
 
     return new CursorResponse.Builder<>("/api/1/videos", videos)
       .withType(type)
       .withState(state)
+      .withSort(sort)
       .withCount(count)
       .withCursor(nextCursor).toBuild();
   }
