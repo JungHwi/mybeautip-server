@@ -755,6 +755,10 @@ public class VideoService {
       onLiveWatchers = String.format("시청(0명)");
     }
     statMessage = onLiveWatchers;
+
+    // guest count
+    int guestCount = videoViewRepository.countByVideoIdAndGuestNameIsNotNull(video.getId());
+    statMessage = statMessage + String.format("\n손님(%d명)", guestCount);
     
     // On-live order summary
     if (video.getRelatedGoodsCount() > 0) {
