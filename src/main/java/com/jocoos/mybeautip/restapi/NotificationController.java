@@ -99,6 +99,13 @@ public class NotificationController {
           }
         }
 
+        // some notifications for video which is old don't have second argument
+        if (VIDEO_STARTED.equals(n.getType())  || VIDEO_UPLOADED.equals(n.getType())) {
+          if (n.getArgs().size() == 1) {
+            n.getArgs().add(""); // add second arg
+          }
+        }
+
         Set<MentionTag> mentionInfo = null;
         if (StringUtils.equalsAny(n.getType(), typeWithComment)) {
           if (n.getArgs().size() > 1) {
