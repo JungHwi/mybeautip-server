@@ -292,7 +292,10 @@ public class VideoService {
     // Set Watch count
     if ("live".equalsIgnoreCase(video.getState())) {
       long duration = new Date().getTime() - watchDuration;
-      video.setWatchCount(videoWatchRepository.countByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration)));
+
+      // FIXME: Replace the watch count to total watch count
+      // video.setWatchCount(videoWatchRepository.countByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration)));
+      video.setWatchCount(video.getTotalWatchCount());
     }
     return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
   }
@@ -302,12 +305,12 @@ public class VideoService {
     VideoWatch watch = videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId()).orElse(null);
     if (watch == null) {
       videoWatchRepository.save(new VideoWatch(video, me));
-      video.setTotalWatchCount(video.getTotalWatchCount() + 1);
     } else {
       watch.setModifiedAt(new Date());
       videoWatchRepository.save(watch);
     }
-    
+
+    video.setTotalWatchCount(video.getTotalWatchCount() + 1);
     video = addView(video, me);
     return videoRepository.save(video);
   }
@@ -317,11 +320,12 @@ public class VideoService {
     VideoWatch watch = videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestUsername).orElse(null);
     if (watch == null) {
       videoWatchRepository.save(new VideoWatch(video, guestUsername));
-      video.setTotalWatchCount(video.getTotalWatchCount() + 1);
     } else {
       watch.setModifiedAt(new Date());
       videoWatchRepository.save(watch);
     }
+
+    video.setTotalWatchCount(video.getTotalWatchCount() + 1);
     video = addViewWithGuest(video, guestUsername);
     return videoRepository.save(video);
   }
