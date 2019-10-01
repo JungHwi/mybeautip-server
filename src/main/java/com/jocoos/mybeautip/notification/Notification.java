@@ -141,7 +141,7 @@ public class Notification {
   public Notification(Video video, String thumbnail, Member target) {
     this.type = "broadcasted".equalsIgnoreCase(video.getType()) ? VIDEO_STARTED : VIDEO_UPLOADED;
     this.targetMember = target;
-    this.args = Lists.newArrayList(video.getMember().getUsername());
+    this.args = Lists.newArrayList(video.getMember().getUsername(), video.getTitle());
     this.resourceType = RESOURCE_TYPE_VIDEO;
     this.resourceId = video.getId();
     this.resourceIds = StringUtils.joinWith(",", video.getId());
