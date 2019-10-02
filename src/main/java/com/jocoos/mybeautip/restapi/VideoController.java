@@ -561,7 +561,11 @@ public class VideoController {
                                        @RequestParam(required = false) String cursor) {
     Long startCursor = StringUtils.isBlank(cursor) ? 0 : Long.parseLong(cursor);  // "createdBy" is used for cursor
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
-    long duration = new Date().getTime() - watchDuration;
+
+    long duration = videoRepository.findById(id)
+       .map(v -> v.getCreatedAt().getTime())
+       .orElse(new Date().getTime() - watchDuration);
+
     Slice<VideoWatch> slice = videoWatchRepository.findByVideoIdAndIsGuestIsFalseAndModifiedAtAfterAndCreatedByIdAfter(id, new Date(duration), startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
     slice.stream().forEach(watch -> members.add(memberService.getMemberInfo(watch.getCreatedBy())));
