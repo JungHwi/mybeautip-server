@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.video;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -137,7 +139,7 @@ public class VideoService {
         }
 
         try {
-          int descCursor = (cursor == null) ? Integer.MAX_VALUE : Integer.parseInt(cursor);
+          int descCursor = (cursor == null) ? 0 : Integer.parseInt(cursor);
           return findVideosBySort(descCursor, count, sort);
         } catch (NumberFormatException e) {
           return videoRepository.getAnyoneAllVideos(startCursor, PageRequest.of(0, count));
@@ -163,7 +165,9 @@ public class VideoService {
         return videoRepository.getAnyoneAllVideosOrderByLikeCount(cursor, PageRequest.of(0, count));
       case "view":
       default:
-        return videoRepository.getAnyoneAllVideosOrderByViewCount(cursor, PageRequest.of(0, count));
+        Instant instant = Instant.now().minus(90, ChronoUnit.DAYS);
+        Date baseDate = Date.from(instant);
+        return videoRepository.getAnyoneAllVideosOrderByViewCount(cursor, baseDate, PageRequest.of(0, count));
     }
   }
 
