@@ -71,7 +71,6 @@ import com.jocoos.mybeautip.video.VideoService;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
-import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
 
 @Slf4j
@@ -558,29 +557,9 @@ public class VideoController {
   @GetMapping("/{id:.+}/watches")
   public CursorResponse getWatcherList(@PathVariable Long id,
                                        @RequestParam(defaultValue = "100") int count,
-                                       @RequestParam(required = false) String cursor) {
-    Long startCursor = StringUtils.isBlank(cursor) ? 0 : Long.parseLong(cursor);  // "createdBy" is used for cursor
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdBy"));
-
-    long duration = videoRepository.findById(id)
-       .map(v -> v.getCreatedAt().getTime())
-       .orElse(new Date().getTime() - watchDuration);
-
-    Slice<VideoWatch> slice = videoWatchRepository.findByVideoIdAndIsGuestIsFalseAndModifiedAtAfterAndCreatedByIdAfter(id, new Date(duration), startCursor, pageable);
-    List<MemberInfo> members = Lists.newArrayList();
-    slice.stream().forEach(watch -> members.add(memberService.getMemberInfo(watch.getCreatedBy())));
-
-    int guestCount = videoWatchRepository.countByVideoIdAndIsGuestIsTrueAndModifiedAtAfter(id, new Date(duration));
-
-    String nextCursor = null;
-    if (members.size() > 0) {
-      nextCursor = String.valueOf(slice.getContent().get(slice.getContent().size() - 1).getId());
-    }
-
-    return new CursorResponse.Builder<>("/api/1/videos/" + id + "/watches", members)
-      .withCount(count)
-      .withGuestCount(guestCount)
-      .withCursor(nextCursor).toBuild();
+                                       @RequestParam(required = false) String cursor,
+                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    return createViewerList(id, count, cursor, lang);
   }
 
   /**
@@ -708,12 +687,16 @@ public class VideoController {
                                       @RequestParam(defaultValue = "100") int count,
                                       @RequestParam(required = false) String cursor,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    return createViewerList(id, count, cursor, lang);
+  }
+
+  private CursorResponse createViewerList(Long id, int count, String cursor, String lang) {
     videoRepository.findByIdAndDeletedAtIsNull(id)
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-    
+
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
-    
+
     Slice<VideoView> slice = videoViewRepository.findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(id, startCursor, pageable);
     List<MemberInfo> members = Lists.newArrayList();
     slice.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
@@ -725,9 +708,9 @@ public class VideoController {
     }
 
     return new CursorResponse.Builder<>("/api/1/videos/" + id + "/views", members)
-      .withCount(count)
-      .withGuestCount(videoViewRepository.countByVideoIdAndCreatedByIsNull(id))
-      .withCursor(nextCursor).toBuild();
+        .withCount(count)
+        .withGuestCount(videoViewRepository.countByVideoIdAndCreatedByIsNull(id))
+        .withCursor(nextCursor).toBuild();
   }
 
   @Data
