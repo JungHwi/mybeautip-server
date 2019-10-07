@@ -192,11 +192,11 @@ public class VideoController {
         } else {
             switch (sort) {
                 case "like":
-                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getViewCount());
+                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getLikeCount());
                     break;
                 case "view":
                 default:
-                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getLikeCount());
+                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getViewCount());
                     break;
             }
         }
