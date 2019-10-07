@@ -249,7 +249,7 @@ public class NotificationService {
       
       if (count == 0) {
         Notification n = notificationRepository.save(new Notification(videoLike, videoLike.getCreatedBy()));
-        deviceService.push(n);
+        //deviceService.push(n);
       }
     }
   }

@@ -16,4 +16,6 @@ public interface VideoViewRepository extends JpaRepository<VideoView, Long> {
   Slice<VideoView> findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(Long videoId, Date time, Pageable pageable);
   
   int countByVideoIdAndCreatedByIsNull(Long id);
+
+  int countByVideoIdAndGuestNameIsNotNull(Long id);
 }
