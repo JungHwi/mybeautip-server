@@ -746,6 +746,10 @@ public class VideoController {
     private Boolean blocked;
     private Date createdAt;
     private Date deletedAt;
+    /**
+     * Real watchers count that was collected for 10 seconds
+     */
+    private Integer realWatchCount;
 
     public VideoInfo(Video video, MemberInfo owner, Long likeId, Boolean blocked) {
       BeanUtils.copyProperties(video, this);
