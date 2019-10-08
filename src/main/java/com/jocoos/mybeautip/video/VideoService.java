@@ -160,14 +160,17 @@ public class VideoService {
   }
 
   private Slice<Video> findVideosBySort(int cursor, int count, String sort) {
+    Instant instant = Instant.now();
+    Date fromDate = Date.from(instant.minus(120, ChronoUnit.DAYS));
+    Date toDate = Date.from(instant.minus(30, ChronoUnit.DAYS));
+
     switch (sort) {
       case "like":
-        return videoRepository.getAnyoneAllVideosOrderByLikeCount(cursor, PageRequest.of(0, count));
+        return videoRepository.getAnyoneAllVideosOrderByLikeCount(cursor, fromDate, toDate, PageRequest.of(0, count));
       case "view":
       default:
-        Instant instant = Instant.now().minus(90, ChronoUnit.DAYS);
-        Date baseDate = Date.from(instant);
-        return videoRepository.getAnyoneAllVideosOrderByViewCount(cursor, baseDate, PageRequest.of(0, count));
+
+        return videoRepository.getAnyoneAllVideosOrderByViewCount(cursor, fromDate, toDate, PageRequest.of(0, count));
     }
   }
 
