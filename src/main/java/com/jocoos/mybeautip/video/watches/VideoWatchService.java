@@ -2,19 +2,18 @@ package com.jocoos.mybeautip.video.watches;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import lombok.Data;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -80,59 +79,28 @@ public class VideoWatchService {
     }
   }
 
-  public VideoWatchStatsInfo getVideoWatchStats(Long videoId) {
+  public Map<Integer, Integer[]> getVideoWatchStats(Long videoId) {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
       Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(String.format(VIDEO_STATS_KEY, videoId), "+inf", "-inf");
 
-      VideoWatchStatsInfo statsInfo = new VideoWatchStatsInfo();
-
+      Map<Integer, Integer[]> stats = Maps.newHashMap();
       for (Tuple t: tuples) {
         try {
           Integer[] counts = objectMapper.readValue(t.getElement(), Integer[].class);
-          statsInfo.add((int) t.getScore(), counts);
+          stats.put((int) t.getScore(), counts);
         } catch (IOException e) {
           log.error("Failed to read the watch count list to object", e);
         }
       }
 
-      return statsInfo;
+      return stats;
     } finally {
       if (jedis != null) {
         jedis.disconnect();
         close(jedis);
       }
-    }
-  }
-
-  @Data
-  public static class VideoWatchStatsInfo {
-    private List<VideoWatchGraph> total;
-    private List<VideoWatchGraph> watcher;
-    private List<VideoWatchGraph> guest;
-
-    public VideoWatchStatsInfo() {
-      this.total = new ArrayList<>();
-      this.watcher = new ArrayList<>();
-      this.guest = new ArrayList<>();
-    }
-
-    public void add(int key, Integer[] counts) {
-      this.total.add(new VideoWatchGraph(key, counts[0]));
-      this.watcher.add(new VideoWatchGraph(key, counts[1]));
-      this.guest.add(new VideoWatchGraph(key, counts[2]));
-    }
-  }
-  
-  @Data
-  public static class VideoWatchGraph {
-    int x;
-    int y;
-
-    public VideoWatchGraph(int x, int y) {
-      this.x = x;
-      this.y = y;
     }
   }
 
