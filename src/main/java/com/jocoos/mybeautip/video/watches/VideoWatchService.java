@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +32,8 @@ public class VideoWatchService {
   private final ObjectMapper objectMapper;
   private final VideoWatchRepository videoWatchRepository;
 
-  // update time duration from lambda, ms
-  private long collectDuration = 3000;
+  @Value("${mybeautip.video.watch-duration}")
+  private long watchDuration;
 
   public VideoWatchService(JedisPool jedisPool,
                            ObjectMapper objectMapper,
@@ -45,7 +46,7 @@ public class VideoWatchService {
   @Async
   public void collectVideoWatchCount(Video video) {
     long now = new Date().getTime();
-    long duration = now - collectDuration;
+    long duration = now - watchDuration;
 
     List<VideoWatch> list = videoWatchRepository.findByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration));
 
