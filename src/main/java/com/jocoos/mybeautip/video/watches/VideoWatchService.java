@@ -71,7 +71,7 @@ public class VideoWatchService {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
-      jedis.zadd(key, elapsedTime, String.format("%s:%s", counts, System.currentTimeMillis()));
+      jedis.zadd(key, elapsedTime, String.format("%s:%s", counts, elapsedTime));
     } finally {
       if (jedis != null) {
         jedis.disconnect();
