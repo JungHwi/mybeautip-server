@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.video.watches;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,8 @@ public interface VideoWatchRepository extends JpaRepository<VideoWatch, Long> {
   Optional<VideoWatch> findByVideoIdAndCreatedById(Long videoId, Long createdById);
 
   Optional<VideoWatch> findByVideoIdAndUsername(Long videoId, String username);
+
+  List<VideoWatch> findByVideoIdAndModifiedAtAfter(Long videoId, Date time);
 
   Integer countByVideoIdAndModifiedAtAfter(Long videoId, Date time);
 

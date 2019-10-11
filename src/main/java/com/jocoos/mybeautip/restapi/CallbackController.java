@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,12 +22,11 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.VideoService;
+import com.jocoos.mybeautip.video.watches.VideoWatchService;
 
 @Slf4j
 @RestController
@@ -37,31 +35,25 @@ public class CallbackController {
   private static final String VIDEO_LOCKED = "video.locked";
 
   private final VideoService videoService;
-  private final TagService tagService;
   private final MessageService messageService;
-  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final VideoRepository videoRepository;
-  private final ObjectMapper objectMapper;
+  private final VideoWatchService videoWatchService;
   
   private static final String MEMBER_NOT_FOUND = "member.not_found";
   private static final String LIVE_NOT_ALLOWED = "video.live_not_allowed";
   private static final String MOTD_UPLOAD_NOT_ALLOWED = "video.motd_upload_not_allowed";
   
   public CallbackController(VideoService videoService,
-                            TagService tagService,
                             MessageService messageService,
-                            MemberService memberService,
                             VideoRepository videoRepository,
                             MemberRepository memberRepository,
-                            ObjectMapper objectMapper) {
+                            VideoWatchService videoWatchService) {
     this.videoService = videoService;
-    this.tagService = tagService;
     this.messageService = messageService;
-    this.memberService = memberService;
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
-    this.objectMapper = objectMapper;
+    this.videoWatchService = videoWatchService;
   }
   
   @PostMapping
@@ -104,6 +96,8 @@ public class CallbackController {
     if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(oldState) && "VOD".equals(request.getState())) {
       videoService.sendStats(video);
     }
+
+    videoWatchService.collectVideoWatchCount(video);
     return video;
   }
   
