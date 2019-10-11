@@ -70,7 +70,7 @@ public class VideoWatchService {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
-      jedis.zadd(key, elapsedTime, counts);
+      jedis.zadd(key, elapsedTime, String.format("%s:%s", counts, System.currentTimeMillis()));
     } finally {
       if (jedis != null) {
         jedis.disconnect();
@@ -83,12 +83,14 @@ public class VideoWatchService {
     Jedis jedis = null;
     try {
       jedis = jedisPool.getResource();
-      Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(String.format(VIDEO_STATS_KEY, videoId), "+inf", "-inf");
+      Set<Tuple> tuples = jedis.zrangeByScoreWithScores(String.format(VIDEO_STATS_KEY, videoId), "-inf", "+inf");
 
-      Map<Integer, Integer[]> stats = Maps.newHashMap();
+      Map<Integer, Integer[]> stats = Maps.newTreeMap();
       for (Tuple t: tuples) {
+        log.info("{}: {}", t.getScore(), t.getElement());
         try {
-          Integer[] counts = objectMapper.readValue(t.getElement(), Integer[].class);
+          String[] split = t.getElement().split(":");
+          Integer[] counts = objectMapper.readValue(split[0], Integer[].class);
           stats.put((int) t.getScore(), counts);
         } catch (IOException e) {
           log.error("Failed to read the watch count list to object", e);

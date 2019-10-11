@@ -40,11 +40,9 @@ public class VideoStatsController {
 
     Map<Integer, Integer[]> stats = videoWatchService.getVideoWatchStats(id);
     VideoWatchStatsInfo statsInfo = new VideoWatchStatsInfo();
-    stats.forEach((k, v) -> {
-      statsInfo.add(k, v);
-    });
+    stats.forEach((k, v) -> statsInfo.add(k, v));
 
-    log.debug("stats: {}", stats);
+    log.info("stats: {}", stats);
     return new ResponseEntity<>(statsInfo, HttpStatus.OK);
   }
 
