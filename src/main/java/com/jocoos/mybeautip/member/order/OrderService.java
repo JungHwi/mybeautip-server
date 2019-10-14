@@ -416,7 +416,9 @@ public class OrderService {
       memberPointService.earnPoints(order);
     } else {
       MemberCoupon memberCoupon = order.getMemberCoupon();
-      memberCoupon.setUsedAt(new Date());
+      if (!memberCoupon.getCoupon().getId().equals(EVENT_COUPON_ID)) {
+        memberCoupon.setUsedAt(new Date());
+      }
       memberCouponRepository.save(memberCoupon);
     }
 
