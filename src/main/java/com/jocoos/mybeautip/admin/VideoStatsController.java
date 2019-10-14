@@ -42,7 +42,7 @@ public class VideoStatsController {
     VideoWatchStatsInfo statsInfo = new VideoWatchStatsInfo();
     stats.forEach((k, v) -> statsInfo.add(k, v));
 
-    log.info("stats: {}", stats);
+    log.debug("stats: {}", stats);
     return new ResponseEntity<>(statsInfo, HttpStatus.OK);
   }
 

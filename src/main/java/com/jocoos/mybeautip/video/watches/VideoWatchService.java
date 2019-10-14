@@ -88,7 +88,7 @@ public class VideoWatchService {
 
       Map<Integer, Integer[]> stats = Maps.newTreeMap();
       for (Tuple t: tuples) {
-        log.info("{}: {}", t.getScore(), t.getElement());
+        log.debug("{}: {}", t.getScore(), t.getElement());
         try {
           String[] split = t.getElement().split(":");
           Integer[] counts = objectMapper.readValue(split[0], Integer[].class);
