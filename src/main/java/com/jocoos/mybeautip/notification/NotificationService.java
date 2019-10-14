@@ -413,7 +413,7 @@ public class NotificationService {
     log.info("notification: {}", notification);
 
     taskScheduler.schedule(() -> deviceService.push(notification),
-        new Date().toInstant().plusSeconds(60));
+        new Date().toInstant().plusSeconds(10));
   }
 
   public void notifyRevenuePayment(RevenuePayment revenuePayment) {
