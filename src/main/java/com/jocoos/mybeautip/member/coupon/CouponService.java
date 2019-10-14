@@ -49,4 +49,19 @@ public class CouponService {
 
     return null;
   }
+
+  public MemberCoupon sendEventCoupon(Member member) {
+    Date now = new Date();
+    Optional<Coupon> coupon = couponRepository.findByCategoryAndStartedAtBeforeAndEndedAtAfter(Coupon.CATEGORY_EVENT_COUPON, now, now);
+    log.info("coupon: {}", coupon);
+
+    if (coupon.isPresent()) {
+      List<MemberCoupon> exists = memberCouponRepository.findByCouponCategoryAndUsedAtIsNullAndExpiryAtBefore(Coupon.CATEGORY_EVENT_COUPON, now);
+      if (exists.size() == 0) {
+        return memberCouponRepository.save(new MemberCoupon(member, coupon.get(), welcomeCouponUsageDays));
+      }
+    }
+
+    return null;
+  }
 }
