@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,7 +54,13 @@ public class OrderService {
 
   @Value("${mybeautip.point.minimum}")
   private int minimumPoint;
-  
+
+  private static final List<String> EVENT_GOODS = Lists.newArrayList("1000037476", "1000037435", "1000037727", "1000037448");
+  private static final Long EVENT_COUPON_ID = 4L;
+  private static final String CANNOT_USE_COUPON_WITH_POINT = "order.not_use_coupon_with_point";
+  private static final String INVALID_GOODS_FOR_COUPON = "order.invalid_goods_for_coupon";
+
+
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String POINT_BAD_REQUEST = "order.point_bad_rqeust";
   private static final String POINT_NOT_ENOUGH = "order.point_not_enough";
@@ -163,6 +170,21 @@ public class OrderService {
 
     if (request.getCouponId() != null) {
       MemberCoupon memberCoupon = memberCouponRepository.findById(request.getCouponId()).orElseThrow(() -> new BadRequestException("coupon_not_found", "invalid member coupon id"));
+
+      if (memberCoupon.getCoupon().getId().equals(EVENT_COUPON_ID)) {
+        if (request.getPoint() > 0) {
+          throw new BadRequestException("point_bad_request",
+              messageService.getMessage(CANNOT_USE_COUPON_WITH_POINT, lang));
+        }
+      }
+
+      request.getPurchases().stream().forEach(p -> {
+        if (!EVENT_GOODS.contains(p.getGoodsNo())) {
+          throw new BadRequestException("order_bad_request",
+              messageService.getMessage(INVALID_GOODS_FOR_COUPON, lang));
+        }
+      });
+
       order.setMemberCoupon(memberCoupon);
     }
 
