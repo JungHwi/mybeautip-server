@@ -1,13 +1,9 @@
 package com.jocoos.mybeautip.member.order;
 
+import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -176,14 +172,18 @@ public class OrderService {
           throw new BadRequestException("point_bad_request",
               messageService.getMessage(CANNOT_USE_COUPON_WITH_POINT, lang));
         }
-      }
 
-      request.getPurchases().stream().forEach(p -> {
-        if (!EVENT_GOODS.contains(p.getGoodsNo())) {
-          throw new BadRequestException("order_bad_request",
-              messageService.getMessage(INVALID_GOODS_FOR_COUPON, lang));
+        List<String> goodsNoList =
+            request.getPurchases().stream().map(p -> p.getGoodsNo()).collect(Collectors.toList());
+        log.info("{}", goodsNoList);
+
+        for (String gno: goodsNoList) {
+          if (!EVENT_GOODS.contains(gno)) {
+            throw new BadRequestException("order_bad_request",
+                messageService.getMessage(INVALID_GOODS_FOR_COUPON, lang));
+          }
         }
-      });
+      }
 
       order.setMemberCoupon(memberCoupon);
     }
