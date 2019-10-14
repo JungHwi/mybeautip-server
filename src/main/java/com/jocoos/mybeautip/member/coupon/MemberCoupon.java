@@ -47,6 +47,7 @@ public class MemberCoupon extends CreatedDateAuditable {
   public MemberCoupon(Member member, Coupon coupon) {
     this.member = member;
     this.coupon = coupon;
+    this.expiryAt = coupon.getEndedAt();
   }
 
   public MemberCoupon(Member member, Coupon coupon, int usageDays) {

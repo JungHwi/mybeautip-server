@@ -56,10 +56,7 @@ public class CouponService {
     log.info("coupon: {}", coupon);
 
     if (coupon.isPresent()) {
-      List<MemberCoupon> exists = memberCouponRepository.findByCouponCategoryAndUsedAtIsNullAndExpiryAtBefore(Coupon.CATEGORY_EVENT_COUPON, now);
-      if (exists.size() == 0) {
-        return memberCouponRepository.save(new MemberCoupon(member, coupon.get(), welcomeCouponUsageDays));
-      }
+      return memberCouponRepository.save(new MemberCoupon(member, coupon.get()));
     }
 
     return null;
