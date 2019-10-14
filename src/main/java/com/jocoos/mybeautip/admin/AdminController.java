@@ -236,8 +236,24 @@ public class AdminController {
      @RequestParam String username) {
 
     log.debug("visible: {}, username: {}", visible, username);
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "reportCount"));
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
     Page<Member> members = memberRepository.findByVisibleAndUsernameContaining(visible, username, pageable);
+
+    Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/memberDetails", params = {"visible", "email"})
+  public ResponseEntity<Page<MemberDetailInfo>> searchMemberDetailsByEmail(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "true") boolean visible,
+      @RequestParam String email) {
+
+    log.debug("visible: {}, email: {}", visible, email);
+    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    Page<Member> members = memberRepository.findByVisibleAndEmailContaining(visible, email, pageable);
+    log.info("{}", members);
 
     Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
     return new ResponseEntity<>(details, HttpStatus.OK);
