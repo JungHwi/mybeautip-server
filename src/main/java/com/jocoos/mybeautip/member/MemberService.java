@@ -267,6 +267,8 @@ public class MemberService {
           });
 
       couponService.sendWelcomeCoupon(member);
+
+      couponService.sendEventCoupon(member);
     }
     
     return finalMember;

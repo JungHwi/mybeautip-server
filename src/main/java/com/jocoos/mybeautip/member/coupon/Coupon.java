@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.audit.MemberAuditable;
 public class Coupon extends MemberAuditable {
 
   public static Byte CATEGORY_WELCOME_COUPON = Byte.parseByte("1");
+  public static Byte CATEGORY_EVENT_COUPON = Byte.parseByte("2");
 
   public static int DISCOUNT_FIXED_PRICE = 1;
   public static int DISCOUNT_FIXED_RATE = 2;

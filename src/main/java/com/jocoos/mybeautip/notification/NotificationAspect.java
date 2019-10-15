@@ -214,4 +214,17 @@ public class NotificationAspect {
     }
   }
 
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.coupon.CouponService.sendEventCoupon(..))",
+      returning = "result")
+  public void onAfterReturningSendEventCoupon(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}, result:{}", joinPoint.toLongString(), result);
+
+    if (result instanceof MemberCoupon) {
+      MemberCoupon memberCoupon = (MemberCoupon) result;
+      log.debug("memberCoupon: {}", memberCoupon);
+
+      notificationService.notifyEventCoupon(memberCoupon);
+    }
+  }
+
 }

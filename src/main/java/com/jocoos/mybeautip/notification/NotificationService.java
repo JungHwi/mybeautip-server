@@ -408,6 +408,14 @@ public class NotificationService {
        new Date().toInstant().plusSeconds(10));
   }
 
+  public void notifyEventCoupon(MemberCoupon memberCoupon) {
+    Notification notification = notificationRepository.save(new Notification(memberCoupon));
+    log.info("notification: {}", notification);
+
+    taskScheduler.schedule(() -> deviceService.push(notification),
+        new Date().toInstant().plusSeconds(10));
+  }
+
   public void notifyRevenuePayment(RevenuePayment revenuePayment) {
     Notification notification = notificationRepository.save(new Notification(revenuePayment));
     log.info("notification: {}", notification);
