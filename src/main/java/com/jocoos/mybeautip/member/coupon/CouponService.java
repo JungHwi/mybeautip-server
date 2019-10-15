@@ -62,7 +62,7 @@ public class CouponService {
   }
 
   public MemberCoupon sendCoupon(Member member, Coupon coupon) {
-    if (!memberCouponRepository.existsByCouponIdAndExpiryAtBefore(coupon.getId(), new Date())) {
+    if (!memberCouponRepository.existsByMemberIdAndCouponIdAndExpiryAtBefore(member.getId(), coupon.getId(), new Date())) {
       return memberCouponRepository.save(new MemberCoupon(member, coupon));
     } else {
       log.warn("member[{}] already has the coupon[{}]", member.getId(), coupon.getId());
