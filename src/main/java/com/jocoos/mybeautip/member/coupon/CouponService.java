@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class CouponService {
     return memberCouponRepository.countByMemberAndCreatedAtBeforeAndExpiryAtAfterAndUsedAtIsNull(member, now, now);
   }
 
+  @Async
   public MemberCoupon sendWelcomeCoupon(Member member) {
     Date now = new Date();
     Optional<Coupon> coupon = couponRepository.findByCategoryAndStartedAtBeforeAndEndedAtAfter(Coupon.CATEGORY_WELCOME_COUPON, now, now);
@@ -50,6 +52,7 @@ public class CouponService {
     return null;
   }
 
+  @Async
   public MemberCoupon sendEventCoupon(Member member) {
     Date now = new Date();
     Optional<Coupon> coupon = couponRepository.findByCategoryAndStartedAtBeforeAndEndedAtAfter(Coupon.CATEGORY_EVENT_COUPON, now, now);
