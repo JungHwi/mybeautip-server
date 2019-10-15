@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -71,7 +72,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   Page<Member> findByVisibleAndUsernameContaining(boolean visible, String username, Pageable pageable);
 
+  Page<Member> findByVisibleAndEmailContaining(boolean visible, String email, Pageable pageable);
+
   Page<Member> findByVisibleAndPushable(boolean visible, boolean pushable, Pageable pageable);
+
+  List<Member> findByVisibleAndDeletedAtIsNull(boolean visible, Pageable pageable);
 
   @Query("select f.id as followingId, r.id as reportedId, b.id as blockedId from Member m" +
           "  left outer join Following f on m.id=f.memberMe.id and f.memberYou.id=?2" +

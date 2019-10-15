@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.coupon;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,8 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
 
   List<MemberCoupon> findByUsedAtIsNullAndExpiryAtBefore(Date date);
 
+  List<MemberCoupon> findByCouponCategoryAndUsedAtIsNullAndExpiryAtBefore(Byte category, Date date);
+
   Page<MemberCoupon> findByMemberId(Long memberId, Pageable pageable);
 
   Page<MemberCoupon> findByMemberIdAndUsedAtIsNull(Long memberId, Pageable pageable);
@@ -28,4 +31,6 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
   Page<MemberCoupon> findByMemberIdAndUsedAtIsNotNull(Long memberId, Pageable pageable);
 
   List<MemberCoupon> findAllByMemberId(Long memberId);
+
+  boolean existsByMemberIdAndCouponId(Long memberId, Long couponId);
 }

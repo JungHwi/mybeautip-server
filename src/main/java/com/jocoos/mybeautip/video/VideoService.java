@@ -160,14 +160,17 @@ public class VideoService {
   }
 
   private Slice<Video> findVideosBySort(int cursor, int count, String sort) {
+    Instant instant = Instant.now();
+    Date fromDate = Date.from(instant.minus(120, ChronoUnit.DAYS));
+    Date toDate = Date.from(instant.minus(30, ChronoUnit.DAYS));
+
     switch (sort) {
       case "like":
-        return videoRepository.getAnyoneAllVideosOrderByLikeCount(cursor, PageRequest.of(0, count));
+        return videoRepository.getAnyoneAllVideosOrderByLikeCount(cursor, fromDate, toDate, PageRequest.of(0, count));
       case "view":
       default:
-        Instant instant = Instant.now().minus(90, ChronoUnit.DAYS);
-        Date baseDate = Date.from(instant);
-        return videoRepository.getAnyoneAllVideosOrderByViewCount(cursor, baseDate, PageRequest.of(0, count));
+
+        return videoRepository.getAnyoneAllVideosOrderByViewCount(cursor, fromDate, toDate, PageRequest.of(0, count));
     }
   }
 
@@ -296,12 +299,13 @@ public class VideoService {
     // Set Watch count
     if ("live".equalsIgnoreCase(video.getState())) {
       long duration = new Date().getTime() - watchDuration;
-
-      // FIXME: Replace the watch count to total watch count
-      // video.setWatchCount(videoWatchRepository.countByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration)));
-      video.setWatchCount(video.getTotalWatchCount());
+      video.setWatchCount(videoWatchRepository.countByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration)));
     }
-    return new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
+
+    VideoController.VideoInfo videoInfo = new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
+    videoInfo.setWatchCount(video.getViewCount());
+    videoInfo.setRealWatchCount(video.getWatchCount());
+    return videoInfo;
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -309,12 +313,12 @@ public class VideoService {
     VideoWatch watch = videoWatchRepository.findByVideoIdAndCreatedById(video.getId(), me.getId()).orElse(null);
     if (watch == null) {
       videoWatchRepository.save(new VideoWatch(video, me));
+      video.setTotalWatchCount(video.getTotalWatchCount() + 1);
     } else {
       watch.setModifiedAt(new Date());
       videoWatchRepository.save(watch);
     }
 
-    video.setTotalWatchCount(video.getTotalWatchCount() + 1);
     video = addView(video, me);
     return videoRepository.save(video);
   }
@@ -324,12 +328,12 @@ public class VideoService {
     VideoWatch watch = videoWatchRepository.findByVideoIdAndUsername(video.getId(), guestUsername).orElse(null);
     if (watch == null) {
       videoWatchRepository.save(new VideoWatch(video, guestUsername));
+      video.setTotalWatchCount(video.getTotalWatchCount() + 1);
     } else {
       watch.setModifiedAt(new Date());
       videoWatchRepository.save(watch);
     }
 
-    video.setTotalWatchCount(video.getTotalWatchCount() + 1);
     video = addViewWithGuest(video, guestUsername);
     return videoRepository.save(video);
   }

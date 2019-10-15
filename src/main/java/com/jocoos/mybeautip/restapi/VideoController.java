@@ -192,11 +192,11 @@ public class VideoController {
         } else {
             switch (sort) {
                 case "like":
-                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getViewCount());
+                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getLikeCount());
                     break;
                 case "view":
                 default:
-                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getLikeCount());
+                    nextCursor = String.valueOf(videos.get(videos.size() - 1).getViewCount());
                     break;
             }
         }
@@ -746,6 +746,10 @@ public class VideoController {
     private Boolean blocked;
     private Date createdAt;
     private Date deletedAt;
+    /**
+     * Real watchers count that was collected for 10 seconds
+     */
+    private Integer realWatchCount;
 
     public VideoInfo(Video video, MemberInfo owner, Long likeId, Boolean blocked) {
       BeanUtils.copyProperties(video, this);
