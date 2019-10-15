@@ -32,5 +32,5 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Long
 
   List<MemberCoupon> findAllByMemberId(Long memberId);
 
-  boolean existsByMemberIdAndCouponIdAndExpiryAtBefore(Long memberId, Long couponId, Date date);
+  boolean existsByMemberIdAndCouponIdAndExpiryAtAfter(Long memberId, Long couponId, Date date);
 }
