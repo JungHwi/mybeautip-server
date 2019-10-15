@@ -70,7 +70,7 @@ public class AdminCouponController {
 
     for (Member m : availables) {
       log.info("send coupon[{}] to member[{}]", coupon.getId(), m.getId());
-      couponService.sendCoupon(m, coupon);
+      couponService.sendEventCoupon(m, coupon);
     }
 
     return new ResponseEntity<>(new SendCouponResponse(availables.size()), HttpStatus.OK);

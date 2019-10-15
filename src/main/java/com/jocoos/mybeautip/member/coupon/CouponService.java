@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.notification.NotificationService;
 
 @Slf4j
 @Service
@@ -55,17 +56,17 @@ public class CouponService {
     log.info("coupon: {}", coupon);
 
     if (coupon.isPresent()) {
-      return sendCoupon(member, coupon.get());
+      return memberCouponRepository.save(new MemberCoupon(member, coupon.get()));
     }
 
     return null;
   }
 
-  public MemberCoupon sendCoupon(Member member, Coupon coupon) {
-    if (!memberCouponRepository.existsByMemberIdAndCouponIdAndExpiryAtBefore(member.getId(), coupon.getId(), new Date())) {
+  public MemberCoupon sendEventCoupon(Member member, Coupon coupon) {
+    boolean exists = memberCouponRepository.existsByMemberIdAndCouponIdAndExpiryAtBefore(member.getId(), coupon.getId(), new Date());
+    log.info("member: {}, coupon: {}, exists: {}", member.getId(), coupon.getId(), exists);
+    if (!exists) {
       return memberCouponRepository.save(new MemberCoupon(member, coupon));
-    } else {
-      log.warn("member[{}] already has the coupon[{}]", member.getId(), coupon.getId());
     }
 
     return null;
