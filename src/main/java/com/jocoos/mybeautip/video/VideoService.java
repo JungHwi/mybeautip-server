@@ -139,7 +139,7 @@ public class VideoService {
         }
 
         try {
-          int descCursor = (cursor == null) ? 0 : Integer.parseInt(cursor);
+          int descCursor = (cursor == null) ? Integer.MAX_VALUE : Integer.parseInt(cursor);
           return findVideosBySort(descCursor, count, sort);
         } catch (NumberFormatException e) {
           return videoRepository.getAnyoneAllVideos(startCursor, PageRequest.of(0, count));
