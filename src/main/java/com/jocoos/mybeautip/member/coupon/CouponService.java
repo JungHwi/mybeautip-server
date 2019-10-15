@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.member.Member;
 
 @Slf4j
@@ -56,7 +55,17 @@ public class CouponService {
     log.info("coupon: {}", coupon);
 
     if (coupon.isPresent()) {
-      return memberCouponRepository.save(new MemberCoupon(member, coupon.get()));
+      return sendCoupon(member, coupon.get());
+    }
+
+    return null;
+  }
+
+  public MemberCoupon sendCoupon(Member member, Coupon coupon) {
+    if (!memberCouponRepository.existsByCouponId(coupon.getId())) {
+      return memberCouponRepository.save(new MemberCoupon(member, coupon));
+    } else {
+      log.warn("member[{}] already has the coupon[{}]", member.getId(), coupon.getId());
     }
 
     return null;
