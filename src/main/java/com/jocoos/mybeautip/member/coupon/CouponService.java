@@ -66,7 +66,7 @@ public class CouponService {
   }
 
   public MemberCoupon sendEventCoupon(Member member, Coupon coupon) {
-    boolean exists = memberCouponRepository.existsByMemberIdAndCouponIdAndExpiryAtAfter(member.getId(), coupon.getId(), new Date());
+    boolean exists = memberCouponRepository.existsByMemberIdAndCouponId(member.getId(), coupon.getId());
     log.info("member: {}, coupon: {}, exists: {}", member.getId(), coupon.getId(), exists);
     if (!exists) {
       return memberCouponRepository.save(new MemberCoupon(member, coupon));
