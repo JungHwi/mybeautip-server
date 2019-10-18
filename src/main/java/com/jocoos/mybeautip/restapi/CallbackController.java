@@ -97,7 +97,11 @@ public class CallbackController {
       videoService.sendStats(video);
     }
 
-    videoWatchService.collectVideoWatchCount(video);
+    // Send collect watch counts on LIVE
+    if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(request.getState())) {
+      videoWatchService.collectVideoWatchCount(video);
+    }
+
     return video;
   }
   
