@@ -381,7 +381,8 @@ public class VideoService {
     Video video = new Video(memberService.currentMember());
     BeanUtils.copyProperties(request, video);
     Video createdVideo = videoRepository.save(video); // do not notify
-  
+    createdVideo.setVideoKey(String.valueOf(video.getId()));
+
     if (StringUtils.isNotEmpty(createdVideo.getContent())) {
       tagService.increaseRefCount(createdVideo.getContent());
       tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());

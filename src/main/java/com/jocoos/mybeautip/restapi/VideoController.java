@@ -161,7 +161,6 @@ public class VideoController {
     log.info("callback createVideo: {}", request.toString());
     Video createdVideo = videoService.create(request);
     VideoInfo videoInfo = videoService.generateVideoInfo(createdVideo);
-    videoInfo.setVideoKey(String.valueOf(videoInfo.getId()));
     return videoInfo;
   }
 
