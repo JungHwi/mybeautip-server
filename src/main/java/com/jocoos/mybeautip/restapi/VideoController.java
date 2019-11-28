@@ -722,6 +722,7 @@ public class VideoController {
     private Boolean locked;
     private Boolean muted;
     private String visibility;
+    private Integer category;
     private String title;
     private String content;
     private String url;
@@ -765,6 +766,7 @@ public class VideoController {
     @NotNull
     String type = "BROADCASTED";
     String visibility = "PUBLIC";
+    Integer category;
     String title ="";
     String content = "";
     String chatRoomId ="";

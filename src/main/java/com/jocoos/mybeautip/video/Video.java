@@ -41,6 +41,9 @@ public class Video {
   private String visibility;
 
   @Column
+  private Integer category;
+
+  @Column
   private String title;
 
   @Column
