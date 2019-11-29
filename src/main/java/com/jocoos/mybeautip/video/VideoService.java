@@ -418,12 +418,6 @@ public class VideoService {
   
   @Transactional
   public Video startVideo(CallbackController.CallbackStartVideoRequest request, Member member) {
-    // Ignore when videoKey is already exist
-    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
-      log.warn("VideoKey is already exist, videoKey: " + request.getVideoKey());
-      throw new BadRequestException("bad_video_key", "video_key_is_already_exist");
-    }
-    
     Video video;
     if ("UPLOADED".equals(request.getType())) {
       video = new Video(member);
@@ -459,11 +453,17 @@ public class VideoService {
         }
       }
     } else {
-      video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
-          .orElseGet(() -> {
-            log.error("Cannot find videoId: " + request.getVideoKey());
-            throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
-          });
+      Optional<Video> videoByKey = videoRepository.findByVideoKey(request.getVideoKey());
+      if (videoByKey.isPresent()) {
+        video = videoByKey.get();
+      } else {
+        video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
+            .orElseGet(() -> {
+              log.error("Cannot find videoId: " + request.getVideoKey());
+              throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
+            });
+      }
+
       BeanUtils.copyProperties(request, video);
     }
 
