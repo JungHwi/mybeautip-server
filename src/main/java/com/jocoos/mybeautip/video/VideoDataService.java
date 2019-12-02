@@ -21,7 +21,7 @@ public class VideoDataService {
     this.objectMapper = objectMapper;
   }
 
-  public Map<String, String> getData(String json) {
+  public Map<String, Object> getData(String json) {
     try {
       return objectMapper.readValue(json, HashMap.class);
     } catch (IOException e) {
@@ -32,9 +32,9 @@ public class VideoDataService {
   }
 
   public List<Integer> getCategory(String json) {
-    Map<String, String> map = getData(json);
+    Map<String, Object> map = getData(json);
     try {
-      Integer[] categoryData =  objectMapper.readValue(map.get("video_category"), Integer[].class);
+      Integer[] categoryData = objectMapper.readValue(String.valueOf(map.get("video_category")), Integer[].class);
       List<Integer> category = Arrays.asList(categoryData);
       log.info("video category: {}", category);
 
