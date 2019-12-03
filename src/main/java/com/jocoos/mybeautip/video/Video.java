@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.video;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -39,6 +40,9 @@ public class Video {
 
   @Column(nullable = false)
   private String visibility;
+
+  @OneToMany(mappedBy = "videoId", cascade = CascadeType.ALL)
+  private List<VideoCategory> category;
 
   @Column
   private String title;

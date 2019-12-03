@@ -6,13 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -91,7 +85,7 @@ public class CallbackController {
     String oldState = video.getState();
     video = videoService.updateVideoProperties(request, video);
     video = videoService.update(video);
-    
+
     // Send on-live stats using slack when LIVE ended
     if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(oldState) && "VOD".equals(request.getState())) {
       videoService.sendStats(video);
@@ -134,6 +128,7 @@ public class CallbackController {
     String thumbnailUrl = "";
     String chatRoomId ="";
     String data = "";
+    String data2 = "";
     
     @NotNull
     Date createdAt;
@@ -157,6 +152,7 @@ public class CallbackController {
     String chatRoomId;
     Integer duration;
     String data;
+    String data2;
     Integer watchCount;
     Integer heartCount;
     Integer viewCount;

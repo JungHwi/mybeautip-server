@@ -2,10 +2,8 @@ package com.jocoos.mybeautip.video;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -69,6 +69,8 @@ public class VideoService {
   private final VideoReportRepository videoReportRepository;
   private final ViewRecodingRepository viewRecodingRepository;
   private final OrderRepository orderRepository;
+  private final VideoDataService videoDataService;
+  private final VideoCategoryRepository videoCategoryRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -91,7 +93,9 @@ public class VideoService {
                       CommentLikeRepository commentLikeRepository,
                       VideoReportRepository videoReportRepository,
                       ViewRecodingRepository viewRecodingRepository,
-                      OrderRepository orderRepository) {
+                      OrderRepository orderRepository,
+                      VideoDataService videoDataService,
+                      VideoCategoryRepository videoCategoryRepository) {
     this.memberService = memberService;
     this.tagService = tagService;
     this.feedService = feedService;
@@ -109,6 +113,8 @@ public class VideoService {
     this.videoReportRepository = videoReportRepository;
     this.viewRecodingRepository = viewRecodingRepository;
     this.orderRepository = orderRepository;
+    this.videoDataService = videoDataService;
+    this.videoCategoryRepository = videoCategoryRepository;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -305,6 +311,9 @@ public class VideoService {
     VideoController.VideoInfo videoInfo = new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
     videoInfo.setWatchCount(video.getViewCount());
     videoInfo.setRealWatchCount(video.getWatchCount());
+    videoInfo.setCategory(
+        video.getCategory().stream().map(c -> c.getCategory()).collect(Collectors.toList())
+    );
     return videoInfo;
   }
 
@@ -380,8 +389,18 @@ public class VideoService {
   public Video create(VideoController.CreateVideoRequest request) {
     Video video = new Video(memberService.currentMember());
     BeanUtils.copyProperties(request, video);
+
+    // Set categories after video is saved
+    video.setCategory(null);
+    log.debug("{}", video);
+
     Video createdVideo = videoRepository.save(video); // do not notify
     createdVideo.setVideoKey(String.valueOf(video.getId()));
+
+    if (request.getCategory() != null) {
+      List<Integer> category = request.getCategory();
+      createdVideo.setCategory(createCategory(createdVideo.getId(), category));
+    }
 
     if (StringUtils.isNotEmpty(createdVideo.getContent())) {
       tagService.increaseRefCount(createdVideo.getContent());
@@ -418,13 +437,8 @@ public class VideoService {
   
   @Transactional
   public Video startVideo(CallbackController.CallbackStartVideoRequest request, Member member) {
-    // Ignore when videoKey is already exist
-    if (videoRepository.findByVideoKey(request.getVideoKey()).isPresent()) {
-      log.warn("VideoKey is already exist, videoKey: " + request.getVideoKey());
-      throw new BadRequestException("bad_video_key", "video_key_is_already_exist");
-    }
-    
     Video video;
+
     if ("UPLOADED".equals(request.getType())) {
       video = new Video(member);
       BeanUtils.copyProperties(request, video);
@@ -459,11 +473,17 @@ public class VideoService {
         }
       }
     } else {
-      video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
-          .orElseGet(() -> {
-            log.error("Cannot find videoId: " + request.getVideoKey());
-            throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
-          });
+      Optional<Video> videoByKey = videoRepository.findByVideoKey(request.getVideoKey());
+      if (videoByKey.isPresent()) {
+        video = videoByKey.get();
+      } else {
+        video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
+            .orElseGet(() -> {
+              log.error("Cannot find videoId: " + request.getVideoKey());
+              throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
+            });
+      }
+
       BeanUtils.copyProperties(request, video);
     }
 
@@ -472,9 +492,24 @@ public class VideoService {
     }
 
     memberRepository.updateTotalVideoCount(member.getId(), 1);
+
+    if (!Strings.isNullOrEmpty(request.getData2())) {
+      List<Integer> category = videoDataService.getCategory(request.getData2());
+      video.setCategory(createCategory(video.getId(), category));
+    }
+
     return videoRepository.save(video);
   }
-  
+
+  private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {
+    List<VideoCategory> categories = Lists.newArrayList();
+    for (int c : category) {
+      categories.add(new VideoCategory(videoId, c));
+    }
+
+    return categories;
+  }
+
   @Transactional
   public Video updateVideoProperties(CallbackController.CallbackUpdateVideoRequest source, Video target) {
     // immutable properties: video_id, video_key, type, owner, likecount, commentcount, relatedgoodscount, relatedgoodsurl
@@ -554,7 +589,15 @@ public class VideoService {
       }
       memberRepository.save(member);
     }
-    
+
+    if (!Strings.isNullOrEmpty(source.getData2())) {
+      List<Integer> category = videoDataService.getCategory(source.getData2());
+      if (target.getCategory() != null) {
+        videoCategoryRepository.deleteByVideoId(target.getId());
+      }
+      target.setCategory(createCategory(target.getId(), category));
+    }
+
     return target;
   }
   
