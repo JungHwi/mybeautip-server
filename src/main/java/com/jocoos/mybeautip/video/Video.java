@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.video;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -13,7 +12,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.post.PostContent;
 
 @NoArgsConstructor
 @Data
@@ -43,13 +41,8 @@ public class Video {
   @Column(nullable = false)
   private String visibility;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
-      name = "video_categories",
-      joinColumns = @JoinColumn(name = "video_id")
-  )
-  @Column(name = "category")
-  private List<Integer> category;
+  @OneToMany(mappedBy = "videoId", cascade = CascadeType.ALL)
+  private List<VideoCategory> category;
 
   @Column
   private String title;

@@ -158,7 +158,7 @@ public class VideoController {
   
   @PostMapping
   public VideoInfo createVideo(@Valid @RequestBody CreateVideoRequest request) {
-    log.info("callback createVideo: {}", request.toString());
+    log.info("createVideo: {}", request.toString());
     Video createdVideo = videoService.create(request);
     VideoInfo videoInfo = videoService.generateVideoInfo(createdVideo);
     return videoInfo;

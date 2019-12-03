@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.video;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -69,6 +70,7 @@ public class VideoService {
   private final ViewRecodingRepository viewRecodingRepository;
   private final OrderRepository orderRepository;
   private final VideoDataService videoDataService;
+  private final VideoCategoryRepository videoCategoryRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -92,7 +94,8 @@ public class VideoService {
                       VideoReportRepository videoReportRepository,
                       ViewRecodingRepository viewRecodingRepository,
                       OrderRepository orderRepository,
-                      VideoDataService videoDataService) {
+                      VideoDataService videoDataService,
+                      VideoCategoryRepository videoCategoryRepository) {
     this.memberService = memberService;
     this.tagService = tagService;
     this.feedService = feedService;
@@ -111,6 +114,7 @@ public class VideoService {
     this.viewRecodingRepository = viewRecodingRepository;
     this.orderRepository = orderRepository;
     this.videoDataService = videoDataService;
+    this.videoCategoryRepository = videoCategoryRepository;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -307,6 +311,9 @@ public class VideoService {
     VideoController.VideoInfo videoInfo = new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
     videoInfo.setWatchCount(video.getViewCount());
     videoInfo.setRealWatchCount(video.getWatchCount());
+    videoInfo.setCategory(
+        video.getCategory().stream().map(c -> c.getCategory()).collect(Collectors.toList())
+    );
     return videoInfo;
   }
 
@@ -382,8 +389,18 @@ public class VideoService {
   public Video create(VideoController.CreateVideoRequest request) {
     Video video = new Video(memberService.currentMember());
     BeanUtils.copyProperties(request, video);
+
+    // Set categories after video is saved
+    video.setCategory(null);
+    log.debug("{}", video);
+
     Video createdVideo = videoRepository.save(video); // do not notify
     createdVideo.setVideoKey(String.valueOf(video.getId()));
+
+    if (request.getCategory() != null) {
+      List<Integer> category = request.getCategory();
+      createdVideo.setCategory(createCategory(createdVideo.getId(), category));
+    }
 
     if (StringUtils.isNotEmpty(createdVideo.getContent())) {
       tagService.increaseRefCount(createdVideo.getContent());
@@ -477,10 +494,20 @@ public class VideoService {
     memberRepository.updateTotalVideoCount(member.getId(), 1);
 
     if (!Strings.isNullOrEmpty(request.getData2())) {
-      video.setCategory(videoDataService.getCategory(request.getData2()));
+      List<Integer> category = videoDataService.getCategory(request.getData2());
+      video.setCategory(createCategory(video.getId(), category));
     }
 
     return videoRepository.save(video);
+  }
+
+  private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {
+    List<VideoCategory> categories = Lists.newArrayList();
+    for (int c : category) {
+      categories.add(new VideoCategory(videoId, c));
+    }
+
+    return categories;
   }
 
   @Transactional
@@ -564,7 +591,11 @@ public class VideoService {
     }
 
     if (!Strings.isNullOrEmpty(source.getData2())) {
-      target.setCategory(videoDataService.getCategory(source.getData2()));
+      List<Integer> category = videoDataService.getCategory(source.getData2());
+      if (target.getCategory() != null) {
+        videoCategoryRepository.deleteByVideoId(target.getId());
+      }
+      target.setCategory(createCategory(target.getId(), category));
     }
 
     return target;
