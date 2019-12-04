@@ -167,7 +167,8 @@ public class CartService {
 
             case "fixed":
             default:
-              delivery.setShipping(fixedShipping);
+              delivery.setShipping(deliveryChargeDetailRepository.findByDeliveryChargeIdAndUnitStartLessThanEqualAndUnitEndGreaterThan(
+                      deliveryCharge.getId(), price, price).map(DeliveryChargeDetail::getPrice).orElse(fixedShipping));
               break;
           }
         } else {
