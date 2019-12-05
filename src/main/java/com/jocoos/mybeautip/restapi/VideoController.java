@@ -158,10 +158,9 @@ public class VideoController {
   
   @PostMapping
   public VideoInfo createVideo(@Valid @RequestBody CreateVideoRequest request) {
-    log.info("callback createVideo: {}", request.toString());
+    log.info("createVideo: {}", request.toString());
     Video createdVideo = videoService.create(request);
     VideoInfo videoInfo = videoService.generateVideoInfo(createdVideo);
-    videoInfo.setVideoKey(String.valueOf(videoInfo.getId()));
     return videoInfo;
   }
 
@@ -723,6 +722,7 @@ public class VideoController {
     private Boolean locked;
     private Boolean muted;
     private String visibility;
+    private List<Integer> category;
     private String title;
     private String content;
     private String url;
@@ -766,6 +766,7 @@ public class VideoController {
     @NotNull
     String type = "BROADCASTED";
     String visibility = "PUBLIC";
+    List<Integer> category;
     String title ="";
     String content = "";
     String chatRoomId ="";
