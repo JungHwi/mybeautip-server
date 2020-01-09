@@ -146,6 +146,7 @@ public class CallbackController {
     String state;
     String title;
     String content;
+    String originalFilename;
     String url;
     String thumbnailPath;
     String thumbnailUrl;
