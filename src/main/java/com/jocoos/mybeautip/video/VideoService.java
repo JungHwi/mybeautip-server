@@ -546,6 +546,10 @@ public class VideoService {
         target.setUrl(source.getUrl());
       }
     }
+
+    if(!Strings.isNullOrEmpty(source.getOriginalFilename()) && source.getOriginalFilename().length() > 0) {
+      target.setOriginalFilename(source.getOriginalFilename());
+    }
     
     if (source.getThumbnailPath() != null) {
       if (StringUtils.strip(source.getThumbnailPath()).length() > 0) {

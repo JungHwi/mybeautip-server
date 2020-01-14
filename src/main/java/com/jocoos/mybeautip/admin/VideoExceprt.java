@@ -28,6 +28,8 @@ public interface VideoExceprt {
 
   String getUrl();
 
+  String getOriginalFilename();
+
   String getThumbnailPath();
 
   String getThumbnailUrl();

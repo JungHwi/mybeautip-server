@@ -726,6 +726,7 @@ public class VideoController {
     private String title;
     private String content;
     private String url;
+    private String originalFilename;
     private String thumbnailPath;
     private String thumbnailUrl;
     private String chatRoomId;
