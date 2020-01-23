@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.member.order;
 
-import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.exception.PaymentConflictException;
 import com.jocoos.mybeautip.goods.Goods;
+import com.jocoos.mybeautip.goods.GoodsOptionService;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -86,6 +87,7 @@ public class OrderService {
   private final MessageService messageService;
   private final SlackService slackService;
   private final NotificationService notificationService;
+  private final GoodsOptionService goodsOptionService;
 
   public OrderService(OrderRepository orderRepository,
                       MemberRepository memberRepository,
@@ -106,7 +108,8 @@ public class OrderService {
                       IamportService iamportService,
                       MessageService messageService,
                       SlackService slackService,
-                      NotificationService notificationService) {
+                      NotificationService notificationService,
+                      GoodsOptionService goodsOptionService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
     this.deliveryRepository = deliveryRepository;
@@ -127,6 +130,7 @@ public class OrderService {
     this.messageService = messageService;
     this.slackService = slackService;
     this.notificationService = notificationService;
+    this.goodsOptionService = goodsOptionService;
   }
 
   @Transactional
@@ -201,7 +205,6 @@ public class OrderService {
 
     deliveryRepository.save(delivery);
 
-
     Payment payment = new Payment(order);
     BeanUtils.copyProperties(request.getPayment(), payment);
     log.debug("payment: {}", payment);
@@ -218,6 +221,12 @@ public class OrderService {
         purchase.setVideoId(order.getVideoId());
         purchase.setOnLive(order.getOnLive());
         purchase.setTotalPrice((long) (p.getQuantity() * p.getGoodsPrice()));
+
+        String optionNames = goodsOptionService.getGoodsOptionNames(p.getGoodsNo(), p.getOptionId());
+        log.debug("optionNames: {}", optionNames);
+        if (!Strings.isNullOrEmpty(optionNames)) {
+          purchase.setOptionValue(optionNames);
+        }
         purchases.add(purchase);
         return Optional.empty();
       })
