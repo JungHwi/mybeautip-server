@@ -1,15 +1,19 @@
 package com.jocoos.mybeautip.goods;
 
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.notification.MessageService;
+import java.util.*;
+
+import org.springframework.stereotype.Service;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.notification.MessageService;
 
 @Slf4j
 @Service
@@ -21,6 +25,7 @@ public class GoodsOptionService {
   private final GoodsOptionRepository goodsOptionRepository;
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
+  private static final String OPTION_DELIMITER = " > ";
   
   public GoodsOptionService(MessageService messageService,
                             TimeSaleService timeSaleService,
@@ -30,6 +35,45 @@ public class GoodsOptionService {
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
     this.timeSaleService = timeSaleService;
+  }
+
+  public String getGoodsOptionNames(String goodsNo, Long option) {
+    log.debug("goodsNo: {}, option: {}", goodsNo, option);
+    if (Strings.isNullOrEmpty(goodsNo) || option == null) {
+      return "";
+    }
+    return getGoodsOptionNames(Integer.parseInt(goodsNo), option.intValue());
+  }
+
+  public String getGoodsOptionNames(int goodsNo, int option) {
+    return goodsOptionRepository.findByGoodsNoAndOptionNoAndOptionViewFl(goodsNo, option, "y").map(
+        o -> optionNames(o))
+        .orElseGet(() -> "");
+  }
+
+  private String optionNames(GoodsOption option) {
+    List<String> names = Lists.newArrayList();
+    if (!Strings.isNullOrEmpty(option.getOptionValue1())) {
+      names.add(option.getOptionValue1());
+    };
+
+    if (!Strings.isNullOrEmpty(option.getOptionValue2())) {
+      names.add(option.getOptionValue2());
+    }
+
+    if (!Strings.isNullOrEmpty(option.getOptionValue3())) {
+      names.add(option.getOptionValue3());
+    }
+
+    if (!Strings.isNullOrEmpty(option.getOptionValue4())) {
+      names.add(option.getOptionValue4());
+    }
+
+    if (!Strings.isNullOrEmpty(option.getOptionValue5())) {
+      names.add(option.getOptionValue5());
+    }
+
+    return String.join(OPTION_DELIMITER, names);
   }
 
   public GoodsOptionInfo getGoodsOptionData(int goodsNo, String lang, TimeSaleCondition timeSaleCondition) {
