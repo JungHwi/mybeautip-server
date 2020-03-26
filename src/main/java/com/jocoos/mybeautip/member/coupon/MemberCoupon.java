@@ -42,6 +42,9 @@ public class MemberCoupon extends CreatedDateAuditable {
   private Date expiryAt;
 
   @Column
+  private Date expiredAt;
+
+  @Column
   private Date usedAt;
 
   public MemberCoupon(Member member, Coupon coupon) {
