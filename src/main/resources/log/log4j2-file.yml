@@ -35,6 +35,10 @@ Configutation:
         - ref: ERROR_FILE
 
     Logger:
+      - name: org.springframework.data.rest.webmvc.RepositoryRestHandlerMapping
+        level: warn
+      - name: org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+        level: warn
       - name: com.jocoos.mybeautip.feed.FeedService
         level: debug
       - name: com.jocoos.mybeautip.devices.DeviceService

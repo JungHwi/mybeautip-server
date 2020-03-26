@@ -14,6 +14,10 @@ Configutation:
       AppenderRef:
         - ref: CONSOLE
     Logger:
+      - name: org.springframework.data.rest.webmvc.RepositoryRestHandlerMapping
+        level: warn
+      - name: org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+        level: warn
       - name: com.jocoos.mybeautip
         level: debug
       - name: jdbc
