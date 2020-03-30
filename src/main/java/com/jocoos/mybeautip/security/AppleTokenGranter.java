@@ -44,7 +44,7 @@ public class AppleTokenGranter extends AbstractTokenGranter {
     }
 
     if (appleId.length() > 30) {
-      throw new AuthenticationException("Apple kakao ID must be less or equals to 30");
+      throw new AuthenticationException("Apple ID must be less or equals to 48");
     }
 
     return appleMemberRepository.findById(appleId)

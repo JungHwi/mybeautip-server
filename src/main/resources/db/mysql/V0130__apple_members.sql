@@ -2,7 +2,7 @@
 -- apple members
 --
 CREATE TABLE `apple_members` (
-  `apple_id` VARCHAR(30) NOT NULL,
+  `apple_id` VARCHAR(48) NOT NULL,
   `email` VARCHAR(256) NOT NULL,
   `name` VARCHAR(256) DEFAULT NULL,
   `member_id` BIGINT NOT NULL,
