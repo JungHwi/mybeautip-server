@@ -6,10 +6,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.admin.AdminMemberRepository;
-import com.jocoos.mybeautip.member.FacebookMemberRepository;
-import com.jocoos.mybeautip.member.KakaoMemberRepository;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.NaverMemberRepository;
+import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.security.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +38,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
   static final String GRANT_TYPE_FACEBOOK = "facebook";
   static final String GRANT_TYPE_NAVER = "naver";
   static final String GRANT_TYPE_KAKAO = "kakao";
+  static final String GRANT_TYPE_APPLE = "apple";
   static final String GRANT_TYPE_CLIENT = "client";
   static final String GRANT_TYPE_ADMIN = "admin";
   static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
@@ -56,6 +54,9 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
   @Autowired
   private KakaoMemberRepository kakaoMemberRepository;
+
+  @Autowired
+  private AppleMemberRepository appleMemberRepository;
 
   @Autowired
   private AdminMemberRepository adminMemberRepository;
@@ -102,7 +103,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     clients.inMemory()
         .withClient("mybeautip-ios")
         .secret(passwordEncoder.encode("akdlqbxlqdkdldhdptm"))
-        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
+        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_APPLE, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
         .scopes(SCOPE_READ, SCOPE_WRITE)
         .accessTokenValiditySeconds(accessTokenValiditySeconds)
         .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
@@ -145,7 +146,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     return accessTokenConverter;
   }
 
-  private CompositeTokenGranter tokenGranter(AuthorizationServerEndpointsConfigurer endpoints) {
+    private CompositeTokenGranter tokenGranter(AuthorizationServerEndpointsConfigurer endpoints) {
 
     return new CompositeTokenGranter(
         Lists.newArrayList(
@@ -167,6 +168,12 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                 endpoints.getOAuth2RequestFactory(),
                 memberRepository,
                 kakaoMemberRepository),
+            new AppleTokenGranter(
+                endpoints.getTokenServices(),
+                endpoints.getClientDetailsService(),
+                endpoints.getOAuth2RequestFactory(),
+                memberRepository,
+                appleMemberRepository),
             new ClientTokenGranter(
                 endpoints.getTokenServices(),
                 endpoints.getClientDetailsService(),
