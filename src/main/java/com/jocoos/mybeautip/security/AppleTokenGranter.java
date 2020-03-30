@@ -43,7 +43,7 @@ public class AppleTokenGranter extends AbstractTokenGranter {
       throw new AuthenticationException("Apple ID is required");
     }
 
-    if (appleId.length() > 30) {
+    if (appleId.length() > 48) {
       throw new AuthenticationException("Apple ID must be less or equals to 48");
     }
 
