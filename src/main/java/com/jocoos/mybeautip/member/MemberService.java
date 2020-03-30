@@ -42,6 +42,7 @@ public class MemberService {
   private final FacebookMemberRepository facebookMemberRepository;
   private final KakaoMemberRepository kakaoMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
+  private final AppleMemberRepository appleMemberRepository;
   private final MemberLeaveLogRepository memberLeaveLogRepository;
   private final CouponService couponService;
   
@@ -64,7 +65,7 @@ public class MemberService {
                        FacebookMemberRepository facebookMemberRepository,
                        KakaoMemberRepository kakaoMemberRepository,
                        NaverMemberRepository naverMemberRepository,
-                       MemberLeaveLogRepository memberLeaveLogRepository,
+                       AppleMemberRepository appleMemberRepository, MemberLeaveLogRepository memberLeaveLogRepository,
                        CouponService couponService) {
     this.bannedWordService = bannedWordService;
     this.messageService = messageService;
@@ -75,6 +76,7 @@ public class MemberService {
     this.facebookMemberRepository = facebookMemberRepository;
     this.kakaoMemberRepository = kakaoMemberRepository;
     this.naverMemberRepository = naverMemberRepository;
+    this.appleMemberRepository = appleMemberRepository;
     this.memberLeaveLogRepository = memberLeaveLogRepository;
     this.couponService = couponService;
   }
@@ -289,7 +291,11 @@ public class MemberService {
       case 4:
         kakaoMemberRepository.findByMemberId(member.getId()).ifPresent(kakaoMemberRepository::delete);
         break;
-    
+
+      case 8:
+        appleMemberRepository.findByMemberId(member.getId()).ifPresent(appleMemberRepository::delete);
+        break;
+
       default:
         throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
     }

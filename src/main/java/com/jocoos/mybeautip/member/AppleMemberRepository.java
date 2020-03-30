@@ -1,6 +1,9 @@
 package com.jocoos.mybeautip.member;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
-public interface AppleMemberRepository extends JpaRepository<AppleMember, String> {
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+public interface AppleMemberRepository extends PagingAndSortingRepository<AppleMember, String> {
+  Optional<AppleMember> findByMemberId(Long memberId);
 }
