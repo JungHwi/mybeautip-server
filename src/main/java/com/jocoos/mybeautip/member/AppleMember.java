@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -33,8 +34,13 @@ public class AppleMember extends CreatedDateAuditable {
 
   public AppleMember(String appleId, String email, String name, Long memberId) {
     this.appleId = appleId;
-    this.email = email;
-    this.name = name;
     this.memberId = memberId;
+    if (!Strings.isNullOrEmpty(email)) {
+      this.email = email;
+    }
+
+    if (!Strings.isNullOrEmpty(name)) {
+      this.name = name;
+    }
   }
 }
