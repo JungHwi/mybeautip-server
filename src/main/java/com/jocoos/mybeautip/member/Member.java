@@ -32,8 +32,10 @@ public class Member {
   static final int LINK_FACEBOOK = 1;
   static final int LINK_NAVER = 2;
   static final int LINK_KAKAO = 4;
-  
-  static final int LINK_STORE = 8;
+  static final int LINK_APPLE = 8;
+
+  // Changed store link from 8 to 32
+  static final int LINK_STORE = 32;
   
   public static final int CHAT_POST = 1;
   public static final int COMMENT_POST = 2;
@@ -123,6 +125,9 @@ public class Member {
       }
       case "kakao": {
         return LINK_KAKAO;
+      }
+      case "apple": {
+        return LINK_APPLE;
       }
       default: {
         throw new IllegalArgumentException("Unknown grant type");
