@@ -74,15 +74,6 @@ public class AddressController {
   public ResponseEntity<AddressInfo> updateAddress(@PathVariable Long id,
                                                    @RequestBody UpdateAddressRequest request,
                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    log.debug("UpdateAddressRequest: {}", request);
-    if (request.getBase() != null && request.getBase()) {
-      addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
-        .ifPresent(prevBaseAddress -> {
-          prevBaseAddress.setBase(false);
-          addressRepository.save(prevBaseAddress);
-        });
-    }
-
     return new ResponseEntity<>(new AddressInfo(addressService.update(id, request, lang)), HttpStatus.OK);
   }
 

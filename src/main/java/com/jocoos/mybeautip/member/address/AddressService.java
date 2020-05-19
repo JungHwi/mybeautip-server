@@ -41,6 +41,8 @@ public class AddressService {
   
   @Transactional
   public Address create(AddressController.CreateAddressRequest request, Member member) {
+    log.debug("CreateAddressRequest: {}", request);
+
     if (request.getBase() != null && request.getBase()) {
       addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId())
           .ifPresent(prevBaseAddress -> {
@@ -50,8 +52,7 @@ public class AddressService {
     }
   
     Address address = new Address();
-    log.debug("CreateAddressRequest: {}", request);
-  
+
     BeanUtils.copyProperties(request, address);
     if (request.getBase() == null) {
       address.setBase(false);
@@ -67,15 +68,25 @@ public class AddressService {
   }
 
   @Transactional
-  public Address update(Long id, AddressController.UpdateAddressRequest update, String lang) {
+  public Address update(Long id, AddressController.UpdateAddressRequest request, String lang) {
+    log.info("UpdateAddressRequest: {}", request);
+
+    if (request.getBase() != null && request.getBase()) {
+      addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
+          .ifPresent(prevBaseAddress -> {
+            prevBaseAddress.setBase(false);
+            addressRepository.save(prevBaseAddress);
+          });
+    }
+
     return addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId())
         .map(address -> {
           boolean originalBase = address.getBase();
-          BeanUtils.copyProperties(update, address);
-          if (update.getBase() == null) {
+          BeanUtils.copyProperties(request, address);
+          if (request.getBase() == null) {
             address.setBase(originalBase);
           }
-          if (addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(id) == 0) {
+          if (addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId()) == 0) {
             address.setBase(true);
           }
           address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
