@@ -35,7 +35,7 @@ public class MybeautipUserDetailsService implements UserDetailsService {
             case 0: {
               return new MyBeautipUserDetails(m, "ROLE_ADMIN");
             }
-            case 8: {
+            case 32: {
               return new MyBeautipUserDetails(m, "ROLE_STORE");
             }
             default: {

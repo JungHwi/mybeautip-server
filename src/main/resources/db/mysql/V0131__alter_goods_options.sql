@@ -1,0 +1,11 @@
+ALTER TABLE `goods_options` MODIFY COLUMN `option_value1` VARCHAR(80) DEFAULT NULL;
+ALTER TABLE `goods_options` MODIFY COLUMN `option_value2` VARCHAR(80) DEFAULT NULL;
+ALTER TABLE `goods_options` MODIFY COLUMN `option_value3` VARCHAR(80) DEFAULT NULL;
+ALTER TABLE `goods_options` MODIFY COLUMN `option_value4` VARCHAR(80) DEFAULT NULL;
+ALTER TABLE `goods_options` MODIFY COLUMN `option_value5` VARCHAR(80) DEFAULT NULL;
+
+-- ALTER TABLE `goods_options` MODIFY COLUMN `option_value1` VARCHAR(40) DEFAULT NULL;
+-- ALTER TABLE `goods_options` MODIFY COLUMN `option_value2` VARCHAR(40) DEFAULT NULL;
+-- ALTER TABLE `goods_options` MODIFY COLUMN `option_value3` VARCHAR(40) DEFAULT NULL;
+-- ALTER TABLE `goods_options` MODIFY COLUMN `option_value4` VARCHAR(40) DEFAULT NULL;
+-- ALTER TABLE `goods_options` MODIFY COLUMN `option_value5` VARCHAR(40) DEFAULT NULL;

@@ -259,12 +259,12 @@ public class MemberPointService {
     memberPointDetailRepository.save(detail);
 
     Member member = memberPoint.getMember();
-    if (memberPoint.getPoint() > member.getPoint()) {
-      member.setPoint(0);
-    } else {
-      member.setPoint(member.getPoint() - remainingPoint);
+    int point = member.getPoint() - remainingPoint;
+    if (point < 0) {
+        log.warn("Member point is in invalid state: member id = {}, current = {}, expired = {}", member.getId(), member.getPoint(), remainingPoint);
+        point = 0;
     }
-
+    member.setPoint(point);
     memberRepository.save(member);
     return expiredPoint;
   }

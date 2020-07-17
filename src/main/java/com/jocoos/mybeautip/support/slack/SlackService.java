@@ -157,7 +157,7 @@ public class SlackService {
   public void sendForDeleteMember(MemberLeaveLog memberLeaveLog) {
     String message = String.format("*회원탈퇴*" +
             "```사용자: %s/%d\n" +
-            "Link:%d (1:facebook 2:naver 4:kakao)\n" +
+            "Link:%d (1:facebook 2:naver 4:kakao 8:apple)\n" +
             "탈퇴이유: %s```",
         memberLeaveLog.getMember().getUsername(),
         memberLeaveLog.getMember().getId(),

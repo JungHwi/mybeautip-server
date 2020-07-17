@@ -26,7 +26,6 @@ public class MemberGiftTask {
 
   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ");
 
-  private final MemberRepository memberRepository;
   private final MemberCouponRepository memberCouponRepository;
   private final MemberPointRepository memberPointRepository;
   private final NotificationService notificationService;
@@ -38,12 +37,10 @@ public class MemberGiftTask {
   @Value("${mybeautip.point.remind-expiring-point}")
   private int reminder;
 
-  public MemberGiftTask(MemberRepository memberRepository,
-                        MemberCouponRepository memberCouponRepository,
+  public MemberGiftTask(MemberCouponRepository memberCouponRepository,
                         MemberPointRepository memberPointRepository,
                         NotificationService notificationService,
                         MemberPointService memberPointService) {
-    this.memberRepository = memberRepository;
     this.memberCouponRepository = memberCouponRepository;
     this.memberPointRepository = memberPointRepository;
     this.notificationService = notificationService;
@@ -55,10 +52,16 @@ public class MemberGiftTask {
    */
   @Scheduled(cron = "0 0 0 * * *")
   public void removeMemberCouponIsExpired() {
-    List<MemberCoupon> expiredCoupons = memberCouponRepository.findByUsedAtIsNullAndExpiryAtBefore(new Date());
+    Date now = new Date();
+    List<MemberCoupon> expiredCoupons = memberCouponRepository.findByUsedAtIsNullAndExpiredAtIsNullAndExpiryAtBefore(new Date());
     if (!CollectionUtils.isEmpty(expiredCoupons)) {
-      log.debug("expired member coupons found: {}", expiredCoupons);
-      memberCouponRepository.deleteAll(expiredCoupons);
+      log.info("expired member coupons found: {}", expiredCoupons);
+
+      expiredCoupons.stream().forEach(c -> {
+        c.setExpiredAt(now);
+      });
+
+      memberCouponRepository.saveAll(expiredCoupons);
     }
   }
 
