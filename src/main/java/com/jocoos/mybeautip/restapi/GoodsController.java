@@ -137,7 +137,7 @@ public class GoodsController {
       if (cursor == null) {
         cursor = 0L;
       }
-      slice = goodsRepository.findAllByKeyword(keyword, of(cursor.intValue(), count));
+      slice = goodsService.findAllByKeyword(keyword, cursor, count);
     } else {
       slice = goodsService.getGoodsList(count, cursor, sort, category);
     }
