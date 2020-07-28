@@ -15,78 +15,80 @@ import org.springframework.data.repository.query.Param;
 
 public interface GoodsRepository extends JpaRepository<Goods, String> {
 
-  @Query("select g from Goods g where g.state <=2 and g.createdAt < :cursor order by g.createdAt desc")
-  Slice<Goods> getGoodsList(@Param("cursor")Date cursor, Pageable pageable);
+  @Query("select g from Goods g where g.state <= :state and g.createdAt < :cursor order by g.createdAt desc")
+  Slice<Goods> getGoodsList(@Param("cursor")Date cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.state <=2 and g.likeCount < :cursor order by g.likeCount desc")
-  Slice<Goods> getGoodsListOrderByLikeCountDesc(@Param("cursor")Integer cursor, Pageable pageable);
+  @Query("select g from Goods g where g.state <= :state and g.likeCount < :cursor order by g.likeCount desc")
+  Slice<Goods> getGoodsListOrderByLikeCountDesc(@Param("cursor")Integer cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.state <=2 and g.orderCnt < :cursor order by g.orderCnt desc")
-  Slice<Goods> getGoodsListOrderByOrderCountDesc(@Param("cursor")Integer cursor, Pageable pageable);
+  @Query("select g from Goods g where g.state <= :state and g.orderCnt < :cursor order by g.orderCnt desc")
+  Slice<Goods> getGoodsListOrderByOrderCountDesc(@Param("cursor")Integer cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.state <=2 and g.hitCnt < :cursor order by g.hitCnt desc")
-  Slice<Goods> getGoodsListOrderByHitCntDesc(@Param("cursor")Integer cursor, Pageable pageable);
+  @Query("select g from Goods g where g.state <= :state and g.hitCnt < :cursor order by g.hitCnt desc")
+  Slice<Goods> getGoodsListOrderByHitCntDesc(@Param("cursor")Integer cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.state <=2 and g.reviewCnt < :cursor order by g.reviewCnt desc")
-  Slice<Goods> getGoodsListOrderByReviewCntDesc(@Param("cursor")Integer cursor, Pageable pageable);
+  @Query("select g from Goods g where g.state <= :state and g.reviewCnt < :cursor order by g.reviewCnt desc")
+  Slice<Goods> getGoodsListOrderByReviewCntDesc(@Param("cursor")Integer cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.state <=2 and g.goodsPrice < :cursor order by g.goodsPrice desc")
-  Slice<Goods> getGoodsListOrderByGoodsPriceDesc(@Param("cursor")Integer cursor, Pageable pageable);
+  @Query("select g from Goods g where g.state <= :state and g.goodsPrice < :cursor order by g.goodsPrice desc")
+  Slice<Goods> getGoodsListOrderByGoodsPriceDesc(@Param("cursor")Integer cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.state <=2 and g.goodsPrice > :cursor order by g.goodsPrice asc")
-  Slice<Goods> getGoodsListOrderByGoodsPriceAsc(@Param("cursor")Integer cursor, Pageable pageable);
+  @Query("select g from Goods g where g.state <= :state and g.goodsPrice > :cursor order by g.goodsPrice asc")
+  Slice<Goods> getGoodsListOrderByGoodsPriceAsc(@Param("cursor")Integer cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.state <=2 and g.createdAt < :cursor order by g.createdAt desc")
-  Slice<Goods> getGoodsListOrderByCreatedAtDesc(@Param("cursor")Date cursor, Pageable pageable);
+  @Query("select g from Goods g where g.state <= :state and g.createdAt < :cursor order by g.createdAt desc")
+  Slice<Goods> getGoodsListOrderByCreatedAtDesc(@Param("cursor")Date cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <=2 " +
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <= :state " +
       "and g.likeCount < :cursor order by g.likeCount desc")
   Slice<Goods> getGoodsListCategoryAndOrderByLikeCountDesc(
-      @Param("category")String category, @Param("cursor")Integer cursor, Pageable pageable);
+      @Param("category")String category, @Param("cursor")Integer cursor, @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <=2 " +
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <= :state " +
       "and g.orderCnt < :cursor order by g.orderCnt desc")
   Slice<Goods> getGoodsListCategoryAndOrderByOrderCountDesc(
-      @Param("category")String category, @Param("cursor")Integer cursor, Pageable pageable);
+      @Param("category")String category, @Param("cursor")Integer cursor,  @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <=2 " +
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <= :state " +
       "and g.hitCnt < :cursor order by g.hitCnt desc")
   Slice<Goods> getGoodsListCategoryAndOrderByHitCntDesc(
-      @Param("category")String category, @Param("cursor")Integer cursor, Pageable pageable);
+      @Param("category")String category, @Param("cursor")Integer cursor,  @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <=2 " +
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <= :state " +
       "and g.reviewCnt < :cursor order by g.reviewCnt desc")
   Slice<Goods> getGoodsListCategoryAndOrderByReviewCntDesc(
-      @Param("category")String category, @Param("cursor")Integer cursor, Pageable pageable);
+      @Param("category")String category, @Param("cursor")Integer cursor,  @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <=2 " +
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <= :state " +
       "and g.goodsPrice < :cursor order by g.goodsPrice desc")
   Slice<Goods> getGoodsListCategoryAndOrderByGoodsPriceDesc(
-      @Param("category")String category, @Param("cursor")Integer cursor, Pageable pageable);
+      @Param("category")String category, @Param("cursor")Integer cursor,  @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <=2 " +
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <= :state " +
       "and g.goodsPrice > :cursor order by g.goodsPrice asc")
   Slice<Goods> getGoodsListCategoryAndOrderByGoodsPriceAsc(
-      @Param("category")String category, @Param("cursor")Integer cursor, Pageable pageable);
+      @Param("category")String category, @Param("cursor")Integer cursor,  @Param("state")Integer maxValidState, Pageable pageable);
   
-  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <=2 " +
+  @Query("select g from Goods g where g.allCd like concat('%',:category,'%') and g.state <= :state " +
       "and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> getGoodsListCategoryAndOrderByCreatedAtDesc(
-      @Param("category")String category, @Param("cursor")Date cursor, Pageable pageable);
+      @Param("category")String category, @Param("cursor")Date cursor,  @Param("state")Integer maxValidState, Pageable pageable);
 
   @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +
-      "and g.state <=2 and g.createdAt < :cursor order by g.createdAt desc")
+      "and g.state <= :state and g.createdAt < :cursor order by g.createdAt desc")
   Slice<Goods> findAllByCategory(@Param("category")String category,
                                  @Param("cursor")Date cursor,
+                                 @Param("state")Integer maxValidState,
                                  Pageable of);
 
   @Query("select g from Goods g where " +
     "(g.goodsNm like concat('%',:keyword,'%') " +
     "or g.goodsDescription like concat('%',:keyword,'%') " +
     "or g.goodsSearchWord like concat('%',:keyword,'%')) " +
-    "and g.state <=2 " +
+    "and g.state <= :state " +
     "order by g.orderCnt desc")
   Slice<Goods> findAllByKeyword(@Param("keyword")String keyword,
+                                @Param("state")Integer maxValidState,
                                 Pageable of);
 
   @Query("select g from Goods g where g.allCd like concat('%',:category,'%') " +

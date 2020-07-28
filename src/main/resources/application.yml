@@ -126,6 +126,8 @@ mybeautip:
       platform: 0 # 0:All, 1:iOs, 2:Android
   coupon:
     welcome-usage-days: 7
+  goods:
+    max-valid-state: 0
 
 
 cloud:

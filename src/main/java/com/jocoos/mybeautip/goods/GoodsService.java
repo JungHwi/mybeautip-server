@@ -44,6 +44,8 @@ public class GoodsService {
   @Value("${mybeautip.store.image-path.as-suffix}")
   private String storeImageAsSuffix;
 
+    @Value("${mybeautip.goods.max-valid-state}")
+  private Integer maxValidState;
 
   public List<Goods> getRelatedGoods(String goodsNo) {
     Optional<Goods> optional = goodsRepository.findByGoodsNo(goodsNo);
@@ -82,7 +84,7 @@ public class GoodsService {
     Slice<Goods> slice;
     switch (filter) {
       case CATEGORY:
-        slice = goodsRepository.findAllByCategory(generateSearchableCategory(category), dateCursor, of(0, count));
+        slice = goodsRepository.findAllByCategory(generateSearchableCategory(category), dateCursor, maxValidState, of(0, count));
         break;
         
       case SORT:
@@ -95,7 +97,7 @@ public class GoodsService {
         
       case ALL:
       default:
-        slice = goodsRepository.getGoodsList(dateCursor, of(0, count));
+        slice = goodsRepository.getGoodsList(dateCursor, maxValidState, of(0, count));
         break;
     }
     return slice;
@@ -108,27 +110,27 @@ public class GoodsService {
     Slice<Goods> slice;
     switch (sort) {
       case "like":
-        slice = goodsRepository.getGoodsListOrderByLikeCountDesc(descCursor, of(0, count));
+        slice = goodsRepository.getGoodsListOrderByLikeCountDesc(descCursor, maxValidState, of(0, count));
         break;
       case "order":
-        slice = goodsRepository.getGoodsListOrderByOrderCountDesc(descCursor, of(0, count));
+        slice = goodsRepository.getGoodsListOrderByOrderCountDesc(descCursor, maxValidState, of(0, count));
         break;
       case "hit":
-        slice = goodsRepository.getGoodsListOrderByHitCntDesc(descCursor, of(0, count));
+        slice = goodsRepository.getGoodsListOrderByHitCntDesc(descCursor, maxValidState, of(0, count));
         break;
       case "review":
-        slice = goodsRepository.getGoodsListOrderByReviewCntDesc(descCursor, of(0, count));
+        slice = goodsRepository.getGoodsListOrderByReviewCntDesc(descCursor, maxValidState, of(0, count));
         break;
       case "high-price":
-        slice = goodsRepository.getGoodsListOrderByGoodsPriceDesc(descCursor, of(0, count));
+        slice = goodsRepository.getGoodsListOrderByGoodsPriceDesc(descCursor, maxValidState, of(0, count));
         break;
       case "low-price":
-        slice = goodsRepository.getGoodsListOrderByGoodsPriceAsc(ascCursor, of(0, count));
+        slice = goodsRepository.getGoodsListOrderByGoodsPriceAsc(ascCursor, maxValidState, of(0, count));
         break;
       case "latest":
       default:
         Date dateCursor = (cursor == null) ? new Date() : new Date(cursor);
-        slice = goodsRepository.getGoodsListOrderByCreatedAtDesc(dateCursor, of(0, count));
+        slice = goodsRepository.getGoodsListOrderByCreatedAtDesc(dateCursor, maxValidState, of(0, count));
         break;
     }
     return slice;
@@ -142,36 +144,40 @@ public class GoodsService {
     switch (sort) {
       case "like":
         slice = goodsRepository.getGoodsListCategoryAndOrderByLikeCountDesc(
-            generateSearchableCategory(category), descCursor, of(0, count));
+            generateSearchableCategory(category), descCursor, maxValidState, of(0, count));
         break;
       case "order":
         slice = goodsRepository.getGoodsListCategoryAndOrderByOrderCountDesc(
-            generateSearchableCategory(category), descCursor, of(0, count));
+            generateSearchableCategory(category), descCursor, maxValidState, of(0, count));
         break;
       case "hit":
         slice = goodsRepository.getGoodsListCategoryAndOrderByHitCntDesc(
-            generateSearchableCategory(category), descCursor, of(0, count));
+            generateSearchableCategory(category), descCursor, maxValidState, of(0, count));
         break;
       case "review":
         slice = goodsRepository.getGoodsListCategoryAndOrderByReviewCntDesc(
-            generateSearchableCategory(category), descCursor, of(0, count));
+            generateSearchableCategory(category), descCursor, maxValidState, of(0, count));
         break;
       case "high-price":
         slice = goodsRepository.getGoodsListCategoryAndOrderByGoodsPriceDesc(
-            generateSearchableCategory(category), descCursor, of(0, count));
+            generateSearchableCategory(category), descCursor, maxValidState, of(0, count));
         break;
       case "low-price":
         slice = goodsRepository.getGoodsListCategoryAndOrderByGoodsPriceAsc(
-            generateSearchableCategory(category), ascCursor, of(0, count));
+            generateSearchableCategory(category), ascCursor, maxValidState, of(0, count));
         break;
       case "latest":
       default:
         Date dateCursor = (cursor == null) ? new Date() : new Date(cursor);
         slice = goodsRepository.getGoodsListCategoryAndOrderByCreatedAtDesc(
-            generateSearchableCategory(category), dateCursor, of(0, count));
+            generateSearchableCategory(category), dateCursor, maxValidState, of(0, count));
         break;
     }
     return slice;
+  }
+
+  public Slice<Goods>  findAllByKeyword(String keyword, Long cursor, int count) {
+      return goodsRepository.findAllByKeyword(keyword, maxValidState, of(cursor.intValue(), count));
   }
 
   private FILTER getRequestFilter(String category, String sort) {
