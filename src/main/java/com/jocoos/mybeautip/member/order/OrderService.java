@@ -154,14 +154,8 @@ public class OrderService {
       if (member.getPoint() < request.getPoint()) {
         throw new BadRequestException("point_not_enough", messageService.getMessage(POINT_NOT_ENOUGH, lang));
       }
-      
-      int price = request.getPriceAmount() + request.getShippingAmount() - request.getDeductionAmount();
-      if (price < MIN_PRICE_TO_USE_POINT) {
-        throw new BadRequestException("point_bad_request",
-            messageService.getMessage(POINT_BAD_REQUEST_MIN_PRICE_CONDITION, lang));
-      }
     }
-    
+
     // Modify member phoneNumber with Order buyerPhoneNumber
     if (!member.getPhoneNumber().equals(request.getBuyerPhoneNumber())) {
       member.setPhoneNumber(request.getBuyerPhoneNumber());
@@ -240,6 +234,19 @@ public class OrderService {
 
     return order;
   }
+
+  @Transactional
+  public void completeZeroOrder(Order order) {
+    paymentRepository.findById(order.getId())
+        .map(payment -> {
+          payment.setMessage("0");
+          payment.setState(Payment.STATE_READY | Payment.STATE_PAID);
+          return paymentRepository.save(payment);
+        })
+        .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid order id or payment id"));
+    completeOrder(order);
+    slackService.sendForOrder(order);
+  }
   
   @Transactional
   public OrderInquiry inquiryExchangeOrReturn(Order order, Byte state, String reason, Purchase purchase) {
@@ -303,8 +310,10 @@ public class OrderService {
 
     Payment payment = paymentRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
 
-    String token = iamportService.getToken();
-    iamportService.cancelPayment(token, payment.getPaymentId());
+    if (order.getPrice() > 0 ) {
+      String token = iamportService.getToken();
+      iamportService.cancelPayment(token, payment.getPaymentId());
+    }
 
     log.debug("cancel order: {}", order);
     saveOrderAndPurchasesStatus(order, Order.Status.ORDER_CANCELLED);
