@@ -731,6 +731,8 @@ public class VideoController {
     private String thumbnailUrl;
     private String chatRoomId;
     private Integer duration;
+    private String liveKey = "";
+    private String outputType = "";
     private String data;
     private Integer watchCount;
     private Integer totalWatchCount;

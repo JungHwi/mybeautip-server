@@ -121,6 +121,8 @@ public class CallbackController {
     Boolean muted = false;
     Boolean locked = false;
     Integer duration = 0;
+    String liveKey;
+    String outputType;
     String title ="";
     String content = "";
     String url ="";
@@ -152,6 +154,8 @@ public class CallbackController {
     String thumbnailUrl;
     String chatRoomId;
     Integer duration;
+    String liveKey;
+    String outputType;
     String data;
     String data2;
     Integer watchCount;
