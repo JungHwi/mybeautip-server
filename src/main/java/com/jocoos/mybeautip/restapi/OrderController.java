@@ -3,9 +3,7 @@ package com.jocoos.mybeautip.restapi;
 import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.order.*;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
@@ -41,6 +39,7 @@ public class OrderController {
   private final PaymentRepository paymentRepository;
   private final DeliveryRepository deliveryRepository;
   private final OrderInquiryRepository orderInquiryRepository;
+  private final MemberBillingService memberBillingService;
 
   private static final String ORDER_NOT_FOUND = "order.not_found";
   private static final String ORDER_INQUIRY_NOT_FOUND = "order.inquiry_not_found";
@@ -51,7 +50,8 @@ public class OrderController {
                          OrderRepository orderRepository,
                          PaymentRepository paymentRepository,
                          DeliveryRepository deliveryRepository,
-                         OrderInquiryRepository orderInquiryRepository) {
+                         OrderInquiryRepository orderInquiryRepository,
+                         MemberBillingService memberBillingService) {
     this.memberService = memberService;
     this.orderService = orderService;
     this.messageService = messageService;
@@ -59,6 +59,7 @@ public class OrderController {
     this.paymentRepository = paymentRepository;
     this.deliveryRepository = deliveryRepository;
     this.orderInquiryRepository = orderInquiryRepository;
+    this.memberBillingService = memberBillingService;
   }
 
   @PostMapping("/orders")
@@ -77,6 +78,32 @@ public class OrderController {
       orderService.completeZeroOrder(order);
     }
 
+    return new ResponseEntity<>(new OrderInfo(order), HttpStatus.OK);
+  }
+
+  @PostMapping("/orders2")
+  public ResponseEntity<OrderInfo> createOrder2(@Valid @RequestBody CreateOrderRequest request,
+                                                       BindingResult bindingResult,
+                                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+
+    if (bindingResult.hasErrors()) {
+      throw new BadRequestException(bindingResult.getFieldError());
+    }
+
+    Member member = memberService.currentMember();
+    Order order = orderService.create(request, member, lang);
+
+    if (order.getPrice() <= 0) {
+      // do not need to pay money
+      orderService.completeZeroOrder(order);
+    } else {
+      // check if billing info exists or not
+      MemberBilling memberBilling = memberBillingService.getBaseBillingInfo(member.getId());
+      String customerId = memberBillingService.getCustomerId(memberBilling);
+      orderService.create2(order, customerId, member, lang);
+    }
+
+    log.debug("order: {}", order);
     return new ResponseEntity<>(new OrderInfo(order), HttpStatus.OK);
   }
 
