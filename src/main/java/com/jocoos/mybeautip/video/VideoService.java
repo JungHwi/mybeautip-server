@@ -572,7 +572,15 @@ public class VideoService {
         target.setState(source.getState());
       }
     }
-    
+
+    if (!Strings.isNullOrEmpty(source.getLiveKey())) {
+      target.setLiveKey(source.getLiveKey());
+    }
+
+    if (!Strings.isNullOrEmpty(source.getOutputType())) {
+      target.setOutputType(source.getOutputType());
+    }
+
     if (source.getVisibility() != null) {
       String prevState = target.getVisibility();
       String newState = source.getVisibility();

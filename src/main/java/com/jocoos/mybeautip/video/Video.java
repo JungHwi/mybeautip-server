@@ -69,6 +69,12 @@ public class Video {
   private int duration;
 
   @Column
+  private String liveKey;
+
+  @Column
+  private String outputType;
+
+  @Column
   private String data;
 
   @Column(nullable = false)
