@@ -73,6 +73,9 @@ public class OrderController {
     Member member = memberService.currentMember();
     Order order = orderService.create(request, member, lang);
     log.debug("order: {}", order);
+    if (order.getPrice() <= 0) {
+      orderService.completeZeroOrder(order);
+    }
 
     return new ResponseEntity<>(new OrderInfo(order), HttpStatus.OK);
   }
