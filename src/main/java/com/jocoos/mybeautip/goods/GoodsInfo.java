@@ -59,6 +59,7 @@ public class GoodsInfo {
   private Integer orderCnt;
   private Integer hitCnt;
   private Integer reviewCnt;
+  private String extraFeeInfo;
 
   @JsonIgnore
   private Date createdAt;
@@ -66,7 +67,7 @@ public class GoodsInfo {
   private Date modifiedAt;
 
   public GoodsInfo(Goods goods, Long likeId, Integer relatedVideoTotalCount,
-                   String deliveryInfo, String refundInfo, String companyInfo) {
+                   String deliveryInfo, String refundInfo, String companyInfo, String extraFeeInfo) {
     BeanUtils.copyProperties(goods, this);
     this.likeId = likeId;
     this.relatedVideoTotalCount = relatedVideoTotalCount;
@@ -90,6 +91,7 @@ public class GoodsInfo {
     this.refundInfo = StringUtils.isBlank(refundInfo) ? "" : refundInfo;
     this.asInfo = "";
     this.companyInfo = StringUtils.isBlank(companyInfo) ? "" : companyInfo;
+    this.extraFeeInfo = extraFeeInfo;
   }
   
   @Data

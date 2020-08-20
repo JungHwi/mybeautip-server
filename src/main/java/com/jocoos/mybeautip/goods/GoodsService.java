@@ -33,6 +33,7 @@ public class GoodsService {
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreRepository storeRepository;
+  private final GoodsExtraInfoRepository goodsExtraInfoRepository;
   private static final String BEST_CATEGORY = "001";
 
   @Value("${mybeautip.store.image-path.prefix}")
@@ -65,7 +66,8 @@ public class GoodsService {
                       GoodsRepository goodsRepository,
                       VideoGoodsRepository videoGoodsRepository,
                       GoodsLikeRepository goodsLikeRepository,
-                      StoreRepository storeRepository) {
+                      StoreRepository storeRepository,
+                      GoodsExtraInfoRepository goodsExtraInfoRepository) {
     this.memberService = memberService;
     this.messageService = messageService;
     this.timeSaleService = timeSaleService;
@@ -73,6 +75,7 @@ public class GoodsService {
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeRepository = storeRepository;
+    this.goodsExtraInfoRepository = goodsExtraInfoRepository;
   }
   
   public Slice<Goods> getGoodsList(int count, Long cursor, String sort, String category) {
@@ -251,7 +254,13 @@ public class GoodsService {
       refundInfo = optional.get().getCancelInfo();
     }
 
-    return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, companyInfo);
+    String extraFeeInfo = null;
+    Optional<GoodsExtraInfo> extraInfo = goodsExtraInfoRepository.findByGoodsNo(goods.getGoodsNo());
+    if (extraInfo.isPresent()) {
+      extraFeeInfo = extraInfo.get().getExtraFeeInfo();
+    }
+
+    return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, companyInfo, extraFeeInfo);
   }
 
   private String generateSearchableCategory(String category) {
