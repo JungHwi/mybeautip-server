@@ -51,6 +51,7 @@ public class CartService {
   private final TimeSaleService timeSaleService;
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
+  private final GoodsExtraInfoRepository goodsExtraInfoRepository;
   private final CartRepository cartRepository;
   private final StoreRepository storeRepository;
   private final DeliveryChargeRepository deliveryChargeRepository;
@@ -60,6 +61,7 @@ public class CartService {
                      TimeSaleService timeSaleService,
                      GoodsRepository goodsRepository,
                      GoodsOptionRepository goodsOptionRepository,
+                     GoodsExtraInfoRepository goodsExtraInfoRepository,
                      CartRepository cartRepository,
                      StoreRepository storeRepository,
                      DeliveryChargeRepository deliveryChargeRepository,
@@ -68,6 +70,7 @@ public class CartService {
     this.timeSaleService = timeSaleService;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
+    this.goodsExtraInfoRepository = goodsExtraInfoRepository;
     this.cartRepository = cartRepository;
     this.storeRepository = storeRepository;
     this.deliveryChargeRepository = deliveryChargeRepository;
@@ -202,6 +205,34 @@ public class CartService {
       .shippingAmount(totalShipping)
       .pointRatio(pointRatio)
       .build();
+  }
+
+  public int updateShippingAmount(CartInfo cartInfo, int areaShipping) {
+    // TODO: change login if table has too much data
+    List<GoodsExtraInfo> goodsExtraInfos = goodsExtraInfoRepository.findAll();
+
+    int shippingAmount = cartInfo.shippingAmount;
+    int extraFeeCount = 0;
+    for (CartStore store : cartInfo.getStores()) {
+      for (CartDelivery delivery : store.getDeliveries()) {
+        for (CartItem item : delivery.getItems()) {
+          if (!foundGoodsExtraInfo(item.goods.goodsNo, goodsExtraInfos)) {
+            extraFeeCount = extraFeeCount + 1;
+            break;
+          }
+        }
+      }
+    }
+    return shippingAmount + (extraFeeCount * areaShipping);
+  }
+
+  private boolean foundGoodsExtraInfo(String goodsNo, List<GoodsExtraInfo> goodsExtraInfos) {
+    for (GoodsExtraInfo extraInfo : goodsExtraInfos) {
+      if (extraInfo.getGoodsNo().equals(goodsNo)) {
+        return true;
+      }
+    }
+    return false;
   }
   
   @Transactional
