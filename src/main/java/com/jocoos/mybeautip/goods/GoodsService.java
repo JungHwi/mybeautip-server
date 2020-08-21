@@ -33,7 +33,7 @@ public class GoodsService {
   private final VideoGoodsRepository videoGoodsRepository;
   private final GoodsLikeRepository goodsLikeRepository;
   private final StoreRepository storeRepository;
-  private final GoodsExtraInfoRepository goodsExtraInfoRepository;
+  private final DeliveryChargeOptionRepository deliveryChargeOptionRepository;
   private static final String BEST_CATEGORY = "001";
 
   @Value("${mybeautip.store.image-path.prefix}")
@@ -67,7 +67,7 @@ public class GoodsService {
                       VideoGoodsRepository videoGoodsRepository,
                       GoodsLikeRepository goodsLikeRepository,
                       StoreRepository storeRepository,
-                      GoodsExtraInfoRepository goodsExtraInfoRepository) {
+                      DeliveryChargeOptionRepository deliveryChargeOptionRepository) {
     this.memberService = memberService;
     this.messageService = messageService;
     this.timeSaleService = timeSaleService;
@@ -75,7 +75,7 @@ public class GoodsService {
     this.videoGoodsRepository = videoGoodsRepository;
     this.goodsLikeRepository = goodsLikeRepository;
     this.storeRepository = storeRepository;
-    this.goodsExtraInfoRepository = goodsExtraInfoRepository;
+    this.deliveryChargeOptionRepository = deliveryChargeOptionRepository;
   }
   
   public Slice<Goods> getGoodsList(int count, Long cursor, String sort, String category) {
@@ -254,13 +254,13 @@ public class GoodsService {
       refundInfo = optional.get().getCancelInfo();
     }
 
-    String extraFeeInfo = null;
-    Optional<GoodsExtraInfo> extraInfo = goodsExtraInfoRepository.findByGoodsNo(goods.getGoodsNo());
-    if (extraInfo.isPresent()) {
-      extraFeeInfo = extraInfo.get().getExtraFeeInfo();
+    String extraInfo = null;
+    Optional<DeliveryChargeOption> deliveryChargeOption = deliveryChargeOptionRepository.findByDeliveryChargeId(goods.getDeliverySno());
+    if (deliveryChargeOption.isPresent()) {
+      extraInfo = deliveryChargeOption.get().getExtraInfo();
     }
 
-    return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, companyInfo, extraFeeInfo);
+    return new GoodsInfo(goods, likeId, relatedVideoTotalCount, deliveryInfo, refundInfo, companyInfo, extraInfo);
   }
 
   private String generateSearchableCategory(String category) {
