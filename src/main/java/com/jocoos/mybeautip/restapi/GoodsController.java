@@ -293,7 +293,8 @@ public class GoodsController {
 
   @PostMapping("/{goodsNo:.+}/likes")
   public ResponseEntity<GoodsLikeInfo> addGoodsLike(@PathVariable String goodsNo,
-                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
+                                                    @RequestParam(name = "broker", required = false) Long broker) {
     Long memberId = memberService.currentMemberId();
     return goodsRepository.findByGoodsNo(goodsNo)
         .map(goods -> {
@@ -301,7 +302,7 @@ public class GoodsController {
             throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
           }
           GoodsLike goodsLike = goodsService.addLike(goods);
-          GoodsLikeInfo info = new GoodsLikeInfo(goodsLike, goodsService.generateGoodsInfo(goods));
+          GoodsLikeInfo info = new GoodsLikeInfo(goodsLike, goodsService.generateGoodsInfo(goods, TimeSaleCondition.createWithBroker(broker)));
           return new ResponseEntity<>(info, HttpStatus.OK);
         })
         .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
