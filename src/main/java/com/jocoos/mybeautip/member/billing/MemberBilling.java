@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.member;
+package com.jocoos.mybeautip.member.billing;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;

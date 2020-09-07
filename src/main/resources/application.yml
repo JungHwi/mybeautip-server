@@ -128,7 +128,15 @@ mybeautip:
     welcome-usage-days: 7
   goods:
     max-valid-state: 0
-
+  smtp:
+    host: "smtp.gmail.com"
+    port: "587"
+    user: "dev@jocoos.com"
+    pass: "xjfqhrTnd2!"
+    mail: "mybeautip@mybeautip.tv"
+  billing:
+    time-between-reset: 60000 # 1 minute (milliseconds)
+    max-error-count: 18
 
 cloud:
   aws:

@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.*;
+import com.jocoos.mybeautip.member.billing.MemberBilling;
+import com.jocoos.mybeautip.member.billing.MemberBillingService;
 import com.jocoos.mybeautip.member.order.*;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
@@ -98,7 +100,7 @@ public class OrderController {
       orderService.completeZeroOrder(order);
     } else {
       // check if billing info exists or not
-      MemberBilling memberBilling = memberBillingService.getBaseBillingInfo(member.getId());
+      MemberBilling memberBilling = memberBillingService.getBaseBillingInfo(member.getId(), lang);
       String customerId = memberBillingService.getCustomerId(memberBilling);
       orderService.create2(order, customerId, member, lang);
     }

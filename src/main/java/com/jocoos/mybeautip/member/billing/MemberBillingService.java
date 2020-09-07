@@ -1,10 +1,10 @@
-package com.jocoos.mybeautip.member;
+package com.jocoos.mybeautip.member.billing;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentBillingInfoData;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.crypto.keygen.KeyGenerators;
@@ -18,26 +18,30 @@ import java.util.Optional;
 @Service
 public class MemberBillingService {
   private final IamportService iamportService;
+  private final MessageService messageService;
   private final MemberBillingRepository memberBillingRepository;
 
   public final static String MERCHANT_BILLING_PREFIX = "mybeautip_billing_";
   private final String billingKey = "mybeautip-akdlqbxlq-Qkd9Ehd9";
 
   public MemberBillingService(IamportService iamportService,
+                              MessageService messageService,
                               MemberBillingRepository memberBillingRepository) {
     this.iamportService = iamportService;
+    this.messageService = messageService;
     this.memberBillingRepository = memberBillingRepository;
   }
 
   @Transactional
-  public MemberBilling getBaseBillingInfo(Long memberId) {
+  public MemberBilling getBaseBillingInfo(Long memberId, String lang) {
     // try to find base billing info
     Optional<MemberBilling> baseInfo = memberBillingRepository.findTopByMemberIdAndValidIsTrueAndBaseIsTrue(memberId);
     if (!baseInfo.isPresent()) {
       List<MemberBilling> validInfos = memberBillingRepository.findByMemberIdAndValid(memberId, true);
       if (validInfos.isEmpty()) {
         // no valid billing infos
-        throw new BadRequestException("billing_not_found", "no billing info registered");
+        String message = messageService.getMessage("billing.not_found", lang);
+        throw new BadRequestException("billing_not_found", message);
       } else {
         // there are valid billing infos which is not base
         MemberBilling validInfo = validInfos.get(0);
@@ -71,9 +75,12 @@ public class MemberBillingService {
   }
 
   @Transactional
-  public MemberBilling completeBillingInfo(Long memberId, Long billingId) {
+  public MemberBilling completeBillingInfo(Long memberId, Long billingId, String lang) {
     MemberBilling memberBilling = memberBillingRepository.findByIdAndMemberIdAndValid(billingId, memberId, false)
-        .orElseThrow(() -> new BadRequestException("billing_not_found", "invalid billing id"));
+        .orElseThrow(() -> {
+          String message = messageService.getMessage("billing.not_found", lang);
+          return new BadRequestException("billing_not_found", message);
+        });
 
     // fetch card info from iamport
     String customerId = getCustomerId(memberBilling);
@@ -95,11 +102,14 @@ public class MemberBillingService {
   }
 
   @Transactional
-  public MemberBilling updateBillingToBase(Long memberId, Long billingId) {
+  public MemberBilling updateBillingToBase(Long memberId, Long billingId, String lang) {
     resetBaseBilling(memberId);
 
     MemberBilling memberBilling = memberBillingRepository.findByIdAndMemberIdAndValid(billingId, memberId, true)
-        .orElseThrow(() -> new BadRequestException("billing_not_found", "invalid billing id"));
+        .orElseThrow(() -> {
+          String message = messageService.getMessage("billing.not_found", lang);
+          return new BadRequestException("billing_not_found", message);
+        });
     memberBilling.setBase(true);
     return memberBillingRepository.save(memberBilling);
   }
@@ -113,10 +123,13 @@ public class MemberBillingService {
     memberBillingRepository.saveAll(memberBillings);
   }
 
-  public void deleteBillingInfo(Long memberId, Long billingId) {
+  public void deleteBillingInfo(Long memberId, Long billingId, String lang) {
     // try to find billing info to delete
     MemberBilling memberBilling = memberBillingRepository.findByIdAndMemberIdAndValid(billingId, memberId, true)
-        .orElseThrow(() -> new BadRequestException("billing_not_found", "invalid billing id"));
+        .orElseThrow(() -> {
+          String message = messageService.getMessage("billing.not_found", lang);
+          return new BadRequestException("billing_not_found", message);
+        });
 
     String customerId = decrypt(memberBilling.getCustomerId(), memberBilling.getSalt());
 
@@ -146,7 +159,7 @@ public class MemberBillingService {
     return decryptor.decrypt(customerId);
   }
 
-  private static class EncryptedInfo {
+  public static class EncryptedInfo {
     String encrypted;
     String salt;
 

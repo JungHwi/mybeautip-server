@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.MemberBillingService;
+import com.jocoos.mybeautip.member.billing.MemberBillingService;
 import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.member.order.OrderService;
 import com.jocoos.mybeautip.support.slack.SlackService;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.jocoos.mybeautip.member.MemberBillingService.MERCHANT_BILLING_PREFIX;
+import static com.jocoos.mybeautip.member.billing.MemberBillingService.MERCHANT_BILLING_PREFIX;
 
 @Slf4j
 @RestController

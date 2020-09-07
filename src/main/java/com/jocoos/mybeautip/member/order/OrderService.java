@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.exception.PaymentConflictException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsOptionService;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -45,7 +44,7 @@ import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
 
-import static com.jocoos.mybeautip.member.MemberBillingService.MERCHANT_BILLING_PREFIX;
+import static com.jocoos.mybeautip.member.billing.MemberBillingService.MERCHANT_BILLING_PREFIX;
 
 @Slf4j
 @Service

@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.member;
+package com.jocoos.mybeautip.member.billing;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
