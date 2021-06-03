@@ -1,7 +1,7 @@
 spring:
   profiles: production
   datasource:
-    url: jdbc:mysql://13.209.183.3:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    url: jdbc:mysql://52.79.91.34:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
     username: mybeautip
     password: akdlqbxlq#1@Jocoos
     test-on-borrow: true
@@ -37,7 +37,7 @@ flipflop:
     thumbnail-format: https://flipflop-prod.s3.ap-northeast-2.amazonaws.com/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 redis:
-  host: 13.209.183.3
+  host: 52.79.91.34
   port: 6379
   password: akdlqbxlq#1@Jocoos
 
