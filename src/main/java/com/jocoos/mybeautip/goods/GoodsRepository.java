@@ -171,4 +171,6 @@ public interface GoodsRepository extends JpaRepository<Goods, String> {
 
   Page<Goods> findByGoodsNoIn(Collection<String> goodses, Pageable pageable);
 
+  Page<Goods> findByGoodsNmContainingOrderByGoodsNoDesc(String goodsNm, Pageable pageable);
+
 }
