@@ -33,6 +33,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
       .antMatchers(OPTIONS, "/api/admin/**").permitAll()
       .antMatchers("/api/admin/**").hasAnyRole("STORE", "ADMIN")
       .antMatchers(GET, "/api/1/notices").permitAll()
+      .antMatchers(POST, "/api/1/payments/**").hasAnyRole("USER", "ADMIN")
       .antMatchers(POST, "/api/1/payments/notification").permitAll()
       .antMatchers(POST, "/api/1/members/me/carts/now").hasAnyRole("GUEST", "USER", "ADMIN")
       .antMatchers(GET, "/api/1/orders/complete").permitAll()

@@ -45,7 +45,7 @@ public class GoodsService {
   @Value("${mybeautip.store.image-path.as-suffix}")
   private String storeImageAsSuffix;
 
-    @Value("${mybeautip.goods.max-valid-state}")
+  @Value("${mybeautip.goods.max-valid-state}")
   private Integer maxValidState;
 
   public List<Goods> getRelatedGoods(String goodsNo) {
