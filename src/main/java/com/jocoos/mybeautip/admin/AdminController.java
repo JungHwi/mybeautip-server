@@ -411,7 +411,10 @@ public class AdminController {
      @RequestParam(defaultValue = "1") int state,
      @RequestParam(required = false) List<String> goodses,
      @RequestParam(required = false) String code,
-     @RequestParam(required = false) String sort) {
+     @RequestParam(required = false) String sort,
+     @RequestParam(required = false) String keyword) {
+
+    log.info("keyword: {}", keyword);
 
     Pageable pageable = null;
     if (sort != null) {
@@ -444,6 +447,10 @@ public class AdminController {
 
     if (!CollectionUtils.isEmpty(goodses)) {
       goods = goodsRepository.findByGoodsNoIn(goodses, pageable);
+    }
+
+    if (!Strings.isNullOrEmpty(keyword)) {
+      goods = goodsRepository.findByGoodsNmContainingOrderByGoodsNoDesc(keyword, pageable);
     }
 
     Page<GoodsDetailInfo> details = goods.map(g -> {

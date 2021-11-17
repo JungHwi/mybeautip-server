@@ -125,6 +125,7 @@ public class CallbackController {
     String outputType;
     String title ="";
     String content = "";
+    String originalFilename;
     String url ="";
     String thumbnailPath = "";
     String thumbnailUrl = "";

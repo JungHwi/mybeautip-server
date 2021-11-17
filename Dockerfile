@@ -2,7 +2,7 @@ FROM java:8
 
 WORKDIR /mybeautip-server
 
-ADD build/libs/mybeautip-server-1.0.0.jar app.jar
+ADD build/libs/mybeautip-server-1.1.0.jar app.jar
 
 ENV SERVER_PROFILE local-mysql
 
