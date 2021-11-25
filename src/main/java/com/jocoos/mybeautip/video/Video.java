@@ -93,6 +93,9 @@ public class Video {
   private Integer likeCount;
 
   @Column(nullable = false)
+  private Integer scrapCount;
+
+  @Column(nullable = false)
   private Integer commentCount;
 
   @Column(nullable = false)

@@ -14,6 +14,8 @@ import java.util.List;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.video.scrap.VideoScrap;
+import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
@@ -102,6 +104,7 @@ public class MemberController {
   private final CommentLikeRepository commentLikeRepository;
   private final RevenueRepository revenueRepository;
   private final RevenuePaymentRepository revenuePaymentRepository;
+  private final VideoScrapService videoScrapService;
   private final ReportRepository reportRepository;
   private final BlockRepository blockRepository;
 
@@ -142,6 +145,7 @@ public class MemberController {
                           KeywordService keywordService,
                           NotificationService notificationService,
                           RevenuePaymentRepository revenuePaymentRepository,
+                          VideoScrapService videoScrapService,
                           ReportRepository reportRepository,
                           BlockRepository blockRepository) {
     this.memberService = memberService;
@@ -162,6 +166,7 @@ public class MemberController {
     this.keywordService = keywordService;
     this.notificationService = notificationService;
     this.revenuePaymentRepository = revenuePaymentRepository;
+    this.videoScrapService = videoScrapService;
     this.reportRepository = reportRepository;
     this.blockRepository = blockRepository;
   }
@@ -601,6 +606,26 @@ public class MemberController {
     }
     
     return new CursorResponse.Builder<>("/api/1/members/me/revenues/" + revenuePaymentId + "/details", revenues)
+        .withCount(count)
+        .withCursor(nextCursor).toBuild();
+  }
+
+  @GetMapping(value = "/me/scraps")
+  public CursorResponse getMyScraps(@RequestParam(defaultValue = "20") int count,
+                                    @RequestParam(required = false) String cursor) {
+    PageRequest pageRequest = PageRequest.of(0, count);
+
+    Long memberId = memberService.currentMemberId();
+    List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, pageRequest);
+    List<VideoController.VideoInfo> videos = Lists.newArrayList();
+    list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v.getVideo())));
+
+    String nextCursor = null;
+    if (videos.size() > 0) {
+      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+    }
+
+    return new CursorResponse.Builder<>("/api/1/members/me/scraps", videos)
         .withCount(count)
         .withCursor(nextCursor).toBuild();
   }
