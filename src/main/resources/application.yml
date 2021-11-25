@@ -132,7 +132,7 @@ mybeautip:
     host: "smtp.gmail.com"
     port: "587"
     user: "dev@jocoos.com"
-    pass: "xjfqhrTnd2!"
+    pass: "279Wkddldi!"
     mail: "mybeautip@mybeautip.tv"
   billing:
     time-between-reset: 60000 # 1 minute (milliseconds)
