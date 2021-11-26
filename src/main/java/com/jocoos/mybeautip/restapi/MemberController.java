@@ -613,19 +613,21 @@ public class MemberController {
   @GetMapping(value = "/me/scraps")
   public CursorResponse getMyScraps(@RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) String cursor) {
-    PageRequest pageRequest = PageRequest.of(0, count);
+    PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id"));
 
+    log.debug("count: {}, cursor: {}", count, cursor);
     Long memberId = memberService.currentMemberId();
     List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, pageRequest);
-    List<VideoController.VideoInfo> videos = Lists.newArrayList();
-    list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v.getVideo())));
+    List<VideoController.VideoScrapInfo> scraps = Lists.newArrayList();
+    list.stream().forEach(scrap -> scraps.add(
+        new VideoController.VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()))));
 
     String nextCursor = null;
-    if (videos.size() > 0) {
-      nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+    if (scraps.size() > 0) {
+      nextCursor = String.valueOf(scraps.get(scraps.size() - 1).getCreatedAt().getTime());
     }
 
-    return new CursorResponse.Builder<>("/api/1/members/me/scraps", videos)
+    return new CursorResponse.Builder<>("/api/1/members/me/scraps", scraps)
         .withCount(count)
         .withCursor(nextCursor).toBuild();
   }

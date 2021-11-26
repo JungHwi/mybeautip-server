@@ -5,7 +5,7 @@ CREATE TABLE `video_scraps` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `video_id` BIGINT NOT NULL,
   `created_by` BIGINT NOT NULL,
-  `created_at` DATETIME NOT NULL,
+  `created_at` DATETIME(3) NOT NULL,
   PRIMARY KEY(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
