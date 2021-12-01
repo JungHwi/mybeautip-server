@@ -761,6 +761,7 @@ public class VideoController {
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
     private Long likeId;
+    private Long scrapId;
     private MemberInfo owner;
     private Boolean blocked;
     private Date createdAt;

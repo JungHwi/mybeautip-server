@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.jocoos.mybeautip.video.scrap.VideoScrapRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -71,6 +72,7 @@ public class VideoService {
   private final OrderRepository orderRepository;
   private final VideoDataService videoDataService;
   private final VideoCategoryRepository videoCategoryRepository;
+  private final VideoScrapRepository videoScrapRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -95,7 +97,8 @@ public class VideoService {
                       ViewRecodingRepository viewRecodingRepository,
                       OrderRepository orderRepository,
                       VideoDataService videoDataService,
-                      VideoCategoryRepository videoCategoryRepository) {
+                      VideoCategoryRepository videoCategoryRepository,
+                      VideoScrapRepository videoScrapRepository) {
     this.memberService = memberService;
     this.tagService = tagService;
     this.feedService = feedService;
@@ -115,6 +118,7 @@ public class VideoService {
     this.orderRepository = orderRepository;
     this.videoDataService = videoDataService;
     this.videoCategoryRepository = videoCategoryRepository;
+    this.videoScrapRepository = videoScrapRepository;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -292,6 +296,7 @@ public class VideoService {
   
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
+    Long scrapId = null;
     boolean blocked = false;
     
     Long me = memberService.currentMemberId();
@@ -299,7 +304,9 @@ public class VideoService {
     if (me != null) {
       Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me);
       likeId = optional.map(VideoLike::getId).orElse(null);
-      
+      scrapId = videoScrapRepository.findByVideoIdAndCreatedById(video.getId(), me)
+          .map(s -> s.getId()).orElse(null);
+      log.debug("{}, {}, {}", video.getId(), me, scrapId);
       blocked = blockRepository.findByMeAndMemberYouId(video.getMember().getId(), me).isPresent();
     }
     // Set Watch count
@@ -309,6 +316,9 @@ public class VideoService {
     }
 
     VideoController.VideoInfo videoInfo = new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
+    if (scrapId != null) {
+      videoInfo.setScrapId(scrapId);
+    }
     videoInfo.setWatchCount(video.getViewCount());
     videoInfo.setRealWatchCount(video.getWatchCount());
     videoInfo.setCategory(
