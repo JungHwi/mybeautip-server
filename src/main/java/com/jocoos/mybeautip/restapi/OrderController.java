@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.billing.MemberBilling;
@@ -45,6 +46,8 @@ public class OrderController {
 
   private static final String ORDER_NOT_FOUND = "order.not_found";
   private static final String ORDER_INQUIRY_NOT_FOUND = "order.inquiry_not_found";
+  private static final String INVALID_ORDER_STATE = "order.invalid_order_state";
+  private static final String INVALID_PURCHASE_STATE = "order.invalid_purchase_state";
 
   public OrderController(MemberService memberService,
                          OrderService orderService,
@@ -130,6 +133,37 @@ public class OrderController {
          return new ResponseEntity<>(new OrderInfo(order, delivery, payment, purchaseInfos), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
+  }
+
+  @PatchMapping("/orders/{id:.+}")
+  public ResponseEntity<OrderInfo> confirmOrder(@PathVariable Long id,
+                                                @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    Long memberId = memberService.currentMemberId();
+    Order order = orderRepository.findByIdAndCreatedById(id, memberId)
+        .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
+
+    List<PurchaseInfo> purchaseInfos = Lists.newArrayList();
+    order.getPurchases().stream().forEach(p -> {
+      if (!p.isDelivered()) {
+        throw new BadRequestException("invalid_purchase_state", messageService.getMessage(INVALID_PURCHASE_STATE, lang));
+      }
+
+      PurchaseInfo purchaseInfo = orderInquiryRepository.findByPurchaseId(p.getId())
+          .map(inquiry -> new PurchaseInfo(p, inquiry.getId()))
+          .orElseGet(() -> new PurchaseInfo(p));
+
+      purchaseInfos.add(purchaseInfo);
+    });
+
+    if (order.getState() != Order.State.DELIVERED.getValue()) {
+      throw new BadRequestException("invalid_order_state", messageService.getMessage(INVALID_ORDER_STATE, lang));
+    }
+    orderService.confirmOrder(order);
+
+    Payment payment = paymentRepository.findById(order.getId()).orElse(null);
+    Delivery delivery = deliveryRepository.findById(order.getId()).orElse(null);
+
+    return new ResponseEntity<>(new OrderInfo(order, delivery, payment, purchaseInfos), HttpStatus.OK);
   }
 
   @GetMapping("/orders")
@@ -462,7 +496,6 @@ public class OrderController {
     private String inquiryInfo;
     private Date deliveredAt;
     private Date createdAt;
-
 
     public PurchaseInfo(Purchase purchase) {
       BeanUtils.copyProperties(purchase, this);
