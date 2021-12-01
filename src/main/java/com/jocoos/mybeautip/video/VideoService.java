@@ -850,7 +850,19 @@ public class VideoService {
   
     slackService.sendStatsForLiveEnded(video.getId(), statMessage);
   }
-  
+
+  @Transactional
+  public Video remove(Video video) {
+    video.setDeletedAt(new Date());
+    return videoRepository.save(video);
+  }
+
+  @Transactional
+  public Video restore(Video video) {
+    video.setDeletedAt(null);
+    return videoRepository.save(video);
+  }
+
   /**
    * Wrap method to avoid duplication for feed aspect
    * @param video
