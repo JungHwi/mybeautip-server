@@ -291,9 +291,14 @@ public class OrderService {
 
     return order;
   }
-  
+
   @Transactional
   public OrderInquiry inquiryExchangeOrReturn(Order order, Byte state, String reason, Purchase purchase) {
+    return inquiryExchangeOrReturn(order, state, reason, purchase, null);
+  }
+
+  @Transactional
+  public OrderInquiry inquiryExchangeOrReturn(Order order, Byte state, String reason, Purchase purchase, String attachments) {
     if (purchase == null) {
       throw new BadRequestException("purchase_not_found", "invalid purchase id");
     }
@@ -318,7 +323,11 @@ public class OrderService {
       purchase.setStatus(status);
       purchaseRepository.save(purchase);
 
-      return orderInquiryRepository.save(new OrderInquiry(order, state, reason, purchase));
+      OrderInquiry orderInquiry = new OrderInquiry(order, state, reason, purchase);
+      if (!Strings.isNullOrEmpty(attachments)) {
+        orderInquiry.setAttachments(attachments);
+      }
+      return orderInquiryRepository.save(orderInquiry);
     } else {
       throw new BadRequestException("required purchase status delivered or delivering - " + purchase.getStatus());
     }

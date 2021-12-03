@@ -162,6 +162,7 @@ public class AdminController {
     return new ResponseEntity<>(info, HttpStatus.OK);
   }
 
+  @SuppressWarnings("deprecation")
   @PostMapping("/banners")
   public ResponseEntity<BannerInfo> createTrend(@RequestBody CreateBannerRequest request) {
     log.debug("request: {}", request);

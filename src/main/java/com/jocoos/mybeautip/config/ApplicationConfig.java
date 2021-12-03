@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.config;
 
+import com.jocoos.mybeautip.support.S3StorageService;
+import com.jocoos.mybeautip.support.StorageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -86,5 +88,10 @@ public class ApplicationConfig {
     props.put("mail.debug", "false");
 
     return mailSender;
+  }
+
+  @Bean
+  public StorageService storageService() {
+    return new S3StorageService();
   }
 }

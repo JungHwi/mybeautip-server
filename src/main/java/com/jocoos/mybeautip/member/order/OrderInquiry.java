@@ -45,6 +45,9 @@ public class OrderInquiry extends MemberAuditable {
   private String comment;
 
   @Column
+  private String attachments;
+
+  @Column
   private boolean completed;
 
   @LastModifiedDate
