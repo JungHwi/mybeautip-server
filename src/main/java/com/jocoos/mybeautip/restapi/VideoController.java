@@ -674,7 +674,7 @@ public class VideoController {
    * Scraps
    */
   @PostMapping("/{videoId:.+}/scraps")
-  public ResponseEntity<VideoLikeInfo> addVideoScrap(@PathVariable Long videoId,
+  public ResponseEntity<VideoScrapInfo> addVideoScrap(@PathVariable Long videoId,
                                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Long memberId = memberService.currentMemberId();
     Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
@@ -683,7 +683,7 @@ public class VideoController {
     try {
       VideoScrap scrap = videoScrapService.scrapVideo(video, memberId);
       VideoScrapInfo info = new VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()));
-      return new ResponseEntity(info, HttpStatus.OK);
+      return new ResponseEntity<>(info, HttpStatus.OK);
     } catch (BadRequestException e) {
       throw new BadRequestException("already_scrap", messageService.getMessage(ALREADY_SCRAPED, lang));
     }

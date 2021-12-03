@@ -53,7 +53,7 @@ public class InstantMessageService {
       .ifPresent(s -> {
          log.debug("{}", s);
          String title = !Strings.isNullOrEmpty(s.getInstantTitle()) ? s.getInstantTitle() : video.getTitle();
-         String message = !Strings.isNullOrEmpty(s.getInstantMessage()) ? s.getInstantMessage() : getDefaultMessage(INSTANT_VIDEO_START_MESSAGE, null);
+         String message = !Strings.isNullOrEmpty(s.getInstantMessage()) ? s.getInstantMessage() : getDefaultMessage(INSTANT_VIDEO_START_MESSAGE);
          log.debug("title: {}, message: {}", title, message);
 
          taskScheduler.schedule(new InstantNotificationTask(
