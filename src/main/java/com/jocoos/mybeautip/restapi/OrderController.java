@@ -30,6 +30,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -52,6 +53,7 @@ public class OrderController {
   private static final String ORDER_INQUIRY_NOT_FOUND = "order.inquiry_not_found";
   private static final String INVALID_ORDER_STATE = "order.invalid_order_state";
   private static final String INVALID_PURCHASE_STATE = "order.invalid_purchase_state";
+  private static final String ATTACHMENT_DELIMETER = ",";
 
   public OrderController(MemberService memberService,
                          OrderService orderService,
@@ -270,6 +272,7 @@ public class OrderController {
       throw new NotFoundException("purchase_not_found", "purchase id required");
     }
 
+    List<String> attachments = Lists.newArrayList();
     if (request.getFiles() != null) {
       int index = 0;
 
@@ -282,6 +285,7 @@ public class OrderController {
         try {
           String path = storageService.upload(file, key);
           log.debug("{}", path);
+          attachments.add(path);
           index++;
         } catch (IOException e) {
           throw new BadRequestException("inquire_image_upload_fail", "state_required");
@@ -300,7 +304,8 @@ public class OrderController {
       case 1:
       case 2: {
         Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
-        inquiry = orderService.inquiryExchangeOrReturn(order, Byte.parseByte(request.getState()), request.getReason(), purchase);
+        String attachment = attachments.size() > 0 ? String.join(ATTACHMENT_DELIMETER, attachments): "";
+        inquiry = orderService.inquiryExchangeOrReturn(order, Byte.parseByte(request.getState()), request.getReason(), purchase, attachment);
         break;
       }
       default:
@@ -584,6 +589,7 @@ public class OrderController {
     private Byte state;
     private String reason;
     private String comment;
+    private List<String> attachments;
     private OrderInfo order;
     private PurchaseInfo purchase;
     private boolean completed;
@@ -595,6 +601,10 @@ public class OrderController {
       this.order = new OrderInfo(orderInquiry.getOrder());
       if (orderInquiry.getPurchase() != null) {
         this.purchase = new PurchaseInfo(orderInquiry.getPurchase());
+      }
+
+      if (!Strings.isNullOrEmpty(orderInquiry.getAttachments())) {
+        this.attachments = Arrays.asList(orderInquiry.getAttachments().split(ATTACHMENT_DELIMETER));
       }
     }
   }
