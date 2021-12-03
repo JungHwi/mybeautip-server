@@ -863,12 +863,16 @@ public class VideoService {
 
   @Transactional
   public Video remove(Video video) {
+    feedService.feedDeletedVideo(video.getId());
+
     video.setDeletedAt(new Date());
     return videoRepository.save(video);
   }
 
   @Transactional
   public Video restore(Video video) {
+    feedService.feedVideo(video);
+
     video.setDeletedAt(null);
     return videoRepository.save(video);
   }
