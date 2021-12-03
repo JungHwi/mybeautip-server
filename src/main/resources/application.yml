@@ -141,10 +141,14 @@ mybeautip:
 cloud:
   aws:
     credentials:
-      accessKey: AKIA3JYLF6P2AOO7IAKN
+      accessKey: AKIA3JYLF6P2AOO7IAKN #mybeautip
       secretKey: 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
     region:
       static: ap-northeast-2
+    s3:
+      bucket: mybeautip-dev
+    sts:
+      token-validity-duration-seconds: 3600
 
 godomall:
   goods-view-url: http://m.mybeautip.tv/goods/goods_view.php

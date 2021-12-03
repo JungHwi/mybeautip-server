@@ -1,14 +1,15 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.billing.MemberBilling;
 import com.jocoos.mybeautip.member.billing.MemberBillingService;
 import com.jocoos.mybeautip.member.order.*;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.support.StorageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +23,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -43,6 +46,7 @@ public class OrderController {
   private final DeliveryRepository deliveryRepository;
   private final OrderInquiryRepository orderInquiryRepository;
   private final MemberBillingService memberBillingService;
+  private final StorageService storageService;
 
   private static final String ORDER_NOT_FOUND = "order.not_found";
   private static final String ORDER_INQUIRY_NOT_FOUND = "order.inquiry_not_found";
@@ -56,7 +60,8 @@ public class OrderController {
                          PaymentRepository paymentRepository,
                          DeliveryRepository deliveryRepository,
                          OrderInquiryRepository orderInquiryRepository,
-                         MemberBillingService memberBillingService) {
+                         MemberBillingService memberBillingService,
+                         StorageService storageService) {
     this.memberService = memberService;
     this.orderService = orderService;
     this.messageService = messageService;
@@ -65,6 +70,7 @@ public class OrderController {
     this.deliveryRepository = deliveryRepository;
     this.orderInquiryRepository = orderInquiryRepository;
     this.memberBillingService = memberBillingService;
+    this.storageService = storageService;
   }
 
   @PostMapping("/orders")
@@ -245,6 +251,65 @@ public class OrderController {
     return new ResponseEntity<>(new OrderInquiryInfo(inquiry), HttpStatus.OK);
   }
 
+  @PostMapping(value = "/orders/{id:.+}/inquiries", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+  public ResponseEntity<OrderInquiryInfo> createInquiryWithFiles(@PathVariable Long id,
+                                                                 CreateOrderInquiry request,
+                                                                 @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    log.debug("inquiry request: {}", request);
+
+    if (Strings.isNullOrEmpty(request.getState())) {
+      throw new BadRequestException("inquire_state_required", "Inquiry state is required");
+    }
+
+    if (Strings.isNullOrEmpty(request.getReason())) {
+      throw new BadRequestException("inquire_reason_required", "Inquiry reason is required");
+    }
+
+    Byte state = Byte.parseByte(request.getState());
+    if (state > 0 && request.getPurchaseId() == null) {
+      throw new NotFoundException("purchase_not_found", "purchase id required");
+    }
+
+    if (request.getFiles() != null) {
+      int index = 0;
+
+      for (MultipartFile file : request.getFiles()) {
+        /**
+         * How to upload with extension
+         */
+        String ext = file.getOriginalFilename().split("\\.")[1];
+        String key = String.format("orders/%s/%s.%s", id, index, ext);
+        try {
+          String path = storageService.upload(file, key);
+          log.debug("{}", path);
+          index++;
+        } catch (IOException e) {
+          throw new BadRequestException("inquire_image_upload_fail", "state_required");
+        }
+      }
+    }
+
+    Long me = memberService.currentMemberId();
+    Order order = orderRepository.findByIdAndCreatedById(id, me)
+        .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
+    OrderInquiry inquiry;
+    switch (state) {
+      case 0:
+        inquiry = orderService.cancelOrderInquire(order, state, request.getReason());
+        break;
+      case 1:
+      case 2: {
+        Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
+        inquiry = orderService.inquiryExchangeOrReturn(order, Byte.parseByte(request.getState()), request.getReason(), purchase);
+        break;
+      }
+      default:
+        throw new IllegalArgumentException("Unknown state type");
+    }
+
+    return new ResponseEntity<>(new OrderInquiryInfo(inquiry), HttpStatus.OK);
+  }
+
   @GetMapping("/inquiries")
   public CursorResponse getInquires(@RequestParam String category,
                                     @RequestParam(defaultValue = "20") int count,
@@ -308,6 +373,8 @@ public class OrderController {
     private String reason;
 
     private Long purchaseId;
+
+    private List<MultipartFile> files;
   }
 
   @Data
