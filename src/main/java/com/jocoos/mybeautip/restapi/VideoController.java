@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
@@ -243,7 +244,8 @@ public class VideoController {
                                     @RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) Long cursor,
                                     @RequestParam(required = false) String direction,
-                                    @RequestParam(name = "parent_id", required = false) Long parentId) {
+                                    @RequestParam(name = "parent_id", required = false) Long parentId,
+                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     PageRequest page;
     if ("next".equals(direction)) {
       page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
@@ -264,12 +266,15 @@ public class VideoController {
       if (comment.getComment().contains("@")) {
         MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
         if (mentionResult != null) {
-          comment.setComment(mentionResult.getComment());
+          String content = commentService.getBlindContent(comment, lang, mentionResult.getComment());
+          comment.setComment(content);
           commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
         } else {
           log.warn("mention result not found - {}", comment);
         }
       } else {
+        String content = commentService.getBlindContent(comment, lang, null);
+        comment.setComment(content);
         commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
       

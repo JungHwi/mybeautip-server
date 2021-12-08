@@ -13,6 +13,7 @@ import java.util.List;
 
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.block.BlockRepository;
+import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.video.scrap.VideoScrap;
 import com.jocoos.mybeautip.video.scrap.VideoScrapService;
@@ -54,11 +55,6 @@ import com.jocoos.mybeautip.member.MemberMeInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.PostProcessService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentInfo;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
@@ -105,6 +101,7 @@ public class MemberController {
   private final RevenueRepository revenueRepository;
   private final RevenuePaymentRepository revenuePaymentRepository;
   private final VideoScrapService videoScrapService;
+  private final CommentService commentService;
   private final ReportRepository reportRepository;
   private final BlockRepository blockRepository;
 
@@ -146,6 +143,7 @@ public class MemberController {
                           NotificationService notificationService,
                           RevenuePaymentRepository revenuePaymentRepository,
                           VideoScrapService videoScrapService,
+                          CommentService commentService,
                           ReportRepository reportRepository,
                           BlockRepository blockRepository) {
     this.memberService = memberService;
@@ -167,6 +165,7 @@ public class MemberController {
     this.notificationService = notificationService;
     this.revenuePaymentRepository = revenuePaymentRepository;
     this.videoScrapService = videoScrapService;
+    this.commentService = commentService;
     this.reportRepository = reportRepository;
     this.blockRepository = blockRepository;
   }
@@ -459,7 +458,8 @@ public class MemberController {
 
   @GetMapping(value = "/me/comments")
   public CursorResponse getMyComments(@RequestParam(defaultValue = "100") int count,
-                                      @RequestParam(required = false) String cursor) {
+                                      @RequestParam(required = false) String cursor,
+                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
     Long me = memberService.currentMemberId();
     Slice<Comment> comments;
@@ -470,30 +470,7 @@ public class MemberController {
       comments = commentRepository.findByCreatedByIdAndParentIdIsNull(me, pageable);
     }
 
-    List<CommentInfo> result = Lists.newArrayList();
-    comments.stream().forEach(comment -> {
-      CommentInfo commentInfo;
-      if (comment.getComment().contains("@")) {
-        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
-        if (mentionResult != null) {
-          comment.setComment(mentionResult.getComment());
-          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
-        } else {
-          log.warn("mention result not found - {}", comment);
-          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
-        }
-      } else {
-        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
-      }
-      
-      if (me != null) {
-        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-            .map(CommentLike::getId).orElse(null);
-        commentInfo.setLikeId(likeId);
-      }
-      result.add(commentInfo);
-    });
-
+    List<CommentInfo> result = transformComment(comments, me, lang);
     String nextCursor = null;
     if (result.size() > 0) {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
@@ -502,6 +479,37 @@ public class MemberController {
     return new CursorResponse.Builder<>("/api/1/members/me/comments", result)
       .withCount(count)
       .withCursor(nextCursor).toBuild();
+  }
+
+  private List<CommentInfo> transformComment(Slice<Comment> comments, Long me, String lang) {
+    List<CommentInfo> result = Lists.newArrayList();
+    comments.stream().forEach(comment -> {
+      CommentInfo commentInfo;
+      if (comment.getComment().contains("@")) {
+        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+        if (mentionResult != null) {
+          String content = commentService.getBlindContent(comment, lang, mentionResult.getComment());
+          comment.setComment(content);
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+        } else {
+          log.warn("mention result not found - {}", comment);
+          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+        }
+      } else {
+        String content = commentService.getBlindContent(comment, lang, null);
+        comment.setComment(content);
+        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+      }
+
+      if (me != null) {
+        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+            .map(CommentLike::getId).orElse(null);
+        commentInfo.setLikeId(likeId);
+      }
+      result.add(commentInfo);
+    });
+
+    return result;
   }
   
   @GetMapping(value = "/{id:.+}/comments")
@@ -520,32 +528,8 @@ public class MemberController {
     } else {
       comments = commentRepository.findByCreatedByIdAndParentIdIsNull(member.getId(), pageable);
     }
-    
-    List<CommentInfo> result = Lists.newArrayList();
-    comments.stream().forEach(comment -> {
-      CommentInfo commentInfo;
-      if (comment.getComment().contains("@")) {
-        MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
-        if (mentionResult != null) {
-          comment.setComment(mentionResult.getComment());
-          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
-        } else {
-          log.warn("mention result not found - {}", comment);
-          commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
-        }
-      } else {
-        commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
-      }
-      
-      Long me = memberService.currentMemberId();
-      if (me != null) {
-        Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
-            .map(CommentLike::getId).orElse(null);
-        commentInfo.setLikeId(likeId);
-      }
-      result.add(commentInfo);
-    });
-    
+
+    List<CommentInfo> result = transformComment(comments, member.getId(), lang);
     String nextCursor = null;
     if (result.size() > 0) {
       nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
