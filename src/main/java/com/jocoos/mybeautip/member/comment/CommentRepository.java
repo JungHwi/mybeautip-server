@@ -1,14 +1,14 @@
 package com.jocoos.mybeautip.member.comment;
 
-import java.util.Date;
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.Date;
+import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
@@ -48,5 +48,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
   Slice<Comment> findByCreatedByIdAndParentIdIsNull(Long id, Pageable pageable);
 
   Page<Comment> findByPostId(Long postId, Pageable pageable);
+
+  int countByParentIdAndCreatedByIdNot(Long parentId, Long createdBy);
+
+  int deleteByParentIdAndCreatedById(Long parentId, Long createdBy);
+
 }
 

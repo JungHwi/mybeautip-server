@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
@@ -25,6 +26,7 @@ import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,10 +46,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -321,7 +320,18 @@ public class VideoController {
   
     if (request.getParentId() != null) {
       commentRepository.findById(request.getParentId())
+          .map(c -> {
+            /**
+             * Not allow 2 depth comment in child comment
+             */
+            if (c.getParentId() != null) {
+              log.warn("comment is child comment: {}", c);
+              throw new BadRequestException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang));
+            }
+            return c;
+          })
           .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+
     }
     
     Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_VIDEO, id);
@@ -364,8 +374,9 @@ public class VideoController {
         if (comment.getLocked()) {
           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
         }
-        videoService.deleteComment(comment);
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        int state = videoService.deleteComment(comment);
+        return new ResponseEntity<>(new CommentStateInfo(state), HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));
   }
@@ -849,5 +860,12 @@ public class VideoController {
       BeanUtils.copyProperties(VideoScrap, this);
       this.video = video;
     }
+  }
+
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  private static class CommentStateInfo {
+    private int state;
   }
 }

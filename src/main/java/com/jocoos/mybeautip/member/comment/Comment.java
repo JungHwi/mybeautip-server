@@ -44,7 +44,35 @@ public class Comment extends MemberAuditable {
   @Column
   private int likeCount;
 
+  /**
+   * 0: Default, 1: Deleted 2: Blinded, 4: Blinded by Admin
+   */
+  @Column
+  private int state;
+
   @Column(nullable = false)
   @LastModifiedDate
   private Date modifiedAt;
+
+
+
+  public enum CommentState {
+    DEFAULT(0),
+    DELETED(1),
+    BLINDED(2),
+    BLINDED_BY_ADMIN(4);
+
+    private int value;
+    CommentState(int value) {
+      this.value = value;
+    }
+
+    public int value() {
+      return this.value;
+    }
+  }
+
+  public void setState(CommentState commentState) {
+    this.state = commentState.value();
+  }
 }
