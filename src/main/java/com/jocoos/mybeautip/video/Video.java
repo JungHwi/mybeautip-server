@@ -145,5 +145,6 @@ public class Video {
     this.viewCount = 0;
     this.orderCount = 0;
     this.reportCount = 0L;
+    this.scrapCount = 0;
   }
 }

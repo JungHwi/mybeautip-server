@@ -718,31 +718,59 @@ public class VideoService {
   }
   
   @Transactional
-  public void deleteComment(Comment comment) {
-    tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-    
-    videoRepository.findById(comment.getVideoId()).ifPresent(
-        video -> {
-          if (video.getCommentCount() > 0) {
-            videoRepository.updateCommentCount(video.getId(), -1);
-          }
-        }
-    );
-    
+  public int deleteComment(Comment comment) {
     if (comment.getParentId() != null) {
-      commentRepository.findById(comment.getParentId()).ifPresent(
-          parentComment -> {
-            if (parentComment.getCommentCount() > 0) {
-              commentRepository.updateCommentCount(parentComment.getId(), -1);
-            }
-          }
-      );
+      return deleteCommentAndChildren(comment);
     }
+
+    int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
+    log.debug("child count: {}", childCount);
+
+    if (childCount == 0) {
+      return deleteCommentAndChildren(comment);
+    } else {
+      return blindComment(comment);
+    }
+  }
+
+  @Transactional
+  private int blindComment(Comment comment) {
+    Comment.CommentState state = Comment.CommentState.BLINDED;
+    comment.setState(state);
+    commentRepository.save(comment);
+    return state.value();
+  }
+
+  @Transactional
+  private int deleteCommentAndChildren(Comment comment) {
+    tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+
+    if(comment.getVideoId() != null) {
+      videoRepository.findById(comment.getVideoId()).ifPresent(video -> {
+        if (video.getCommentCount() > 0) {
+          videoRepository.updateCommentCount(video.getId(), -1);
+        }
+      });
+    }
+
+    if (comment.getParentId() != null) {
+      commentRepository.findById(comment.getParentId()).ifPresent(parentComment -> {
+        if (parentComment.getCommentCount() > 0) {
+          commentRepository.updateCommentCount(parentComment.getId(), -1);
+        }
+      });
+    } else {
+      if (comment.getCommentCount() > 0) {
+        commentRepository.deleteByParentIdAndCreatedById(comment.getId(), comment.getCreatedBy().getId());
+      }
+    }
+    commentRepository.delete(comment);
+
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
-    commentRepository.delete(comment);
+
+    return Comment.CommentState.DELETED.value();
   }
-  
   
   @Transactional
   public Video lockVideo(Video video) {

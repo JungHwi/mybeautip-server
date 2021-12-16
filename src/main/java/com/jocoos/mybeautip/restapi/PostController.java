@@ -303,7 +303,8 @@ public class PostController {
                                     @RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) Long cursor,
                                     @RequestParam(required = false) String direction,
-                                    @RequestParam(required = false) Long parentId) {
+                                    @RequestParam(required = false) Long parentId,
+                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Date now = new Date();
     postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
         .orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
@@ -328,12 +329,15 @@ public class PostController {
       if (comment.getComment().contains("@")) {
         MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
         if (mentionResult != null) {
-          comment.setComment(mentionResult.getComment());
+          String content = commentService.getBlindContent(comment, lang, mentionResult.getComment());
+          comment.setComment(content);
           commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
         } else {
           log.warn("mention result not found - {}", comment);
         }
       } else {
+        String content = commentService.getBlindContent(comment, lang, null);
+        comment.setComment(content);
         commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
   

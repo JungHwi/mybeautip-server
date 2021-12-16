@@ -17,13 +17,19 @@ import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoRepository;
 
+import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class CommentService {
+  private static final String COMMENT_LOCK_MESSAGE = "comment.lock_message";
+  private static final String COMMENT_BLIND_MESSAGE = "comment.blind_message";
+  private static final String COMMENT_BLIND_MESSAGE_BY_ADMIN = "comment.blind_message_by_admin";
 
   public static final int COMMENT_TYPE_VIDEO = 1;
   public static final int COMMENT_TYPE_POST = 2;
-  private final String COMMENT_LOCK_MESSAGE = "comment.lock_message";
-  
+
   private final TagService tagService;
   private final MessageService messageService;
   private final MentionService mentionService;
@@ -96,5 +102,20 @@ public class CommentService {
   
     comment.setComment(request.getComment());
     return commentRepository.save(comment);
+  }
+
+  public String getBlindContent(Comment comment, String lang, String defaultValue) {
+    String content;
+    switch (comment.getCommentState()) {
+      case BLINDED_BY_ADMIN:
+        content = messageService.getMessage(COMMENT_BLIND_MESSAGE_BY_ADMIN, lang);
+        break;
+      case BLINDED:
+        content = messageService.getMessage(COMMENT_BLIND_MESSAGE, lang);
+        break;
+      default:
+        content = !Strings.isNullOrEmpty(defaultValue) ? defaultValue : comment.getComment();
+    }
+    return content;
   }
 }
