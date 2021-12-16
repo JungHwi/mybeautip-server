@@ -775,14 +775,7 @@ public class VideoService {
   private int deleteCommentAndChildren(Comment comment) {
     tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
 
-    if(comment.getVideoId() != null) {
-      videoRepository.findById(comment.getVideoId()).ifPresent(video -> {
-        if (video.getCommentCount() > 0) {
-          videoRepository.updateCommentCount(video.getId(), -1);
-        }
-      });
-    }
-
+    int count = 1;
     if (comment.getParentId() != null) {
       commentRepository.findById(comment.getParentId()).ifPresent(parentComment -> {
         if (parentComment.getCommentCount() > 0) {
@@ -791,13 +784,23 @@ public class VideoService {
       });
     } else {
       if (comment.getCommentCount() > 0) {
-        commentRepository.deleteByParentIdAndCreatedById(comment.getId(), comment.getCreatedBy().getId());
+        count += commentRepository.deleteByParentIdAndCreatedById(comment.getId(), comment.getCreatedBy().getId());
       }
     }
-    commentRepository.delete(comment);
 
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
+    commentRepository.delete(comment);
+
+    if(comment.getVideoId() != null) {
+      final int commentCount = -count;
+      log.info("deleted comment count: {}", count);
+      videoRepository.findById(comment.getVideoId()).ifPresent(video -> {
+        if (video.getCommentCount() > 0) {
+          videoRepository.updateCommentCount(video.getId(), commentCount);
+        }
+      });
+    }
 
     return Comment.CommentState.DELETED.value();
   }
