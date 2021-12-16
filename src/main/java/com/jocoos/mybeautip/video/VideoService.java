@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.jocoos.mybeautip.video.scrap.VideoScrapRepository;
 import org.springframework.beans.BeanUtils;
@@ -460,25 +461,41 @@ public class VideoService {
       }
     
       // Set related goods info
+      log.info("data: {}", request.getData());
       if (StringUtils.isNotEmpty(request.getData())) {
-        String[] userData = StringUtils.deleteWhitespace(request.getData()).split(",");
-        List<VideoGoods> videoGoods = new ArrayList<>();
-        for (String goods : userData) {
-          if (goods.length() != 10) { // invalid goodsNo
-            continue;
-          }
-          goodsRepository.findByGoodsNo(goods).ifPresent(g -> {
-            videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
-          });
+        String[] split = request.getData().split("\\|");
+        List<VideoCategory> categories = Lists.newArrayList();
+
+        // if data had category array
+        if (split.length == 2) {
+          categories = parseCategory(video.getId(), split[1]);
+          log.info("categories: {}", categories);
+          video.setCategory(categories);
         }
-      
-        if (videoGoods.size() > 0) {
-          videoGoodsRepository.saveAll(videoGoods);
-        
-          // Set related goods count & one thumbnail image
-          String url = videoGoods.get(0).getGoods().getListImageData().toString();
-          createdVideo.setRelatedGoodsThumbnailUrl(url);
-          createdVideo.setRelatedGoodsCount(videoGoods.size());
+
+        List<VideoGoods> videoGoods = new ArrayList<>();
+        String goods = split[0];
+        if (!Strings.isNullOrEmpty(goods)) {
+          String[] userData = StringUtils.deleteWhitespace(goods).split(",");
+          for (String goodsNo : userData) {
+            if (goodsNo.length() != 10) { // invalid goodsNo
+              continue;
+            }
+            goodsRepository.findByGoodsNo(goods).ifPresent(g -> {
+              videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
+            });
+          }
+
+          if (videoGoods.size() > 0) {
+            videoGoodsRepository.saveAll(videoGoods);
+
+            // Set related goods count & one thumbnail image
+            String url = videoGoods.get(0).getGoods().getListImageData().toString();
+            createdVideo.setRelatedGoodsThumbnailUrl(url);
+            createdVideo.setRelatedGoodsCount(videoGoods.size());
+          }
+        }
+        if (videoGoods.size() > 0 || categories.size() > 0) {
           videoRepository.save(createdVideo);
         }
       }
@@ -511,10 +528,23 @@ public class VideoService {
     return videoRepository.save(video);
   }
 
+  private List<VideoCategory> parseCategory(Long videoId, String category) {
+    if (Strings.isNullOrEmpty(category)) {
+      return Lists.newArrayList();
+    }
+    String[] categories = category.split(",");
+    List<Integer> collect = Arrays.stream(categories)
+        .filter(c -> !"0".equals(c)).map(c -> Integer.valueOf(c))
+        .collect(Collectors.toList());
+    return createCategory(videoId, collect);
+  }
+
   private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {
     List<VideoCategory> categories = Lists.newArrayList();
     for (int c : category) {
-      categories.add(new VideoCategory(videoId, c));
+      if (c > 0) {
+        categories.add(new VideoCategory(videoId, c));        
+      }
     }
 
     return categories;
