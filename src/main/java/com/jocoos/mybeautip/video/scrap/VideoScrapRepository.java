@@ -13,7 +13,8 @@ public interface VideoScrapRepository extends JpaRepository<VideoScrap, Long> {
 
   Optional<VideoScrap> findByVideoIdAndCreatedById(Long videoId, Long member);
 
-  List<VideoScrap> findByCreatedByIdAndCreatedAtBefore(Long createdId, Date createdAt, Pageable pageable);
+  List<VideoScrap> findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNull(Long createdId, Date createdAt, String visibility, Pageable pageable);
 
-  List<VideoScrap> findByCreatedById(Long createdId, Pageable pageable);
+  List<VideoScrap> findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNull(Long createdId, String visibility, Pageable pageable);
+
 }

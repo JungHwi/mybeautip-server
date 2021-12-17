@@ -15,6 +15,7 @@ import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.scrap.VideoScrap;
 import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,10 +73,6 @@ import com.jocoos.mybeautip.post.PostLikeRepository;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoLike;
-import com.jocoos.mybeautip.video.VideoLikeRepository;
-import com.jocoos.mybeautip.video.VideoService;
 
 @Slf4j
 @RestController
@@ -601,7 +598,7 @@ public class MemberController {
 
     log.debug("count: {}, cursor: {}", count, cursor);
     Long memberId = memberService.currentMemberId();
-    List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, pageRequest);
+    List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
     List<VideoController.VideoScrapInfo> scraps = Lists.newArrayList();
     list.stream().forEach(scrap -> scraps.add(
         new VideoController.VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()))));

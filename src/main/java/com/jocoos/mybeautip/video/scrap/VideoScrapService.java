@@ -6,6 +6,8 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
+import com.jocoos.mybeautip.video.Visibility;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -50,12 +52,13 @@ public class VideoScrapService {
     videoRepository.save(video);
   }
 
-  public List<VideoScrap> findByMemberId(Long memberId, String cursor, Pageable pageable) {
+  public List<VideoScrap> findByMemberId(Long memberId, String cursor, Visibility visibility, Pageable pageable) {
+    String visibilityName = visibility != null ? visibility.name() : Visibility.PUBLIC.name();
     if (!Strings.isNullOrEmpty(cursor)) {
       Date createdAtBefore = DateUtils.toDate(cursor);
       log.debug("cursor: {}", createdAtBefore);
-      return videoScrapRepository.findByCreatedByIdAndCreatedAtBefore(memberId, createdAtBefore, pageable);
+      return videoScrapRepository.findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNull(memberId, createdAtBefore, visibilityName, pageable);
     }
-    return videoScrapRepository.findByCreatedById(memberId, pageable);
+    return videoScrapRepository.findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNull(memberId, visibilityName, pageable);
   }
 }
