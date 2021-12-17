@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,9 +22,9 @@ public class VideoDataService {
     this.objectMapper = objectMapper;
   }
 
-  public Map<String, Object> getData(String json) {
+  public HashMap<String, Object> getData(String json) {
     try {
-      return objectMapper.readValue(json, HashMap.class);
+      return objectMapper.readValue(json, new TypeReference<HashMap<String, Object>>() {});
     } catch (IOException e) {
       log.error("{}", json);
       log.error("JSON Error", e);

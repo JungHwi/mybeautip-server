@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.jocoos.mybeautip.video.scrap.VideoScrapRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -71,6 +73,7 @@ public class VideoService {
   private final OrderRepository orderRepository;
   private final VideoDataService videoDataService;
   private final VideoCategoryRepository videoCategoryRepository;
+  private final VideoScrapRepository videoScrapRepository;
 
   @Value("${mybeautip.video.watch-duration}")
   private long watchDuration;
@@ -95,7 +98,8 @@ public class VideoService {
                       ViewRecodingRepository viewRecodingRepository,
                       OrderRepository orderRepository,
                       VideoDataService videoDataService,
-                      VideoCategoryRepository videoCategoryRepository) {
+                      VideoCategoryRepository videoCategoryRepository,
+                      VideoScrapRepository videoScrapRepository) {
     this.memberService = memberService;
     this.tagService = tagService;
     this.feedService = feedService;
@@ -115,6 +119,7 @@ public class VideoService {
     this.orderRepository = orderRepository;
     this.videoDataService = videoDataService;
     this.videoCategoryRepository = videoCategoryRepository;
+    this.videoScrapRepository = videoScrapRepository;
   }
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
@@ -292,6 +297,7 @@ public class VideoService {
   
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
+    Long scrapId = null;
     boolean blocked = false;
     
     Long me = memberService.currentMemberId();
@@ -299,7 +305,9 @@ public class VideoService {
     if (me != null) {
       Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me);
       likeId = optional.map(VideoLike::getId).orElse(null);
-      
+      scrapId = videoScrapRepository.findByVideoIdAndCreatedById(video.getId(), me)
+          .map(s -> s.getId()).orElse(null);
+      log.debug("{}, {}, {}", video.getId(), me, scrapId);
       blocked = blockRepository.findByMeAndMemberYouId(video.getMember().getId(), me).isPresent();
     }
     // Set Watch count
@@ -309,6 +317,9 @@ public class VideoService {
     }
 
     VideoController.VideoInfo videoInfo = new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
+    if (scrapId != null) {
+      videoInfo.setScrapId(scrapId);
+    }
     videoInfo.setWatchCount(video.getViewCount());
     videoInfo.setRealWatchCount(video.getWatchCount());
     videoInfo.setCategory(
@@ -450,25 +461,41 @@ public class VideoService {
       }
     
       // Set related goods info
+      log.info("data: {}", request.getData());
       if (StringUtils.isNotEmpty(request.getData())) {
-        String[] userData = StringUtils.deleteWhitespace(request.getData()).split(",");
-        List<VideoGoods> videoGoods = new ArrayList<>();
-        for (String goods : userData) {
-          if (goods.length() != 10) { // invalid goodsNo
-            continue;
-          }
-          goodsRepository.findByGoodsNo(goods).ifPresent(g -> {
-            videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
-          });
+        String[] split = request.getData().split("\\|");
+        List<VideoCategory> categories = Lists.newArrayList();
+
+        // if data had category array
+        if (split.length == 2) {
+          categories = parseCategory(video.getId(), split[1]);
+          log.info("categories: {}", categories);
+          video.setCategory(categories);
         }
-      
-        if (videoGoods.size() > 0) {
-          videoGoodsRepository.saveAll(videoGoods);
-        
-          // Set related goods count & one thumbnail image
-          String url = videoGoods.get(0).getGoods().getListImageData().toString();
-          createdVideo.setRelatedGoodsThumbnailUrl(url);
-          createdVideo.setRelatedGoodsCount(videoGoods.size());
+
+        List<VideoGoods> videoGoods = new ArrayList<>();
+        String goods = split[0];
+        if (!Strings.isNullOrEmpty(goods)) {
+          String[] userData = StringUtils.deleteWhitespace(goods).split(",");
+          for (String goodsNo : userData) {
+            if (goodsNo.length() != 10) { // invalid goodsNo
+              continue;
+            }
+            goodsRepository.findByGoodsNo(goods).ifPresent(g -> {
+              videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
+            });
+          }
+
+          if (videoGoods.size() > 0) {
+            videoGoodsRepository.saveAll(videoGoods);
+
+            // Set related goods count & one thumbnail image
+            String url = videoGoods.get(0).getGoods().getListImageData().toString();
+            createdVideo.setRelatedGoodsThumbnailUrl(url);
+            createdVideo.setRelatedGoodsCount(videoGoods.size());
+          }
+        }
+        if (videoGoods.size() > 0 || categories.size() > 0) {
           videoRepository.save(createdVideo);
         }
       }
@@ -501,10 +528,23 @@ public class VideoService {
     return videoRepository.save(video);
   }
 
+  private List<VideoCategory> parseCategory(Long videoId, String category) {
+    if (Strings.isNullOrEmpty(category)) {
+      return Lists.newArrayList();
+    }
+    String[] categories = category.split(",");
+    List<Integer> collect = Arrays.stream(categories)
+        .filter(c -> !"0".equals(c)).map(c -> Integer.valueOf(c))
+        .collect(Collectors.toList());
+    return createCategory(videoId, collect);
+  }
+
   private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {
     List<VideoCategory> categories = Lists.newArrayList();
     for (int c : category) {
-      categories.add(new VideoCategory(videoId, c));
+      if (c > 0) {
+        categories.add(new VideoCategory(videoId, c));        
+      }
     }
 
     return categories;
@@ -572,7 +612,15 @@ public class VideoService {
         target.setState(source.getState());
       }
     }
-    
+
+    if (!Strings.isNullOrEmpty(source.getLiveKey())) {
+      target.setLiveKey(source.getLiveKey());
+    }
+
+    if (!Strings.isNullOrEmpty(source.getOutputType())) {
+      target.setOutputType(source.getOutputType());
+    }
+
     if (source.getVisibility() != null) {
       String prevState = target.getVisibility();
       String newState = source.getVisibility();
@@ -700,31 +748,62 @@ public class VideoService {
   }
   
   @Transactional
-  public void deleteComment(Comment comment) {
-    tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-    
-    videoRepository.findById(comment.getVideoId()).ifPresent(
-        video -> {
-          if (video.getCommentCount() > 0) {
-            videoRepository.updateCommentCount(video.getId(), -1);
-          }
-        }
-    );
-    
+  public int deleteComment(Comment comment) {
     if (comment.getParentId() != null) {
-      commentRepository.findById(comment.getParentId()).ifPresent(
-          parentComment -> {
-            if (parentComment.getCommentCount() > 0) {
-              commentRepository.updateCommentCount(parentComment.getId(), -1);
-            }
-          }
-      );
+      return deleteCommentAndChildren(comment);
     }
+
+    int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
+    log.debug("child count: {}", childCount);
+
+    if (childCount == 0) {
+      return deleteCommentAndChildren(comment);
+    } else {
+      return blindComment(comment);
+    }
+  }
+
+  @Transactional
+  private int blindComment(Comment comment) {
+    Comment.CommentState state = Comment.CommentState.BLINDED;
+    comment.setState(state);
+    commentRepository.save(comment);
+    return state.value();
+  }
+
+  @Transactional
+  private int deleteCommentAndChildren(Comment comment) {
+    tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+
+    int count = 1;
+    if (comment.getParentId() != null) {
+      commentRepository.findById(comment.getParentId()).ifPresent(parentComment -> {
+        if (parentComment.getCommentCount() > 0) {
+          commentRepository.updateCommentCount(parentComment.getId(), -1);
+        }
+      });
+    } else {
+      if (comment.getCommentCount() > 0) {
+        count += commentRepository.deleteByParentIdAndCreatedById(comment.getId(), comment.getCreatedBy().getId());
+      }
+    }
+
     List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
     commentLikeRepository.deleteAll(commentLikes);
     commentRepository.delete(comment);
+
+    if(comment.getVideoId() != null) {
+      final int commentCount = -count;
+      log.info("deleted comment count: {}", count);
+      videoRepository.findById(comment.getVideoId()).ifPresent(video -> {
+        if (video.getCommentCount() > 0) {
+          videoRepository.updateCommentCount(video.getId(), commentCount);
+        }
+      });
+    }
+
+    return Comment.CommentState.DELETED.value();
   }
-  
   
   @Transactional
   public Video lockVideo(Video video) {
@@ -842,7 +921,23 @@ public class VideoService {
   
     slackService.sendStatsForLiveEnded(video.getId(), statMessage);
   }
-  
+
+  @Transactional
+  public Video remove(Video video) {
+    feedService.feedDeletedVideo(video.getId());
+
+    video.setDeletedAt(new Date());
+    return videoRepository.save(video);
+  }
+
+  @Transactional
+  public Video restore(Video video) {
+    feedService.feedVideo(video);
+
+    video.setDeletedAt(null);
+    return videoRepository.save(video);
+  }
+
   /**
    * Wrap method to avoid duplication for feed aspect
    * @param video

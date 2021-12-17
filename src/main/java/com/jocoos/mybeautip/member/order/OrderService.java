@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.exception.PaymentConflictException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsOptionService;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -44,6 +43,8 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
+
+import static com.jocoos.mybeautip.member.billing.MemberBillingService.MERCHANT_BILLING_PREFIX;
 
 @Slf4j
 @Service
@@ -154,14 +155,8 @@ public class OrderService {
       if (member.getPoint() < request.getPoint()) {
         throw new BadRequestException("point_not_enough", messageService.getMessage(POINT_NOT_ENOUGH, lang));
       }
-      
-      int price = request.getPriceAmount() + request.getShippingAmount() - request.getDeductionAmount();
-      if (price < MIN_PRICE_TO_USE_POINT) {
-        throw new BadRequestException("point_bad_request",
-            messageService.getMessage(POINT_BAD_REQUEST_MIN_PRICE_CONDITION, lang));
-      }
     }
-    
+
     // Modify member phoneNumber with Order buyerPhoneNumber
     if (!member.getPhoneNumber().equals(request.getBuyerPhoneNumber())) {
       member.setPhoneNumber(request.getBuyerPhoneNumber());
@@ -240,9 +235,70 @@ public class OrderService {
 
     return order;
   }
-  
+
+  @Transactional
+  public void completeZeroOrder(Order order) {
+    checkCoupon(order);
+
+    paymentRepository.findById(order.getId())
+        .map(payment -> {
+          payment.setMessage("0");
+          payment.setState(Payment.STATE_READY | Payment.STATE_PAID);
+          return paymentRepository.save(payment);
+        })
+        .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid order id or payment id"));
+    completeOrder(order);
+    slackService.sendForOrder(order);
+  }
+
+  @Transactional
+  public Order create2(Order order, String customerId, Member member, String lang) {
+    checkCoupon(order);
+
+    String name;
+    if (order.getPurchases().size() > 1) {
+      name = order.getPurchases().get(0).getGoodsName() + "...";
+    } else {
+      name = order.getPurchases().get(0).getGoodsName();
+    }
+
+    String token = iamportService.getToken();
+    PaymentResponse response = iamportService.requestBilling(token, customerId, MERCHANT_BILLING_PREFIX + order.getId(), Long.toString(order.getPrice()), name);
+    
+    Payment payment = order.getPayment();
+    if (response.getResponse().getStatus().equals("paid")) {
+      payment.setMessage(response.getResponse().getStatus());
+      payment.setReceipt(response.getResponse().getReceiptUrl());
+      payment.setState(Payment.STATE_READY | Payment.STATE_PAID);
+      if (StringUtils.isNotEmpty(response.getResponse().getCardName())) {
+        payment.setCardName(response.getResponse().getCardName());
+      }
+      payment.setPaymentId(response.getResponse().getImpUid());
+      paymentRepository.save(payment);
+
+      completeOrder(order);
+      slackService.sendForOrder(order);
+    } else {
+      String failReason = response.getResponse().getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
+      log.warn("invalid_iamport_response, fail reason: {}", failReason);
+      slackService.sendForImportPaymentMismatch(response.getResponse().getImpUid(), response.toString());
+      payment.setState(Payment.STATE_FAILED);
+      payment.setMessage(failReason);
+      payment.setPaymentId(response.getResponse().getImpUid());
+      paymentRepository.save(payment);
+      throw new BadRequestException("order_failed", response.getResponse().getFailReason());
+    }
+
+    return order;
+  }
+
   @Transactional
   public OrderInquiry inquiryExchangeOrReturn(Order order, Byte state, String reason, Purchase purchase) {
+    return inquiryExchangeOrReturn(order, state, reason, purchase, null);
+  }
+
+  @Transactional
+  public OrderInquiry inquiryExchangeOrReturn(Order order, Byte state, String reason, Purchase purchase, String attachments) {
     if (purchase == null) {
       throw new BadRequestException("purchase_not_found", "invalid purchase id");
     }
@@ -267,7 +323,11 @@ public class OrderService {
       purchase.setStatus(status);
       purchaseRepository.save(purchase);
 
-      return orderInquiryRepository.save(new OrderInquiry(order, state, reason, purchase));
+      OrderInquiry orderInquiry = new OrderInquiry(order, state, reason, purchase);
+      if (!Strings.isNullOrEmpty(attachments)) {
+        orderInquiry.setAttachments(attachments);
+      }
+      return orderInquiryRepository.save(orderInquiry);
     } else {
       throw new BadRequestException("required purchase status delivered or delivering - " + purchase.getStatus());
     }
@@ -303,8 +363,10 @@ public class OrderService {
 
     Payment payment = paymentRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
 
-    String token = iamportService.getToken();
-    iamportService.cancelPayment(token, payment.getPaymentId());
+    if (order.getPrice() > 0 ) {
+      String token = iamportService.getToken();
+      iamportService.cancelPayment(token, payment.getPaymentId());
+    }
 
     log.debug("cancel order: {}", order);
     saveOrderAndPurchasesStatus(order, Order.Status.ORDER_CANCELLED);
@@ -322,13 +384,13 @@ public class OrderService {
   @Transactional
   public Order notifyPayment(Order order, String status, String impUid) {
     log.info(String.format("notifyPayment called, id: %d, status: %s, impUid: %s ", order.getId(), status, impUid));
-    PaymentResponse response = iamportService.getPayment(iamportService.getToken(), impUid);
-    
-    if (response.getCode() != 0 || response.getResponse() == null) {
-      log.warn("invalid_iamport_response, notifyPayment response is not success: " + response.getMessage());
-      slackService.sendForImportGetPaymentException(impUid, response.toString());
-      throw new PaymentConflictException();
-    }
+//    PaymentResponse response = iamportService.getPayment(iamportService.getToken(), impUid);
+//
+//    if (response.getCode() != 0 || response.getResponse() == null) {
+//      log.warn("invalid_iamport_response, notifyPayment response is not success: " + response.getMessage());
+//      slackService.sendForImportGetPaymentException(impUid, response.toString());
+//      throw new PaymentConflictException();
+//    }
     
     Payment payment = checkPaymentAndUpdate(order.getId(), impUid);
     
@@ -336,15 +398,10 @@ public class OrderService {
       order.setStatus(Order.Status.PAYMENT_CANCELLED);
       orderRepository.save(order);
     } else if ((payment.getState() & Payment.STATE_PAID) == Payment.STATE_PAID) {
-      if (order.getMemberCoupon() != null) {
-        MemberCoupon memberCoupon = order.getMemberCoupon();
-        if (memberCouponRepository.countByIdAndUsedAtIsNull(memberCoupon.getId()) == 0) {
-          log.warn("{}", memberCoupon);
-          cancelOrderInquire(order, OrderInquiry.STATE_CANCEL_ORDER, "쿠폰 중복 사용으로 인한 취소");
-
-          slackService.sendUsedCouponUse(memberCoupon);
-          throw new MybeautipRuntimeException("Used coupon used Error");
-        }
+      try {
+        checkCoupon(order);
+      } catch (MybeautipRuntimeException e) {
+        cancelOrderInquire(order, OrderInquiry.STATE_CANCEL_ORDER, "쿠폰 중복 사용으로 인한 취소");
       }
 
       completeOrder(order);
@@ -353,6 +410,18 @@ public class OrderService {
       orderRepository.save(order);
     }
     return order;
+  }
+
+  private void checkCoupon(Order order) {
+    if (order.getMemberCoupon() != null) {
+      MemberCoupon memberCoupon = order.getMemberCoupon();
+      if (memberCouponRepository.countByIdAndUsedAtIsNull(memberCoupon.getId()) == 0) {
+        log.warn("{}", memberCoupon);
+
+        slackService.sendUsedCouponUse(memberCoupon);
+        throw new MybeautipRuntimeException("Used coupon used Error");
+      }
+    }
   }
 
   @Transactional
@@ -376,7 +445,7 @@ public class OrderService {
              }
            } else {
              String failReason = iamportData.getFailReason() == null ? "invalid payment price or state" : response.getResponse().getFailReason();
-             log.warn("invalid_iamport_response, fail reason: ", failReason);
+             log.warn("invalid_iamport_response, fail reason: {}", failReason);
              slackService.sendForImportPaymentMismatch(paymentId, response.toString());
              payment.setState(state | Payment.STATE_FAILED);
              payment.setMessage(failReason);

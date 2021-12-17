@@ -198,6 +198,30 @@ public class SlackService {
             block.getMemberYou().getId());
     send(message);
   }
+
+  public void sendForBillingInfo(String merchantUid, String impUid) {
+    String message = String.format("*아임포트 billing info 추가됨*" +
+        "```merchant_uid: %s, imp_uid: %s```", merchantUid, impUid);
+    send(message);
+  }
+
+  public void sendForImportRequestBillingException(String merchantId, String response) {
+    String message = String.format("*아임포트 결제요청 응답이상, merchant_id: %s*" +
+        "```%s```", merchantId, response);
+    send(message);
+  }
+
+  public void sendForImportGetCardInfoException(Long billingId, String response) {
+    String message = String.format("*아임포트 카드정보조회 응답이상, billing_id: %s*" +
+        "```%s```", billingId, response);
+    send(message);
+  }
+
+  public void sendForImportDeleteBillingInfoException(Long billingId, String response) {
+    String message = String.format("*아임포트 빌링키정보삭제 응답이상, billing_id: %s*" +
+        "```%s```", billingId, response);
+    send(message);
+  }
   
   public void sendForImportGetPaymentException(String impUid, String response) {
     String message = String.format("*아임포트 결제조회 응답이상, payment_id: %s*" +

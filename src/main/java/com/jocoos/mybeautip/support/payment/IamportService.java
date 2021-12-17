@@ -103,6 +103,98 @@ public class IamportService implements IamportApi {
     }
   }
 
+  public PaymentResponse requestBilling(String accessToken, String customerId, String merchantId, String amount, String name) {
+    String tokenUri = fromUriString(api).path("/subscribe/payments/again").toUriString();
+
+    MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+    body.add("customer_uid", customerId);
+    body.add("merchant_uid", merchantId);
+    body.add("amount", amount);
+    body.add("name", name);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.AUTHORIZATION, accessToken);
+
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+    PaymentResponse response;
+    try {
+      response = restTemplate.postForObject(tokenUri, request, PaymentResponse.class);
+    } catch (RestClientException e) {
+      log.error("invalid_iamport_response, Check payment status, merchantId: " + merchantId);
+      slackService.sendForImportRequestBillingException(merchantId, e.getMessage());
+      throw new PaymentConflictException();
+    }
+
+    if (response == null || response.getCode() != 0) {
+      log.warn("invalid_iamport_response, Check payment status, merchantId: " + merchantId);
+      slackService.sendForImportCancelPaymentException(merchantId, (response == null) ? "" : response.toString());
+      throw new BadRequestException("order_failed", (response == null) ? "" : response.getMessage());
+    }
+
+    log.debug("{}, {}", response.getCode(), response.getResponse());
+    return response;
+  }
+
+  public PaymentBillingInfoData getCardInfo(String accessToken, String customerId, Long billingId) {
+    String path = "/subscribe/customers/" + customerId;
+    String tokenUri = fromUriString(api).path(path).toUriString();
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.AUTHORIZATION, accessToken);
+
+    HttpEntity<String> request = new HttpEntity<>("", headers);
+
+    ResponseEntity<PaymentBillingInfoResponse> responseEntity;
+    try {
+      responseEntity = restTemplate.exchange(tokenUri, HttpMethod.GET, request, PaymentBillingInfoResponse.class);
+    } catch (RestClientException e) {
+      log.error("invalid_iamport_response: Get payment error", e);
+      slackService.sendForImportGetCardInfoException(billingId, e.getMessage());
+      throw new PaymentConflictException();
+    }
+
+    PaymentBillingInfoResponse response = responseEntity.getBody();
+    if (response == null || response.getCode() != 0) {
+      log.warn("invalid_iamport_response, Check request card info status, billingId: " + billingId);
+      slackService.sendForImportGetCardInfoException(billingId, (response == null) ? "" : response.toString());
+      throw new BadRequestException("delete_billing_info_failed", (response == null) ? "" : response.getMessage());
+    }
+
+    log.debug("{}, {}", response.getCode(), response.getResponse());
+    return response.getResponse();
+  }
+
+  public PaymentResponse removeBillingInfo(String accessToken, String customerId, Long billingId) {
+    String path = "/subscribe/customers/" + customerId;
+    String tokenUri = fromUriString(api).path(path).toUriString();
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.AUTHORIZATION, accessToken);
+
+    HttpEntity<String> request = new HttpEntity<>("", headers);
+
+    ResponseEntity<PaymentResponse> responseEntity;
+    PaymentResponse response;
+    try {
+      responseEntity = restTemplate.exchange(tokenUri, HttpMethod.DELETE, request, PaymentResponse.class);
+      response = responseEntity.getBody();
+    } catch (RestClientException e) {
+      log.error("invalid_iamport_response, Check deleting billing info status, billingId: " + billingId);
+      slackService.sendForImportDeleteBillingInfoException(billingId, e.getMessage());
+      throw new PaymentConflictException();
+    }
+
+    if (response == null || response.getCode() != 0) {
+      log.warn("invalid_iamport_response, Check deleting billing info status, billingId: " + billingId);
+      slackService.sendForImportDeleteBillingInfoException(billingId, (response == null) ? "" : response.toString());
+      throw new BadRequestException("delete_billing_info_failed", (response == null) ? "" : response.getMessage());
+    }
+
+    log.debug("{}, {}", response.getCode(), response.getResponse());
+    return response;
+  }
+
   @Override
   public PaymentResponse cancelPayment(String accessToken, String impUid) {
     String tokenUri = fromUriString(api).path("/payments/cancel").toUriString();

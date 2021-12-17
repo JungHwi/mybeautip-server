@@ -31,6 +31,11 @@ mybeautip:
     key: 3621612290867148
     secret: Z4CYi1YGDdOfk2ti4mYQtpEJiJPfxzlxEXvWZtCCGqR1skjxHinaI1U1LJgijBPXzlTyOwavW2xpmRW4
 
+cloud:
+  aws:
+    s3:
+      bucket: mybeautip-prod
+
 flipflop:
   app-key: 9z27htVnKe
   video:

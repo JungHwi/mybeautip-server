@@ -1,14 +1,37 @@
 package com.jocoos.mybeautip.restapi;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.jocoos.mybeautip.comment.CreateCommentRequest;
+import com.jocoos.mybeautip.comment.UpdateCommentRequest;
+import com.jocoos.mybeautip.exception.AccessDeniedException;
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.revenue.*;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.notification.NotificationService;
+import com.jocoos.mybeautip.search.KeywordService;
+import com.jocoos.mybeautip.tag.TagService;
+import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.report.VideoReportRepository;
+import com.jocoos.mybeautip.video.scrap.VideoScrap;
+import com.jocoos.mybeautip.video.scrap.VideoScrapService;
+import com.jocoos.mybeautip.video.view.VideoView;
+import com.jocoos.mybeautip.video.view.VideoViewRepository;
+import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -19,59 +42,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.comment.CreateCommentRequest;
-import com.jocoos.mybeautip.comment.UpdateCommentRequest;
-import com.jocoos.mybeautip.exception.AccessDeniedException;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentInfo;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.member.comment.CommentService;
-import com.jocoos.mybeautip.member.mention.MentionResult;
-import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.revenue.Revenue;
-import com.jocoos.mybeautip.member.revenue.RevenueOverview;
-import com.jocoos.mybeautip.member.revenue.RevenueRepository;
-import com.jocoos.mybeautip.member.revenue.RevenueService;
-import com.jocoos.mybeautip.member.revenue.SalesInfo;
-import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.NotificationService;
-import com.jocoos.mybeautip.search.KeywordService;
-import com.jocoos.mybeautip.tag.TagService;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoGoods;
-import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.VideoLike;
-import com.jocoos.mybeautip.video.VideoLikeRepository;
-import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
-import com.jocoos.mybeautip.video.report.VideoReportRepository;
-import com.jocoos.mybeautip.video.view.VideoView;
-import com.jocoos.mybeautip.video.view.VideoViewRepository;
-import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -98,11 +74,14 @@ public class VideoController {
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
   private final TimeSaleService timeSaleService;
+  private final VideoScrapService videoScrapService;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String LIKE_NOT_FOUND = "like.not_found";
+  private static final String SCRAP_NOT_FOUND = "scrap.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
+  private static final String ALREADY_SCRAPED = "scrap.already_scraped";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_LOCKED = "comment.locked";
@@ -132,7 +111,8 @@ public class VideoController {
                          KeywordService keywordService,
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
-                         TimeSaleService timeSaleService) {
+                         TimeSaleService timeSaleService,
+                         VideoScrapService videoScrapService) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.messageService = messageService;
@@ -154,6 +134,7 @@ public class VideoController {
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
     this.timeSaleService = timeSaleService;
+    this.videoScrapService = videoScrapService;
   }
   
   @PostMapping
@@ -263,7 +244,8 @@ public class VideoController {
                                     @RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) Long cursor,
                                     @RequestParam(required = false) String direction,
-                                    @RequestParam(name = "parent_id", required = false) Long parentId) {
+                                    @RequestParam(name = "parent_id", required = false) Long parentId,
+                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     PageRequest page;
     if ("next".equals(direction)) {
       page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
@@ -284,12 +266,15 @@ public class VideoController {
       if (comment.getComment().contains("@")) {
         MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
         if (mentionResult != null) {
-          comment.setComment(mentionResult.getComment());
+          String content = commentService.getBlindContent(comment, lang, mentionResult.getComment());
+          comment.setComment(content);
           commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
         } else {
           log.warn("mention result not found - {}", comment);
         }
       } else {
+        String content = commentService.getBlindContent(comment, lang, null);
+        comment.setComment(content);
         commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
       
@@ -340,7 +325,18 @@ public class VideoController {
   
     if (request.getParentId() != null) {
       commentRepository.findById(request.getParentId())
+          .map(c -> {
+            /**
+             * Not allow 2 depth comment in child comment
+             */
+            if (c.getParentId() != null) {
+              log.warn("comment is child comment: {}", c);
+              throw new BadRequestException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang));
+            }
+            return c;
+          })
           .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+
     }
     
     Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_VIDEO, id);
@@ -383,8 +379,9 @@ public class VideoController {
         if (comment.getLocked()) {
           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
         }
-        videoService.deleteComment(comment);
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        int state = videoService.deleteComment(comment);
+        return new ResponseEntity<>(new CommentStateInfo(state), HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));
   }
@@ -689,6 +686,41 @@ public class VideoController {
     return createViewerList(id, count, cursor, lang);
   }
 
+  /**
+   * Scraps
+   */
+  @PostMapping("/{videoId:.+}/scraps")
+  public ResponseEntity<VideoScrapInfo> addVideoScrap(@PathVariable Long videoId,
+                                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    Long memberId = memberService.currentMemberId();
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+
+    try {
+      VideoScrap scrap = videoScrapService.scrapVideo(video, memberId);
+      VideoScrapInfo info = new VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()));
+      return new ResponseEntity<>(info, HttpStatus.OK);
+    } catch (BadRequestException e) {
+      throw new BadRequestException("already_scrap", messageService.getMessage(ALREADY_SCRAPED, lang));
+    }
+  }
+
+  @DeleteMapping("/{videoId:.+}/scraps")
+  public ResponseEntity<?> removeVideoScrap(@PathVariable Long videoId,
+                                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    Long memberId = memberService.currentMemberId();
+
+    Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
+        .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+
+    try {
+      videoScrapService.deleteScrap(video, memberId);
+      return new ResponseEntity(HttpStatus.OK);
+    } catch (NotFoundException e) {
+      throw new NotFoundException("scrap_not_found", messageService.getMessage(SCRAP_NOT_FOUND, lang));
+    }
+  }
+
   private CursorResponse createViewerList(Long id, int count, String cursor, String lang) {
     videoRepository.findByIdAndDeletedAtIsNull(id)
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
@@ -731,6 +763,8 @@ public class VideoController {
     private String thumbnailUrl;
     private String chatRoomId;
     private Integer duration;
+    private String liveKey = "";
+    private String outputType = "";
     private String data;
     private Integer watchCount;
     private Integer totalWatchCount;
@@ -743,6 +777,7 @@ public class VideoController {
     private Integer relatedGoodsCount;
     private String relatedGoodsThumbnailUrl;
     private Long likeId;
+    private Long scrapId;
     private MemberInfo owner;
     private Boolean blocked;
     private Date createdAt;
@@ -816,5 +851,26 @@ public class VideoController {
   @Data
   private static class VideoHeartRequest {
     private Integer count;
+  }
+
+  @Data
+  public static class VideoScrapInfo {
+    private Long id;
+    @Deprecated
+    private Long createdBy;
+    private Date createdAt;
+    private VideoInfo video;
+
+    VideoScrapInfo(VideoScrap VideoScrap, VideoInfo video) {
+      BeanUtils.copyProperties(VideoScrap, this);
+      this.video = video;
+    }
+  }
+
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  private static class CommentStateInfo {
+    private int state;
   }
 }

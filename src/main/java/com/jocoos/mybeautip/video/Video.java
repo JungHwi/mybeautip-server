@@ -69,6 +69,12 @@ public class Video {
   private int duration;
 
   @Column
+  private String liveKey;
+
+  @Column
+  private String outputType;
+
+  @Column
   private String data;
 
   @Column(nullable = false)
@@ -85,6 +91,9 @@ public class Video {
 
   @Column(nullable = false)
   private Integer likeCount;
+
+  @Column(nullable = false)
+  private Integer scrapCount;
 
   @Column(nullable = false)
   private Integer commentCount;
@@ -136,5 +145,6 @@ public class Video {
     this.viewCount = 0;
     this.orderCount = 0;
     this.reportCount = 0L;
+    this.scrapCount = 0;
   }
 }

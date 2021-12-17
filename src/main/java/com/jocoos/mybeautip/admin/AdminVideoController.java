@@ -14,13 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -63,20 +57,28 @@ public class AdminVideoController {
   public ResponseEntity<VideoController.VideoInfo> updateVideo(@PathVariable Long id,
                                                                @RequestBody UpdateVideoRequest request) {
     log.debug("request: {}", request);
-    
+
+    if (request.getRestore() != null && request.getRestore()) {
+      Video video = videoRepository.findById(id)
+          .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + id));
+      videoService.restore(video);
+      return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+    }
+
     VideoController.VideoInfo videoInfo = videoRepository.findByIdAndDeletedAtIsNull(id)
         .map(video -> {
-          if (request.getLocked() != null && request.getLocked()) {
-            if (video.getLocked()) {
-              throw new BadRequestException("already_locked", "Video already locked");
+          if (request.getLocked() != null) {
+            if (request.getLocked()) {
+              if (video.getLocked()) {
+                throw new BadRequestException("already_locked", "Video already locked");
+              }
+              video = videoService.lockVideo(video);
+            } else {
+              if (!video.getLocked()) {
+                throw new BadRequestException("already_unlocked", "Video does not lock.");
+              }
+              video = videoService.unLockVideo(video);
             }
-            video = videoService.lockVideo(video);
-          }
-          if (request.getLocked() != null && !request.getLocked()) {
-            if (!video.getLocked()) {
-              throw new BadRequestException("already_unlocked", "Video does not lock.");
-            }
-            video = videoService.unLockVideo(video);
           }
           return videoService.generateVideoInfo(video);
         })
@@ -85,6 +87,17 @@ public class AdminVideoController {
     return new ResponseEntity<>(videoInfo, HttpStatus.OK);
   }
 
+  @DeleteMapping("/{id:.+}")
+  public ResponseEntity<VideoController.VideoInfo> removeVideo(@PathVariable Long id) {
+    VideoController.VideoInfo videoInfo = videoRepository.findByIdAndDeletedAtIsNull(id)
+        .map(video -> {
+          video = videoService.remove(video);
+          return videoService.generateVideoInfo(video);
+        })
+        .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + id));
+
+    return new ResponseEntity<>(videoInfo, HttpStatus.OK);
+  }
 
   @GetMapping("/recently")
   public ResponseEntity<List<RecentVideoInfo>> getRecentVideos(
@@ -157,6 +170,7 @@ public class AdminVideoController {
   @Data
   private static class UpdateVideoRequest {
     private Boolean locked;
+    private Boolean restore;
   }
 
   @Data

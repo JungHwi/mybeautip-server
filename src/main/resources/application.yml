@@ -128,15 +128,27 @@ mybeautip:
     welcome-usage-days: 7
   goods:
     max-valid-state: 0
-
+  smtp:
+    host: "smtp.gmail.com"
+    port: "587"
+    user: "dev@jocoos.com"
+    pass: "279Wkddldi!"
+    mail: "mybeautip@mybeautip.tv"
+  billing:
+    time-between-reset: 60000 # 1 minute (milliseconds)
+    max-error-count: 18
 
 cloud:
   aws:
     credentials:
-      accessKey: AKIA3JYLF6P2AOO7IAKN
+      accessKey: AKIA3JYLF6P2AOO7IAKN #mybeautip
       secretKey: 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
     region:
       static: ap-northeast-2
+    s3:
+      bucket: mybeautip-dev
+    sts:
+      token-validity-duration-seconds: 3600
 
 godomall:
   goods-view-url: http://m.mybeautip.tv/goods/goods_view.php

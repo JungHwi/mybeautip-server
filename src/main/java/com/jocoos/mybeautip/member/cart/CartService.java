@@ -55,11 +55,13 @@ public class CartService {
   private final StoreRepository storeRepository;
   private final DeliveryChargeRepository deliveryChargeRepository;
   private final DeliveryChargeDetailRepository deliveryChargeDetailRepository;
+  private final DeliveryChargeOptionRepository deliveryChargeOptionRepository;
 
   public CartService(MessageService messageService,
                      TimeSaleService timeSaleService,
                      GoodsRepository goodsRepository,
                      GoodsOptionRepository goodsOptionRepository,
+                     DeliveryChargeOptionRepository deliveryChargeOptionRepository,
                      CartRepository cartRepository,
                      StoreRepository storeRepository,
                      DeliveryChargeRepository deliveryChargeRepository,
@@ -68,6 +70,7 @@ public class CartService {
     this.timeSaleService = timeSaleService;
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
+    this.deliveryChargeOptionRepository = deliveryChargeOptionRepository;
     this.cartRepository = cartRepository;
     this.storeRepository = storeRepository;
     this.deliveryChargeRepository = deliveryChargeRepository;
@@ -202,6 +205,31 @@ public class CartService {
       .shippingAmount(totalShipping)
       .pointRatio(pointRatio)
       .build();
+  }
+
+  public int updateShippingAmount(CartInfo cartInfo, int areaShipping) {
+    // TODO: change logic if table has too much data
+    List<DeliveryChargeOption> deliveryChargeOptions = deliveryChargeOptionRepository.findAll();
+
+    int shippingAmount = cartInfo.shippingAmount;
+    int extraFeeCount = 0;
+    for (CartStore store : cartInfo.getStores()) {
+      for (CartDelivery delivery : store.getDeliveries()) {
+        if (!foundDeliveryChargeOption(delivery.deliverySno, deliveryChargeOptions)) {
+          extraFeeCount = extraFeeCount + 1;
+        }
+      }
+    }
+    return shippingAmount + (extraFeeCount * areaShipping);
+  }
+
+  private boolean foundDeliveryChargeOption(int deliveryChargeId, List<DeliveryChargeOption> deliveryChargeOptions) {
+    for (DeliveryChargeOption chargeOption : deliveryChargeOptions) {
+      if (chargeOption.getDeliveryChargeId() == deliveryChargeId) {
+        return true;
+      }
+    }
+    return false;
   }
   
   @Transactional

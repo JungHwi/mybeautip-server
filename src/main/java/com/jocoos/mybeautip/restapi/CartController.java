@@ -5,8 +5,13 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.address.Address;
+import com.jocoos.mybeautip.member.address.AddressRepository;
+import com.jocoos.mybeautip.member.order.Delivery;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,11 +47,13 @@ public class CartController {
   private final GoodsRepository goodsRepository;
   private final GoodsOptionRepository goodsOptionRepository;
   private final StoreRepository storeRepository;
+  private final AddressRepository addressRepository;
 
   private static final String GOODS_NOT_FOUND = "goods.not_found";
   private static final String OPTION_NOT_FOUND = "option.not_found";
   private static final String CART_ITEM_NOT_FOUND = "cart.item_not_found";
   private static final String STORE_NOT_FOUND = "store.not_found";
+  private static final String ADDRESS_NOT_FOUND = "address.not_found";
 
   public CartController(MemberService memberService,
                         CartService cartService,
@@ -54,7 +61,8 @@ public class CartController {
                         CartRepository cartRepository,
                         GoodsRepository goodsRepository,
                         GoodsOptionRepository goodsOptionRepository,
-                        StoreRepository storeRepository) {
+                        StoreRepository storeRepository,
+                        AddressRepository addressRepository) {
     this.memberService = memberService;
     this.cartService = cartService;
     this.messageService = messageService;
@@ -62,6 +70,7 @@ public class CartController {
     this.goodsRepository = goodsRepository;
     this.goodsOptionRepository = goodsOptionRepository;
     this.storeRepository = storeRepository;
+    this.addressRepository = addressRepository;
   }
 
   @GetMapping("/count")
@@ -117,6 +126,37 @@ public class CartController {
     return cartService.getCartItemList(list, TimeSaleCondition.createWithBroker(broker));
   }
 
+  @PostMapping("/now2")
+  public CartService.CartInfo calculateInstantCartInfo2(@Valid @RequestBody AddCartRequest request,
+                                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
+                                                        @RequestParam(name = "broker", required = false) Long broker) {
+    List<Cart> list = new ArrayList<>();
+    for (CartItemRequest item : request.getItems()) {
+      list.add(getValidCartItem(item.getGoodsNo(), item.getOptionNo(), item.getQuantity(), lang));
+    }
+
+    CartService.CartInfo cartInfo = cartService.getCartItemList(list, TimeSaleCondition.createWithBroker(broker));
+
+    // check area shipping
+    Member member = memberService.currentMember();
+    Address address = null;
+    if (request.addressId != null) {
+      address = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(request.addressId, member.getId())
+          .orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
+    } else {
+      Optional<Address> baseAddress = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId());
+      if (baseAddress.isPresent()) {
+        address = baseAddress.get();
+      }
+    }
+    if (address != null) {
+      int shippingAmount = cartService.updateShippingAmount(cartInfo, address.getAreaShipping());
+      cartInfo.setShippingAmount(shippingAmount);
+    }
+
+    return cartInfo;
+  }
+
   private Cart getValidCartItem(String goodsNo, int optionNo, int quantity, String lang) {
     Goods goods = goodsRepository.findByGoodsNoAndStateLessThanEqual(goodsNo, Goods.GoodsState.NO_SALE.ordinal())
       .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
@@ -162,6 +202,8 @@ public class CartController {
   public static class AddCartRequest {
     @Valid
     List<CartItemRequest> items;
+
+    Long addressId;
   }
 
   @Data

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.billing.MemberBillingService;
 import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.member.order.OrderService;
 import com.jocoos.mybeautip.support.slack.SlackService;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.jocoos.mybeautip.member.billing.MemberBillingService.MERCHANT_BILLING_PREFIX;
+
 @Slf4j
 @RestController
 @RequestMapping(path = "/api/1/payments", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -24,13 +27,16 @@ public class PublicPaymentController {
 
   private final OrderService orderService;
   private final SlackService slackService;
+  private final MemberBillingService memberBillingService;
   private final OrderRepository orderRepository;
 
   public PublicPaymentController(OrderService orderService,
                                  SlackService slackService,
+                                 MemberBillingService memberBillingService,
                                  OrderRepository orderRepository) {
     this.orderService = orderService;
     this.slackService = slackService;
+    this.memberBillingService = memberBillingService;
     this.orderRepository = orderRepository;
   }
 
@@ -39,15 +45,22 @@ public class PublicPaymentController {
     log.info("payments/notification called: {}", request);
     
     if (request.getImpUid() == null || request.getMerchantUid() == null) {
-      log.warn("Invalid iamport notification request: ", request.toString());
+      log.warn("Invalid iamport notification request: {}", request.toString());
       return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
-  
+
+    // billing
+    if (request.getMerchantUid().startsWith(MERCHANT_BILLING_PREFIX)) {
+      //slackService.sendForBillingInfo(request.getMerchantUid(), request.getImpUid());
+      return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    // normal payment
     long orderId;
     try {
       orderId = orderService.parseOrderId(request.getMerchantUid());
     } catch (NumberFormatException e) {
-      log.warn("Invalid merchant_uid: %s, imp_uid: %s", request.getMerchantUid(), request.getImpUid());
+      log.warn("Invalid merchant_uid: {}, imp_uid: {}", request.getMerchantUid(), request.getImpUid());
       slackService.sendForImportMerchantIdFormatException(request.getMerchantUid(), request.getImpUid());
       return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
