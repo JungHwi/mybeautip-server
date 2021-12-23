@@ -431,10 +431,10 @@ public class VideoService {
           return Optional.empty();
         });
       }
-    
+
       if (videoGoods.size() > 0) {
         videoGoodsRepository.saveAll(videoGoods);
-      
+
         // Set related goods count & one thumbnail image
         String url = videoGoods.get(0).getGoods().getListImageData().toString();
         createdVideo.setRelatedGoodsThumbnailUrl(url);
@@ -445,7 +445,7 @@ public class VideoService {
     
     return createdVideo;
   }
-  
+
   @Transactional
   public Video startVideo(CallbackController.CallbackStartVideoRequest request, Member member) {
     Video video;
@@ -548,6 +548,34 @@ public class VideoService {
     }
 
     return categories;
+  }
+
+  @Transactional
+  public void updateVideoGoods(Video video, String goods) {
+    if (video.getRelatedGoodsCount() != null && video.getRelatedGoodsCount() > 0) {
+      videoGoodsRepository.deleteByVideoId(video.getId());
+    }
+
+    List<VideoGoods> videoGoods = new ArrayList<>();
+    String[] goodses = StringUtils.deleteWhitespace(goods).split(",");
+    for (String goodsNo : goodses) {
+      if (goodsNo.length() != 10) { // invalid goodsNo
+        continue;
+      }
+      goodsRepository.findByGoodsNo(goods).ifPresent(g -> {
+        videoGoods.add(new VideoGoods(video, g, video.getMember()));
+      });
+    }
+
+    if (videoGoods.size() > 0) {
+      videoGoodsRepository.saveAll(videoGoods);
+
+      // Set related goods count & one thumbnail image
+      String url = videoGoods.get(0).getGoods().getListImageData().toString();
+      video.setRelatedGoodsThumbnailUrl(url);
+      video.setRelatedGoodsCount(videoGoods.size());
+      videoRepository.save(video);
+    }
   }
 
   @Transactional

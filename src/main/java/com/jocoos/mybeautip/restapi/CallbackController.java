@@ -8,6 +8,7 @@ import java.util.Locale;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,8 +84,14 @@ public class CallbackController {
     }
 
     String oldState = video.getState();
+
     video = videoService.updateVideoProperties(request, video);
     video = videoService.update(video);
+
+    if (!Strings.isNullOrEmpty(request.getData())) {
+      log.info("goods {}, request goods: {}", video.getData(), request.getData());
+      videoService.updateVideoGoods(video, request.getData());
+    }
 
     // Send on-live stats using slack when LIVE ended
     if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(oldState) && "VOD".equals(request.getState())) {

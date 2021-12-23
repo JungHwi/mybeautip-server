@@ -24,4 +24,6 @@ public interface VideoGoodsRepository extends JpaRepository<VideoGoods, Long> {
   int countByGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(String goodsNo, String visibility, String state);
   
   List<VideoGoods> findByGoodsAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(Goods goods, String visibility, String state);
+
+  void deleteByVideoId(Long id);
 }
