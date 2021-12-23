@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.admin;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
 import java.util.*;
 
 import org.springframework.beans.BeanUtils;
@@ -46,6 +47,7 @@ import com.jocoos.mybeautip.restapi.PostController;
 import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.schedules.ScheduleRepository;
 import com.jocoos.mybeautip.store.StoreRepository;
+import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.tag.TagRepository;
 import com.jocoos.mybeautip.tag.TagService;
@@ -524,8 +526,11 @@ public class AdminController {
          recommendation.setStartedAt(getRecommendedDate(request.getStartedAt()));
          recommendation.setEndedAt(getRecommendedDate(request.getEndedAt()));
 
-         Date baseDate = recommendation.getStartedAt();
-         log.debug("baseDate: {}", baseDate);
+         Date startedAt = recommendation.getStartedAt();
+
+         LocalDate localDate = DateUtils.toLocalDate(startedAt);
+         Date baseDate = DateUtils.toDate(localDate);
+         log.info("baseDate: {}", baseDate);
 
          Optional<MotdRecommendationBase> base = motdRecommendationBaseRepository.findByBaseDate(baseDate);
          MotdRecommendationBase newBase = null;
