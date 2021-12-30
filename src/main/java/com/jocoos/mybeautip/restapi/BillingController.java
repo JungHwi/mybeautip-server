@@ -58,6 +58,7 @@ public class BillingController {
                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberService.currentMember();
     memberBillingService.deleteBillingInfo(member.getId(), id, lang);
+    memberBillingAuthService.remove(member.getId());
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

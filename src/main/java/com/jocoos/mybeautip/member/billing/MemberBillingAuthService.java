@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -39,20 +40,24 @@ public class MemberBillingAuthService {
   }
 
   public MemberBillingAuth create(Long memberId, BillingController.CreateBillingAuthRequest request)  {
-    MemberBillingAuth billingAuth = new MemberBillingAuth();
-    billingAuth.setMemberId(memberId);
-    billingAuth.setUsername(request.getUsername());
-    billingAuth.setEmail(request.getEmail());
+    Optional<MemberBillingAuth> optionalBillingAuth = memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId);
+    if (optionalBillingAuth.isPresent()) {
+      return optionalBillingAuth.get();
+    } else {
+      MemberBillingAuth billingAuth = new MemberBillingAuth();
+      billingAuth.setMemberId(memberId);
+      billingAuth.setUsername(request.getUsername());
+      billingAuth.setEmail(request.getEmail());
 
-    MemberBillingService.EncryptedInfo encryptedInfo = encrypt(request.getPassword());
-    billingAuth.setPassword(encryptedInfo.encrypted);
-    billingAuth.setSalt(encryptedInfo.salt);
-
-    return memberBillingAuthRepository.save(billingAuth);
+      MemberBillingService.EncryptedInfo encryptedInfo = encrypt(request.getPassword());
+      billingAuth.setPassword(encryptedInfo.encrypted);
+      billingAuth.setSalt(encryptedInfo.salt);
+      return memberBillingAuthRepository.save(billingAuth);
+    }
   }
 
   public MemberBillingAuth update(Long memberId, BillingController.UpdateBillingAuthRequest request, String lang) {
-    MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberId(memberId)
+    MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
         .orElseThrow(() -> {
           String message = messageService.getMessage("billing.auth.not_found", lang);
           return new BadRequestException("billing_auth_not_found", message);
@@ -66,16 +71,20 @@ public class MemberBillingAuthService {
   }
 
   public MemberBillingAuth get(Long memberId, String lang) {
-    return memberBillingAuthRepository.findTopByMemberId(memberId)
+    return memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
         .orElseThrow(() -> {
           String message = messageService.getMessage("billing.auth.not_found", lang);
           return new BadRequestException("billing_auth_not_found", message);
         });
   }
 
+  public void remove(Long memberId) {
+    memberBillingAuthRepository.deleteTopByMemberIdOrderByCreatedAtDesc(memberId);
+  }
+
   @Transactional
   public MemberBillingAuth auth(Long memberId, BillingController.BillingAuthRequest request, String lang) {
-    MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberId(memberId)
+    MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
         .orElseThrow(() -> {
           String message = messageService.getMessage("billing.auth.not_found", lang);
           return new BadRequestException("billing_auth_not_found", message);
@@ -98,7 +107,7 @@ public class MemberBillingAuthService {
 
   @Async
   public void resetPasswordAsync(Long memberId, String lang) {
-    MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberId(memberId)
+    MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
         .orElseThrow(() -> {
           String message = messageService.getMessage("billing.auth.not_found", lang);
           return new BadRequestException("billing_auth_not_found", message);
