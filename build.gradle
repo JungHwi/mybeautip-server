@@ -7,6 +7,7 @@ buildscript {
     swaggerVersion = '2.9.2'
     awsSdkVersion = '1.10.73'
     jacksonDataFormatVersion = '2.7.3'
+    log4jVersion = '2.17.1'
   }
   repositories {
     mavenCentral()
@@ -61,6 +62,9 @@ dependencies {
   compile "org.springframework.boot:spring-boot-starter-actuator:${springVersion}"
   compile "org.springframework.boot:spring-boot-starter-web:${springVersion}"
   compile "org.springframework.boot:spring-boot-starter-log4j2:${springVersion}"
+  compile "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+  compile "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+  compile "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
   compile "org.springframework.boot:spring-boot-starter-data-rest:${springVersion}"
   compile "org.springframework.boot:spring-boot-starter-data-jpa:${springVersion}"
   compile "org.springframework.boot:spring-boot-starter-security:${springVersion}"
