@@ -4,6 +4,7 @@ import java.time.ZoneId;
 import java.util.List;
 
 import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.member.comment.CommentReport;
 import com.jocoos.mybeautip.restapi.ScheduleController;
 import com.jocoos.mybeautip.schedules.Schedule;
 import org.springframework.beans.factory.annotation.Value;
@@ -188,6 +189,42 @@ public class SlackService {
         report.getYou().getId(),
         report.getReason());
     send(message);
+  }
+
+  public void sendForReportComment(CommentReport report) {
+    String message = String.format("*댓글신고*" +
+            "```%s/%d (이)가 %d 영상의 %s 댓글을 신고함\n" +
+            "신고이유: %s```",
+        report.getCreatedBy().getUsername(),
+        report.getCreatedBy().getId(),
+        report.getComment().getVideoId(),
+        report.getComment().getComment(),
+        toReason(report.getReasonCode()));
+    send(message);
+  }
+
+  private String toReason(int reasonCode) {
+    String reason;
+    switch (reasonCode) {
+      case 1:
+        reason = "홍보 또는 상업적인 내용";
+        break;
+      case 2:
+        reason = "음란성 혹은 부적절한 내용";
+        break;
+      case 3:
+        reason = "명예훼손 및 저작권 침해등";
+        break;
+      case 4:
+        reason = "정치적 성향 및 갈등 조장";
+        break;
+      case 5:
+        reason = "허위사실 유포 등";
+        break;
+      default:
+        reason = "";
+    }
+    return reason;
   }
 
   public void sendForBlockMember(Block block) {

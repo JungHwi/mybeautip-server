@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.member.comment.CommentReport;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
@@ -116,7 +117,18 @@ public class NotificationAspect {
     }
   }
 
+  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.comment.CommentReportRepository.save(..))",
+      returning = "result")
+  public void onAfterReturningReportComment(JoinPoint joinPoint, Object result) {
+    log.debug("joinPoint: {}", joinPoint.toLongString());
 
+    if (result instanceof CommentReport) {
+      CommentReport commentReport = (CommentReport) result;
+      log.debug("commentReport: {}", commentReport);
+      slackService.sendForReportComment(commentReport);
+    }
+  }
+  
   @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.report.ReportRepository.save(..))",
       returning = "result")
   public void onAfterReturningReportMember(JoinPoint joinPoint, Object result) {
