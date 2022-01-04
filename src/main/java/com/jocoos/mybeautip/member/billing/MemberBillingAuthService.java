@@ -78,6 +78,7 @@ public class MemberBillingAuthService {
         });
   }
 
+  @Transactional
   public void remove(Long memberId) {
     memberBillingAuthRepository.deleteTopByMemberIdOrderByCreatedAtDesc(memberId);
   }
