@@ -109,10 +109,11 @@ public class CommentService {
   }
 
   @Transactional
-  public Comment reportComment(Comment comment, Member me, int reasonCode, String reason) {
-    commentReportRepository.save(new CommentReport(comment, me, reasonCode, reason));
+  public CommentReport reportComment(Comment comment, Member me, int reasonCode, String reason) {
+    CommentReport report = commentReportRepository.save(new CommentReport(comment, me, reasonCode, reason));
     comment.setReportCount(comment.getReportCount() + 1);
-    return commentRepository.save(comment);
+    commentRepository.save(comment);
+    return report;
   }
 
   public String getBlindContent(Comment comment, String lang, String defaultValue) {

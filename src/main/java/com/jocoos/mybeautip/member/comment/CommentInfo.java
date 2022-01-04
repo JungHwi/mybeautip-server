@@ -25,6 +25,7 @@ public class CommentInfo {
   private String commentRef;
   private Long likeId;
   private Integer likeCount;
+  private Integer reportCount;
   private Integer state;
   private Set<MentionTag> mentionInfo;
 

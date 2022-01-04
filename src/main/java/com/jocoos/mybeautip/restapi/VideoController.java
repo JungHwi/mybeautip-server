@@ -729,7 +729,7 @@ public class VideoController {
    * Comment Report
    */
   @PostMapping(value = "/{videoId:.+}/comments/{id:.+}/report")
-  public ResponseEntity<CommentInfo> reportVideoComment(@PathVariable Long videoId,
+  public ResponseEntity<CommentReportInfo> reportVideoComment(@PathVariable Long videoId,
                                                         @PathVariable Long id,
                                                         @Valid @RequestBody VideoController.CommentReportRequest request,
                                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
@@ -744,9 +744,8 @@ public class VideoController {
       throw new ConflictException(messageService.getMessage(COMMENT_ALREADY_REPORTED, lang));
     }
 
-    Comment result = commentService.reportComment(comment, me, reasonCode, request.getReason());
-    return new ResponseEntity<>(
-        new CommentInfo(result, memberService.getMemberInfo(comment.getCreatedBy())), HttpStatus.OK);
+    CommentReport report = commentService.reportComment(comment, me, reasonCode, request.getReason());
+    return new ResponseEntity<>(new CommentReportInfo(report), HttpStatus.OK);
   }
 
   private CursorResponse createViewerList(Long id, int count, String cursor, String lang) {
@@ -909,5 +908,31 @@ public class VideoController {
 
     @NotNull
     private Integer reasonCode;
+  }
+
+  @Data
+  private static class CommentReportInfo {
+    private Long id;
+    private CommentInfo comment;
+    private Integer reasonCode;
+    private String reason;
+    private SimpleMemberInfo createdBy;
+
+    public CommentReportInfo(CommentReport commentReport) {
+      BeanUtils.copyProperties(commentReport, this);
+      comment = new CommentInfo(commentReport.getComment());
+      createdBy = new SimpleMemberInfo(commentReport.getCreatedBy());
+    }
+  }
+
+  @Data
+  private static class SimpleMemberInfo {
+    private Long id;
+    private String username;
+    private Date createdAt;
+
+    public SimpleMemberInfo(Member member) {
+      BeanUtils.copyProperties(member, this);
+    }
   }
 }
