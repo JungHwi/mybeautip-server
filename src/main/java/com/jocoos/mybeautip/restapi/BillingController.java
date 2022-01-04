@@ -57,8 +57,8 @@ public class BillingController {
   public ResponseEntity<?> delete(@PathVariable Long id,
                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member member = memberService.currentMember();
-    memberBillingService.deleteBillingInfo(member.getId(), id, lang);
     memberBillingAuthService.remove(member.getId());
+    memberBillingService.deleteBillingInfo(member.getId(), id, lang);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
