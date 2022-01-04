@@ -1,12 +1,12 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.ConflictException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.Member;
@@ -75,9 +75,11 @@ public class VideoController {
   private final GoodsRepository goodsRepository;
   private final TimeSaleService timeSaleService;
   private final VideoScrapService videoScrapService;
+  private final CommentReportRepository commentReportRepository;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
+  private static final String COMMENT_ALREADY_REPORTED = "comment.already_reported";
   private static final String LIKE_NOT_FOUND = "like.not_found";
   private static final String SCRAP_NOT_FOUND = "scrap.not_found";
   private static final String ALREADY_LIKED = "like.already_liked";
@@ -112,7 +114,8 @@ public class VideoController {
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
                          TimeSaleService timeSaleService,
-                         VideoScrapService videoScrapService) {
+                         VideoScrapService videoScrapService,
+                         CommentReportRepository commentReportRepository) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.messageService = messageService;
@@ -135,6 +138,7 @@ public class VideoController {
     this.goodsRepository = goodsRepository;
     this.timeSaleService = timeSaleService;
     this.videoScrapService = videoScrapService;
+    this.commentReportRepository = commentReportRepository;
   }
   
   @PostMapping
@@ -615,7 +619,7 @@ public class VideoController {
    */
   @PostMapping(value = "/{id:.+}/report")
   public ResponseEntity<VideoInfo> reportVideo(@PathVariable Long id,
-                                               @Valid @RequestBody VideoReportRequest request,
+                                               @Valid @RequestBody VideoController.VideoReportRequest request,
                                                @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
     Member me = memberService.currentMember();
@@ -719,6 +723,30 @@ public class VideoController {
     } catch (NotFoundException e) {
       throw new NotFoundException("scrap_not_found", messageService.getMessage(SCRAP_NOT_FOUND, lang));
     }
+  }
+
+  /**
+   * Comment Report
+   */
+  @PostMapping(value = "/{videoId:.+}/comments/{id:.+}/report")
+  public ResponseEntity<CommentInfo> reportVideoComment(@PathVariable Long videoId,
+                                                        @PathVariable Long id,
+                                                        @Valid @RequestBody VideoController.CommentReportRequest request,
+                                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+    Member me = memberService.currentMember();
+
+    Comment comment = commentRepository.findByIdAndVideoId(id, videoId)
+        .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+
+    Optional<CommentReport> alreadyCommentReport = commentReportRepository.findByCommentIdAndCreatedById(id, me.getId());
+    if (alreadyCommentReport.isPresent()) {
+      throw new ConflictException(messageService.getMessage(COMMENT_ALREADY_REPORTED, lang));
+    }
+
+    Comment result = commentService.reportComment(comment, me, reasonCode, request.getReason());
+    return new ResponseEntity<>(
+        new CommentInfo(result, memberService.getMemberInfo(comment.getCreatedBy())), HttpStatus.OK);
   }
 
   private CursorResponse createViewerList(Long id, int count, String cursor, String lang) {
@@ -872,5 +900,14 @@ public class VideoController {
   @NoArgsConstructor
   private static class CommentStateInfo {
     private int state;
+  }
+
+  @Data
+  private static class CommentReportRequest {
+    @Size(max = 80)
+    private String reason;
+
+    @NotNull
+    private Integer reasonCode;
   }
 }

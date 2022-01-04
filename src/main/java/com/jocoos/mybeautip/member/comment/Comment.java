@@ -44,6 +44,9 @@ public class Comment extends MemberAuditable {
   @Column
   private int likeCount;
 
+  @Column
+  private int reportCount;
+
   /**
    * 0: Default, 1: Deleted 2: Blinded, 4: Blinded by Admin
    */

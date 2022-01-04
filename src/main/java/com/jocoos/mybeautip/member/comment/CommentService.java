@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.MessageService;
@@ -37,14 +38,16 @@ public class CommentService {
   private final CommentRepository commentRepository;
   private final VideoRepository videoRepository;
   private final PostRepository postRepository;
-  
+  private final CommentReportRepository commentReportRepository;
+
   public CommentService(TagService tagService,
                         MessageService messageService,
                         MentionService mentionService,
                         NotificationService notificationService,
                         CommentRepository commentRepository,
                         VideoRepository videoRepository,
-                        PostRepository postRepository) {
+                        PostRepository postRepository,
+                        CommentReportRepository commentReportRepository) {
     this.tagService = tagService;
     this.messageService = messageService;
     this.mentionService = mentionService;
@@ -52,6 +55,7 @@ public class CommentService {
     this.commentRepository = commentRepository;
     this.videoRepository = videoRepository;
     this.postRepository = postRepository;
+    this.commentReportRepository = commentReportRepository;
   }
   
   @Transactional
@@ -101,6 +105,13 @@ public class CommentService {
     tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
   
     comment.setComment(request.getComment());
+    return commentRepository.save(comment);
+  }
+
+  @Transactional
+  public Comment reportComment(Comment comment, Member me, int reasonCode, String reason) {
+    commentReportRepository.save(new CommentReport(comment, me, reasonCode, reason));
+    comment.setReportCount(comment.getReportCount() + 1);
     return commentRepository.save(comment);
   }
 
