@@ -59,9 +59,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .and()
         .requestMatchers()
         .antMatchers(OPTIONS,"/api/**")
-        .antMatchers(POST,"/api/1/payments/notification")
         .and()
         .authorizeRequests()
+        .antMatchers(POST,"/api/1/payments/notification").permitAll()
         .antMatchers(OPTIONS,"/api/**").permitAll()
         .and()
         .csrf().disable();
