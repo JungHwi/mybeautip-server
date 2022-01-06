@@ -131,6 +131,8 @@ public class CartController {
                                                         @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang,
                                                         @RequestParam(name = "broker", required = false) Long broker) {
     List<Cart> list = new ArrayList<>();
+    log.info("{}", request.getItems());
+
     for (CartItemRequest item : request.getItems()) {
       list.add(getValidCartItem(item.getGoodsNo(), item.getOptionNo(), item.getQuantity(), lang));
     }

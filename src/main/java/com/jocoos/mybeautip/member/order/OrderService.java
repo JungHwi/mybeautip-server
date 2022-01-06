@@ -652,32 +652,61 @@ public class OrderService {
     if (order.getState() != Order.State.PAID.getValue()) {
       throw new BadRequestException("invalid_order_state", "Invalid order state: " + order.getState());
     }
-    
+
     log.debug("cancel order: {}", order);
-    
+
     // 1. Prepare order cancel
-    order.setStatus(Order.Status.ORDER_CANCELLING);
+    order.setStatus(Order.Status.ORDER_CANCELLED);
     orderRepository.save(order);
-    
+
     // 2. Create order cancel inquiry
     OrderInquiry orderInquiry = new OrderInquiry(order, state, reason);
     orderInquiry = orderInquiryRepository.save(orderInquiry);
-  
+
     // 3. Cancel order and payment without Iamport
     saveOrderAndPurchasesStatus(order, Order.Status.ORDER_CANCELLED);
     payment.setState(Payment.STATE_CANCELLED);
     payment.setMessage(reason);
     paymentRepository.save(payment);
-  
+
     // 4. Complete order cancel inquiry
     orderInquiry.setCompleted(true);
     orderInquiry.setCreatedBy(order.getCreatedBy());
     orderInquiryRepository.save(orderInquiry);
-  
+
     revokeResourcesBeforeCancelOrder(order);
     return orderInquiry;
   }
-  
+
+  @Transactional
+  public OrderInquiry cancelPaymentByAdmin(Order order, Payment payment, Byte state, String reason) {
+    if (order.getState() != Order.State.DELIVERED.getValue()) {
+      throw new BadRequestException("invalid_order_state", "Invalid order state: " + order.getState());
+    }
+
+    log.debug("cancel order: {}", order);
+    String orderStatus = Order.Status.ORDER_CANCELLED;
+
+    // Cancel payment without Iamport
+    saveOrderAndPurchasesStatus(order, orderStatus);
+    payment.setState(Payment.STATE_CANCELLED);
+    payment.setMessage(reason);
+    paymentRepository.save(payment);
+
+    if (order.getPrice() > 0 ) {
+      String token = iamportService.getToken();
+      iamportService.cancelPayment(token, payment.getPaymentId());
+    }
+
+    OrderInquiry orderInquiry = orderInquiryRepository.findByOrderAndCreatedBy(order, order.getCreatedBy())
+        .orElseThrow(() -> new NotFoundException("inquire_not_found", "inquire_not_found"));
+    orderInquiry.setComment("canceled_by_admin");
+    orderInquiryRepository.save(orderInquiry);
+
+    revokeResourcesBeforeCancelOrder(order);
+    return orderInquiry;
+  }
+
   @Transactional
   public Order confirmOrder(Order order) {
     // Convert earning point state
@@ -691,7 +720,15 @@ public class OrderService {
     
     return orderRepository.save(order);
   }
-  
+
+  @Transactional
+  public Order confirmOrderAndPurchase(Order order) {
+    for (Purchase purchase: order.getPurchases()) {
+      confirmPurchase(purchase);
+    }
+    return confirmOrder(order);
+  }
+
   @Transactional
   private void revokeResourcesBeforeCancelOrder(Order order) {
     // Revoke used coupon

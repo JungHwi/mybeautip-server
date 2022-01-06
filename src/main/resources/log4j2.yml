@@ -3,4 +3,4 @@ Configutation:
 
   Loggers:
     Root:
-      level: info
+      level: debug

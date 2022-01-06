@@ -28,7 +28,7 @@ public interface OrderInquireExceprt {
 
   String getReason();
 
-  String comment();
+  String getComment();
 
   boolean isCompleted();
 

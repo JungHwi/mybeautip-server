@@ -43,7 +43,7 @@ public class AdminOrderController {
    * This API is used to cancel myBeautip Order and payment state without Iamport payment
    * It is used when inconsistency occurred between myBeautip and Iamport payment state
    */
-  @PostMapping("/{id}/cancel")
+  @PostMapping("/{id}/order_cancel")
   public ResponseEntity<OrderController.OrderInquiryInfo> orderCancelByAdmin(@PathVariable("id") Long id) {
     Order order = orderRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found: " + id));
@@ -53,4 +53,16 @@ public class AdminOrderController {
     OrderInquiry inquiry = orderService.cancelOrderInquireByAdmin(order, payment, Byte.parseByte("0"), CANCEL_REASON);
     return new ResponseEntity<>(new OrderController.OrderInquiryInfo(inquiry), HttpStatus.OK);
   }
+
+  @PostMapping("/{id}/payment_cancel")
+  public ResponseEntity<OrderController.OrderInquiryInfo> cancelPaymentByAdmin(@PathVariable("id") Long id) {
+    Order order = orderRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found: " + id));
+    Payment payment = paymentRepository.findById(order.getId())
+        .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
+
+    OrderInquiry inquiry = orderService.cancelPaymentByAdmin(order, payment, Byte.parseByte("0"), CANCEL_REASON);
+    return new ResponseEntity<>(new OrderController.OrderInquiryInfo(inquiry), HttpStatus.OK);
+  }
+
 }
