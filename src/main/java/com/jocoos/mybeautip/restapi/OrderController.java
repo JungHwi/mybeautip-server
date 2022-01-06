@@ -166,7 +166,8 @@ public class OrderController {
     if (order.getState() != Order.State.DELIVERED.getValue()) {
       throw new BadRequestException("invalid_order_state", messageService.getMessage(INVALID_ORDER_STATE, lang));
     }
-    orderService.confirmOrder(order);
+
+    orderService.confirmOrderAndPurchase(order);
 
     Payment payment = paymentRepository.findById(order.getId()).orElse(null);
     Delivery delivery = deliveryRepository.findById(order.getId()).orElse(null);
@@ -177,6 +178,7 @@ public class OrderController {
   @GetMapping("/orders")
   public CursorResponse getOrders(@RequestParam(defaultValue = "20") int count,
                                   @RequestParam(defaultValue = "") String category,
+                                  @RequestParam(defaultValue = "12") int within,
                                   @RequestParam(required = false) Long cursor) {
     Long memberId = memberService.currentMemberId();
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
@@ -196,8 +198,11 @@ public class OrderController {
         break;
       }
       default: {
+        Order.State orderState = parseState(within);
+        log.debug("orderState: {}, {}", orderState.getValue(), orderState.name());
+
         orders = orderRepository.findByCreatedByIdAndStateLessThanEqualAndCreatedAtBefore(
-            memberId, Order.State.CONFIRMED.getValue(), createdAt, page);
+            memberId, orderState.getValue(), createdAt, page);
       }
     }
 
@@ -215,6 +220,21 @@ public class OrderController {
        .withCursor(nextCursor)
        .withCategory(category)
        .toBuild();
+  }
+
+  private Order.State parseState(int within) {
+    try {
+      for (Order.State state: Order.State.values()) {
+        if (state.getValue() == within) {
+          return state;
+        }
+      }
+
+      return Order.State.CONFIRMED;
+    } catch (IllegalArgumentException e) {
+      log.error(e.getMessage());
+      return Order.State.CONFIRMED;
+    }
   }
 
   @PostMapping("/orders/{id:.+}/inquiries")
