@@ -557,16 +557,19 @@ public class VideoService {
     }
 
     List<VideoGoods> videoGoods = new ArrayList<>();
-    String[] goodses = StringUtils.deleteWhitespace(goods).split(",");
+    String[] goodses = StringUtils.deleteWhitespace(goods).split("\\,");
+    log.info("goodses: {}", Arrays.toString(goodses));
+
     for (String goodsNo : goodses) {
       if (goodsNo.length() != 10) { // invalid goodsNo
         continue;
       }
-      goodsRepository.findByGoodsNo(goods).ifPresent(g -> {
+      goodsRepository.findByGoodsNo(goodsNo).ifPresent(g -> {
         videoGoods.add(new VideoGoods(video, g, video.getMember()));
       });
     }
 
+    log.info("videoGoods size: {}", videoGoods.size());
     if (videoGoods.size() > 0) {
       videoGoodsRepository.saveAll(videoGoods);
 
