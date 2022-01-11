@@ -28,6 +28,8 @@ import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+
+import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -263,7 +265,8 @@ public class VideoController {
     
     Slice<Comment> comments;
     Long me = memberService.currentMemberId();
-    Map<Long, Block> blackList = videoService.getBlackListByMe(me);
+    Map<Long, Block> blackList = me != null ?
+        videoService.getBlackListByMe(me) : Maps.newHashMap();
 
     if (parentId != null) {
       comments = videoService.findCommentsByParentId(parentId, cursor, page, direction);
