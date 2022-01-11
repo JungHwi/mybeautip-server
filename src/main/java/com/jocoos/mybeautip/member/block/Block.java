@@ -29,7 +29,11 @@ public class Block {
   @Column
   @CreatedDate
   public Date createdAt;
-  
+
+  public Long getYouId() {
+    return memberYou.getId();
+  }
+
   public Block(Long me, Member memberYou) {
     this.me = me;
     this.memberYou = memberYou;

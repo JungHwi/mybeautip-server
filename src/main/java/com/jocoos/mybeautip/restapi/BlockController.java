@@ -94,8 +94,10 @@ public class BlockController {
   @DeleteMapping("/me/blocks/{id:.+}")
   public void unblockMember(@PathVariable("id") Long id,
                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Block block = blockRepository.findById(id)
+    Long me = memberService.currentMemberId();
+    Block block = blockRepository.findByIdAndMe(id, me)
         .orElseThrow(() ->  new NotFoundException("block_not_found", messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
+
     blockRepository.delete(block);
   }
   

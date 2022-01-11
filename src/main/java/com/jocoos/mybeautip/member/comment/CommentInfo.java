@@ -24,6 +24,7 @@ public class CommentInfo {
   private Date createdAt;
   private String commentRef;
   private Long likeId;
+  private Long blockId;
   private Integer likeCount;
   private Integer reportCount;
   private Integer state;

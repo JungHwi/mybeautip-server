@@ -12,6 +12,7 @@ import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
@@ -48,6 +49,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @RestController
@@ -85,6 +88,7 @@ public class VideoController {
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String ALREADY_SCRAPED = "scrap.already_scraped";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
+  private static final String COMMENT_BLOCKED_MESSAGE = "comment.blocked_message";
   private static final String VIDEO_ALREADY_REPORTED = "video.already_reported";
   private static final String COMMENT_LOCKED = "comment.locked";
 
@@ -258,6 +262,9 @@ public class VideoController {
     }
     
     Slice<Comment> comments;
+    Long me = memberService.currentMemberId();
+    Map<Long, Block> blackList = videoService.getBlackListByMe(me);
+
     if (parentId != null) {
       comments = videoService.findCommentsByParentId(parentId, cursor, page, direction);
     } else {
@@ -281,12 +288,17 @@ public class VideoController {
         comment.setComment(content);
         commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
-      
-      Long me = memberService.currentMemberId();
+
       if (me != null) {
         Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
            .map(CommentLike::getId).orElse(null);
         commentInfo.setLikeId(likeId);
+
+        Block block = blackList.get(commentInfo.getCreatedBy().getId());
+        if (block != null) {
+          commentInfo.setBlockId(block.getId());
+          commentInfo.setComment(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
+        }
       }
 
       result.add(commentInfo);
@@ -301,7 +313,8 @@ public class VideoController {
       }
     }
 
-    int totalCount = videoRepository.findById(id).map(Video::getCommentCount).orElse(0);
+    int totalCount = videoRepository.findById(id)
+        .map(v ->  v.getCommentCount()).orElse(0);
 
     return new CursorResponse
       .Builder<>("/api/1/videos/" + id + "/comments", result)
@@ -309,7 +322,7 @@ public class VideoController {
       .withCursor(nextCursor)
       .withTotalCount(totalCount).toBuild();
   }
-  
+
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
@@ -35,13 +36,19 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
   Slice<Comment> findByVideoIdAndIdLessThanEqualAndParentIdIsNull(Long id, Long cursor, Pageable pageable);
   Slice<Comment> findByVideoIdAndIdGreaterThanEqualAndParentIdIsNull(Long id, Long cursor, Pageable pageable);
-
   Slice<Comment> findByVideoIdAndParentIdIsNull(Long id, Pageable pageable);
 
-  Slice<Comment> findByParentId(Long parentId, Pageable pageable);
+  Slice<Comment> findByVideoIdAndIdLessThanEqualAndParentIdIsNullAndCreatedByIdNotIn(Long id, Long cursor, List<Long> blackList, Pageable pageable);
+  Slice<Comment> findByVideoIdAndIdGreaterThanEqualAndParentIdIsNullAndCreatedByIdNotIn(Long id, Long cursor, List<Long> blackList, Pageable pageable);
+  Slice<Comment> findByVideoIdAndParentIdIsNullAndCreatedByIdNotIn(Long id, List<Long> blackList, Pageable pageable);
 
+  Slice<Comment> findByParentId(Long parentId, Pageable pageable);
   Slice<Comment> findByParentIdAndIdLessThanEqual(Long parentId, Long cursor, Pageable pageable);
   Slice<Comment> findByParentIdAndIdGreaterThanEqual(Long parentId, Long cursor, Pageable pageable);
+
+  Slice<Comment> findByParentIdAndCreatedByIdNotIn(Long parentId, List<Long> blackList, Pageable pageable);
+  Slice<Comment> findByParentIdAndIdLessThanEqualAndCreatedByIdNotIn(Long parentId, Long cursor, List<Long> blackList, Pageable pageable);
+  Slice<Comment> findByParentIdAndIdGreaterThanEqualAndCreatedByIdNotIn(Long parentId, Long cursor, List<Long> blackList, Pageable pageable);
 
   Slice<Comment> findByCreatedByIdAndCreatedAtBeforeAndParentIdIsNull(Long id, Date createdAt, Pageable pageable);
 
@@ -53,5 +60,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
   int deleteByParentIdAndCreatedById(Long parentId, Long createdBy);
 
+  int countByVideoIdAndCreatedByIdNot(Long videoId, List<Long> blackList);
 }
 

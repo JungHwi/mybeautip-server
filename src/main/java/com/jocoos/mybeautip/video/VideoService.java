@@ -3,9 +3,11 @@ package com.jocoos.mybeautip.video;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.video.scrap.VideoScrapRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -267,16 +270,16 @@ public class VideoService {
     return "all";
   }
 
-  public Slice<Comment> findCommentsByVideoId(Long id, Long cursor, Pageable pageable, String direction) {
+  public Slice<Comment> findCommentsByVideoId(Long videoId, Long cursor, Pageable pageable, String direction) {
     Slice<Comment> comments;
     if (cursor != null) {
       if ("next".equals(direction)) {
-        comments = commentRepository.findByVideoIdAndIdGreaterThanEqualAndParentIdIsNull(id, cursor, pageable);
+        comments = commentRepository.findByVideoIdAndIdGreaterThanEqualAndParentIdIsNull(videoId, cursor, pageable);
       } else {
-        comments = commentRepository.findByVideoIdAndIdLessThanEqualAndParentIdIsNull(id, cursor, pageable);
+        comments = commentRepository.findByVideoIdAndIdLessThanEqualAndParentIdIsNull(videoId, cursor, pageable);
       }
     } else {
-      comments = commentRepository.findByVideoIdAndParentIdIsNull(id, pageable);
+      comments = commentRepository.findByVideoIdAndParentIdIsNull(videoId, pageable);
     }
     return comments;
   }
@@ -294,7 +297,25 @@ public class VideoService {
     }
     return comments;
   }
-  
+
+  public Map<Long, Block> getBlackListByMe(Long me) {
+    List<Block> blocks = blockRepository.findByMe(me);
+    Map<Long, Block> map = blocks != null ?
+        blocks.stream().collect(Collectors.toMap(Block::getYouId, Function.identity())) :
+        Maps.newHashMap();
+
+    if (map.keySet().size() > 0) {
+      log.debug("{} blocked by {}", Lists.newArrayList(map.keySet()), me);
+    }
+
+    return map;
+  }
+
+  public int countBlackListComments(Long videoId, Long me) {
+    List<Long> blacklist = Lists.newArrayList(getBlackListByMe(me).keySet());
+    return commentRepository.countByVideoIdAndCreatedByIdNot(videoId, blacklist);
+  }
+
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
     Long scrapId = null;
