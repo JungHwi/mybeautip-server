@@ -603,6 +603,17 @@ public class VideoService {
   }
 
   @Transactional
+  public void clearVideoGoods(Video video) {
+    if (video.getRelatedGoodsCount() != null && video.getRelatedGoodsCount() > 0) {
+      videoGoodsRepository.deleteByVideoId(video.getId());
+    }
+
+    video.setRelatedGoodsThumbnailUrl("");
+    video.setRelatedGoodsCount(0);
+    videoRepository.save(video);
+  }
+
+  @Transactional
   public Video updateVideoProperties(CallbackController.CallbackUpdateVideoRequest source, Video target) {
     // immutable properties: video_id, video_key, type, owner, likecount, commentcount, relatedgoodscount, relatedgoodsurl
     // mutable properties: title, content, url, thumbnail_url, chatroomid, data, state, duration, visibility, banned, watchcount, heartcount, viewcount

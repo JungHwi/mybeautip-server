@@ -91,6 +91,8 @@ public class CallbackController {
     if (!Strings.isNullOrEmpty(request.getData())) {
       log.info("goods {}, request goods: {}", video.getData(), request.getData());
       videoService.updateVideoGoods(video, request.getData());
+    } else {
+      videoService.clearVideoGoods(video);
     }
 
     // Send on-live stats using slack when LIVE ended
