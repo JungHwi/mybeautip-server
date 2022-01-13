@@ -64,7 +64,7 @@ public class SlackService {
     if ("BROADCASTED".equals(video.getType())) {
       header = "라이브(" + video.getId() + ") 시작";
     } else {
-      String visibility = "PRIVATE".equals(video.getVisibility()) ? "미공개": "공개";
+      String visibility = "PRIVATE".equals(video.getVisibility()) ? "비공개": "공개";
       header = String.format("#%s 컨텐츠(%d) 업로드 완료", visibility, video.getId());
     }
     
