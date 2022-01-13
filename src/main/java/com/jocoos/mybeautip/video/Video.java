@@ -115,16 +115,19 @@ public class Video {
   private Member member;
 
   @Column
+  public Date startedAt;
+
+  @Column
+  public Date endedAt;
+
+  @Column
   @CreatedDate
   public Date createdAt;
 
   @Column
   @LastModifiedDate
   public Date modifiedAt;
-  
-  @Column
-  public Date endedAt;
-  
+
   @Column
   public Date deletedAt;
   

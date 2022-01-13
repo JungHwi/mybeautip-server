@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.common.base.Strings;
@@ -18,9 +19,7 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
+import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.watches.VideoWatchService;
 
 @Slf4j
@@ -34,6 +33,7 @@ public class CallbackController {
   private final MemberRepository memberRepository;
   private final VideoRepository videoRepository;
   private final VideoWatchService videoWatchService;
+  private final VideoDataService videoDataService;
   
   private static final String MEMBER_NOT_FOUND = "member.not_found";
   private static final String LIVE_NOT_ALLOWED = "video.live_not_allowed";
@@ -43,17 +43,23 @@ public class CallbackController {
                             MessageService messageService,
                             VideoRepository videoRepository,
                             MemberRepository memberRepository,
-                            VideoWatchService videoWatchService) {
+                            VideoWatchService videoWatchService,
+                            VideoDataService videoDataService) {
     this.videoService = videoService;
     this.messageService = messageService;
     this.videoRepository = videoRepository;
     this.memberRepository = memberRepository;
     this.videoWatchService = videoWatchService;
+    this.videoDataService = videoDataService;
   }
   
   @PostMapping
   public Video startVideo(@Valid @RequestBody CallbackStartVideoRequest request,
+                           BindingResult bindingResult,
                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    if (bindingResult.hasErrors()) {
+      log.info("{}", bindingResult.getTarget());
+    }
     log.info("callback startVideo: {}", request.toString());
   
     Member member = memberRepository.findByIdAndDeletedAtIsNull(request.getUserId())
@@ -61,7 +67,7 @@ public class CallbackController {
           log.error("Invalid UserID: " + request.getUserId());
           throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
         });
-    
+
     return videoService.startVideo(request, member);
   }
 
@@ -83,13 +89,19 @@ public class CallbackController {
       throw new BadRequestException("video_locked", messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
     }
 
+    VideoExtraData extraData = null;
+    if (!Strings.isNullOrEmpty(request.getData())) {
+      extraData = videoDataService.getDataObject(request.getData());
+      log.info("{}", extraData);
+    }
+
     String oldState = video.getState();
 
-    video = videoService.updateVideoProperties(request, video);
+    video = videoService.updateVideoProperties(request, video, extraData);
     video = videoService.update(video);
 
-    if (!Strings.isNullOrEmpty(request.getData())) {
-      log.info("goods {}, request goods: {}", video.getData(), request.getData());
+    if (extraData != null && !Strings.isNullOrEmpty(extraData.getGoods())) {
+      log.info("goods {}, request goods: {}", video.getData(), extraData.getGoods());
       videoService.updateVideoGoods(video, request.getData());
     } else {
       videoService.clearVideoGoods(video);
