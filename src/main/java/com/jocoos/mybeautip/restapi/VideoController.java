@@ -13,6 +13,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.member.block.MemberBlockService;
 import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
@@ -51,8 +52,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @RestController
@@ -81,6 +80,7 @@ public class VideoController {
   private final TimeSaleService timeSaleService;
   private final VideoScrapService videoScrapService;
   private final CommentReportRepository commentReportRepository;
+  private final MemberBlockService memberBlockService;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
@@ -121,7 +121,8 @@ public class VideoController {
                          GoodsRepository goodsRepository,
                          TimeSaleService timeSaleService,
                          VideoScrapService videoScrapService,
-                         CommentReportRepository commentReportRepository) {
+                         CommentReportRepository commentReportRepository,
+                         MemberBlockService memberBlockService) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.messageService = messageService;
@@ -145,6 +146,7 @@ public class VideoController {
     this.timeSaleService = timeSaleService;
     this.videoScrapService = videoScrapService;
     this.commentReportRepository = commentReportRepository;
+    this.memberBlockService = memberBlockService;
   }
   
   @PostMapping
@@ -265,8 +267,7 @@ public class VideoController {
     
     Slice<Comment> comments;
     Long me = memberService.currentMemberId();
-    Map<Long, Block> blackList = me != null ?
-        videoService.getBlackListByMe(me) : Maps.newHashMap();
+    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : Maps.newHashMap();
 
     if (parentId != null) {
       comments = videoService.findCommentsByParentId(parentId, cursor, page, direction);

@@ -1,4 +1,4 @@
-ALTER TABLE `posts` ADD `type_id` TINYINT DEFAULT 0 AFTER `category`;
+ALTER TABLE `posts` ADD `label_id` TINYINT DEFAULT 0 AFTER `category`;
 
 ALTER TABLE `posts` ADD `report_count` BIGINT DEFAULT 0 AFTER `comment_count`;
 

@@ -1,10 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
@@ -27,8 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,8 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.member.block.MemberBlockService;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentInfo;
 import com.jocoos.mybeautip.member.comment.CommentLike;
@@ -76,7 +79,9 @@ public class PostController {
   private final TagService tagService;
   private final MessageService messageService;
   private final KeywordService keywordService;
+  private final MemberBlockService memberBlockService;
   private final PostLabelRepository postLabelRepository;
+  private final PostReportRepository postReportRepository;
 
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String LIKE_NOT_FOUND = "like.not_found";
@@ -84,7 +89,9 @@ public class PostController {
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String COMMENT_LOCKED = "comment.locked";
-  
+  private static final String POST_ALREADY_REPORTED = "post.already_reported";
+  private static final String COMMENT_BLOCKED_MESSAGE = "comment.blocked_message";
+
   public PostController(PostService postService,
                         PostRepository postRepository,
                         PostLikeRepository postLikeRepository,
@@ -99,7 +106,9 @@ public class PostController {
                         TagService tagService,
                         MessageService messageService,
                         KeywordService keywordService,
-                        PostLabelRepository postLabelRepository) {
+                        MemberBlockService memberBlockService,
+                        PostLabelRepository postLabelRepository,
+                        PostReportRepository postReportRepository) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -114,7 +123,9 @@ public class PostController {
     this.tagService = tagService;
     this.messageService = messageService;
     this.keywordService = keywordService;
+    this.memberBlockService = memberBlockService;
     this.postLabelRepository = postLabelRepository;
+    this.postReportRepository = postReportRepository;
   }
   
   @GetMapping
@@ -317,6 +328,9 @@ public class PostController {
     }
     
     Slice<Comment> comments;
+    Long me = memberService.currentMemberId();
+    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : Maps.newHashMap();
+
     if (parentId != null) {
       comments = postService.findCommentsByParentId(parentId, cursor, page, direction);
     } else {
@@ -341,11 +355,16 @@ public class PostController {
         commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
   
-      Long me = memberService.currentMemberId();
       if (me != null) {
         Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
            .map(CommentLike::getId).orElse(null);
         commentInfo.setLikeId(likeId);
+
+        Block block = blackList.get(commentInfo.getCreatedBy().getId());
+        if (block != null) {
+          commentInfo.setBlockId(block.getId());
+          commentInfo.setComment(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
+        }
       }
       result.add(commentInfo);
     });
@@ -479,9 +498,31 @@ public class PostController {
     if (groups == null) {
       return new ResponseEntity<>(Lists.newArrayList(), HttpStatus.OK);
     }
-    List<PostLabelInfo> collect = groups.stream().map(g -> new PostLabelInfo(g)).collect(Collectors.toList());
-    return new ResponseEntity(collect, HttpStatus.OK);
+    List<PostLabelInfo> result = groups.stream().map(g -> new PostLabelInfo(g)).collect(Collectors.toList());
+    return new ResponseEntity<>(result, HttpStatus.OK);
   }
+
+  /**
+   * Report
+   */
+  @PostMapping(value = "/{id:.+}/report")
+  public ResponseEntity<PostInfo> reportVideo(@PathVariable Long id,
+                                               @Valid @RequestBody PostReportRequest request,
+                                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+    Member me = memberService.currentMember();
+
+    Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
+
+    if (postReportRepository.findByPostIdAndCreatedById(id, me.getId()).isPresent()) {
+      throw new BadRequestException("already_reported", messageService.getMessage(POST_ALREADY_REPORTED, lang));
+    }
+
+    postService.reportPost(post, me, reasonCode, request.getReason());
+    return new ResponseEntity<>(new PostInfo(post, new MemberInfo(me), null), HttpStatus.OK);
+  }
+
 
   /**
    * @see com.jocoos.mybeautip.post.Post
@@ -494,6 +535,7 @@ public class PostController {
     private String description;
     private String thumbnailUrl;
     private int category;
+    private int label;
     private int progress;
     private Set<PostContent> contents;
     @Deprecated
@@ -514,6 +556,7 @@ public class PostController {
       this(post);
       this.createdBy = memberInfo;
       this.goodsInfo = goodsInfo;
+      this.label = post.getLabelId();
     }
 
     public PostInfo(Post post) {
@@ -579,5 +622,14 @@ public class PostController {
     public PostLabelInfo(PostLabel postLabel) {
       BeanUtils.copyProperties(postLabel, this);
     }
+  }
+
+  @Data
+  private static class PostReportRequest {
+    @NotNull
+    @Size(max = 80)
+    private String reason;
+
+    private Integer reasonCode;
   }
 }

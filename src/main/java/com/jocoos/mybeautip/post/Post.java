@@ -47,9 +47,8 @@ public class Post extends MemberAuditable {
   @Column(nullable = false)
   private int category;
 
-  @ManyToOne
-  @JoinColumn(name = "label_id")
-  private PostLabel label;
+  @Column
+  private int labelId;
 
   @Column(nullable = false)
   private boolean opened;

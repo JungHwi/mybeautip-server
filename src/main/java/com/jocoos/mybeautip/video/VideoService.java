@@ -300,24 +300,6 @@ public class VideoService {
     return comments;
   }
 
-  public Map<Long, Block> getBlackListByMe(Long me) {
-    List<Block> blocks = blockRepository.findByMe(me);
-    Map<Long, Block> map = blocks != null ?
-        blocks.stream().collect(Collectors.toMap(Block::getYouId, Function.identity())) :
-        Maps.newHashMap();
-
-    if (map.keySet().size() > 0) {
-      log.debug("{} blocked by {}", Lists.newArrayList(map.keySet()), me);
-    }
-
-    return map;
-  }
-
-  public int countBlackListComments(Long videoId, Long me) {
-    List<Long> blacklist = Lists.newArrayList(getBlackListByMe(me).keySet());
-    return commentRepository.countByVideoIdAndCreatedByIdNot(videoId, blacklist);
-  }
-
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
     Long scrapId = null;

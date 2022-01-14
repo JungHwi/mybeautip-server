@@ -10,10 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.video.report.VideoReport;
 
 @Slf4j
 @Service
@@ -23,15 +25,18 @@ public class PostService {
   private final PostRepository postRepository;
   private final CommentLikeRepository commentLikeRepository;
   private final PostLikeRepository postLikeRepository;
+  private final PostReportRepository postReportRepository;
 
   public PostService(CommentRepository commentRepository,
                      PostRepository postRepository,
                      CommentLikeRepository commentLikeRepository,
-                     PostLikeRepository postLikeRepository) {
+                     PostLikeRepository postLikeRepository,
+                     PostReportRepository postReportRepository) {
     this.commentRepository = commentRepository;
     this.postRepository = postRepository;
     this.commentLikeRepository = commentLikeRepository;
     this.postLikeRepository = postLikeRepository;
+    this.postReportRepository = postReportRepository;
   }
 
   public Slice<Comment> findCommentsByPostId(Long id, Long cursor, Pageable pageable, String direction) {
@@ -138,5 +143,12 @@ public class PostService {
   @Transactional
   public void updateViewCount(Post post, int i) {
     postRepository.updateViewCount(post.getId(), i);
+  }
+
+  @Transactional
+  public Post reportPost(Post post, Member me, int reasonCode, String reason) {
+    postReportRepository.save(new PostReport(post, me, reasonCode, reason));
+    post.setReportCount(post.getReportCount() + 1);
+    return postRepository.save(post);
   }
 }
