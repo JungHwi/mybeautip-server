@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public final class DateUtils {
@@ -34,5 +35,14 @@ public final class DateUtils {
     return java.util.Date.from(dateToConvert.atStartOfDay()
         .atZone(ZoneId.systemDefault())
         .toInstant());
+  }
+
+  public static Date stringFormatToDate(String date) {
+    return fromString(date,"yyyyMMdd HHmmss", ZONE_SEOUL);
+  }
+
+  private static Date fromString(String date, String format, ZoneId zoneId) {
+    LocalDateTime localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd HHmmss"));
+    return Date.from(localDateTime.atZone(zoneId).toInstant());
   }
 }

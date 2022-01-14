@@ -10,6 +10,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -43,6 +45,16 @@ public class VideoDataService {
     } catch (IOException e) {
       log.error("{}", map.get("video_category"));
       log.error("JSON data Error", e);
+      return null;
+    }
+  }
+
+  public VideoExtraData getDataObject(String json) {
+    try {
+      return objectMapper.readValue(json, VideoExtraData.class);
+    } catch (IOException e) {
+      log.error("{}", json);
+      log.error("JSON Error", e);
       return null;
     }
   }

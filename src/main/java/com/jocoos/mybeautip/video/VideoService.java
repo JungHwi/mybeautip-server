@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.video;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.video.scrap.VideoScrapRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -484,25 +486,32 @@ public class VideoService {
       // Set related goods info
       log.info("data: {}", request.getData());
       if (StringUtils.isNotEmpty(request.getData())) {
-        String[] split = request.getData().split("\\|");
+        VideoExtraData extraData = videoDataService.getDataObject(request.getData());
+        log.info("{}", extraData);
         List<VideoCategory> categories = Lists.newArrayList();
+        if (!Strings.isNullOrEmpty(extraData.getStartedAt())) {
+          String startedAt = String.valueOf(extraData.getStartedAt());
+
+          log.info("startedAt: {}", startedAt);
+          Date date = DateUtils.stringFormatToDate(startedAt);
+          video.setStartedAt(date);
+        }
 
         // if data had category array
-        if (split.length == 2) {
-          categories = parseCategory(video.getId(), split[1]);
+        if (!Strings.isNullOrEmpty(extraData.getCategory())) {
+          categories = parseCategory(video.getId(), extraData.getCategory());
           log.info("categories: {}", categories);
           video.setCategory(categories);
         }
 
         List<VideoGoods> videoGoods = new ArrayList<>();
-        String goods = split[0];
-        if (!Strings.isNullOrEmpty(goods)) {
-          String[] userData = StringUtils.deleteWhitespace(goods).split(",");
+        if (!Strings.isNullOrEmpty(extraData.getGoods())) {
+          String[] userData = StringUtils.deleteWhitespace(String.valueOf(extraData.getGoods())).split(",");
           for (String goodsNo : userData) {
             if (goodsNo.length() != 10) { // invalid goodsNo
               continue;
             }
-            goodsRepository.findByGoodsNo(goods).ifPresent(g -> {
+            goodsRepository.findByGoodsNo(goodsNo).ifPresent(g -> {
               videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
             });
           }
@@ -516,7 +525,7 @@ public class VideoService {
             createdVideo.setRelatedGoodsCount(videoGoods.size());
           }
         }
-        if (videoGoods.size() > 0 || categories.size() > 0) {
+        if (videoGoods.size() > 0 || categories.size() > 0 || video.getStartedAt() != null) {
           videoRepository.save(createdVideo);
         }
       }
@@ -547,6 +556,11 @@ public class VideoService {
     }
 
     return videoRepository.save(video);
+  }
+
+  private Date parseStartedAt(String date) {
+    LocalDateTime dateTime = LocalDateTime.parse("2018-05-05T11:50:55");
+    return new Date();
   }
 
   private List<VideoCategory> parseCategory(Long videoId, String category) {
@@ -613,8 +627,7 @@ public class VideoService {
     videoRepository.save(video);
   }
 
-  @Transactional
-  public Video updateVideoProperties(CallbackController.CallbackUpdateVideoRequest source, Video target) {
+  public Video updateVideoProperties(CallbackController.CallbackUpdateVideoRequest source, Video target, VideoExtraData extraData) {
     // immutable properties: video_id, video_key, type, owner, likecount, commentcount, relatedgoodscount, relatedgoodsurl
     // mutable properties: title, content, url, thumbnail_url, chatroomid, data, state, duration, visibility, banned, watchcount, heartcount, viewcount
     
@@ -705,12 +718,23 @@ public class VideoService {
       memberRepository.save(member);
     }
 
-    if (!Strings.isNullOrEmpty(source.getData2())) {
-      List<Integer> category = videoDataService.getCategory(source.getData2());
-      if (target.getCategory() != null) {
-        videoCategoryRepository.deleteByVideoId(target.getId());
+    if (extraData != null) {
+      if (!Strings.isNullOrEmpty(extraData.getCategory())) {
+        String[] split = extraData.getCategory().split(",");
+        List<Integer> category = Arrays.stream(split).map(s -> Integer.valueOf(s)).collect(Collectors.toList());
+
+        if (target.getCategory() != null) {
+          videoCategoryRepository.deleteByVideoId(target.getId());
+        }
+
+        target.setCategory(createCategory(target.getId(), category));
       }
-      target.setCategory(createCategory(target.getId(), category));
+
+      if (!Strings.isNullOrEmpty(extraData.getStartedAt())) {
+        Date startedAt = DateUtils.stringFormatToDate(extraData.getStartedAt());
+        log.info("{}", startedAt);
+        target.setStartedAt(startedAt);
+      }
     }
 
     return target;

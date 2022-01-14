@@ -64,7 +64,8 @@ public class SlackService {
     if ("BROADCASTED".equals(video.getType())) {
       header = "라이브(" + video.getId() + ") 시작";
     } else {
-      header = "#MOTD(" + video.getId() + ") 업로드 완료";
+      String visibility = "PRIVATE".equals(video.getVisibility()) ? "비공개": "공개";
+      header = String.format("#%s 컨텐츠(%d) 업로드 완료", visibility, video.getId());
     }
     
     String message = String.format("*%s*" +
@@ -78,7 +79,7 @@ public class SlackService {
         generateRelatedGoodsInfo(video));
     send(message);
   }
-  
+
   private String generateRelatedGoodsInfo(Video video) {
     if (video.getRelatedGoodsCount() == null || video.getRelatedGoodsCount() == 0) {
       return "관련상품: 없음";
@@ -336,7 +337,7 @@ public class SlackService {
     send(message);
   }
 
-  public void sendForUpadtingSchedule(Schedule prevSchedule, ScheduleController.UpdateScheduleRequest updatedSchedule) {
+  public void sendForUpdatingSchedule(Schedule prevSchedule, ScheduleController.UpdateScheduleRequest updatedSchedule) {
     String message = String.format("*스케줄 변경*" +
                     "```사용자: %s/%d\n" +
                     "제목: %s -> %s\n" +

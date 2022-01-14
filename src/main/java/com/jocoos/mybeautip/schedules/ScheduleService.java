@@ -103,7 +103,7 @@ public class ScheduleService {
                 .orElseThrow(() -> new NotFoundException("schedule_item_not_found",
                         messageService.getMessage(SCHEDULE_ITEM_NOT_FOUND, lang)));
 
-        slackService.sendForUpadtingSchedule(schedule, request);
+        slackService.sendForUpdatingSchedule(schedule, request);
 
         if (request.getTitle() != null) {
             schedule.setTitle(request.getTitle());
