@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.CannotAcquireLockException;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,12 +54,7 @@ import com.jocoos.mybeautip.member.comment.CommentService;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.PostContent;
-import com.jocoos.mybeautip.post.PostLike;
-import com.jocoos.mybeautip.post.PostLikeRepository;
-import com.jocoos.mybeautip.post.PostRepository;
-import com.jocoos.mybeautip.post.PostService;
+import com.jocoos.mybeautip.post.*;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.tag.TagService;
 
@@ -79,6 +76,7 @@ public class PostController {
   private final TagService tagService;
   private final MessageService messageService;
   private final KeywordService keywordService;
+  private final PostLabelRepository postLabelRepository;
 
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String LIKE_NOT_FOUND = "like.not_found";
@@ -100,7 +98,8 @@ public class PostController {
                         MentionService mentionService,
                         TagService tagService,
                         MessageService messageService,
-                        KeywordService keywordService) {
+                        KeywordService keywordService,
+                        PostLabelRepository postLabelRepository) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -115,6 +114,7 @@ public class PostController {
     this.tagService = tagService;
     this.messageService = messageService;
     this.keywordService = keywordService;
+    this.postLabelRepository = postLabelRepository;
   }
   
   @GetMapping
@@ -473,6 +473,16 @@ public class PostController {
     return new ResponseEntity(HttpStatus.OK);
   }
 
+  @GetMapping("/labels")
+  public ResponseEntity<?> getPostLabels() {
+    List<PostLabel> groups = postLabelRepository.findAll();
+    if (groups == null) {
+      return new ResponseEntity<>(Lists.newArrayList(), HttpStatus.OK);
+    }
+    List<PostLabelInfo> collect = groups.stream().map(g -> new PostLabelInfo(g)).collect(Collectors.toList());
+    return new ResponseEntity(collect, HttpStatus.OK);
+  }
+
   /**
    * @see com.jocoos.mybeautip.post.Post
    */
@@ -556,6 +566,18 @@ public class PostController {
     public CommentLikeInfo(CommentLike commentLike) {
       BeanUtils.copyProperties(commentLike, this);
       comment = new CommentInfo(commentLike.getComment());
+    }
+  }
+
+  @Data
+  @NoArgsConstructor
+  public static class PostLabelInfo {
+    private Long id;
+    private String name;
+    private Date createdAt;
+
+    public PostLabelInfo(PostLabel postLabel) {
+      BeanUtils.copyProperties(postLabel, this);
     }
   }
 }
