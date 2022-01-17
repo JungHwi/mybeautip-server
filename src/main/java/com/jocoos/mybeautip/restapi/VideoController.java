@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.google.common.collect.Lists;
 
+import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
@@ -747,9 +748,9 @@ public class VideoController {
    */
   @PostMapping(value = "/{videoId:.+}/comments/{id:.+}/report")
   public ResponseEntity<CommentReportInfo> reportVideoComment(@PathVariable Long videoId,
-                                                        @PathVariable Long id,
-                                                        @Valid @RequestBody VideoController.CommentReportRequest request,
-                                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+                                                              @PathVariable Long id,
+                                                              @Valid @RequestBody VideoController.CommentReportRequest request,
+                                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
     Member me = memberService.currentMember();
 
@@ -925,31 +926,5 @@ public class VideoController {
 
     @NotNull
     private Integer reasonCode;
-  }
-
-  @Data
-  private static class CommentReportInfo {
-    private Long id;
-    private CommentInfo comment;
-    private Integer reasonCode;
-    private String reason;
-    private SimpleMemberInfo createdBy;
-
-    public CommentReportInfo(CommentReport commentReport) {
-      BeanUtils.copyProperties(commentReport, this);
-      comment = new CommentInfo(commentReport.getComment());
-      createdBy = new SimpleMemberInfo(commentReport.getCreatedBy());
-    }
-  }
-
-  @Data
-  private static class SimpleMemberInfo {
-    private Long id;
-    private String username;
-    private Date createdAt;
-
-    public SimpleMemberInfo(Member member) {
-      BeanUtils.copyProperties(member, this);
-    }
   }
 }

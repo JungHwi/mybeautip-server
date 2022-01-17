@@ -35,9 +35,11 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.ConflictException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -48,12 +50,7 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.MemberBlockService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentInfo;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.member.comment.CommentService;
+import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.notification.MessageService;
@@ -82,6 +79,7 @@ public class PostController {
   private final MemberBlockService memberBlockService;
   private final PostLabelRepository postLabelRepository;
   private final PostReportRepository postReportRepository;
+  private final CommentReportRepository commentReportRepository;
 
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String LIKE_NOT_FOUND = "like.not_found";
@@ -91,6 +89,7 @@ public class PostController {
   private static final String COMMENT_LOCKED = "comment.locked";
   private static final String POST_ALREADY_REPORTED = "post.already_reported";
   private static final String COMMENT_BLOCKED_MESSAGE = "comment.blocked_message";
+  private static final String COMMENT_ALREADY_REPORTED = "comment.already_reported";
 
   public PostController(PostService postService,
                         PostRepository postRepository,
@@ -108,7 +107,8 @@ public class PostController {
                         KeywordService keywordService,
                         MemberBlockService memberBlockService,
                         PostLabelRepository postLabelRepository,
-                        PostReportRepository postReportRepository) {
+                        PostReportRepository postReportRepository,
+                        CommentReportRepository commentReportRepository) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -126,15 +126,18 @@ public class PostController {
     this.memberBlockService = memberBlockService;
     this.postLabelRepository = postLabelRepository;
     this.postReportRepository = postReportRepository;
+    this.commentReportRepository = commentReportRepository;
   }
   
   @GetMapping
   public CursorResponse getPosts(@RequestParam(defaultValue = "20") int count,
-                                   @RequestParam(required = false, defaultValue = "0") int category,
-                                   @RequestParam(required = false) String keyword,
-                                   @RequestParam(required = false) String cursor) {
+                                 @RequestParam(required = false, defaultValue = "0") int category,
+                                 @RequestParam(required = false) String keyword,
+                                 @RequestParam(required = false) String cursor,
+                                 @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Member me = memberService.currentMember();
+    final Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me.getId()) : null;
 
     Slice<Post> posts = findPosts(count, category, keyword, cursor);
     List<PostInfo> result = Lists.newArrayList();
@@ -144,12 +147,18 @@ public class PostController {
       post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
       
       PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
-      log.debug("post info: {}", info);
 
       if (me != null) {
         postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
             .ifPresent(like -> info.setLikeId(like.getId()));
+
+        Block block = blackList != null ? blackList.get(post.getCreatedBy().getId()) : null;
+        if (block != null) {
+          info.setDescription(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
+        }
       }
+
+      log.debug("post info: {}", info);
       result.add(info);
     });
   
@@ -304,7 +313,7 @@ public class PostController {
          postService.unLikePost(liked);
          return Optional.empty();
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+       .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
   
     return new ResponseEntity(HttpStatus.OK);
   }
@@ -507,7 +516,7 @@ public class PostController {
    */
   @PostMapping(value = "/{id:.+}/report")
   public ResponseEntity<PostInfo> reportVideo(@PathVariable Long id,
-                                               @Valid @RequestBody PostReportRequest request,
+                                               @Valid @RequestBody PostController.ReportRequest request,
                                                @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
     Member me = memberService.currentMember();
@@ -523,6 +532,25 @@ public class PostController {
     return new ResponseEntity<>(new PostInfo(post, new MemberInfo(me), null), HttpStatus.OK);
   }
 
+  @PostMapping(value = "/{postId:.+}/comments/{id:.+}/report")
+  public ResponseEntity<CommentReportInfo> reportPostComment(@PathVariable Long postId,
+                                                             @PathVariable Long id,
+                                                             @Valid @RequestBody ReportRequest request,
+                                                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+    Member me = memberService.currentMember();
+
+    Comment comment = commentRepository.findByIdAndPostId(id, postId)
+        .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+
+    Optional<CommentReport> alreadyCommentReport = commentReportRepository.findByCommentIdAndCreatedById(id, me.getId());
+    if (alreadyCommentReport.isPresent()) {
+      throw new ConflictException(messageService.getMessage(COMMENT_ALREADY_REPORTED, lang));
+    }
+
+    CommentReport report = commentService.reportComment(comment, me, reasonCode, request.getReason());
+    return new ResponseEntity<>(new CommentReportInfo(report), HttpStatus.OK);
+  }
 
   /**
    * @see com.jocoos.mybeautip.post.Post
@@ -625,11 +653,11 @@ public class PostController {
   }
 
   @Data
-  private static class PostReportRequest {
-    @NotNull
+  private static class ReportRequest {
     @Size(max = 80)
     private String reason;
 
+    @NotNull
     private Integer reasonCode;
   }
 }
