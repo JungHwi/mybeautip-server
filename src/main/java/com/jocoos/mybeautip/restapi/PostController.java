@@ -134,12 +134,13 @@ public class PostController {
                                  @RequestParam(required = false, defaultValue = "0") int category,
                                  @RequestParam(required = false) String keyword,
                                  @RequestParam(required = false) String cursor,
+                                 @RequestParam(required = false) int label,
                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Member me = memberService.currentMember();
     final Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me.getId()) : null;
 
-    Slice<Post> posts = findPosts(count, category, keyword, cursor);
+    Slice<Post> posts = findPosts(count, category, label, keyword, cursor);
     List<PostInfo> result = Lists.newArrayList();
 
     posts.stream().forEach(post -> {
@@ -184,7 +185,7 @@ public class PostController {
        .withCategory(String.valueOf(category)).toBuild();
   }
 
-  private Slice<Post> findPosts(int count, int category, String keyword, String cursor) {
+  private Slice<Post> findPosts(int count, int category, int label, String keyword, String cursor) {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<Post> posts;
     Date dateCursor = null;
@@ -195,12 +196,23 @@ public class PostController {
       dateCursor = new Date();
     }
 
-
-    if (category > 0) {
+    if (category > 0 && label > 0) {
+      if (!Strings.isNullOrEmpty(keyword)) {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, label, keyword, keyword, page);
+      } else {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNull(dateCursor, dateCursor, category, label, page);
+      }
+    } else if (category > 0) {
       if (!Strings.isNullOrEmpty(keyword)) {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNull(dateCursor, dateCursor, category, page);
+      }
+    } else if (label > 0) {
+      if (!Strings.isNullOrEmpty(keyword)) {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, label, keyword, keyword, page);
+      } else {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNull(dateCursor, dateCursor, label, page);
       }
     } else {
       if (!Strings.isNullOrEmpty(keyword)) {
