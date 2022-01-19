@@ -1,21 +1,28 @@
 package com.jocoos.mybeautip.post;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.support.AttachmentService;
 
 @Slf4j
 @Service
@@ -26,17 +33,21 @@ public class PostService {
   private final CommentLikeRepository commentLikeRepository;
   private final PostLikeRepository postLikeRepository;
   private final PostReportRepository postReportRepository;
+  private final AttachmentService attachmentService;
 
   public PostService(CommentRepository commentRepository,
                      PostRepository postRepository,
                      CommentLikeRepository commentLikeRepository,
                      PostLikeRepository postLikeRepository,
-                     PostReportRepository postReportRepository) {
+                     PostReportRepository postReportRepository,
+                     AttachmentService attachmentService) {
+
     this.commentRepository = commentRepository;
     this.postRepository = postRepository;
     this.commentLikeRepository = commentLikeRepository;
     this.postLikeRepository = postLikeRepository;
     this.postReportRepository = postReportRepository;
+    this.attachmentService = attachmentService;
   }
 
   public Slice<Comment> findCommentsByPostId(Long id, Long cursor, Pageable pageable, String direction) {
@@ -150,5 +161,31 @@ public class PostService {
     postReportRepository.save(new PostReport(post, me, reasonCode, reason));
     post.setReportCount(post.getReportCount() + 1);
     return postRepository.save(post);
+  }
+
+  @Transactional
+  public Post savePost(Post post, List<MultipartFile> files) {
+    postRepository.save(post);
+
+    List<String> attachments = null;
+    try {
+      String keyPath = String.format("posts/%s", post.getId());
+      attachments = attachmentService.upload(files, keyPath);
+    } catch (IOException e) {
+      throw new BadRequestException("post_image_upload_fail", "state_required");
+    }
+
+    if(attachments != null && attachments.size() > 0) {
+      int seq = 0;
+      Set<PostContent> contents = Sets.newHashSet();
+      for (String attachment: attachments) {
+        contents.add(new PostContent(seq++, 1, attachment));
+
+      }
+      post.setContents(contents);
+      postRepository.save(post);
+    }
+
+    return post;
   }
 }

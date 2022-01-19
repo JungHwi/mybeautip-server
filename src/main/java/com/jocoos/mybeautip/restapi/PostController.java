@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -56,6 +57,8 @@ import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.*;
 import com.jocoos.mybeautip.search.KeywordService;
+import com.jocoos.mybeautip.support.AttachmentService;
+import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.TagService;
 
 @Slf4j
@@ -77,6 +80,8 @@ public class PostController {
   private final MessageService messageService;
   private final KeywordService keywordService;
   private final MemberBlockService memberBlockService;
+  private final AttachmentService attachmentService;
+
   private final PostLabelRepository postLabelRepository;
   private final PostReportRepository postReportRepository;
   private final CommentReportRepository commentReportRepository;
@@ -106,6 +111,7 @@ public class PostController {
                         MessageService messageService,
                         KeywordService keywordService,
                         MemberBlockService memberBlockService,
+                        AttachmentService attachmentService,
                         PostLabelRepository postLabelRepository,
                         PostReportRepository postReportRepository,
                         CommentReportRepository commentReportRepository) {
@@ -124,6 +130,7 @@ public class PostController {
     this.messageService = messageService;
     this.keywordService = keywordService;
     this.memberBlockService = memberBlockService;
+    this.attachmentService = attachmentService;
     this.postLabelRepository = postLabelRepository;
     this.postReportRepository = postReportRepository;
     this.commentReportRepository = commentReportRepository;
@@ -564,6 +571,36 @@ public class PostController {
     return new ResponseEntity<>(new CommentReportInfo(report), HttpStatus.OK);
   }
 
+  @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+  public ResponseEntity<PostInfo> savePost(PostRequest request,
+                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+
+    log.debug("{}", request);
+    Post post = createPersonalPost(request);
+    postService.savePost(post, request.getFiles());
+
+    return new ResponseEntity<>(new PostInfo(post), HttpStatus.OK);
+  }
+
+  private Post createPersonalPost(PostRequest request) {
+    Post post = new Post();
+    BeanUtils.copyProperties(request, post);
+
+    post.setTitle("");
+    post.setThumbnailUrl("");
+    post.setCategory(Post.CATEGORY_TREND);
+    post.setLabelId(request.getLabel());
+
+    post.setOpened(true);
+    Date startedAt = new Date();
+    Date endedAt = DateUtils.addYear(10);
+    post.setStartedAt(startedAt);
+    post.setEndedAt(endedAt);
+
+    return post;
+  }
+
+
   /**
    * @see com.jocoos.mybeautip.post.Post
    */
@@ -601,6 +638,7 @@ public class PostController {
 
     public PostInfo(Post post) {
       BeanUtils.copyProperties(post, this);
+      this.createdBy = new MemberInfo(post.getCreatedBy());
     }
   }
 
@@ -671,5 +709,13 @@ public class PostController {
 
     @NotNull
     private Integer reasonCode;
+  }
+
+  @Data
+  public static class PostRequest {
+    @NotNull
+    private String description;
+    private int label;
+    private List<MultipartFile> files;
   }
 }

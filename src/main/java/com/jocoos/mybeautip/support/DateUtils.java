@@ -32,9 +32,13 @@ public final class DateUtils {
   }
 
   public static Date toDate(LocalDate dateToConvert) {
-    return java.util.Date.from(dateToConvert.atStartOfDay()
+    return Date.from(dateToConvert.atStartOfDay()
         .atZone(ZoneId.systemDefault())
         .toInstant());
+  }
+
+  public static Date toDate(LocalDateTime localDateTime) {
+    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
   }
 
   public static Date stringFormatToDate(String date) {
@@ -44,5 +48,10 @@ public final class DateUtils {
   private static Date fromString(String date, String format, ZoneId zoneId) {
     LocalDateTime localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd HHmmss"));
     return Date.from(localDateTime.atZone(zoneId).toInstant());
+  }
+
+  public static Date addYear(int year) {
+    LocalDateTime localDateTime = LocalDateTime.now().plusYears(year);
+    return toDate(localDateTime);
   }
 }
