@@ -44,6 +44,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
       .antMatchers(POST, "/api/1/videos/**/view_count").hasAnyRole("GUEST", "USER", "ADMIN")
       .antMatchers(POST, "/api/1/videos/**/watches").hasAnyRole("GUEST", "USER", "ADMIN")
       .antMatchers(POST, "/api/**").hasAnyRole("USER", "ADMIN")
+      .antMatchers(GET, "/api/1/posts").hasAnyRole("GUEST", "USER", "ADMIN")
+      .antMatchers(GET, "/api/1/banners/**").hasAnyRole("GUEST", "USER", "ADMIN")
       .antMatchers(PATCH, "/api/1/videos/**/watches").hasAnyRole("GUEST", "USER", "ADMIN")
       .antMatchers(PATCH, "/api/1/categories/**").hasRole("ADMIN")
       .antMatchers(PATCH, "/api/1/stores/**").hasRole("ADMIN")
