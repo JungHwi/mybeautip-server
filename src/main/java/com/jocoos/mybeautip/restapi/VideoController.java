@@ -402,7 +402,7 @@ public class VideoController {
           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
         }
 
-        int state = videoService.deleteComment(comment);
+        int state = commentService.deleteComment(comment);
         return new ResponseEntity<>(new CommentStateInfo(state), HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));
@@ -915,7 +915,7 @@ public class VideoController {
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
-  private static class CommentStateInfo {
+  public static class CommentStateInfo {
     private int state;
   }
 
