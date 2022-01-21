@@ -9,4 +9,5 @@ public interface StorageService {
 
   String upload(MultipartFile file, String key) throws IOException;
   Resource getResource(String key);
+  void delete(String key);
 }

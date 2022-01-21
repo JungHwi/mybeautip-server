@@ -1,5 +1,17 @@
 package com.jocoos.mybeautip.support;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -16,15 +28,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 
 @Slf4j
 public class S3StorageService implements StorageService {
@@ -142,6 +145,29 @@ public class S3StorageService implements StorageService {
     } catch (AmazonS3Exception e) {
       log.error("{}", e);
       return null;
+    }
+  }
+
+  @Override
+  public void delete(String key) {
+    try {
+      AmazonS3 s3Client = getS3Client();
+      s3Client.deleteObject(new DeleteObjectRequest(bucketName, key));
+      log.info("Deleted {}", key);
+    } catch (AmazonServiceException e) {
+      // The call was transmitted successfully, but Amazon S3 couldn't process
+      // it, so it returned an error response.
+      log.error("{}", e);
+    } catch (SdkClientException e) {
+      // Amazon S3 couldn't be contacted for a response, or the client
+      // couldn't parse the response from Amazon S3.
+      log.error("{}", e);
+    }
+  }
+
+  public void delete(List<String> keys) {
+    for (String key: keys) {
+      delete(key);
     }
   }
 

@@ -141,7 +141,7 @@ public class PostController {
                                  @RequestParam(required = false, defaultValue = "0") int category,
                                  @RequestParam(required = false) String keyword,
                                  @RequestParam(required = false) String cursor,
-                                 @RequestParam(required = false) int label,
+                                 @RequestParam(defaultValue = "0") int label,
                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Member me = memberService.currentMember();
@@ -478,9 +478,8 @@ public class PostController {
          if (comment.getLocked()) {
            throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
          }
-         postService.deleteComment(comment);
-         tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-         return new ResponseEntity<>(HttpStatus.OK);
+         int state = commentService.deleteComment(comment);
+         return new ResponseEntity<>(new VideoController.CommentStateInfo(state), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
   }
@@ -582,6 +581,22 @@ public class PostController {
     return new ResponseEntity<>(new PostInfo(post), HttpStatus.OK);
   }
 
+  @PostMapping(value = "/{id:.+}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+  public ResponseEntity<PostInfo> updatePost(@PathVariable Long id,
+                                             PostRequest request,
+                                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+
+    log.debug("{}", request);
+
+    Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
+
+    updatePostProperties(post, request);
+    postService.updatePost(post, request.getFiles());
+
+    return new ResponseEntity<>(new PostInfo(post), HttpStatus.OK);
+  }
+
   private Post createPersonalPost(PostRequest request) {
     Post post = new Post();
     BeanUtils.copyProperties(request, post);
@@ -600,7 +615,15 @@ public class PostController {
     return post;
   }
 
+  private void updatePostProperties(Post post, PostRequest request) {
+    if (post.getLabelId() != request.getLabel()) {
+      post.setLabelId(request.getLabel());
+    }
 
+    if (!post.getDescription().equals(request.getDescription()) && !Strings.isNullOrEmpty(request.getDescription())) {
+      post.setDescription(request.getDescription());
+    }
+  }
   /**
    * @see com.jocoos.mybeautip.post.Post
    */

@@ -1,11 +1,5 @@
 package com.jocoos.mybeautip.post;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -13,8 +7,13 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.common.collect.Sets;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -23,6 +22,13 @@ import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.support.AttachmentService;
+import com.jocoos.mybeautip.support.DigestUtils;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -96,32 +102,7 @@ public class PostService {
         return "post";
     }
   }
-  
-  @Transactional
-  public void deleteComment(Comment comment) {
-    postRepository.findById(comment.getPostId()).ifPresent(
-        post -> {
-          if (post.getCommentCount() > 0) {
-            postRepository.updateCommentCount(comment.getPostId(), -1);
-          }
-        }
-    );
-    
-    if (comment.getParentId() != null) {
-      postRepository.findById(comment.getParentId()).ifPresent(
-          parentComment -> {
-            if (parentComment.getCommentCount() > 0) {
-              commentRepository.updateCommentCount(parentComment.getId(), -1);
-            }
-          }
-      );
-    }
-    
-    List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
-    commentLikeRepository.deleteAll(commentLikes);
-    commentRepository.delete(comment);
-  }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public PostLike likePost(Post post) {
     postRepository.updateLikeCount(post.getId(), 1);
@@ -179,7 +160,7 @@ public class PostService {
       int seq = 0;
       Set<PostContent> contents = Sets.newHashSet();
       for (String attachment: attachments) {
-        contents.add(new PostContent(seq++, 1, attachment));
+        contents.add(new PostContent(seq++, PostContent.ContentCategory.IMAGE, attachment));
 
       }
       post.setContents(contents);
@@ -187,5 +168,76 @@ public class PostService {
     }
 
     return post;
+  }
+
+  @Transactional
+  public Post updatePost(Post post, List<MultipartFile> files) {
+    List<String> attachments = Lists.newArrayList();
+    String keyPath = String.format("posts/%s", post.getId());
+
+    Set<PostContent> contents = post.getContents();
+    Map<String, PostContent> contentMap = Maps.newHashMap();
+    contents.stream().forEach(c ->
+        contentMap.put(getFilename(c.getContent()), c));
+
+    for (MultipartFile file: files) {
+      String filename = DigestUtils.getFilename(file);
+      if (contentMap.containsKey(filename)) {
+        PostContent uploadedContent = contentMap.get(filename);
+        attachments.add(uploadedContent.getContent());
+        contents.remove(uploadedContent);
+      } else {
+        try {
+          attachments.add(attachmentService.upload(file, keyPath));
+        } catch (IOException e) {
+          throw new BadRequestException("post_image_upload_fail", "image_upload_fail");
+        }
+      }
+    }
+
+    if(attachments != null && attachments.size() > 0) {
+      if (contents.size() > 0) {
+        post.setContents(null);
+        postRepository.save(post);
+
+        log.debug("{}", contents);
+        clearResource(contents);
+      }
+
+      int seq = 0;
+      Set<PostContent> newContents = Sets.newHashSet();
+      for (String attachment: attachments) {
+        newContents.add(new PostContent(seq++, PostContent.ContentCategory.IMAGE, attachment));
+      }
+      post.setContents(newContents);
+    }
+
+    return postRepository.save(post);
+  }
+
+  private String getFilename(String path) {
+    if (!Strings.isNullOrEmpty(path)) {
+      String[] split = path.split("/");
+      if (split.length > 0) {
+        return split[split.length - 1];
+      }
+    }
+    return "";
+  }
+
+  private void clearResource(Set<PostContent> contents) {
+    List<String> keys = contents.stream()
+        .map(c -> getPath(c.getContent())).collect(Collectors.toList());
+    attachmentService.deleteAttachments(keys);
+  }
+
+  private String getPath(String content) {
+    try {
+      URI uri = new URI(content);
+      return uri.getPath();
+    } catch (URISyntaxException e) {
+      log.error("{}", e);
+    }
+    return null;
   }
 }
