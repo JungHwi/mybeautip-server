@@ -163,6 +163,7 @@ public class PostController {
         Block block = blackList != null ? blackList.get(post.getCreatedBy().getId()) : null;
         if (block != null) {
           info.setDescription(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
+          info.setBlockId(block.getId());
         }
       }
 
@@ -648,6 +649,7 @@ public class PostController {
     private Date createdAt;
     private MemberInfo createdBy;
     private Long likeId;
+    private Long blockId;
     private boolean opened;
     private Date startedAt;
     private Date endedAt;
@@ -686,6 +688,7 @@ public class PostController {
     private String title;
     private String description;
     private int category;
+    private int label;
     private int progress;
     private String thumbnailUrl;
     private Date createdAt;
@@ -696,6 +699,7 @@ public class PostController {
     public PostBasicInfo(Post post, MemberInfo createdBy) {
       BeanUtils.copyProperties(post, this);
       this.createdBy = createdBy;
+      this.label = post.getLabelId();
     }
   }
 
