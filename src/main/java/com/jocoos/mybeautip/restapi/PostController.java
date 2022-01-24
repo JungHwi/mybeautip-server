@@ -598,6 +598,19 @@ public class PostController {
     return new ResponseEntity<>(new PostInfo(post), HttpStatus.OK);
   }
 
+  @DeleteMapping("/{id:.+}")
+  public ResponseEntity removePost(@PathVariable Long id,
+                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+
+    Long memberId = memberService.currentMemberId();
+    log.debug("post id: {}, member id: {}", id, memberId);
+    Post post = postRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberId)
+        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
+
+    postService.removePost(post);
+    return new ResponseEntity(HttpStatus.OK);
+  }
+
   private Post createPersonalPost(PostRequest request) {
     Post post = new Post();
     BeanUtils.copyProperties(request, post);

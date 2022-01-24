@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -239,5 +240,10 @@ public class PostService {
       log.error("{}", e);
     }
     return null;
+  }
+
+  public void removePost(Post post) {
+    post.setDeletedAt(new Date());
+    postRepository.save(post);
   }
 }

@@ -15,6 +15,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   Optional<Post> findByIdAndDeletedAtIsNull(Long id);
 
+  Optional<Post> findByIdAndCreatedByIdAndDeletedAtIsNull(Long id, Long createdBy);
+
   Optional<Post> findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(Long id, Date startedAt, Date endedAt);
 
   @Modifying
