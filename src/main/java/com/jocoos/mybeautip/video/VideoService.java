@@ -609,6 +609,7 @@ public class VideoService {
     videoRepository.save(video);
   }
 
+  @Transactional
   public Video updateVideoProperties(CallbackController.CallbackUpdateVideoRequest source, Video target, VideoExtraData extraData) {
     // immutable properties: video_id, video_key, type, owner, likecount, commentcount, relatedgoodscount, relatedgoodsurl
     // mutable properties: title, content, url, thumbnail_url, chatroomid, data, state, duration, visibility, banned, watchcount, heartcount, viewcount
