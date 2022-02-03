@@ -75,7 +75,7 @@ public class FeedService {
   public void feedVideo(Video video) {
     Long creator = video.getMember().getId();
     List<Following> followers = followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator);
-    log.debug("followers: {}", followers);
+    log.debug("followers count: {}", followers != null ? followers.size() : 0);
 
     addMyVideo(String.format(MEMBER_KEY, creator), video);
 
