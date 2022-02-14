@@ -47,9 +47,9 @@ public class Post extends MemberAuditable {
   @Column(nullable = false)
   private int category;
 
-  /**
-   * Show post to users whether or not
-   */
+  @Column
+  private int labelId;
+
   @Column(nullable = false)
   private boolean opened;
 
@@ -74,6 +74,9 @@ public class Post extends MemberAuditable {
 
   @Column(nullable = false)
   private int commentCount;
+
+  @Column(nullable = false)
+  private int reportCount;
 
   @OneToOne(mappedBy = "post")
   private Banner banner;

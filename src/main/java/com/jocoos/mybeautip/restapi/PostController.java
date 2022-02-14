@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.CannotAcquireLockException;
@@ -25,16 +22,25 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.ConflictException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -43,22 +49,16 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentInfo;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.member.comment.CommentService;
+import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.member.block.MemberBlockService;
+import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.PostContent;
-import com.jocoos.mybeautip.post.PostLike;
-import com.jocoos.mybeautip.post.PostLikeRepository;
-import com.jocoos.mybeautip.post.PostRepository;
-import com.jocoos.mybeautip.post.PostService;
+import com.jocoos.mybeautip.post.*;
 import com.jocoos.mybeautip.search.KeywordService;
+import com.jocoos.mybeautip.support.AttachmentService;
+import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.TagService;
 
 @Slf4j
@@ -79,6 +79,12 @@ public class PostController {
   private final TagService tagService;
   private final MessageService messageService;
   private final KeywordService keywordService;
+  private final MemberBlockService memberBlockService;
+  private final AttachmentService attachmentService;
+
+  private final PostLabelRepository postLabelRepository;
+  private final PostReportRepository postReportRepository;
+  private final CommentReportRepository commentReportRepository;
 
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
   private static final String LIKE_NOT_FOUND = "like.not_found";
@@ -86,7 +92,10 @@ public class PostController {
   private static final String ALREADY_LIKED = "like.already_liked";
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String COMMENT_LOCKED = "comment.locked";
-  
+  private static final String POST_ALREADY_REPORTED = "post.already_reported";
+  private static final String COMMENT_BLOCKED_MESSAGE = "comment.blocked_message";
+  private static final String COMMENT_ALREADY_REPORTED = "comment.already_reported";
+
   public PostController(PostService postService,
                         PostRepository postRepository,
                         PostLikeRepository postLikeRepository,
@@ -100,7 +109,12 @@ public class PostController {
                         MentionService mentionService,
                         TagService tagService,
                         MessageService messageService,
-                        KeywordService keywordService) {
+                        KeywordService keywordService,
+                        MemberBlockService memberBlockService,
+                        AttachmentService attachmentService,
+                        PostLabelRepository postLabelRepository,
+                        PostReportRepository postReportRepository,
+                        CommentReportRepository commentReportRepository) {
     this.postService = postService;
     this.postRepository = postRepository;
     this.postLikeRepository = postLikeRepository;
@@ -115,17 +129,25 @@ public class PostController {
     this.tagService = tagService;
     this.messageService = messageService;
     this.keywordService = keywordService;
+    this.memberBlockService = memberBlockService;
+    this.attachmentService = attachmentService;
+    this.postLabelRepository = postLabelRepository;
+    this.postReportRepository = postReportRepository;
+    this.commentReportRepository = commentReportRepository;
   }
   
   @GetMapping
   public CursorResponse getPosts(@RequestParam(defaultValue = "20") int count,
-                                   @RequestParam(required = false, defaultValue = "0") int category,
-                                   @RequestParam(required = false) String keyword,
-                                   @RequestParam(required = false) String cursor) {
+                                 @RequestParam(required = false, defaultValue = "0") int category,
+                                 @RequestParam(required = false) String keyword,
+                                 @RequestParam(required = false) String cursor,
+                                 @RequestParam(defaultValue = "0") int label,
+                                 @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Member me = memberService.currentMember();
+    final Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me.getId()) : null;
 
-    Slice<Post> posts = findPosts(count, category, keyword, cursor);
+    Slice<Post> posts = findPosts(count, category, label, keyword, cursor);
     List<PostInfo> result = Lists.newArrayList();
 
     posts.stream().forEach(post -> {
@@ -133,12 +155,19 @@ public class PostController {
       post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
       
       PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
-      log.debug("post info: {}", info);
 
       if (me != null) {
         postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
             .ifPresent(like -> info.setLikeId(like.getId()));
+
+        Block block = blackList != null ? blackList.get(post.getCreatedBy().getId()) : null;
+        if (block != null) {
+          info.setDescription(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
+          info.setBlockId(block.getId());
+        }
       }
+
+      log.debug("post info: {}", info);
       result.add(info);
     });
   
@@ -164,7 +193,7 @@ public class PostController {
        .withCategory(String.valueOf(category)).toBuild();
   }
 
-  private Slice<Post> findPosts(int count, int category, String keyword, String cursor) {
+  private Slice<Post> findPosts(int count, int category, int label, String keyword, String cursor) {
     PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
     Slice<Post> posts;
     Date dateCursor = null;
@@ -175,12 +204,23 @@ public class PostController {
       dateCursor = new Date();
     }
 
-
-    if (category > 0) {
+    if (category > 0 && label > 0) {
+      if (!Strings.isNullOrEmpty(keyword)) {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, label, keyword, keyword, page);
+      } else {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNull(dateCursor, dateCursor, category, label, page);
+      }
+    } else if (category > 0) {
       if (!Strings.isNullOrEmpty(keyword)) {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNull(dateCursor, dateCursor, category, page);
+      }
+    } else if (label > 0) {
+      if (!Strings.isNullOrEmpty(keyword)) {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, label, keyword, keyword, page);
+      } else {
+        posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNull(dateCursor, dateCursor, label, page);
       }
     } else {
       if (!Strings.isNullOrEmpty(keyword)) {
@@ -293,7 +333,7 @@ public class PostController {
          postService.unLikePost(liked);
          return Optional.empty();
        })
-       .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+       .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
   
     return new ResponseEntity(HttpStatus.OK);
   }
@@ -317,6 +357,9 @@ public class PostController {
     }
     
     Slice<Comment> comments;
+    Long me = memberService.currentMemberId();
+    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : Maps.newHashMap();
+
     if (parentId != null) {
       comments = postService.findCommentsByParentId(parentId, cursor, page, direction);
     } else {
@@ -341,11 +384,16 @@ public class PostController {
         commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
       }
   
-      Long me = memberService.currentMemberId();
       if (me != null) {
         Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
            .map(CommentLike::getId).orElse(null);
         commentInfo.setLikeId(likeId);
+
+        Block block = blackList.get(commentInfo.getCreatedBy().getId());
+        if (block != null) {
+          commentInfo.setBlockId(block.getId());
+          commentInfo.setComment(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
+        }
       }
       result.add(commentInfo);
     });
@@ -431,9 +479,8 @@ public class PostController {
          if (comment.getLocked()) {
            throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
          }
-         postService.deleteComment(comment);
-         tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-         return new ResponseEntity<>(HttpStatus.OK);
+         int state = commentService.deleteComment(comment);
+         return new ResponseEntity<>(new VideoController.CommentStateInfo(state), HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid post id or comment id"));
   }
@@ -473,6 +520,124 @@ public class PostController {
     return new ResponseEntity(HttpStatus.OK);
   }
 
+  @GetMapping("/labels")
+  public ResponseEntity<?> getPostLabels() {
+    List<PostLabel> groups = postLabelRepository.findAll();
+    if (groups == null) {
+      return new ResponseEntity<>(Lists.newArrayList(), HttpStatus.OK);
+    }
+    List<PostLabelInfo> result = groups.stream().map(g -> new PostLabelInfo(g)).collect(Collectors.toList());
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+
+  /**
+   * Report
+   */
+  @PostMapping(value = "/{id:.+}/report")
+  public ResponseEntity<PostInfo> reportVideo(@PathVariable Long id,
+                                               @Valid @RequestBody PostController.ReportRequest request,
+                                               @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+    Member me = memberService.currentMember();
+
+    Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
+
+    if (postReportRepository.findByPostIdAndCreatedById(id, me.getId()).isPresent()) {
+      throw new BadRequestException("already_reported", messageService.getMessage(POST_ALREADY_REPORTED, lang));
+    }
+
+    postService.reportPost(post, me, reasonCode, request.getReason());
+    return new ResponseEntity<>(new PostInfo(post, new MemberInfo(me), null), HttpStatus.OK);
+  }
+
+  @PostMapping(value = "/{postId:.+}/comments/{id:.+}/report")
+  public ResponseEntity<CommentReportInfo> reportPostComment(@PathVariable Long postId,
+                                                             @PathVariable Long id,
+                                                             @Valid @RequestBody ReportRequest request,
+                                                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+    int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+    Member me = memberService.currentMember();
+
+    Comment comment = commentRepository.findByIdAndPostId(id, postId)
+        .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+
+    Optional<CommentReport> alreadyCommentReport = commentReportRepository.findByCommentIdAndCreatedById(id, me.getId());
+    if (alreadyCommentReport.isPresent()) {
+      throw new ConflictException(messageService.getMessage(COMMENT_ALREADY_REPORTED, lang));
+    }
+
+    CommentReport report = commentService.reportComment(comment, me, reasonCode, request.getReason());
+    return new ResponseEntity<>(new CommentReportInfo(report), HttpStatus.OK);
+  }
+
+  @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+  public ResponseEntity<PostInfo> savePost(PostRequest request,
+                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+
+    log.debug("{}", request);
+    Post post = createPersonalPost(request);
+    postService.savePost(post, request.getFiles());
+
+    return new ResponseEntity<>(new PostInfo(post), HttpStatus.OK);
+  }
+
+  @PostMapping(value = "/{id:.+}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+  public ResponseEntity<PostInfo> updatePost(@PathVariable Long id,
+                                             PostRequest request,
+                                             @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+
+    log.debug("{}", request);
+
+    Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
+
+    updatePostProperties(post, request);
+    postService.updatePost(post, request.getFiles());
+
+    return new ResponseEntity<>(new PostInfo(post), HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{id:.+}")
+  public ResponseEntity removePost(@PathVariable Long id,
+                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+
+    Long memberId = memberService.currentMemberId();
+    log.debug("post id: {}, member id: {}", id, memberId);
+    Post post = postRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberId)
+        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
+
+    postService.removePost(post);
+    return new ResponseEntity(HttpStatus.OK);
+  }
+
+  private Post createPersonalPost(PostRequest request) {
+    Post post = new Post();
+    BeanUtils.copyProperties(request, post);
+
+    post.setTitle("");
+    post.setThumbnailUrl("");
+    post.setCategory(Post.CATEGORY_TREND);
+    post.setLabelId(request.getLabel());
+
+    post.setOpened(true);
+    Date startedAt = new Date();
+    Date endedAt = DateUtils.addYear(10);
+    post.setStartedAt(startedAt);
+    post.setEndedAt(endedAt);
+
+    return post;
+  }
+
+  private void updatePostProperties(Post post, PostRequest request) {
+    if (post.getLabelId() != request.getLabel()) {
+      post.setLabelId(request.getLabel());
+    }
+
+    if (!post.getDescription().equals(request.getDescription()) && !Strings.isNullOrEmpty(request.getDescription())) {
+      post.setDescription(request.getDescription());
+    }
+  }
   /**
    * @see com.jocoos.mybeautip.post.Post
    */
@@ -484,6 +649,7 @@ public class PostController {
     private String description;
     private String thumbnailUrl;
     private int category;
+    private int label;
     private int progress;
     private Set<PostContent> contents;
     @Deprecated
@@ -496,6 +662,7 @@ public class PostController {
     private Date createdAt;
     private MemberInfo createdBy;
     private Long likeId;
+    private Long blockId;
     private boolean opened;
     private Date startedAt;
     private Date endedAt;
@@ -504,10 +671,12 @@ public class PostController {
       this(post);
       this.createdBy = memberInfo;
       this.goodsInfo = goodsInfo;
+      this.label = post.getLabelId();
     }
 
     public PostInfo(Post post) {
       BeanUtils.copyProperties(post, this);
+      this.createdBy = new MemberInfo(post.getCreatedBy());
     }
   }
 
@@ -532,6 +701,7 @@ public class PostController {
     private String title;
     private String description;
     private int category;
+    private int label;
     private int progress;
     private String thumbnailUrl;
     private Date createdAt;
@@ -542,6 +712,7 @@ public class PostController {
     public PostBasicInfo(Post post, MemberInfo createdBy) {
       BeanUtils.copyProperties(post, this);
       this.createdBy = createdBy;
+      this.label = post.getLabelId();
     }
   }
 
@@ -557,5 +728,34 @@ public class PostController {
       BeanUtils.copyProperties(commentLike, this);
       comment = new CommentInfo(commentLike.getComment());
     }
+  }
+
+  @Data
+  @NoArgsConstructor
+  public static class PostLabelInfo {
+    private Long id;
+    private String name;
+    private Date createdAt;
+
+    public PostLabelInfo(PostLabel postLabel) {
+      BeanUtils.copyProperties(postLabel, this);
+    }
+  }
+
+  @Data
+  private static class ReportRequest {
+    @Size(max = 80)
+    private String reason;
+
+    @NotNull
+    private Integer reasonCode;
+  }
+
+  @Data
+  public static class PostRequest {
+    @NotNull
+    private String description;
+    private int label;
+    private List<MultipartFile> files;
   }
 }

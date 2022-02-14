@@ -15,6 +15,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   Optional<Post> findByIdAndDeletedAtIsNull(Long id);
 
+  Optional<Post> findByIdAndCreatedByIdAndDeletedAtIsNull(Long id, Long createdBy);
+
   Optional<Post> findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(Long id, Date startedAt, Date endedAt);
 
   @Modifying
@@ -30,11 +32,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   void updateCommentCount(Long id, int count);
 
   Page<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNull(Date startedAt, Date endedAt, int category, Pageable pageable);
-
   Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(Date startedAt, Date endedAt, Pageable pageable);
-
   Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date startedAt, Date endedAt, int category, String title, String description, Pageable pageable);
-  
+
+  Page<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNull(Date startedAt, Date endedAt, int category, int label, Pageable pageable);
+  Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date startedAt, Date endedAt, int category, int label, String title, String description, Pageable pageable);
+  Page<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNull(Date startedAt, Date endedAt, int label, Pageable pageable);
+  Slice<Post> findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(Date startedAt, Date endedAt, int label, String title, String description, Pageable pageable);
+
   @Query("select p from Post p where p.deletedAt is null " +
       "and p.opened is true and p.startedAt < :now and p.endedAt > :now " +
       "and p.category != 4 " +

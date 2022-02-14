@@ -300,24 +300,6 @@ public class VideoService {
     return comments;
   }
 
-  public Map<Long, Block> getBlackListByMe(Long me) {
-    List<Block> blocks = blockRepository.findByMe(me);
-    Map<Long, Block> map = blocks != null ?
-        blocks.stream().collect(Collectors.toMap(Block::getYouId, Function.identity())) :
-        Maps.newHashMap();
-
-    if (map.keySet().size() > 0) {
-      log.debug("{} blocked by {}", Lists.newArrayList(map.keySet()), me);
-    }
-
-    return map;
-  }
-
-  public int countBlackListComments(Long videoId, Long me) {
-    List<Long> blacklist = Lists.newArrayList(getBlackListByMe(me).keySet());
-    return commentRepository.countByVideoIdAndCreatedByIdNot(videoId, blacklist);
-  }
-
   public VideoController.VideoInfo generateVideoInfo(Video video) {
     Long likeId = null;
     Long scrapId = null;
@@ -627,6 +609,7 @@ public class VideoService {
     videoRepository.save(video);
   }
 
+  @Transactional
   public Video updateVideoProperties(CallbackController.CallbackUpdateVideoRequest source, Video target, VideoExtraData extraData) {
     // immutable properties: video_id, video_key, type, owner, likecount, commentcount, relatedgoodscount, relatedgoodsurl
     // mutable properties: title, content, url, thumbnail_url, chatroomid, data, state, duration, visibility, banned, watchcount, heartcount, viewcount
@@ -832,64 +815,6 @@ public class VideoService {
   
     video.setViewCount(video.getViewCount() + 1);
     return videoRepository.save(video);
-  }
-  
-  @Transactional
-  public int deleteComment(Comment comment) {
-    if (comment.getParentId() != null) {
-      return deleteCommentAndChildren(comment);
-    }
-
-    int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
-    log.debug("child count: {}", childCount);
-
-    if (childCount == 0) {
-      return deleteCommentAndChildren(comment);
-    } else {
-      return blindComment(comment);
-    }
-  }
-
-  @Transactional
-  private int blindComment(Comment comment) {
-    Comment.CommentState state = Comment.CommentState.BLINDED;
-    comment.setState(state);
-    commentRepository.save(comment);
-    return state.value();
-  }
-
-  @Transactional
-  private int deleteCommentAndChildren(Comment comment) {
-    tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-
-    int count = 1;
-    if (comment.getParentId() != null) {
-      commentRepository.findById(comment.getParentId()).ifPresent(parentComment -> {
-        if (parentComment.getCommentCount() > 0) {
-          commentRepository.updateCommentCount(parentComment.getId(), -1);
-        }
-      });
-    } else {
-      if (comment.getCommentCount() > 0) {
-        count += commentRepository.deleteByParentIdAndCreatedById(comment.getId(), comment.getCreatedBy().getId());
-      }
-    }
-
-    List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
-    commentLikeRepository.deleteAll(commentLikes);
-    commentRepository.delete(comment);
-
-    if(comment.getVideoId() != null) {
-      final int commentCount = -count;
-      log.info("deleted comment count: {}", count);
-      videoRepository.findById(comment.getVideoId()).ifPresent(video -> {
-        if (video.getCommentCount() > 0) {
-          videoRepository.updateCommentCount(video.getId(), commentCount);
-        }
-      });
-    }
-
-    return Comment.CommentState.DELETED.value();
   }
   
   @Transactional

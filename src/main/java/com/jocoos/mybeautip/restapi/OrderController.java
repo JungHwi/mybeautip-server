@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.member.billing.MemberBilling;
 import com.jocoos.mybeautip.member.billing.MemberBillingService;
 import com.jocoos.mybeautip.member.order.*;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.support.StorageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -48,12 +49,13 @@ public class OrderController {
   private final OrderInquiryRepository orderInquiryRepository;
   private final MemberBillingService memberBillingService;
   private final StorageService storageService;
+  private final AttachmentService attachmentService;
 
   private static final String ORDER_NOT_FOUND = "order.not_found";
   private static final String ORDER_INQUIRY_NOT_FOUND = "order.inquiry_not_found";
   private static final String INVALID_ORDER_STATE = "order.invalid_order_state";
   private static final String INVALID_PURCHASE_STATE = "order.invalid_purchase_state";
-  private static final String ATTACHMENT_DELIMETER = ",";
+  private static final String ATTACHMENT_DELIMITER = ",";
 
   public OrderController(MemberService memberService,
                          OrderService orderService,
@@ -63,7 +65,7 @@ public class OrderController {
                          DeliveryRepository deliveryRepository,
                          OrderInquiryRepository orderInquiryRepository,
                          MemberBillingService memberBillingService,
-                         StorageService storageService) {
+                         StorageService storageService, AttachmentService attachmentService) {
     this.memberService = memberService;
     this.orderService = orderService;
     this.messageService = messageService;
@@ -73,6 +75,7 @@ public class OrderController {
     this.orderInquiryRepository = orderInquiryRepository;
     this.memberBillingService = memberBillingService;
     this.storageService = storageService;
+    this.attachmentService = attachmentService;
   }
 
   @PostMapping("/orders")
@@ -292,25 +295,11 @@ public class OrderController {
       throw new NotFoundException("purchase_not_found", "purchase id required");
     }
 
-    List<String> attachments = Lists.newArrayList();
-    if (request.getFiles() != null) {
-      int index = 0;
-
-      for (MultipartFile file : request.getFiles()) {
-        /**
-         * How to upload with extension
-         */
-        String ext = file.getOriginalFilename().split("\\.")[1];
-        String key = String.format("orders/%s/%s.%s", id, index, ext);
-        try {
-          String path = storageService.upload(file, key);
-          log.debug("{}", path);
-          attachments.add(path);
-          index++;
-        } catch (IOException e) {
-          throw new BadRequestException("inquire_image_upload_fail", "state_required");
-        }
-      }
+    List<String> attachments;
+    try {
+      attachments = attachmentService.upload(request.getFiles(), String.format("orders/%s", id));
+    } catch (IOException e) {
+      throw new BadRequestException("inquire_image_upload_fail", "state_required");
     }
 
     Long me = memberService.currentMemberId();
@@ -324,7 +313,7 @@ public class OrderController {
       case 1:
       case 2: {
         Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
-        String attachment = attachments.size() > 0 ? String.join(ATTACHMENT_DELIMETER, attachments): "";
+        String attachment = attachments != null && attachments.size() > 0 ? String.join(ATTACHMENT_DELIMITER, attachments): "";
         inquiry = orderService.inquiryExchangeOrReturn(order, Byte.parseByte(request.getState()), request.getReason(), purchase, attachment);
         break;
       }
@@ -624,7 +613,7 @@ public class OrderController {
       }
 
       if (!Strings.isNullOrEmpty(orderInquiry.getAttachments())) {
-        this.attachments = Arrays.asList(orderInquiry.getAttachments().split(ATTACHMENT_DELIMETER));
+        this.attachments = Arrays.asList(orderInquiry.getAttachments().split(ATTACHMENT_DELIMITER));
       }
     }
   }

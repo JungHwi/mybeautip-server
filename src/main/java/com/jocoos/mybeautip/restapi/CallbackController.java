@@ -102,7 +102,7 @@ public class CallbackController {
 
     if (extraData != null && !Strings.isNullOrEmpty(extraData.getGoods())) {
       log.info("goods {}, request goods: {}", video.getData(), extraData.getGoods());
-      videoService.updateVideoGoods(video, request.getData());
+      videoService.updateVideoGoods(video, extraData.getGoods());
     } else {
       videoService.clearVideoGoods(video);
     }

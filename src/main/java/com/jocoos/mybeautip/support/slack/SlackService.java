@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.support.slack;
 
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 import com.jocoos.mybeautip.member.block.Block;
@@ -29,6 +30,7 @@ import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.report.Report;
+import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
@@ -61,23 +63,24 @@ public class SlackService {
 
   public void sendForVideo(Video video) {
     String header;
+    boolean isPrivateVideo = "PRIVATE".equals(video.getVisibility());
     if ("BROADCASTED".equals(video.getType())) {
       header = "라이브(" + video.getId() + ") 시작";
     } else {
-      String visibility = "PRIVATE".equals(video.getVisibility()) ? "비공개": "공개";
-      header = String.format("#%s 컨텐츠(%d) 업로드 완료", visibility, video.getId());
+      header = isPrivateVideo ?
+          String.format("#비공개 컨텐츠(%d) 업로드 완료", video.getId()) :
+          String.format("컨텐츠(%d) 업로드 완료", video.getId());
     }
-    
-    String message = String.format("*%s*" +
-            "```사용자: %s/%d\n" +
-            "영상제목: %s\n" +
-            "%s```",
-        header,
-        video.getMember().getUsername(),
-        video.getMember().getId(),
-        video.getTitle(),
-        generateRelatedGoodsInfo(video));
-    send(message);
+
+    StringBuilder sb = new StringBuilder(String.format("*%s*", header));
+    sb.append(String.format("```사용자: %s/%d\n", video.getMember().getUsername(), video.getMember().getId()));
+    if (isPrivateVideo) {
+      sb.append(String.format("영상제목: %s, 공개일: %s\n", video.getTitle(), DateUtils.toFormat(video.getStartedAt())));
+    } else {
+      sb.append(String.format("영상제목: %s\n", video.getTitle()));
+    }
+    sb.append(String.format("%s```", generateRelatedGoodsInfo(video)));
+    send(sb.toString());
   }
 
   private String generateRelatedGoodsInfo(Video video) {

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.google.common.collect.Lists;
 
+import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.exception.AccessDeniedException;
@@ -13,6 +14,7 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.member.block.MemberBlockService;
 import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
@@ -51,8 +53,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @RestController
@@ -81,6 +81,7 @@ public class VideoController {
   private final TimeSaleService timeSaleService;
   private final VideoScrapService videoScrapService;
   private final CommentReportRepository commentReportRepository;
+  private final MemberBlockService memberBlockService;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
@@ -121,7 +122,8 @@ public class VideoController {
                          GoodsRepository goodsRepository,
                          TimeSaleService timeSaleService,
                          VideoScrapService videoScrapService,
-                         CommentReportRepository commentReportRepository) {
+                         CommentReportRepository commentReportRepository,
+                         MemberBlockService memberBlockService) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.messageService = messageService;
@@ -145,6 +147,7 @@ public class VideoController {
     this.timeSaleService = timeSaleService;
     this.videoScrapService = videoScrapService;
     this.commentReportRepository = commentReportRepository;
+    this.memberBlockService = memberBlockService;
   }
   
   @PostMapping
@@ -265,8 +268,7 @@ public class VideoController {
     
     Slice<Comment> comments;
     Long me = memberService.currentMemberId();
-    Map<Long, Block> blackList = me != null ?
-        videoService.getBlackListByMe(me) : Maps.newHashMap();
+    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : Maps.newHashMap();
 
     if (parentId != null) {
       comments = videoService.findCommentsByParentId(parentId, cursor, page, direction);
@@ -400,7 +402,7 @@ public class VideoController {
           throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
         }
 
-        int state = videoService.deleteComment(comment);
+        int state = commentService.deleteComment(comment);
         return new ResponseEntity<>(new CommentStateInfo(state), HttpStatus.OK);
       })
       .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video key or comment id"));
@@ -746,9 +748,9 @@ public class VideoController {
    */
   @PostMapping(value = "/{videoId:.+}/comments/{id:.+}/report")
   public ResponseEntity<CommentReportInfo> reportVideoComment(@PathVariable Long videoId,
-                                                        @PathVariable Long id,
-                                                        @Valid @RequestBody VideoController.CommentReportRequest request,
-                                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+                                                              @PathVariable Long id,
+                                                              @Valid @RequestBody VideoController.CommentReportRequest request,
+                                                              @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
     Member me = memberService.currentMember();
 
@@ -913,7 +915,7 @@ public class VideoController {
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
-  private static class CommentStateInfo {
+  public static class CommentStateInfo {
     private int state;
   }
 
@@ -924,31 +926,5 @@ public class VideoController {
 
     @NotNull
     private Integer reasonCode;
-  }
-
-  @Data
-  private static class CommentReportInfo {
-    private Long id;
-    private CommentInfo comment;
-    private Integer reasonCode;
-    private String reason;
-    private SimpleMemberInfo createdBy;
-
-    public CommentReportInfo(CommentReport commentReport) {
-      BeanUtils.copyProperties(commentReport, this);
-      comment = new CommentInfo(commentReport.getComment());
-      createdBy = new SimpleMemberInfo(commentReport.getCreatedBy());
-    }
-  }
-
-  @Data
-  private static class SimpleMemberInfo {
-    private Long id;
-    private String username;
-    private Date createdAt;
-
-    public SimpleMemberInfo(Member member) {
-      BeanUtils.copyProperties(member, this);
-    }
   }
 }
