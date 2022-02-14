@@ -181,39 +181,42 @@ public class PostService {
     contents.stream().forEach(c ->
         contentMap.put(getFilename(c.getContent()), c));
 
-    for (MultipartFile file: files) {
-      String filename = DigestUtils.getFilename(file);
-      if (contentMap.containsKey(filename)) {
-        PostContent uploadedContent = contentMap.get(filename);
-        attachments.add(uploadedContent.getContent());
-        contents.remove(uploadedContent);
-      } else {
-        try {
-          attachments.add(attachmentService.upload(file, keyPath));
-        } catch (IOException e) {
-          throw new BadRequestException("post_image_upload_fail", "image_upload_fail");
+    if (files != null) {
+      for (MultipartFile file: files) {
+        String filename = DigestUtils.getFilename(file);
+        if (contentMap.containsKey(filename)) {
+          PostContent uploadedContent = contentMap.get(filename);
+          attachments.add(uploadedContent.getContent());
+          contents.remove(uploadedContent);
+        } else {
+          try {
+            attachments.add(attachmentService.upload(file, keyPath));
+          } catch (IOException e) {
+            throw new BadRequestException("post_image_upload_fail", "image_upload_fail");
+          }
         }
       }
     }
 
-    if(attachments != null && attachments.size() > 0) {
-      if (contents.size() > 0) {
-        post.setContents(null);
-        postRepository.save(post);
+    if (contents.size() > 0) {
+      post.setContents(null);
+      postRepository.save(post);
 
-        log.debug("{}", contents);
-        clearResource(contents);
-      }
+      log.debug("{}", contents);
+      clearResource(contents);
+    }
 
+    if (attachments != null && attachments.size() > 0) {
       int seq = 0;
       Set<PostContent> newContents = Sets.newHashSet();
       for (String attachment: attachments) {
         newContents.add(new PostContent(seq++, PostContent.ContentCategory.IMAGE, attachment));
       }
       post.setContents(newContents);
+      return postRepository.save(post);
+    } else {
+      return post;
     }
-
-    return postRepository.save(post);
   }
 
   private String getFilename(String path) {
