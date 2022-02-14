@@ -99,7 +99,7 @@ public class FeedService {
       jedis = jedisPool.getResource();
       Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
       for (Tuple t: tuples) {
-        log.debug("copey videos key: {}, element: {}", t.getScore(), t.getElement());
+        log.debug("copy videos key: {}, element: {}", t.getScore(), t.getElement());
         jedis.zadd(myFeedKey, t.getScore(), t.getElement());
       }
     } finally {
@@ -139,7 +139,7 @@ public class FeedService {
        v -> {
         Long creator = v.getMember().getId();
         List<Following> followers = followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator);
-        log.debug("followers: {}", followers);
+        log.debug("followers: {}", followers != null ? followers.size() : 0);
 
         String videoKey = removeMyVideoAndGetVideoKey(creator, String.valueOf(v.getCreatedAt().getTime()));
         log.debug("video element: {}", videoKey);
