@@ -93,6 +93,8 @@ dependencies {
   compile 'com.amazonaws:aws-java-sdk-sts:1.11.375'
   compile 'org.jsoup:jsoup:1.11.2'
   compile 'redis.clients:jedis:2.9.0'
+  compile 'io.jsonwebtoken:jjwt:0.9.0'
+
   testCompile group: 'org.springframework.security', name: 'spring-security-test', version: '5.0.0.RELEASE'
   testCompile ("org.springframework.boot:spring-boot-starter-test:${springVersion}") {
     exclude module: 'commons-logging'
