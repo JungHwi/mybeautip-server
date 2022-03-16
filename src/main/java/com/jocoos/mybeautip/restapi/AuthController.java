@@ -1,19 +1,25 @@
 package com.jocoos.mybeautip.restapi;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UnsupportedEncodingException;
 
+import javax.validation.constraints.NotNull;
+
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.security.AccessTokenResponse;
 import com.jocoos.mybeautip.security.JwtTokenProvider;
+import com.jocoos.mybeautip.security.SocialLoginService;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,16 +30,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/1/token")
 public class AuthController {
 
+  private final SocialLoginService socialLoginService;
   private final JwtTokenProvider jwtTokenProvider;
-  private final MemberRepository memberRepository;
 
-  @PostMapping("/kakao")
-  public ResponseEntity<?> authKakao(OauthRequest request) throws UnsupportedEncodingException {
-    log.debug("{}", request);
-
-//    Member member = socialLoginService.getMember(request.getProvider(), request.getCode());
-    Member member = memberRepository.findById(43L)
-        .orElseThrow(() -> new MybeautipRuntimeException("member_not_found"));
+  @PostMapping(value = "/{provider}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public ResponseEntity<?> authKakao(@PathVariable String provider,
+                                     OauthRequest request) throws UnsupportedEncodingException {
+    log.debug("{}, {}", provider, request);
+    
+    Member member = socialLoginService.loadMember(provider, request.getCode());
     AccessTokenResponse accessTokenResponse = jwtTokenProvider.auth(member);
     log.debug("response: {}", accessTokenResponse);
 
@@ -50,7 +55,7 @@ public class AuthController {
 
   @Data
   static class OauthRequest {
-    String provider;
+    @NotNull
     String code;
   }
 }
