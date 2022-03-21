@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @ConfigurationProperties(prefix = "spring.security.oauth2.client.provider")
 public class Oauth2Config {
+
   private Oauth2ProviderConfig kakao;
+  private Oauth2ProviderConfig naver;
 
   @PostConstruct
   public void postConstruct() {
@@ -30,5 +32,6 @@ public class Oauth2Config {
     private String clientSecret;
     private String authorizationGrantType;
     private String redirectUri;
+    private String state;
   }
 }

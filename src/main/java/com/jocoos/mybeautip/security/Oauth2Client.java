@@ -13,6 +13,7 @@ import java.util.HashMap;
 import com.jocoos.mybeautip.config.Oauth2Config;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +42,13 @@ public class Oauth2Client {
     body.add("grant_type", providerConfig.getAuthorizationGrantType());
     body.add("client_id", providerConfig.getClientId());
     body.add("redirect_uri", providerConfig.getRedirectUri());
+    if (!Strings.isNullOrEmpty(providerConfig.getClientSecret())) {
+      body.add("client_secret", providerConfig.getClientSecret());
+    }
+    if (!Strings.isNullOrEmpty(providerConfig.getState())) {
+      body.add("state", providerConfig.getState());
+    }
+
     body.add("code", code);
 
     HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);

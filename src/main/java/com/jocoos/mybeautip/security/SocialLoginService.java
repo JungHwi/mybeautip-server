@@ -21,6 +21,7 @@ public class SocialLoginService {
   private final MemberRepository memberRepository;
   private final KakaoMemberRepository kakaoMemberRepository;
   private final KakaoLoginService kakaoLoginService;
+  private final NaverLoginService naverLoginService;
 
   private LoginService loginService = null;
 
@@ -37,8 +38,11 @@ public class SocialLoginService {
 
   private void setProvider(String provider) {
     switch (provider) {
-      case "kakao":
+      case KakaoLoginService.PROVIDER_TYPE :
         this.loginService = kakaoLoginService;
+        break;
+      case NaverLoginService.PROVIDER_TYPE :
+        this.loginService = naverLoginService;
         break;
       default:
         throw new MybeautipRuntimeException("Unsupported provider type");

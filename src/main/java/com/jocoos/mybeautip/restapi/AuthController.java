@@ -34,8 +34,8 @@ public class AuthController {
   private final JwtTokenProvider jwtTokenProvider;
 
   @PostMapping(value = "/{provider}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public ResponseEntity<?> authKakao(@PathVariable String provider,
-                                     OauthRequest request) throws UnsupportedEncodingException {
+  public ResponseEntity<?> socialLoing(@PathVariable String provider,
+                                       OauthRequest request) throws UnsupportedEncodingException {
     log.debug("{}, {}", provider, request);
     
     Member member = socialLoginService.loadMember(provider, request.getCode());

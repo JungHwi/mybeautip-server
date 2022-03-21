@@ -15,15 +15,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KakaoLoginService implements LoginService {
-  public static final String PROVIDER_TYPE = "kakao";
+public class NaverLoginService implements LoginService {
+  public static final String PROVIDER_TYPE = "naver";
 
   private final Oauth2Config oauth2Config;
   private final Oauth2Client oauth2Client;
 
   @Override
   public SocialMember getMember(String code) {
-    oauth2Client.setProviderConfig(oauth2Config.getKakao());
+    oauth2Client.setProviderConfig(oauth2Config.getNaver());
 
     String accessToken = oauth2Client.getAccessToken(code);
     log.debug("accessToken: {}", accessToken);
@@ -39,20 +39,17 @@ public class KakaoLoginService implements LoginService {
     return toSocialMember(body);
   }
 
-  @SuppressWarnings("unchecked")
   private SocialMember toSocialMember(Map<String, Object> attributes) {
     log.debug("{}", attributes);
-    Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-    Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-    log.debug("{}", kakaoAccount);
+    Map<String, Object> profile = (Map<String, Object>) attributes.get("response");
     log.debug("{}", profile);
 
     return SocialMember.builder()
         .id(String.valueOf(attributes.get("id")))
         .provider(PROVIDER_TYPE)
         .name((String) profile.get("nickname"))
-        .email((String) kakaoAccount.get("email"))
-        .picture((String) profile.get("profile_image_url"))
+        .email((String) profile.get("email"))
+        .picture((String) profile.get("profile_image"))
         .build();
   }
 }
