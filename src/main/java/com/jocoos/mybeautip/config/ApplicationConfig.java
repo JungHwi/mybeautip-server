@@ -5,13 +5,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
+import java.util.Collections;
 import java.util.Properties;
 
 import com.jocoos.mybeautip.support.RestTemplateResponseErrorHandler;
@@ -65,6 +68,7 @@ public class ApplicationConfig {
     requestFactory.setReadTimeout(CONNECTION_TIMEOUT);
     restTemplate.setRequestFactory(requestFactory);
     restTemplate.setErrorHandler(restTemplateResponseErrorHandler);
+//    restTemplate.getMessageConverters().add(textHtmlMessageConverter());
     return restTemplate;
   }
 
@@ -99,5 +103,11 @@ public class ApplicationConfig {
   @Bean
   public StorageService storageService() {
     return new S3StorageService();
+  }
+
+  public MappingJackson2HttpMessageConverter textHtmlMessageConverter() {
+    MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+    converter.setSupportedMediaTypes(Collections.singletonList(MediaType.TEXT_HTML));
+    return converter;
   }
 }

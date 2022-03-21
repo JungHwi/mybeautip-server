@@ -22,6 +22,7 @@ public class SocialLoginService {
   private final KakaoMemberRepository kakaoMemberRepository;
   private final KakaoLoginService kakaoLoginService;
   private final NaverLoginService naverLoginService;
+  private final FacebookLoginService facebookLoginService;
 
   private LoginService loginService = null;
 
@@ -43,6 +44,9 @@ public class SocialLoginService {
         break;
       case NaverLoginService.PROVIDER_TYPE :
         this.loginService = naverLoginService;
+        break;
+      case FacebookLoginService.PROVIDER_TYPE:
+        this.loginService = facebookLoginService;
         break;
       default:
         throw new MybeautipRuntimeException("Unsupported provider type");

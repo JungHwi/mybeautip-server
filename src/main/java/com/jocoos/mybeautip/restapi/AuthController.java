@@ -34,7 +34,7 @@ public class AuthController {
   private final JwtTokenProvider jwtTokenProvider;
 
   @PostMapping(value = "/{provider}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public ResponseEntity<?> socialLoing(@PathVariable String provider,
+  public ResponseEntity<?> socialLogin(@PathVariable String provider,
                                        OauthRequest request) throws UnsupportedEncodingException {
     log.debug("{}, {}", provider, request);
     

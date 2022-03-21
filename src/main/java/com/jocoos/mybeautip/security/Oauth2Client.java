@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +35,44 @@ public class Oauth2Client {
       throw new MybeautipRuntimeException("Provider config required");
     }
 
+    if ("GET".equals(providerConfig.getTokenMethod())) {
+      return accessTokenWithGet(code);
+    }
+    return accessTokenWithPost(code);
+  }
+
+  private String accessTokenWithGet(String code) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+    HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(headers);
+    log.debug("{}", entity);
+
+    UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(providerConfig.getTokenUri())
+        .queryParam("grant_type", providerConfig.getAuthorizationGrantType())
+        .queryParam("client_id", providerConfig.getClientId())
+        .queryParam("redirect_uri", providerConfig.getRedirectUri())
+        .queryParam("code", code);
+
+    if (!Strings.isNullOrEmpty(providerConfig.getClientSecret())) {
+      uriBuilder.queryParam("client_secret", providerConfig.getClientSecret());
+    }
+
+    if (!Strings.isNullOrEmpty(providerConfig.getState())) {
+      uriBuilder.queryParam("state", providerConfig.getState());
+    }
+
+    String uri = uriBuilder.toUriString();
+    log.debug("{}", uri);
+    ResponseEntity<AccessTokenResponse> response = restTemplate
+        .exchange(uri, HttpMethod.GET, entity, AccessTokenResponse.class);
+
+    log.debug("{}", response.getHeaders());
+    log.debug("{}", response.getBody());
+    return response.getBody().getAccessToken();
+  }
+
+  private String accessTokenWithPost(String code) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -63,18 +102,22 @@ public class Oauth2Client {
 
   public HashMap<String, Object> getUserData(String accessToken) {
     HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     headers.set("Authorization", String.format("Bearer %s", accessToken));
 
-    MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
-
-    HttpEntity httpEntity = new HttpEntity<>(request, headers);
+    HttpEntity httpEntity = new HttpEntity<>(headers);
     ParameterizedTypeReference<HashMap<String, Object>> responseType =
         new ParameterizedTypeReference<HashMap<String, Object>>() {
       };
 
+    UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(providerConfig.getUserInfoUri());
+    if (!Strings.isNullOrEmpty(providerConfig.getFields())) {
+      uriBuilder.queryParam("fields", providerConfig.getFields());
+    }
+
+    String uri = uriBuilder.toUriString();
+    log.debug("{}", uri);
     ResponseEntity<HashMap<String, Object>> responseEntity = restTemplate
-        .exchange(providerConfig.getUserInfoUri(), HttpMethod.GET, httpEntity, responseType);
+        .exchange(uri, HttpMethod.GET, httpEntity, responseType);
 
     HashMap<String, Object> body = responseEntity.getBody();
     log.debug("body: {}", body);

@@ -17,6 +17,7 @@ public class Oauth2Config {
 
   private Oauth2ProviderConfig kakao;
   private Oauth2ProviderConfig naver;
+  private Oauth2ProviderConfig facebook;
 
   @PostConstruct
   public void postConstruct() {
@@ -33,5 +34,7 @@ public class Oauth2Config {
     private String authorizationGrantType;
     private String redirectUri;
     private String state;
+    private String tokenMethod;
+    private String fields;
   }
 }

@@ -15,15 +15,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NaverLoginService implements LoginService {
-  public static final String PROVIDER_TYPE = "naver";
+public class FacebookLoginService implements LoginService {
+  public static final String PROVIDER_TYPE = "facebook";
 
   private final Oauth2Config oauth2Config;
   private final Oauth2Client oauth2Client;
 
   @Override
   public SocialMember getMember(String code) {
-    oauth2Client.setProviderConfig(oauth2Config.getNaver());
+    oauth2Client.setProviderConfig(oauth2Config.getFacebook());
 
     String accessToken = oauth2Client.getAccessToken(code);
     log.debug("accessToken: {}", accessToken);
@@ -42,15 +42,16 @@ public class NaverLoginService implements LoginService {
   @SuppressWarnings("unchecked")
   private SocialMember toSocialMember(Map<String, Object> attributes) {
     log.debug("{}", attributes);
-    Map<String, Object> profile = (Map<String, Object>) attributes.get("response");
-    log.debug("{}", profile);
+    Map<String, Object> picture = (Map<String, Object>) attributes.get("picture");
+    Map<String, Object> data = (Map<String, Object>) picture.get("data");
+    String url = data.get("url") != null ? String.valueOf(data.get("url")) : "";
 
     return SocialMember.builder()
-        .id(String.valueOf(attributes.get("id")))
+        .id(String.valueOf(attributes.get("user_id")))
         .provider(PROVIDER_TYPE)
-        .name((String) profile.get("nickname"))
-        .email((String) profile.get("email"))
-        .picture((String) profile.get("profile_image"))
+        .name((String) attributes.get("name"))
+        .email((String) attributes.get("email"))
+        .picture(url)
         .build();
   }
 }
