@@ -29,10 +29,10 @@ import com.jocoos.mybeautip.recommendation.MemberRecommendation;
 @Table(name = "members")
 public class Member {
 
-  static final int LINK_FACEBOOK = 1;
-  static final int LINK_NAVER = 2;
-  static final int LINK_KAKAO = 4;
-  static final int LINK_APPLE = 8;
+  public static final int LINK_FACEBOOK = 1;
+  public static final int LINK_NAVER = 2;
+  public static final int LINK_KAKAO = 4;
+  public static final int LINK_APPLE = 8;
 
   // Changed store link from 8 to 32
   static final int LINK_STORE = 32;

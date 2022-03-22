@@ -84,4 +84,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
           "  left outer join Block b on m.id=b.me and b.memberYou.id=?2" +
           "  where m.id=?1")
   Optional<MemberExtraInfo> findMemberExtraInfo(Long me, Long you);
+
+  Optional<Member> findByEmailAndDeletedAtIsNull(String email);
 }
