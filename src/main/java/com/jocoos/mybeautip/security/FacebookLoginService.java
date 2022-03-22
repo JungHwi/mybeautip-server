@@ -47,7 +47,7 @@ public class FacebookLoginService implements LoginService {
     String url = data.get("url") != null ? String.valueOf(data.get("url")) : "";
 
     return SocialMember.builder()
-        .id(String.valueOf(attributes.get("user_id")))
+        .id(String.valueOf(attributes.get("id")))
         .provider(PROVIDER_TYPE)
         .name((String) attributes.get("name"))
         .email((String) attributes.get("email"))

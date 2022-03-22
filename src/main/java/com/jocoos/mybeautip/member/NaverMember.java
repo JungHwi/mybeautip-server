@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,12 @@ public class NaverMember extends CreatedDateAuditable {
 
   @Column(nullable = false)
   private Long memberId;
+
+  public NaverMember(String naverId, String nickname, Long memberId) {
+    this.naverId = naverId;
+    this.nickname = nickname;
+    this.memberId = memberId;
+  }
 
   public NaverMember(Map<String, String> params, Long memberId) {
     this.naverId = params.get("naver_id");

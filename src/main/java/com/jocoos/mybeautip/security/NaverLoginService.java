@@ -46,7 +46,7 @@ public class NaverLoginService implements LoginService {
     log.debug("{}", profile);
 
     return SocialMember.builder()
-        .id(String.valueOf(attributes.get("id")))
+        .id(String.valueOf(profile.get("id")))
         .provider(PROVIDER_TYPE)
         .name((String) profile.get("nickname"))
         .email((String) profile.get("email"))
