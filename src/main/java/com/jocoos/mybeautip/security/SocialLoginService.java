@@ -58,24 +58,34 @@ public class SocialLoginService {
 
   private Member findMember(SocialMember socialMember) {
     Member member = null;
-    /**
-     * Kakao has empty email case
-     */
-    if (KakaoLoginService.PROVIDER_TYPE.equals(socialMember.getProvider()) &&
-        Strings.isNullOrEmpty(socialMember.getEmail())) {
-      Long memberId = kakaoMemberRepository.findById(socialMember.getId())
-          .map(s -> s.getMemberId())
-          .orElse(null);
+    Long memberId = null;
 
-      if (memberId != null) {
-        member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
-            .orElse(socialMember.toMember());
-      } else {
-        member = socialMember.toMember();
-      }
-    } else {
-      member = memberRepository.findByEmailAndDeletedAtIsNull(socialMember.getEmail())
+    switch (socialMember.getProvider()) {
+      case KakaoLoginService.PROVIDER_TYPE:
+        memberId = kakaoMemberRepository.findById(socialMember.getId())
+            .map(s -> s.getMemberId())
+            .orElse(null);
+        break;
+      case NaverLoginService.PROVIDER_TYPE:
+        memberId = naverMemberRepository.findById(socialMember.getId())
+            .map(s -> s.getMemberId())
+            .orElse(null);
+        break;
+
+      case FacebookLoginService.PROVIDER_TYPE:
+        memberId = facebookMemberRepository.findById(socialMember.getId())
+            .map(s -> s.getMemberId())
+            .orElse(null);
+        break;
+      default:
+        throw new MybeautipRuntimeException("Unsupported provider type");
+    }
+
+    if (memberId != null) {
+      member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
           .orElse(socialMember.toMember());
+    } else {
+      member = socialMember.toMember();
     }
     return member;
   }
