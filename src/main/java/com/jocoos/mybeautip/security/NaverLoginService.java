@@ -22,10 +22,10 @@ public class NaverLoginService implements LoginService {
   private final Oauth2Client oauth2Client;
 
   @Override
-  public SocialMember getMember(String code) {
+  public SocialMember getMember(String code, String state) {
     oauth2Client.setProviderConfig(oauth2Config.getNaver());
 
-    String accessToken = oauth2Client.getAccessToken(code);
+    String accessToken = oauth2Client.getAccessToken(code, state);
     log.debug("accessToken: {}", accessToken);
 
     if (Strings.isNullOrEmpty(accessToken)) {

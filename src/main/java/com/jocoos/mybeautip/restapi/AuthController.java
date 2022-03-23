@@ -37,8 +37,8 @@ public class AuthController {
   public ResponseEntity<?> socialLogin(@PathVariable String provider,
                                        OauthRequest request) throws UnsupportedEncodingException {
     log.debug("{}, {}", provider, request);
-    
-    Member member = socialLoginService.loadMember(provider, request.getCode());
+
+    Member member = socialLoginService.loadMember(provider, request.getCode(), request.getState());
     AccessTokenResponse accessTokenResponse = jwtTokenProvider.auth(member);
     log.debug("response: {}", accessTokenResponse);
 
@@ -57,5 +57,6 @@ public class AuthController {
   static class OauthRequest {
     @NotNull
     String code;
+    String state = "mybeautip-web-mobile";
   }
 }

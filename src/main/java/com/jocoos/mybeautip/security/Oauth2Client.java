@@ -30,18 +30,18 @@ public class Oauth2Client {
     this.providerConfig = providerConfig;
   }
 
-  public String getAccessToken(String code) {
+  public String getAccessToken(String code, String state) {
     if (providerConfig == null) {
       throw new MybeautipRuntimeException("Provider config required");
     }
 
     if ("GET".equals(providerConfig.getTokenMethod())) {
-      return accessTokenWithGet(code);
+      return accessTokenWithGet(code, state);
     }
-    return accessTokenWithPost(code);
+    return accessTokenWithPost(code, state);
   }
 
-  private String accessTokenWithGet(String code) {
+  private String accessTokenWithGet(String code, String state) {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
@@ -58,8 +58,8 @@ public class Oauth2Client {
       uriBuilder.queryParam("client_secret", providerConfig.getClientSecret());
     }
 
-    if (!Strings.isNullOrEmpty(providerConfig.getState())) {
-      uriBuilder.queryParam("state", providerConfig.getState());
+    if (!Strings.isNullOrEmpty(state)) {
+      uriBuilder.queryParam("state", state);
     }
 
     String uri = uriBuilder.toUriString();
@@ -72,7 +72,7 @@ public class Oauth2Client {
     return response.getBody().getAccessToken();
   }
 
-  private String accessTokenWithPost(String code) {
+  private String accessTokenWithPost(String code, String state) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -84,8 +84,8 @@ public class Oauth2Client {
     if (!Strings.isNullOrEmpty(providerConfig.getClientSecret())) {
       body.add("client_secret", providerConfig.getClientSecret());
     }
-    if (!Strings.isNullOrEmpty(providerConfig.getState())) {
-      body.add("state", providerConfig.getState());
+    if (!Strings.isNullOrEmpty(state)) {
+      body.add("state", state);
     }
 
     body.add("code", code);

@@ -3,13 +3,10 @@ package com.jocoos.mybeautip.security;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.member.*;
 
 import com.google.common.base.Strings;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,11 +27,11 @@ public class SocialLoginService {
   private LoginService loginService = null;
 
   @Transactional
-  public Member loadMember(String provider, String code) {
+  public Member loadMember(String provider, String code, String state) {
     log.debug("provider: {}, code: {}", provider, code);
     setProvider(provider);
 
-    SocialMember member = loginService.getMember(code);
+    SocialMember member = loginService.getMember(code, state);
     log.debug("{}", member);
 
     return saveOrUpdate(member);
