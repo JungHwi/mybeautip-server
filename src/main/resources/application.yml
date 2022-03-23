@@ -18,7 +18,7 @@ spring:
     use-code-as-default-message: true
   profiles:
     active: ${profile:local}
-    include: oauth-dev
+    include: oauth-local
   datasource:
     url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
     username: mybeautip
