@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.recommendation.MemberRecommendation;
 
+// space migration test
 
 @Data
 @NoArgsConstructor
