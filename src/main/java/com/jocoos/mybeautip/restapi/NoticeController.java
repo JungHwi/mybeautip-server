@@ -3,9 +3,11 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.app.AppInfo;
 import com.jocoos.mybeautip.app.AppInfoRepository;
 import com.jocoos.mybeautip.devices.NoticeService;
+import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/api/1/notices", produces = MediaType.APPLICATION_JSON_VALUE)
 public class NoticeController {
   
@@ -28,18 +31,11 @@ public class NoticeController {
   
   @Value("${mybeautip.revenue.revenue-ratio-vod}")
   private int revenueRatioForVod;
-  
+
+  private final MemberService memberService;
   private final NoticeService noticeService;
   private final MessageService messageService;
   private final AppInfoRepository appInfoRepository;
-
-  public NoticeController(NoticeService noticeService,
-                          MessageService messageService,
-                          AppInfoRepository appInfoRepository) {
-    this.noticeService = noticeService;
-    this.messageService = messageService;
-    this.appInfoRepository = appInfoRepository;
-  }
 
   @GetMapping
   public ResponseEntity<NoticeResponse> getNotices(@RequestParam("device_os") String deviceOs,
@@ -52,6 +48,8 @@ public class NoticeController {
        .stream().map(input -> new NoticeInfo(input.getType(),
             messageService.getMessage(input.getMessage(), language)))
        .collect(Collectors.toList());
+
+    memberService.updateLastLoginAt();
 
     NoticeResponse response = new NoticeResponse();
     PageRequest pageable = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "createdAt"));

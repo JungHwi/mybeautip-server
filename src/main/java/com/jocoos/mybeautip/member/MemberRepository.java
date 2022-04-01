@@ -31,6 +31,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(Date createdAt, String username, String intro, Pageable pageable);
 
   @Modifying
+  @Query("update Member m set m.lastLoginAt = current_timestamp where m.id = ?1")
+  void updateLastLoginAt(Long memberId);
+
+  @Modifying
   @Query("update Member m set m.followingCount = m.followingCount + ?2, m.modifiedAt = now() where m.id = ?1")
   void updateFollowingCount(Long id, Integer count);
 

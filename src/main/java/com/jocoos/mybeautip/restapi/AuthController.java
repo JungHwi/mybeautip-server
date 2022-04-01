@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.jocoos.mybeautip.member.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/1/token")
 public class AuthController {
 
+  private final MemberService memberService;
   private final SocialLoginService socialLoginService;
   private final JwtTokenProvider jwtTokenProvider;
+
 
   @PostMapping(value = "/{provider}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public ResponseEntity<?> socialLogin(@PathVariable String provider,
@@ -53,6 +56,8 @@ public class AuthController {
 
     String memberId = jwtTokenProvider.getMemberId(accessToken);
     log.debug("memberId: {}", memberId);
+
+    memberService.updateLastLoginAt();
 
     return new ResponseEntity<>(accessTokenResponse, HttpStatus.OK);
   }

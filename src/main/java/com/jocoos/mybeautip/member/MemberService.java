@@ -209,6 +209,14 @@ public class MemberService {
   public boolean hasCommentPostPermission(Member member) {
     return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
   }
+
+  @Transactional
+  public void updateLastLoginAt() {
+    Member member = currentMember();
+    if (member != null) {
+      memberRepository.updateLastLoginAt(member.getId());
+    }
+  }
   
   @Transactional
   public Report reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {

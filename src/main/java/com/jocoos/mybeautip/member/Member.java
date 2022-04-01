@@ -114,6 +114,9 @@ public class Member {
   private Date modifiedAt;
 
   @Column
+  private Date lastLoginAt;
+
+  @Column
   private Date deletedAt;
 
   public int parseLink(String grantType) {
