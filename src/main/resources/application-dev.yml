@@ -1,7 +1,7 @@
 spring:
   profiles:
     active: dev
-    include: oauth-local
+    include: oauth-dev
   datasource:
     url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
     username: mybeautip

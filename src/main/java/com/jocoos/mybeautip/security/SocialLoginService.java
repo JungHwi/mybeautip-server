@@ -27,11 +27,11 @@ public class SocialLoginService {
   private LoginService loginService = null;
 
   @Transactional
-  public Member loadMember(String provider, String code, String state) {
-    log.debug("provider: {}, code: {}", provider, code);
+  public Member loadMember(String provider, String code, String state, String redirectUri) {
+    log.debug("provider: {}, code: {}, redirect url: {}", provider, code, redirectUri);
     setProvider(provider);
 
-    SocialMember member = loginService.getMember(code, state);
+    SocialMember member = loginService.getMember(code, state, redirectUri);
     log.debug("{}", member);
 
     return saveOrUpdate(member);

@@ -22,10 +22,10 @@ public class KakaoLoginService implements LoginService {
   private final Oauth2Client oauth2Client;
 
   @Override
-  public SocialMember getMember(String code, String state) {
+  public SocialMember getMember(String code, String state, String redirectUri) {
     oauth2Client.setProviderConfig(oauth2Config.getKakao());
 
-    String accessToken = oauth2Client.getAccessToken(code, state);
+    String accessToken = oauth2Client.getAccessToken(code, state, redirectUri);
     log.debug("accessToken: {}", accessToken);
 
     if (Strings.isNullOrEmpty(accessToken)) {

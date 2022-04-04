@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.security.AccessTokenResponse;
 import com.jocoos.mybeautip.security.JwtTokenProvider;
 import com.jocoos.mybeautip.security.SocialLoginService;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +38,11 @@ public class AuthController {
   public ResponseEntity<?> socialLogin(@PathVariable String provider,
                                        OauthRequest request) throws UnsupportedEncodingException {
     log.debug("{}, {}", provider, request);
+    if (Strings.isNullOrEmpty(request.getRedirectUri())) {
+      throw new IllegalArgumentException("Redirect uri was required");
+    }
 
-    Member member = socialLoginService.loadMember(provider, request.getCode(), request.getState());
+    Member member = socialLoginService.loadMember(provider, request.getCode(), request.getState(), request.getRedirectUri());
     AccessTokenResponse accessTokenResponse = jwtTokenProvider.auth(member);
     log.debug("response: {}", accessTokenResponse);
 
@@ -58,5 +62,11 @@ public class AuthController {
     @NotNull
     String code;
     String state = "mybeautip-web-mobile";
+    @NotNull
+    String redirectUri;
+
+    public void setRedirect_uri(String redirectUri) {
+      this.redirectUri = redirectUri;
+    }
   }
 }

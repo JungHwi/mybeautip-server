@@ -30,18 +30,18 @@ public class Oauth2Client {
     this.providerConfig = providerConfig;
   }
 
-  public String getAccessToken(String code, String state) {
+  public String getAccessToken(String code, String state, String redirectUri) {
     if (providerConfig == null) {
       throw new MybeautipRuntimeException("Provider config required");
     }
 
     if ("GET".equals(providerConfig.getTokenMethod())) {
-      return accessTokenWithGet(code, state);
+      return accessTokenWithGet(code, state, redirectUri);
     }
-    return accessTokenWithPost(code, state);
+    return accessTokenWithPost(code, state, redirectUri);
   }
 
-  private String accessTokenWithGet(String code, String state) {
+  private String accessTokenWithGet(String code, String state, String redirectUri) {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
@@ -51,7 +51,7 @@ public class Oauth2Client {
     UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(providerConfig.getTokenUri())
         .queryParam("grant_type", providerConfig.getAuthorizationGrantType())
         .queryParam("client_id", providerConfig.getClientId())
-        .queryParam("redirect_uri", providerConfig.getRedirectUri())
+        .queryParam("redirect_uri", redirectUri)
         .queryParam("code", code);
 
     if (!Strings.isNullOrEmpty(providerConfig.getClientSecret())) {
@@ -72,7 +72,7 @@ public class Oauth2Client {
     return response.getBody().getAccessToken();
   }
 
-  private String accessTokenWithPost(String code, String state) {
+  private String accessTokenWithPost(String code, String state, String redirectUri) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -80,7 +80,7 @@ public class Oauth2Client {
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
     body.add("grant_type", providerConfig.getAuthorizationGrantType());
     body.add("client_id", providerConfig.getClientId());
-    body.add("redirect_uri", providerConfig.getRedirectUri());
+    body.add("redirect_uri", redirectUri);
     if (!Strings.isNullOrEmpty(providerConfig.getClientSecret())) {
       body.add("client_secret", providerConfig.getClientSecret());
     }
