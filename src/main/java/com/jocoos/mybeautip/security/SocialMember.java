@@ -27,6 +27,8 @@ public class SocialMember {
     member.setEmail(this.email);
     member.setUsername(this.name);
     member.setAvatarUrl(this.picture);
+    member.setPermission(Member.PERMISSION_ALL);
+
     return member;
   }
 

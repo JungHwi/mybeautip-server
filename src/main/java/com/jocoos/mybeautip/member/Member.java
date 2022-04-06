@@ -42,6 +42,7 @@ public class Member {
   public static final int LIVE_POST = 4;
   public static final int MOTD_POST = 8;
   public static final int REVENUE_RETURN = 16;
+  public static final int PERMISSION_ALL = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
 
   @Transient
   @JsonIgnore
