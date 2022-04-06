@@ -20,8 +20,7 @@ import com.jocoos.mybeautip.security.AccessTokenResponse;
 import com.jocoos.mybeautip.security.JwtTokenProvider;
 import com.jocoos.mybeautip.security.SocialLoginService;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jocoos.mybeautip.member.Member;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
+
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.feed.FeedService;
@@ -40,7 +41,7 @@ public class FeedController {
     Member me = memberService.currentMember();
   
 //    if (me.getFollowingCount() == 0) {
-//      List<VideoController.VideoInfo> videos = Lists.newArrayList();
+//      List<VideoController.VideoInfo> videos = new ArrayList<>();
 //      videoService.findVideos(null, null, null, count)
 //          .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 //      return new CursorResponse.Builder<>(null, videos).toBuild();
@@ -48,7 +49,7 @@ public class FeedController {
     
     List<Video> videos = feedService.getVideoKeys(me.getId(), cursor, count);
     
-    List<VideoController.VideoInfo> result = Lists.newArrayList();
+    List<VideoController.VideoInfo> result = new ArrayList<>();
     videos
        .forEach(v -> {
          if (StringUtils.isBlank(v.getVideoKey())) {

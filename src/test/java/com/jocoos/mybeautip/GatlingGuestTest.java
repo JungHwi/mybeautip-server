@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.google.common.collect.Lists;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.BeforeClass;
@@ -65,7 +66,7 @@ public class GatlingGuestTest {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.setAccept(Lists.newArrayList(MediaType.APPLICATION_JSON));
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
     for (int i = 0; i < GUEST_COUNT; i++) {
       int r = random.nextInt(RANDOM_BOUND);
@@ -96,7 +97,7 @@ public class GatlingGuestTest {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.setAccept(Lists.newArrayList(MediaType.APPLICATION_JSON));
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
     for (int i = 0; i < GUEST_COUNT; i++) {
       int r = random.nextInt(RANDOM_BOUND);
@@ -137,7 +138,7 @@ public class GatlingGuestTest {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-    headers.setAccept(Lists.newArrayList(MediaType.APPLICATION_JSON));
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
     headers.set(HttpHeaders.AUTHORIZATION, "Basic bXliZWF1dGlwLWlvczpha2RscWJ4bHFka2RsZGhkcHRt");
 

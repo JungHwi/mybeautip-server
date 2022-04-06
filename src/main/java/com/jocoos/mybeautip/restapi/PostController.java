@@ -28,9 +28,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
+
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -148,7 +148,7 @@ public class PostController {
     final Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me.getId()) : null;
 
     Slice<Post> posts = findPosts(count, category, label, keyword, cursor);
-    List<PostInfo> result = Lists.newArrayList();
+    List<PostInfo> result = new ArrayList<>();
 
     posts.stream().forEach(post -> {
       List<GoodsInfo> goodsInfo = new ArrayList<>();
@@ -194,7 +194,7 @@ public class PostController {
   }
 
   private Slice<Post> findPosts(int count, int category, int label, String keyword, String cursor) {
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id"));
     Slice<Post> posts;
     Date dateCursor = null;
 
@@ -205,25 +205,25 @@ public class PostController {
     }
 
     if (category > 0 && label > 0) {
-      if (!Strings.isNullOrEmpty(keyword)) {
+      if (!StringUtils.isBlank(keyword)) {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, label, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNull(dateCursor, dateCursor, category, label, page);
       }
     } else if (category > 0) {
-      if (!Strings.isNullOrEmpty(keyword)) {
+      if (!StringUtils.isBlank(keyword)) {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNull(dateCursor, dateCursor, category, page);
       }
     } else if (label > 0) {
-      if (!Strings.isNullOrEmpty(keyword)) {
+      if (!StringUtils.isBlank(keyword)) {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, label, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNull(dateCursor, dateCursor, label, page);
       }
     } else {
-      if (!Strings.isNullOrEmpty(keyword)) {
+      if (!StringUtils.isBlank(keyword)) {
         posts = postRepository.searchPost(keyword, new Date(), dateCursor, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(dateCursor, dateCursor, page);
@@ -262,7 +262,7 @@ public class PostController {
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
-         List<GoodsInfo> result = Lists.newArrayList();
+         List<GoodsInfo> result = new ArrayList<>();
          post.getGoods().stream().forEach(gno -> {
            goodsRepository.findByGoodsNo(gno).ifPresent(g -> {
              result.add(goodsService.generateGoodsInfo(g));
@@ -279,7 +279,7 @@ public class PostController {
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
-         List<MemberInfo> result = Lists.newArrayList();
+         List<MemberInfo> result = new ArrayList<>();
          post.getWinners().stream().forEach(mid -> {
            memberRepository.findByIdAndDeletedAtIsNull(mid).ifPresent(m -> {
              result.add(memberService.getMemberInfo(m));
@@ -351,14 +351,14 @@ public class PostController {
     
     PageRequest page;
     if ("next".equals(direction)) {
-      page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
+      page = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "id"));
     } else {
-      page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id")); // default
+      page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id")); // default
     }
     
     Slice<Comment> comments;
     Long me = memberService.currentMemberId();
-    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : Maps.newHashMap();
+    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : new HashMap<>();
 
     if (parentId != null) {
       comments = postService.findCommentsByParentId(parentId, cursor, page, direction);
@@ -366,7 +366,7 @@ public class PostController {
       comments = postService.findCommentsByPostId(id, cursor, page, direction);
     }
 
-    List<CommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = new ArrayList<>();
     comments.stream().forEach(comment -> {
         CommentInfo commentInfo = null;
       if (comment.getComment().contains("@")) {
@@ -524,7 +524,7 @@ public class PostController {
   public ResponseEntity<?> getPostLabels() {
     List<PostLabel> groups = postLabelRepository.findAll();
     if (groups == null) {
-      return new ResponseEntity<>(Lists.newArrayList(), HttpStatus.OK);
+      return new ResponseEntity<>(Arrays.asList(), HttpStatus.OK);
     }
     List<PostLabelInfo> result = groups.stream().map(g -> new PostLabelInfo(g)).collect(Collectors.toList());
     return new ResponseEntity<>(result, HttpStatus.OK);
@@ -634,7 +634,7 @@ public class PostController {
       post.setLabelId(request.getLabel());
     }
 
-    if (!post.getDescription().equals(request.getDescription()) && !Strings.isNullOrEmpty(request.getDescription())) {
+    if (!post.getDescription().equals(request.getDescription()) && !StringUtils.isBlank(request.getDescription())) {
       post.setDescription(request.getDescription());
     }
   }

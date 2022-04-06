@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -43,7 +43,7 @@ public class GoodsDetailService {
           log.debug("goods description: {}", goodsDescription);
 
           Element root;
-          if (!Strings.isNullOrEmpty(goodsDescription) && !hasComplicatedStyle(goodsDescription)) {
+          if (!StringUtils.isBlank(goodsDescription) && !hasComplicatedStyle(goodsDescription)) {
             root = createDocumentFromString(goodsDescription);
           } else {
             root = createDocumentFromUri(goodsNo);
@@ -55,7 +55,7 @@ public class GoodsDetailService {
   }
 
   private boolean hasComplicatedStyle(String document) {
-    return !Strings.isNullOrEmpty(document) && document.contains("background-image: url(");
+    return !StringUtils.isBlank(document) && document.contains("background-image: url(");
   }
 
   @Cacheable("goods_detail")
@@ -101,7 +101,7 @@ public class GoodsDetailService {
       String text = element.text();
       String style = element.attr("style");
 
-      if (!Strings.isNullOrEmpty(text)) {
+      if (!StringUtils.isBlank(text)) {
         log.debug("tag: {}, style: {}, text: {}", element.tag(), style, element.text());
         elements.add(element);
       }
@@ -136,7 +136,7 @@ public class GoodsDetailService {
           String videoSrc = element.attr("src");
           log.debug("video src: {}", videoSrc);
 
-          if (includeVideo && !Strings.isNullOrEmpty(videoSrc)) {
+          if (includeVideo && !StringUtils.isBlank(videoSrc)) {
             builder.append(String.format(VIDEO_ELEMENT_FORMAT, videoSrc));
           }
           break;
@@ -144,7 +144,7 @@ public class GoodsDetailService {
         case "div": {
           String style = element.attr("style");
 
-          if (!Strings.isNullOrEmpty(style)) {
+          if (!StringUtils.isBlank(style)) {
             builder.append("<div style=\"" + element.attr("style") + "\">");
           } else {
             builder.append("<div>");
@@ -197,12 +197,12 @@ public class GoodsDetailService {
         case "p": {
           String ownText = c.ownText();
           log.debug("tag: {}, own text: {}", tag, ownText);
-          if (Strings.isNullOrEmpty(ownText)) {
+          if (StringUtils.isBlank(ownText)) {
             break;
           }
           String style = c.attr("style");
 
-          if (!Strings.isNullOrEmpty(style)) {
+          if (!StringUtils.isBlank(style)) {
             builder.append(String.format("<%s style=\"%s\">%s</%s>", tag, style, ownText, tag));
           } else {
             builder.append(String.format("<%s>%s</%s>", tag, ownText, tag));

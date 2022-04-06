@@ -54,7 +54,7 @@ public class GoodsService {
     if (optional.isPresent()) {
       category = optional.get().getCateCd();
     }
-    PageRequest pageable = PageRequest.of(0, 10, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
     return goodsRepository.findRelatedGoods(category, goodsNo, pageable);
   }
 

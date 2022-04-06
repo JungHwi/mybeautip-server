@@ -9,7 +9,7 @@ spring:
       base-path: /api/admin
       default-page-size: 10
   main:
-    show_banner: false
+    banner-mode: off
   messages:
     always-use-message-format: false
     basename: i18n/messages
@@ -31,7 +31,7 @@ spring:
     serialization:
       write-dates-as-timestamps: true
     default-property-inclusion: NON_NULL
-    property-naming-strategy: CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
+    property-naming-strategy: SNAKE_CASE
   flyway:
     baselineOnMigrate: true
     locations: classpath:db/mysql
@@ -55,7 +55,7 @@ security:
       nCUnuw4MlP/VwKIiv++sYJ3f2AqLBbdvnfQHudv6duWK8E4lRePRBSECGwyQxblN
       LDdVWAkDjuAN1zJANzbVaS7fcZfpuTVvqJimAsCOtlfLad3ak4C4mlUnAgMBAAEC
       gYBAM7oG8+6pJpBtKo9sLCfMhlt+/eep0ykxr2KhoFpFZyKOelW3488j/mfxryqc
-      QXBIET/L28Ef3CBqcZqJsGjW+86MA5dECiQwP3SkoAJQ9x0D4h2RBUJ2YAymgKx6
+      QXBIET/L28Ef3CBqcZqJsGjW+86MA5dECiQwP3SkoAJQ9x0D4 h2RBUJ2YAymgKx6
       icv6zJ4ei7MHqHg3GG/E4FBSXcdSJLhEflJTZGvRUK6xIQJBAMQKNAF8vqdsoxxs
       lqiR+68B41gOeyWsUKKBcpZEfGSKCLn8fuqkPGyS3ub2xFozPfsufrlIx7M5BKfG
       UZDi4VcCQQCN9Zhcv97gwuc7bYYJBRLV06WBwK/W0ueCPMdnBUAYZvXCGCv2lcC7
@@ -173,7 +173,8 @@ redis:
 
 ---
 spring:
-  profiles: local
+  profiles:
+    active: local
 
 logging:
   config: classpath:log/log4j2-console.yml

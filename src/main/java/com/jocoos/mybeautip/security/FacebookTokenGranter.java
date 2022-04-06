@@ -8,7 +8,7 @@ import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
@@ -41,7 +41,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     String username = requestParameters.get("facebook_id");
     log.debug("facebook id: {}, username: {}", facebookId, username);
 
-    if (Strings.isNullOrEmpty(facebookId)) {
+    if (StringUtils.isBlank(facebookId)) {
       throw new AuthenticationException("facebook ID is required");
     }
 
@@ -50,7 +50,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     }
 
     return facebookMemberRepository.findById(facebookId)
-        .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
+        .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
   }
 

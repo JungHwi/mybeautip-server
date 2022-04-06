@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -113,7 +113,7 @@ public class StoreController {
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
     Slice<Goods> slice;
     if (StringUtils.isEmpty(category)) {
       slice = goodsRepository.findByCreatedAtBeforeAndScmNoAndStateLessThanEqual(startCursor, id, Goods.GoodsState.NO_SALE.ordinal(), pageable);
@@ -214,7 +214,7 @@ public class StoreController {
 
     public StoreInfo(Store store, Long likeId) {
       BeanUtils.copyProperties(store, this);
-      this.description = Strings.isNullOrEmpty(store.getDescription()) ? "" : store.getDescription();
+      this.description = StringUtils.isBlank(store.getDescription()) ? "" : store.getDescription();
       this.likeId = likeId;
     }
   }

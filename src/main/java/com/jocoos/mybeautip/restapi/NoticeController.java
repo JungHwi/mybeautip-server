@@ -52,7 +52,7 @@ public class NoticeController {
     memberService.updateLastLoginAt();
 
     NoticeResponse response = new NoticeResponse();
-    PageRequest pageable = PageRequest.of(0, 1, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdAt"));
     List<AppInfo> list = appInfoRepository.findByOs(deviceOs, pageable);
     response.setLatestVersion((list.size() > 0) ? list.get(0).getVersion() : "");
     response.setRevenueRatio(revenueRatioForLive);

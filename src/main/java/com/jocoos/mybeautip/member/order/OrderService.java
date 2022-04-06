@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -53,7 +53,7 @@ public class OrderService {
   @Value("${mybeautip.point.minimum}")
   private int minimumPoint;
 
-  private static final List<String> EVENT_GOODS = Lists.newArrayList("1000037476", "1000037435", "1000037727", "1000037448");
+  private static final List<String> EVENT_GOODS = Arrays.asList("1000037476", "1000037435", "1000037727", "1000037448");
   private static final Long EVENT_COUPON_ID = 4L;
   private static final String CANNOT_USE_COUPON_WITH_POINT = "order.not_use_coupon_with_point";
   private static final String INVALID_GOODS_FOR_COUPON = "order.invalid_goods_for_coupon";
@@ -207,7 +207,7 @@ public class OrderService {
     paymentRepository.save(payment);
 
 
-    List<Purchase> purchases = Lists.newArrayList();
+    List<Purchase> purchases = new ArrayList<>();
     request.getPurchases().forEach(p -> goodsRepository.findByGoodsNo(p.getGoodsNo())
       .map(goods -> {
         Purchase purchase = new Purchase(order.getId(), goods);
@@ -219,7 +219,7 @@ public class OrderService {
 
         String optionNames = goodsOptionService.getGoodsOptionNames(p.getGoodsNo(), p.getOptionId());
         log.debug("optionNames: {}", optionNames);
-        if (!Strings.isNullOrEmpty(optionNames)) {
+        if (!StringUtils.isBlank(optionNames)) {
           purchase.setOptionValue(optionNames);
         }
         purchases.add(purchase);
@@ -324,7 +324,7 @@ public class OrderService {
       purchaseRepository.save(purchase);
 
       OrderInquiry orderInquiry = new OrderInquiry(order, state, reason, purchase);
-      if (!Strings.isNullOrEmpty(attachments)) {
+      if (!StringUtils.isBlank(attachments)) {
         orderInquiry.setAttachments(attachments);
       }
       return orderInquiryRepository.save(orderInquiry);
@@ -356,7 +356,7 @@ public class OrderService {
   }
 
   @Transactional
-  private void cancelPayment(Order order) {
+  public void cancelPayment(Order order) {
     if (order.getState() >= Order.State.ORDER_CANCELLED.getValue()) {
       throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
     }
@@ -425,7 +425,7 @@ public class OrderService {
   }
 
   @Transactional
-  private Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
+  public Payment checkPaymentAndUpdate(Long orderId, String paymentId) {
     return paymentRepository.findById(orderId)
        .map(payment -> {
          String token = iamportService.getToken();
@@ -467,7 +467,7 @@ public class OrderService {
    * Update order status and relative purchases of order
    */
   @Transactional
-  private void saveOrderAndPurchasesStatus(Order order, String status) {
+  public void saveOrderAndPurchasesStatus(Order order, String status) {
     log.info(String.format("saveOrderAndPurchasesStatus called, id: %d, status: %s", order.getId(), status));
     order.setStatus(status);
     order.getPurchases().forEach(p -> p.setStatus(status));
@@ -477,7 +477,7 @@ public class OrderService {
   }
   
   @Transactional
-  private void completeOrder(Order order) {
+  public void completeOrder(Order order) {
     log.info(String.format("completeOrder called, id: %d, state: %s ", order.getId(), order.getStatus()));
     saveOrderAndPurchasesStatus(order, Order.Status.PAID);
 
@@ -520,7 +520,7 @@ public class OrderService {
   }
   
   @Transactional
-  private boolean isOrderOnLive(Order order) {
+  public boolean isOrderOnLive(Order order) {
     if (order.getVideoId() == null) {
       return false;
     }
@@ -570,7 +570,7 @@ public class OrderService {
    * Save revenues for seller
    */
   @Transactional
-  private void saveRevenuesForSeller(Order order, String videoState) {
+  public void saveRevenuesForSeller(Order order, String videoState) {
     Map<Goods, Video> videoGoods = videoGoodsRepository.findAllByVideoId(order.getVideoId())
        .stream().collect(Collectors.toMap(VideoGoods::getGoods, VideoGoods::getVideo));
 
@@ -597,7 +597,7 @@ public class OrderService {
   
   // Delete cart items when order is completed(paid)
   @Transactional
-  private void deleteCartItems(Order order) {
+  public void deleteCartItems(Order order) {
     log.debug("delete cart items: purchase count is " + order.getPurchases().size());
     for (Purchase p: order.getPurchases()) {
       log.debug(String.format("- item: %s, %d, %d", p.getGoods().getGoodsNo(), p.getOptionId().intValue(), p.getQuantity()));
@@ -730,7 +730,7 @@ public class OrderService {
   }
 
   @Transactional
-  private void revokeResourcesBeforeCancelOrder(Order order) {
+  public void revokeResourcesBeforeCancelOrder(Order order) {
     // Revoke used coupon
     if (order.getMemberCoupon() != null) {
       log.info("Order canceled - coupon revoked: {}, {}", order.getId(), order.getMemberCoupon());

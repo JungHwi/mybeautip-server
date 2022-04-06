@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.security;
 
 import java.util.Map;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
     String username = requestParameters.get("username");
     log.debug("kakao id: {}, username: {}", kakaoId, username);
 
-    if (Strings.isNullOrEmpty(kakaoId)) {
+    if (StringUtils.isBlank(kakaoId)) {
       throw new AuthenticationException("kakao ID is required");
     }
 
@@ -45,7 +45,7 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
     }
 
     return kakaoMemberRepository.findById(kakaoId)
-        .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
+        .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
   }
 

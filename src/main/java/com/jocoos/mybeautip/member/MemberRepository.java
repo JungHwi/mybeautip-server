@@ -82,6 +82,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   List<Member> findByVisibleAndDeletedAtIsNull(boolean visible, Pageable pageable);
 
+  List<Member> findAllByVisibleTrueAndPushableTrue();
+
   @Query("select f.id as followingId, r.id as reportedId, b.id as blockedId from Member m" +
           "  left outer join Following f on m.id=f.memberMe.id and f.memberYou.id=?2" +
           "  left outer join Report r on m.id=r.me.id and r.you.id=?2" +

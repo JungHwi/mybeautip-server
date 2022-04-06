@@ -3,10 +3,7 @@ package com.jocoos.mybeautip.admin;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,12 +70,12 @@ public class AdminNotificationController {
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "100") int size) {
 
-    List<Integer> links = Lists.newArrayList(0, 1, 2, 4);
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "createdAt"));
+    List<Integer> links = Arrays.asList(0, 1, 2, 4);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     String deviceOs = deviceService.getDeviceOs(platform);
     Page<Device> devices = null;
-    if (!Strings.isNullOrEmpty(username)) {
+    if (!StringUtils.isBlank(username)) {
       if (deviceOs != null) {
         devices = deviceRepository.findByCreatedByLinkInAndPushableAndValidAndOsAndCreatedByDeletedAtIsNullAndCreatedByUsernameContaining(links, pushable, valid, deviceOs, username, pageable);
       } else {
@@ -104,11 +101,11 @@ public class AdminNotificationController {
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "100") int size) {
 
-    List<Integer> links = Lists.newArrayList(0, 1, 2, 4);
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "createdAt"));
+    List<Integer> links = Arrays.asList(0, 1, 2, 4);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     Page<Member> members = null;
-    if (!Strings.isNullOrEmpty(username)) {
+    if (!StringUtils.isBlank(username)) {
       members = memberRepository.findByVisibleAndPushableAndUsernameContaining(true, true, username, pageable);
     } else {
       members = memberRepository.findByVisibleAndPushable(true, true, pageable);
@@ -117,10 +114,10 @@ public class AdminNotificationController {
     String deviceOs = deviceService.getDeviceOs(platform);
     Page<MemberDevicesInfo> result = members.map(m -> {
       MemberDevicesInfo info = new MemberDevicesInfo(m);
-      List<DeviceController.DeviceInfo> devices = Lists.newArrayList();
+      List<DeviceController.DeviceInfo> devices = new ArrayList<>();
       List<Device> list = null;
 
-      if (!Strings.isNullOrEmpty(deviceOs)) {
+      if (!StringUtils.isBlank(deviceOs)) {
         list = deviceRepository.findByCreatedByIdAndOs(m.getId(), deviceOs);
       } else {
         list = deviceRepository.findByCreatedById(m.getId());

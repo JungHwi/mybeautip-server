@@ -2,15 +2,12 @@ package com.jocoos.mybeautip.feed;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -44,12 +41,12 @@ public class FeedService {
     String key = String.format(FEED_KEY, memberId);
     Jedis jedis = null;
     log.debug("memberId: {}, cursor: {}, count: {}", memberId, cursor, count);
-    List<Video> videos = Lists.newArrayList();
+    List<Video> videos = new ArrayList<>();
 
     try {
       jedis = jedisPool.getResource();
       Set<Tuple> tuples;
-      if (Strings.isNullOrEmpty(cursor)) {
+      if (StringUtils.isBlank(cursor)) {
         tuples = jedis.zrevrangeByScoreWithScores(key, "+inf", "-inf", 0, count);
       } else {
         tuples = jedis.zrevrangeByScoreWithScores(key, "(" + cursor, "-inf", 0, count);
@@ -79,7 +76,7 @@ public class FeedService {
 
     addMyVideo(String.format(MEMBER_KEY, creator), video);
 
-    List<String> receives = Lists.newArrayList(String.format(FEED_KEY, creator));
+    List<String> receives = new ArrayList<>(Arrays.asList(String.format(FEED_KEY, creator)));
     for (Following f: followers) {
       receives.add(String.format(FEED_KEY, f.getMemberMe().getId()));
     }
@@ -144,7 +141,7 @@ public class FeedService {
         String videoKey = removeMyVideoAndGetVideoKey(creator, String.valueOf(v.getCreatedAt().getTime()));
         log.debug("video element: {}", videoKey);
 
-        List<String> receives = Lists.newArrayList(String.format(FEED_KEY, v.getMember().getId()));
+        List<String> receives = Arrays.asList(String.format(FEED_KEY, v.getMember().getId()));
         if (videoKey != null) {
           for (Following f: followers) {
             receives.add(String.format(FEED_KEY, f.getMemberMe().getId()));

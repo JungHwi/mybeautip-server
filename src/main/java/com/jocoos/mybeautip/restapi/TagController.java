@@ -59,7 +59,7 @@ public class TagController {
                           @RequestParam(defaultValue = "start") String method) {
   
     count = validateRequestAndGetValidCount(count, scope, keyword, method);
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "modifiedAt"));
     Member me = memberService.currentMember();
     
     switch (scope) {
@@ -95,7 +95,7 @@ public class TagController {
       count = 100;
     }
     
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "refCount"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "refCount"));
     List<Tag> tags;
     if (StringUtils.isBlank(keyword)) {
       tags = tagRepository.findAll(page).getContent();

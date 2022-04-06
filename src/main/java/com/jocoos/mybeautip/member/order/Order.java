@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.member.order;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import lombok.Data;
@@ -76,7 +76,7 @@ public class Order extends MemberAuditable {
     }
 
     public static State getState(String name) {
-      if (Strings.isNullOrEmpty(name)) {
+      if (StringUtils.isBlank(name)) {
         throw new IllegalArgumentException("name is required");
       }
 

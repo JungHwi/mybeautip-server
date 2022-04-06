@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.security;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -40,7 +40,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
 
     log.debug("naver id: {}, username: {}", naverId, username);
 
-    if (Strings.isNullOrEmpty(naverId)) {
+    if (StringUtils.isBlank(naverId)) {
       throw new AuthenticationException("naver ID is required");
     }
 
@@ -49,7 +49,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
     }
 
     return naverMemberRepository.findById(naverId)
-        .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
+        .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
   }
 

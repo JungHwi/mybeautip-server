@@ -336,7 +336,7 @@ public class GoodsController {
     Date startCursor = (Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
-    PageRequest pageable = of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
     Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(
         startCursor, goodsNo, "PUBLIC", "CREATED", pageable);
     List<VideoController.VideoInfo> result = new ArrayList<>();

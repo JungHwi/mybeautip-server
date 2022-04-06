@@ -122,7 +122,7 @@ public class BlockController {
     Date startCursor = (Strings.isBlank(cursor)) ?
       new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<Block> page = blockRepository.findByCreatedAtBeforeAndMe(startCursor, memberService.currentMemberId(), pageable);
     List<BlockInfo> result = new ArrayList<>();
     for (Block block : page.getContent()) {

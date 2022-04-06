@@ -16,7 +16,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import com.jocoos.mybeautip.member.Member;
 
-import com.google.common.collect.Lists;
+
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,7 +50,7 @@ public class JwtTokenProvider {
   }
 
   public AccessTokenResponse generateToken(Authentication authentication) {
-    ArrayList<String> scope = Lists.newArrayList("read", "write");
+    ArrayList<String> scope = new ArrayList<>(Arrays.asList("read", "write"));
 
     Map<String, Object> header = new HashMap<>();
     header.put(HEADER_TOKEN_ALG, "RS256");
@@ -61,7 +61,7 @@ public class JwtTokenProvider {
     Claims claims = Jwts.claims();
     String jti = UUID.randomUUID().toString();
     claims.put(PAYLOAD_USER_NAME, authentication.getPrincipal());
-    claims.put(PAYLOAD_SCOPE, Lists.newArrayList("read", "write"));
+    claims.put(PAYLOAD_SCOPE, Arrays.asList("read", "write"));
     claims.put(PAYLOAD_JTI, jti);
     claims.put(PAYLOAD_CLIENT_ID, "mybeautip-web");
 

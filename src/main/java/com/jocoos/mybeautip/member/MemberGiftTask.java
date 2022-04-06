@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.google.common.collect.Lists;
+
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
@@ -108,6 +109,6 @@ public class MemberGiftTask {
   }
 
   private List<Integer> getTotalEarnedStates() {
-    return Lists.newArrayList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT, MemberPoint.STATE_REFUNDED_POINT);
+    return Arrays.asList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT, MemberPoint.STATE_REFUNDED_POINT);
   }
 }

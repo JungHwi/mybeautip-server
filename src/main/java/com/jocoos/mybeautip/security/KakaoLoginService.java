@@ -8,7 +8,7 @@ import java.util.Map;
 import com.jocoos.mybeautip.config.Oauth2Config;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +28,7 @@ public class KakaoLoginService implements LoginService {
     String accessToken = oauth2Client.getAccessToken(code, state, redirectUri);
     log.debug("accessToken: {}", accessToken);
 
-    if (Strings.isNullOrEmpty(accessToken)) {
+    if (StringUtils.isBlank(accessToken)) {
       throw new AuthenticationException("Access token required");
     }
     return getUserData(accessToken);

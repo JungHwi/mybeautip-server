@@ -5,12 +5,12 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import org.apache.commons.lang3.StringUtils;
 
 @Entity
 @Table(name = "apple_members")
@@ -35,11 +35,11 @@ public class AppleMember extends CreatedDateAuditable {
   public AppleMember(String appleId, String email, String name, Long memberId) {
     this.appleId = appleId;
     this.memberId = memberId;
-    if (!Strings.isNullOrEmpty(email)) {
+    if (!StringUtils.isBlank(email)) {
       this.email = email;
     }
 
-    if (!Strings.isNullOrEmpty(name)) {
+    if (!StringUtils.isBlank(name)) {
       this.name = name;
     }
   }

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -58,7 +59,7 @@ public class AdminCouponController {
       throw new IllegalArgumentException("member id not found");
     }
 
-    List<Member> availables = Lists.newArrayList();
+    List<Member> availables = new ArrayList<>();
     if (request.getMemberId() == 0L) {
       PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
       availables.addAll(memberRepository.findByVisibleAndDeletedAtIsNull(true, pageRequest));

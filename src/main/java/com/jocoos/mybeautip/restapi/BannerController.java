@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -14,7 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,10 +55,10 @@ public class BannerController {
   }
 
   private ResponseEntity<List<BannerInfo>> getBanners0(int count, Set<Integer> categories, boolean isSlim) {
-    PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "seq", "createdAt"));
+    PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "seq", "createdAt"));
     Date now = new Date();
     Slice<Banner> banners = bannerRepository.findByStartedAtBeforeAndEndedAtAfterAndDeletedAtIsNull(now, now, pageRequest);
-    List<BannerInfo> result = Lists.newArrayList();
+    List<BannerInfo> result = new ArrayList<>();
     log.debug("now: {}", now);
 
     banners.stream()

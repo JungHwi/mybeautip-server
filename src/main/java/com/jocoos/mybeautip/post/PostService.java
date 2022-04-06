@@ -10,10 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -25,10 +22,9 @@ import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.support.DigestUtils;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -159,7 +155,7 @@ public class PostService {
 
     if(attachments != null && attachments.size() > 0) {
       int seq = 0;
-      Set<PostContent> contents = Sets.newHashSet();
+      Set<PostContent> contents = new HashSet<>();
       for (String attachment: attachments) {
         contents.add(new PostContent(seq++, PostContent.ContentCategory.IMAGE, attachment));
 
@@ -173,11 +169,11 @@ public class PostService {
 
   @Transactional
   public Post updatePost(Post post, List<MultipartFile> files) {
-    List<String> attachments = Lists.newArrayList();
+    List<String> attachments = new ArrayList<>();
     String keyPath = String.format("posts/%s", post.getId());
 
     Set<PostContent> contents = post.getContents();
-    Map<String, PostContent> contentMap = Maps.newHashMap();
+    Map<String, PostContent> contentMap = new HashMap<>();
     contents.stream().forEach(c ->
         contentMap.put(getFilename(c.getContent()), c));
 
@@ -208,7 +204,7 @@ public class PostService {
 
     if (attachments != null && attachments.size() > 0) {
       int seq = 0;
-      Set<PostContent> newContents = Sets.newHashSet();
+      Set<PostContent> newContents = new HashSet<>();
       for (String attachment: attachments) {
         newContents.add(new PostContent(seq++, PostContent.ContentCategory.IMAGE, attachment));
       }
@@ -220,7 +216,7 @@ public class PostService {
   }
 
   private String getFilename(String path) {
-    if (!Strings.isNullOrEmpty(path)) {
+    if (!StringUtils.isBlank(path)) {
       String[] split = path.split("/");
       if (split.length > 0) {
         return split[split.length - 1];

@@ -23,7 +23,8 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Links;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +40,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -168,11 +167,12 @@ public class MemberController {
   }
 
   @GetMapping("/me")
-  public Resource<MemberMeInfo> getMe(Principal principal,
+  public EntityModel<MemberMeInfo> getMe(Principal principal,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("member id: {}", principal.getName());
+
     return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-              .map(m -> new Resource<>(new MemberMeInfo(m, pointRatio, revenueRatio)))
+              .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
               .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
   
@@ -208,7 +208,7 @@ public class MemberController {
                                    @RequestParam(required = false) String cursor,
                                    @RequestParam(required = false) String keyword,
                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    List<MemberInfo> members = Lists.newArrayList();
+    List<MemberInfo> members = new ArrayList<>();
     String nextCursor = null;
     
     if (StringUtils.isNotBlank(keyword)) {
@@ -248,7 +248,7 @@ public class MemberController {
     private int count = 20;
 
     public boolean hasKeyword() {
-      return !Strings.isNullOrEmpty(keyword);
+      return !StringUtils.isBlank(keyword);
     }
 
     public boolean hasCursor() {
@@ -260,7 +260,7 @@ public class MemberController {
   private Slice<Member> findMembers(String keyword, String cursor, int count) {
     Cursor<Date> dateCursor;
 
-    if (Strings.isNullOrEmpty(cursor)) {
+    if (StringUtils.isBlank(cursor)) {
       dateCursor = new Cursor<>(keyword, null, count);
     } else {
       Date toDate;
@@ -280,7 +280,7 @@ public class MemberController {
     Slice<Member> list;
     log.debug("Cursor: {}", cursor);
 
-    PageRequest page = PageRequest.of(0, cursor.getCount(), new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(0, cursor.getCount(), Sort.by("createdAt").descending());
 
     if (cursor.hasCursor() && cursor.hasKeyword()) {
       list = memberRepository.findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(cursor.getCursor(), cursor.getKeyword(), cursor.getKeyword(), page);
@@ -348,7 +348,7 @@ public class MemberController {
                                     @RequestParam(required = false) String type,
                                     @RequestParam(required = false) String state) {
     Slice<Video> list = videoService.findMyVideos(memberService.currentMember(), type, state, cursor, count);
-    List<VideoController.VideoInfo> videos = Lists.newArrayList();
+    List<VideoController.VideoInfo> videos = new ArrayList<>();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
@@ -374,7 +374,7 @@ public class MemberController {
       .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
     Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
-    List<VideoController.VideoInfo> videos = Lists.newArrayList();
+    List<VideoController.VideoInfo> videos = new ArrayList<>();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
@@ -392,7 +392,7 @@ public class MemberController {
   @GetMapping(value = "/me/members")
   public CursorResponse getMyMembers(@RequestParam(required = false) String keyword) {
     long me = memberService.currentMemberId();
-    PageRequest pageable = PageRequest.of(0, 100, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, 100, Sort.by("createdAt").descending());
     
     LinkedHashSet<Member> members = new LinkedHashSet<>();
     List<MemberInfo> info = new ArrayList<>();
@@ -457,7 +457,7 @@ public class MemberController {
   public CursorResponse getMyComments(@RequestParam(defaultValue = "100") int count,
                                       @RequestParam(required = false) String cursor,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Long me = memberService.currentMemberId();
     Slice<Comment> comments;
     if (StringUtils.isNumeric(cursor)) {
@@ -479,7 +479,7 @@ public class MemberController {
   }
 
   private List<CommentInfo> transformComment(Slice<Comment> comments, Long me, String lang) {
-    List<CommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = new ArrayList<>();
     comments.stream().forEach(comment -> {
       CommentInfo commentInfo;
       if (comment.getComment().contains("@")) {
@@ -517,7 +517,7 @@ public class MemberController {
     Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<Comment> comments;
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
@@ -542,7 +542,7 @@ public class MemberController {
                                             @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
     
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "date"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("date").descending());
     Slice<RevenuePayment>  list;
 
     if (StringUtils.isNotEmpty(cursor)) {
@@ -551,7 +551,7 @@ public class MemberController {
       list = revenuePaymentRepository.findByMember(member, pageable);
     }
     
-    List<RevenuePaymentInfo> revenues = Lists.newArrayList();
+    List<RevenuePaymentInfo> revenues = new ArrayList<>();
     list.forEach(r -> revenues.add(new RevenuePaymentInfo(r)));
   
     
@@ -575,10 +575,10 @@ public class MemberController {
     RevenuePayment revenuePayment = revenuePaymentRepository.findById(revenuePaymentId)
         .orElseThrow(() -> new NotFoundException("revenue_payment_not_found", "RevenuePayment not found: " + revenuePaymentId));
     
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("id").ascending());
     Slice<Revenue> list = revenueRepository.findByRevenuePaymentAndConfirmedIsTrueAndIdGreaterThanEqual(revenuePayment, cursor, pageable);
     
-    List<RevenueInfo> revenues = Lists.newArrayList();
+    List<RevenueInfo> revenues = new ArrayList<>();
     list.forEach(r -> revenues.add(new RevenueInfo(r)));
     
     String nextCursor = null;
@@ -594,12 +594,12 @@ public class MemberController {
   @GetMapping(value = "/me/scraps")
   public CursorResponse getMyScraps(@RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) String cursor) {
-    PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id"));
+    PageRequest pageRequest = PageRequest.of(0, count, Sort.by("id").descending());
 
     log.debug("count: {}, cursor: {}", count, cursor);
     Long memberId = memberService.currentMemberId();
     List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
-    List<VideoController.VideoScrapInfo> scraps = Lists.newArrayList();
+    List<VideoController.VideoScrapInfo> scraps = new ArrayList<>();
     list.stream().forEach(scrap -> scraps.add(
         new VideoController.VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()))));
 
@@ -629,9 +629,9 @@ public class MemberController {
   }
 
   private CursorResponse createPostLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<PostLike> postLikes;
-    List<PostController.PostLikeInfo> result = Lists.newArrayList();
+    List<PostController.PostLikeInfo> result = new ArrayList<>();
 
     if (cursor != null) {
       postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndPostDeletedAtIsNull(new Date(cursor), memberId, pageable);
@@ -659,9 +659,9 @@ public class MemberController {
   }
 
   private CursorResponse createGoodsLikeResponse(Long memberId, String category, int count, Long cursor, String uri, TimeSaleCondition timeSaleCondition) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<GoodsLike> goodsLikes;
-    List<GoodsInfo> result = Lists.newArrayList();
+    List<GoodsInfo> result = new ArrayList<>();
 
     if (cursor != null) {
       goodsLikes = goodsLikeRepository.findByCreatedAtBeforeAndCreatedById(
@@ -686,9 +686,9 @@ public class MemberController {
   }
 
   private CursorResponse createStoreLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<StoreLike> storeLikes;
-    List<StoreController.StoreInfo> result = Lists.newArrayList();
+    List<StoreController.StoreInfo> result = new ArrayList<>();
 
     if (cursor != null) {
       storeLikes = storeLikeRepository.findByCreatedAtBeforeAndCreatedById(new Date(cursor), memberId, pageable);
@@ -717,9 +717,9 @@ public class MemberController {
   }
 
   private CursorResponse createVideoLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<VideoLike> videoLikes;
-    List<VideoController.VideoInfo> result = Lists.newArrayList();
+    List<VideoController.VideoInfo> result = new ArrayList<>();
 
     if (cursor != null) {
       videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndVideoDeletedAtIsNull(

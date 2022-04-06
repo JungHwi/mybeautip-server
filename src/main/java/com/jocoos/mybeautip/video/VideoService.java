@@ -22,9 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -129,14 +126,14 @@ public class VideoService {
 
   public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     return videoRepository.searchVideos(keyword, startCursor, page);
   }
 
   public Slice<Video> findVideosWithTag(String keyword, String cursor, int count) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     return videoRepository.searchVideosWithTag(keyword, startCursor, page);
   }
@@ -470,8 +467,8 @@ public class VideoService {
       if (StringUtils.isNotEmpty(request.getData())) {
         VideoExtraData extraData = videoDataService.getDataObject(request.getData());
         log.info("{}", extraData);
-        List<VideoCategory> categories = Lists.newArrayList();
-        if (!Strings.isNullOrEmpty(extraData.getStartedAt())) {
+        List<VideoCategory> categories = new ArrayList<>();
+        if (!StringUtils.isBlank(extraData.getStartedAt())) {
           String startedAt = String.valueOf(extraData.getStartedAt());
 
           log.info("startedAt: {}", startedAt);
@@ -480,14 +477,14 @@ public class VideoService {
         }
 
         // if data had category array
-        if (!Strings.isNullOrEmpty(extraData.getCategory())) {
+        if (!StringUtils.isBlank(extraData.getCategory())) {
           categories = parseCategory(video.getId(), extraData.getCategory());
           log.info("categories: {}", categories);
           video.setCategory(categories);
         }
 
         List<VideoGoods> videoGoods = new ArrayList<>();
-        if (!Strings.isNullOrEmpty(extraData.getGoods())) {
+        if (!StringUtils.isBlank(extraData.getGoods())) {
           String[] userData = StringUtils.deleteWhitespace(String.valueOf(extraData.getGoods())).split(",");
           for (String goodsNo : userData) {
             if (goodsNo.length() != 10) { // invalid goodsNo
@@ -532,7 +529,7 @@ public class VideoService {
 
     memberRepository.updateTotalVideoCount(member.getId(), 1);
 
-    if (!Strings.isNullOrEmpty(request.getData2())) {
+    if (!StringUtils.isBlank(request.getData2())) {
       List<Integer> category = videoDataService.getCategory(request.getData2());
       video.setCategory(createCategory(video.getId(), category));
     }
@@ -546,8 +543,8 @@ public class VideoService {
   }
 
   private List<VideoCategory> parseCategory(Long videoId, String category) {
-    if (Strings.isNullOrEmpty(category)) {
-      return Lists.newArrayList();
+    if (StringUtils.isBlank(category)) {
+      return new ArrayList<>();
     }
     String[] categories = category.split(",");
     List<Integer> collect = Arrays.stream(categories)
@@ -557,7 +554,7 @@ public class VideoService {
   }
 
   private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {
-    List<VideoCategory> categories = Lists.newArrayList();
+    List<VideoCategory> categories = new ArrayList<>();
     for (int c : category) {
       if (c > 0) {
         categories.add(new VideoCategory(videoId, c));        
@@ -646,7 +643,7 @@ public class VideoService {
       }
     }
 
-    if(!Strings.isNullOrEmpty(source.getOriginalFilename()) && source.getOriginalFilename().length() > 0) {
+    if(!StringUtils.isBlank(source.getOriginalFilename()) && source.getOriginalFilename().length() > 0) {
       target.setOriginalFilename(source.getOriginalFilename());
     }
     
@@ -672,11 +669,11 @@ public class VideoService {
       }
     }
 
-    if (!Strings.isNullOrEmpty(source.getLiveKey())) {
+    if (!StringUtils.isBlank(source.getLiveKey())) {
       target.setLiveKey(source.getLiveKey());
     }
 
-    if (!Strings.isNullOrEmpty(source.getOutputType())) {
+    if (!StringUtils.isBlank(source.getOutputType())) {
       target.setOutputType(source.getOutputType());
     }
 
@@ -702,7 +699,7 @@ public class VideoService {
     }
 
     if (extraData != null) {
-      if (!Strings.isNullOrEmpty(extraData.getCategory())) {
+      if (!StringUtils.isBlank(extraData.getCategory())) {
         String[] split = extraData.getCategory().split(",");
         List<Integer> category = Arrays.stream(split).map(s -> Integer.valueOf(s)).collect(Collectors.toList());
 
@@ -713,7 +710,7 @@ public class VideoService {
         target.setCategory(createCategory(target.getId(), category));
       }
 
-      if (!Strings.isNullOrEmpty(extraData.getStartedAt())) {
+      if (!StringUtils.isBlank(extraData.getStartedAt())) {
         Date startedAt = DateUtils.stringFormatToDate(extraData.getStartedAt());
         log.info("{}", startedAt);
         target.setStartedAt(startedAt);

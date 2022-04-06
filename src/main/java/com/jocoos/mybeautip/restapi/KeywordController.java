@@ -52,7 +52,7 @@ public class KeywordController {
                           @RequestParam(defaultValue = "start") String method) {
   
     count = validateRequestAndGetValidCount(count, scope, keyword, method);
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "modifiedAt"));
     Member me = memberService.currentMember();
     
     switch (scope) {

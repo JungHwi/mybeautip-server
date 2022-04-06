@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.google.common.collect.Lists;
+
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
@@ -24,10 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,9 +64,9 @@ public class NotificationController {
   public CursorResponse getNotifications(@RequestParam(defaultValue = "20") int count,
                                          @RequestParam(required = false) String cursor,
                                          @RequestParam(defaultValue = "0") int step) {
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id"));
     Long memberId = memberService.currentMemberId();
-    List<NotificationInfo> result = Lists.newArrayList();
+    List<NotificationInfo> result = new ArrayList<>();
 
     Slice<Notification> notifications;
 

@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -90,7 +90,7 @@ public class CallbackController {
     }
 
     VideoExtraData extraData = null;
-    if (!Strings.isNullOrEmpty(request.getData())) {
+    if (!StringUtils.isBlank(request.getData())) {
       extraData = videoDataService.getDataObject(request.getData());
       log.info("{}", extraData);
     }
@@ -100,7 +100,7 @@ public class CallbackController {
     video = videoService.updateVideoProperties(request, video, extraData);
     video = videoService.update(video);
 
-    if (extraData != null && !Strings.isNullOrEmpty(extraData.getGoods())) {
+    if (extraData != null && !StringUtils.isBlank(extraData.getGoods())) {
       log.info("goods {}, request goods: {}", video.getData(), extraData.getGoods());
       videoService.updateVideoGoods(video, extraData.getGoods());
     } else {

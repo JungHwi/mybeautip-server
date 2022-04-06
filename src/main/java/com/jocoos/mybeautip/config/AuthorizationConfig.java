@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.config;
 
 import javax.annotation.PostConstruct;
 
-import com.google.common.collect.Lists;
+
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.admin.AdminMemberRepository;
@@ -25,6 +25,8 @@ import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConv
 import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+import java.util.Arrays;
 
 @Slf4j
 @Configuration
@@ -156,7 +158,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     private CompositeTokenGranter tokenGranter(AuthorizationServerEndpointsConfigurer endpoints) {
 
     return new CompositeTokenGranter(
-        Lists.newArrayList(
+        Arrays.asList(
             new FacebookTokenGranter(
                 endpoints.getTokenServices(),
                 endpoints.getClientDetailsService(),

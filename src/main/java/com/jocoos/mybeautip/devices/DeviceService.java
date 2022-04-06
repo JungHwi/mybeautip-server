@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.devices;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,8 +22,8 @@ import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.admin.AdminNotificationController;
@@ -212,11 +213,11 @@ public class DeviceService {
   }
 
   private String convertToGcmMessage(Notification notification, String os) {
-    String message = !Strings.isNullOrEmpty(notification.getInstantMessageBody()) ?
+    String message = !StringUtils.isBlank(notification.getInstantMessageBody()) ?
        notification.getInstantMessageBody() :
        messageService.getMessage(notification);
 
-    Map<String, String> data = Maps.newHashMap();
+    Map<String, String> data = new HashMap<>();
     data.put("id", String.valueOf(notification.getId()));
     data.put("type", notification.getType());
     data.put("body", message);
@@ -229,11 +230,11 @@ public class DeviceService {
     if (notification.getResourceOwner() != null) {
       data.put("member_id", String.valueOf(notification.getResourceOwner().getId()));
     }
-    if (!Strings.isNullOrEmpty(notification.getImageUrl())) {
+    if (!StringUtils.isBlank(notification.getImageUrl())) {
       data.put("image", notification.getImageUrl());
     }
   
-    if (!Strings.isNullOrEmpty(notification.getInstantMessageTitle())) {
+    if (!StringUtils.isBlank(notification.getInstantMessageTitle())) {
       data.put("title", notification.getInstantMessageTitle());
     } else {
       data.put("title", null);
@@ -258,9 +259,9 @@ public class DeviceService {
   }
 
   private String createPushMessage(Map<String, String> message, int badge, String os) {
-    Map<String, String> map = Maps.newHashMap();
-    Map<String, Map<String, String>> data = Maps.newHashMap();
-    Map<String, String> notification = Maps.newHashMap();
+    Map<String, String> map = new HashMap<>();
+    Map<String, Map<String, String>> data = new HashMap<>();
+    Map<String, String> notification = new HashMap<>();
 
     notification.put("title", message.get("title"));
     notification.put("body", message.get("body"));

@@ -3,10 +3,10 @@ package com.jocoos.mybeautip.word;
 import java.util.Hashtable;
 
 import com.jocoos.mybeautip.notification.MessageService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -27,7 +27,7 @@ public class BannedWordService {
   }
 
   public String findWordAndThrowException(String word, String lang) {
-    if (Strings.isNullOrEmpty(word)) {
+    if (StringUtils.isBlank(word)) {
       return word;
     }
 
@@ -48,7 +48,7 @@ public class BannedWordService {
   }
 
   @Cacheable("banned_word")
-  private Hashtable<String, BannedWord> getDictionary(int category) {
+  public Hashtable<String, BannedWord> getDictionary(int category) {
     Hashtable<String, BannedWord> dictionary = new Hashtable<>();
     bannedWordRepository.findByCategory(category).stream().forEach(
        word -> dictionary.put(word.getWord(), word)

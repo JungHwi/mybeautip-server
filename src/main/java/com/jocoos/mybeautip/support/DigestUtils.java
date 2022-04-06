@@ -6,7 +6,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -14,7 +14,7 @@ public final class DigestUtils {
 
   public static String getFilename(MultipartFile file) {
     String ext = getExtension(file.getOriginalFilename());
-    if (!Strings.isNullOrEmpty(ext)) {
+    if (!StringUtils.isBlank(ext)) {
       String hash = getFileHash(file);
       return String.format("%s.%s", hash, ext);
     }
@@ -23,7 +23,7 @@ public final class DigestUtils {
 
   public static String getFilename(File file) {
     String ext = getExtension(file.getName());
-    if (!Strings.isNullOrEmpty(ext)) {
+    if (!StringUtils.isBlank(ext)) {
       String hash = getFileHash(file);
       return String.format("%s.%s", hash, ext);
     }
@@ -31,7 +31,7 @@ public final class DigestUtils {
   }
 
   private static String getExtension(String filename) {
-    if (!Strings.isNullOrEmpty(filename)) {
+    if (!StringUtils.isBlank(filename)) {
       String[] split = filename.split("\\.");
       if (split.length > 0) {
         return split[split.length - 1];

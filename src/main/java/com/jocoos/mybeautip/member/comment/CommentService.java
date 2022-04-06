@@ -18,7 +18,7 @@ import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoRepository;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -111,7 +111,7 @@ public class CommentService {
         content = messageService.getMessage(COMMENT_BLIND_MESSAGE, lang);
         break;
       default:
-        content = !Strings.isNullOrEmpty(defaultValue) ? defaultValue : comment.getComment();
+        content = !StringUtils.isBlank(defaultValue) ? defaultValue : comment.getComment();
     }
     return content;
   }
@@ -133,7 +133,7 @@ public class CommentService {
   }
 
   @Transactional
-  private int blindComment(Comment comment) {
+  public int blindComment(Comment comment) {
     Comment.CommentState state = Comment.CommentState.BLINDED;
     comment.setState(state);
     commentRepository.save(comment);

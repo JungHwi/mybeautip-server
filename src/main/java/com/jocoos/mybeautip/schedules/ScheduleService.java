@@ -61,10 +61,10 @@ public class ScheduleService {
 
         Page<Schedule> schedules;
         if (DIRECTION_PREV.equals(direction)) {
-            PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "startedAt"));
+            PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "startedAt"));
             schedules = scheduleRepository.findByStartedAtBeforeAndDeletedAtIsNull(startCursor, pageRequest);
         } else {
-            PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
+            PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "startedAt"));
             schedules = scheduleRepository.findByStartedAtAfterAndDeletedAtIsNull(startCursor, pageRequest);
         }
         return schedules;
@@ -77,7 +77,7 @@ public class ScheduleService {
         } else {
             startCursor = getFutureDate();
         }
-        PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "startedAt"));
+        PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "startedAt"));
         return scheduleRepository
                 .findByCreatedByIdAndStartedAtBeforeAndDeletedAtIsNull(memberId, startCursor, pageRequest);
     }

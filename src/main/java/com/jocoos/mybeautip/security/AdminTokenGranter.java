@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.security;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.admin.AdminMemberRepository;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.member.Member;
@@ -42,7 +42,7 @@ public class AdminTokenGranter extends AbstractTokenGranter {
 
     log.debug("email: {}, password: {}", adminId, password);
 
-    if (Strings.isNullOrEmpty(adminId)) {
+    if (StringUtils.isBlank(adminId)) {
       throw new AuthenticationException("email is required");
     }
 
@@ -50,13 +50,13 @@ public class AdminTokenGranter extends AbstractTokenGranter {
       throw new AuthenticationException("The email must be less or equals to 50");
     }
 
-    if (Strings.isNullOrEmpty(password)) {
+    if (StringUtils.isBlank(password)) {
       throw new AuthenticationException("admin password is required");
     }
 
     return adminMemberRepository.findById(adminId)
        .filter(m -> passwordEncoder.matches(password, m.getPassword()))
-       .map(m -> generateToken(memberRepository.getOne(m.getMember().getId()), client, tokenRequest))
+       .map(m -> generateToken(memberRepository.getById(m.getMember().getId()), client, tokenRequest))
        .orElseThrow(() -> new AuthenticationException("email or password Invalid."));
   }
 

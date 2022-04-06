@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.core.Authentication;
@@ -321,7 +322,7 @@ public class MemberService {
     log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
     memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public Following followMember(Member me, Member you) {
     memberRepository.updateFollowingCount(me.getId(), 1);

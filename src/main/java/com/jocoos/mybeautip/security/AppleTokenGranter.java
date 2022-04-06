@@ -8,7 +8,7 @@ import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
@@ -39,12 +39,12 @@ public class AppleTokenGranter extends AbstractTokenGranter {
     String email = requestParameters.get("email");
     log.debug("apple id: {}, email: {}, name: {}", appleId, name, email);
 
-    if (Strings.isNullOrEmpty(appleId)) {
+    if (StringUtils.isBlank(appleId)) {
       throw new AuthenticationException("Apple ID is required");
     }
 
     return appleMemberRepository.findById(appleId)
-        .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
+        .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
   }
 

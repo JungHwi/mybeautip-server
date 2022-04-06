@@ -14,7 +14,7 @@ import java.util.HashMap;
 import com.jocoos.mybeautip.config.Oauth2Config;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,11 +54,11 @@ public class Oauth2Client {
         .queryParam("redirect_uri", redirectUri)
         .queryParam("code", code);
 
-    if (!Strings.isNullOrEmpty(providerConfig.getClientSecret())) {
+    if (!StringUtils.isBlank(providerConfig.getClientSecret())) {
       uriBuilder.queryParam("client_secret", providerConfig.getClientSecret());
     }
 
-    if (!Strings.isNullOrEmpty(state)) {
+    if (!StringUtils.isBlank(state)) {
       uriBuilder.queryParam("state", state);
     }
 
@@ -80,11 +80,10 @@ public class Oauth2Client {
     MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
     body.add("grant_type", providerConfig.getAuthorizationGrantType());
     body.add("client_id", providerConfig.getClientId());
-    body.add("redirect_uri", redirectUri);
-    if (!Strings.isNullOrEmpty(providerConfig.getClientSecret())) {
+    if (!StringUtils.isBlank(providerConfig.getClientSecret())) {
       body.add("client_secret", providerConfig.getClientSecret());
     }
-    if (!Strings.isNullOrEmpty(state)) {
+    if (!StringUtils.isBlank(state)) {
       body.add("state", state);
     }
 
@@ -110,7 +109,7 @@ public class Oauth2Client {
       };
 
     UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(providerConfig.getUserInfoUri());
-    if (!Strings.isNullOrEmpty(providerConfig.getFields())) {
+    if (!StringUtils.isBlank(providerConfig.getFields())) {
       uriBuilder.queryParam("fields", providerConfig.getFields());
     }
 
