@@ -58,27 +58,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .httpBasic()
         .and()
         .requestMatchers()
-        .antMatchers(OPTIONS,"/api/**")
         .antMatchers(POST,"/api/1/payments/notification")
         .and()
         .authorizeRequests()
-        .antMatchers(OPTIONS,"/api/**").permitAll()
         .anyRequest().authenticated()
         .and()
         .csrf().disable();
-  }
-
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.addAllowedOrigin("*");
-    configuration.addAllowedMethod("*");
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-    configuration.setAllowCredentials(true);
-    configuration.setMaxAge(3600L);
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/api/**", configuration);
-
-    return source;
   }
 }
