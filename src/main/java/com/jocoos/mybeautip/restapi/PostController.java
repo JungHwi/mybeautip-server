@@ -343,7 +343,7 @@ public class PostController {
                                     @RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) Long cursor,
                                     @RequestParam(required = false) String direction,
-                                    @RequestParam(required = false) Long parentId,
+                                    @RequestParam(name = "parent_id", required = false) Long parentId,
                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Date now = new Date();
     postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
