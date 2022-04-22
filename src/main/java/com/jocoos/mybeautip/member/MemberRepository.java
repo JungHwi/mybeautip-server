@@ -7,12 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
+  List<Member> findByIdIn(Set<Long> ids);
 
   Optional<Member> findByIdAndDeletedAtIsNull(Long id);
   
@@ -92,4 +92,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Optional<MemberExtraInfo> findMemberExtraInfo(Long me, Long you);
 
   Optional<Member> findByEmailAndDeletedAtIsNull(String email);
+
+  List<Member> findByVisibleIsTrueAndPushableIsTrue();
+
+  List<Member> findByVisibleIsTrueAndPushableIsTrueAndLastLoginAtLessThan(LocalDateTime localDateTime);
 }

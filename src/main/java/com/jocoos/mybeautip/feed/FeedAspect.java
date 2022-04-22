@@ -1,15 +1,13 @@
 package com.jocoos.mybeautip.feed;
 
-import org.springframework.stereotype.Component;
-
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.video.Video;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-
-import com.jocoos.mybeautip.member.following.Following;
-import com.jocoos.mybeautip.video.Video;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Aspect
@@ -51,7 +49,6 @@ public class FeedAspect {
         log.debug("video: {}", video);
         feedService.feedVideo(video);
       }
-
     }
   }
 

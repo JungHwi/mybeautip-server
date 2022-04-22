@@ -1,12 +1,18 @@
 package com.jocoos.mybeautip.devices;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.model.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jocoos.mybeautip.admin.AdminNotificationController;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.notification.Notification;
+import com.jocoos.mybeautip.notification.NotificationRepository;
+import com.jocoos.mybeautip.notification.event.PushMessage;
+import com.jocoos.mybeautip.notification.event.PushMessageRepository;
+import com.jocoos.mybeautip.restapi.DeviceController;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -14,27 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.model.AmazonSNSException;
-import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
-import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
-import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
-
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.admin.AdminNotificationController;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.Notification;
-import com.jocoos.mybeautip.notification.NotificationRepository;
-import com.jocoos.mybeautip.notification.event.PushMessage;
-import com.jocoos.mybeautip.notification.event.PushMessageRepository;
-import com.jocoos.mybeautip.restapi.DeviceController;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -71,7 +62,7 @@ public class DeviceService {
   }
   
   @Transactional
-  private Device copyBasicInfo(DeviceController.UpdateDeviceRequest src, Device target) {
+  public Device copyBasicInfo(DeviceController.UpdateDeviceRequest src, Device target) {
     target.setId(src.getDeviceId());
     target.setOs(src.getDeviceOs());
     target.setOsVersion(src.getDeviceOsVersion());

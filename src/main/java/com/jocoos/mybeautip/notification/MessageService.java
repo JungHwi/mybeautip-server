@@ -1,11 +1,10 @@
 package com.jocoos.mybeautip.notification;
 
-import java.util.Locale;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -20,14 +19,26 @@ public class MessageService {
     this.messageSource = messageSource;
   }
 
+  // see getNotificationMessage(NotificationMessage message, Object[] args)
+  @Deprecated
   public String getNotificationMessage(String code, Object[] args) {
     return getNotificationMessage(code, args, Locale.KOREAN);
   }
 
+  // see getNotificationMessage(NotificationMessage message, Object[] args, Locale locale)
+  @Deprecated
   private String getNotificationMessage(String code, Object[] args, Locale locale) {
     String message = messageSource.getMessage(
        String.format(NOTIFICATION_NAME_FORMAT, code), args, locale);
     return message;
+  }
+
+  public String getNotificationMessage(NotificationMessage message, Object[] args) {
+    return getNotificationMessage(message, args, Locale.KOREAN);
+  }
+
+  private String getNotificationMessage(NotificationMessage message, Object[] args, Locale locale) {
+    return messageSource.getMessage(message.getProperty(), args, locale);
   }
 
   public String getGoodsCompanyMessage() {

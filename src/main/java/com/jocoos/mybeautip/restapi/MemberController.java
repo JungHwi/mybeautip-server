@@ -1,5 +1,44 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.*;
+import com.jocoos.mybeautip.member.block.BlockRepository;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.member.revenue.*;
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.post.PostLike;
+import com.jocoos.mybeautip.post.PostLikeRepository;
+import com.jocoos.mybeautip.search.KeywordService;
+import com.jocoos.mybeautip.store.StoreLike;
+import com.jocoos.mybeautip.store.StoreLikeRepository;
+import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.scrap.VideoScrap;
+import com.jocoos.mybeautip.video.scrap.VideoScrapService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -10,68 +49,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
-
-import com.jocoos.mybeautip.goods.*;
-import com.jocoos.mybeautip.member.block.BlockRepository;
-import com.jocoos.mybeautip.member.comment.*;
-import com.jocoos.mybeautip.member.report.ReportRepository;
-import com.jocoos.mybeautip.video.*;
-import com.jocoos.mybeautip.video.scrap.VideoScrap;
-import com.jocoos.mybeautip.video.scrap.VideoScrapService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Links;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberMeInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.PostProcessService;
-import com.jocoos.mybeautip.member.following.Following;
-import com.jocoos.mybeautip.member.following.FollowingRepository;
-import com.jocoos.mybeautip.member.mention.MentionResult;
-import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.revenue.Revenue;
-import com.jocoos.mybeautip.member.revenue.RevenueInfo;
-import com.jocoos.mybeautip.member.revenue.RevenuePayment;
-import com.jocoos.mybeautip.member.revenue.RevenuePaymentInfo;
-import com.jocoos.mybeautip.member.revenue.RevenuePaymentRepository;
-import com.jocoos.mybeautip.member.revenue.RevenueRepository;
-import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.NotificationService;
-import com.jocoos.mybeautip.post.PostLike;
-import com.jocoos.mybeautip.post.PostLikeRepository;
-import com.jocoos.mybeautip.search.KeywordService;
-import com.jocoos.mybeautip.store.StoreLike;
-import com.jocoos.mybeautip.store.StoreLikeRepository;
 
 @Slf4j
 @RestController
@@ -85,7 +62,7 @@ public class MemberController {
   private final MessageService messageService;
   private final MentionService mentionService;
   private final KeywordService keywordService;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
   private final PostLikeRepository postLikeRepository;
@@ -136,7 +113,7 @@ public class MemberController {
                           MessageService messageService,
                           MentionService mentionService,
                           KeywordService keywordService,
-                          NotificationService notificationService,
+                          LegacyNotificationService legacyNotificationService,
                           RevenuePaymentRepository revenuePaymentRepository,
                           VideoScrapService videoScrapService,
                           CommentService commentService,
@@ -158,7 +135,7 @@ public class MemberController {
     this.messageService = messageService;
     this.mentionService = mentionService;
     this.keywordService = keywordService;
-    this.notificationService = notificationService;
+    this.legacyNotificationService = legacyNotificationService;
     this.revenuePaymentRepository = revenuePaymentRepository;
     this.videoScrapService = videoScrapService;
     this.commentService = commentService;
@@ -432,7 +409,7 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
     memberService.deleteMember(request, member);
-    notificationService.readAllNotification(member.getId());
+    legacyNotificationService.readAllNotification(member.getId());
     
     // Async processing after response
     postProcessService.deleteMember(member);
@@ -446,7 +423,7 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
     memberService.deleteMember(request, member);
-    notificationService.readAllNotification(member.getId());
+    legacyNotificationService.readAllNotification(member.getId());
     
     // Async processing after response
     postProcessService.deleteMember(member);

@@ -1,19 +1,5 @@
 package com.jocoos.mybeautip.member.order;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import org.apache.commons.lang3.StringUtils;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -32,8 +18,8 @@ import com.jocoos.mybeautip.member.revenue.RevenuePayment;
 import com.jocoos.mybeautip.member.revenue.RevenuePaymentService;
 import com.jocoos.mybeautip.member.revenue.RevenueRepository;
 import com.jocoos.mybeautip.member.revenue.RevenueService;
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.restapi.OrderController;
 import com.jocoos.mybeautip.support.payment.IamportService;
 import com.jocoos.mybeautip.support.payment.PaymentData;
@@ -43,6 +29,16 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.VideoRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.member.billing.MemberBillingService.MERCHANT_BILLING_PREFIX;
 
@@ -87,7 +83,7 @@ public class OrderService {
   private final IamportService iamportService;
   private final MessageService messageService;
   private final SlackService slackService;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final GoodsOptionService goodsOptionService;
 
   public OrderService(OrderRepository orderRepository,
@@ -109,7 +105,7 @@ public class OrderService {
                       IamportService iamportService,
                       MessageService messageService,
                       SlackService slackService,
-                      NotificationService notificationService,
+                      LegacyNotificationService legacyNotificationService,
                       GoodsOptionService goodsOptionService) {
     this.orderRepository = orderRepository;
     this.memberRepository = memberRepository;
@@ -130,7 +126,7 @@ public class OrderService {
     this.iamportService = iamportService;
     this.messageService = messageService;
     this.slackService = slackService;
-    this.notificationService = notificationService;
+    this.legacyNotificationService = legacyNotificationService;
     this.goodsOptionService = goodsOptionService;
   }
 
@@ -510,7 +506,7 @@ public class OrderService {
       }
   
       videoRepository.updateOrderCount(order.getVideoId(), 1);
-      notificationService.notifyOrder(order, order.getVideoId());
+      legacyNotificationService.notifyOrder(order, order.getVideoId());
     }
     
     deleteCartItems(order);

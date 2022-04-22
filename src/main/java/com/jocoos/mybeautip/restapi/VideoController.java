@@ -17,8 +17,8 @@ import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.*;
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.*;
@@ -28,7 +28,6 @@ import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -71,7 +70,7 @@ public class VideoController {
   private final MentionService mentionService;
   private final RevenueService revenueService;
   private final TagService tagService;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final KeywordService keywordService;
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
@@ -113,7 +112,7 @@ public class VideoController {
                          MentionService mentionService,
                          RevenueService revenueService,
                          TagService tagService,
-                         NotificationService notificationService,
+                         LegacyNotificationService legacyNotificationService,
                          KeywordService keywordService,
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
@@ -137,7 +136,7 @@ public class VideoController {
     this.mentionService = mentionService;
     this.revenueService = revenueService;
     this.tagService = tagService;
-    this.notificationService = notificationService;
+    this.legacyNotificationService = legacyNotificationService;
     this.keywordService = keywordService;
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;

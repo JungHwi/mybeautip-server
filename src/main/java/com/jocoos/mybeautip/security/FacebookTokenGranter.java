@@ -1,21 +1,19 @@
 package com.jocoos.mybeautip.security;
 
-import java.util.Map;
-
+import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.member.FacebookMember;
+import com.jocoos.mybeautip.member.FacebookMemberRepository;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.apache.commons.lang3.StringUtils;
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.FacebookMember;
-import com.jocoos.mybeautip.member.FacebookMemberRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
+import java.util.Map;
 
 @Slf4j
 public class FacebookTokenGranter extends AbstractTokenGranter {
@@ -60,7 +58,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
   }
 
   @Transactional
-  private Member createRookie(Map<String, String> params) {
+  public Member createRookie(Map<String, String> params) {
     Member member1 = new Member(params);
     log.debug("member1: {}", member1);
 

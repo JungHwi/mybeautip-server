@@ -1,17 +1,14 @@
 package com.jocoos.mybeautip.member.coupon;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.jocoos.mybeautip.member.Member;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.notification.NotificationService;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service

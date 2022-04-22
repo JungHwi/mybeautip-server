@@ -1,26 +1,24 @@
 package com.jocoos.mybeautip.member.comment;
 
-import java.util.List;
-import java.util.Locale;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoRepository;
-
-import org.apache.commons.lang3.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -36,7 +34,7 @@ public class CommentService {
   private final TagService tagService;
   private final MessageService messageService;
   private final MentionService mentionService;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final CommentRepository commentRepository;
   private final VideoRepository videoRepository;
   private final PostRepository postRepository;
@@ -78,7 +76,7 @@ public class CommentService {
     if (mentionTags != null && mentionTags.size() > 0) {
       mentionService.updateCommentWithMention(comment, mentionTags);
     } else {
-      notificationService.notifyAddComment(comment);
+      legacyNotificationService.notifyAddComment(comment);
     }
     
     return comment;
@@ -141,7 +139,7 @@ public class CommentService {
   }
 
   @Transactional
-  private int deleteCommentAndChildren(Comment comment) {
+  public int deleteCommentAndChildren(Comment comment) {
     tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
 
     int count = 1;

@@ -1,23 +1,21 @@
 package com.jocoos.mybeautip.godo;
 
-import java.io.IOException;
-
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.GoodsRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.HttpStatusException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import org.apache.commons.lang3.StringUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.jsoup.HttpStatusException;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.goods.GoodsRepository;
+import java.io.IOException;
 
 @Slf4j
 @Service
@@ -59,7 +57,7 @@ public class GoodsDetailService {
   }
 
   @Cacheable("goods_detail")
-  private Element createDocumentFromUri(String goodsNo) {
+  public Element createDocumentFromUri(String goodsNo) {
     UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(goodsViewUrl);
     builder.queryParam("goodsNo", goodsNo);
     String uri = builder.toUriString();

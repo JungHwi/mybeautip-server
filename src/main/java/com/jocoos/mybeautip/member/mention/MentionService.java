@@ -1,25 +1,16 @@
 package com.jocoos.mybeautip.member.mention;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.notification.NotificationService;
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,14 +19,14 @@ public class MentionService {
   private static final String MENTION_TAG = "@";
   
   private final MemberRepository memberRepository;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final CommentRepository commentRepository;
 
   public MentionService(MemberRepository memberRepository,
-                        NotificationService notificationService,
+                        LegacyNotificationService legacyNotificationService,
                         CommentRepository commentRepository) {
     this.memberRepository = memberRepository;
-    this.notificationService = notificationService;
+    this.legacyNotificationService = legacyNotificationService;
     this.commentRepository = commentRepository;
   }
 
@@ -83,7 +74,7 @@ public class MentionService {
     } while (target.length() > 0);
   
     for (Member member : notifyTargetMember) {
-      notificationService.notifyAddCommentWithMention(comment, member);
+      legacyNotificationService.notifyAddCommentWithMention(comment, member);
     }
   
     log.debug("comment with mention: {}", sb.toString().trim());

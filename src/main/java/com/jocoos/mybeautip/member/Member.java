@@ -1,23 +1,19 @@
 package com.jocoos.mybeautip.member;
 
-import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.jocoos.mybeautip.member.report.Report;
-import com.jocoos.mybeautip.recommendation.MemberRecommendation;
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Map;
 
 // space migration test
 
@@ -115,7 +111,7 @@ public class Member {
   private Date modifiedAt;
 
   @Column
-  private Date lastLoginAt;
+  private LocalDateTime lastLoginAt;
 
   @Column
   private Date deletedAt;

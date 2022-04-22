@@ -11,8 +11,10 @@ import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
-import com.jocoos.mybeautip.notification.*;
-
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.notification.Notification;
+import com.jocoos.mybeautip.notification.NotificationRepository;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +35,7 @@ import static com.jocoos.mybeautip.notification.Notification.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/1/members/me/notifications")
-public class NotificationController {
+public class LegacyNotificationController {
   private static final String NOTICE_IMG = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_notice.png";
 
   private final NotificationRepository notificationRepository;
@@ -41,22 +43,22 @@ public class NotificationController {
   private final CommentRepository commentRepository;
   private final MemberService memberService;
   private final MessageService messageService;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final MentionService mentionService;
 
-  public NotificationController(NotificationRepository notificationRepository,
-                                FollowingRepository followingRepository,
-                                CommentRepository commentRepository,
-                                MemberService memberService,
-                                MessageService messageService,
-                                NotificationService notificationService,
-                                MentionService mentionService) {
+  public LegacyNotificationController(NotificationRepository notificationRepository,
+                                      FollowingRepository followingRepository,
+                                      CommentRepository commentRepository,
+                                      MemberService memberService,
+                                      MessageService messageService,
+                                      LegacyNotificationService legacyNotificationService,
+                                      MentionService mentionService) {
     this.notificationRepository = notificationRepository;
     this.followingRepository = followingRepository;
     this.commentRepository = commentRepository;
     this.memberService = memberService;
     this.messageService = messageService;
-    this.notificationService = notificationService;
+    this.legacyNotificationService = legacyNotificationService;
     this.mentionService = mentionService;
   }
 
@@ -129,7 +131,7 @@ public class NotificationController {
         }
       });
     
-    notificationService.readAllNotification(memberId);
+    legacyNotificationService.readAllNotification(memberId);
 
     String nextCursor = null;
     if (result.size() > 0) {

@@ -1,12 +1,12 @@
 package com.jocoos.mybeautip.security;
 
-import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.NaverMember;
 import com.jocoos.mybeautip.member.NaverMemberRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
@@ -59,7 +59,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
   }
   
   @Transactional
-  private Member createRookie(Map<String, String> params) {
+  public Member createRookie(Map<String, String> params) {
     Member member = memberRepository.save(new Member(params));
     naverMemberRepository.save(new NaverMember(params, member.getId()));
     return member;

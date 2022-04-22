@@ -1,5 +1,15 @@
 package com.jocoos.mybeautip.post;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.CommentLike;
+import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.support.AttachmentService;
+import com.jocoos.mybeautip.support.DigestUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -12,20 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.support.AttachmentService;
-import com.jocoos.mybeautip.support.DigestUtils;
-
-import org.apache.commons.lang3.StringUtils;
-
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -101,15 +97,19 @@ public class PostService {
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  public PostLike likePost(Post post) {
+  public PostLike likePost(Post post, long memberId) {
     postRepository.updateLikeCount(post.getId(), 1);
     post.setLikeCount(post.getLikeCount() + 1);
-    return postLikeRepository.save(new PostLike(post));
+    PostLike postLike = postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
+            .orElse(new PostLike(post));
+    postLike.setStatus(PostLikeStatus.LIKE);
+    return postLikeRepository.save(postLike);
   }
   
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public void unLikePost(PostLike liked) {
-    postLikeRepository.delete(liked);
+    liked.setStatus(PostLikeStatus.UNLIKE);
+    postLikeRepository.save(liked);
     if (liked.getPost().getLikeCount() > 0) {
       postRepository.updateLikeCount(liked.getPost().getId(), -1);
     }
