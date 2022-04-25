@@ -73,8 +73,7 @@ public class CommunityCommentNotificationService implements NotificationService<
         Post post = postRepository.findById(comment.getPostId())
                 .orElseThrow(() -> new BadRequestException("No such Post."));
 
-//      NotificationTargetInfo targetInfo = getTargetInfo(post.getCreatedBy().getId());
-        NotificationTargetInfo targetInfo = getTargetInfo(4L);
+        NotificationTargetInfo targetInfo = getTargetInfo(post.getCreatedBy().getId());
 
         Map<String, String> arguments = getArgument(targetInfo.getNickname(), post);
         sendCenter(messageIndex, post.getThumbnailUrl(), targetInfo, arguments);

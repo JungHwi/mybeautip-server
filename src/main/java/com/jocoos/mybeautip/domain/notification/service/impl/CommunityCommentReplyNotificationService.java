@@ -71,12 +71,9 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
     @Override
     public void send(Comment comment) {
         int messageIndex = getMessageRandomIndex();
-//        NotificationTargetInfo targetInfo = getTargetInfo(post.getCreatedBy().getId());
-        NotificationTargetInfo targetInfo = getTargetInfo(4L);
-
         Post post = postRepository.findById(comment.getPostId())
-                .orElseThrow(() -> new BadRequestException("No such Post Info."));
-
+                .orElseThrow(() -> new BadRequestException("No such Post."));
+        NotificationTargetInfo targetInfo = getTargetInfo(post.getCreatedBy().getId());
 
         Map<String, String> arguments = getArgument(targetInfo.getNickname(), comment);
         sendCenter(messageIndex, post.getThumbnailUrl(), targetInfo, arguments);
