@@ -1,21 +1,9 @@
 package com.jocoos.mybeautip.member;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.coupon.CouponService;
@@ -26,9 +14,23 @@ import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.MemberController;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
+import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.word.BannedWordService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -46,7 +48,10 @@ public class MemberService {
   private final AppleMemberRepository appleMemberRepository;
   private final MemberLeaveLogRepository memberLeaveLogRepository;
   private final CouponService couponService;
-  
+
+  private final AttachmentService attachmentService;
+
+  private final String PATH_AVATAR = "avatar";
   private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
   private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
   
@@ -67,7 +72,8 @@ public class MemberService {
                        KakaoMemberRepository kakaoMemberRepository,
                        NaverMemberRepository naverMemberRepository,
                        AppleMemberRepository appleMemberRepository, MemberLeaveLogRepository memberLeaveLogRepository,
-                       CouponService couponService) {
+                       CouponService couponService,
+                       AttachmentService attachmentService) {
     this.bannedWordService = bannedWordService;
     this.messageService = messageService;
     this.tagService = tagService;
@@ -80,6 +86,7 @@ public class MemberService {
     this.appleMemberRepository = appleMemberRepository;
     this.memberLeaveLogRepository = memberLeaveLogRepository;
     this.couponService = couponService;
+    this.attachmentService = attachmentService;
   }
 
   public Long currentMemberId() {
@@ -341,4 +348,31 @@ public class MemberService {
       memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
     }
   }
+
+    @Transactional
+    public String updateAvatar(long memberId, MultipartFile avatar) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("No such memberId - " + memberId));
+
+        String originalAvatar = member.getAvatarUrl();
+        String path = "";
+
+        try {
+          path = attachmentService.upload(avatar, PATH_AVATAR);
+        } catch (IOException ex) {
+          throw new MybeautipRuntimeException("Member avatar upload Error. id - " + memberId);
+        }
+
+        member.setAvatarUrl(path);
+        memberRepository.save(member);
+
+        deleteAvatar(originalAvatar);
+        return path;
+    }
+
+    public void deleteAvatar(String avatar) {
+        if (StringUtils.isNotBlank(avatar)) {
+            attachmentService.deleteAttachments(StringConvertUtil.getPath(avatar));
+        }
+    }
 }

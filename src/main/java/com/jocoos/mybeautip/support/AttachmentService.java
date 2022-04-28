@@ -1,16 +1,14 @@
 package com.jocoos.mybeautip.support;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -38,12 +36,16 @@ public class AttachmentService {
     return path;
   }
 
-  public void deleteAttachments(List<String> keys) {
-    for (String k : keys) {
-      if (!StringUtils.isBlank(k)) {
-        String key = k.startsWith("/") ? k.substring(1) : k;
-        storageService.delete(key);
-      }
+    public void deleteAttachments(String k) {
+        if (!StringUtils.isBlank(k)) {
+            String key = k.startsWith("/") ? k.substring(1) : k;
+            storageService.delete(key);
+        }
     }
-  }
+
+    public void deleteAttachments(List<String> keys) {
+        for (String k : keys) {
+            deleteAttachments(k);
+        }
+    }
 }

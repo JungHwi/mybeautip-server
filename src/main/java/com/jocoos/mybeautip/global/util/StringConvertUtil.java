@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 @Slf4j
@@ -39,6 +41,16 @@ public class StringConvertUtil {
             log.error("failed convert map to json string. map >>" + map, ex);
         }
 
+        return null;
+    }
+
+    public static String getPath(String url) {
+        try {
+            URI uri = new URI(url);
+            return uri.getPath();
+        } catch (URISyntaxException e) {
+            log.error("{}", e);
+        }
         return null;
     }
 }

@@ -38,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -177,6 +178,14 @@ public class MemberController {
     
     member = memberService.updateMember(updateMemberRequest, member);
     return new ResponseEntity<>(memberService.getMemberInfo(member), HttpStatus.OK);
+  }
+
+  @PatchMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<String> updateAvatar(MultipartFile avatar) {
+      long memberId = memberService.currentMemberId();
+      String path = memberService.updateAvatar(memberId, avatar);
+
+      return new ResponseEntity<>(path, HttpStatus.OK);
   }
   
   @GetMapping
