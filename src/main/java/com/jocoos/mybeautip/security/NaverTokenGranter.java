@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.NaverMember;
-import com.jocoos.mybeautip.member.NaverMemberRepository;
+import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +15,7 @@ import java.util.Map;
 @Slf4j
 public class NaverTokenGranter extends AbstractTokenGranter {
 
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final NaverMemberRepository naverMemberRepository;
 
@@ -25,9 +23,12 @@ public class NaverTokenGranter extends AbstractTokenGranter {
       AuthorizationServerTokenServices tokenServices,
       ClientDetailsService clientDetailsService,
       OAuth2RequestFactory requestFactory,
+      MemberService memberService,
       MemberRepository memberRepository,
       NaverMemberRepository naverMemberRepository) {
+
     super(tokenServices, clientDetailsService, requestFactory, "naver");
+    this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.naverMemberRepository = naverMemberRepository;
   }
@@ -60,7 +61,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
   
   @Transactional
   public Member createRookie(Map<String, String> params) {
-    Member member = memberRepository.save(new Member(params));
+    Member member = memberService.register(params);
     naverMemberRepository.save(new NaverMember(params, member.getId()));
     return member;
   }

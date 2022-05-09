@@ -7,6 +7,8 @@ import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.detail.MemberDetailRequest;
+import com.jocoos.mybeautip.member.detail.MemberDetailResponse;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
@@ -153,6 +155,19 @@ public class MemberController {
               .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
               .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
+
+    // 최초에 TAG 없는 멤버들 TAG 생성
+    @PatchMapping("/tag/migration")
+    public ResponseEntity migrationTag() {
+        List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
+
+        for (Member member : noTagMembers) {
+          memberService.adjustTag(member);
+          log.debug("Member id - " + member.getId() + ", Member tag - " + member.getTag());
+          memberRepository.save(member);
+        }
+        return new ResponseEntity(HttpStatus.ACCEPTED);
+    }
   
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
@@ -186,6 +201,23 @@ public class MemberController {
       String path = memberService.updateAvatar(memberId, avatar);
 
       return new ResponseEntity<>(path, HttpStatus.OK);
+  }
+
+  @PutMapping(value = "/detail")
+  public ResponseEntity updateDetailInfo(@RequestBody MemberDetailRequest request) {
+    long memberId = memberService.currentMemberId();
+    request.setMemberId(memberId);
+
+    memberService.updateDetailInfo(request);
+    return new ResponseEntity(HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/detail")
+  public ResponseEntity<MemberDetailResponse> getDetailInfo() {
+    long memberId = memberService.currentMemberId();
+
+    MemberDetailResponse result = memberService.getDetailInfo(memberId);
+    return new ResponseEntity<>(result, HttpStatus.OK);
   }
   
   @GetMapping

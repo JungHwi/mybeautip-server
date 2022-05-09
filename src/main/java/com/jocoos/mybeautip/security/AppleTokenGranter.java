@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.AppleMember;
-import com.jocoos.mybeautip.member.AppleMemberRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +15,7 @@ import java.util.Map;
 @Slf4j
 public class AppleTokenGranter extends AbstractTokenGranter {
 
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final AppleMemberRepository appleMemberRepository;
 
@@ -25,9 +23,11 @@ public class AppleTokenGranter extends AbstractTokenGranter {
       AuthorizationServerTokenServices tokenServices,
       ClientDetailsService clientDetailsService,
       OAuth2RequestFactory requestFactory,
+      MemberService memberService,
       MemberRepository memberRepository,
       AppleMemberRepository appleMemberRepository) {
     super(tokenServices, clientDetailsService, requestFactory, "apple");
+    this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.appleMemberRepository = appleMemberRepository;
   }
@@ -56,7 +56,7 @@ public class AppleTokenGranter extends AbstractTokenGranter {
 
   @Transactional
   public Member createRookie(Map<String, String> params) {
-    Member member = memberRepository.save(new Member(params));
+    Member member = memberService.register(params);
     appleMemberRepository.save(new AppleMember(params.get("apple_id"), params.get("email"), params.get("name"), member.getId()));
     return member;
   }

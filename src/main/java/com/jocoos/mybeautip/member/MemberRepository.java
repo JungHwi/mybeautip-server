@@ -14,6 +14,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   List<Member> findByIdIn(Set<Long> ids);
 
+  long countByTag(String tag);
+
+  Optional<Member> findByTag(String tag);
+
   Optional<Member> findByIdAndDeletedAtIsNull(Long id);
   
   Optional<Member> findByIdAndVisibleIsTrue(Long id);
@@ -96,4 +100,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   List<Member> findByVisibleIsTrueAndPushableIsTrue();
 
   List<Member> findByVisibleIsTrueAndPushableIsTrueAndLastLoginAtLessThan(LocalDateTime localDateTime);
+
+  @Query("SELECT m FROM Member m WHERE LENGTH(m.tag) < 1")
+  List<Member> selectTagIsEmpty();
 }

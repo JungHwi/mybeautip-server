@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.KakaoMember;
-import com.jocoos.mybeautip.member.KakaoMemberRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +15,7 @@ import java.util.Map;
 @Slf4j
 public class KakaoTokenGranter extends AbstractTokenGranter {
 
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final KakaoMemberRepository kakaoMemberRepository;
 
@@ -25,9 +23,11 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
       AuthorizationServerTokenServices tokenServices,
       ClientDetailsService clientDetailsService,
       OAuth2RequestFactory requestFactory,
+      MemberService memberService,
       MemberRepository memberRepository,
       KakaoMemberRepository kakaoMemberRepository) {
     super(tokenServices, clientDetailsService, requestFactory, "kakao");
+    this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.kakaoMemberRepository = kakaoMemberRepository;
   }
@@ -59,7 +59,7 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
 
   @Transactional
   public Member createRookie(Map<String, String> params) {
-    Member member = memberRepository.save(new Member(params));
+    Member member = memberService.register(params);
     kakaoMemberRepository.save(new KakaoMember(params.get("kakao_id"), member.getId()));
     return member;
   }

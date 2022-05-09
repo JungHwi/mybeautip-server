@@ -37,16 +37,16 @@ create table notification_center (
     created_at datetime not null comment '생성일시'
 ) character set utf8mb4 comment '알림센터 내역';
 
-create table notification_send_history (
-    id bigint auto_increment primary key comment 'Notification ID',
-    user_id bigint not null comment 'User ID',
-    platform varchar(20) not null comment '플랫폼. WEB || ANDROID || IOS || SMS || EMAIL',
-    target varchar(200) not null comment '대상. WEB - TOKEN, ANDROID || IOS - ARN TOKEN, SMS - PhoneNumber, EMAIL - EMAIL',
-    message_id bigint comment 'message ID',
-    email_file varchar(50) comment 'EMAIL 일때 파일명',
-    arguments varchar(200) comment 'message arguments(json format)',
-    created_at datetime not null comment '발송일시'
-) character set utf8mb4 comment '알림센터 내역';
+# create table notification_send_history (
+#     id bigint auto_increment primary key comment 'Notification ID',
+#     user_id bigint not null comment 'User ID',
+#     platform varchar(20) not null comment '플랫폼. WEB || ANDROID || IOS || SMS || EMAIL',
+#     target varchar(200) not null comment '대상. WEB - TOKEN, ANDROID || IOS - ARN TOKEN, SMS - PhoneNumber, EMAIL - EMAIL',
+#     message_id bigint comment 'message ID',
+#     email_file varchar(50) comment 'EMAIL 일때 파일명',
+#     arguments varchar(200) comment 'message arguments(json format)',
+#     created_at datetime not null comment '발송일시'
+# ) character set utf8mb4 comment '알림센터 내역';
 
 alter table post_likes add column modified_at datetime default now();
 
@@ -62,7 +62,7 @@ values ('VIDEO_UPLOAD', '동영상 업로드 시, 모든 유저에게', 'CENTER,
 
 insert into notification_message_center (template_id, lang, message_type, isLastVersion, message, deep_link)
 values ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '오늘 영상 올라왔눈데 안볼꺼얌? 마부띠 똑땅해😣', 'link://content?id={{CONTENT_ID}}'),
-       ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '새 영상 올라왔다. 안 보냐?', 'link://content?id={{CONTENT_ID}}'),
+       ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '새 영상 올라왔다. 안 보냥?😼', 'link://content?id={{CONTENT_ID}}'),
        ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '울 액히 같이 영상 보러갈꽈~ 👀', 'link://content?id={{CONTENT_ID}}'),
        ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '당신에게 바치는 내 영상. 내가 당신의 마음을 훔치는 그날을 위해! 치얼스 😏🍷', 'link://content?id={{CONTENT_ID}}'),
        ('COMMUNITY_COMMENT', 'KO', 'COMMUNITY', true, '{{USER_NICKNAME}}님 댓글 달렸또오😊얼른 화긴해죠 쀼~🥰', 'link://post?id={{POST_ID}}&comment_id={{COMMENT_ID}}'),
@@ -89,11 +89,11 @@ values ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '오늘 영상 올라왔눈데 �
 insert into notification_message_push (template_id, lang, message_type, isLastVersion, message, deep_link)
 select template_id, lang, message_type, isLastVersion, message, deep_link from notification_message_center;
 
--- ALTER TABLE post_likes DROP COLUMN modified_at;
--- ALTER TABLE post_likes DROP COLUMN status;
-
--- DROP TABLE notification_template;
--- DROP TABLE notification_message_center;
--- DROP TABLE notification_message_push;
--- DROP TABLE notification_center;
--- DELETE FROM flyway_schema_history WHERE version = '0145';
+# ALTER TABLE post_likes DROP COLUMN modified_at;
+# ALTER TABLE post_likes DROP COLUMN status;
+#
+# DROP TABLE notification_template;
+# DROP TABLE notification_message_center;
+# DROP TABLE notification_message_push;
+# DROP TABLE notification_center;
+# DELETE FROM flyway_schema_history WHERE version = '0145';

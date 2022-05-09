@@ -14,7 +14,7 @@ import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
-import com.jocoos.mybeautip.member.block.MemberBlockService;
+import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
@@ -64,7 +64,7 @@ public class PostController {
   private final TagService tagService;
   private final MessageService messageService;
   private final KeywordService keywordService;
-  private final MemberBlockService memberBlockService;
+  private final BlockService blockService;
   private final AttachmentService attachmentService;
 
   private final PostLabelRepository postLabelRepository;
@@ -95,7 +95,7 @@ public class PostController {
                         TagService tagService,
                         MessageService messageService,
                         KeywordService keywordService,
-                        MemberBlockService memberBlockService,
+                        BlockService blockService,
                         AttachmentService attachmentService,
                         PostLabelRepository postLabelRepository,
                         PostReportRepository postReportRepository,
@@ -114,7 +114,7 @@ public class PostController {
     this.tagService = tagService;
     this.messageService = messageService;
     this.keywordService = keywordService;
-    this.memberBlockService = memberBlockService;
+    this.blockService = blockService;
     this.attachmentService = attachmentService;
     this.postLabelRepository = postLabelRepository;
     this.postReportRepository = postReportRepository;
@@ -130,7 +130,7 @@ public class PostController {
                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Member me = memberService.currentMember();
-    final Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me.getId()) : null;
+    final Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me.getId()) : null;
 
     Slice<Post> posts = findPosts(count, category, label, keyword, cursor);
     List<PostInfo> result = new ArrayList<>();
@@ -343,7 +343,7 @@ public class PostController {
     
     Slice<Comment> comments;
     Long me = memberService.currentMemberId();
-    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : new HashMap<>();
+    Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me) : new HashMap<>();
 
     if (parentId != null) {
       comments = postService.findCommentsByParentId(parentId, cursor, page, direction);

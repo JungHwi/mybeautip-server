@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.FacebookMember;
-import com.jocoos.mybeautip.member.FacebookMemberRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +15,7 @@ import java.util.Map;
 @Slf4j
 public class FacebookTokenGranter extends AbstractTokenGranter {
 
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
 
@@ -25,9 +23,11 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
       AuthorizationServerTokenServices tokenServices,
       ClientDetailsService clientDetailsService,
       OAuth2RequestFactory requestFactory,
+      MemberService memberService,
       MemberRepository memberRepository,
       FacebookMemberRepository facebookMemberRepository) {
     super(tokenServices, clientDetailsService, requestFactory, "facebook");
+    this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.facebookMemberRepository = facebookMemberRepository;
   }
@@ -59,10 +59,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
 
   @Transactional
   public Member createRookie(Map<String, String> params) {
-    Member member1 = new Member(params);
-    log.debug("member1: {}", member1);
-
-    Member member = memberRepository.save(new Member(params));
+    Member member = memberService.register(params);
     facebookMemberRepository.save(new FacebookMember(params.get("facebook_id"), member.getId()));
     return member;
   }

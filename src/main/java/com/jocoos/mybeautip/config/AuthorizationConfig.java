@@ -1,13 +1,9 @@
 package com.jocoos.mybeautip.config;
 
-import javax.annotation.PostConstruct;
-
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.jocoos.mybeautip.admin.AdminMemberRepository;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.security.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +22,7 @@ import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticat
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 
 @Slf4j
@@ -44,6 +41,9 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
   static final String GRANT_TYPE_CLIENT = "client";
   static final String GRANT_TYPE_ADMIN = "admin";
   static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
+
+  @Autowired
+  private MemberService memberService;
 
   @Autowired
   private MemberRepository memberRepository;
@@ -163,24 +163,28 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                 endpoints.getTokenServices(),
                 endpoints.getClientDetailsService(),
                 endpoints.getOAuth2RequestFactory(),
+                memberService,
                 memberRepository,
                 facebookMemberRepository),
             new NaverTokenGranter(
                 endpoints.getTokenServices(),
                 endpoints.getClientDetailsService(),
                 endpoints.getOAuth2RequestFactory(),
+                memberService,
                 memberRepository,
                 naverMemberRepository),
             new KakaoTokenGranter(
                 endpoints.getTokenServices(),
                 endpoints.getClientDetailsService(),
                 endpoints.getOAuth2RequestFactory(),
+                memberService,
                 memberRepository,
                 kakaoMemberRepository),
             new AppleTokenGranter(
                 endpoints.getTokenServices(),
                 endpoints.getClientDetailsService(),
                 endpoints.getOAuth2RequestFactory(),
+                memberService,
                 memberRepository,
                 appleMemberRepository),
             new ClientTokenGranter(

@@ -1,14 +1,11 @@
 package com.jocoos.mybeautip.security;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.member.*;
-
-import org.apache.commons.lang3.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -19,6 +16,7 @@ public class SocialLoginService {
   private final NaverLoginService naverLoginService;
   private final FacebookLoginService facebookLoginService;
 
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final KakaoMemberRepository kakaoMemberRepository;
   private final NaverMemberRepository naverMemberRepository;
@@ -93,7 +91,7 @@ public class SocialLoginService {
     if (member.getId() == null) {
       // FIXME: Default pushable agreement value is true?
       member.setPushable(Boolean.TRUE);
-      memberRepository.save(member);
+      memberService.register(member);
 
       log.debug("{}", socialMember);
 
