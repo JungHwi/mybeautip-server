@@ -45,6 +45,9 @@ public class Member {
   public static final int TAG_ALPHABETIC_LENGTH = 5;
   public static final int TAG_MAX_NUMERIC = 99;
 
+  public static final int TAG_ALPHABETIC_LENGTH = 5;
+  public static final int TAG_MAX_NUMERIC = 99;
+
   @Transient
   @JsonIgnore
   private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
