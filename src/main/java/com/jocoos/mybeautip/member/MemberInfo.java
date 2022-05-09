@@ -4,11 +4,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import com.jocoos.mybeautip.restapi.VideoController;
+import org.apache.commons.lang3.StringUtils;
 
 @NoArgsConstructor
 @Data
@@ -33,11 +33,11 @@ public class MemberInfo {
 
   public MemberInfo(Member member) {
     this.id = member.getId();
-    this.username = Strings.isNullOrEmpty(member.getUsername()) ? "" : member.getUsername();
-    this.email = Strings.isNullOrEmpty(member.getEmail()) ? "" : member.getEmail();
-    this.phoneNumber = Strings.isNullOrEmpty(member.getPhoneNumber()) ? "" : member.getPhoneNumber();
-    this.avatarUrl = Strings.isNullOrEmpty(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
-    this.intro = Strings.isNullOrEmpty(member.getIntro()) ? "" : member.getIntro();
+    this.username = StringUtils.isBlank(member.getUsername()) ? "" : member.getUsername();
+    this.email = StringUtils.isBlank(member.getEmail()) ? "" : member.getEmail();
+    this.phoneNumber = StringUtils.isBlank(member.getPhoneNumber()) ? "" : member.getPhoneNumber();
+    this.avatarUrl = StringUtils.isBlank(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
+    this.intro = StringUtils.isBlank(member.getIntro()) ? "" : member.getIntro();
     this.createdAt = member.getCreatedAt();
     this.modifiedAt = member.getModifiedAt();
     this.deletedAt = member.getDeletedAt();

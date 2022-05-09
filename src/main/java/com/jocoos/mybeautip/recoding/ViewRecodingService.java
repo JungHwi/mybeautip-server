@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -39,10 +39,10 @@ public class ViewRecodingService {
       throw new BadRequestException("The count must be less or equals to 200");
     }
 
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "modifiedAt"));
 
     Date now;
-    if (!Strings.isNullOrEmpty(cursor)) {
+    if (!StringUtils.isBlank(cursor)) {
       now = new Date(Long.parseLong(cursor));
     } else  {
       now = new Date();

@@ -4,8 +4,8 @@ import java.util.*;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,7 +39,7 @@ public class GoodsOptionService {
 
   public String getGoodsOptionNames(String goodsNo, Long option) {
     log.debug("goodsNo: {}, option: {}", goodsNo, option);
-    if (Strings.isNullOrEmpty(goodsNo) || option == null) {
+    if (StringUtils.isBlank(goodsNo) || option == null) {
       return "";
     }
     return getGoodsOptionNames(Integer.parseInt(goodsNo), option.intValue());
@@ -52,24 +52,24 @@ public class GoodsOptionService {
   }
 
   private String optionNames(GoodsOption option) {
-    List<String> names = Lists.newArrayList();
-    if (!Strings.isNullOrEmpty(option.getOptionValue1())) {
+    List<String> names = new ArrayList<>();
+    if (!StringUtils.isBlank(option.getOptionValue1())) {
       names.add(option.getOptionValue1());
     };
 
-    if (!Strings.isNullOrEmpty(option.getOptionValue2())) {
+    if (!StringUtils.isBlank(option.getOptionValue2())) {
       names.add(option.getOptionValue2());
     }
 
-    if (!Strings.isNullOrEmpty(option.getOptionValue3())) {
+    if (!StringUtils.isBlank(option.getOptionValue3())) {
       names.add(option.getOptionValue3());
     }
 
-    if (!Strings.isNullOrEmpty(option.getOptionValue4())) {
+    if (!StringUtils.isBlank(option.getOptionValue4())) {
       names.add(option.getOptionValue4());
     }
 
-    if (!Strings.isNullOrEmpty(option.getOptionValue5())) {
+    if (!StringUtils.isBlank(option.getOptionValue5())) {
       names.add(option.getOptionValue5());
     }
 

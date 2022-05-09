@@ -1,42 +1,56 @@
 package com.jocoos.mybeautip.member;
 
-import java.util.Date;
-import java.util.Optional;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
+import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.coupon.CouponService;
+import com.jocoos.mybeautip.member.detail.MemberDetail;
+import com.jocoos.mybeautip.member.detail.MemberDetailRepository;
+import com.jocoos.mybeautip.member.detail.MemberDetailRequest;
+import com.jocoos.mybeautip.member.detail.MemberDetailResponse;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.MemberController;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
+import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.word.BannedWordService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
 public class MemberService {
 
+  private final BlockService blockService;
   private final BannedWordService bannedWordService;
   private final MessageService messageService;
   private final TagService tagService;
   private final MemberRepository memberRepository;
+  private final MemberDetailRepository memberDetailRepository;
   private final FollowingRepository followingRepository;
   private final ReportRepository reportRepository;
   private final FacebookMemberRepository facebookMemberRepository;
@@ -45,7 +59,10 @@ public class MemberService {
   private final AppleMemberRepository appleMemberRepository;
   private final MemberLeaveLogRepository memberLeaveLogRepository;
   private final CouponService couponService;
-  
+
+  private final AttachmentService attachmentService;
+
+  private final String PATH_AVATAR = "avatar";
   private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
   private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
   
@@ -60,25 +77,31 @@ public class MemberService {
                        MessageService messageService,
                        TagService tagService,
                        MemberRepository memberRepository,
+                       MemberDetailRepository memberDetailRepository,
                        FollowingRepository followingRepository,
                        ReportRepository reportRepository,
+                       BlockService blockService,
                        FacebookMemberRepository facebookMemberRepository,
                        KakaoMemberRepository kakaoMemberRepository,
                        NaverMemberRepository naverMemberRepository,
                        AppleMemberRepository appleMemberRepository, MemberLeaveLogRepository memberLeaveLogRepository,
-                       CouponService couponService) {
+                       CouponService couponService,
+                       AttachmentService attachmentService) {
     this.bannedWordService = bannedWordService;
     this.messageService = messageService;
     this.tagService = tagService;
     this.memberRepository = memberRepository;
+    this.memberDetailRepository = memberDetailRepository;
     this.followingRepository = followingRepository;
     this.reportRepository = reportRepository;
+    this.blockService = blockService;
     this.facebookMemberRepository = facebookMemberRepository;
     this.kakaoMemberRepository = kakaoMemberRepository;
     this.naverMemberRepository = naverMemberRepository;
     this.appleMemberRepository = appleMemberRepository;
     this.memberLeaveLogRepository = memberLeaveLogRepository;
     this.couponService = couponService;
+    this.attachmentService = attachmentService;
   }
 
   public Long currentMemberId() {
@@ -107,7 +130,7 @@ public class MemberService {
 
   public Member getAdmin() {
     return memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue("마이뷰팁")
-       .orElseThrow(() -> new MemberNotFoundException("Cann't find admin"));
+       .orElseThrow(() -> new MemberNotFoundException("Can't find admin"));
   }
 
   private Object currentPrincipal() {
@@ -209,6 +232,49 @@ public class MemberService {
   public boolean hasCommentPostPermission(Member member) {
     return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
   }
+
+    @Transactional
+    public void tagMigration() {
+        List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
+
+        for (Member member : noTagMembers) {
+            adjustTag(member);
+            memberRepository.save(member);
+        }
+    }
+
+    @Transactional
+    public Member register(Member member) {
+        adjustTag(member);
+
+        return memberRepository.save(member);
+    }
+
+    @Transactional
+    public Member register(Map<String, String> params) {
+        Member member = new Member(params);
+        adjustTag(member);
+
+        return memberRepository.save(member);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Member adjustTag(Member member) {
+        while (true) {
+           if (memberRepository.countByTag(member.getTag()) == 0) {
+              return member;
+           }
+           member.setTag();
+        }
+    }
+
+  @Transactional
+  public void updateLastLoginAt() {
+    Member member = currentMember();
+    if (member != null) {
+      memberRepository.updateLastLoginAt(member.getId());
+    }
+  }
   
   @Transactional
   public Report reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {
@@ -217,6 +283,8 @@ public class MemberService {
     
     Report report = reportRepository.save(new Report(me, you, reasonCode, reason, video));
     memberRepository.updateReportCount(you.getId(), 1);
+
+    blockService.blockMember(me.getId(), targetId);
 
     return report;
   }
@@ -313,7 +381,7 @@ public class MemberService {
     log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
     memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
   }
-  
+
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public Following followMember(Member me, Member you) {
     memberRepository.updateFollowingCount(me.getId(), 1);
@@ -332,4 +400,81 @@ public class MemberService {
       memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
     }
   }
+
+    @Transactional(readOnly = true)
+    public MemberDetailResponse getDetailInfo(long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("No such Member. id - " + memberId));
+
+        MemberDetail memberDetail = memberDetailRepository.findByMemberId(memberId)
+                .orElse(null);
+
+        String tag = "";
+        if (memberDetail != null && memberDetail.getInviterId() != null) {
+            Member inverterMember = memberRepository.findById(memberDetail.getInviterId()).orElse(null);
+            tag = inverterMember != null ? inverterMember.getTag() : "";
+        }
+
+        return MemberDetailResponse.builder()
+                .ageGroup(member.getBirthday().getAgeGroupByTen())
+                .skinType(memberDetail != null ? memberDetail.getSkinType() : null)
+                .skinWorry(memberDetail != null ? memberDetail.getSkinWorry() : null)
+                .inviterTag(tag)
+                .build();
+    }
+
+    @Transactional
+    public void updateDetailInfo(MemberDetailRequest request) {
+        Member member = memberRepository.findById(request.getMemberId())
+                .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + request.getMemberId()));
+
+        member.setBirthday(new Birthday(request.getAgeGroup()));
+        memberRepository.save(member);
+
+        Long inviterId = null;
+        if (StringUtils.isNotBlank(request.getInviterTag())) {
+            inviterId = memberRepository.findByTag(request.getInviterTag())
+                    .orElseThrow(() -> new MemberNotFoundException("No such Member. tag - " + request.getInviterTag()))
+                    .getId();
+        }
+
+        MemberDetail memberDetail = memberDetailRepository.findByMemberId(request.getMemberId())
+                .orElse(MemberDetail.builder()
+                        .memberId(request.getMemberId())
+                        .skinType(request.getSkinType())
+                        .skinWorry(request.getSkinWorry())
+                        .inviterId(inviterId)
+                        .build());
+
+        memberDetail.setSkinType(request.getSkinType());
+        memberDetail.setSkinWorry(request.getSkinWorry());
+        memberDetail.setInviterId(inviterId);
+
+        memberDetailRepository.save(memberDetail);
+    }
+
+    @Transactional
+    public String updateAvatar(long memberId, MultipartFile avatar) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("No such memberId - " + memberId));
+
+        String originalAvatar = member.getAvatarUrl();
+        String path = "";
+
+        try {
+          path = attachmentService.upload(avatar, PATH_AVATAR);
+        } catch (IOException ex) {
+          throw new MybeautipRuntimeException("Member avatar upload Error. id - " + memberId);
+        }
+
+        member.setAvatarUrl(path);
+        memberRepository.save(member);
+
+        deleteAvatar(originalAvatar);
+        return path;
+    }
+
+    public void deleteAvatar(String avatar) {
+        attachmentService.deleteAttachments(StringConvertUtil.getPath(avatar));
+    }
 }

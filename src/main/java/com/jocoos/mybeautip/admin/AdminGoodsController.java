@@ -40,7 +40,7 @@ public class AdminGoodsController {
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "20") int size) {
 
-    PageRequest pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     Page<TimeSale> list = null;
     log.debug("isDeleted: {}", isDeleted);
 

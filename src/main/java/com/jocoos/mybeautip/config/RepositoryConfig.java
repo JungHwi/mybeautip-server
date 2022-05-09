@@ -12,7 +12,7 @@ import com.jocoos.mybeautip.recommendation.MotdRecommendationBase;
 import com.jocoos.mybeautip.store.Store;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.member.Member;
@@ -22,16 +22,17 @@ import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.word.BannedWord;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 @Configuration
-public class RepositoryConfig extends RepositoryRestConfigurerAdapter {
+public class RepositoryConfig implements RepositoryRestConfigurer {
 
   @Override
-  public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-    config.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class, Order.class,
-        Category.class, DeliveryCharge.class, DeliveryChargeDetail.class, Store.class,
-        Goods.class, GoodsOption.class, VideoReport.class, Report.class, Post.class, Purchase.class,
-       MemberCoupon.class, MemberPoint.class, MotdRecommendationBase.class, AppInfo.class, Device.class, Video.class, BannedWord.class,
-       PushMessage.class);
+  public void configureRepositoryRestConfiguration(RepositoryRestConfiguration repositoryRestConfiguration, CorsRegistry cors) {
+    repositoryRestConfiguration.exposeIdsFor(Coupon.class, Post.class, Banner.class, Member.class, Order.class,
+            Category.class, DeliveryCharge.class, DeliveryChargeDetail.class, Store.class,
+            Goods.class, GoodsOption.class, VideoReport.class, Report.class, Post.class, Purchase.class,
+            MemberCoupon.class, MemberPoint.class, MotdRecommendationBase.class, AppInfo.class, Device.class, Video.class, BannedWord.class,
+            PushMessage.class);
   }
 }

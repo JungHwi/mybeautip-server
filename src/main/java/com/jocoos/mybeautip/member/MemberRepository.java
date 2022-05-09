@@ -7,12 +7,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
+  List<Member> findByIdIn(Set<Long> ids);
+
+  long countByTag(String tag);
+
+  Optional<Member> findByTag(String tag);
 
   Optional<Member> findByIdAndDeletedAtIsNull(Long id);
   
@@ -29,6 +33,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Slice<Member> findByDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(String username, String intro, Pageable pageable);
 
   Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(Date createdAt, String username, String intro, Pageable pageable);
+
+  @Modifying
+  @Query("update Member m set m.lastLoginAt = current_timestamp where m.id = ?1")
+  void updateLastLoginAt(Long memberId);
 
   @Modifying
   @Query("update Member m set m.followingCount = m.followingCount + ?2, m.modifiedAt = now() where m.id = ?1")
@@ -78,6 +86,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   List<Member> findByVisibleAndDeletedAtIsNull(boolean visible, Pageable pageable);
 
+  List<Member> findAllByVisibleTrueAndPushableTrue();
+
   @Query("select f.id as followingId, r.id as reportedId, b.id as blockedId from Member m" +
           "  left outer join Following f on m.id=f.memberMe.id and f.memberYou.id=?2" +
           "  left outer join Report r on m.id=r.me.id and r.you.id=?2" +
@@ -86,4 +96,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Optional<MemberExtraInfo> findMemberExtraInfo(Long me, Long you);
 
   Optional<Member> findByEmailAndDeletedAtIsNull(String email);
+
+  List<Member> findByVisibleIsTrueAndPushableIsTrue();
+
+  List<Member> findByVisibleIsTrueAndPushableIsTrueAndLastLoginAtLessThan(LocalDateTime localDateTime);
+
+  @Query("SELECT m FROM Member m WHERE LENGTH(m.tag) < 1")
+  List<Member> selectTagIsEmpty();
 }

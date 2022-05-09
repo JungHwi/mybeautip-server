@@ -16,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -213,7 +211,7 @@ public class AdminController {
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size) {
 
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     Page<Member> members = memberRepository.findByDeletedAtIsNotNull(pageable);
     Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
     return new ResponseEntity<>(details, HttpStatus.OK);
@@ -224,7 +222,7 @@ public class AdminController {
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size) {
 
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "reportCount"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reportCount"));
     Page<Member> members = memberRepository.findByVisibleAndReportCountNot(true, 0, pageable);
 
     Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
@@ -239,7 +237,7 @@ public class AdminController {
      @RequestParam String username) {
 
     log.debug("visible: {}, username: {}", visible, username);
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     Page<Member> members = memberRepository.findByVisibleAndUsernameContaining(visible, username, pageable);
 
     Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
@@ -254,7 +252,7 @@ public class AdminController {
       @RequestParam String email) {
 
     log.debug("visible: {}, email: {}", visible, email);
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     Page<Member> members = memberRepository.findByVisibleAndEmailContaining(visible, email, pageable);
     log.info("{}", members);
 
@@ -277,33 +275,33 @@ public class AdminController {
       Sort pagingSort = null;
       switch (sort) {
         case "video":
-          pagingSort = new Sort(Sort.Direction.DESC, "publicVideoCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "publicVideoCount");
           break;
         case "revenue":
-          pagingSort = new Sort(Sort.Direction.DESC, "revenue");
+          pagingSort = Sort.by(Sort.Direction.DESC, "revenue");
           break;
         case "point":
-          pagingSort = new Sort(Sort.Direction.DESC, "point");
+          pagingSort = Sort.by(Sort.Direction.DESC, "point");
           break;
         case "follower":
-          pagingSort = new Sort(Sort.Direction.DESC, "followerCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "followerCount");
           break;
         case "following":
-          pagingSort = new Sort(Sort.Direction.DESC, "followingCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "followingCount");
           break;
         case "report":
-          pagingSort = new Sort(Sort.Direction.DESC, "reportCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "reportCount");
           break;
         case "order":
-          pagingSort = new Sort(Sort.Direction.DESC, "orderCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "orderCount");
           break;
         default:
-          pagingSort = new Sort(Sort.Direction.DESC, "id");
+          pagingSort = Sort.by(Sort.Direction.DESC, "id");
       }
 
       pageable = PageRequest.of(page, size, pagingSort);
     } else {
-      pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+      pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     }
 
     Page<Member> members = null;
@@ -324,10 +322,10 @@ public class AdminController {
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "100") int size) {
 
-    List<Integer> links = Lists.newArrayList(1, 2, 4);
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+    List<Integer> links = Arrays.asList(1, 2, 4);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     Page<Member> members = null;
-    if (!Strings.isNullOrEmpty(username)) {
+    if (!StringUtils.isBlank(username)) {
       members = memberRepository.findByVisibleAndPushableAndUsernameContaining(true, pushable, username, pageable);
     } else {
       members = memberRepository.findByVisibleAndPushable(true, pushable, pageable);
@@ -354,7 +352,7 @@ public class AdminController {
      @RequestParam(defaultValue = "0") int page,
      @RequestParam(defaultValue = "10") int size) {
 
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.ASC, "seq"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "seq"));
     Page<MemberRecommendation> members = memberRecommendationRepository.findByMemberDeletedAtIsNull(pageable);
 
     Page<MemberDetailInfo> details = members.map(m -> {
@@ -424,25 +422,25 @@ public class AdminController {
       Sort pagingSort = null;
       switch (sort) {
         case "order":
-          pagingSort = new Sort(Sort.Direction.DESC, "orderCnt");
+          pagingSort = Sort.by(Sort.Direction.DESC, "orderCnt");
           break;
         case "hit":
-          pagingSort = new Sort(Sort.Direction.DESC, "hitCnt");
+          pagingSort = Sort.by(Sort.Direction.DESC, "hitCnt");
           break;
         case "like":
-          pagingSort = new Sort(Sort.Direction.DESC, "likeCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "likeCount");
           break;
         default:
-          pagingSort = new Sort(Sort.Direction.DESC, "goodsNo");
+          pagingSort = Sort.by(Sort.Direction.DESC, "goodsNo");
       }
 
       pageable = PageRequest.of(page, size, pagingSort);
     } else {
-      pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "goodsNo"));
+      pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "goodsNo"));
     }
 
     Page<Goods> goods = null;
-    if (!Strings.isNullOrEmpty(code)) {
+    if (!StringUtils.isBlank(code)) {
       goods = goodsRepository.findByStateAndCateCd(state, code, pageable);
     } else {
       goods = goodsRepository.findByState(state, pageable);
@@ -452,7 +450,7 @@ public class AdminController {
       goods = goodsRepository.findByGoodsNoIn(goodses, pageable);
     }
 
-    if (!Strings.isNullOrEmpty(keyword)) {
+    if (!StringUtils.isBlank(keyword)) {
       goods = goodsRepository.findByGoodsNmContainingOrderByGoodsNoDesc(keyword, pageable);
     }
 
@@ -604,22 +602,22 @@ public class AdminController {
     Pageable pageable = null;
     switch (sort) {
       case "views":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "viewCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "viewCount"));
         break;
       case "like":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "likeCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
         break;
       case "comments":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "commentCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "commentCount"));
         break;
       case "watch":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "totalWatchCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "totalWatchCount"));
         break;
       case "heart":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "heartCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "heartCount"));
         break;
       default:
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     }
 
     Page<Video> videos = null;
@@ -667,22 +665,22 @@ public class AdminController {
     Pageable pageable = null;
     switch (sort) {
       case "views":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "viewCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "viewCount"));
         break;
       case "like":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "likeCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
         break;
       case "comments":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "commentCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "commentCount"));
         break;
       case "watch":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "totalWatchCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "totalWatchCount"));
         break;
       case "heart":
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "heartCount"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "heartCount"));
         break;
       default:
-        pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+        pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     }
 
     Page<Video> videos = null;
@@ -701,7 +699,7 @@ public class AdminController {
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "desc") String direction) {
 
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "baseDate"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), "baseDate"));
     Page<MotdRecommendationBase> bases = motdRecommendationBaseRepository.findAll(pageable);
 
     Page<RecommendationController.RecommendedMotdBaseInfo> details = bases.map(b -> {
@@ -719,7 +717,7 @@ public class AdminController {
      @RequestParam(defaultValue = "10") int size,
      @RequestParam(defaultValue = "desc") String direction) {
 
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.fromString(direction), "seq", "createdAt"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), "seq", "createdAt"));
     Page<MotdRecommendation> bases = motdRecommendationRepository.findByVideoTypeAndVideoDeletedAtIsNull(type, pageable);
 
     Page<RecommendationController.RecommendedMotdInfo> details = bases.map(m -> new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
@@ -727,7 +725,7 @@ public class AdminController {
   }
 
   private List<RecommendationController.RecommendedMotdInfo> createRecommendedMotd(MotdRecommendationBase base) {
-    List<RecommendationController.RecommendedMotdInfo> motds = Lists.newArrayList();
+    List<RecommendationController.RecommendedMotdInfo> motds = new ArrayList<>();
     for (MotdRecommendation m : base.getMotds()) {
       motds.add(new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
     }

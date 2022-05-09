@@ -1,24 +1,22 @@
 package com.jocoos.mybeautip.member;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
-import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.coupon.MemberCouponRepository;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointRepository;
 import com.jocoos.mybeautip.member.point.MemberPointService;
-import com.jocoos.mybeautip.notification.NotificationService;
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -28,7 +26,7 @@ public class MemberGiftTask {
 
   private final MemberCouponRepository memberCouponRepository;
   private final MemberPointRepository memberPointRepository;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final MemberPointService memberPointService;
 
   @Value("${mybeautip.point.earn-after-days}")
@@ -39,11 +37,11 @@ public class MemberGiftTask {
 
   public MemberGiftTask(MemberCouponRepository memberCouponRepository,
                         MemberPointRepository memberPointRepository,
-                        NotificationService notificationService,
+                        LegacyNotificationService legacyNotificationService,
                         MemberPointService memberPointService) {
     this.memberCouponRepository = memberCouponRepository;
     this.memberPointRepository = memberPointRepository;
-    this.notificationService = notificationService;
+    this.legacyNotificationService = legacyNotificationService;
     this.memberPointService = memberPointService;
   }
 
@@ -86,7 +84,7 @@ public class MemberGiftTask {
       log.debug("reminder before 3 days : {}", dateFormat.format(reminder));
       log.debug("expired points found: {}", reminders);
       reminders.stream().forEach(memberPoint -> {
-        notificationService.notifyReminderMemberPoint(memberPoint);
+        legacyNotificationService.notifyReminderMemberPoint(memberPoint);
         memberPoint.setRemind(true);
         memberPointRepository.save(memberPoint);
       });
@@ -108,6 +106,6 @@ public class MemberGiftTask {
   }
 
   private List<Integer> getTotalEarnedStates() {
-    return Lists.newArrayList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT, MemberPoint.STATE_REFUNDED_POINT);
+    return Arrays.asList(MemberPoint.STATE_EARNED_POINT, MemberPoint.STATE_PRESENT_POINT, MemberPoint.STATE_REFUNDED_POINT);
   }
 }

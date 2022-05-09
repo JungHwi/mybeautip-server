@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -144,7 +144,7 @@ public class AdminMemberController {
     }
 
     Date expiryAt = null;
-    if (Strings.isNullOrEmpty(request.getExpiryAt())) {
+    if (StringUtils.isBlank(request.getExpiryAt())) {
       expiryAt = Dates.afterMonthsFromNow(1);
     } else {
       expiryAt = Dates.getRecommendedDate(request.getExpiryAt());

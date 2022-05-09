@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Lists;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,7 +94,7 @@ public class RecodingController {
     Long memberId = memberService.currentMemberId();
 
     Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(memberId, count, cursor, category);
-    List<RecodingInfo> result = Lists.newArrayList();
+    List<RecodingInfo> result = new ArrayList<>();
 
     recodings.stream().forEach(recoding -> result.add(getBasicInfo(recoding)));
     log.debug("{}", result);

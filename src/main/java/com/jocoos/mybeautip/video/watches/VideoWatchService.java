@@ -2,10 +2,7 @@ package com.jocoos.mybeautip.video.watches;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -13,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+
+
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -60,7 +57,7 @@ public class VideoWatchService {
         video.getId(), elapsedTime, totalCount, watchCount, guestCount);
 
     try {
-      String countList = objectMapper.writeValueAsString(Lists.newArrayList(totalCount, watchCount, guestCount));
+      String countList = objectMapper.writeValueAsString(Arrays.asList(totalCount, watchCount, guestCount));
       saveVideoWatchCount(String.format(VIDEO_STATS_KEY, video.getId()), elapsedTime, countList);
     } catch (JsonProcessingException e) {
       log.error("Failed to parse the watch count list to json", e);
@@ -86,7 +83,7 @@ public class VideoWatchService {
       jedis = jedisPool.getResource();
       Set<Tuple> tuples = jedis.zrangeByScoreWithScores(String.format(VIDEO_STATS_KEY, videoId), "-inf", "+inf");
 
-      Map<Integer, Integer[]> stats = Maps.newTreeMap();
+      Map<Integer, Integer[]> stats = new TreeMap<>();
       for (Tuple t: tuples) {
         log.debug("{}: {}", t.getScore(), t.getElement());
         try {

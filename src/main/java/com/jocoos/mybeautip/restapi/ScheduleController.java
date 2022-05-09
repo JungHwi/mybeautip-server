@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
@@ -61,7 +61,7 @@ public class ScheduleController {
 
   @GetMapping("/schedules")
   public ResponseEntity<List<ScheduleInfo>> getSchedules(@RequestParam(defaultValue = "10") int count) {
-    PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
+    PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "startedAt"));
 
     Instant instant = Instant.now().minus(LIVE_INTERVAL_MIN, ChronoUnit.MINUTES);
     Date now = Date.from(instant);
@@ -195,7 +195,7 @@ public class ScheduleController {
                                        @RequestBody UpdateScheduleRequest request,
                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     if (request == null ||
-            Strings.isNullOrEmpty(request.title) || request.startedAt == null) {
+            StringUtils.isBlank(request.title) || request.startedAt == null) {
       throw new BadRequestException("invalid_values", "All values are null.");
     }
 

@@ -1,41 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
@@ -50,7 +14,7 @@ import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
-import com.jocoos.mybeautip.member.block.MemberBlockService;
+import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
@@ -60,6 +24,27 @@ import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.TagService;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -79,7 +64,7 @@ public class PostController {
   private final TagService tagService;
   private final MessageService messageService;
   private final KeywordService keywordService;
-  private final MemberBlockService memberBlockService;
+  private final BlockService blockService;
   private final AttachmentService attachmentService;
 
   private final PostLabelRepository postLabelRepository;
@@ -110,7 +95,7 @@ public class PostController {
                         TagService tagService,
                         MessageService messageService,
                         KeywordService keywordService,
-                        MemberBlockService memberBlockService,
+                        BlockService blockService,
                         AttachmentService attachmentService,
                         PostLabelRepository postLabelRepository,
                         PostReportRepository postReportRepository,
@@ -129,7 +114,7 @@ public class PostController {
     this.tagService = tagService;
     this.messageService = messageService;
     this.keywordService = keywordService;
-    this.memberBlockService = memberBlockService;
+    this.blockService = blockService;
     this.attachmentService = attachmentService;
     this.postLabelRepository = postLabelRepository;
     this.postReportRepository = postReportRepository;
@@ -145,10 +130,10 @@ public class PostController {
                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
 
     Member me = memberService.currentMember();
-    final Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me.getId()) : null;
+    final Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me.getId()) : null;
 
     Slice<Post> posts = findPosts(count, category, label, keyword, cursor);
-    List<PostInfo> result = Lists.newArrayList();
+    List<PostInfo> result = new ArrayList<>();
 
     posts.stream().forEach(post -> {
       List<GoodsInfo> goodsInfo = new ArrayList<>();
@@ -194,7 +179,7 @@ public class PostController {
   }
 
   private Slice<Post> findPosts(int count, int category, int label, String keyword, String cursor) {
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id"));
     Slice<Post> posts;
     Date dateCursor = null;
 
@@ -205,25 +190,25 @@ public class PostController {
     }
 
     if (category > 0 && label > 0) {
-      if (!Strings.isNullOrEmpty(keyword)) {
+      if (!StringUtils.isBlank(keyword)) {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, label, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndLabelIdAndDeletedAtIsNull(dateCursor, dateCursor, category, label, page);
       }
     } else if (category > 0) {
-      if (!Strings.isNullOrEmpty(keyword)) {
+      if (!StringUtils.isBlank(keyword)) {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, category, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndCategoryAndDeletedAtIsNull(dateCursor, dateCursor, category, page);
       }
     } else if (label > 0) {
-      if (!Strings.isNullOrEmpty(keyword)) {
+      if (!StringUtils.isBlank(keyword)) {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNullAndTitleContainingOrDescriptionContaining(dateCursor, dateCursor, label, keyword, keyword, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndLabelIdAndDeletedAtIsNull(dateCursor, dateCursor, label, page);
       }
     } else {
-      if (!Strings.isNullOrEmpty(keyword)) {
+      if (!StringUtils.isBlank(keyword)) {
         posts = postRepository.searchPost(keyword, new Date(), dateCursor, page);
       } else {
         posts = postRepository.findByStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(dateCursor, dateCursor, page);
@@ -262,7 +247,7 @@ public class PostController {
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
-         List<GoodsInfo> result = Lists.newArrayList();
+         List<GoodsInfo> result = new ArrayList<>();
          post.getGoods().stream().forEach(gno -> {
            goodsRepository.findByGoodsNo(gno).ifPresent(g -> {
              result.add(goodsService.generateGoodsInfo(g));
@@ -279,7 +264,7 @@ public class PostController {
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
-         List<MemberInfo> result = Lists.newArrayList();
+         List<MemberInfo> result = new ArrayList<>();
          post.getWinners().stream().forEach(mid -> {
            memberRepository.findByIdAndDeletedAtIsNull(mid).ifPresent(m -> {
              result.add(memberService.getMemberInfo(m));
@@ -316,7 +301,7 @@ public class PostController {
            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
          
-         PostLike postLike = postService.likePost(post);
+         PostLike postLike = postService.likePost(post, me.getId());
          return new ResponseEntity<>(new PostLikeInfo(postLike, memberService.getMemberInfo(me),
              memberService.getMemberInfo(post.getCreatedBy())), HttpStatus.OK);
        })
@@ -351,14 +336,14 @@ public class PostController {
     
     PageRequest page;
     if ("next".equals(direction)) {
-      page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
+      page = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "id"));
     } else {
-      page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id")); // default
+      page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id")); // default
     }
     
     Slice<Comment> comments;
     Long me = memberService.currentMemberId();
-    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : Maps.newHashMap();
+    Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me) : new HashMap<>();
 
     if (parentId != null) {
       comments = postService.findCommentsByParentId(parentId, cursor, page, direction);
@@ -366,7 +351,7 @@ public class PostController {
       comments = postService.findCommentsByPostId(id, cursor, page, direction);
     }
 
-    List<CommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = new ArrayList<>();
     comments.stream().forEach(comment -> {
         CommentInfo commentInfo = null;
       if (comment.getComment().contains("@")) {
@@ -524,7 +509,7 @@ public class PostController {
   public ResponseEntity<?> getPostLabels() {
     List<PostLabel> groups = postLabelRepository.findAll();
     if (groups == null) {
-      return new ResponseEntity<>(Lists.newArrayList(), HttpStatus.OK);
+      return new ResponseEntity<>(Arrays.asList(), HttpStatus.OK);
     }
     List<PostLabelInfo> result = groups.stream().map(g -> new PostLabelInfo(g)).collect(Collectors.toList());
     return new ResponseEntity<>(result, HttpStatus.OK);
@@ -634,7 +619,7 @@ public class PostController {
       post.setLabelId(request.getLabel());
     }
 
-    if (!post.getDescription().equals(request.getDescription()) && !Strings.isNullOrEmpty(request.getDescription())) {
+    if (!post.getDescription().equals(request.getDescription()) && !StringUtils.isBlank(request.getDescription())) {
       post.setDescription(request.getDescription());
     }
   }

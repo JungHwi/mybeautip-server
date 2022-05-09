@@ -40,21 +40,21 @@ public class AdminPostController {
       Sort pagingSort = null;
       switch (sort) {
         case "like":
-          pagingSort = new Sort(Sort.Direction.DESC, "likeCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "likeCount");
           break;
         case "view":
-          pagingSort = new Sort(Sort.Direction.DESC, "viewCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "viewCount");
           break;
         case "comment":
-          pagingSort = new Sort(Sort.Direction.DESC, "commentCount");
+          pagingSort = Sort.by(Sort.Direction.DESC, "commentCount");
           break;
         default:
-          pagingSort = new Sort(Sort.Direction.DESC, "id");
+          pagingSort = Sort.by(Sort.Direction.DESC, "id");
       }
 
       pageable = PageRequest.of(page, size, pagingSort);
     } else {
-      pageable = PageRequest.of(page, size, new Sort(Sort.Direction.DESC, "id"));
+      pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     }
 
     Page<Post> posts = postRepository.findByDeletedAtIsNull(pageable);

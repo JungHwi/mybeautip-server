@@ -123,7 +123,7 @@ public class CartService {
 
     List<CartStore> stores = new ArrayList<>();
     for (Integer storeId : storeMap.keySet()) {
-      stores.add(new CartStore(storeId, storeRepository.getOne(storeId).getName(), storeMap.get(storeId)));
+      stores.add(new CartStore(storeId, storeRepository.getById(storeId).getName(), storeMap.get(storeId)));
     }
 
     // Calculate count, price and shipping
@@ -149,7 +149,7 @@ public class CartService {
         delivery.setFixedPrice(fixedPrice);
         delivery.setPrice(price);
 
-        DeliveryCharge deliveryCharge = deliveryChargeRepository.getOne(delivery.getDeliverySno());
+        DeliveryCharge deliveryCharge = deliveryChargeRepository.getById(delivery.getDeliverySno());
         BeanUtils.copyProperties(deliveryCharge, delivery);
 
         if (checkedCount > 0) {

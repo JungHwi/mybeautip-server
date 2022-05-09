@@ -15,10 +15,7 @@ public class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
   @Override
   public boolean hasError(ClientHttpResponse response) throws IOException {
     log.debug("response code : {}", response.getStatusCode());
-    if (HttpStatus.INTERNAL_SERVER_ERROR == response.getStatusCode()) {
-      return true;
-    }
-    return false;
+    return HttpStatus.INTERNAL_SERVER_ERROR == response.getStatusCode();
   }
 
   @Override

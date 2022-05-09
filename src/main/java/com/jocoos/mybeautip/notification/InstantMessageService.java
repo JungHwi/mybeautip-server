@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.config.InstantNotificationConfig;
@@ -52,8 +52,8 @@ public class InstantMessageService {
     scheduleService.getSchedule(video)
       .ifPresent(s -> {
          log.debug("{}", s);
-         String title = !Strings.isNullOrEmpty(s.getInstantTitle()) ? s.getInstantTitle() : video.getTitle();
-         String message = !Strings.isNullOrEmpty(s.getInstantMessage()) ? s.getInstantMessage() : getDefaultMessage(INSTANT_VIDEO_START_MESSAGE);
+         String title = !StringUtils.isBlank(s.getInstantTitle()) ? s.getInstantTitle() : video.getTitle();
+         String message = !StringUtils.isBlank(s.getInstantMessage()) ? s.getInstantMessage() : getDefaultMessage(INSTANT_VIDEO_START_MESSAGE);
          log.debug("title: {}, message: {}", title, message);
 
          taskScheduler.schedule(new InstantNotificationTask(

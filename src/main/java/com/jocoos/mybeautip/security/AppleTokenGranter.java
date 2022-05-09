@@ -1,22 +1,21 @@
 package com.jocoos.mybeautip.security;
 
-import java.util.Map;
-
+import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.member.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Strings;
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.*;
+import java.util.Map;
 
 @Slf4j
 public class AppleTokenGranter extends AbstractTokenGranter {
 
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final AppleMemberRepository appleMemberRepository;
 
@@ -24,9 +23,11 @@ public class AppleTokenGranter extends AbstractTokenGranter {
       AuthorizationServerTokenServices tokenServices,
       ClientDetailsService clientDetailsService,
       OAuth2RequestFactory requestFactory,
+      MemberService memberService,
       MemberRepository memberRepository,
       AppleMemberRepository appleMemberRepository) {
     super(tokenServices, clientDetailsService, requestFactory, "apple");
+    this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.appleMemberRepository = appleMemberRepository;
   }
@@ -39,12 +40,12 @@ public class AppleTokenGranter extends AbstractTokenGranter {
     String email = requestParameters.get("email");
     log.debug("apple id: {}, email: {}, name: {}", appleId, name, email);
 
-    if (Strings.isNullOrEmpty(appleId)) {
+    if (StringUtils.isBlank(appleId)) {
       throw new AuthenticationException("Apple ID is required");
     }
 
     return appleMemberRepository.findById(appleId)
-        .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
+        .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
   }
 
@@ -54,8 +55,8 @@ public class AppleTokenGranter extends AbstractTokenGranter {
   }
 
   @Transactional
-  private Member createRookie(Map<String, String> params) {
-    Member member = memberRepository.save(new Member(params));
+  public Member createRookie(Map<String, String> params) {
+    Member member = memberService.register(params);
     appleMemberRepository.save(new AppleMember(params.get("apple_id"), params.get("email"), params.get("name"), member.getId()));
     return member;
   }

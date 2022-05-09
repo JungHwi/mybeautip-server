@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.*;
@@ -31,6 +31,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -133,7 +134,7 @@ public class OrderController {
             .orElse(null);
          Delivery delivery = deliveryRepository.findById(order.getId()).orElse(null);
 
-         List<PurchaseInfo> purchaseInfos = Lists.newArrayList();
+         List<PurchaseInfo> purchaseInfos = new ArrayList<>();
          order.getPurchases().stream().forEach(p -> {
            PurchaseInfo purchaseInfo = orderInquiryRepository.findByPurchaseId(p.getId()).map(inquiry ->
               new PurchaseInfo(p, inquiry.getId())
@@ -153,7 +154,7 @@ public class OrderController {
     Order order = orderRepository.findByIdAndCreatedById(id, memberId)
         .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
 
-    List<PurchaseInfo> purchaseInfos = Lists.newArrayList();
+    List<PurchaseInfo> purchaseInfos = new ArrayList<>();
     order.getPurchases().stream().forEach(p -> {
       if (!p.isDelivered()) {
         throw new BadRequestException("invalid_purchase_state", messageService.getMessage(INVALID_PURCHASE_STATE, lang));
@@ -184,9 +185,9 @@ public class OrderController {
                                   @RequestParam(defaultValue = "12") int within,
                                   @RequestParam(required = false) Long cursor) {
     Long memberId = memberService.currentMemberId();
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
     Slice<Order> orders;
-    List<OrderInfo> result = Lists.newArrayList();
+    List<OrderInfo> result = new ArrayList<>();
 
     Date createdAt;
     if (cursor != null) {
@@ -282,11 +283,11 @@ public class OrderController {
                                                                  @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("inquiry request: {}", request);
 
-    if (Strings.isNullOrEmpty(request.getState())) {
+    if (StringUtils.isBlank(request.getState())) {
       throw new BadRequestException("inquire_state_required", "Inquiry state is required");
     }
 
-    if (Strings.isNullOrEmpty(request.getReason())) {
+    if (StringUtils.isBlank(request.getReason())) {
       throw new BadRequestException("inquire_reason_required", "Inquiry reason is required");
     }
 
@@ -330,7 +331,7 @@ public class OrderController {
                                     @RequestParam(required = false) Long cursor) {
 
     Long me = memberService.currentMemberId();
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
     Slice<OrderInquiry> inquiries;
     switch (category) {
       case "cancel": {
@@ -354,7 +355,7 @@ public class OrderController {
       }
     }
 
-    List<OrderInquiryInfo> result = Lists.newArrayList();
+    List<OrderInquiryInfo> result = new ArrayList<>();
     if (inquiries != null && inquiries.getSize() > 0) {
       inquiries.stream().forEach(inquiry -> result.add(new OrderInquiryInfo(inquiry)));
     }
@@ -492,7 +493,7 @@ public class OrderController {
       BeanUtils.copyProperties(order, this);
       log.debug("purchases: {}", purchases);
 
-      purchases = Lists.newArrayList();
+      purchases = new ArrayList<>();
       List<Purchase> orderPurchases = order.getPurchases();
       if (!CollectionUtils.isEmpty(orderPurchases)) {
         orderPurchases.forEach(p -> purchases.add(new PurchaseInfo(p)));
@@ -612,7 +613,7 @@ public class OrderController {
         this.purchase = new PurchaseInfo(orderInquiry.getPurchase());
       }
 
-      if (!Strings.isNullOrEmpty(orderInquiry.getAttachments())) {
+      if (!StringUtils.isBlank(orderInquiry.getAttachments())) {
         this.attachments = Arrays.asList(orderInquiry.getAttachments().split(ATTACHMENT_DELIMITER));
       }
     }

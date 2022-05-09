@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -80,13 +79,13 @@ public class RecommendationController {
       @RequestParam(defaultValue = "100") int count) {
     Date now = new Date();
     List<MemberRecommendation> members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqLessThan(
-        now, now, MAX_RECOMMENDED_BJ_COUNT + 1, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
-    List<MemberInfo> result = Lists.newArrayList();
+        now, now, MAX_RECOMMENDED_BJ_COUNT + 1, PageRequest.of(0, count, Sort.by("seq").ascending()));
+    List<MemberInfo> result = new ArrayList<>();
 
     members.forEach(r -> {
       MemberInfo memberInfo = memberService.getMemberInfo(r.getMember());
       if (memberInfo.getVideoCount() > 0) {
-        List<VideoController.VideoInfo> videoList = Lists.newArrayList();
+        List<VideoController.VideoInfo> videoList = new ArrayList<>();
         Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
         if (slice.hasContent()) {
           for (Video video : slice) {
@@ -101,13 +100,13 @@ public class RecommendationController {
     count = count - result.size();
     if (count > 0) {
       members = memberRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(
-          now, now, MAX_RECOMMENDED_BJ_COUNT, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+          now, now, MAX_RECOMMENDED_BJ_COUNT, PageRequest.of(0, count, Sort.by("seq")));
       Collections.shuffle(members);
   
       members.forEach(r -> {
         MemberInfo memberInfo = memberService.getMemberInfo(r.getMember());
         if (memberInfo.getVideoCount() > 0) {
-          List<VideoController.VideoInfo> videoList = Lists.newArrayList();
+          List<VideoController.VideoInfo> videoList = new ArrayList<>();
           Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
           if (slice.hasContent()) {
             for (Video video : slice) {
@@ -125,12 +124,12 @@ public class RecommendationController {
 
   @GetMapping("/goods")
   public ResponseEntity<List<GoodsInfo>> getRecommendedGoods(@RequestParam(defaultValue = "100") int count) {
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq"));
+    PageRequest page = PageRequest.of(0, count, Sort.by("seq"));
     Date now = new Date();
     Slice<GoodsRecommendation> goods = goodsRecommendationRepository.findByStartedAtBeforeAndEndedAtAfterAndGoodsStateLessThanEqual(
         now, now, Goods.GoodsState.NO_SALE.ordinal(), page);
 
-    List<GoodsInfo> result = Lists.newArrayList();
+    List<GoodsInfo> result = new ArrayList<>();
     goods.stream().forEach(recommendation
         -> result.add(goodsService.generateGoodsInfo(recommendation.getGoods())));
 
@@ -141,7 +140,7 @@ public class RecommendationController {
   public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedLiveVideos() {
     // response up to 10 live videos regardless of member
     Slice<Video> list = videoService.findVideos("BROADCASTED", "LIVE", null, 10);
-    List<VideoController.VideoInfo> result = Lists.newArrayList();
+    List<VideoController.VideoInfo> result = new ArrayList<>();
     list.stream().forEach(v -> result.add(videoService.generateVideoInfo(v)));
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
@@ -168,7 +167,7 @@ public class RecommendationController {
     }
 
     Slice<MotdRecommendationBase> videos = motdRecommendationBaseRepository.findByBaseDateBefore(createDate,
-       PageRequest.of(0, count, new Sort(Sort.Direction.fromString(direction), "baseDate")));
+       PageRequest.of(0, count, Sort.by(Sort.Direction.fromString(direction), "baseDate")));
 
     Date now = new Date();
     List<RecommendedMotdBaseInfo> result = videos.stream()
@@ -198,9 +197,9 @@ public class RecommendationController {
   public ResponseEntity<List<KeywordInfo>> getRecommendedKeywords(
     @RequestParam(defaultValue = "100") int count) {
     List<KeywordRecommendation> keywords = keywordRecommendationRepository.findBySeqLessThan(
-        MAX_RECOMMENDED_KEYWORD_COUNT + 1, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+        MAX_RECOMMENDED_KEYWORD_COUNT + 1, PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "seq")));
 
-    List<KeywordInfo> result = Lists.newArrayList();
+    List<KeywordInfo> result = new ArrayList<>();
     for (KeywordRecommendation keyword : keywords) {
       switch (keyword.getCategory()) {
         case 1:
@@ -218,7 +217,7 @@ public class RecommendationController {
     count = count - result.size();
     if (count > 0) {
       keywords = keywordRecommendationRepository.findBySeqGreaterThan(
-          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, new Sort(Sort.Direction.ASC, "seq")));
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, Sort.by(Sort.Direction.ASC, "seq")));
       Collections.shuffle(keywords);
       int subListCount = (count <= keywords.size()) ? count : keywords.size();
       List<KeywordRecommendation> subList = keywords.subList(0, subListCount);
@@ -244,9 +243,9 @@ public class RecommendationController {
   public ResponseEntity<List<SearchKeywordInfo>> getRecommendedSearchKeywords(
       @RequestParam(defaultValue = "100") int count) {
     List<KeywordRecommendation> keywords = keywordRecommendationRepository.findBySeqLessThan(
-        MAX_RECOMMENDED_KEYWORD_COUNT + 1, PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "seq")));
+        MAX_RECOMMENDED_KEYWORD_COUNT + 1, PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "seq")));
     
-    List<SearchKeywordInfo> result = Lists.newArrayList();
+    List<SearchKeywordInfo> result = new ArrayList<>();
     for (KeywordRecommendation keyword : keywords) {
       switch (keyword.getCategory()) {
         case 1:
@@ -264,7 +263,7 @@ public class RecommendationController {
     count = count - result.size();
     if (count > 0) {
       keywords = keywordRecommendationRepository.findBySeqGreaterThan(
-          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, new Sort(Sort.Direction.ASC, "seq")));
+          MAX_RECOMMENDED_KEYWORD_COUNT, PageRequest.of(0, MAX_RECOMMENDED_KEYWORD_COUNT, Sort.by(Sort.Direction.ASC, "seq")));
       Collections.shuffle(keywords);
       List<KeywordRecommendation> subList = keywords.subList(0, count);
       

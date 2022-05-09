@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member.billing;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.BillingController;
+import com.jocoos.mybeautip.support.RandomUtils;
 import com.jocoos.mybeautip.support.mail.MailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -123,7 +124,7 @@ public class MemberBillingAuthService {
 
     // send email async
     log.info("send email: to = {}", billingAuth.getEmail());
-    String newPassword = String.valueOf(getRandomIntegerBetweenRange(111111, 999999));
+    String newPassword = String.valueOf(RandomUtils.getRandom(111111, 999999));
     mailService.sendMessageForPasswordReset(billingAuth.getEmail(), newPassword, lang);
 
     // update password
@@ -156,8 +157,5 @@ public class MemberBillingAuthService {
     return decryptor.decrypt(password);
   }
 
-  public static int getRandomIntegerBetweenRange(double min, double max){
-    double x = (int)(Math.random()*((max-min)+1)) + min;
-    return (int)x;
-  }
+
 }

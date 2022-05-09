@@ -1,9 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
@@ -17,8 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+
 import lombok.extern.slf4j.Slf4j;
 
 import com.jocoos.mybeautip.exception.NotFoundException;
@@ -67,7 +63,7 @@ public class VideoRelationController {
     Video video = videoRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
-    PageRequest page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
     List<VideoGoods> videoGoods = videoGoodsRepository.findAllByVideoId(video.getId());
 
     Date dateCursor;
@@ -78,7 +74,7 @@ public class VideoRelationController {
     }
 
     List<Goods> goodses = videoGoods.stream().map(VideoGoods::getGoods).collect(Collectors.toList());
-    Set<Video> combines = Sets.newConcurrentHashSet();
+    Set<Video> combines = new HashSet<>();
     for (Goods g: goodses) {
       log.debug("goods: {}", g.getGoodsNo());
       Slice<VideoGoods> goodsVideo = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(dateCursor, g.getGoodsNo(), "PUBLIC", "CREATED", page);
@@ -91,7 +87,7 @@ public class VideoRelationController {
 
       log.debug("combines size: {}", combines.size());
       if (combines.size() == count) {
-        return createResponse(Lists.newArrayList(combines), id, count, cursor);
+        return createResponse(new ArrayList<>(combines), id, count, cursor);
       }
     }
 
@@ -107,7 +103,7 @@ public class VideoRelationController {
     });
 
     if (combines.size() == count) {
-      return createResponse(Lists.newArrayList(combines), id, count, cursor);
+      return createResponse(new ArrayList<>(combines), id, count, cursor);
     }
 
     Slice<MotdRecommendation> recommendations = motdRecommendationRepository.findByVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNotAndCreatedAtBefore("PUBLIC", "CREATED", dateCursor, page);
@@ -119,11 +115,11 @@ public class VideoRelationController {
       }
     });
 
-    return createResponse(Lists.newArrayList(combines), id, count, cursor);
+    return createResponse(new ArrayList<>(combines), id, count, cursor);
   }
 
   private CursorResponse createResponse(List<Video> list, Long id, int count, String cursor) {
-    List<VideoController.VideoInfo> videos = Lists.newArrayList();
+    List<VideoController.VideoInfo> videos = new ArrayList<>();
     Collections.sort(list, (Video o1, Video o2) -> o2.getId().compareTo(o1.getId()));
 
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));

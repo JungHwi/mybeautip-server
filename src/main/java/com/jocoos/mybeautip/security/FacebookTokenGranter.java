@@ -1,25 +1,21 @@
 package com.jocoos.mybeautip.security;
 
-import java.util.Map;
-
+import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.member.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Strings;
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.FacebookMember;
-import com.jocoos.mybeautip.member.FacebookMemberRepository;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
+import java.util.Map;
 
 @Slf4j
 public class FacebookTokenGranter extends AbstractTokenGranter {
 
+  private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final FacebookMemberRepository facebookMemberRepository;
 
@@ -27,9 +23,11 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
       AuthorizationServerTokenServices tokenServices,
       ClientDetailsService clientDetailsService,
       OAuth2RequestFactory requestFactory,
+      MemberService memberService,
       MemberRepository memberRepository,
       FacebookMemberRepository facebookMemberRepository) {
     super(tokenServices, clientDetailsService, requestFactory, "facebook");
+    this.memberService = memberService;
     this.memberRepository = memberRepository;
     this.facebookMemberRepository = facebookMemberRepository;
   }
@@ -41,7 +39,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     String username = requestParameters.get("facebook_id");
     log.debug("facebook id: {}, username: {}", facebookId, username);
 
-    if (Strings.isNullOrEmpty(facebookId)) {
+    if (StringUtils.isBlank(facebookId)) {
       throw new AuthenticationException("facebook ID is required");
     }
 
@@ -50,7 +48,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     }
 
     return facebookMemberRepository.findById(facebookId)
-        .map(m -> generateToken(memberRepository.getOne(m.getMemberId()), client, tokenRequest))
+        .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
         .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
   }
 
@@ -60,11 +58,8 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
   }
 
   @Transactional
-  private Member createRookie(Map<String, String> params) {
-    Member member1 = new Member(params);
-    log.debug("member1: {}", member1);
-
-    Member member = memberRepository.save(new Member(params));
+  public Member createRookie(Map<String, String> params) {
+    Member member = memberService.register(params);
     facebookMemberRepository.save(new FacebookMember(params.get("facebook_id"), member.getId()));
     return member;
   }

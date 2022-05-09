@@ -1,16 +1,13 @@
 package com.jocoos.mybeautip.notification;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -131,9 +128,9 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", following.getMemberMe().getId());
     this.resourceOwner = following.getMemberMe();
     this.imageUrl = following.getMemberMe().getAvatarUrl();
-    this.args = Lists.newArrayList(following.getMemberMe().getUsername());
+    this.args = new ArrayList<>(Arrays.asList(following.getMemberMe().getUsername()));
     if (followId != null) {
-      custom = Maps.newHashMap();
+      custom = new HashMap<>();
       custom.put("follow_id", String.valueOf(followId));
     }
   }
@@ -141,7 +138,7 @@ public class Notification {
   public Notification(Video video, String thumbnail, Member target) {
     this.type = "broadcasted".equalsIgnoreCase(video.getType()) ? VIDEO_STARTED : VIDEO_UPLOADED;
     this.targetMember = target;
-    this.args = Lists.newArrayList(video.getMember().getUsername(), video.getTitle());
+    this.args = new ArrayList<>(Arrays.asList(video.getMember().getUsername(), video.getTitle()));
     this.resourceType = RESOURCE_TYPE_VIDEO;
     this.resourceId = video.getId();
     this.resourceIds = StringUtils.joinWith(",", video.getId());
@@ -152,7 +149,7 @@ public class Notification {
   public Notification(Video video) {
     this.type = MY_VIDEO_UPLOADED;
     this.targetMember = video.getMember();
-    this.args = Lists.newArrayList(video.getMember().getUsername());
+    this.args = Arrays.asList(video.getMember().getUsername());
     this.resourceType = RESOURCE_TYPE_VIDEO;
     this.resourceId = video.getId();
     this.resourceIds = StringUtils.joinWith(",", video.getId());
@@ -170,7 +167,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", videoLike.getVideo().getId());
     this.resourceOwner = source;
     this.imageUrl = videoLike.getVideo().getThumbnailUrl();
-    this.args = Lists.newArrayList(source.getUsername());
+    this.args = Arrays.asList(source.getUsername());
   }
   
   public Notification(Video video, Comment comment, Member target, String thumbnail) {
@@ -182,7 +179,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", video.getId(), comment.getId());
     this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
+    this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
   
   public Notification(Post post, Comment comment, Member target, String thumbnail) {
@@ -194,7 +191,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", post.getId(), comment.getId());
     this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
+    this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
 
   public Notification(Video video, Comment comment, Long parentId, Member target, String thumbnail) {
@@ -206,7 +203,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", video.getId(), comment.getParentId(), comment.getId());
     this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
+    this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
   
   public Notification(Post post, Comment comment, Long parentId, Member target, String thumbnail) {
@@ -218,7 +215,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", post.getId(), comment.getParentId(), comment.getId());
     this.resourceOwner = comment.getCreatedBy();
     this.imageUrl = thumbnail;
-    this.args = Lists.newArrayList(comment.getCreatedBy().getUsername(), comment.getComment());
+    this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
   }
 
   public Notification(Video video, CommentLike commentLike, String commentStr) {
@@ -230,7 +227,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", video.getId(), commentLike.getComment().getId());
     this.resourceOwner = commentLike.getCreatedBy();
     this.imageUrl = video.getThumbnailUrl();
-    this.args = Lists.newArrayList(commentLike.getCreatedBy().getUsername(), commentStr);
+    this.args = Arrays.asList(commentLike.getCreatedBy().getUsername(), commentStr);
   }
   
   public Notification(Post post, CommentLike commentLike, String commentStr) {
@@ -242,7 +239,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", post.getId(), commentLike.getComment().getId());
     this.resourceOwner = commentLike.getCreatedBy();
     this.imageUrl = post.getThumbnailUrl();
-    this.args = Lists.newArrayList(commentLike.getCreatedBy().getUsername(), commentStr);
+    this.args = Arrays.asList(commentLike.getCreatedBy().getUsername(), commentStr);
   }
 
   public Notification(Post post, Comment postComment, Member mentioned) {
@@ -254,7 +251,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", post.getId(), postComment.getId());
     this.resourceOwner = postComment.getCreatedBy();
     this.imageUrl = post.getThumbnailUrl();
-    this.args = Lists.newArrayList(postComment.getCreatedBy().getUsername(), postComment.getComment());
+    this.args = Arrays.asList(postComment.getCreatedBy().getUsername(), postComment.getComment());
   }
 
   public Notification(Video video, Comment videoComment, Member mentioned) {
@@ -266,7 +263,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", video.getId(), videoComment.getId());
     this.resourceOwner = videoComment.getCreatedBy();
     this.imageUrl = video.getThumbnailUrl();
-    this.args = Lists.newArrayList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
+    this.args = Arrays.asList(videoComment.getCreatedBy().getUsername(), videoComment.getComment());
   }
   
   public Notification(Order order, Video video) {
@@ -278,7 +275,7 @@ public class Notification {
     this.resourceIds = StringUtils.joinWith(",", video.getId());
     this.resourceOwner = order.getCreatedBy();
     this.imageUrl = video.getThumbnailUrl();
-    this.args = Lists.newArrayList(order.getCreatedBy().getUsername());
+    this.args = Arrays.asList(order.getCreatedBy().getUsername());
   }
 
   public Notification(Member target, String title, String message, String resourceType, String resourceIds, String imageUrl) {
@@ -311,12 +308,12 @@ public class Notification {
         setDeductPointMessage(memberPoint.getFormattedPoint());
         break;
       case "remind_point":
-        this.args = Lists.newArrayList();
+        this.args = new ArrayList<>();
         break;
       default:
         throw new IllegalArgumentException("Unknown detail type - " + detail);
     }
-    this.custom = Maps.newHashMap();
+    this.custom = new HashMap<>();
     this.custom.put("system_detail", detail);
   }
 
@@ -327,7 +324,7 @@ public class Notification {
     this.resourceId = memberCoupon.getMember().getId();
     this.resourceIds = StringUtils.joinWith(",", memberCoupon.getMember().getId());
     this.resourceOwner = memberCoupon.getMember();
-    this.args = Lists.newArrayList(memberCoupon.getCoupon().getDescription());
+    this.args = Arrays.asList(memberCoupon.getCoupon().getDescription());
   }
 
   public Notification(RevenuePayment revenuePayment) {
@@ -337,16 +334,16 @@ public class Notification {
     this.resourceId = revenuePayment.getMember().getId();
     this.resourceIds = StringUtils.joinWith(",", revenuePayment.getMember().getId());
     this.resourceOwner = revenuePayment.getMember();
-    this.args = Lists.newArrayList(revenuePayment.getDate().split("-")[1],
+    this.args = Arrays.asList(revenuePayment.getDate().split("-")[1],
        String.valueOf(revenuePayment.getFinalAmount()));
   }
 
   private void setSendPointMessage(String point, String username) {
-    this.args = Lists.newArrayList(username, point);
+    this.args = Arrays.asList(username, point);
   }
 
   private void setDeductPointMessage(String point) {
-    this.args = Lists.newArrayList(point);
+    this.args = Arrays.asList(point);
   }
 
 

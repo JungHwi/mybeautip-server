@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -107,7 +108,7 @@ public class AdminVideoController {
 
     LocalDate localDate = LocalDate.now();
     PageRequest pageRequest = PageRequest.of(0, 100, Sort.Direction.DESC, "id");
-    List<RecentVideoInfo> recentVideos = Lists.newArrayList();
+    List<RecentVideoInfo> recentVideos = new ArrayList<>();
     LocalDateTime today = localDate.atStartOfDay();
 
     for (int i = 0; i < days; i++) {
@@ -139,7 +140,7 @@ public class AdminVideoController {
   
   /**
    * This API is not for retrieve realtime watcher list
-   * @param video_id
+   * @param id
    * @return watcher list who have watched a video when on streaming
    */
   @GetMapping("/{id:.+}/on-live-watchers")
@@ -158,7 +159,7 @@ public class AdminVideoController {
       endedAt = new Date(video.getCreatedAt().getTime() + video.getDuration());
     }
   
-    Pageable pageable = PageRequest.of(page, size, new Sort(Sort.Direction.ASC, "createdAt"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
     Page<ViewRecoding> viewRecodings = viewRecodingRepository.findByItemIdAndCategoryAndCreatedAtLessThanEqual(
         video.getId().toString(), ViewRecoding.CATEGORY_VIDEO, endedAt, pageable);
     Page<MemberInfo> watchers = viewRecodings.map(m -> memberService.getMemberInfo(m.getCreatedBy()));

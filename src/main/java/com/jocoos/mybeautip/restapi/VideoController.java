@@ -1,7 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.google.common.collect.Lists;
-
 import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
@@ -14,13 +12,13 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
-import com.jocoos.mybeautip.member.block.MemberBlockService;
+import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.comment.*;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.*;
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.NotificationService;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.*;
@@ -30,8 +28,6 @@ import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
-
-import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -74,14 +70,14 @@ public class VideoController {
   private final MentionService mentionService;
   private final RevenueService revenueService;
   private final TagService tagService;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final KeywordService keywordService;
   private final RevenueRepository revenueRepository;
   private final GoodsRepository goodsRepository;
   private final TimeSaleService timeSaleService;
   private final VideoScrapService videoScrapService;
   private final CommentReportRepository commentReportRepository;
-  private final MemberBlockService memberBlockService;
+  private final BlockService blockService;
 
   private static final String VIDEO_NOT_FOUND = "video.not_found";
   private static final String COMMENT_NOT_FOUND = "comment.not_found";
@@ -116,14 +112,14 @@ public class VideoController {
                          MentionService mentionService,
                          RevenueService revenueService,
                          TagService tagService,
-                         NotificationService notificationService,
+                         LegacyNotificationService legacyNotificationService,
                          KeywordService keywordService,
                          RevenueRepository revenueRepository,
                          GoodsRepository goodsRepository,
                          TimeSaleService timeSaleService,
                          VideoScrapService videoScrapService,
                          CommentReportRepository commentReportRepository,
-                         MemberBlockService memberBlockService) {
+                         BlockService blockService) {
     this.memberService = memberService;
     this.videoService = videoService;
     this.messageService = messageService;
@@ -140,14 +136,14 @@ public class VideoController {
     this.mentionService = mentionService;
     this.revenueService = revenueService;
     this.tagService = tagService;
-    this.notificationService = notificationService;
+    this.legacyNotificationService = legacyNotificationService;
     this.keywordService = keywordService;
     this.revenueRepository = revenueRepository;
     this.goodsRepository = goodsRepository;
     this.timeSaleService = timeSaleService;
     this.videoScrapService = videoScrapService;
     this.commentReportRepository = commentReportRepository;
-    this.memberBlockService = memberBlockService;
+    this.blockService = blockService;
   }
   
   @PostMapping
@@ -174,7 +170,7 @@ public class VideoController {
                                   @RequestParam(required = false) String sort) {
     Slice<Video> list = videoService.findVideos(type, state, cursor, count, sort);
 
-    List<VideoInfo> videos = Lists.newArrayList();
+    List<VideoInfo> videos = new ArrayList<>();
     list.filter(video -> "live".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(videoService.generateVideoInfo(v)));
     list.filter(video -> "vod".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
@@ -215,7 +211,7 @@ public class VideoController {
     } else {
       list = videoService.findVideosWithKeyword(keyword, cursor, count);
     }
-    List<VideoInfo> videos = Lists.newArrayList();
+    List<VideoInfo> videos = new ArrayList<>();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     if (StringUtils.isNotBlank(keyword)) {
@@ -261,14 +257,14 @@ public class VideoController {
                                     @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     PageRequest page;
     if ("next".equals(direction)) {
-      page = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
+      page = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "id"));
     } else {
-      page = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "id")); // default
+      page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id")); // default
     }
     
     Slice<Comment> comments;
     Long me = memberService.currentMemberId();
-    Map<Long, Block> blackList = me != null ? memberBlockService.getBlackListByMe(me) : Maps.newHashMap();
+    Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me) : new HashMap<>();
 
     if (parentId != null) {
       comments = videoService.findCommentsByParentId(parentId, cursor, page, direction);
@@ -276,7 +272,7 @@ public class VideoController {
       comments = videoService.findCommentsByVideoId(id, cursor, page, direction);
     }
 
-    List<CommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = new ArrayList<>();
     comments.stream().forEach(comment -> {
       CommentInfo commentInfo = null;
       if (comment.getComment().contains("@")) {
@@ -449,9 +445,9 @@ public class VideoController {
                                            @RequestParam(defaultValue = "100") int count,
                                            @RequestParam(required = false) String cursor) {
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
     Slice<VideoLike> slice = videoLikeRepository.findByVideoIdAndCreatedAtBeforeAndVideoDeletedAtIsNull(id, startCursor, pageable);
-    List<MemberInfo> members = Lists.newArrayList();
+    List<MemberInfo> members = new ArrayList<>();
     slice.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
     String nextCursor = null;
@@ -608,7 +604,7 @@ public class VideoController {
       throw new AccessDeniedException("Invalid member id");
     }
 
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "createdAt"));
     Slice<Revenue> slice;
 
     if (StringUtils.isNumeric(cursor)) {
@@ -618,7 +614,7 @@ public class VideoController {
       slice = revenueRepository.findByVideo(video, pageable);
     }
 
-    List<SalesInfo> revenues = Lists.newArrayList();
+    List<SalesInfo> revenues = new ArrayList<>();
 
     slice.getContent().forEach(r -> revenues.add(new SalesInfo(r)));
 
@@ -771,10 +767,10 @@ public class VideoController {
         .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
     Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "modifiedAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "modifiedAt"));
 
     Slice<VideoView> slice = videoViewRepository.findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(id, startCursor, pageable);
-    List<MemberInfo> members = Lists.newArrayList();
+    List<MemberInfo> members = new ArrayList<>();
     slice.stream().forEach(view -> members.add(memberService.getMemberInfo(view.getCreatedBy())));
 
     String nextCursor = null;

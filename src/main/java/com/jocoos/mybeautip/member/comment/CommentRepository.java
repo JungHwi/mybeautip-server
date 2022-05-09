@@ -60,6 +60,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
   int deleteByParentIdAndCreatedById(Long parentId, Long createdBy);
 
-  int countByVideoIdAndCreatedByIdNot(Long videoId, List<Long> blackList);
+  int countByVideoIdAndCreatedByIdNotIn(Long videoId, List<Long> blackList);
 }
 

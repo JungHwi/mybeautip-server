@@ -1,5 +1,47 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.*;
+import com.jocoos.mybeautip.member.block.BlockRepository;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.detail.MemberDetailRequest;
+import com.jocoos.mybeautip.member.detail.MemberDetailResponse;
+import com.jocoos.mybeautip.member.following.Following;
+import com.jocoos.mybeautip.member.following.FollowingRepository;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.member.report.ReportRepository;
+import com.jocoos.mybeautip.member.revenue.*;
+import com.jocoos.mybeautip.notification.LegacyNotificationService;
+import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.post.PostLike;
+import com.jocoos.mybeautip.post.PostLikeRepository;
+import com.jocoos.mybeautip.search.KeywordService;
+import com.jocoos.mybeautip.store.StoreLike;
+import com.jocoos.mybeautip.store.StoreLikeRepository;
+import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.scrap.VideoScrap;
+import com.jocoos.mybeautip.video.scrap.VideoScrapService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -10,69 +52,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
-
-import com.jocoos.mybeautip.goods.*;
-import com.jocoos.mybeautip.member.block.BlockRepository;
-import com.jocoos.mybeautip.member.comment.*;
-import com.jocoos.mybeautip.member.report.ReportRepository;
-import com.jocoos.mybeautip.video.*;
-import com.jocoos.mybeautip.video.scrap.VideoScrap;
-import com.jocoos.mybeautip.video.scrap.VideoScrapService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberMeInfo;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.member.PostProcessService;
-import com.jocoos.mybeautip.member.following.Following;
-import com.jocoos.mybeautip.member.following.FollowingRepository;
-import com.jocoos.mybeautip.member.mention.MentionResult;
-import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.revenue.Revenue;
-import com.jocoos.mybeautip.member.revenue.RevenueInfo;
-import com.jocoos.mybeautip.member.revenue.RevenuePayment;
-import com.jocoos.mybeautip.member.revenue.RevenuePaymentInfo;
-import com.jocoos.mybeautip.member.revenue.RevenuePaymentRepository;
-import com.jocoos.mybeautip.member.revenue.RevenueRepository;
-import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.notification.NotificationService;
-import com.jocoos.mybeautip.post.PostLike;
-import com.jocoos.mybeautip.post.PostLikeRepository;
-import com.jocoos.mybeautip.search.KeywordService;
-import com.jocoos.mybeautip.store.StoreLike;
-import com.jocoos.mybeautip.store.StoreLikeRepository;
 
 @Slf4j
 @RestController
@@ -86,7 +65,7 @@ public class MemberController {
   private final MessageService messageService;
   private final MentionService mentionService;
   private final KeywordService keywordService;
-  private final NotificationService notificationService;
+  private final LegacyNotificationService legacyNotificationService;
   private final MemberRepository memberRepository;
   private final FollowingRepository followingRepository;
   private final PostLikeRepository postLikeRepository;
@@ -137,7 +116,7 @@ public class MemberController {
                           MessageService messageService,
                           MentionService mentionService,
                           KeywordService keywordService,
-                          NotificationService notificationService,
+                          LegacyNotificationService legacyNotificationService,
                           RevenuePaymentRepository revenuePaymentRepository,
                           VideoScrapService videoScrapService,
                           CommentService commentService,
@@ -159,7 +138,7 @@ public class MemberController {
     this.messageService = messageService;
     this.mentionService = mentionService;
     this.keywordService = keywordService;
-    this.notificationService = notificationService;
+    this.legacyNotificationService = legacyNotificationService;
     this.revenuePaymentRepository = revenuePaymentRepository;
     this.videoScrapService = videoScrapService;
     this.commentService = commentService;
@@ -168,13 +147,27 @@ public class MemberController {
   }
 
   @GetMapping("/me")
-  public Resource<MemberMeInfo> getMe(Principal principal,
+  public EntityModel<MemberMeInfo> getMe(Principal principal,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     log.debug("member id: {}", principal.getName());
+
     return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-              .map(m -> new Resource<>(new MemberMeInfo(m, pointRatio, revenueRatio)))
+              .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
               .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
   }
+
+    // 최초에 TAG 없는 멤버들 TAG 생성
+    @PatchMapping("/tag/migration")
+    public ResponseEntity migrationTag() {
+        List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
+
+        for (Member member : noTagMembers) {
+          memberService.adjustTag(member);
+          log.debug("Member id - " + member.getId() + ", Member tag - " + member.getTag());
+          memberRepository.save(member);
+        }
+        return new ResponseEntity(HttpStatus.ACCEPTED);
+    }
   
   @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
@@ -201,6 +194,31 @@ public class MemberController {
     member = memberService.updateMember(updateMemberRequest, member);
     return new ResponseEntity<>(memberService.getMemberInfo(member), HttpStatus.OK);
   }
+
+  @PatchMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<String> updateAvatar(MultipartFile avatar) {
+      long memberId = memberService.currentMemberId();
+      String path = memberService.updateAvatar(memberId, avatar);
+
+      return new ResponseEntity<>(path, HttpStatus.OK);
+  }
+
+  @PutMapping(value = "/detail")
+  public ResponseEntity updateDetailInfo(@RequestBody MemberDetailRequest request) {
+    long memberId = memberService.currentMemberId();
+    request.setMemberId(memberId);
+
+    memberService.updateDetailInfo(request);
+    return new ResponseEntity(HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/detail")
+  public ResponseEntity<MemberDetailResponse> getDetailInfo() {
+    long memberId = memberService.currentMemberId();
+
+    MemberDetailResponse result = memberService.getDetailInfo(memberId);
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
   
   @GetMapping
   @ResponseBody
@@ -208,7 +226,7 @@ public class MemberController {
                                    @RequestParam(required = false) String cursor,
                                    @RequestParam(required = false) String keyword,
                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    List<MemberInfo> members = Lists.newArrayList();
+    List<MemberInfo> members = new ArrayList<>();
     String nextCursor = null;
     
     if (StringUtils.isNotBlank(keyword)) {
@@ -248,7 +266,7 @@ public class MemberController {
     private int count = 20;
 
     public boolean hasKeyword() {
-      return !Strings.isNullOrEmpty(keyword);
+      return !StringUtils.isBlank(keyword);
     }
 
     public boolean hasCursor() {
@@ -260,7 +278,7 @@ public class MemberController {
   private Slice<Member> findMembers(String keyword, String cursor, int count) {
     Cursor<Date> dateCursor;
 
-    if (Strings.isNullOrEmpty(cursor)) {
+    if (StringUtils.isBlank(cursor)) {
       dateCursor = new Cursor<>(keyword, null, count);
     } else {
       Date toDate;
@@ -280,7 +298,7 @@ public class MemberController {
     Slice<Member> list;
     log.debug("Cursor: {}", cursor);
 
-    PageRequest page = PageRequest.of(0, cursor.getCount(), new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(0, cursor.getCount(), Sort.by("createdAt").descending());
 
     if (cursor.hasCursor() && cursor.hasKeyword()) {
       list = memberRepository.findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(cursor.getCursor(), cursor.getKeyword(), cursor.getKeyword(), page);
@@ -348,7 +366,7 @@ public class MemberController {
                                     @RequestParam(required = false) String type,
                                     @RequestParam(required = false) String state) {
     Slice<Video> list = videoService.findMyVideos(memberService.currentMember(), type, state, cursor, count);
-    List<VideoController.VideoInfo> videos = Lists.newArrayList();
+    List<VideoController.VideoInfo> videos = new ArrayList<>();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
@@ -374,7 +392,7 @@ public class MemberController {
       .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
     Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
-    List<VideoController.VideoInfo> videos = Lists.newArrayList();
+    List<VideoController.VideoInfo> videos = new ArrayList<>();
     list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
     String nextCursor = null;
@@ -392,7 +410,7 @@ public class MemberController {
   @GetMapping(value = "/me/members")
   public CursorResponse getMyMembers(@RequestParam(required = false) String keyword) {
     long me = memberService.currentMemberId();
-    PageRequest pageable = PageRequest.of(0, 100, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, 100, Sort.by("createdAt").descending());
     
     LinkedHashSet<Member> members = new LinkedHashSet<>();
     List<MemberInfo> info = new ArrayList<>();
@@ -432,7 +450,7 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
     memberService.deleteMember(request, member);
-    notificationService.readAllNotification(member.getId());
+    legacyNotificationService.readAllNotification(member.getId());
     
     // Async processing after response
     postProcessService.deleteMember(member);
@@ -446,7 +464,7 @@ public class MemberController {
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
     memberService.deleteMember(request, member);
-    notificationService.readAllNotification(member.getId());
+    legacyNotificationService.readAllNotification(member.getId());
     
     // Async processing after response
     postProcessService.deleteMember(member);
@@ -457,7 +475,7 @@ public class MemberController {
   public CursorResponse getMyComments(@RequestParam(defaultValue = "100") int count,
                                       @RequestParam(required = false) String cursor,
                                       @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Long me = memberService.currentMemberId();
     Slice<Comment> comments;
     if (StringUtils.isNumeric(cursor)) {
@@ -479,7 +497,7 @@ public class MemberController {
   }
 
   private List<CommentInfo> transformComment(Slice<Comment> comments, Long me, String lang) {
-    List<CommentInfo> result = Lists.newArrayList();
+    List<CommentInfo> result = new ArrayList<>();
     comments.stream().forEach(comment -> {
       CommentInfo commentInfo;
       if (comment.getComment().contains("@")) {
@@ -517,7 +535,7 @@ public class MemberController {
     Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
         .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<Comment> comments;
     if (StringUtils.isNumeric(cursor)) {
       Date createdAt = new Date(Long.parseLong(cursor));
@@ -542,7 +560,7 @@ public class MemberController {
                                             @RequestParam(required = false) String cursor) {
     Member member = memberService.currentMember();
     
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "date"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("date").descending());
     Slice<RevenuePayment>  list;
 
     if (StringUtils.isNotEmpty(cursor)) {
@@ -551,7 +569,7 @@ public class MemberController {
       list = revenuePaymentRepository.findByMember(member, pageable);
     }
     
-    List<RevenuePaymentInfo> revenues = Lists.newArrayList();
+    List<RevenuePaymentInfo> revenues = new ArrayList<>();
     list.forEach(r -> revenues.add(new RevenuePaymentInfo(r)));
   
     
@@ -575,10 +593,10 @@ public class MemberController {
     RevenuePayment revenuePayment = revenuePaymentRepository.findById(revenuePaymentId)
         .orElseThrow(() -> new NotFoundException("revenue_payment_not_found", "RevenuePayment not found: " + revenuePaymentId));
     
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "id"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("id").ascending());
     Slice<Revenue> list = revenueRepository.findByRevenuePaymentAndConfirmedIsTrueAndIdGreaterThanEqual(revenuePayment, cursor, pageable);
     
-    List<RevenueInfo> revenues = Lists.newArrayList();
+    List<RevenueInfo> revenues = new ArrayList<>();
     list.forEach(r -> revenues.add(new RevenueInfo(r)));
     
     String nextCursor = null;
@@ -594,12 +612,12 @@ public class MemberController {
   @GetMapping(value = "/me/scraps")
   public CursorResponse getMyScraps(@RequestParam(defaultValue = "20") int count,
                                     @RequestParam(required = false) String cursor) {
-    PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id"));
+    PageRequest pageRequest = PageRequest.of(0, count, Sort.by("id").descending());
 
     log.debug("count: {}, cursor: {}", count, cursor);
     Long memberId = memberService.currentMemberId();
     List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
-    List<VideoController.VideoScrapInfo> scraps = Lists.newArrayList();
+    List<VideoController.VideoScrapInfo> scraps = new ArrayList<>();
     list.stream().forEach(scrap -> scraps.add(
         new VideoController.VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()))));
 
@@ -629,9 +647,9 @@ public class MemberController {
   }
 
   private CursorResponse createPostLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<PostLike> postLikes;
-    List<PostController.PostLikeInfo> result = Lists.newArrayList();
+    List<PostController.PostLikeInfo> result = new ArrayList<>();
 
     if (cursor != null) {
       postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndPostDeletedAtIsNull(new Date(cursor), memberId, pageable);
@@ -659,9 +677,9 @@ public class MemberController {
   }
 
   private CursorResponse createGoodsLikeResponse(Long memberId, String category, int count, Long cursor, String uri, TimeSaleCondition timeSaleCondition) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<GoodsLike> goodsLikes;
-    List<GoodsInfo> result = Lists.newArrayList();
+    List<GoodsInfo> result = new ArrayList<>();
 
     if (cursor != null) {
       goodsLikes = goodsLikeRepository.findByCreatedAtBeforeAndCreatedById(
@@ -686,9 +704,9 @@ public class MemberController {
   }
 
   private CursorResponse createStoreLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<StoreLike> storeLikes;
-    List<StoreController.StoreInfo> result = Lists.newArrayList();
+    List<StoreController.StoreInfo> result = new ArrayList<>();
 
     if (cursor != null) {
       storeLikes = storeLikeRepository.findByCreatedAtBeforeAndCreatedById(new Date(cursor), memberId, pageable);
@@ -717,9 +735,9 @@ public class MemberController {
   }
 
   private CursorResponse createVideoLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
     Slice<VideoLike> videoLikes;
-    List<VideoController.VideoInfo> result = Lists.newArrayList();
+    List<VideoController.VideoInfo> result = new ArrayList<>();
 
     if (cursor != null) {
       videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndVideoDeletedAtIsNull(

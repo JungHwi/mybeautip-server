@@ -3,10 +3,10 @@ package com.jocoos.mybeautip.recommendation;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -35,7 +35,7 @@ public class MotdRecommendationBase extends CreatedDateAuditable {
 
   public void addMotd(MotdRecommendation motd) {
     if (this.motds == null)  {
-      this.motds = Lists.newArrayList();
+      this.motds = new ArrayList<>();
     }
 
     this.motds.add(motd);

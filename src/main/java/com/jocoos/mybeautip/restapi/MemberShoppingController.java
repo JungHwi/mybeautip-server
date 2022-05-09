@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -65,7 +65,7 @@ public class MemberShoppingController {
 
   @GetMapping("/coupons")
   public ResponseEntity<List<MemberCouponInfo>> getCoupons() {
-    List<MemberCouponInfo> coupons = Lists.newArrayList();
+    List<MemberCouponInfo> coupons = new ArrayList<>();
     List<MemberCoupon> memberCoupons = couponService.findMemberCouponsByMember(memberService.currentMember());
     log.debug("coupons: {}", memberCoupons);
 
@@ -95,7 +95,7 @@ public class MemberShoppingController {
       return new ResponseEntity<>(new ShoppingInfo(member, couponCount, pointInfo), HttpStatus.OK);
     }
 
-    List<OrderController.OrderInfo> orders = Lists.newArrayList();
+    List<OrderController.OrderInfo> orders = new ArrayList<>();
     list.forEach(o -> orders.add(new OrderController.OrderInfo(o)));
 
     Collections.sort(orders, new OrderCreatedAtDesc());
@@ -117,7 +117,7 @@ public class MemberShoppingController {
                                   @RequestParam(required = false) Long cursor,
                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
     Member me = memberService.currentMember();
-    PageRequest pageable = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "createdAt"));
+    PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     Date createdAt;
     if (cursor != null) {
@@ -127,7 +127,7 @@ public class MemberShoppingController {
     }
 
     Slice<MemberPoint> points = memberPointRepository.findByMemberAndCreatedAtBefore(me, createdAt, pageable);
-    List<PointDetailInfo> details = Lists.newArrayList();
+    List<PointDetailInfo> details = new ArrayList<>();
 
     if (points != null) {
       points.stream().forEach(point -> {

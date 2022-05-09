@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.video.scrap;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.support.DateUtils;
@@ -54,7 +54,7 @@ public class VideoScrapService {
 
   public List<VideoScrap> findByMemberId(Long memberId, String cursor, Visibility visibility, Pageable pageable) {
     String visibilityName = visibility != null ? visibility.name() : Visibility.PUBLIC.name();
-    if (!Strings.isNullOrEmpty(cursor)) {
+    if (!StringUtils.isBlank(cursor)) {
       Date createdAtBefore = DateUtils.toDate(cursor);
       log.debug("cursor: {}", createdAtBefore);
       return videoScrapRepository.findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNull(memberId, createdAtBefore, visibilityName, pageable);
