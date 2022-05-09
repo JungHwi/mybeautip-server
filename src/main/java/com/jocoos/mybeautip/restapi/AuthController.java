@@ -40,7 +40,7 @@ public class AuthController {
   public ResponseEntity<?> socialLogin(@PathVariable String provider,
                                        OauthRequest request) throws UnsupportedEncodingException {
     log.debug("{}, {}", provider, request);
-    if (Strings.isNullOrEmpty(request.getRedirectUri())) {
+    if (StringUtils.isBlank(request.getRedirectUri())) {
       throw new IllegalArgumentException("Redirect uri was required");
     }
 
