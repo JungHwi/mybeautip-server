@@ -30,7 +30,7 @@ public class NotificationMessagePushEntity {
     private MessageType messageType;
 
     @Column(nullable = false)
-    private boolean isLastVersion;
+    private boolean lastVersion;
 
     @Column(nullable = false)
     private String title;

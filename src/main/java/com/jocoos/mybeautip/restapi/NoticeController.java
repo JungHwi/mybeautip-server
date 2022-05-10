@@ -49,7 +49,7 @@ public class NoticeController {
             messageService.getMessage(input.getMessage(), language)))
        .collect(Collectors.toList());
 
-    memberService.updateLastLoginAt();
+    memberService.updateLastLoggedAt();
 
     NoticeResponse response = new NoticeResponse();
     PageRequest pageable = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdAt"));
