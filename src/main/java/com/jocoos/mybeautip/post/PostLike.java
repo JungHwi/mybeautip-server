@@ -23,6 +23,7 @@ public class PostLike extends MemberAuditable {
   private Long id;
 
   @Column
+  @Enumerated(EnumType.STRING)
   private PostLikeStatus status;
 
   @ManyToOne
