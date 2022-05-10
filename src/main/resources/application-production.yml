@@ -1,7 +1,8 @@
 spring:
-  profiles:
-    active: production
-    include: oauth-prod
+  config:
+    activate:
+      on-profile: production
+    import: classpath:application-oauth-prod.yml
   datasource:
     url: jdbc:mysql://172.31.2.106:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
     username: mybeautip
