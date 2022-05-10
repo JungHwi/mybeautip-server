@@ -20,8 +20,8 @@ public class MemberServiceTest {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
-    public void updateLastLoginAt() {
-        memberService.updateLastLoginAt();
+    public void updateLastLoggedAt() {
+        memberService.updateLastLoggedAt();
     }
 
     @Test

@@ -269,10 +269,10 @@ public class MemberService {
     }
 
   @Transactional
-  public void updateLastLoginAt() {
+  public void updateLastLoggedAt() {
     Member member = currentMember();
     if (member != null) {
-      memberRepository.updateLastLoginAt(member.getId());
+      memberRepository.updateLastLoggedAt(member.getId());
     }
   }
   

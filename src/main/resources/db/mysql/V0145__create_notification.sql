@@ -10,7 +10,7 @@ create table notification_message_center (
     template_id varchar(30) not null comment 'Template ID',
     lang varchar(6) not null default 'KO' comment '언어 코드',
     message_type varchar(20) not null comment '메세지 종류. COMMUNITY || CONTENT || LOGIN',
-    isLastVersion boolean not null default true comment '마지막 버전여부',
+    last_version boolean not null default true comment '마지막 버전여부',
     message varchar(300) not null comment 'message',
     deep_link varchar(200) comment 'deep link'
 ) character set utf8mb4 comment '알림센터에서 사용할 Message 정보';
@@ -20,7 +20,7 @@ create table notification_message_push (
     template_id varchar(30) not null comment 'Template ID',
     lang varchar(6) not null default 'KO' comment '언어 코드',
     message_type varchar(20) not null comment '메세지 종류. COMMUNITY || CONTENT || LOGIN',
-    isLastVersion boolean not null default true comment '마지막 버전여부',
+    last_version boolean not null default true comment '마지막 버전여부',
     title varchar(200) comment 'title',
     message varchar(300) not null comment 'message',
     deep_link varchar(200) comment 'deep link'
@@ -37,16 +37,16 @@ create table notification_center (
     created_at datetime not null comment '생성일시'
 ) character set utf8mb4 comment '알림센터 내역';
 
-# create table notification_send_history (
-#     id bigint auto_increment primary key comment 'Notification ID',
-#     user_id bigint not null comment 'User ID',
-#     platform varchar(20) not null comment '플랫폼. WEB || ANDROID || IOS || SMS || EMAIL',
-#     target varchar(200) not null comment '대상. WEB - TOKEN, ANDROID || IOS - ARN TOKEN, SMS - PhoneNumber, EMAIL - EMAIL',
-#     message_id bigint comment 'message ID',
-#     email_file varchar(50) comment 'EMAIL 일때 파일명',
-#     arguments varchar(200) comment 'message arguments(json format)',
-#     created_at datetime not null comment '발송일시'
-# ) character set utf8mb4 comment '알림센터 내역';
+create table notification_send_history (
+    id bigint auto_increment primary key comment 'Notification History ID',
+    user_id bigint not null comment 'User ID',
+    platform varchar(20) not null comment '플랫폼. WEB || ANDROID || IOS || SMS || EMAIL',
+    target varchar(200) not null comment '대상. WEB - TOKEN, ANDROID || IOS - ARN TOKEN, SMS - PhoneNumber, EMAIL - EMAIL',
+    message_id bigint comment 'message ID',
+    email_file varchar(50) comment 'EMAIL 일때 파일명',
+    arguments varchar(200) comment 'message arguments(json format)',
+    created_at datetime not null comment '발송일시'
+) character set utf8mb4 comment '알림센터 내역';
 
 alter table post_likes add column modified_at datetime default now();
 
@@ -60,7 +60,7 @@ values ('VIDEO_UPLOAD', '동영상 업로드 시, 모든 유저에게', 'CENTER,
        ('COMMUNITY_COMMENT_REPLY', '댓글에 대댓글이 달렸을 때, 댓글 작성자에게', 'CENTER,APP_PUSH', 'USER_NICKNAME,POST_ID,COMMENT_ID'),
        ('NO_LOGIN_2WEEKS', '로그인 안 한지 2주째...', 'CENTER,APP_PUSH', 'USER_NICKNAME');
 
-insert into notification_message_center (template_id, lang, message_type, isLastVersion, message, deep_link)
+insert into notification_message_center (template_id, lang, message_type, last_version, message, deep_link)
 values ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '오늘 영상 올라왔눈데 안볼꺼얌? 마부띠 똑땅해😣', 'link://content?id={{CONTENT_ID}}'),
        ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '새 영상 올라왔다. 안 보냥?😼', 'link://content?id={{CONTENT_ID}}'),
        ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '울 액히 같이 영상 보러갈꽈~ 👀', 'link://content?id={{CONTENT_ID}}'),
@@ -86,8 +86,8 @@ values ('VIDEO_UPLOAD', 'KO', 'CONTENT', true, '오늘 영상 올라왔눈데 �
        ('NO_LOGIN_2WEEKS', 'KO', 'LOGIN', true, '울 액희 나 안보고 싶뉘~ 서운해~😒', 'link://main'),
        ('NO_LOGIN_2WEEKS', 'KO', 'LOGIN', true, '당신을 오랫동안 보지 못해,,내 마음에 가뭄이,,,🌵', 'link://main');
 
-insert into notification_message_push (template_id, lang, message_type, isLastVersion, message, deep_link)
-select template_id, lang, message_type, isLastVersion, message, deep_link from notification_message_center;
+insert into notification_message_push (template_id, lang, message_type, last_version, message, deep_link)
+select template_id, lang, message_type, last_version, message, deep_link from notification_message_center;
 
 # ALTER TABLE post_likes DROP COLUMN modified_at;
 # ALTER TABLE post_likes DROP COLUMN status;

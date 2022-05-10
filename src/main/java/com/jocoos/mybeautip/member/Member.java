@@ -122,7 +122,7 @@ public class Member {
   private Date modifiedAt;
 
   @Column
-  private LocalDateTime lastLoginAt;
+  private LocalDateTime lastLoggedAt;
 
   @Column
   private Date deletedAt;

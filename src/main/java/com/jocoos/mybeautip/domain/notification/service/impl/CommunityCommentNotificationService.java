@@ -99,17 +99,17 @@ public class CommunityCommentNotificationService implements NotificationService<
     }
 
     private int getMessageRandomIndex() {
-        int count = messageCenterRepository.countByTemplateIdAndIsLastVersionIsTrue(templateType);
+        int count = messageCenterRepository.countByTemplateIdAndLastVersionIsTrue(templateType);
         return RandomUtils.getRandomIndex(count);
     }
 
     private NotificationMessageCenterEntity getCenterMessage(int index) {
-        List<NotificationMessageCenterEntity> entities = messageCenterRepository.findByTemplateIdAndIsLastVersionIsTrue(templateType);
+        List<NotificationMessageCenterEntity> entities = messageCenterRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
         return entities.get(index);
     }
 
     private AppPushMessage getAppPushMessage(int index, String imageUrl, Map<String, String> arguments) {
-        List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndIsLastVersionIsTrue(templateType);
+        List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
         NotificationMessagePushEntity entity = entities.get(index);
         AppPushMessage message = pushConverter.convert(entity, imageUrl);
         return message.setArguments(arguments);

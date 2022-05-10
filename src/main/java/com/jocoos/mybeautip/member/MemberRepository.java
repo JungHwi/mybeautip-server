@@ -35,8 +35,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
   Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(Date createdAt, String username, String intro, Pageable pageable);
 
   @Modifying
-  @Query("update Member m set m.lastLoginAt = current_timestamp where m.id = ?1")
-  void updateLastLoginAt(Long memberId);
+  @Query("update Member m set m.lastLoggedAt = current_timestamp where m.id = ?1")
+  void updateLastLoggedAt(Long memberId);
 
   @Modifying
   @Query("update Member m set m.followingCount = m.followingCount + ?2, m.modifiedAt = now() where m.id = ?1")
@@ -99,7 +99,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   List<Member> findByVisibleIsTrueAndPushableIsTrue();
 
-  List<Member> findByVisibleIsTrueAndPushableIsTrueAndLastLoginAtLessThan(LocalDateTime localDateTime);
+  List<Member> findByVisibleIsTrueAndPushableIsTrueAndLastLoggedAtLessThan(LocalDateTime localDateTime);
 
   @Query("SELECT m FROM Member m WHERE LENGTH(m.tag) < 1")
   List<Member> selectTagIsEmpty();

@@ -1,6 +1,14 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.security.AccessTokenResponse;
+import com.jocoos.mybeautip.security.JwtTokenProvider;
+import com.jocoos.mybeautip.security.SocialLoginService;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -9,21 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.UnsupportedEncodingException;
-
 import javax.validation.constraints.NotNull;
-
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.security.AccessTokenResponse;
-import com.jocoos.mybeautip.security.JwtTokenProvider;
-import com.jocoos.mybeautip.security.SocialLoginService;
-
-import org.apache.commons.lang3.StringUtils;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.UnsupportedEncodingException;
 
 @Slf4j
 @RestController
@@ -56,7 +51,7 @@ public class AuthController {
     String memberId = jwtTokenProvider.getMemberId(accessToken);
     log.debug("memberId: {}", memberId);
 
-    memberService.updateLastLoginAt();
+    memberService.updateLastLoggedAt();
 
     return new ResponseEntity<>(accessTokenResponse, HttpStatus.OK);
   }
