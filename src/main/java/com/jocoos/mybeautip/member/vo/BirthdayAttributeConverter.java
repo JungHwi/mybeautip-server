@@ -8,6 +8,10 @@ public class BirthdayAttributeConverter implements AttributeConverter<Birthday, 
 
     @Override
     public String convertToDatabaseColumn(Birthday attribute) {
+        if (attribute == null) {
+            return null;
+        }
+
         return attribute.toString();
     }
 
