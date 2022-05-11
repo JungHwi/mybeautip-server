@@ -32,7 +32,7 @@ create table notification_center (
     status varchar(20) not null default 'NOT_READ' comment 'Notification 상태. NOT_READ || READ || DELETE',
     message_id bigint not null comment 'message ID',
     arguments varchar(200) comment 'message arguments(json format)',
-    imageUrl varchar(200) comment 'image URL',
+    image_url varchar(200) comment 'image URL',
     modified_at datetime not null comment '수정일시',
     created_at datetime not null comment '생성일시'
 ) character set utf8mb4 comment '알림센터 내역';
@@ -96,4 +96,5 @@ select template_id, lang, message_type, last_version, message, deep_link from no
 # DROP TABLE notification_message_center;
 # DROP TABLE notification_message_push;
 # DROP TABLE notification_center;
+# DROP TABLE notification_send_history;
 # DELETE FROM flyway_schema_history WHERE version = '0145';
