@@ -297,7 +297,7 @@ public class PostController {
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
          Long postId = post.getId();
-         if (postLikeRepository.findByPostIdAndCreatedById(postId, me.getId()).isPresent()) {
+         if (postLikeRepository.findByPostIdAndStatusAndCreatedById(postId, PostLikeStatus.LIKE, me.getId()).isPresent()) {
            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
          }
          

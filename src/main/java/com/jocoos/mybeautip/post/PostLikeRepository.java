@@ -12,6 +12,8 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
   Optional<PostLike> findByPostIdAndCreatedById(Long postId, Long createdBy);
 
+  Optional<PostLike> findByPostIdAndStatusAndCreatedById(Long postId, PostLikeStatus status, Long createdBy);
+
   Optional<PostLike> findByIdAndPostIdAndCreatedById(Long id, Long postId, Long createdBy);
 
   Slice<PostLike> findByCreatedAtBeforeAndCreatedByIdAndPostDeletedAtIsNull(Date createdAt, Long createdBy, Pageable pageable);
