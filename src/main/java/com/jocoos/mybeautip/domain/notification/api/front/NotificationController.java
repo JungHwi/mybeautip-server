@@ -33,7 +33,6 @@ public class NotificationController {
                                             @RequestParam(defaultValue = "20") int size) {
 
         Member member = memberService.currentMember();
-
         cursor = (cursor == null) ? Long.MAX_VALUE : cursor;
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
 
@@ -42,7 +41,7 @@ public class NotificationController {
 
         return new CursorResponse.Builder<>("/api/2/notification/", result)
                 .withCount(size)
-                .withCursor(String.valueOf(result.get(result.size()-1).getId()))
+                .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size()-1).getId()) : null)
                 .toBuild();
     }
 
