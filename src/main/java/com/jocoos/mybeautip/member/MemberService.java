@@ -21,6 +21,8 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.MemberController;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import com.jocoos.mybeautip.support.AttachmentService;
+import com.jocoos.mybeautip.support.RandomUtils;
+import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.word.BannedWordService;
@@ -30,7 +32,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,6 +62,7 @@ public class MemberService {
   private final CouponService couponService;
 
   private final AttachmentService attachmentService;
+  private final SlackService slackService;
 
   private final String PATH_AVATAR = "avatar";
   private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
@@ -86,7 +88,8 @@ public class MemberService {
                        NaverMemberRepository naverMemberRepository,
                        AppleMemberRepository appleMemberRepository, MemberLeaveLogRepository memberLeaveLogRepository,
                        CouponService couponService,
-                       AttachmentService attachmentService) {
+                       AttachmentService attachmentService,
+                       SlackService slackService) {
     this.bannedWordService = bannedWordService;
     this.messageService = messageService;
     this.tagService = tagService;
@@ -102,6 +105,7 @@ public class MemberService {
     this.memberLeaveLogRepository = memberLeaveLogRepository;
     this.couponService = couponService;
     this.attachmentService = attachmentService;
+    this.slackService = slackService;
   }
 
   public Long currentMemberId() {
@@ -258,14 +262,20 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    // TODO Migration 하고 나면 private 으로 변경.
     public Member adjustTag(Member member) {
-        while (true) {
-           if (memberRepository.countByTag(member.getTag()) == 0) {
+        String tag = member.getTag();
+        for (int retry = 0; retry < 5; retry++) {
+           if (StringUtils.isNotBlank(tag) && memberRepository.countByTag(tag) == 0) {
+              member.setTag(tag);
               return member;
            }
-           member.setTag();
+           tag = RandomUtils.generateTag();
         }
+
+        log.warn("Duplicate Tag : " + member.getUsername());
+        slackService.duplicateTag(member.getUsername());
+        return member;
     }
 
   @Transactional

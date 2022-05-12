@@ -17,4 +17,7 @@ public interface NotificationMessagePushConverter {
             @Mapping(target = "imageUrl", source = "imageUrl"),
     })
     AppPushMessage convert(NotificationMessagePushEntity entity, String imageUrl);
+
+    @Mapping(target = "imageUrl", ignore = true)
+    AppPushMessage convert(NotificationMessagePushEntity entity);
 }

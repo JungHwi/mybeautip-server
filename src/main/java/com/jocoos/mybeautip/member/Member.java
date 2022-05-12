@@ -7,7 +7,6 @@ import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -42,8 +41,7 @@ public class Member {
   public static final int REVENUE_RETURN = 16;
   public static final int PERMISSION_ALL = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
 
-  public static final int TAG_ALPHABETIC_LENGTH = 5;
-  public static final int TAG_MAX_NUMERIC = 99;
+
 
   @Transient
   @JsonIgnore
@@ -148,13 +146,7 @@ public class Member {
   }
 
   public void setTag() {
-    this.tag = generateTag();
-  }
-
-  private String generateTag() {
-    String tag = RandomStringUtils.randomAlphabetic(TAG_ALPHABETIC_LENGTH).toUpperCase();
-    int numberTag = RandomUtils.getRandom(TAG_MAX_NUMERIC);
-    return String.format("%s%02d", tag, numberTag);
+    this.tag = RandomUtils.generateTag();
   }
 
   public Member() {

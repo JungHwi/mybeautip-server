@@ -21,6 +21,7 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -28,8 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.jocoos.mybeautip.global.constant.SignConstant.EMPTY_STRING;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +54,7 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(List<Member> members) {
         int messageIndex = getMessageRandomIndex();
         List<Long> ids = members.stream()
@@ -65,26 +65,25 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
 
         for (NotificationTargetInfo targetInfo : targetInfoList) {
             Map<String, String> arguments = getArgument(targetInfo.getNickname());
-            sendCenter(messageIndex, EMPTY_STRING, targetInfo, arguments);
-            sendAppPush(messageIndex, EMPTY_STRING, targetInfo, arguments);
+            sendCenter(messageIndex, targetInfo, arguments);
+            sendAppPush(messageIndex, targetInfo, arguments);
         }
     }
 
-    private void sendCenter(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+    private void sendCenter(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
         NotificationMessageCenterEntity messageInfo = getCenterMessage(messageIndex);
         NotificationCenterEntity entity = NotificationCenterEntity.builder()
                 .userId(targetInfo.getMemberId())
                 .status(NotificationStatus.NOT_READ)
                 .arguments(StringConvertUtil.convertMapToJson(arguments))
-                .imageUrl(imageUrl)
                 .messageId(messageInfo.getId())
                 .build();
 
         notificationCenterRepository.save(entity);
     }
 
-    private void sendAppPush(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
-        AppPushMessage pushMessage = getAppPushMessage(messageIndex, imageUrl, arguments);
+    private void sendAppPush(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+        AppPushMessage pushMessage = getAppPushMessage(messageIndex, arguments);
         pushService.send(targetInfo, pushMessage);
     }
 
@@ -98,10 +97,10 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
         return entities.get(index);
     }
 
-    private AppPushMessage getAppPushMessage(int index, String imageUrl, Map<String, String> arguments) {
+    private AppPushMessage getAppPushMessage(int index, Map<String, String> arguments) {
         List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
         NotificationMessagePushEntity entity = entities.get(index);
-        AppPushMessage message = pushConverter.convert(entity, imageUrl);
+        AppPushMessage message = pushConverter.convert(entity);
         return message.setArguments(arguments);
     }
 

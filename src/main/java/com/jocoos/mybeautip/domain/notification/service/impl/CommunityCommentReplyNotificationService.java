@@ -18,14 +18,15 @@ import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.PostRepository;
+import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CommunityCommentReplyNotificationService implements NotificationService<Comment> {
 
-    private final PostRepository postRepository;
+//    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final MemberNotificationService memberNotificationService;
     private final NotificationCenterRepository notificationCenterRepository;
     private final NotificationMessageCenterRepository messageCenterRepository;
@@ -69,32 +71,32 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(Comment comment) {
         int messageIndex = getMessageRandomIndex();
-        Post post = postRepository.findById(comment.getPostId())
+        Comment parentComment = commentRepository.findById(comment.getParentId())
                 .orElseThrow(() -> new BadRequestException("No such Post."));
-        NotificationTargetInfo targetInfo = getTargetInfo(post.getCreatedBy().getId());
+        NotificationTargetInfo targetInfo = getTargetInfo(parentComment.getCreatedBy().getId());
 
         Map<String, String> arguments = getArgument(targetInfo.getNickname(), comment);
-        sendCenter(messageIndex, post.getThumbnailUrl(), targetInfo, arguments);
-        sendAppPush(messageIndex, post.getThumbnailUrl(), targetInfo, arguments);
+        sendCenter(messageIndex, targetInfo, arguments);
+        sendAppPush(messageIndex, targetInfo, arguments);
     }
 
-    private void sendCenter(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+    private void sendCenter(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
         NotificationMessageCenterEntity messageInfo = getCenterMessage(messageIndex);
         NotificationCenterEntity entity = NotificationCenterEntity.builder()
                 .userId(targetInfo.getMemberId())
                 .status(NotificationStatus.NOT_READ)
                 .arguments(StringConvertUtil.convertMapToJson(arguments))
-                .imageUrl(imageUrl)
                 .messageId(messageInfo.getId())
                 .build();
 
         notificationCenterRepository.save(entity);
     }
 
-    private void sendAppPush(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
-        AppPushMessage pushMessage = getAppPushMessage(messageIndex, imageUrl, arguments);
+    private void sendAppPush(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+        AppPushMessage pushMessage = getAppPushMessage(messageIndex, arguments);
         pushService.send(targetInfo, pushMessage);
     }
 
@@ -108,10 +110,10 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
         return entities.get(index);
     }
 
-    private AppPushMessage getAppPushMessage(int index, String imageUrl, Map<String, String> arguments) {
+    private AppPushMessage getAppPushMessage(int index, Map<String, String> arguments) {
         List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
         NotificationMessagePushEntity entity = entities.get(index);
-        AppPushMessage message = pushConverter.convert(entity, imageUrl);
+        AppPushMessage message = pushConverter.convert(entity);
         return message.setArguments(arguments);
     }
 

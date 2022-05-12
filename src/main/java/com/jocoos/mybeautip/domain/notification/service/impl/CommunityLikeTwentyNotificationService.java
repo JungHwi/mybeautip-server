@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +72,7 @@ public class CommunityLikeTwentyNotificationService implements NotificationServi
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(PostLike postLike) {
         int messageIndex = getMessageRandomIndex();
         Post post = postRepository.getById(postLike.getPost().getId());

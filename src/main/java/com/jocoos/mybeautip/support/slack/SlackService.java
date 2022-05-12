@@ -1,13 +1,25 @@
 package com.jocoos.mybeautip.support.slack;
 
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-
+import com.jocoos.mybeautip.admin.Dates;
+import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.comment.CommentReport;
+import com.jocoos.mybeautip.member.coupon.MemberCoupon;
+import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.member.order.OrderInquiry;
+import com.jocoos.mybeautip.member.order.Purchase;
+import com.jocoos.mybeautip.member.point.MemberPoint;
+import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.restapi.ScheduleController;
 import com.jocoos.mybeautip.schedules.Schedule;
+import com.jocoos.mybeautip.support.DateUtils;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoGoods;
+import com.jocoos.mybeautip.video.VideoGoodsRepository;
+import com.jocoos.mybeautip.video.report.VideoReport;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,23 +30,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-
-import com.jocoos.mybeautip.admin.Dates;
-import com.jocoos.mybeautip.log.MemberLeaveLog;
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.order.Order;
-import com.jocoos.mybeautip.member.order.OrderInquiry;
-import com.jocoos.mybeautip.member.order.Purchase;
-import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.report.Report;
-import com.jocoos.mybeautip.support.DateUtils;
-import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoGoods;
-import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.report.VideoReport;
+import java.time.ZoneId;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -337,6 +334,13 @@ public class SlackService {
             schedule.getCreatedBy().getId(),
             schedule.getTitle(),
             Dates.toString(schedule.getStartedAt(), ZoneId.of("Asia/Seoul")));
+    send(message);
+  }
+
+  public void duplicateTag(String name) {
+    String message = String.format("*TAG 중복 발생*" +
+                    "```Member Name: %s```",
+            name);
     send(message);
   }
 

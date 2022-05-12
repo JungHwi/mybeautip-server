@@ -26,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +70,7 @@ public class CommunityCommentNotificationService implements NotificationService<
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(Comment comment) {
         int messageIndex = getMessageRandomIndex();
         Post post = postRepository.findById(comment.getPostId())
