@@ -51,7 +51,7 @@ public class AuthController {
     String memberId = jwtTokenProvider.getMemberId(accessToken);
     log.debug("memberId: {}", memberId);
 
-    memberService.updateLastLoggedAt();
+    memberService.updateLastLoggedAt(member.getId());
 
     return new ResponseEntity<>(accessTokenResponse, HttpStatus.OK);
   }

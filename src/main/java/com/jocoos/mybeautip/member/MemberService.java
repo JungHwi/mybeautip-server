@@ -282,8 +282,13 @@ public class MemberService {
   public void updateLastLoggedAt() {
     Member member = currentMember();
     if (member != null) {
-      memberRepository.updateLastLoggedAt(member.getId());
+      updateLastLoggedAt(member.getId());
     }
+  }
+
+  @Transactional
+  public void updateLastLoggedAt(long memberId) {
+    memberRepository.updateLastLoggedAt(memberId);
   }
   
   @Transactional
