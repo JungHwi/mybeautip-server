@@ -53,4 +53,22 @@ public class BlockService {
 
         return map;
     }
+
+    @Transactional
+    public boolean isBlocked(long memberId, long targetId) {
+        Member targetMember = memberRepository.findById(targetId)
+                .orElseGet(null);
+
+        if (targetMember == null) {
+            return false;
+        }
+
+        return isBlocked(memberId, targetMember);
+
+    }
+
+    @Transactional
+    public boolean isBlocked(long memberId, Member targetMember) {
+        return blockRepository.countByMeAndMemberYou(memberId, targetMember) > 0;
+    }
 }

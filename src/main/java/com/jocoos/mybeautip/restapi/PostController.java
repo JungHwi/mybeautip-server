@@ -78,6 +78,7 @@ public class PostController {
   private static final String COMMENT_WRITE_NOT_ALLOWED = "comment.write_not_allowed";
   private static final String COMMENT_LOCKED = "comment.locked";
   private static final String POST_ALREADY_REPORTED = "post.already_reported";
+  private static final String POST_BLOCKED_MESSAGE = "post.blocked_message";
   private static final String COMMENT_BLOCKED_MESSAGE = "comment.blocked_message";
   private static final String COMMENT_ALREADY_REPORTED = "comment.already_reported";
 
@@ -147,7 +148,8 @@ public class PostController {
 
         Block block = blackList != null ? blackList.get(post.getCreatedBy().getId()) : null;
         if (block != null) {
-          info.setDescription(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
+          info.setDescription(messageService.getMessage(POST_BLOCKED_MESSAGE, lang));
+          info.setContents(new HashSet<>());
           info.setBlockId(block.getId());
         }
       }
@@ -221,20 +223,30 @@ public class PostController {
   @GetMapping("/{id:.+}")
   public ResponseEntity<PostInfo> getPost(@PathVariable Long id,
                                           @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Long memberId = memberService.currentMemberId();
+    Member me = memberService.currentMember();
+
+    final Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me.getId()) : null;
+
     Date now = new Date();
     return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
        .map(post -> {
+         boolean blocked = me != null && blockService.isBlocked(me.getId(), post.getCreatedBy());
          List<GoodsInfo> goodsInfo = new ArrayList<>();
          post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
          
          PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
          log.debug("post info: {}", info);
       
-         if (memberId != null) {
-           postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
+         if (me != null) {
+           postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
                .ifPresent(like -> info.setLikeId(like.getId()));
          }
+
+         if (blocked) {
+           info.setDescription(messageService.getMessage(POST_BLOCKED_MESSAGE, lang));
+           info.setContents(new HashSet<>());
+         }
+
          return new ResponseEntity<>(info, HttpStatus.OK);
        })
        .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));

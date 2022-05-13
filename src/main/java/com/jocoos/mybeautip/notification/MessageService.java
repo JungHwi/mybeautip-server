@@ -45,12 +45,14 @@ public class MessageService {
     return messageSource.getMessage(GOODS_COMPANY_TEXT, null, Locale.KOREAN);
   }
 
+  // TODO 다국어 지원하게 되면 받은 locale 로 수정.
   public String getMessage(String code, Locale locale) {
-    return messageSource.getMessage(code, null, locale);
+    return messageSource.getMessage(code, null, Locale.KOREAN);
   }
 
+  // TODO 다국어 지원하게 되면 받은 locale 로 수정.
   public String getMessage(String code, String lang) {
-    return messageSource.getMessage(code, null, getLocale(lang));
+    return messageSource.getMessage(code, null, getLocale("ko"));
   }
 
   private Locale getLocale(String lang) {

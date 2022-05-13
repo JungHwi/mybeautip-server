@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member.block;
 
+import com.jocoos.mybeautip.member.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
@@ -16,4 +17,6 @@ public interface BlockRepository extends CrudRepository<Block, Long> {
   List<Block> findByMe(long me);
 
   Optional<Block> findByIdAndMe(long id, long me);
+
+  int countByMeAndMemberYou(long memberId, Member member);
 }
