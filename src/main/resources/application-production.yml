@@ -25,7 +25,7 @@ mybeautip:
       bucket: 'mybeautip-prod'
       region: 'ap-northeast-2'
   slack:
-    key: T02GN94AU/BE58JHXSP/gX7G3sOlHhDVQTfWqFYQ8ue8
+    key: T03FMJ9ANNR/B03GE9Y94AC/9YFdrtMkegXj8laKNsEDOGDY
     channel: "#z-mybeautip-prod"
     order-key: T02GN94AU/BKB98G20Z/mula9sD6NE9rpxIhuRWUePwH
     order-channel: "#z-mybeautip-order"
