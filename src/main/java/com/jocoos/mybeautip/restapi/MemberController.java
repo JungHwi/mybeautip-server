@@ -48,10 +48,7 @@ import javax.validation.constraints.Size;
 import java.security.Principal;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -146,15 +143,15 @@ public class MemberController {
     this.blockRepository = blockRepository;
   }
 
-  @GetMapping("/me")
-  public EntityModel<MemberMeInfo> getMe(Principal principal,
-                                      @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    log.debug("member id: {}", principal.getName());
+    @GetMapping("/me")
+    public EntityModel<MemberMeInfo> getMe(Principal principal,
+                                        @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+        log.debug("member id: {}", principal.getName());
 
-    return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-              .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
-              .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
-  }
+        return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
+                  .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
+                  .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+    }
 
     // 최초에 TAG 없는 멤버들 TAG 생성
     @PatchMapping("/tag/migration")
@@ -169,39 +166,36 @@ public class MemberController {
         return new ResponseEntity(HttpStatus.ACCEPTED);
     }
   
-  @PatchMapping(value = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
-                                                 @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    log.debug("member id: {}", memberService.currentMemberId());
-  
-    Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
-    
-    if (!member.isVisible()) { // when first called
-      if (StringUtils.isEmpty(updateMemberRequest.getUsername())) {
-        throw new BadRequestException("username_required", "Username required.");
-      }
-    }
-    
-    if (updateMemberRequest.getUsername() != null) {
-      memberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
+    @PatchMapping()
+    public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
+                                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+        log.debug("member id: {}", memberService.currentMemberId());
+
+        Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
+            .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+
+        if (!member.isVisible()) { // when first called
+          if (StringUtils.isEmpty(updateMemberRequest.getUsername())) {
+            throw new BadRequestException("username_required", "Username required.");
+          }
+        }
+
+        if (updateMemberRequest.getUsername() != null) {
+          memberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
+        }
+
+        member = memberService.updateMember(updateMemberRequest, member);
+        return new ResponseEntity<>(memberService.getMemberInfo(member), HttpStatus.OK);
     }
 
-    if (updateMemberRequest.getEmail() != null) {
-      memberService.checkEmailValidation(updateMemberRequest.getEmail(), lang);
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadAvatar(@RequestBody MultipartFile avatar) {
+        String avatarUrl = memberService.uploadAvatar(avatar);
+        Map<String, String> result = new HashMap<>();
+        result.put("avatar_url", avatarUrl);
+        return new ResponseEntity(result, HttpStatus.OK);
     }
-    
-    member = memberService.updateMember(updateMemberRequest, member);
-    return new ResponseEntity<>(memberService.getMemberInfo(member), HttpStatus.OK);
-  }
 
-  @PatchMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<String> updateAvatar(MultipartFile avatar) {
-      long memberId = memberService.currentMemberId();
-      String path = memberService.updateAvatar(memberId, avatar);
-
-      return new ResponseEntity<>(path, HttpStatus.OK);
-  }
 
   @PutMapping(value = "/detail")
   public ResponseEntity updateDetailInfo(@RequestBody MemberDetailRequest request) {
@@ -768,16 +762,7 @@ public class MemberController {
     @Size(max = 50)
     private String username;
 
-    @Size(max = 50)
-    private String email;
-
-    @Size(max = 200)
     private String avatarUrl;
-
-    @Size(max = 200)
-    private String intro;
-    
-    private Boolean pushable;
   }
 
   @Data

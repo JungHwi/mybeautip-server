@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.notification.code.converter;
+package com.jocoos.mybeautip.domain.notification.persistence.converter;
 
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
 import com.jocoos.mybeautip.global.converter.GenericEnumSetConverter;

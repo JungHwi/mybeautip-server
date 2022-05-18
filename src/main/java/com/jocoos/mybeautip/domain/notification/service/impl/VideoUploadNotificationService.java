@@ -118,7 +118,7 @@ public class VideoUploadNotificationService implements NotificationService<Video
     private Map<String, String> getArgument(String nickname, Video video) {
         Map<String, String> arguments = new HashMap<>();
         arguments.put(NotificationArgument.USER_NICKNAME.name(), nickname);
-        arguments.put(NotificationArgument.CONTENT_ID.name(), String.valueOf(video.getId()));
+        arguments.put(NotificationArgument.VIDEO_ID.name(), String.valueOf(video.getId()));
         return arguments;
     }
 }

@@ -77,6 +77,7 @@ dependencies {
   compile "org.springframework.boot:spring-boot-devtools:${springVersion}"
   compile "org.springframework.cloud:spring-cloud-aws-messaging:${springCloudVersion}"
   implementation("com.fasterxml.jackson.core:jackson-core:${jacksonDataFormatVersion}")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonDataFormatVersion}")
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonDataFormatVersion}"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonDataFormatVersion}"
   implementation("org.mapstruct:mapstruct:1.4.2.Final")

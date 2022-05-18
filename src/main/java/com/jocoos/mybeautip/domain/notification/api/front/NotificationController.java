@@ -33,16 +33,19 @@ public class NotificationController {
                                             @RequestParam(defaultValue = "20") int size) {
 
         Member member = memberService.currentMember();
+
         cursor = (cursor == null) ? Long.MAX_VALUE : cursor;
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
 
         Page<NotificationCenterEntity> notificationCenters = service.getUserCenterMessage(member.getId(), cursor, pageable);
         List<CenterMessageResponse> result = converter.convert(notificationCenters.getContent());
 
-        return new CursorResponse.Builder<>("/api/2/notification/", result)
+        CursorResponse cursorResponse = new CursorResponse.Builder<>("/api/2/notification/", result)
                 .withCount(size)
                 .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size()-1).getId()) : null)
                 .toBuild();
+
+        return cursorResponse;
     }
 
     @PatchMapping("/{id}")

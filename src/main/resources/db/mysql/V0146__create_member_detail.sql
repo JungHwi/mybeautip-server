@@ -9,7 +9,7 @@ create table member_detail (
    member_id bigint not null comment '회원 ID',
    inviter_id bigint comment '초대자 ID',
    skin_type varchar(20) comment '피부 타입',
-   skin_worry varchar(50) comment '피부 고민'
+   skin_worry varchar(100) comment '피부 고민'
 ) character set utf8mb4 comment 'notification template';
 
 create index idx_member_detail_member_id on member_detail (member_id);

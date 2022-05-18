@@ -13,11 +13,12 @@ public interface NotificationMessagePushConverter {
             @Mapping(target = "messageType", source = "entity.messageType"),
             @Mapping(target = "title", source = "entity.title"),
             @Mapping(target = "message", source = "entity.message"),
-            @Mapping(target = "deepLink", source = "entity.deepLink"),
+            @Mapping(target = "notificationLinkType", source = "entity.notificationLinkType"),
             @Mapping(target = "imageUrl", source = "imageUrl"),
     })
     AppPushMessage convert(NotificationMessagePushEntity entity, String imageUrl);
 
     @Mapping(target = "imageUrl", ignore = true)
     AppPushMessage convert(NotificationMessagePushEntity entity);
+
 }

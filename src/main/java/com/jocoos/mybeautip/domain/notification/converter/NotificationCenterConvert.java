@@ -1,13 +1,16 @@
 package com.jocoos.mybeautip.domain.notification.converter;
 
+import com.jocoos.mybeautip.domain.notification.code.NotificationLinkType;
 import com.jocoos.mybeautip.domain.notification.dto.CenterMessageResponse;
 import com.jocoos.mybeautip.domain.notification.persistence.domain.NotificationCenterEntity;
-import com.jocoos.mybeautip.global.util.MessageConvertUtil;
+import com.jocoos.mybeautip.domain.notification.vo.NotificationLink;
+import com.jocoos.mybeautip.global.util.NotificationConvertUtil;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +22,11 @@ import static com.jocoos.mybeautip.global.constant.SignConstant.*;
 public interface NotificationCenterConvert {
 
     @Mappings({
+            @Mapping(target = "status" , source = "status"),
             @Mapping(target = "messageType" , source = "messageCenter.messageType"),
             @Mapping(target = "imageUrl", source = "imageUrl", qualifiedByName = "justString"),
             @Mapping(target = "message", source = "entity", qualifiedByName = "mergeMessage"),
-            @Mapping(target = "deepLink", source = "entity", qualifiedByName = "mergeDeepLink")
+            @Mapping(target = "notificationLink", source = "entity", qualifiedByName = "mergeNotificationLink")
     })
     CenterMessageResponse convert(NotificationCenterEntity entity);
 
@@ -33,9 +37,15 @@ public interface NotificationCenterConvert {
         return convert(entity.getMessageCenter().getMessage(), entity.getArguments());
     }
 
-    @Named("mergeDeepLink")
-    default String mergeDeepLink(NotificationCenterEntity entity) {
-        return convert(entity.getMessageCenter().getDeepLink(), entity.getArguments());
+    @Named("mergeNotificationLink")
+    default List<NotificationLink> mergeNotificationLink(NotificationCenterEntity entity) {
+        List<NotificationLinkType> typeList = entity.getMessageCenter().getNotificationLinkType();
+        if (CollectionUtils.isEmpty(typeList)) {
+            return null;
+        }
+
+        Map<String, String> argumentMap = StringConvertUtil.convertJsonToMap(entity.getArguments());
+        return NotificationConvertUtil.generateNotificationLinkByArguments(typeList, argumentMap);
     }
 
     @Named("justString")
@@ -45,7 +55,7 @@ public interface NotificationCenterConvert {
 
     default String convert(final String message, final String argument) {
         Map<String, String> argumentMap = StringConvertUtil.convertJsonToMap(argument);
-        return MessageConvertUtil.generateStringByArguments(message, argumentMap);
+        return NotificationConvertUtil.generateStringByArguments(message, argumentMap);
     }
 
     // Message 치환하는 방법.
@@ -67,7 +77,4 @@ public interface NotificationCenterConvert {
 
         return result;
     }
-
-
-
 }

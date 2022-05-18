@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.domain.member.dto.SettingNotificationDto;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
@@ -37,10 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -318,28 +316,9 @@ public class MemberService {
       member.setUsername(request.getUsername());
     }
     
-    if (request.getEmail() != null) {
-      member.setEmail(request.getEmail());
-    }
-  
-    if (request.getAvatarUrl() != null) {
-      if ("".equals(request.getAvatarUrl())) {
-        member.setAvatarUrl(defaultAvatarUrl);
-      } else {
-        member.setAvatarUrl(request.getAvatarUrl());
-      }
-    }
+    String avatarUrl = request.getAvatarUrl() != null ? request.getAvatarUrl() : defaultAvatarUrl;
+    member.setAvatarUrl(avatarUrl);
     
-    if (request.getIntro() != null) {
-      tagService.touchRefCount(request.getIntro());
-      tagService.updateHistory(member.getIntro(), request.getIntro(), TagService.TAG_MEMBER, member.getId(), member);
-      member.setIntro(request.getIntro());
-    }
-  
-    if (request.getPushable() != null) {
-      member.setPushable(request.getPushable());
-    }
-  
     member.setVisible(true);
     Member finalMember = memberRepository.save(member);
     
@@ -350,10 +329,6 @@ public class MemberService {
             followMember(finalMember, adminMember);
             finalMember.setFollowingCount(1); // for response view
           });
-
-      couponService.sendWelcomeCoupon(member);
-
-      couponService.sendEventCoupon(member);
     }
     
     return finalMember;
@@ -433,7 +408,7 @@ public class MemberService {
         return MemberDetailResponse.builder()
                 .ageGroup(member.getBirthday().getAgeGroupByTen())
                 .skinType(memberDetail != null ? memberDetail.getSkinType() : null)
-                .skinWorry(memberDetail != null ? memberDetail.getSkinWorry() : null)
+                .skinWorry(memberDetail != null ? memberDetail.getSkinWorry() : new HashSet<>())
                 .inviterTag(tag)
                 .build();
     }
@@ -477,9 +452,9 @@ public class MemberService {
         String path = "";
 
         try {
-          path = attachmentService.upload(avatar, PATH_AVATAR);
+            path = attachmentService.upload(avatar, PATH_AVATAR);
         } catch (IOException ex) {
-          throw new MybeautipRuntimeException("Member avatar upload Error. id - " + memberId);
+            throw new MybeautipRuntimeException("Member avatar upload Error. id - " + memberId);
         }
 
         member.setAvatarUrl(path);
@@ -489,7 +464,39 @@ public class MemberService {
         return path;
     }
 
+    public String uploadAvatar(MultipartFile avatar) {
+        String path = "";
+        try {
+            if (avatar != null) {
+                path = attachmentService.upload(avatar, PATH_AVATAR);
+            } else {
+                path = defaultAvatarUrl;
+            }
+
+        } catch (IOException ex) {
+            throw new MybeautipRuntimeException("Member avatar upload Error.");
+        }
+
+        return path;
+    }
+
     public void deleteAvatar(String avatar) {
         attachmentService.deleteAttachments(StringConvertUtil.getPath(avatar));
+    }
+
+    @Transactional
+    public MemberInfo updateSettingNotification(long memberId, SettingNotificationDto request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("No such Member. id - " + memberId));
+
+        return updateSettingNotification(member, request);
+    }
+
+    @Transactional
+    public MemberInfo updateSettingNotification(Member member, SettingNotificationDto request) {
+        member.setPushable(request.isPushable());
+
+        memberRepository.save(member);
+        return getMemberInfo(member);
     }
 }

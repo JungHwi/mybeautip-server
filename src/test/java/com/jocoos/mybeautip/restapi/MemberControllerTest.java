@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,7 +61,7 @@ class MemberControllerTest {
                 "image/jpeg",
                 Files.newInputStream(Paths.get(file.getAbsolutePath())));
 
-        ResponseEntity<String> info = memberController.updateAvatar(multipartFile);
+        ResponseEntity<Map<String, String>> info = memberController.uploadAvatar(multipartFile);
         assertEquals(HttpStatus.OK, info.getStatusCode());
     }
 

@@ -3,9 +3,11 @@ package com.jocoos.mybeautip.member.detail;
 import com.jocoos.mybeautip.member.code.SkinType;
 import com.jocoos.mybeautip.member.code.SkinWorry;
 import lombok.Builder;
+import lombok.Getter;
 
 import java.util.Set;
 
+@Getter
 @Builder
 public class MemberDetailResponse {
 

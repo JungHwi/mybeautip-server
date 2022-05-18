@@ -13,3 +13,4 @@ public enum NotificationStatus implements CodeValue {
 
     private final String description;
 }
+

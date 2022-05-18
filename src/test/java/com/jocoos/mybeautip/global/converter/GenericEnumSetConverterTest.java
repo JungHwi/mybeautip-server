@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.global.converter;
 
 import com.jocoos.mybeautip.domain.notification.code.SendType;
-import com.jocoos.mybeautip.domain.notification.code.converter.SendTypeSetConverter;
+import com.jocoos.mybeautip.domain.notification.persistence.converter.SendTypeSetConverter;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
 

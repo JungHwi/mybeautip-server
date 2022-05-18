@@ -13,7 +13,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -120,7 +120,7 @@ public class Member {
   private Date modifiedAt;
 
   @Column
-  private LocalDateTime lastLoggedAt;
+  private ZonedDateTime lastLoggedAt;
 
   @Column
   private Date deletedAt;
