@@ -15,8 +15,8 @@ mybeautip:
     access-token-validity-seconds: 604800     # 7 hours
     refresh-token-validity-seconds: 1814400    # 21 days
   slack:
-    key: T03FMJ9ANNR/B03FMKSJLH3/Z8iTlyAygCiKz647cM1dZtMn
-    channel: "#z-mybeautip-dev"
+    key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
+    channel: "#mybeautip-dev"
     order-key: T02GN94AU/BJA6YDJPJ/7L197lsrvR2X5yBsZpA2wdH0
     order-channel: "#z-mybeautip-dev"
 
