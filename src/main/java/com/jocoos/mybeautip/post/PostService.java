@@ -1,13 +1,18 @@
 package com.jocoos.mybeautip.post;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
-import com.jocoos.mybeautip.member.comment.CommentLikeRepository;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.block.Block;
+import com.jocoos.mybeautip.member.block.BlockRepository;
+import com.jocoos.mybeautip.member.comment.*;
+import com.jocoos.mybeautip.member.mention.MentionResult;
+import com.jocoos.mybeautip.member.mention.MentionService;
+import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.support.DigestUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
@@ -25,29 +30,22 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
-  private final CommentRepository commentRepository;
   private final PostRepository postRepository;
+  private final CommentRepository commentRepository;
+  private final MentionService mentionService;
+  private final CommentService commentService;
+  private final MemberService memberService;
   private final CommentLikeRepository commentLikeRepository;
   private final PostLikeRepository postLikeRepository;
   private final PostReportRepository postReportRepository;
+  private final BlockRepository blockRepository;
   private final AttachmentService attachmentService;
+  private final MessageService messageService;
 
-  public PostService(CommentRepository commentRepository,
-                     PostRepository postRepository,
-                     CommentLikeRepository commentLikeRepository,
-                     PostLikeRepository postLikeRepository,
-                     PostReportRepository postReportRepository,
-                     AttachmentService attachmentService) {
-
-    this.commentRepository = commentRepository;
-    this.postRepository = postRepository;
-    this.commentLikeRepository = commentLikeRepository;
-    this.postLikeRepository = postLikeRepository;
-    this.postReportRepository = postReportRepository;
-    this.attachmentService = attachmentService;
-  }
+  private static final String COMMENT_BLOCKED_MESSAGE = "comment.blocked_message";
 
   public Slice<Comment> findCommentsByPostId(Long id, Long cursor, Pageable pageable, String direction) {
     Slice<Comment> comments;
@@ -61,6 +59,41 @@ public class PostService {
       comments = commentRepository.findByPostIdAndParentIdIsNull(id, pageable);
     }
     return comments;
+  }
+
+  public CommentInfo getPostComment(Long postId, Long id, Member me, String lang) {
+    Comment comment = commentRepository.findByIdAndPostId(id, postId)
+            .orElseThrow(() -> new NotFoundException("No such Comment. postId - " + postId + ", commentId - " + id));
+
+    CommentInfo commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+    boolean isChangeableComment = true;
+
+    String content = commentService.getBlindContent(comment, lang, null);
+    if (me != null) {
+      Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me.getId())
+              .map(CommentLike::getId).orElse(null);
+      commentInfo.setLikeId(likeId);
+
+      Block block = blockRepository.findByMeAndMemberYouId(me.getId(), comment.getCreatedBy().getId())
+              .orElse(null);
+      if (block != null) {
+        commentInfo.setBlockId(block.getId());
+        commentInfo.setComment(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
+        isChangeableComment = false;
+      }
+    }
+
+    if (isChangeableComment && !comment.getComment().equals(content)) {
+      commentInfo.setComment(content);
+      isChangeableComment = false;
+    }
+
+    if (isChangeableComment && comment.getComment().contains("@")) {
+      MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+      commentInfo.setComment(mentionResult.getComment());
+    }
+
+    return commentInfo;
   }
 
   public Slice<Comment> findCommentsByParentId(Long parentId, Long cursor, Pageable pageable, String direction) {
