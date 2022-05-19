@@ -426,8 +426,6 @@ public class PostController {
     return new ResponseEntity<>(commentInfo, HttpStatus.OK);
   }
 
-
-
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
