@@ -193,7 +193,7 @@ public class MemberController {
         String avatarUrl = memberService.uploadAvatar(avatar);
         Map<String, String> result = new HashMap<>();
         result.put("avatar_url", avatarUrl);
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 

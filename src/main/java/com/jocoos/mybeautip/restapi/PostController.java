@@ -414,6 +414,20 @@ public class PostController {
       .withTotalCount(totalCount).toBuild();
   }
 
+  @GetMapping("/{postId}/comments/{id}")
+  public ResponseEntity<CommentInfo> getPostComment(@PathVariable long postId,
+                                                    @PathVariable long id,
+                                                    @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
+
+    Member member = memberService.currentMember();
+
+    CommentInfo commentInfo = postService.getPostComment(postId, id, member, lang);
+
+    return new ResponseEntity<>(commentInfo, HttpStatus.OK);
+  }
+
+
+
   @PostMapping("/{id:.+}/comments")
   public ResponseEntity addComment(@PathVariable Long id,
                                    @RequestBody CreateCommentRequest request,
