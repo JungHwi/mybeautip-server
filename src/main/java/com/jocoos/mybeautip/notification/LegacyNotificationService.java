@@ -142,8 +142,8 @@ public class LegacyNotificationService {
     }
   }
 
-  private void notifyAddPostComment(Comment comment) {
-    postRepository.findById(comment.getPostId())
+    private void notifyAddPostComment(Comment comment) {
+        postRepository.findById(comment.getPostId())
             .ifPresent(post -> {
               Notification n = null;
               if (comment.getParentId() != null) {
@@ -154,15 +154,11 @@ public class LegacyNotificationService {
                   n = notificationRepository.save(new Notification(post, comment, post.getCreatedBy(), post.getThumbnailUrl()));
                 }
               }
-
-              if (n != null) {
-                deviceService.push(n);
-              }
             });
-  }
+    }
 
-  private void notifyAddVideoComment(Comment comment) {
-    videoRepository.findById(comment.getVideoId())
+    private void notifyAddVideoComment(Comment comment) {
+        videoRepository.findById(comment.getVideoId())
             .ifPresent(v -> {
               Notification n = null;
               if (comment.getParentId() != null) {
@@ -173,12 +169,8 @@ public class LegacyNotificationService {
                   n = notificationRepository.save(new Notification(v, comment, v.getMember(), v.getThumbnailUrl()));
                 }
               }
-
-              if (n != null) {
-                deviceService.push(n);
-              }
             });
-  }
+    }
 
   private Member findCommentMemberByParentId(Long parentId) {
     return commentRepository.findById(parentId)
@@ -300,7 +292,6 @@ public class LegacyNotificationService {
                 notifyAddPostComment(comment);
               }
             });
-    //test
   }
 
   private void notifyAddMentionVideoComment(Comment comment, Member[] mentioned) {
