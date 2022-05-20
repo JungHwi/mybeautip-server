@@ -300,6 +300,7 @@ public class LegacyNotificationService {
                 notifyAddPostComment(comment);
               }
             });
+    //test
   }
 
   private void notifyAddMentionVideoComment(Comment comment, Member[] mentioned) {
