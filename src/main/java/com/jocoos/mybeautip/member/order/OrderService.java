@@ -154,7 +154,7 @@ public class OrderService {
     }
 
     // Modify member phoneNumber with Order buyerPhoneNumber
-    if (!member.getPhoneNumber().equals(request.getBuyerPhoneNumber())) {
+    if (request.getBuyerPhoneNumber() != null && !request.getBuyerPhoneNumber().equals(member.getPhoneNumber())) {
       member.setPhoneNumber(request.getBuyerPhoneNumber());
       memberRepository.save(member);
     }
