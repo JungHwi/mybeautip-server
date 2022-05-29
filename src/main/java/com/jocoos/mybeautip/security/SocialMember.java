@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.member.Member;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +25,7 @@ public class SocialMember {
     member.setLink(getLinkType());
     member.setEmail(this.email);
     member.setUsername(this.name);
+    member.setPushable(true);
     member.setAvatarUrl(this.picture);
     member.setPermission(Member.PERMISSION_ALL);
 

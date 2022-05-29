@@ -1,19 +1,17 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
+import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.*;
-import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.*;
-import com.jocoos.mybeautip.member.detail.MemberDetailRequest;
-import com.jocoos.mybeautip.member.detail.MemberDetailResponse;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.member.revenue.*;
 import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
@@ -75,8 +73,6 @@ public class MemberController {
   private final RevenuePaymentRepository revenuePaymentRepository;
   private final VideoScrapService videoScrapService;
   private final CommentService commentService;
-  private final ReportRepository reportRepository;
-  private final BlockRepository blockRepository;
 
   @Value("${mybeautip.store.image-path.prefix}")
   private String storeImagePrefix;
@@ -116,9 +112,7 @@ public class MemberController {
                           LegacyNotificationService legacyNotificationService,
                           RevenuePaymentRepository revenuePaymentRepository,
                           VideoScrapService videoScrapService,
-                          CommentService commentService,
-                          ReportRepository reportRepository,
-                          BlockRepository blockRepository) {
+                          CommentService commentService) {
     this.memberService = memberService;
     this.goodsService = goodsService;
     this.videoService = videoService;
@@ -139,8 +133,6 @@ public class MemberController {
     this.revenuePaymentRepository = revenuePaymentRepository;
     this.videoScrapService = videoScrapService;
     this.commentService = commentService;
-    this.reportRepository = reportRepository;
-    this.blockRepository = blockRepository;
   }
 
     @GetMapping("/me")

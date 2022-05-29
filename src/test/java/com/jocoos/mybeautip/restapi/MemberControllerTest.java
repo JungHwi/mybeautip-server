@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
+import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.member.MemberMeInfo;
 import com.jocoos.mybeautip.member.code.SkinType;
 import com.jocoos.mybeautip.member.code.SkinWorry;
-import com.jocoos.mybeautip.member.detail.MemberDetailRequest;
-import com.jocoos.mybeautip.member.detail.MemberDetailResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;

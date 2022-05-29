@@ -1,14 +1,17 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.*;
+import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.member.FacebookMemberRepository;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -35,8 +38,8 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
   @Override
   protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
     Map<String, String> requestParameters = tokenRequest.getRequestParameters();
-    String facebookId = requestParameters.get("facebook_id");
-    String username = requestParameters.get("facebook_id");
+    String facebookId = requestParameters.get("social_id");
+    String username = requestParameters.get("social_id");
     log.debug("facebook id: {}, username: {}", facebookId, username);
 
     if (StringUtils.isBlank(facebookId)) {
@@ -48,19 +51,12 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     }
 
     return facebookMemberRepository.findById(facebookId)
-        .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
-        .orElseGet(() -> generateToken(createRookie(requestParameters), client, tokenRequest));
+            .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
+            .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such facebook member. facebook social id - " + facebookId));
   }
 
   private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
     return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
-  }
-
-  @Transactional
-  public Member createRookie(Map<String, String> params) {
-    Member member = memberService.register(params);
-    facebookMemberRepository.save(new FacebookMember(params.get("facebook_id"), member.getId()));
-    return member;
   }
 }

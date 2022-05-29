@@ -1,14 +1,15 @@
 package com.jocoos.mybeautip.member;
 
-import lombok.Builder;
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.security.SocialMember;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.util.Map;
-
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "naver_members")
@@ -24,15 +25,6 @@ public class NaverMember extends CreatedDateAuditable {
   @Column(length = 30)
   private String nickname;
 
-  @Column(length = 1)
-  private String gender;
-
-  @Column(length = 10)
-  private String age;
-
-  @Column(length = 10)
-  private String birthday;
-
   @Column(nullable = false)
   private Long memberId;
 
@@ -42,12 +34,9 @@ public class NaverMember extends CreatedDateAuditable {
     this.memberId = memberId;
   }
 
-  public NaverMember(Map<String, String> params, Long memberId) {
-    this.naverId = params.get("naver_id");
-    this.nickname = params.get("nickname");
-    this.gender = params.get("gender");
-    this.age = params.get("age");
-    this.birthday = params.get("birthday");
+  public NaverMember(SocialMember socialMember, long memberId) {
+    this.naverId = socialMember.getId();
+    this.nickname = socialMember.getName();
     this.memberId = memberId;
   }
 }

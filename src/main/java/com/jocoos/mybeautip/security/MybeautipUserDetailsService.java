@@ -1,32 +1,27 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.member.MemberRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.member.MemberRepository;
-
-
-@Service
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class MybeautipUserDetailsService implements UserDetailsService {
 
-  private final MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-  public MybeautipUserDetailsService(MemberRepository memberRepository) {
-    this.memberRepository = memberRepository;
-  }
-
-  @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    log.debug("load user by username: {}", username);
-    if (StringUtils.startsWith(username, "guest:")) {
-      return createGuestUserDetails(username);
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.debug("load user by username: {}", username);
+        if (StringUtils.startsWith(username, "guest:")) {
+            return createGuestUserDetails(username);
     }
 
     return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(username))
@@ -44,9 +39,9 @@ public class MybeautipUserDetailsService implements UserDetailsService {
           }
         })
         .orElseThrow(() -> new AuthenticationException("username not found"));
-  }
+    }
 
-  private MyBeautipUserDetails createGuestUserDetails(String username) {
-    return new MyBeautipUserDetails(username, "ROLE_GUEST");
-  }
+    private MyBeautipUserDetails createGuestUserDetails(String username) {
+        return new MyBeautipUserDetails(username, "ROLE_GUEST");
+    }
 }

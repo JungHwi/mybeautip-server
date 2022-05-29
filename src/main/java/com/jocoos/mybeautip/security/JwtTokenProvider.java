@@ -1,24 +1,19 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.member.Member;
+import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.*;
-import javax.xml.bind.DatatypeConverter;
-
-import com.jocoos.mybeautip.member.Member;
-
-
-import io.jsonwebtoken.*;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -44,7 +39,7 @@ public class JwtTokenProvider {
   private static final String PAYLOAD_ATI = "ati";
   private static final String PAYLOAD_CLIENT_ID = "client_id";
 
-  public AccessTokenResponse auth(Member member) throws UnsupportedEncodingException {
+  public AccessTokenResponse auth(Member member) {
     Authentication authentication = new UsernamePasswordAuthenticationToken(String.valueOf(member.getId()), null, null);
     return generateToken(authentication);
   }

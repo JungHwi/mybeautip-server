@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.restapi.VideoController;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ public class MemberInfo {
   private Long blockedId;
   private Integer videoCount;
   private List<VideoController.VideoInfo> videos;
+  private MemberDetailResponse memberDetail;
   private Date createdAt;
   private Date modifiedAt;
   private Date deletedAt;
