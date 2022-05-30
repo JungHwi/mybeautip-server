@@ -71,12 +71,12 @@ public class VideoUploadNotificationService implements NotificationService<Video
 
         for (NotificationTargetInfo targetInfo : targetInfoList) {
             Map<String, String> arguments = getArgument(targetInfo.getNickname(), video);
-            sendCenter(messageIndex, video.getThumbnailUrl(), targetInfo, arguments);
-            sendAppPush(messageIndex, video.getThumbnailUrl(), targetInfo, arguments);
+            NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, video.getThumbnailUrl(), targetInfo, arguments);
+            sendAppPush(messageIndex, video.getThumbnailUrl(), notificationCenterEntity.getId(), targetInfo, arguments);
         }
     }
 
-    private void sendCenter(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+    private NotificationCenterEntity sendCenter(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
         NotificationMessageCenterEntity messageInfo = getCenterMessage(messageIndex);
         NotificationCenterEntity entity = NotificationCenterEntity.builder()
                 .userId(targetInfo.getMemberId())
@@ -86,11 +86,11 @@ public class VideoUploadNotificationService implements NotificationService<Video
                 .messageId(messageInfo.getId())
                 .build();
 
-        notificationCenterRepository.save(entity);
+        return notificationCenterRepository.save(entity);
     }
 
-    private void sendAppPush(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
-        AppPushMessage pushMessage = getAppPushMessage(messageIndex, imageUrl, arguments);
+    private void sendAppPush(int messageIndex, String imageUrl, Long notificationId,  NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+        AppPushMessage pushMessage = getAppPushMessage(messageIndex, imageUrl, notificationId, arguments);
         pushService.send(targetInfo, pushMessage);
     }
 
@@ -104,10 +104,10 @@ public class VideoUploadNotificationService implements NotificationService<Video
         return entities.get(index);
     }
 
-    private AppPushMessage getAppPushMessage(int index, String imageUrl, Map<String, String> arguments) {
+    private AppPushMessage getAppPushMessage(int index, String imageUrl, Long notificationId, Map<String, String> arguments) {
         List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
         NotificationMessagePushEntity entity = entities.get(index);
-        AppPushMessage message = pushConverter.convert(entity, imageUrl);
+        AppPushMessage message = pushConverter.convert(entity, imageUrl, notificationId);
         return message.setArguments(arguments);
     }
 

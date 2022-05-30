@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.revenue.RevenuePayment;
 import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.support.slack.SlackService;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +39,6 @@ public class AdminNotificationAspect {
       log.debug("point: {}", point);
 
       try {
-        legacyNotificationService.notifyMemberPoint(point);
-      } catch (Exception e) {
-        log.error("{}", e);
-      }
-
-      try {
         slackService.sendPointToMember(point);
       } catch (Exception e) {
         log.error("{}", e);
@@ -68,35 +61,7 @@ public class AdminNotificationAspect {
       log.debug("point: {}", point);
 
       try {
-        legacyNotificationService.notifyDeductMemberPoint(point);
-      } catch (Exception e) {
-        log.error("{}", e);
-      }
-
-      try {
         slackService.sendDeductPoint(point);
-      } catch (Exception e) {
-        log.error("{}", e);
-      }
-    }
-  }
-
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.revenue.RevenuePaymentService.pay(..))",
-     returning = "result")
-  public void onAfterReturningRevenuePayment(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-
-    // Ignore when duplicate createVideo
-    if (result == null) {
-      return;
-    }
-
-    if (result instanceof RevenuePayment) {
-      RevenuePayment revenuePayment = (RevenuePayment) result;
-      log.debug("revenuePayment: {}", revenuePayment);
-
-      try {
-        legacyNotificationService.notifyRevenuePayment(revenuePayment);
       } catch (Exception e) {
         log.error("{}", e);
       }

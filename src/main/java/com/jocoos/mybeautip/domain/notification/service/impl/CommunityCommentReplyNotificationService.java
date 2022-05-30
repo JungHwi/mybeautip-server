@@ -79,11 +79,11 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
         NotificationTargetInfo targetInfo = getTargetInfo(parentComment.getCreatedBy().getId());
 
         Map<String, String> arguments = getArgument(targetInfo.getNickname(), comment);
-        sendCenter(messageIndex, targetInfo, arguments);
-        sendAppPush(messageIndex, targetInfo, arguments);
+        NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, targetInfo, arguments);
+        sendAppPush(messageIndex, notificationCenterEntity.getId(), targetInfo, arguments);
     }
 
-    private void sendCenter(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+    private NotificationCenterEntity sendCenter(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
         NotificationMessageCenterEntity messageInfo = getCenterMessage(messageIndex);
         NotificationCenterEntity entity = NotificationCenterEntity.builder()
                 .userId(targetInfo.getMemberId())
@@ -92,11 +92,11 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
                 .messageId(messageInfo.getId())
                 .build();
 
-        notificationCenterRepository.save(entity);
+        return notificationCenterRepository.save(entity);
     }
 
-    private void sendAppPush(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
-        AppPushMessage pushMessage = getAppPushMessage(messageIndex, arguments);
+    private void sendAppPush(int messageIndex, Long notificationId, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+        AppPushMessage pushMessage = getAppPushMessage(messageIndex, notificationId, arguments);
         pushService.send(targetInfo, pushMessage);
     }
 
@@ -110,10 +110,10 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
         return entities.get(index);
     }
 
-    private AppPushMessage getAppPushMessage(int index, Map<String, String> arguments) {
+    private AppPushMessage getAppPushMessage(int index, long notificationId, Map<String, String> arguments) {
         List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
         NotificationMessagePushEntity entity = entities.get(index);
-        AppPushMessage message = pushConverter.convert(entity);
+        AppPushMessage message = pushConverter.convert(entity, notificationId);
         return message.setArguments(arguments);
     }
 

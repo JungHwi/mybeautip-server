@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.notification.client.MobilePushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.vo.DeviceToken;
 import com.jocoos.mybeautip.domain.notification.vo.MobileDeviceToken;
+import com.jocoos.mybeautip.global.util.NotificationConvertUtil;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,8 @@ public class IosPushService implements MobilePushService {
         notification.put(KEY_TITLE, message.getTitle());
         notification.put(KEY_BODY, message.getMessage());
         notification.put(KEY_IMAGE, message.getImageUrl());
+        notification.put(KEY_NOTIFICATION_ID, message.getNotificationId().toString());
+        notification.put(KEY_NOTIFICATION_LINK, NotificationConvertUtil.convertToStringAsLink(message.getNotificationLink()));
 
         data.put(KEY_NOTIFICATION, notification);
         data.put(KEY_DATA, messageMap);

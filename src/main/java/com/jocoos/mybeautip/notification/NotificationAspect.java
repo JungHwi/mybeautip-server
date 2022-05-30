@@ -4,10 +4,7 @@ import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.member.block.Block;
-import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentReport;
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.report.Report;
@@ -20,7 +17,6 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +54,6 @@ public class NotificationAspect {
       Video video = (Video) result;
       log.debug("video: {}", video);
       if ("PUBLIC".equals(video.getVisibility())) {
-        legacyNotificationService.notifyCreateVideoForAllMembers(video);
         feedService.feedVideo(video);
       }
 
@@ -71,17 +66,6 @@ public class NotificationAspect {
     }
   }
 
-  @Before(value = "execution(* com.jocoos.mybeautip.member.following.FollowingRepository.save(..))")
-  public void onBeforeSaveFollowingMember(JoinPoint joinPoint) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-    Object o = joinPoint.getArgs()[0];
-    if (o instanceof Following) {
-      Following f = (Following) o;
-      log.debug("following: {}", f);
-      legacyNotificationService.notifyFollowMember(f);
-    }
-  }
-
   @After(value = "execution(* com.jocoos.mybeautip.video.VideoLikeRepository.save(..))")
   public void onAfterSaveVideoLike(JoinPoint joinPoint) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -90,17 +74,6 @@ public class NotificationAspect {
       VideoLike videoLike = (VideoLike) o;
       log.debug("video like: {}", videoLike);
       legacyNotificationService.notifyAddVideoLike(videoLike);
-    }
-  }
-
-  @After(value = "execution(* com.jocoos.mybeautip.member.comment.CommentLikeRepository.save(..))")
-  public void onAfterSaveCommentLike(JoinPoint joinPoint) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-    Object o = joinPoint.getArgs()[0];
-    if (o instanceof CommentLike) {
-      CommentLike commentLike = (CommentLike) o;
-      log.debug("comment like: {}", commentLike);
-      legacyNotificationService.notifyAddCommentLike(commentLike);
     }
   }
 
@@ -211,31 +184,4 @@ public class NotificationAspect {
       slackService.sendForDeleteMember(memberLeaveLog);
     }
   }
-
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.coupon.CouponService.sendWelcomeCoupon(..))",
-          returning = "result")
-  public void onAfterReturningSendWelcomeCoupon(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}, result:{}", joinPoint.toLongString(), result);
-
-    if (result instanceof MemberCoupon) {
-      MemberCoupon memberCoupon = (MemberCoupon) result;
-      log.debug("memberCoupon: {}", memberCoupon);
-
-      legacyNotificationService.notifyWelcomeCoupon(memberCoupon);
-    }
-  }
-
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.coupon.CouponService.sendEventCoupon(..))",
-          returning = "result")
-  public void onAfterReturningSendEventCoupon(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}, result:{}", joinPoint.toLongString(), result);
-
-    if (result instanceof MemberCoupon) {
-      MemberCoupon memberCoupon = (MemberCoupon) result;
-      log.debug("memberCoupon: {}", memberCoupon);
-
-      legacyNotificationService.notifyEventCoupon(memberCoupon);
-    }
-  }
-
 }

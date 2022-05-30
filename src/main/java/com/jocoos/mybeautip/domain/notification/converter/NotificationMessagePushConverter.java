@@ -15,14 +15,20 @@ public interface NotificationMessagePushConverter {
             @Mapping(target = "message", source = "entity.message"),
             @Mapping(target = "notificationLinkType", source = "entity.notificationLinkType"),
             @Mapping(target = "imageUrl", source = "imageUrl"),
+            @Mapping(target = "notificationId", source = "notificationId"),
             @Mapping(target = "notificationLink", ignore = true)
     })
-    AppPushMessage convert(NotificationMessagePushEntity entity, String imageUrl);
+    AppPushMessage convert(NotificationMessagePushEntity entity, String imageUrl, Long notificationId);
 
     @Mappings({
+            @Mapping(target = "messageType", source = "entity.messageType"),
+            @Mapping(target = "title", source = "entity.title"),
+            @Mapping(target = "message", source = "entity.message"),
+            @Mapping(target = "notificationLinkType", source = "entity.notificationLinkType"),
+            @Mapping(target = "notificationId", source = "notificationId"),
             @Mapping(target = "imageUrl", ignore = true),
             @Mapping(target = "notificationLink", ignore = true),
     })
-    AppPushMessage convert(NotificationMessagePushEntity entity);
+    AppPushMessage convert(NotificationMessagePushEntity entity, long notificationId);
 
 }

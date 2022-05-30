@@ -40,6 +40,8 @@ public class SocialMember {
         return Member.LINK_NAVER;
       case "facebook":
         return Member.LINK_FACEBOOK;
+      case "apple":
+          return Member.LINK_APPLE;
       default:
         throw new MybeautipRuntimeException("Unsupported provider type");
     }

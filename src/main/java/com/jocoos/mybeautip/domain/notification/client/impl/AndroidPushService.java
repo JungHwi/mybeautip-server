@@ -64,6 +64,7 @@ public class AndroidPushService implements MobilePushService {
         messageMap.put(KEY_TITLE, message.getTitle());
         messageMap.put(KEY_BODY, message.getMessage());
         messageMap.put(KEY_IMAGE, message.getImageUrl());
+        messageMap.put(KEY_NOTIFICATION_ID, message.getNotificationId().toString());
         messageMap.put(KEY_NOTIFICATION_LINK, NotificationConvertUtil.convertToStringAsLink(message.getNotificationLink()));
 
         data.put(KEY_DATA, messageMap);

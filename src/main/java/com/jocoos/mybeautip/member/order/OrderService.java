@@ -506,7 +506,6 @@ public class OrderService {
       }
   
       videoRepository.updateOrderCount(order.getVideoId(), 1);
-      legacyNotificationService.notifyOrder(order, order.getVideoId());
     }
     
     deleteCartItems(order);
