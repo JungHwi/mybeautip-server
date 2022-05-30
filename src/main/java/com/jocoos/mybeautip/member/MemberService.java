@@ -1,6 +1,10 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
+import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.SettingNotificationDto;
+import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
+import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
@@ -8,11 +12,6 @@ import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.block.BlockService;
-import com.jocoos.mybeautip.member.coupon.CouponService;
-import com.jocoos.mybeautip.member.detail.MemberDetail;
-import com.jocoos.mybeautip.member.detail.MemberDetailRepository;
-import com.jocoos.mybeautip.member.detail.MemberDetailRequest;
-import com.jocoos.mybeautip.member.detail.MemberDetailResponse;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.report.Report;
@@ -20,7 +19,9 @@ import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.MemberController;
+import com.jocoos.mybeautip.security.LoginServiceFactory;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
+import com.jocoos.mybeautip.security.SocialMember;
 import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.support.RandomUtils;
 import com.jocoos.mybeautip.support.slack.SlackService;
@@ -38,7 +39,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -57,7 +61,8 @@ public class MemberService {
   private final NaverMemberRepository naverMemberRepository;
   private final AppleMemberRepository appleMemberRepository;
   private final MemberLeaveLogRepository memberLeaveLogRepository;
-  private final CouponService couponService;
+  private final LoginServiceFactory loginServiceFactory;
+
 
   private final AttachmentService attachmentService;
   private final SlackService slackService;
@@ -85,7 +90,7 @@ public class MemberService {
                        KakaoMemberRepository kakaoMemberRepository,
                        NaverMemberRepository naverMemberRepository,
                        AppleMemberRepository appleMemberRepository, MemberLeaveLogRepository memberLeaveLogRepository,
-                       CouponService couponService,
+                       LoginServiceFactory loginServiceFactory,
                        AttachmentService attachmentService,
                        SlackService slackService) {
     this.bannedWordService = bannedWordService;
@@ -101,9 +106,9 @@ public class MemberService {
     this.naverMemberRepository = naverMemberRepository;
     this.appleMemberRepository = appleMemberRepository;
     this.memberLeaveLogRepository = memberLeaveLogRepository;
-    this.couponService = couponService;
     this.attachmentService = attachmentService;
     this.slackService = slackService;
+    this.loginServiceFactory = loginServiceFactory;
   }
 
   public Long currentMemberId() {
@@ -231,9 +236,9 @@ public class MemberService {
     }
   }
   
-  public boolean hasCommentPostPermission(Member member) {
-    return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
-  }
+    public boolean hasCommentPostPermission(Member member) {
+        return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
+    }
 
     @Transactional
     public void tagMigration() {
@@ -246,18 +251,32 @@ public class MemberService {
     }
 
     @Transactional
-    public Member register(Member member) {
-        adjustTag(member);
+    public Member register(SocialMember socialMember) {
+        Member member = socialMember.toMember();
+        adjustUniqueInfo(member);
+        Member registeredMember = memberRepository.save(member);
 
-        return memberRepository.save(member);
+        switch (registeredMember.getLink()) {
+            case Member.LINK_FACEBOOK:
+                facebookMemberRepository.save(new FacebookMember(socialMember.getId(), registeredMember.getId()));
+                break;
+            case Member.LINK_NAVER:
+                naverMemberRepository.save(new NaverMember(socialMember, registeredMember.getId()));
+                break;
+            case Member.LINK_KAKAO:
+                kakaoMemberRepository.save(new KakaoMember(socialMember.getId(), registeredMember.getId()));
+                break;
+            case Member.LINK_APPLE:
+                appleMemberRepository.save(new AppleMember(socialMember.getId(), socialMember.getEmail(), socialMember.getName(), registeredMember.getId()));
+                break;
+        }
+
+        return registeredMember;
     }
 
-    @Transactional
-    public Member register(Map<String, String> params) {
-        Member member = new Member(params);
-        adjustTag(member);
-
-        return memberRepository.save(member);
+    public void adjustUniqueInfo(Member member) {
+      adjustTag(member);
+      adjustUserName(member);
     }
 
     // TODO Migration 하고 나면 private 으로 변경.
@@ -274,6 +293,11 @@ public class MemberService {
         log.warn("Duplicate Tag : " + member.getUsername());
         slackService.duplicateTag(member.getUsername());
         return member;
+    }
+
+    public Member adjustUserName(Member member) {
+      // TODO adjust nickname
+      return member;
     }
 
   @Transactional

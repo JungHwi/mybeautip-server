@@ -29,6 +29,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
   @Override
   public void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
+            .antMatchers(POST, "/api/1/member/signup/**").hasAnyRole("GUEST")
       .antMatchers(GET, "/api/1/words").hasAnyRole("USER", "ADMIN")
       .antMatchers("/api/admin/**").hasAnyRole("STORE", "ADMIN")
       .antMatchers(GET, "/api/1/notices").permitAll()

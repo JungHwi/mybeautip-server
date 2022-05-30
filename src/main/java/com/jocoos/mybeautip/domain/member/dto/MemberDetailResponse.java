@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.member.detail;
+package com.jocoos.mybeautip.domain.member.dto;
 
 import com.jocoos.mybeautip.member.code.SkinType;
 import com.jocoos.mybeautip.member.code.SkinWorry;

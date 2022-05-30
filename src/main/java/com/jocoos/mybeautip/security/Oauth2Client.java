@@ -1,5 +1,10 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.config.Oauth2Config;
+import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -10,13 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.HashMap;
-
-import com.jocoos.mybeautip.config.Oauth2Config;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
-
-import org.apache.commons.lang3.StringUtils;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Data
@@ -30,18 +28,18 @@ public class Oauth2Client {
     this.providerConfig = providerConfig;
   }
 
-  public String getAccessToken(String code, String state, String redirectUri) {
+  public String getAccessToken(String code, String state) {
     if (providerConfig == null) {
       throw new MybeautipRuntimeException("Provider config required");
     }
 
     if ("GET".equals(providerConfig.getTokenMethod())) {
-      return accessTokenWithGet(code, state, redirectUri);
+      return accessTokenWithGet(code, state);
     }
-    return accessTokenWithPost(code, state, redirectUri);
+    return accessTokenWithPost(code, state);
   }
 
-  private String accessTokenWithGet(String code, String state, String redirectUri) {
+  private String accessTokenWithGet(String code, String state) {
     HttpHeaders headers = new HttpHeaders();
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
@@ -51,7 +49,6 @@ public class Oauth2Client {
     UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(providerConfig.getTokenUri())
         .queryParam("grant_type", providerConfig.getAuthorizationGrantType())
         .queryParam("client_id", providerConfig.getClientId())
-        .queryParam("redirect_uri", redirectUri)
         .queryParam("code", code);
 
     if (!StringUtils.isBlank(providerConfig.getClientSecret())) {
@@ -72,7 +69,7 @@ public class Oauth2Client {
     return response.getBody().getAccessToken();
   }
 
-  private String accessTokenWithPost(String code, String state, String redirectUri) {
+  private String accessTokenWithPost(String code, String state) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));

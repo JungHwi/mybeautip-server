@@ -7,8 +7,12 @@ public class RandomUtils {
     private static final int MIN_INTEGER = 1;
     private static final int MIN_INDEX = 0;
 
-    public static final int TAG_ALPHABETIC_LENGTH = 5;
-    public static final int TAG_MAX_NUMERIC = 99;
+    private static final int TAG_ALPHABETIC_LENGTH = 5;
+    private static final int TAG_MAX_NUMERIC = 99;
+
+    private static final String USERNAME_PREFIX = "뷰띠";
+    private static final int USERNAME_ALPHABETIC_LENGTH = 2;
+    private static final int USERNAME_MAX_NUMERIC = 99999;
 
     public static int getRandom(int max) {
         return getRandom(MIN_INTEGER, max);
@@ -25,7 +29,13 @@ public class RandomUtils {
 
     public static String generateTag() {
         String tag = RandomStringUtils.randomAlphabetic(TAG_ALPHABETIC_LENGTH).toUpperCase();
-        int numberTag = RandomUtils.getRandom(TAG_MAX_NUMERIC);
+        int numberTag = getRandom(TAG_MAX_NUMERIC);
         return String.format("%s%02d", tag, numberTag);
+    }
+
+    public static String generateUsername() {
+        String middleName = RandomStringUtils.randomAlphabetic(USERNAME_ALPHABETIC_LENGTH).toLowerCase();
+        int randomNumber = getRandom(USERNAME_MAX_NUMERIC);
+        return String.format("%s%s%05d", USERNAME_PREFIX, middleName, randomNumber);
     }
 }

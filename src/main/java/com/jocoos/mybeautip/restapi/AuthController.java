@@ -1,14 +1,10 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
-import com.jocoos.mybeautip.security.AccessTokenResponse;
-import com.jocoos.mybeautip.security.JwtTokenProvider;
+import com.jocoos.mybeautip.domain.member.dto.OauthRequest;
 import com.jocoos.mybeautip.security.SocialLoginService;
-import lombok.Data;
+import com.jocoos.mybeautip.security.WebSocialLoginResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,55 +13,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotNull;
-import java.io.UnsupportedEncodingException;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/1/token")
 public class AuthController {
 
-  private final MemberService memberService;
-  private final SocialLoginService socialLoginService;
-  private final JwtTokenProvider jwtTokenProvider;
+    private final SocialLoginService socialLoginService;
 
+    @PostMapping(value = "/{provider}", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<WebSocialLoginResponse> socialLogin(@PathVariable String provider,
+                                         OauthRequest request) {
 
-  @PostMapping(value = "/{provider}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public ResponseEntity<?> socialLogin(@PathVariable String provider,
-                                       OauthRequest request) throws UnsupportedEncodingException {
-    log.debug("{}, {}", provider, request);
-    if (StringUtils.isBlank(request.getRedirectUri())) {
-      throw new IllegalArgumentException("Redirect uri was required");
+        WebSocialLoginResponse result = socialLoginService.webSocialLogin(provider, request.getCode(), request.getState());
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
-
-    Member member = socialLoginService.loadMember(provider, request.getCode(), request.getState(), request.getRedirectUri());
-    AccessTokenResponse accessTokenResponse = jwtTokenProvider.auth(member);
-    log.debug("response: {}", accessTokenResponse);
-
-    String accessToken = accessTokenResponse.getAccessToken();
-
-    boolean validated = jwtTokenProvider.validateToken(accessToken);
-    log.debug("validated: {}", validated);
-
-    String memberId = jwtTokenProvider.getMemberId(accessToken);
-    log.debug("memberId: {}", memberId);
-
-    memberService.updateLastLoggedAt(member.getId());
-
-    return new ResponseEntity<>(accessTokenResponse, HttpStatus.OK);
-  }
-
-  @Data
-  static class OauthRequest {
-    @NotNull
-    String code;
-    String state = "mybeautip-web-mobile";
-    @NotNull
-    String redirectUri;
-
-    public void setRedirect_uri(String redirectUri) {
-      this.redirectUri = redirectUri;
-    }
-  }
 }

@@ -3,7 +3,10 @@ package com.jocoos.mybeautip.member;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.member.vo.BirthdayAttributeConverter;
+import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import com.jocoos.mybeautip.support.RandomUtils;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +18,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.Map;
 
 
 @Data
+@Builder
+@AllArgsConstructor
 @Slf4j
 @EqualsAndHashCode(callSuper = false)
 @Entity
@@ -153,18 +157,20 @@ public class Member {
     setTag();
   }
 
-  public Member(Map<String, String> params) {
-    this.link = parseLink(params.get("grant_type"));
-    this.username = (StringUtils.isBlank(params.get("username"))) ? "" : params.get("username");
-    this.email = (StringUtils.isBlank(params.get("email"))) ? "" : params.get("email");
-    this.phoneNumber = (StringUtils.isBlank(params.get("phone_number"))) ? "" : params.get("phone_number");
-    this.intro = (StringUtils.isBlank(params.get("intro"))) ? "" : params.get("intro");
-    this.avatarUrl = (StringUtils.isBlank(params.get("avatar_url"))) ? defaultAvatarUrl : params.get("avatar_url");
-    this.point = 0;
-    this.visible = false;
-    this.revenueModifiedAt = null;
-    this.pushable = true; // default true
-    this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
-    setTag();
-  }
+    public Member(SignupRequest request) {
+        this.link = parseLink(request.getGrantType());
+        this.username = StringUtils.isBlank(request.getUsername()) ? RandomUtils.generateUsername() : request.getUsername();
+        this.email = StringUtils.isBlank(request.getEmail()) ? "" : request.getEmail();
+        this.avatarUrl = StringUtils.isBlank(request.getAvatarUrl()) ? defaultAvatarUrl : request.getAvatarUrl();
+        this.point = 0;
+        this.visible = false;
+        this.revenueModifiedAt = null;
+        this.pushable = true; // default true
+        this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
+        setTag();
+    }
+
+
+
+
 }

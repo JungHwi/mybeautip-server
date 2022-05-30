@@ -1,16 +1,14 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.config.Oauth2Config;
+import com.jocoos.mybeautip.exception.AuthenticationException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.jocoos.mybeautip.config.Oauth2Config;
-import com.jocoos.mybeautip.exception.AuthenticationException;
-
-import org.apache.commons.lang3.StringUtils;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -22,10 +20,10 @@ public class KakaoLoginService implements LoginService {
   private final Oauth2Client oauth2Client;
 
   @Override
-  public SocialMember getMember(String code, String state, String redirectUri) {
+  public SocialMember getMember(String code, String state) {
     oauth2Client.setProviderConfig(oauth2Config.getKakao());
 
-    String accessToken = oauth2Client.getAccessToken(code, state, redirectUri);
+    String accessToken = oauth2Client.getAccessToken(code, state);
     log.debug("accessToken: {}", accessToken);
 
     if (StringUtils.isBlank(accessToken)) {

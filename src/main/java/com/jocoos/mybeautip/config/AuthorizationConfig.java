@@ -94,7 +94,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     endpoints
         .pathMapping("/oauth/token", "/api/1/token")
         .authenticationManager(authenticationManager)
-        .accessTokenConverter(jwtTokenEnhencer())
+        .accessTokenConverter(jwtTokenEnhancer())
         .tokenGranter(tokenGranter(endpoints))
         .tokenStore(jwtTokenStore())
         .userDetailsService(userDetailService);
@@ -133,7 +133,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
   }
 
   @Bean
-  public JwtAccessTokenConverter jwtTokenEnhencer() {
+  public JwtAccessTokenConverter jwtTokenEnhancer() {
     JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
     jwtAccessTokenConverter.setSigningKey(privateKey);
     jwtAccessTokenConverter.setVerifierKey(publicKey);
@@ -143,7 +143,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
   @Bean
   public JwtTokenStore jwtTokenStore() {
-    return new JwtTokenStore(jwtTokenEnhencer());
+    return new JwtTokenStore(jwtTokenEnhancer());
   }
 
   private AccessTokenConverter accessTokenConverter() {
