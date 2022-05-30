@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.member.AppleMemberRepository;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -49,7 +49,7 @@ public class AppleTokenGranter extends AbstractTokenGranter {
 
     return appleMemberRepository.findById(appleId)
             .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
-            .orElseThrow(() -> new MemberNotFoundException("No such apple user. apple id - " + appleId));
+            .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such apple user. apple id - " + appleId));
   }
 
   private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {

@@ -19,6 +19,7 @@ public class AppPushMessage {
     private String title;
     private String message;
     private String imageUrl;
+    private Long notificationId;
     private List<NotificationLink> notificationLink;
 
     @JsonIgnore
@@ -28,6 +29,7 @@ public class AppPushMessage {
         return AppPushMessage.builder()
                 .messageType(this.messageType)
                 .imageUrl(this.imageUrl)
+                .notificationId(this.notificationId)
                 .title(NotificationConvertUtil.generateStringByArguments(this.title, arguments))
                 .message(NotificationConvertUtil.generateStringByArguments(this.message, arguments))
                 .notificationLink(NotificationConvertUtil.generateNotificationLinkByArguments(this.notificationLinkType, arguments))

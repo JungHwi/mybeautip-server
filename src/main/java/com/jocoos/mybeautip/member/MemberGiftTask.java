@@ -84,7 +84,6 @@ public class MemberGiftTask {
       log.debug("reminder before 3 days : {}", dateFormat.format(reminder));
       log.debug("expired points found: {}", reminders);
       reminders.stream().forEach(memberPoint -> {
-        legacyNotificationService.notifyReminderMemberPoint(memberPoint);
         memberPoint.setRemind(true);
         memberPointRepository.save(memberPoint);
       });

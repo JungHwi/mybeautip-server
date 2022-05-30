@@ -1,35 +1,28 @@
 package com.jocoos.mybeautip.notification;
 
 import com.jocoos.mybeautip.devices.DeviceService;
-import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentLike;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
-import com.jocoos.mybeautip.member.coupon.MemberCoupon;
-import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionTag;
-import com.jocoos.mybeautip.member.order.Order;
-import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.revenue.RevenuePayment;
-import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
-import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -73,63 +66,6 @@ public class LegacyNotificationService {
     this.memberRecommendationRepository = memberRecommendationRepository;
     this.instantMessageService = instantMessageService;
     this.taskScheduler = taskScheduler;
-  }
-
-  @Async
-  public void notifyCreateVideoForAllMembers(Video video) {
-    List<Member> pushableMember = memberRepository.findAllByVisibleTrueAndPushableTrue();
-    for (Member member : pushableMember) {
-      Notification notification = new Notification(video, video.getThumbnailUrl(), member);
-      notificationRepository.save(notification);
-      deviceService.push(notification);
-    }
-  }
-
-  @Async
-  public void notifyCreateVideoForFollower(Video video) {
-    Long creator = video.getMember().getId();
-
-    List<Following> followingList = followingRepository.findByCreatedAtBeforeAndMemberYouId(new Date(), creator);
-    followingList
-            .forEach(f -> {
-              Notification notification = new Notification(video, video.getThumbnailUrl(), f.getMemberMe());
-              log.debug("notification: {}", notification);
-
-              notificationRepository.save(notification);
-              deviceService.push(notification);
-            });
-
-    // if creator is recommended member
-    List<Member> excludes = followingList.stream().map(Following::getMemberMe).collect(Collectors.toList());
-    excludes.add(video.getMember());
-    memberRecommendationRepository.findByMemberId(creator)
-            .ifPresent(r -> instantMessageService.instantPushMessage(video, excludes));
-  }
-
-  public void notifyUploadedMyVideo(Video video) {
-    Notification notification = new Notification(video);
-    notificationRepository.save(notification);
-    deviceService.push(notification);
-  }
-
-  public void notifyFollowMember(Following following) {
-    Notification notification = followingRepository.findByMemberMeIdAndMemberYouId(
-                    following.getMemberYou().getId(), following.getMemberMe().getId())
-            .map(f -> new Notification(following, f.getId()))
-            .orElseGet(() -> new Notification(following, null));
-
-    int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
-            Notification.FOLLOWING,
-            notification.getTargetMember(),
-            notification.getResourceId(),
-            notification.getResourceOwner(),
-            new Date(System.currentTimeMillis() - duration));
-
-    if (count == 0) {
-      Notification n = notificationRepository.save(notification);
-      log.debug("notification: {}", n);
-      deviceService.push(n);
-    }
   }
 
   public void notifyAddComment(Comment comment) {
@@ -176,66 +112,6 @@ public class LegacyNotificationService {
     return commentRepository.findById(parentId)
             .map(Comment::getCreatedBy)
             .orElse(null);
-  }
-
-  public void notifyAddCommentLike(CommentLike commentLike) {
-    if (!(commentLike.getCreatedBy().getId().equals(commentLike.getComment().getCreatedBy().getId()))) {
-      Notification n = null;
-      if (commentLike.getComment().getVideoId() != null) {
-        Video video = videoRepository.findById(commentLike.getComment().getVideoId())
-                .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + commentLike.getComment().getVideoId()));
-
-        int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
-                Notification.COMMENT_LIKE,
-                commentLike.getComment().getCreatedBy(),
-                commentLike.getComment().getId(),
-                commentLike.getCreatedBy(),
-                new Date(System.currentTimeMillis() - duration));
-
-        if (count == 0) {
-          n = notificationRepository.save(new Notification(video, commentLike, commentLike.getComment().getComment()));
-
-          log.debug("commentlike video notification: {}", n);
-          if (n.getArgs().size() > 1) {
-            String original = n.getArgs().get(1);
-            if (original.contains("@")) {
-              MentionResult mentionResult = createMentionComment(original);
-              if (mentionResult != null) {
-                n.getArgs().set(1, mentionResult.getComment());
-              }
-            }
-          }
-          deviceService.push(n);
-        }
-      }
-
-      if (commentLike.getComment().getPostId() != null) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(commentLike.getComment().getPostId())
-                .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + commentLike.getComment().getPostId()));
-
-        int count = notificationRepository.countByTypeAndTargetMemberAndResourceIdAndResourceOwnerAndCreatedAtAfter(
-                Notification.COMMENT_LIKE,
-                commentLike.getComment().getCreatedBy(),
-                commentLike.getComment().getId(),
-                commentLike.getCreatedBy(),
-                new Date(System.currentTimeMillis() - duration));
-
-        if (count == 0) {
-          n = notificationRepository.save(new Notification(post, commentLike, commentLike.getComment().getComment()));
-          log.debug("commentlike post notification: {}", n);
-          if (n.getArgs().size() > 1) {
-            String original = n.getArgs().get(1);
-            if (original.contains("@")) {
-              MentionResult mentionResult = createMentionComment(original);
-              if (mentionResult != null) {
-                n.getArgs().set(1, mentionResult.getComment());
-              }
-            }
-          }
-          deviceService.push(n);
-        }
-      }
-    }
   }
 
   public void notifyAddVideoLike(VideoLike videoLike) {
@@ -285,7 +161,7 @@ public class LegacyNotificationService {
                         }
                       }
                     }
-                    deviceService.push(n);
+//                    deviceService.push(n);
                   }
                 });
               } else {
@@ -312,7 +188,7 @@ public class LegacyNotificationService {
                         }
                       }
                     }
-                    deviceService.push(n);
+//                    deviceService.push(n);
                   }
                 });
               } else {
@@ -362,64 +238,5 @@ public class LegacyNotificationService {
     log.debug("original comment: {}", comment);
     mentionResult.setComment(comment);
     return mentionResult;
-  }
-
-  public void notifyOrder(Order order, long videoId) {
-    videoRepository.findById(videoId)
-            .ifPresent(video -> {
-              Notification notification = new Notification(order, video);
-              log.debug("notification: {}", notification);
-
-              notificationRepository.save(notification);
-              deviceService.push(notification);
-            });
-  }
-
-  public void notifyMemberPoint(MemberPoint memberPoint) {
-    Member admin = memberService.currentMember();
-
-    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "point"));
-    log.info("notification: {}", notification);
-
-    deviceService.push(notification);
-  }
-
-  public void notifyDeductMemberPoint(MemberPoint memberPoint) {
-    Member admin = memberService.getAdmin();
-    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "deduct_point"));
-    log.info("notification: {}", notification);
-
-    deviceService.push(notification);
-  }
-
-  public void notifyReminderMemberPoint(MemberPoint memberPoint) {
-    Member admin = memberService.getAdmin();
-    Notification notification = notificationRepository.save(new Notification(memberPoint, admin, "remind_point"));
-    log.info("notification: {}", notification);
-
-    deviceService.push(notification);
-  }
-
-  public void notifyWelcomeCoupon(MemberCoupon memberCoupon) {
-    Notification notification = notificationRepository.save(new Notification(memberCoupon));
-    log.info("notification: {}", notification);
-
-    taskScheduler.schedule(() -> deviceService.push(notification),
-            new Date().toInstant().plusSeconds(10));
-  }
-
-  public void notifyEventCoupon(MemberCoupon memberCoupon) {
-    Notification notification = notificationRepository.save(new Notification(memberCoupon));
-    log.info("notification: {}", notification);
-
-    taskScheduler.schedule(() -> deviceService.push(notification),
-            new Date().toInstant().plusSeconds(10));
-  }
-
-  public void notifyRevenuePayment(RevenuePayment revenuePayment) {
-    Notification notification = notificationRepository.save(new Notification(revenuePayment));
-    log.info("notification: {}", notification);
-
-    deviceService.push(notification);
   }
 }
