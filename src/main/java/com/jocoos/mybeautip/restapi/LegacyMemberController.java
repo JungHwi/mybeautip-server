@@ -166,9 +166,7 @@ public class LegacyMemberController {
             }
         }
 
-        if (updateMemberRequest.getUsername() != null) {
-            memberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
-        }
+        memberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
 
         member = memberService.updateMember(updateMemberRequest, member);
         return new ResponseEntity<>(memberService.getMemberInfo(member), HttpStatus.OK);
@@ -729,7 +727,7 @@ public class LegacyMemberController {
     @Data
     public static class UpdateMemberRequest {
 
-        @Size(max = 50)
+        @Size(min = 2, max = 10)
         private String username;
 
         private String avatarUrl;

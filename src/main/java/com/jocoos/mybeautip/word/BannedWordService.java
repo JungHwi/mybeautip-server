@@ -23,13 +23,13 @@ public class BannedWordService {
         this.bannedWordRepository = bannedWordRepository;
     }
 
-    public String findWordAndThrowException(String word, String lang) {
+    public String findWordAndThrowException(int category, String word, String lang) {
         if (StringUtils.isBlank(word)) {
             return word;
         }
 
         String lowerCase = word.toLowerCase();
-        getDictionary(BannedWord.CATEGORY_USERNAME).forEach((key, value) -> {
+        getDictionary(category).forEach((key, value) -> {
             if (lowerCase.contains(value.getWord().toLowerCase())) {
                 throw new BadRequestException("banned_word", messageService.getMessage(USERNAME_BANNED_WORD, lang));
             }

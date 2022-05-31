@@ -11,4 +11,8 @@ public enum Language implements CodeValue {
     EN("영어");
 
     private final String description;
+
+    public Language getDefault() {
+        return Language.KO;
+    }
 }
