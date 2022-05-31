@@ -18,23 +18,23 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 public class PostLike extends MemberAuditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column
-  @Enumerated(EnumType.STRING)
-  private PostLikeStatus status;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private PostLikeStatus status;
 
-  @ManyToOne
-  @JoinColumn(name = "post_id")
-  private Post post;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
 
-  public PostLike(Post post) {
-    this.post = post;
-  }
+    public PostLike(Post post) {
+        this.post = post;
+    }
 }

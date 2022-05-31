@@ -1,32 +1,31 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-
-import org.springframework.data.rest.core.config.Projection;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.revenue.RevenuePayment;
+import org.springframework.data.rest.core.config.Projection;
+
+import java.util.Date;
 
 @Projection(name = "revenue_payment_detail", types = {RevenuePayment.class})
 public interface RevenuePaymentExceprt {
 
-  Long getId();
+    Long getId();
 
-  Member getMember();
+    Member getMember();
 
-  String getDate();
+    String getDate();
 
-  Integer getState();
+    Integer getState();
 
-  Integer getEstimatedAmount();
+    Integer getEstimatedAmount();
 
-  Integer getFinalAmount();
+    Integer getFinalAmount();
 
-  String getPaymentMethod();
+    String getPaymentMethod();
 
-  Date getPaymentDate();
+    Date getPaymentDate();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 }
 
 

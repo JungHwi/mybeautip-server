@@ -22,9 +22,9 @@ public class RandomUtils {
         return getRandom(MIN_INDEX, max - 1);
     }
 
-    public static int getRandom(double min, double max){
-        double x = (int)(Math.random()*((max-min)+1)) + min;
-        return (int)x;
+    public static int getRandom(double min, double max) {
+        double x = (int) (Math.random() * ((max - min) + 1)) + min;
+        return (int) x;
     }
 
     public static String generateTag() {

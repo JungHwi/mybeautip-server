@@ -9,12 +9,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface KeywordRecommendationRepository extends JpaRepository<KeywordRecommendation, Long> {
-  List<KeywordRecommendation> findByTagNameStartingWith(String keyword, Pageable pageable);
-  List<KeywordRecommendation> findByTagNameContaining(String keyword, Pageable pageable);
-  
-  Optional<KeywordRecommendation> findByMember(Member member);
-  Optional<KeywordRecommendation> findByTag(Tag tag);
-  
-  List<KeywordRecommendation> findBySeqGreaterThan(int seq, Pageable pageable);
-  List<KeywordRecommendation> findBySeqLessThan(int seq, Pageable pageable);
+    List<KeywordRecommendation> findByTagNameStartingWith(String keyword, Pageable pageable);
+
+    List<KeywordRecommendation> findByTagNameContaining(String keyword, Pageable pageable);
+
+    Optional<KeywordRecommendation> findByMember(Member member);
+
+    Optional<KeywordRecommendation> findByTag(Tag tag);
+
+    List<KeywordRecommendation> findBySeqGreaterThan(int seq, Pageable pageable);
+
+    List<KeywordRecommendation> findBySeqLessThan(int seq, Pageable pageable);
 }

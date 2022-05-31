@@ -6,6 +6,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class FollowingMemberRequest {
-  @NotNull
-  private Long memberId;
+    @NotNull
+    private Long memberId;
 }

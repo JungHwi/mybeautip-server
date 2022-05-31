@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberRecommendationRepository extends JpaRepository<MemberRecommendation, Long> {
-  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(Date statedAt, Date endedAt, Pageable pageable);
-  
-  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(Date statedAt, Date endedAt, int seq, Pageable pageable);
-  
-  List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqLessThan(Date statedAt, Date endedAt, int seq, Pageable pageable);
+    List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrue(Date statedAt, Date endedAt, Pageable pageable);
 
-  Optional<MemberRecommendation> findByMemberId(Long memberId);
+    List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqGreaterThan(Date statedAt, Date endedAt, int seq, Pageable pageable);
 
-  Page<MemberRecommendation> findByMemberDeletedAtIsNull(Pageable pageable);
+    List<MemberRecommendation> findByStartedAtBeforeAndEndedAtAfterAndMemberVisibleIsTrueAndSeqLessThan(Date statedAt, Date endedAt, int seq, Pageable pageable);
+
+    Optional<MemberRecommendation> findByMemberId(Long memberId);
+
+    Page<MemberRecommendation> findByMemberDeletedAtIsNull(Pageable pageable);
 }

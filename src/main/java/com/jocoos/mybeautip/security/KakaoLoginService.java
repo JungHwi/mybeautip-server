@@ -14,43 +14,43 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class KakaoLoginService implements LoginService {
-  public static final String PROVIDER_TYPE = "kakao";
+    public static final String PROVIDER_TYPE = "kakao";
 
-  private final Oauth2Config oauth2Config;
-  private final Oauth2Client oauth2Client;
+    private final Oauth2Config oauth2Config;
+    private final Oauth2Client oauth2Client;
 
-  @Override
-  public SocialMember getMember(String code, String state) {
-    oauth2Client.setProviderConfig(oauth2Config.getKakao());
+    @Override
+    public SocialMember getMember(String code, String state) {
+        oauth2Client.setProviderConfig(oauth2Config.getKakao());
 
-    String accessToken = oauth2Client.getAccessToken(code, state);
-    log.debug("accessToken: {}", accessToken);
+        String accessToken = oauth2Client.getAccessToken(code, state);
+        log.debug("accessToken: {}", accessToken);
 
-    if (StringUtils.isBlank(accessToken)) {
-      throw new AuthenticationException("Access token required");
+        if (StringUtils.isBlank(accessToken)) {
+            throw new AuthenticationException("Access token required");
+        }
+        return getUserData(accessToken);
     }
-    return getUserData(accessToken);
-  }
 
-  private SocialMember getUserData(String accessToken) {
-    HashMap<String, Object> body = oauth2Client.getUserData(accessToken);
-    return toSocialMember(body);
-  }
+    private SocialMember getUserData(String accessToken) {
+        HashMap<String, Object> body = oauth2Client.getUserData(accessToken);
+        return toSocialMember(body);
+    }
 
-  @SuppressWarnings("unchecked")
-  private SocialMember toSocialMember(Map<String, Object> attributes) {
-    log.debug("{}", attributes);
-    Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-    Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-    log.debug("{}", kakaoAccount);
-    log.debug("{}", profile);
+    @SuppressWarnings("unchecked")
+    private SocialMember toSocialMember(Map<String, Object> attributes) {
+        log.debug("{}", attributes);
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+        log.debug("{}", kakaoAccount);
+        log.debug("{}", profile);
 
-    return SocialMember.builder()
-        .id(String.valueOf(attributes.get("id")))
-        .provider(PROVIDER_TYPE)
-        .name((String) profile.get("nickname"))
-        .email((String) kakaoAccount.get("email"))
-        .picture((String) profile.get("profile_image_url"))
-        .build();
-  }
+        return SocialMember.builder()
+                .id(String.valueOf(attributes.get("id")))
+                .provider(PROVIDER_TYPE)
+                .name((String) profile.get("nickname"))
+                .email((String) kakaoAccount.get("email"))
+                .picture((String) profile.get("profile_image_url"))
+                .build();
+    }
 }

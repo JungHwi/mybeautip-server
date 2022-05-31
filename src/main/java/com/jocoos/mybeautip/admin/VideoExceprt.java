@@ -1,70 +1,69 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-
-import org.springframework.data.rest.core.config.Projection;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.Video;
+import org.springframework.data.rest.core.config.Projection;
+
+import java.util.Date;
 
 @Projection(name = "video_details", types = Video.class)
 public interface VideoExceprt {
 
-  Long getId();
+    Long getId();
 
-  String getVideoKey();
+    String getVideoKey();
 
-  String getType();
+    String getType();
 
-  String getState();
+    String getState();
 
-  String getVisibility();
+    String getVisibility();
 
-  boolean getLocked();
+    boolean getLocked();
 
-  String getTitle();
+    String getTitle();
 
-  String getContent();
+    String getContent();
 
-  String getUrl();
+    String getUrl();
 
-  String getOriginalFilename();
+    String getOriginalFilename();
 
-  String getThumbnailPath();
+    String getThumbnailPath();
 
-  String getThumbnailUrl();
+    String getThumbnailUrl();
 
-  String getChatRoomId();
+    String getChatRoomId();
 
-  int getDuration();
+    int getDuration();
 
-  String getData();
+    String getData();
 
-  Integer getWatchCount();
+    Integer getWatchCount();
 
-  Integer getTotalWatchCount();
+    Integer getTotalWatchCount();
 
-  Integer getHeartCount();
+    Integer getHeartCount();
 
-  Integer getViewCount();
+    Integer getViewCount();
 
-  Integer getLikeCount();
+    Integer getLikeCount();
 
-  Integer getCommentCount();
+    Integer getCommentCount();
 
-  Integer getOrderCount();
+    Integer getOrderCount();
 
-  Integer getReportCount();
+    Integer getReportCount();
 
-  Integer getRelatedGoodsCount();
+    Integer getRelatedGoodsCount();
 
-  String getRelatedGoodsThumbnailUrl();
+    String getRelatedGoodsThumbnailUrl();
 
-  Member getMember();
+    Member getMember();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 
-  Date getModifiedAt();
+    Date getModifiedAt();
 
-  Date getDeletedAt();
+    Date getDeletedAt();
 }

@@ -11,10 +11,10 @@ import java.util.Arrays;
 public enum DeviceOs implements CodeValue {
 
     ANDROID(true, "android", "ANDROID OS"),
-    IOS(true, "ios","iOS"),
-    WINDOWS(false, "","Windows"),
-    BLACKBERRY(false, "","BLACKBERRY"),
-    ETC(false, "","그 외..");
+    IOS(true, "ios", "iOS"),
+    WINDOWS(false, "", "Windows"),
+    BLACKBERRY(false, "", "BLACKBERRY"),
+    ETC(false, "", "그 외..");
 
     private final boolean isSupport;
     private final String legacyCode;

@@ -1,53 +1,51 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.data.rest.core.config.Projection;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.recommendation.MemberRecommendation;
+import org.springframework.data.rest.core.config.Projection;
+
+import java.util.Date;
 
 @Projection(name = "member_detail", types = {Member.class, MemberRecommendation.class, Report.class})
 public interface MemberExcerpt {
 
-  Long getId();
+    Long getId();
 
-  boolean isVisible();
+    boolean isVisible();
 
-  String getUsername();
+    String getUsername();
 
-  String getEmail();
+    String getEmail();
 
-  int getPoint();
+    int getPoint();
 
-  String getIntro();
+    String getIntro();
 
-  int getLink();
+    int getLink();
 
-  int getFollowerCount();
+    int getFollowerCount();
 
-  int getFollowingCount();
+    int getFollowingCount();
 
-  int getPublicVideoCount();
+    int getPublicVideoCount();
 
-  int getTotalVideoCount();
+    int getTotalVideoCount();
 
-  int getOrderCount();
+    int getOrderCount();
 
-  int getReportCount();
+    int getReportCount();
 
-  int getRevenue();
+    int getRevenue();
 
-  MemberInfo.PermissionInfo getPermission();
+    MemberInfo.PermissionInfo getPermission();
 
-  Date getRevenueModifiedAt();
+    Date getRevenueModifiedAt();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 
-  Date getDeletedAt();
+    Date getDeletedAt();
 
-  Date getModifiedAt();
+    Date getModifiedAt();
 }

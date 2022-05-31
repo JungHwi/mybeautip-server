@@ -17,10 +17,9 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class TemplateLoader implements ApplicationRunner {
+    public static Map<TemplateType, NotificationTemplate> templateMap;
     private final NotificationTemplateRepository repository;
     private final NotificationTemplateConverter converter;
-
-    public static Map<TemplateType, NotificationTemplate> templateMap;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

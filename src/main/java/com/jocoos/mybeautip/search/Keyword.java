@@ -13,18 +13,18 @@ import javax.persistence.*;
 @Entity
 @Table(name = "keywords")
 public class Keyword extends ModifiedDateAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-  
-  @Column(nullable = false)
-  private String keyword;
-  
-  @Column(nullable = false)
-  private Integer count;
-  
-  public Keyword(String keyword) {
-    this.keyword = keyword;
-    this.count = 1;
-  }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String keyword;
+
+    @Column(nullable = false)
+    private Integer count;
+
+    public Keyword(String keyword) {
+        this.keyword = keyword;
+        this.count = 1;
+    }
 }

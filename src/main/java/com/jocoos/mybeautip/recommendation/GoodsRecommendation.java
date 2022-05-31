@@ -19,25 +19,25 @@ import java.util.Date;
 @Table(name = "recommended_goods")
 public class GoodsRecommendation extends MemberAuditable {
 
-  @Id
-  @Column(name = "goods_no")
-  private String goodsNo;
+    @Id
+    @Column(name = "goods_no")
+    private String goodsNo;
 
-  @MapsId("goods_no")
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "goods_no")
-  private Goods goods;
+    @MapsId("goods_no")
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "goods_no")
+    private Goods goods;
 
-  @Column(nullable = false)
-  private int seq;
+    @Column(nullable = false)
+    private int seq;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
 
-  @Column
-  private Date startedAt;
+    @Column
+    private Date startedAt;
 
-  @Column
-  private Date endedAt;
+    @Column
+    private Date endedAt;
 }

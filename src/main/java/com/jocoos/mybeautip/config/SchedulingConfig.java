@@ -10,28 +10,28 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 @Configuration
 public class SchedulingConfig implements SchedulingConfigurer {
 
-  @Value("${mybeautip.point.scheduler-pool-size}")
-  private int poolSize;
+    @Value("${mybeautip.point.scheduler-pool-size}")
+    private int poolSize;
 
-  @Value("${mybeautip.point.scheduler-prefix}")
-  private String poolPrefix;
+    @Value("${mybeautip.point.scheduler-prefix}")
+    private String poolPrefix;
 
-  @Override
-  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-    ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 
-    threadPoolTaskScheduler.setPoolSize(poolSize);
-    threadPoolTaskScheduler.setThreadNamePrefix(poolPrefix);
-    threadPoolTaskScheduler.initialize();
+        threadPoolTaskScheduler.setPoolSize(poolSize);
+        threadPoolTaskScheduler.setThreadNamePrefix(poolPrefix);
+        threadPoolTaskScheduler.initialize();
 
-    taskRegistrar.setTaskScheduler(threadPoolTaskScheduler);
-  }
+        taskRegistrar.setTaskScheduler(threadPoolTaskScheduler);
+    }
 
-  @Bean("instantMessageTaskScheduler")
-  public ThreadPoolTaskScheduler instantMessageTaskScheduler(){
-    ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-    threadPoolTaskScheduler.setPoolSize(5);
-    threadPoolTaskScheduler.setThreadNamePrefix("instantNotificationTaskScheduler");
-    return threadPoolTaskScheduler;
-  }
+    @Bean("instantMessageTaskScheduler")
+    public ThreadPoolTaskScheduler instantMessageTaskScheduler() {
+        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        threadPoolTaskScheduler.setPoolSize(5);
+        threadPoolTaskScheduler.setThreadNamePrefix("instantNotificationTaskScheduler");
+        return threadPoolTaskScheduler;
+    }
 }

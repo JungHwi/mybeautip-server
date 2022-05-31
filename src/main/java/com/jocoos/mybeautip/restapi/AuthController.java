@@ -23,7 +23,7 @@ public class AuthController {
 
     @PostMapping(value = "/{provider}", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<WebSocialLoginResponse> socialLogin(@PathVariable String provider,
-                                         OauthRequest request) {
+                                                              OauthRequest request) {
 
         WebSocialLoginResponse result = socialLoginService.webSocialLogin(provider, request.getCode(), request.getState());
 

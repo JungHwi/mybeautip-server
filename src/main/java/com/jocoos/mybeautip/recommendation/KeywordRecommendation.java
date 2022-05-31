@@ -17,46 +17,46 @@ import java.util.Date;
 @Entity
 @Table(name = "recommended_keywords")
 public class KeywordRecommendation extends MemberAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  /**
-   * 1: member, 2: tag
-   */
-  @Column(nullable = false)
-  private int category;
+    /**
+     * 1: member, 2: tag
+     */
+    @Column(nullable = false)
+    private int category;
 
-  @ManyToOne
-  @JoinColumn(name = "member")
-  private Member member;
+    @ManyToOne
+    @JoinColumn(name = "member")
+    private Member member;
 
-  @ManyToOne
-  @JoinColumn(name = "tag")
-  private Tag tag;
+    @ManyToOne
+    @JoinColumn(name = "tag")
+    private Tag tag;
 
-  @Column(nullable = false)
-  private int seq;
+    @Column(nullable = false)
+    private int seq;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
 
-  @Column
-  private Date startedAt;
+    @Column
+    private Date startedAt;
 
-  @Column
-  private Date endedAt;
-  
-  public KeywordRecommendation(Member member, int seq) {
-    this.category = 1;
-    this.member = member;
-    this.seq = seq;
-  }
-  
-  public KeywordRecommendation(Tag tag, int seq) {
-    this.category = 2;
-    this.tag = tag;
-    this.seq = seq;
-  }
+    @Column
+    private Date endedAt;
+
+    public KeywordRecommendation(Member member, int seq) {
+        this.category = 1;
+        this.member = member;
+        this.seq = seq;
+    }
+
+    public KeywordRecommendation(Tag tag, int seq) {
+        this.category = 2;
+        this.tag = tag;
+        this.seq = seq;
+    }
 }

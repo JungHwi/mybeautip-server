@@ -15,24 +15,24 @@ import javax.persistence.*;
 @Entity
 @Table(name = "video_reports")
 public class VideoReport extends MemberAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "video_id")
-  private Video video;
+    @ManyToOne
+    @JoinColumn(name = "video_id")
+    private Video video;
 
-  @Column
-  private Integer reasonCode;
-  
-  @Column(nullable = false)
-  private String reason;
+    @Column
+    private Integer reasonCode;
 
-  public VideoReport(Video video, Member member, int reasonCode, String reason) {
-    this.video = video;
-    this.createdBy = member;
-    this.reasonCode = reasonCode;
-    this.reason = reason;
-  }
+    @Column(nullable = false)
+    private String reason;
+
+    public VideoReport(Video video, Member member, int reasonCode, String reason) {
+        this.video = video;
+        this.createdBy = member;
+        this.reasonCode = reasonCode;
+        this.reason = reason;
+    }
 }

@@ -6,11 +6,11 @@ import lombok.Data;
 @Data
 public class PaymentTokenData {
 
-  @JsonProperty("access_token")
-  private String accessToken;
+    @JsonProperty("access_token")
+    private String accessToken;
 
-  @JsonProperty("expired_at")
-  private Long expiredAt;
+    @JsonProperty("expired_at")
+    private Long expiredAt;
 
-  private Long now;
+    private Long now;
 }

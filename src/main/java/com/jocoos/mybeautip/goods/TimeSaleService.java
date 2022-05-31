@@ -53,13 +53,13 @@ public class TimeSaleService {
         List<TimeSaleOption> timeSaleOptions = getTimeSaleOptions(now, timeSaleCondition);
 
         carts.forEach(cart -> {
-            timeSales.forEach( ts -> {
+            timeSales.forEach(ts -> {
                 Goods goods = cart.getGoods();
                 if (goods.getGoodsNo().equals(ts.getGoodsNo())) {
                     updateGoods(goods, ts);
                 }
             });
-            timeSaleOptions.forEach( tso -> {
+            timeSaleOptions.forEach(tso -> {
                 GoodsOption goodsOption = cart.getOption();
                 if (goodsOption != null) {
                     if (goodsOption.getGoodsNo().equals(tso.getGoodsNo()) &&

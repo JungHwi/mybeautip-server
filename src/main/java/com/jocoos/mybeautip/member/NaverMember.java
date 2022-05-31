@@ -18,25 +18,25 @@ import javax.persistence.Table;
 @EqualsAndHashCode(callSuper = false)
 public class NaverMember extends CreatedDateAuditable {
 
-  @Id
-  @Column(nullable = false, length = 30)
-  private String naverId;
+    @Id
+    @Column(nullable = false, length = 30)
+    private String naverId;
 
-  @Column(length = 30)
-  private String nickname;
+    @Column(length = 30)
+    private String nickname;
 
-  @Column(nullable = false)
-  private Long memberId;
+    @Column(nullable = false)
+    private Long memberId;
 
-  public NaverMember(String naverId, String nickname, Long memberId) {
-    this.naverId = naverId;
-    this.nickname = nickname;
-    this.memberId = memberId;
-  }
+    public NaverMember(String naverId, String nickname, Long memberId) {
+        this.naverId = naverId;
+        this.nickname = nickname;
+        this.memberId = memberId;
+    }
 
-  public NaverMember(SocialMember socialMember, long memberId) {
-    this.naverId = socialMember.getId();
-    this.nickname = socialMember.getName();
-    this.memberId = memberId;
-  }
+    public NaverMember(SocialMember socialMember, long memberId) {
+        this.naverId = socialMember.getId();
+        this.nickname = socialMember.getName();
+        this.memberId = memberId;
+    }
 }

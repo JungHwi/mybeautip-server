@@ -11,27 +11,27 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/1/words", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WordController {
 
-  
-  private final MemberService memberService;
 
-  public WordController(MemberService memberService) {
-    this.memberService = memberService;
-  }
+    private final MemberService memberService;
 
-  @GetMapping
-  public void isValidParams(@RequestParam(required = false) String username,
-                            @RequestParam(required = false) String email,
-                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    if (username == null && email == null) {
-      throw new BadRequestException("invalid_query_string");
+    public WordController(MemberService memberService) {
+        this.memberService = memberService;
     }
-    
-    if (email != null) {
-      memberService.checkEmailValidation(email, lang);
+
+    @GetMapping
+    public void isValidParams(@RequestParam(required = false) String username,
+                              @RequestParam(required = false) String email,
+                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        if (username == null && email == null) {
+            throw new BadRequestException("invalid_query_string");
+        }
+
+        if (email != null) {
+            memberService.checkEmailValidation(email, lang);
+        }
+
+        if (username != null) {
+            memberService.checkUsernameValidation(username, lang);
+        }
     }
-  
-    if (username != null) {
-      memberService.checkUsernameValidation(username, lang);
-    }
-  }
 }

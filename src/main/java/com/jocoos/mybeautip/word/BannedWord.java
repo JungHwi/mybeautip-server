@@ -1,12 +1,11 @@
 package com.jocoos.mybeautip.word;
 
-import javax.persistence.*;
-import java.util.Date;
-
+import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.Data;
+import javax.persistence.*;
+import java.util.Date;
 
 @Data
 @Entity
@@ -14,19 +13,19 @@ import lombok.Data;
 @Table(name = "banned_words")
 public class BannedWord {
 
-  public static final int CATEGORY_USERNAME = 1;
-  public static final int CATEGORY_BANNED_WORD = 2;
-  @Id
-  private String word;
+    public static final int CATEGORY_USERNAME = 1;
+    public static final int CATEGORY_BANNED_WORD = 2;
+    @Id
+    private String word;
 
-  @Column
-  private String clean;
+    @Column
+    private String clean;
 
-  @Column(nullable = false)
-  private int category;
+    @Column(nullable = false)
+    private int category;
 
-  @Column(nullable = false)
-  @CreatedDate
-  private Date createdAt;
+    @Column(nullable = false)
+    @CreatedDate
+    private Date createdAt;
 
 }

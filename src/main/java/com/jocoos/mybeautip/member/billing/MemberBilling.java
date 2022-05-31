@@ -15,32 +15,32 @@ import java.util.Date;
 @Entity
 @Table(name = "member_billings")
 public class MemberBilling extends CreatedDateAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private Boolean base;
+    @Column(nullable = false)
+    private Boolean base;
 
-  @Column(nullable = false)
-  private String customerId;
+    @Column(nullable = false)
+    private String customerId;
 
-  @Column(nullable = false)
-  private String salt;
+    @Column(nullable = false)
+    private String salt;
 
-  @Column(nullable = false)
-  private Long memberId;
+    @Column(nullable = false)
+    private Long memberId;
 
-  @Column(nullable = false)
-  private Boolean valid;
+    @Column(nullable = false)
+    private Boolean valid;
 
-  @Column(nullable = false)
-  private String cardName;
+    @Column(nullable = false)
+    private String cardName;
 
-  @Column(nullable = false)
-  private String cardNumber;
+    @Column(nullable = false)
+    private String cardNumber;
 
-  @Column
-  @CreatedDate
-  private Date createdAt;
+    @Column
+    @CreatedDate
+    private Date createdAt;
 }

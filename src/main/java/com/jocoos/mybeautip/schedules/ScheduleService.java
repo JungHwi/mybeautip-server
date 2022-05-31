@@ -19,11 +19,9 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class ScheduleService {
-    private static final String SCHEDULE_ITEM_NOT_FOUND = "schedule.item_not_found";
-
     public static final String DIRECTION_PREV = "prev";
     public static final String DIRECTION_NEXT = "next";
-
+    private static final String SCHEDULE_ITEM_NOT_FOUND = "schedule.item_not_found";
     private final MessageService messageService;
     private final SlackService slackService;
     private final ScheduleRepository scheduleRepository;

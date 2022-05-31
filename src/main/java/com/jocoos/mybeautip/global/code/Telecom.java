@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Telecom implements CodeValue {
-    SKT(false,"SKT"),
+    SKT(false, "SKT"),
     KT(false, "KT"),
     LG(false, "LG U+"),
     SKT_SAVE(true, "SKT 알뜰폰"),

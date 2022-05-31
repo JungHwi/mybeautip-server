@@ -1,18 +1,12 @@
 package com.jocoos.mybeautip.member.point;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.util.Date;
-
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data
@@ -75,6 +69,10 @@ public class MemberPointDetail extends CreatedDateAuditable {
         this.orderId = orderId;
     }
 
+    public static int getEarnedState() {
+        return MemberPoint.STATE_EARNED_POINT;
+    }
+
     private void setPointAndState(int point, int state) {
         switch (state) {
             case MemberPoint.STATE_USE_POINT:
@@ -89,10 +87,6 @@ public class MemberPointDetail extends CreatedDateAuditable {
                 this.point = point;
                 break;
         }
-    }
-
-    public static int getEarnedState() {
-        return MemberPoint.STATE_EARNED_POINT;
     }
 
     public void setCreatedAt(Date date) {

@@ -12,13 +12,13 @@ import javax.persistence.*;
 @Entity
 @Table(name = "delivery_charge_options")
 public class DeliveryChargeOption {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-  @Column(nullable = false)
-  private Integer deliveryChargeId;
+    @Column(nullable = false)
+    private Integer deliveryChargeId;
 
-  @Column
-  private String extraInfo;
+    @Column
+    private String extraInfo;
 }

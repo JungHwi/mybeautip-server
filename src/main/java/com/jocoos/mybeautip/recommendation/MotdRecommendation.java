@@ -18,28 +18,28 @@ import java.util.Date;
 @Entity
 @Table(name = "recommended_motds")
 public class MotdRecommendation extends MemberAuditable {
-  @Id
-  @Column(name = "video_id")
-  private Long videoId;
+    @Id
+    @Column(name = "video_id")
+    private Long videoId;
 
-  @MapsId
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "video_id")
-  private Video video;
+    @MapsId
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "video_id")
+    private Video video;
 
-  @Column(nullable = false)
-  private int seq;
+    @Column(nullable = false)
+    private int seq;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
 
-  @Column(nullable = false)
-  private Long baseId;
+    @Column(nullable = false)
+    private Long baseId;
 
-  @Column
-  private Date startedAt;
+    @Column
+    private Date startedAt;
 
-  @Column
-  private Date endedAt;
+    @Column
+    private Date endedAt;
 }

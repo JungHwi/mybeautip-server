@@ -89,7 +89,7 @@ public class VideoUploadNotificationService implements NotificationService<Video
         return notificationCenterRepository.save(entity);
     }
 
-    private void sendAppPush(int messageIndex, String imageUrl, Long notificationId,  NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+    private void sendAppPush(int messageIndex, String imageUrl, Long notificationId, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
         AppPushMessage pushMessage = getAppPushMessage(messageIndex, imageUrl, notificationId, arguments);
         pushService.send(targetInfo, pushMessage);
     }

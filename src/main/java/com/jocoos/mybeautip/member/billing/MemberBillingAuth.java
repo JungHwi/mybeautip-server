@@ -12,33 +12,33 @@ import java.util.Date;
 @Entity
 @Table(name = "member_billing_auths")
 public class MemberBillingAuth extends CreatedDateAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private Long memberId;
+    @Column(nullable = false)
+    private Long memberId;
 
-  @Column(length = 10)
-  private String username;
+    @Column(length = 10)
+    private String username;
 
-  @Column(length = 50)
-  private String email;
+    @Column(length = 50)
+    private String email;
 
-  @Column(length = 256)
-  private String password;
+    @Column(length = 256)
+    private String password;
 
-  @Column(length = 20)
-  private String salt;
+    @Column(length = 20)
+    private String salt;
 
-  @Column(nullable = false)
-  private Integer errorCount;
+    @Column(nullable = false)
+    private Integer errorCount;
 
-  @Column
-  private Date resetAt;
+    @Column
+    private Date resetAt;
 
-  public MemberBillingAuth() {
-    this.errorCount = 0;
-    this.resetAt = new Date();
-  }
+    public MemberBillingAuth() {
+        this.errorCount = 0;
+        this.resetAt = new Date();
+    }
 }

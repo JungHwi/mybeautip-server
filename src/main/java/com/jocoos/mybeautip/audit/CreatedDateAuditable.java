@@ -14,7 +14,7 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class CreatedDateAuditable {
 
-  @Column(nullable = false)
-  @CreatedDate
-  protected Date createdAt;
+    @Column(nullable = false)
+    @CreatedDate
+    protected Date createdAt;
 }

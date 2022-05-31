@@ -32,132 +32,131 @@ import java.util.List;
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 public class BlockController {
-  private final BlockService blockService;
-  private final MemberService memberService;
-  private final MessageService messageService;
-  private final MemberRepository memberRepository;
-  private final BlockRepository blockRepository;
+    private static final String MEMBER_NOT_FOUND = "member.not_found";
+    private static final String MEMBER_REPORT_BAD_REQUEST = "member.report_bad_request";
+    private static final String MEMBER_BLOCK_NOT_FOUND = "member_block.not_found";
+    private final BlockService blockService;
+    private final MemberService memberService;
+    private final MessageService messageService;
+    private final MemberRepository memberRepository;
+    private final BlockRepository blockRepository;
 
-  private static final String MEMBER_NOT_FOUND = "member.not_found";
-  private static final String MEMBER_REPORT_BAD_REQUEST = "member.report_bad_request";
-  private static final String MEMBER_BLOCK_NOT_FOUND = "member_block.not_found";
-  
-  public BlockController(BlockService blockService,
-                         MemberService memberService,
-                         MessageService messageService,
-                         MemberRepository memberRepository,
-                         BlockRepository blockRepository) {
-    this.blockService = blockService;
-    this.memberService = memberService;
-    this.messageService = messageService;
-    this.memberRepository = memberRepository;
-    this.blockRepository = blockRepository;
-  }
-  
-  @PostMapping("/me/blocks")
-  public BlockResponse blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest,
-                                   BindingResult bindingResult,
-                                   @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    if (bindingResult.hasErrors()) {
-      log.debug("bindingResult: {}", bindingResult);
-      throw new BadRequestException("invalid blocks request");
+    public BlockController(BlockService blockService,
+                           MemberService memberService,
+                           MessageService messageService,
+                           MemberRepository memberRepository,
+                           BlockRepository blockRepository) {
+        this.blockService = blockService;
+        this.memberService = memberService;
+        this.messageService = messageService;
+        this.memberRepository = memberRepository;
+        this.blockRepository = blockRepository;
     }
 
-    Long me = memberService.currentMemberId();
-    long you = blockMemberRequest.getMemberId();
-    
-    if (me == you) {
-      throw new BadRequestException("report_bad_request", messageService.getMessage(MEMBER_REPORT_BAD_REQUEST, lang));
-    }
-    log.debug("Block " + me + " : " + you);
+    @PostMapping("/me/blocks")
+    public BlockResponse blockMember(@Valid @RequestBody BlockMemberRequest blockMemberRequest,
+                                     BindingResult bindingResult,
+                                     @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        if (bindingResult.hasErrors()) {
+            log.debug("bindingResult: {}", bindingResult);
+            throw new BadRequestException("invalid blocks request");
+        }
 
-    Member member = memberRepository.findByIdAndDeletedAtIsNull(you)
-      .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+        Long me = memberService.currentMemberId();
+        long you = blockMemberRequest.getMemberId();
 
-    Block block = blockService.blockMember(me, member);
-    return new BlockResponse(block.getId());
+        if (me == you) {
+            throw new BadRequestException("report_bad_request", messageService.getMessage(MEMBER_REPORT_BAD_REQUEST, lang));
+        }
+        log.debug("Block " + me + " : " + you);
 
-  }
-  
-  @DeleteMapping("/me/blocks/{id:.+}")
-  public void unblockMember(@PathVariable("id") Long id,
-                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    Long me = memberService.currentMemberId();
-    Block block = blockRepository.findByIdAndMe(id, me)
-        .orElseThrow(() ->  new NotFoundException("block_not_found", messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
+        Member member = memberRepository.findByIdAndDeletedAtIsNull(you)
+                .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
-    blockRepository.delete(block);
-  }
-  
-  @GetMapping("/me/blocks")
-  public CursorResponse getMyBlockMembers(@RequestParam(defaultValue = "50") int count,
-                                          @RequestParam(required = false) String cursor,
-                                          HttpServletRequest httpServletRequest) {
-    return getBlockMembers(httpServletRequest.getRequestURI(), cursor, count);
-  }
+        Block block = blockService.blockMember(me, member);
+        return new BlockResponse(block.getId());
 
-  @GetMapping("/me/blocked")
-  public BlockResponse isBlocked(@RequestParam(name="member_id") Long memberId) {
-    Long me = memberService.currentMemberId();
-    BlockResponse response = new BlockResponse(false);
-    blockRepository.findByMeAndMemberYouId(memberId, me)
-      .ifPresent(block -> response.setBlocked(true));
-    return response;
-  }
-
-
-  private CursorResponse getBlockMembers(String requestUri, String cursor, int count) {
-    Date startCursor = (Strings.isBlank(cursor)) ?
-      new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
-
-    PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Block> page = blockRepository.findByCreatedAtBeforeAndMe(startCursor, memberService.currentMemberId(), pageable);
-    List<BlockInfo> result = new ArrayList<>();
-    for (Block block : page.getContent()) {
-      result.add(new BlockInfo(block, memberService.getMemberInfo(block.getMemberYou())));
     }
 
-    String nextCursor = null;
-    if (result.size() > 0) {
-      nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
-    }
-    return new CursorResponse.Builder<>(requestUri, result)
-      .withCount(count)
-      .withTotalCount(Math.toIntExact(page.getTotalElements()))
-      .withCursor(nextCursor).toBuild();
-  }
+    @DeleteMapping("/me/blocks/{id:.+}")
+    public void unblockMember(@PathVariable("id") Long id,
+                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        Long me = memberService.currentMemberId();
+        Block block = blockRepository.findByIdAndMe(id, me)
+                .orElseThrow(() -> new NotFoundException("block_not_found", messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
 
-  @Data
-  @NoArgsConstructor
-  public class BlockInfo {
-    private Long blockId;
-    private Date createdAt;
-    private MemberInfo member;
-
-    BlockInfo(Block block, MemberInfo member) {
-      this.blockId = block.getId();
-      this.createdAt = block.getCreatedAt();
-      this.member = member;
-    }
-  }
-
-  @Data
-  static class BlockMemberRequest {
-    private Long memberId;
-  }
-
-  @Data
-  @NoArgsConstructor
-  class BlockResponse {
-    Long id;
-    Boolean blocked;
-
-    BlockResponse(Long id) {
-      this.id = id;
+        blockRepository.delete(block);
     }
 
-    BlockResponse(Boolean blocked) {
-      this.blocked = blocked;
+    @GetMapping("/me/blocks")
+    public CursorResponse getMyBlockMembers(@RequestParam(defaultValue = "50") int count,
+                                            @RequestParam(required = false) String cursor,
+                                            HttpServletRequest httpServletRequest) {
+        return getBlockMembers(httpServletRequest.getRequestURI(), cursor, count);
     }
-  }
+
+    @GetMapping("/me/blocked")
+    public BlockResponse isBlocked(@RequestParam(name = "member_id") Long memberId) {
+        Long me = memberService.currentMemberId();
+        BlockResponse response = new BlockResponse(false);
+        blockRepository.findByMeAndMemberYouId(memberId, me)
+                .ifPresent(block -> response.setBlocked(true));
+        return response;
+    }
+
+
+    private CursorResponse getBlockMembers(String requestUri, String cursor, int count) {
+        Date startCursor = (Strings.isBlank(cursor)) ?
+                new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
+
+        PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Block> page = blockRepository.findByCreatedAtBeforeAndMe(startCursor, memberService.currentMemberId(), pageable);
+        List<BlockInfo> result = new ArrayList<>();
+        for (Block block : page.getContent()) {
+            result.add(new BlockInfo(block, memberService.getMemberInfo(block.getMemberYou())));
+        }
+
+        String nextCursor = null;
+        if (result.size() > 0) {
+            nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+        }
+        return new CursorResponse.Builder<>(requestUri, result)
+                .withCount(count)
+                .withTotalCount(Math.toIntExact(page.getTotalElements()))
+                .withCursor(nextCursor).toBuild();
+    }
+
+    @Data
+    static class BlockMemberRequest {
+        private Long memberId;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public class BlockInfo {
+        private Long blockId;
+        private Date createdAt;
+        private MemberInfo member;
+
+        BlockInfo(Block block, MemberInfo member) {
+            this.blockId = block.getId();
+            this.createdAt = block.getCreatedAt();
+            this.member = member;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    class BlockResponse {
+        Long id;
+        Boolean blocked;
+
+        BlockResponse(Long id) {
+            this.id = id;
+        }
+
+        BlockResponse(Boolean blocked) {
+            this.blocked = blocked;
+        }
+    }
 }

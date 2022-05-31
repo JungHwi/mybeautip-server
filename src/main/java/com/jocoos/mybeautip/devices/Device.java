@@ -20,44 +20,44 @@ import java.util.Date;
 @Table(name = "devices")
 public class Device extends MemberAuditable {
 
-  public static final String OS_NAME_IOS = "ios";
-  public static final String OS_NAME_ANDROID = "android";
+    public static final String OS_NAME_IOS = "ios";
+    public static final String OS_NAME_ANDROID = "android";
 
-  @Id
-  private String id;
+    @Id
+    private String id;
 
-  @Column(nullable = false)
-  private String arn;
+    @Column(nullable = false)
+    private String arn;
 
-  @Column(nullable = false)
-  private String os;
+    @Column(nullable = false)
+    private String os;
 
-  @Column(nullable = false)
-  private String osVersion;
+    @Column(nullable = false)
+    private String osVersion;
 
-  @Column(nullable = false)
-  private String name;
+    @Column(nullable = false)
+    private String name;
 
-  @Column(nullable = false)
-  private String language;
+    @Column(nullable = false)
+    private String language;
 
-  @Column(nullable = false)
-  private String timezone;
+    @Column(nullable = false)
+    private String timezone;
 
-  @Column(nullable = false)
-  private String appVersion;
+    @Column(nullable = false)
+    private String appVersion;
 
-  @Column(nullable = false)
-  private boolean valid = true; // default value
-  
-  @Column(nullable = false)
-  private boolean pushable;
+    @Column(nullable = false)
+    private boolean valid = true; // default value
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column(nullable = false)
+    private boolean pushable;
 
-  public void setCreatedBy(Member createdBy) {
-    this.createdBy = createdBy;
-  }
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
+
+    public void setCreatedBy(Member createdBy) {
+        this.createdBy = createdBy;
+    }
 }

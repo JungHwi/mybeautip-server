@@ -19,48 +19,48 @@ import java.util.Map;
 @Slf4j
 public class NaverTokenGranter extends AbstractTokenGranter {
 
-  private final MemberService memberService;
-  private final MemberRepository memberRepository;
-  private final NaverMemberRepository naverMemberRepository;
+    private final MemberService memberService;
+    private final MemberRepository memberRepository;
+    private final NaverMemberRepository naverMemberRepository;
 
-  public NaverTokenGranter(
-      AuthorizationServerTokenServices tokenServices,
-      ClientDetailsService clientDetailsService,
-      OAuth2RequestFactory requestFactory,
-      MemberService memberService,
-      MemberRepository memberRepository,
-      NaverMemberRepository naverMemberRepository) {
+    public NaverTokenGranter(
+            AuthorizationServerTokenServices tokenServices,
+            ClientDetailsService clientDetailsService,
+            OAuth2RequestFactory requestFactory,
+            MemberService memberService,
+            MemberRepository memberRepository,
+            NaverMemberRepository naverMemberRepository) {
 
-    super(tokenServices, clientDetailsService, requestFactory, "naver");
-    this.memberService = memberService;
-    this.memberRepository = memberRepository;
-    this.naverMemberRepository = naverMemberRepository;
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
-    Map<String, String> requestParameters = tokenRequest.getRequestParameters();
-    String naverId = requestParameters.get("social_id");
-    String username = requestParameters.get("social_id");
-
-    log.debug("naver id: {}, username: {}", naverId, username);
-
-    if (StringUtils.isBlank(naverId)) {
-      throw new AuthenticationException("naver ID is required");
+        super(tokenServices, clientDetailsService, requestFactory, "naver");
+        this.memberService = memberService;
+        this.memberRepository = memberRepository;
+        this.naverMemberRepository = naverMemberRepository;
     }
 
-    if (naverId.length() > 30) {
-      throw new AuthenticationException("The naver ID must be less or equals to 30");
+    @Override
+    @Transactional(readOnly = true)
+    public OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
+        Map<String, String> requestParameters = tokenRequest.getRequestParameters();
+        String naverId = requestParameters.get("social_id");
+        String username = requestParameters.get("social_id");
+
+        log.debug("naver id: {}, username: {}", naverId, username);
+
+        if (StringUtils.isBlank(naverId)) {
+            throw new AuthenticationException("naver ID is required");
+        }
+
+        if (naverId.length() > 30) {
+            throw new AuthenticationException("The naver ID must be less or equals to 30");
+        }
+
+        return naverMemberRepository.findById(naverId)
+                .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such naver member. naver social id - " + naverId));
     }
 
-    return naverMemberRepository.findById(naverId)
-            .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
-            .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such naver member. naver social id - " + naverId));
-  }
-
-  private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
-    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
-    return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
-  }
+    private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
+        return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
+    }
 }

@@ -38,7 +38,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CommunityCommentReplyNotificationService implements NotificationService<Comment> {
 
-//    private final PostRepository postRepository;
+    //    private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final MemberNotificationService memberNotificationService;
     private final NotificationCenterRepository notificationCenterRepository;

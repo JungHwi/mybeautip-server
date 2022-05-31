@@ -1,30 +1,29 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.schedules.Schedule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.schedules.Schedule;
+import java.util.Date;
 
 @Projection(name = "schedule_details", types = Schedule.class)
 public interface ScheduleExcerpt {
 
-  Long getId();
+    Long getId();
 
-  String getTitle();
+    String getTitle();
 
-  String getThumbnailUrl();
+    String getThumbnailUrl();
 
-  @Value("#{target.createdBy}")
-  Member getMember();
+    @Value("#{target.createdBy}")
+    Member getMember();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 
-  Date getStartedAt();
+    Date getStartedAt();
 
-  String getInstantTitle();
+    String getInstantTitle();
 
-  String getInstantMessage();
+    String getInstantMessage();
 }

@@ -10,5 +10,6 @@ import java.util.List;
 public interface NotificationTemplateConverter {
 
     NotificationTemplate convert(NotificationTemplateEntity entity);
+
     List<NotificationTemplate> convert(List<NotificationTemplateEntity> entityList);
 }

@@ -32,9 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
 @SpringBootTest
-class MemberControllerTest {
+class LegacyMemberControllerTest {
     @Autowired
-    private MemberController memberController;
+    private LegacyMemberController legacyMemberController;
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
@@ -46,7 +46,7 @@ class MemberControllerTest {
             }
         };
 
-        EntityModel<MemberMeInfo> info = memberController.getMe(principal, "ko");
+        EntityModel<MemberMeInfo> info = legacyMemberController.getMe(principal, "ko");
         System.out.println("info >> " + info);
     }
 
@@ -61,14 +61,14 @@ class MemberControllerTest {
                 "image/jpeg",
                 Files.newInputStream(Paths.get(file.getAbsolutePath())));
 
-        ResponseEntity<Map<String, String>> info = memberController.uploadAvatar(multipartFile);
+        ResponseEntity<Map<String, String>> info = legacyMemberController.uploadAvatar(multipartFile);
         assertEquals(HttpStatus.OK, info.getStatusCode());
     }
 
     @Test
     @WithUserDetails(value = "10", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     public void getDetailInfo() {
-        ResponseEntity<MemberDetailResponse> result =memberController.getDetailInfo();
+        ResponseEntity<MemberDetailResponse> result = legacyMemberController.getDetailInfo();
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
@@ -81,12 +81,12 @@ class MemberControllerTest {
                 .skinWorry(Stream.of(SkinWorry.PORES_SCARS, SkinWorry.SEBUM).collect(Collectors.toSet()))
                 .build();
 
-        ResponseEntity result = memberController.updateDetailInfo(request);
+        ResponseEntity result = legacyMemberController.updateDetailInfo(request);
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
     public void migrationTag() {
-        memberController.migrationTag();
+        legacyMemberController.migrationTag();
     }
 }

@@ -9,12 +9,12 @@ import java.util.Optional;
 
 public interface VideoScrapRepository extends JpaRepository<VideoScrap, Long> {
 
-  boolean existsByVideoIdAndCreatedById(Long videoId, Long member);
+    boolean existsByVideoIdAndCreatedById(Long videoId, Long member);
 
-  Optional<VideoScrap> findByVideoIdAndCreatedById(Long videoId, Long member);
+    Optional<VideoScrap> findByVideoIdAndCreatedById(Long videoId, Long member);
 
-  List<VideoScrap> findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNull(Long createdId, Date createdAt, String visibility, Pageable pageable);
+    List<VideoScrap> findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNull(Long createdId, Date createdAt, String visibility, Pageable pageable);
 
-  List<VideoScrap> findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNull(Long createdId, String visibility, Pageable pageable);
+    List<VideoScrap> findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNull(Long createdId, String visibility, Pageable pageable);
 
 }

@@ -13,15 +13,15 @@ import javax.persistence.*;
 @Entity
 @Table(name = "video_likes")
 public class VideoLike extends MemberAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "video_id")
-  private Video video;
+    @ManyToOne
+    @JoinColumn(name = "video_id")
+    private Video video;
 
-  public VideoLike(Video video) {
-    this.video = video;
-  }
+    public VideoLike(Video video) {
+        this.video = video;
+    }
 }

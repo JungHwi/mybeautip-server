@@ -25,163 +25,163 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificationAspect {
 
-  private final LegacyNotificationService legacyNotificationService;
-  private final FeedService feedService;
-  private final SlackService slackService;
+    private final LegacyNotificationService legacyNotificationService;
+    private final FeedService feedService;
+    private final SlackService slackService;
 
 
-  public NotificationAspect(LegacyNotificationService legacyNotificationService,
-                            SlackService slackService,
-                            InstantNotificationConfig instantNotificationConfig,
-                            ThreadPoolTaskScheduler taskScheduler,
-                            FeedService feedService) {
-    this.legacyNotificationService = legacyNotificationService;
-    this.slackService = slackService;
-    this.feedService = feedService;
-  }
-
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.startVideo(..))",
-          returning = "result")
-  public void onAfterReturningStartVideo(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-
-    // Ignore when duplicate createVideo
-    if (result == null) {
-      return;
+    public NotificationAspect(LegacyNotificationService legacyNotificationService,
+                              SlackService slackService,
+                              InstantNotificationConfig instantNotificationConfig,
+                              ThreadPoolTaskScheduler taskScheduler,
+                              FeedService feedService) {
+        this.legacyNotificationService = legacyNotificationService;
+        this.slackService = slackService;
+        this.feedService = feedService;
     }
 
-    if (result instanceof Video) {
-      Video video = (Video) result;
-      log.debug("video: {}", video);
-      if ("PUBLIC".equals(video.getVisibility())) {
-        feedService.feedVideo(video);
-      }
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.startVideo(..))",
+            returning = "result")
+    public void onAfterReturningStartVideo(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-      slackService.sendForVideo(video);
+        // Ignore when duplicate createVideo
+        if (result == null) {
+            return;
+        }
 
-      // See VideoUploadNotificationService.occurs 참고.
+        if (result instanceof Video) {
+            Video video = (Video) result;
+            log.debug("video: {}", video);
+            if ("PUBLIC".equals(video.getVisibility())) {
+                feedService.feedVideo(video);
+            }
+
+            slackService.sendForVideo(video);
+
+            // See VideoUploadNotificationService.occurs 참고.
 //      if ("UPLOADED".equals(video.getType()) && "VOD".equals(video.getState())) {
 //        legacyNotificationService.notifyUploadedMyVideo(video);
 //      }
+        }
     }
-  }
 
-  @After(value = "execution(* com.jocoos.mybeautip.video.VideoLikeRepository.save(..))")
-  public void onAfterSaveVideoLike(JoinPoint joinPoint) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-    Object o = joinPoint.getArgs()[0];
-    if (o instanceof VideoLike) {
-      VideoLike videoLike = (VideoLike) o;
-      log.debug("video like: {}", videoLike);
-      legacyNotificationService.notifyAddVideoLike(videoLike);
+    @After(value = "execution(* com.jocoos.mybeautip.video.VideoLikeRepository.save(..))")
+    public void onAfterSaveVideoLike(JoinPoint joinPoint) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
+        Object o = joinPoint.getArgs()[0];
+        if (o instanceof VideoLike) {
+            VideoLike videoLike = (VideoLike) o;
+            log.debug("video like: {}", videoLike);
+            legacyNotificationService.notifyAddVideoLike(videoLike);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.report.VideoReportRepository.save(..))",
-          returning = "result")
-  public void onAfterReturningReportVideo(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.report.VideoReportRepository.save(..))",
+            returning = "result")
+    public void onAfterReturningReportVideo(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof VideoReport) {
-      VideoReport videoReport = (VideoReport) result;
-      log.debug("videoReport: {}", videoReport);
-      slackService.sendForReportVideo(videoReport);
+        if (result instanceof VideoReport) {
+            VideoReport videoReport = (VideoReport) result;
+            log.debug("videoReport: {}", videoReport);
+            slackService.sendForReportVideo(videoReport);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.comment.CommentReportRepository.save(..))",
-          returning = "result")
-  public void onAfterReturningReportComment(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.comment.CommentReportRepository.save(..))",
+            returning = "result")
+    public void onAfterReturningReportComment(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof CommentReport) {
-      CommentReport commentReport = (CommentReport) result;
-      log.debug("commentReport: {}", commentReport);
-      slackService.sendForReportComment(commentReport);
+        if (result instanceof CommentReport) {
+            CommentReport commentReport = (CommentReport) result;
+            log.debug("commentReport: {}", commentReport);
+            slackService.sendForReportComment(commentReport);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.report.ReportRepository.save(..))",
-          returning = "result")
-  public void onAfterReturningReportMember(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.report.ReportRepository.save(..))",
+            returning = "result")
+    public void onAfterReturningReportMember(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof Report) {
-      Report memberReport = (Report) result;
-      log.debug("memberReport: {}", memberReport);
-      slackService.sendForReportMember(memberReport);
+        if (result instanceof Report) {
+            Report memberReport = (Report) result;
+            log.debug("memberReport: {}", memberReport);
+            slackService.sendForReportMember(memberReport);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.block.BlockRepository.save(..))",
-          returning = "result")
-  public void onAfterReturningBlockMember(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.block.BlockRepository.save(..))",
+            returning = "result")
+    public void onAfterReturningBlockMember(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof Block) {
-      Block memberBlock = (Block) result;
-      log.debug("memberBlock: {}", memberBlock);
-      slackService.sendForBlockMember(memberBlock);
+        if (result instanceof Block) {
+            Block memberBlock = (Block) result;
+            log.debug("memberBlock: {}", memberBlock);
+            slackService.sendForBlockMember(memberBlock);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.notifyPayment(..))",
-          returning = "result")
-  public void onAfterReturningOrder(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.notifyPayment(..))",
+            returning = "result")
+    public void onAfterReturningOrder(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof Order) {
-      Order order = (Order) result;
-      log.debug("order: {}", order);
-      slackService.sendForOrder(order);
+        if (result instanceof Order) {
+            Order order = (Order) result;
+            log.debug("order: {}", order);
+            slackService.sendForOrder(order);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.cancelOrderInquire(..))",
-          returning = "result")
-  public void onAfterReturningOrderCancel(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.cancelOrderInquire(..))",
+            returning = "result")
+    public void onAfterReturningOrderCancel(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof OrderInquiry) {
-      OrderInquiry orderInquiry = (OrderInquiry) result;
-      log.debug("orderInquiry: {}", orderInquiry);
-      slackService.sendForOrderCancel(orderInquiry);
+        if (result instanceof OrderInquiry) {
+            OrderInquiry orderInquiry = (OrderInquiry) result;
+            log.debug("orderInquiry: {}", orderInquiry);
+            slackService.sendForOrderCancel(orderInquiry);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.cancelOrderInquireByAdmin(..))",
-          returning = "result")
-  public void onAfterReturningOrderCancelByAdmin(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.cancelOrderInquireByAdmin(..))",
+            returning = "result")
+    public void onAfterReturningOrderCancelByAdmin(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof OrderInquiry) {
-      OrderInquiry orderInquiry = (OrderInquiry) result;
-      log.debug("orderInquiry: {}", orderInquiry);
-      slackService.sendForOrderCancelByAdmin(orderInquiry);
+        if (result instanceof OrderInquiry) {
+            OrderInquiry orderInquiry = (OrderInquiry) result;
+            log.debug("orderInquiry: {}", orderInquiry);
+            slackService.sendForOrderCancelByAdmin(orderInquiry);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.inquiryExchangeOrReturn(..))",
-          returning = "result")
-  public void onAfterReturningOrderExchangeOrReturn(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.order.OrderService.inquiryExchangeOrReturn(..))",
+            returning = "result")
+    public void onAfterReturningOrderExchangeOrReturn(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof OrderInquiry) {
-      OrderInquiry orderInquiry = (OrderInquiry) result;
-      log.debug("orderInquiry: {}", orderInquiry);
-      slackService.SendForOrderExchangeOrReturn(orderInquiry);
+        if (result instanceof OrderInquiry) {
+            OrderInquiry orderInquiry = (OrderInquiry) result;
+            log.debug("orderInquiry: {}", orderInquiry);
+            slackService.SendForOrderExchangeOrReturn(orderInquiry);
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.log.MemberLeaveLogRepository.save(..))",
-          returning = "result")
-  public void onAfterReturningAddDeleteMemberLog(JoinPoint joinPoint, Object result) {
-    log.info("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.log.MemberLeaveLogRepository.save(..))",
+            returning = "result")
+    public void onAfterReturningAddDeleteMemberLog(JoinPoint joinPoint, Object result) {
+        log.info("joinPoint: {}", joinPoint.toLongString());
 
-    if (result instanceof MemberLeaveLog) {
-      MemberLeaveLog memberLeaveLog = (MemberLeaveLog) result;
-      log.info("video: {}", memberLeaveLog);
-      slackService.sendForDeleteMember(memberLeaveLog);
+        if (result instanceof MemberLeaveLog) {
+            MemberLeaveLog memberLeaveLog = (MemberLeaveLog) result;
+            log.info("video: {}", memberLeaveLog);
+            slackService.sendForDeleteMember(memberLeaveLog);
+        }
     }
-  }
 }

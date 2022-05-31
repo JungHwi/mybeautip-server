@@ -22,64 +22,64 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/1")
 public class KeyController {
 
-  @Autowired
-  private AWSSecurityTokenService awsSTS;
+    @Autowired
+    private AWSSecurityTokenService awsSTS;
 
-  @Value("${mybeautip.addr.confirm-key}")
-  private String confirmKey;
-
-  @Value("${mybeautip.aws.s3.bucket}")
-  private String bucketName;
-
-  @Value("${mybeautip.aws.s3.region}")
-  private String region;
-
-  @Value("${mybeautip.aws.sts.token-validity-duration-seconds}")
-  private String tokenValidityDurations;
-
-
-  @GetMapping("/keys")
-  public ResponseEntity<KeyInfo> getAddressConfirmKey(@RequestParam String name) {
-    log.debug("confirmKey: {}", confirmKey);
-
-    switch (name) {
-      case "addr_confirm":
-        return new ResponseEntity<>(new KeyInfo(confirmKey), HttpStatus.OK);
-
-      case "storage":
-        GetSessionTokenRequest request = new GetSessionTokenRequest();
-        request.withDurationSeconds(Integer.parseInt(tokenValidityDurations));
-        GetSessionTokenResult result = awsSTS.getSessionToken(request);
-        KeyInfo keyInfo = new KeyInfo(bucketName, region, result.getCredentials());
-        return new ResponseEntity<>(keyInfo, HttpStatus.OK);
-
-      default:
-        throw new BadRequestException("invalid request name - " + name);
-    }
-  }
-
-  @NoArgsConstructor
-  @Getter
-  static class KeyInfo {
+    @Value("${mybeautip.addr.confirm-key}")
     private String confirmKey;
-    private String bucket;
+
+    @Value("${mybeautip.aws.s3.bucket}")
+    private String bucketName;
+
+    @Value("${mybeautip.aws.s3.region}")
     private String region;
-    private String accessKeyId;
-    private String secretAccessKey;
-    private String sessionToken;
-    private Long expiration;
 
-    private KeyInfo(String confirmKey) {
-      this.confirmKey = confirmKey;
+    @Value("${mybeautip.aws.sts.token-validity-duration-seconds}")
+    private String tokenValidityDurations;
+
+
+    @GetMapping("/keys")
+    public ResponseEntity<KeyInfo> getAddressConfirmKey(@RequestParam String name) {
+        log.debug("confirmKey: {}", confirmKey);
+
+        switch (name) {
+            case "addr_confirm":
+                return new ResponseEntity<>(new KeyInfo(confirmKey), HttpStatus.OK);
+
+            case "storage":
+                GetSessionTokenRequest request = new GetSessionTokenRequest();
+                request.withDurationSeconds(Integer.parseInt(tokenValidityDurations));
+                GetSessionTokenResult result = awsSTS.getSessionToken(request);
+                KeyInfo keyInfo = new KeyInfo(bucketName, region, result.getCredentials());
+                return new ResponseEntity<>(keyInfo, HttpStatus.OK);
+
+            default:
+                throw new BadRequestException("invalid request name - " + name);
+        }
     }
 
-    private KeyInfo(String bucket, String region, Credentials credentials) {
-      this.bucket = bucket;
-      this.region = region;
-      this.accessKeyId = credentials.getAccessKeyId();
-      this.secretAccessKey = credentials.getSecretAccessKey();
-      this.sessionToken = credentials.getSessionToken();
-      this.expiration = credentials.getExpiration().getTime();
+    @NoArgsConstructor
+    @Getter
+    static class KeyInfo {
+        private String confirmKey;
+        private String bucket;
+        private String region;
+        private String accessKeyId;
+        private String secretAccessKey;
+        private String sessionToken;
+        private Long expiration;
+
+        private KeyInfo(String confirmKey) {
+            this.confirmKey = confirmKey;
+        }
+
+        private KeyInfo(String bucket, String region, Credentials credentials) {
+            this.bucket = bucket;
+            this.region = region;
+            this.accessKeyId = credentials.getAccessKeyId();
+            this.secretAccessKey = credentials.getSecretAccessKey();
+            this.sessionToken = credentials.getSessionToken();
+            this.expiration = credentials.getExpiration().getTime();
+        }
     }
-  }
 }
