@@ -18,7 +18,7 @@ import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.restapi.MemberController;
+import com.jocoos.mybeautip.restapi.LegacyMemberController;
 import com.jocoos.mybeautip.security.LoginServiceFactory;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import com.jocoos.mybeautip.security.SocialMember;
@@ -155,14 +155,26 @@ public class MemberService {
         return null;
     }
 
-  public Long getFollowingId(Long you) {
-    if (currentMemberId() == null) {
-      return null;
+    public boolean validPhoneNumber(String phoneNumber) {
+        phoneNumber = phoneNumber.trim()
+                .replace("-", "")
+                .replace(" ", "");
+
+        if (memberRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new BadRequestException("duplicate_phone");
+        }
+
+        return true;
     }
-    Optional<Following> optional
-      = followingRepository.findByMemberMeIdAndMemberYouId(currentMemberId(), you);
-    return optional.map(Following::getId).orElse(null);
-  }
+
+    public Long getFollowingId(Long you) {
+        if (currentMemberId() == null) {
+            return null;
+        }
+        Optional<Following> optional
+                = followingRepository.findByMemberMeIdAndMemberYouId(currentMemberId(), you);
+        return optional.map(Following::getId).orElse(null);
+    }
 
     public Long getFollowingId(Member member) {
         if (currentMemberId() == null) {
@@ -319,56 +331,56 @@ public class MemberService {
 
         blockService.blockMember(me.getId(), targetId);
 
-    return report;
-  }
-  
-  @Transactional
-  public void readMemberRevenue(Member member) {
-    member.setRevenueModifiedAt(null);
-    memberRepository.save(member);
-  }
-  
-  @Transactional
-  public Member updateMember(MemberController.UpdateMemberRequest request, Member member) {
-    boolean isFirstUpdate = !member.isVisible();
-    
-    if (request.getUsername() != null) {
-      member.setUsername(request.getUsername());
+        return report;
     }
-    
-    String avatarUrl = request.getAvatarUrl() != null ? request.getAvatarUrl() : defaultAvatarUrl;
-    member.setAvatarUrl(avatarUrl);
-    
-    member.setVisible(true);
-    Member finalMember = memberRepository.save(member);
-    
-    if (isFirstUpdate) { // when first called
-      // Follow Admin member as default
-      memberRepository.findByUsernameAndLinkAndDeletedAtIsNull("마이뷰팁", 0)
-          .ifPresent(adminMember -> {
-            followMember(finalMember, adminMember);
-            finalMember.setFollowingCount(1); // for response view
-          });
+
+    @Transactional
+    public void readMemberRevenue(Member member) {
+        member.setRevenueModifiedAt(null);
+        memberRepository.save(member);
     }
-    
-    return finalMember;
-  }
-  
-  @Transactional
-  public void deleteMember(MemberController.DeleteMemberRequest request, Member member) {
-    int link = member.getLink();
-    switch (link) {
-      case 1:
-        facebookMemberRepository.findByMemberId(member.getId()).ifPresent(facebookMemberRepository::delete);
-        break;
-    
-      case 2:
-        naverMemberRepository.findByMemberId(member.getId()).ifPresent(naverMemberRepository::delete);
-        break;
-    
-      case 4:
-        kakaoMemberRepository.findByMemberId(member.getId()).ifPresent(kakaoMemberRepository::delete);
-        break;
+
+    @Transactional
+    public Member updateMember(LegacyMemberController.UpdateMemberRequest request, Member member) {
+        boolean isFirstUpdate = !member.isVisible();
+
+        if (request.getUsername() != null) {
+            member.setUsername(request.getUsername());
+        }
+
+        String avatarUrl = request.getAvatarUrl() != null ? request.getAvatarUrl() : defaultAvatarUrl;
+        member.setAvatarUrl(avatarUrl);
+
+        member.setVisible(true);
+        Member finalMember = memberRepository.save(member);
+
+        if (isFirstUpdate) { // when first called
+            // Follow Admin member as default
+            memberRepository.findByUsernameAndLinkAndDeletedAtIsNull("마이뷰팁", 0)
+                    .ifPresent(adminMember -> {
+                        followMember(finalMember, adminMember);
+                        finalMember.setFollowingCount(1); // for response view
+                    });
+        }
+
+        return finalMember;
+    }
+
+    @Transactional
+    public void deleteMember(LegacyMemberController.DeleteMemberRequest request, Member member) {
+        int link = member.getLink();
+        switch (link) {
+            case 1:
+                facebookMemberRepository.findByMemberId(member.getId()).ifPresent(facebookMemberRepository::delete);
+                break;
+
+            case 2:
+                naverMemberRepository.findByMemberId(member.getId()).ifPresent(naverMemberRepository::delete);
+                break;
+
+            case 4:
+                kakaoMemberRepository.findByMemberId(member.getId()).ifPresent(kakaoMemberRepository::delete);
+                break;
 
             case 8:
                 appleMemberRepository.findByMemberId(member.getId()).ifPresent(appleMemberRepository::delete);
