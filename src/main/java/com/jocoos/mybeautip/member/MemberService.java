@@ -48,116 +48,112 @@ import java.util.Optional;
 @Service
 public class MemberService {
 
-  private final BlockService blockService;
-  private final BannedWordService bannedWordService;
-  private final MessageService messageService;
-  private final TagService tagService;
-  private final MemberRepository memberRepository;
-  private final MemberDetailRepository memberDetailRepository;
-  private final FollowingRepository followingRepository;
-  private final ReportRepository reportRepository;
-  private final FacebookMemberRepository facebookMemberRepository;
-  private final KakaoMemberRepository kakaoMemberRepository;
-  private final NaverMemberRepository naverMemberRepository;
-  private final AppleMemberRepository appleMemberRepository;
-  private final MemberLeaveLogRepository memberLeaveLogRepository;
-  private final LoginServiceFactory loginServiceFactory;
+    private static final String USERNAME_INVALID_LENGTH = "username.invalid_length";
+    private static final String USERNAME_INVALID_FORMAT = "username.invalid_format";
+    private static final String USERNAME_INVALID_CHAR = "username.invalid_char";
+    private static final String USERNAME_ALREADY_USED = "username.already_used";
+    private static final String EMAIL_INVALID_FORMAT = "email.invalid_format";
+    private static final String MEMBER_NOT_FOUND = "member.not_found";
+    private final BlockService blockService;
+    private final BannedWordService bannedWordService;
+    private final MessageService messageService;
+    private final TagService tagService;
+    private final MemberRepository memberRepository;
+    private final MemberDetailRepository memberDetailRepository;
+    private final FollowingRepository followingRepository;
+    private final ReportRepository reportRepository;
+    private final FacebookMemberRepository facebookMemberRepository;
+    private final KakaoMemberRepository kakaoMemberRepository;
+    private final NaverMemberRepository naverMemberRepository;
+    private final AppleMemberRepository appleMemberRepository;
+    private final MemberLeaveLogRepository memberLeaveLogRepository;
+    private final LoginServiceFactory loginServiceFactory;
+    private final AttachmentService attachmentService;
+    private final SlackService slackService;
+    private final String PATH_AVATAR = "avatar";
+    private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
+    private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
 
-
-  private final AttachmentService attachmentService;
-  private final SlackService slackService;
-
-  private final String PATH_AVATAR = "avatar";
-  private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
-  private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
-  
-  private static final String USERNAME_INVALID_LENGTH = "username.invalid_length";
-  private static final String USERNAME_INVALID_FORMAT = "username.invalid_format";
-  private static final String USERNAME_INVALID_CHAR = "username.invalid_char";
-  private static final String USERNAME_ALREADY_USED = "username.already_used";
-  private static final String EMAIL_INVALID_FORMAT = "email.invalid_format";
-  private static final String MEMBER_NOT_FOUND = "member.not_found";
-
-  public MemberService(BannedWordService bannedWordService,
-                       MessageService messageService,
-                       TagService tagService,
-                       MemberRepository memberRepository,
-                       MemberDetailRepository memberDetailRepository,
-                       FollowingRepository followingRepository,
-                       ReportRepository reportRepository,
-                       BlockService blockService,
-                       FacebookMemberRepository facebookMemberRepository,
-                       KakaoMemberRepository kakaoMemberRepository,
-                       NaverMemberRepository naverMemberRepository,
-                       AppleMemberRepository appleMemberRepository, MemberLeaveLogRepository memberLeaveLogRepository,
-                       LoginServiceFactory loginServiceFactory,
-                       AttachmentService attachmentService,
-                       SlackService slackService) {
-    this.bannedWordService = bannedWordService;
-    this.messageService = messageService;
-    this.tagService = tagService;
-    this.memberRepository = memberRepository;
-    this.memberDetailRepository = memberDetailRepository;
-    this.followingRepository = followingRepository;
-    this.reportRepository = reportRepository;
-    this.blockService = blockService;
-    this.facebookMemberRepository = facebookMemberRepository;
-    this.kakaoMemberRepository = kakaoMemberRepository;
-    this.naverMemberRepository = naverMemberRepository;
-    this.appleMemberRepository = appleMemberRepository;
-    this.memberLeaveLogRepository = memberLeaveLogRepository;
-    this.attachmentService = attachmentService;
-    this.slackService = slackService;
-    this.loginServiceFactory = loginServiceFactory;
-  }
-
-  public Long currentMemberId() {
-    return Optional.ofNullable(currentMember()).map(Member::getId).orElse(null);
-  }
-
-  public String getGuestUserName() {
-    Object principal = currentPrincipal();
-    if (principal instanceof MyBeautipUserDetails) {
-      return ((MyBeautipUserDetails) principal).getUsername();
-    } else {
-      log.warn("Unknown principal type");
+    public MemberService(BannedWordService bannedWordService,
+                         MessageService messageService,
+                         TagService tagService,
+                         MemberRepository memberRepository,
+                         MemberDetailRepository memberDetailRepository,
+                         FollowingRepository followingRepository,
+                         ReportRepository reportRepository,
+                         BlockService blockService,
+                         FacebookMemberRepository facebookMemberRepository,
+                         KakaoMemberRepository kakaoMemberRepository,
+                         NaverMemberRepository naverMemberRepository,
+                         AppleMemberRepository appleMemberRepository, MemberLeaveLogRepository memberLeaveLogRepository,
+                         LoginServiceFactory loginServiceFactory,
+                         AttachmentService attachmentService,
+                         SlackService slackService) {
+        this.bannedWordService = bannedWordService;
+        this.messageService = messageService;
+        this.tagService = tagService;
+        this.memberRepository = memberRepository;
+        this.memberDetailRepository = memberDetailRepository;
+        this.followingRepository = followingRepository;
+        this.reportRepository = reportRepository;
+        this.blockService = blockService;
+        this.facebookMemberRepository = facebookMemberRepository;
+        this.kakaoMemberRepository = kakaoMemberRepository;
+        this.naverMemberRepository = naverMemberRepository;
+        this.appleMemberRepository = appleMemberRepository;
+        this.memberLeaveLogRepository = memberLeaveLogRepository;
+        this.attachmentService = attachmentService;
+        this.slackService = slackService;
+        this.loginServiceFactory = loginServiceFactory;
     }
-    return null;
-  }
 
-  public Member currentMember() {
-    Object principal = currentPrincipal();
-    if (principal instanceof MyBeautipUserDetails) {
-      return ((MyBeautipUserDetails) principal).getMember();
-    } else {
-      log.warn("Unknown principal type");
+    public Long currentMemberId() {
+        return Optional.ofNullable(currentMember()).map(Member::getId).orElse(null);
     }
-    return null;
-  }
 
-  public Member getAdmin() {
-    return memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue("마이뷰팁")
-       .orElseThrow(() -> new MemberNotFoundException("Can't find admin"));
-  }
-
-  private Object currentPrincipal() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null || !authentication.isAuthenticated()) {
-      return null;
+    public String getGuestUserName() {
+        Object principal = currentPrincipal();
+        if (principal instanceof MyBeautipUserDetails) {
+            return ((MyBeautipUserDetails) principal).getUsername();
+        } else {
+            log.warn("Unknown principal type");
+        }
+        return null;
     }
-    
-    return authentication.getPrincipal();
-  }
 
-  public MyBeautipUserDetails currentUserDetails() {
-    Object principal = currentPrincipal();
-    if (principal instanceof MyBeautipUserDetails) {
-      return (MyBeautipUserDetails) principal;
-    } else {
-      log.warn("Unknown principal type");
+    public Member currentMember() {
+        Object principal = currentPrincipal();
+        if (principal instanceof MyBeautipUserDetails) {
+            return ((MyBeautipUserDetails) principal).getMember();
+        } else {
+            log.warn("Unknown principal type");
+        }
+        return null;
     }
-    return null;
-  }
+
+    public Member getAdmin() {
+        return memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue("마이뷰팁")
+                .orElseThrow(() -> new MemberNotFoundException("Can't find admin"));
+    }
+
+    private Object currentPrincipal() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        return authentication.getPrincipal();
+    }
+
+    public MyBeautipUserDetails currentUserDetails() {
+        Object principal = currentPrincipal();
+        if (principal instanceof MyBeautipUserDetails) {
+            return (MyBeautipUserDetails) principal;
+        } else {
+            log.warn("Unknown principal type");
+        }
+        return null;
+    }
 
   public Long getFollowingId(Long you) {
     if (currentMemberId() == null) {
@@ -168,74 +164,74 @@ public class MemberService {
     return optional.map(Following::getId).orElse(null);
   }
 
-  public Long getFollowingId(Member member) {
-    if (currentMemberId() == null) {
-      return null;
-    }
-    Optional<Following> optional
-      = followingRepository.findByMemberMeIdAndMemberYouId(currentMemberId(), member.getId());
-    return optional.map(Following::getId).orElse(null);
-  }
-
-  public MemberExtraInfo getMemberExtraInfo(Member member) {
-    if (currentMemberId() == null) {
-      return null;
-    }
-    Optional<MemberExtraInfo> optional = memberRepository.findMemberExtraInfo(currentMemberId(), member.getId());
-    return optional.orElse(null);
-  }
-
-  public MemberInfo getMemberInfo(Member member) {
-    if (currentMember() != null && member.getId().equals(currentMember().getId())) {
-      return new MemberMeInfo(member);
-    } else {
-      return new MemberInfo(member, getMemberExtraInfo(member));
-    }
-  }
-
-  public void checkUsernameValidation(@RequestParam String username, String lang) {
-    Member me = currentMember();
-    
-    if (username.length() < 2 || username.length() > 25) {
-      throw new BadRequestException("invalid_length", messageService.getMessage(USERNAME_INVALID_LENGTH, lang));
-    }
-
-    if (StringUtils.isNumeric(username)) {
-      throw new BadRequestException("invalid_number", messageService.getMessage(USERNAME_INVALID_FORMAT, lang));
-    }
-
-    String regex = "^[\\w가-힣!_~]+$";
-    if (!(username.matches(regex))) {
-      throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
-    }
-
-    if (me.isVisible()) { // Already registered member
-      if (!me.getUsername().equals(username)) {
-        if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
-          throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+    public Long getFollowingId(Member member) {
+        if (currentMemberId() == null) {
+            return null;
         }
-        if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
-          throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
-        }
-      }
-    } else {
-      if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
-        throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
-      }
-      if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
-        throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
-      }
+        Optional<Following> optional
+                = followingRepository.findByMemberMeIdAndMemberYouId(currentMemberId(), member.getId());
+        return optional.map(Following::getId).orElse(null);
     }
 
-    bannedWordService.findWordAndThrowException(username, lang);
-  }
-  
-  public void checkEmailValidation(String email, String lang) {
-    if (email.length() > 50 || !email.matches(emailRegex)) {
-      throw new BadRequestException("invalid_email", messageService.getMessage(EMAIL_INVALID_FORMAT, lang));
+    public MemberExtraInfo getMemberExtraInfo(Member member) {
+        if (currentMemberId() == null) {
+            return null;
+        }
+        Optional<MemberExtraInfo> optional = memberRepository.findMemberExtraInfo(currentMemberId(), member.getId());
+        return optional.orElse(null);
     }
-  }
-  
+
+    public MemberInfo getMemberInfo(Member member) {
+        if (currentMember() != null && member.getId().equals(currentMember().getId())) {
+            return new MemberMeInfo(member);
+        } else {
+            return new MemberInfo(member, getMemberExtraInfo(member));
+        }
+    }
+
+    public void checkUsernameValidation(@RequestParam String username, String lang) {
+        Member me = currentMember();
+
+        if (username.length() < 2 || username.length() > 25) {
+            throw new BadRequestException("invalid_length", messageService.getMessage(USERNAME_INVALID_LENGTH, lang));
+        }
+
+        if (StringUtils.isNumeric(username)) {
+            throw new BadRequestException("invalid_number", messageService.getMessage(USERNAME_INVALID_FORMAT, lang));
+        }
+
+        String regex = "^[\\w가-힣!_~]+$";
+        if (!(username.matches(regex))) {
+            throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
+        }
+
+        if (me.isVisible()) { // Already registered member
+            if (!me.getUsername().equals(username)) {
+                if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
+                    throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+                }
+                if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
+                    throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+                }
+            }
+        } else {
+            if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
+                throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+            }
+            if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
+                throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+            }
+        }
+
+        bannedWordService.findWordAndThrowException(username, lang);
+    }
+
+    public void checkEmailValidation(String email, String lang) {
+        if (email.length() > 50 || !email.matches(emailRegex)) {
+            throw new BadRequestException("invalid_email", messageService.getMessage(EMAIL_INVALID_FORMAT, lang));
+        }
+    }
+
     public boolean hasCommentPostPermission(Member member) {
         return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
     }
@@ -275,19 +271,19 @@ public class MemberService {
     }
 
     public void adjustUniqueInfo(Member member) {
-      adjustTag(member);
-      adjustUserName(member);
+        adjustTag(member);
+        adjustUserName(member);
     }
 
     // TODO Migration 하고 나면 private 으로 변경.
     public Member adjustTag(Member member) {
         String tag = member.getTag();
         for (int retry = 0; retry < 5; retry++) {
-           if (StringUtils.isNotBlank(tag) && memberRepository.countByTag(tag) == 0) {
-              member.setTag(tag);
-              return member;
-           }
-           tag = RandomUtils.generateTag();
+            if (StringUtils.isNotBlank(tag) && memberRepository.countByTag(tag) == 0) {
+                member.setTag(tag);
+                return member;
+            }
+            tag = RandomUtils.generateTag();
         }
 
         log.warn("Duplicate Tag : " + member.getUsername());
@@ -296,32 +292,32 @@ public class MemberService {
     }
 
     public Member adjustUserName(Member member) {
-      // TODO adjust nickname
-      return member;
+
+        return member;
     }
 
-  @Transactional
-  public void updateLastLoggedAt() {
-    Member member = currentMember();
-    if (member != null) {
-      updateLastLoggedAt(member.getId());
+    @Transactional
+    public void updateLastLoggedAt() {
+        Member member = currentMember();
+        if (member != null) {
+            updateLastLoggedAt(member.getId());
+        }
     }
-  }
 
-  @Transactional
-  public void updateLastLoggedAt(long memberId) {
-    memberRepository.updateLastLoggedAt(memberId);
-  }
-  
-  @Transactional
-  public Report reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {
-    Member you = memberRepository.findByIdAndDeletedAtIsNull(targetId)
-        .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
-    
-    Report report = reportRepository.save(new Report(me, you, reasonCode, reason, video));
-    memberRepository.updateReportCount(you.getId(), 1);
+    @Transactional
+    public void updateLastLoggedAt(long memberId) {
+        memberRepository.updateLastLoggedAt(memberId);
+    }
 
-    blockService.blockMember(me.getId(), targetId);
+    @Transactional
+    public Report reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {
+        Member you = memberRepository.findByIdAndDeletedAtIsNull(targetId)
+                .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+
+        Report report = reportRepository.save(new Report(me, you, reasonCode, reason, video));
+        memberRepository.updateReportCount(you.getId(), 1);
+
+        blockService.blockMember(me.getId(), targetId);
 
     return report;
   }
@@ -374,46 +370,46 @@ public class MemberService {
         kakaoMemberRepository.findByMemberId(member.getId()).ifPresent(kakaoMemberRepository::delete);
         break;
 
-      case 8:
-        appleMemberRepository.findByMemberId(member.getId()).ifPresent(appleMemberRepository::delete);
-        break;
+            case 8:
+                appleMemberRepository.findByMemberId(member.getId()).ifPresent(appleMemberRepository::delete);
+                break;
 
-      default:
-        throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
-    }
-  
-    member.setIntro("");
-    member.setAvatarUrl("https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_deleted.png");
-    member.setVisible(false);
-    member.setFollowingCount(0);
-    member.setFollowerCount(0);
-    member.setPublicVideoCount(0);
-    member.setTotalVideoCount(0);
-    member.setDeletedAt(new Date());
-    memberRepository.saveAndFlush(member);
-  
-    log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
-    memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
-  }
+            default:
+                throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
+        }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
-  public Following followMember(Member me, Member you) {
-    memberRepository.updateFollowingCount(me.getId(), 1);
-    memberRepository.updateFollowerCount(you.getId(), 1);
-    return followingRepository.save(new Following(me, you));
-  }
-  
-  @Transactional
-  public void unFollowMember(Following following) {
-    followingRepository.delete(following);
-    if (following.getMemberMe().getFollowingCount() > 0) {
-      memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
+        member.setIntro("");
+        member.setAvatarUrl("https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_deleted.png");
+        member.setVisible(false);
+        member.setFollowingCount(0);
+        member.setFollowerCount(0);
+        member.setPublicVideoCount(0);
+        member.setTotalVideoCount(0);
+        member.setDeletedAt(new Date());
+        memberRepository.saveAndFlush(member);
+
+        log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
+        memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
     }
-    
-    if (following.getMemberYou().getFollowerCount() > 0) {
-      memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Following followMember(Member me, Member you) {
+        memberRepository.updateFollowingCount(me.getId(), 1);
+        memberRepository.updateFollowerCount(you.getId(), 1);
+        return followingRepository.save(new Following(me, you));
     }
-  }
+
+    @Transactional
+    public void unFollowMember(Following following) {
+        followingRepository.delete(following);
+        if (following.getMemberMe().getFollowingCount() > 0) {
+            memberRepository.updateFollowingCount(following.getMemberMe().getId(), -1);
+        }
+
+        if (following.getMemberYou().getFollowerCount() > 0) {
+            memberRepository.updateFollowerCount(following.getMemberYou().getId(), -1);
+        }
+    }
 
     @Transactional(readOnly = true)
     public MemberDetailResponse getDetailInfo(long memberId) {

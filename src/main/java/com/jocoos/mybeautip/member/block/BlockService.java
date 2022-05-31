@@ -30,7 +30,7 @@ public class BlockService {
 
     @Transactional
     public Block blockMember(long userId, Member targetMember) {
-       Optional<Block> optional = blockRepository.findByMeAndMemberYouId(userId, targetMember.getId());
+        Optional<Block> optional = blockRepository.findByMeAndMemberYouId(userId, targetMember.getId());
 
         if (optional.isPresent()) {
             return optional.get();
@@ -43,8 +43,8 @@ public class BlockService {
     public Map<Long, Block> getBlackListByMe(Long me) {
         List<Block> blocks = blockRepository.findByMe(me);
         Map<Long, Block> map = blocks != null ?
-            blocks.stream().collect(Collectors.toMap(Block::getYouId, Function.identity())) :
-            new HashMap<>();
+                blocks.stream().collect(Collectors.toMap(Block::getYouId, Function.identity())) :
+                new HashMap<>();
         new HashMap<>();
 
         if (map.keySet().size() > 0) {

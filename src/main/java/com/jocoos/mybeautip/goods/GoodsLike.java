@@ -14,15 +14,15 @@ import javax.persistence.*;
 @Table(name = "goods_likes")
 public class GoodsLike extends MemberAuditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "goods_no")
-  private Goods goods;
+    @ManyToOne
+    @JoinColumn(name = "goods_no")
+    private Goods goods;
 
-  public GoodsLike(Goods goods) {
-    this.goods = goods;
-  }
+    public GoodsLike(Goods goods) {
+        this.goods = goods;
+    }
 }

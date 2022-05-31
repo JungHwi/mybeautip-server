@@ -14,57 +14,57 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminNotificationAspect {
 
-  private final LegacyNotificationService legacyNotificationService;
-  private final SlackService slackService;
+    private final LegacyNotificationService legacyNotificationService;
+    private final SlackService slackService;
 
 
-  public AdminNotificationAspect(LegacyNotificationService legacyNotificationService,
-                                 SlackService slackService) {
-    this.legacyNotificationService = legacyNotificationService;
-    this.slackService = slackService;
-  }
-
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.point.MemberPointService.presentPoint(..))",
-                  returning = "result")
-  public void onAfterReturningPresentPoint(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
-
-    // Ignore when duplicate createVideo
-    if (result == null) {
-      return;
+    public AdminNotificationAspect(LegacyNotificationService legacyNotificationService,
+                                   SlackService slackService) {
+        this.legacyNotificationService = legacyNotificationService;
+        this.slackService = slackService;
     }
 
-    if (result instanceof MemberPoint) {
-      MemberPoint point = (MemberPoint) result;
-      log.debug("point: {}", point);
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.point.MemberPointService.presentPoint(..))",
+            returning = "result")
+    public void onAfterReturningPresentPoint(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-      try {
-        slackService.sendPointToMember(point);
-      } catch (Exception e) {
-        log.error("{}", e);
-      }
+        // Ignore when duplicate createVideo
+        if (result == null) {
+            return;
+        }
+
+        if (result instanceof MemberPoint) {
+            MemberPoint point = (MemberPoint) result;
+            log.debug("point: {}", point);
+
+            try {
+                slackService.sendPointToMember(point);
+            } catch (Exception e) {
+                log.error("{}", e);
+            }
+        }
     }
-  }
 
-  @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.point.MemberPointService.expiredPoint(..))",
-     returning = "result")
-  public void onAfterReturningExpiredPoint(JoinPoint joinPoint, Object result) {
-    log.debug("joinPoint: {}", joinPoint.toLongString());
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.point.MemberPointService.expiredPoint(..))",
+            returning = "result")
+    public void onAfterReturningExpiredPoint(JoinPoint joinPoint, Object result) {
+        log.debug("joinPoint: {}", joinPoint.toLongString());
 
-    // Ignore when duplicate createVideo
-    if (result == null) {
-      return;
+        // Ignore when duplicate createVideo
+        if (result == null) {
+            return;
+        }
+
+        if (result instanceof MemberPoint) {
+            MemberPoint point = (MemberPoint) result;
+            log.debug("point: {}", point);
+
+            try {
+                slackService.sendDeductPoint(point);
+            } catch (Exception e) {
+                log.error("{}", e);
+            }
+        }
     }
-
-    if (result instanceof MemberPoint) {
-      MemberPoint point = (MemberPoint) result;
-      log.debug("point: {}", point);
-
-      try {
-        slackService.sendDeductPoint(point);
-      } catch (Exception e) {
-        log.error("{}", e);
-      }
-    }
-  }
 }

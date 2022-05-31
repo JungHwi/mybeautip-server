@@ -15,26 +15,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttachmentService {
 
-  private final StorageService storageService;
+    private final StorageService storageService;
 
-  public List<String> upload(List<MultipartFile> files, String keyPrefix) throws IOException {
-    List<String> attachments = new ArrayList<>();
-    if (files != null && files.size() > 0) {
-      for (MultipartFile file : files) {
-        String path = upload(file, keyPrefix);
-        attachments.add(path);
-      }
+    public List<String> upload(List<MultipartFile> files, String keyPrefix) throws IOException {
+        List<String> attachments = new ArrayList<>();
+        if (files != null && files.size() > 0) {
+            for (MultipartFile file : files) {
+                String path = upload(file, keyPrefix);
+                attachments.add(path);
+            }
+        }
+        return attachments;
     }
-    return attachments;
-  }
 
-  public String upload(MultipartFile file, String keyPrefix) throws IOException {
-    String filename = DigestUtils.getFilename(file);
-    String key = String.format("%s/%s", keyPrefix, filename);
-    String path = storageService.upload(file, key);
-    log.info("Uploaded {}", path);
-    return path;
-  }
+    public String upload(MultipartFile file, String keyPrefix) throws IOException {
+        String filename = DigestUtils.getFilename(file);
+        String key = String.format("%s/%s", keyPrefix, filename);
+        String path = storageService.upload(file, key);
+        log.info("Uploaded {}", path);
+        return path;
+    }
 
     public void deleteAttachments(String k) {
         if (!StringUtils.isBlank(k)) {

@@ -22,8 +22,8 @@ import static com.jocoos.mybeautip.global.constant.SignConstant.*;
 public interface NotificationCenterConvert {
 
     @Mappings({
-            @Mapping(target = "status" , source = "status"),
-            @Mapping(target = "messageType" , source = "messageCenter.messageType"),
+            @Mapping(target = "status", source = "status"),
+            @Mapping(target = "messageType", source = "messageCenter.messageType"),
             @Mapping(target = "imageUrl", source = "imageUrl", qualifiedByName = "justString"),
             @Mapping(target = "message", source = "entity", qualifiedByName = "mergeMessage"),
             @Mapping(target = "notificationLink", source = "entity", qualifiedByName = "mergeNotificationLink")

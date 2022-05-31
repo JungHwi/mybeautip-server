@@ -16,26 +16,26 @@ import java.util.Date;
 @Table(name = "notices")
 public class Notice extends MemberAuditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private String type;
+    @Column(nullable = false)
+    private String type;
 
-  @Column(nullable = false)
-  private String os;
+    @Column(nullable = false)
+    private String os;
 
-  @Column(nullable = false)
-  private String message;
+    @Column(nullable = false)
+    private String message;
 
-  @Column(nullable = false)
-  private String minVersion;
+    @Column(nullable = false)
+    private String minVersion;
 
-  @Column(nullable = false)
-  private String maxVersion;
+    @Column(nullable = false)
+    private String maxVersion;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
 }

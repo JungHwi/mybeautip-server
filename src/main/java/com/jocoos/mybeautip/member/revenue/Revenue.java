@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
@@ -17,33 +16,33 @@ import java.util.Date;
 @Table(name = "member_revenues")
 public class Revenue extends CreatedDateAuditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "video_id")
-  private Video video;
+    @ManyToOne
+    @JoinColumn(name = "video_id")
+    private Video video;
 
-  @ManyToOne
-  @JoinColumn(name = "purchase_id")
-  private Purchase purchase;
+    @ManyToOne
+    @JoinColumn(name = "purchase_id")
+    private Purchase purchase;
 
-  @Column
-  private int revenue;
-  
-  @Column
-  private Boolean confirmed;
-  
-  @ManyToOne
-  @JoinColumn(name = "revenue_payment_id")
-  private RevenuePayment revenuePayment;
+    @Column
+    private int revenue;
 
-  public Revenue(Video video, Purchase purchase, int revenue, RevenuePayment revenuePayment) {
-    this.video = video;
-    this.purchase = purchase;
-    this.revenue = revenue;
-    this.revenuePayment = revenuePayment;
-    this.confirmed = false;
-  }
+    @Column
+    private Boolean confirmed;
+
+    @ManyToOne
+    @JoinColumn(name = "revenue_payment_id")
+    private RevenuePayment revenuePayment;
+
+    public Revenue(Video video, Purchase purchase, int revenue, RevenuePayment revenuePayment) {
+        this.video = video;
+        this.purchase = purchase;
+        this.revenue = revenue;
+        this.revenuePayment = revenuePayment;
+        this.confirmed = false;
+    }
 }

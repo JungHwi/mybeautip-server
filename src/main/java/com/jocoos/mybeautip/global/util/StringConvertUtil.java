@@ -14,7 +14,8 @@ public class StringConvertUtil {
     public static Map<String, String> convertJsonToMap(String jsonString) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {});
+            return mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+            });
         } catch (JsonProcessingException ex) {
             log.error("failed convert json string to map. string >>" + jsonString, ex);
         }

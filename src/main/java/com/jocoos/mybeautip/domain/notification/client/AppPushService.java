@@ -12,14 +12,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class AppPushService {
-    private final MobilePushFactory mobilePushFactory;
-    private final AmazonSNS amazonSNS;
-
-    @Value("${mybeautip.aws.sns.application.gcm-arn}")
-    private String gcmArn;
     private static final String MESSAGE_STRUCTURE = "json";
     private static final String KEY_NOTIFICATION = "notification";
     private static final String KEY_DATA = "data";
+    private final MobilePushFactory mobilePushFactory;
+    private final AmazonSNS amazonSNS;
+    @Value("${mybeautip.aws.sns.application.gcm-arn}")
+    private String gcmArn;
 
     @Autowired
     public AppPushService(MobilePushFactory mobilePushFactory,

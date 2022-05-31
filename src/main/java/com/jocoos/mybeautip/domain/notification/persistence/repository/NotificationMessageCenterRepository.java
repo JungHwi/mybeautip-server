@@ -11,5 +11,6 @@ import java.util.List;
 public interface NotificationMessageCenterRepository extends DefaultJpaRepository<NotificationMessageCenterEntity, Long> {
 
     int countByTemplateIdAndLastVersionIsTrue(TemplateType templateType);
+
     List<NotificationMessageCenterEntity> findByTemplateIdAndLastVersionIsTrue(TemplateType templateType);
 }

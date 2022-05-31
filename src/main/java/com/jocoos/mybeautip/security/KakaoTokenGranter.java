@@ -18,45 +18,45 @@ import java.util.Map;
 @Slf4j
 public class KakaoTokenGranter extends AbstractTokenGranter {
 
-  private final MemberService memberService;
-  private final MemberRepository memberRepository;
-  private final KakaoMemberRepository kakaoMemberRepository;
+    private final MemberService memberService;
+    private final MemberRepository memberRepository;
+    private final KakaoMemberRepository kakaoMemberRepository;
 
-  public KakaoTokenGranter(
-      AuthorizationServerTokenServices tokenServices,
-      ClientDetailsService clientDetailsService,
-      OAuth2RequestFactory requestFactory,
-      MemberService memberService,
-      MemberRepository memberRepository,
-      KakaoMemberRepository kakaoMemberRepository) {
-    super(tokenServices, clientDetailsService, requestFactory, "kakao");
-    this.memberService = memberService;
-    this.memberRepository = memberRepository;
-    this.kakaoMemberRepository = kakaoMemberRepository;
-  }
-
-  @Override
-  protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
-    Map<String, String> requestParameters = tokenRequest.getRequestParameters();
-    String kakaoId = requestParameters.get("social_id");
-    String username = requestParameters.get("username");
-    log.debug("kakao id: {}, username: {}", kakaoId, username);
-
-    if (StringUtils.isBlank(kakaoId)) {
-      throw new AuthenticationException("kakao ID is required");
+    public KakaoTokenGranter(
+            AuthorizationServerTokenServices tokenServices,
+            ClientDetailsService clientDetailsService,
+            OAuth2RequestFactory requestFactory,
+            MemberService memberService,
+            MemberRepository memberRepository,
+            KakaoMemberRepository kakaoMemberRepository) {
+        super(tokenServices, clientDetailsService, requestFactory, "kakao");
+        this.memberService = memberService;
+        this.memberRepository = memberRepository;
+        this.kakaoMemberRepository = kakaoMemberRepository;
     }
 
-    if (kakaoId.length() > 30) {
-      throw new AuthenticationException("The kakao ID must be less or equals to 30");
+    @Override
+    protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
+        Map<String, String> requestParameters = tokenRequest.getRequestParameters();
+        String kakaoId = requestParameters.get("social_id");
+        String username = requestParameters.get("username");
+        log.debug("kakao id: {}, username: {}", kakaoId, username);
+
+        if (StringUtils.isBlank(kakaoId)) {
+            throw new AuthenticationException("kakao ID is required");
+        }
+
+        if (kakaoId.length() > 30) {
+            throw new AuthenticationException("The kakao ID must be less or equals to 30");
+        }
+
+        return kakaoMemberRepository.findById(kakaoId)
+                .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such kakao member. kakao social id - " + kakaoId));
     }
 
-    return kakaoMemberRepository.findById(kakaoId)
-            .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
-            .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such kakao member. kakao social id - " + kakaoId));
-  }
-
-  private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
-    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
-    return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
-  }
+    private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
+        return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
+    }
 }

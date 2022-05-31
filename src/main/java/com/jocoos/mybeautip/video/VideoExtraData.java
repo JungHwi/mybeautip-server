@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class VideoExtraData {
-  private String goods;
-  private String category;
-  private String startedAt;
+    private String goods;
+    private String category;
+    private String startedAt;
 }

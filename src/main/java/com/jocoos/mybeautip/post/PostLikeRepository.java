@@ -10,20 +10,20 @@ import java.util.Optional;
 
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
-  Optional<PostLike> findByPostIdAndCreatedById(Long postId, Long createdBy);
+    Optional<PostLike> findByPostIdAndCreatedById(Long postId, Long createdBy);
 
-  Optional<PostLike> findByPostIdAndStatusAndCreatedById(Long postId, PostLikeStatus status, Long createdBy);
+    Optional<PostLike> findByPostIdAndStatusAndCreatedById(Long postId, PostLikeStatus status, Long createdBy);
 
-  Optional<PostLike> findByIdAndPostIdAndCreatedById(Long id, Long postId, Long createdBy);
+    Optional<PostLike> findByIdAndPostIdAndCreatedById(Long id, Long postId, Long createdBy);
 
-  Slice<PostLike> findByCreatedAtBeforeAndCreatedByIdAndPostDeletedAtIsNull(Date createdAt, Long createdBy, Pageable pageable);
+    Slice<PostLike> findByCreatedAtBeforeAndCreatedByIdAndPostDeletedAtIsNull(Date createdAt, Long createdBy, Pageable pageable);
 
-  Slice<PostLike> findByCreatedByIdAndPostDeletedAtIsNull(Long createdBy, Pageable pageable);
+    Slice<PostLike> findByCreatedByIdAndPostDeletedAtIsNull(Long createdBy, Pageable pageable);
 
-  Integer countByCreatedByIdAndPostDeletedAtIsNull(Long createdBy);
+    Integer countByCreatedByIdAndPostDeletedAtIsNull(Long createdBy);
 
-  Page<PostLike> findByPostId(Long postId, Pageable pageable);
+    Page<PostLike> findByPostId(Long postId, Pageable pageable);
 
-  int countByPostId(Long postId);
+    int countByPostId(Long postId);
 
 }

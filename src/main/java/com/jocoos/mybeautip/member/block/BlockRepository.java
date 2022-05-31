@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BlockRepository extends CrudRepository<Block, Long> {
-  Optional<Block> findByMeAndMemberYouId(long me, long you);
+    Optional<Block> findByMeAndMemberYouId(long me, long you);
 
-  Page<Block> findByCreatedAtBeforeAndMe(Date startCursor, long me, Pageable pageable);
+    Page<Block> findByCreatedAtBeforeAndMe(Date startCursor, long me, Pageable pageable);
 
-  List<Block> findByMe(long me);
+    List<Block> findByMe(long me);
 
-  Optional<Block> findByIdAndMe(long id, long me);
+    Optional<Block> findByIdAndMe(long id, long me);
 
-  int countByMeAndMemberYou(long memberId, Member member);
+    int countByMeAndMemberYou(long memberId, Member member);
 }

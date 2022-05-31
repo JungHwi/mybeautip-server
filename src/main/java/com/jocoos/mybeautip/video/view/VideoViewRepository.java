@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface VideoViewRepository extends JpaRepository<VideoView, Long> {
 
-  Optional<VideoView> findByVideoIdAndCreatedById(Long videoId, Long createdById);
-  
-  Optional<VideoView> findByVideoIdAndGuestName(Long videoId, String guestName);
-  
-  Slice<VideoView> findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(Long videoId, Date time, Pageable pageable);
-  
-  int countByVideoIdAndCreatedByIsNull(Long id);
+    Optional<VideoView> findByVideoIdAndCreatedById(Long videoId, Long createdById);
 
-  int countByVideoIdAndGuestNameIsNotNull(Long id);
+    Optional<VideoView> findByVideoIdAndGuestName(Long videoId, String guestName);
+
+    Slice<VideoView> findByVideoIdAndAndCreatedByIsNotNullAndModifiedAtBefore(Long videoId, Date time, Pageable pageable);
+
+    int countByVideoIdAndCreatedByIsNull(Long id);
+
+    int countByVideoIdAndGuestNameIsNotNull(Long id);
 }

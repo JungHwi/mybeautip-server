@@ -13,37 +13,37 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class SocialMember {
-  private String id;
-  private String email;
-  private String name;
-  private String picture;
-  private String provider;
+    private String id;
+    private String email;
+    private String name;
+    private String picture;
+    private String provider;
 
-  public Member toMember() {
-    Member member = new Member();
+    public Member toMember() {
+        Member member = new Member();
 
-    member.setLink(getLinkType());
-    member.setEmail(this.email);
-    member.setUsername(this.name);
-    member.setPushable(true);
-    member.setAvatarUrl(this.picture);
-    member.setPermission(Member.PERMISSION_ALL);
+        member.setLink(getLinkType());
+        member.setEmail(this.email);
+        member.setUsername(this.name);
+        member.setPushable(true);
+        member.setAvatarUrl(this.picture);
+        member.setPermission(Member.PERMISSION_ALL);
 
-    return member;
-  }
-
-  private int getLinkType() {
-    switch (provider) {
-      case "kakao":
-        return Member.LINK_KAKAO;
-      case "naver":
-        return Member.LINK_NAVER;
-      case "facebook":
-        return Member.LINK_FACEBOOK;
-      case "apple":
-          return Member.LINK_APPLE;
-      default:
-        throw new MybeautipRuntimeException("Unsupported provider type");
+        return member;
     }
-  }
+
+    private int getLinkType() {
+        switch (provider) {
+            case "kakao":
+                return Member.LINK_KAKAO;
+            case "naver":
+                return Member.LINK_NAVER;
+            case "facebook":
+                return Member.LINK_FACEBOOK;
+            case "apple":
+                return Member.LINK_APPLE;
+            default:
+                throw new MybeautipRuntimeException("Unsupported provider type");
+        }
+    }
 }

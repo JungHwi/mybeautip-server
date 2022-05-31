@@ -18,45 +18,45 @@ import java.util.Map;
 @Slf4j
 public class FacebookTokenGranter extends AbstractTokenGranter {
 
-  private final MemberService memberService;
-  private final MemberRepository memberRepository;
-  private final FacebookMemberRepository facebookMemberRepository;
+    private final MemberService memberService;
+    private final MemberRepository memberRepository;
+    private final FacebookMemberRepository facebookMemberRepository;
 
-  public FacebookTokenGranter(
-      AuthorizationServerTokenServices tokenServices,
-      ClientDetailsService clientDetailsService,
-      OAuth2RequestFactory requestFactory,
-      MemberService memberService,
-      MemberRepository memberRepository,
-      FacebookMemberRepository facebookMemberRepository) {
-    super(tokenServices, clientDetailsService, requestFactory, "facebook");
-    this.memberService = memberService;
-    this.memberRepository = memberRepository;
-    this.facebookMemberRepository = facebookMemberRepository;
-  }
-
-  @Override
-  protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
-    Map<String, String> requestParameters = tokenRequest.getRequestParameters();
-    String facebookId = requestParameters.get("social_id");
-    String username = requestParameters.get("social_id");
-    log.debug("facebook id: {}, username: {}", facebookId, username);
-
-    if (StringUtils.isBlank(facebookId)) {
-      throw new AuthenticationException("facebook ID is required");
+    public FacebookTokenGranter(
+            AuthorizationServerTokenServices tokenServices,
+            ClientDetailsService clientDetailsService,
+            OAuth2RequestFactory requestFactory,
+            MemberService memberService,
+            MemberRepository memberRepository,
+            FacebookMemberRepository facebookMemberRepository) {
+        super(tokenServices, clientDetailsService, requestFactory, "facebook");
+        this.memberService = memberService;
+        this.memberRepository = memberRepository;
+        this.facebookMemberRepository = facebookMemberRepository;
     }
 
-    if (facebookId.length() > 20) {
-      throw new AuthenticationException("The facebook ID must be less or equals to 20");
+    @Override
+    protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
+        Map<String, String> requestParameters = tokenRequest.getRequestParameters();
+        String facebookId = requestParameters.get("social_id");
+        String username = requestParameters.get("social_id");
+        log.debug("facebook id: {}, username: {}", facebookId, username);
+
+        if (StringUtils.isBlank(facebookId)) {
+            throw new AuthenticationException("facebook ID is required");
+        }
+
+        if (facebookId.length() > 20) {
+            throw new AuthenticationException("The facebook ID must be less or equals to 20");
+        }
+
+        return facebookMemberRepository.findById(facebookId)
+                .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such facebook member. facebook social id - " + facebookId));
     }
 
-    return facebookMemberRepository.findById(facebookId)
-            .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
-            .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such facebook member. facebook social id - " + facebookId));
-  }
-
-  private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
-    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
-    return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
-  }
+    private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
+        return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
+    }
 }

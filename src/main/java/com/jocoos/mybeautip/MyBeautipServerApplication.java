@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients
 public class MyBeautipServerApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(MyBeautipServerApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(MyBeautipServerApplication.class, args);
+    }
 }

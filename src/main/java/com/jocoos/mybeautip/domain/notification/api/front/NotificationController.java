@@ -42,7 +42,7 @@ public class NotificationController {
 
         CursorResponse cursorResponse = new CursorResponse.Builder<>("/api/2/notification/", result)
                 .withCount(size)
-                .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size()-1).getId()) : null)
+                .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size() - 1).getId()) : null)
                 .toBuild();
 
         return cursorResponse;

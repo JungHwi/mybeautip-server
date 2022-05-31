@@ -17,33 +17,33 @@ import java.util.Date;
 @Entity
 @Table(name = "video_views")
 public class VideoView extends MemberAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "video_id")
-  private Video video;
-  
-  @Column
-  private String guestName;
-  
-  @Column(nullable = false)
-  private Integer viewCount = 0;
+    @ManyToOne
+    @JoinColumn(name = "video_id")
+    private Video video;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    private String guestName;
 
-  public VideoView(Video video, Member member) {
-    this.video = video;
-    this.createdBy = member;
-    this.viewCount = 1; // init
-  }
-  
-  public VideoView(Video video, String guestName) {
-    this.video = video;
-    this.guestName = guestName;
-    this.viewCount = 1; // init
-  }
+    @Column(nullable = false)
+    private Integer viewCount = 0;
+
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
+
+    public VideoView(Video video, Member member) {
+        this.video = video;
+        this.createdBy = member;
+        this.viewCount = 1; // init
+    }
+
+    public VideoView(Video video, String guestName) {
+        this.video = video;
+        this.guestName = guestName;
+        this.viewCount = 1; // init
+    }
 }

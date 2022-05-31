@@ -1,26 +1,25 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-
-import org.springframework.data.rest.core.config.Projection;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.point.MemberPoint;
+import org.springframework.data.rest.core.config.Projection;
+
+import java.util.Date;
 
 @Projection(name = "point_detail", types = {MemberPoint.class})
 public interface MemberPointExcerpt {
 
-  Long getId();
+    Long getId();
 
-  Member getMember();
+    Member getMember();
 
-  int getState();
+    int getState();
 
-  int getPoint();
+    int getPoint();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 
-  Date getExpiryAt();
+    Date getExpiryAt();
 
-  Date getExpiredAt();
+    Date getExpiredAt();
 }

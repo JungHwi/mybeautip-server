@@ -1,58 +1,55 @@
 package com.jocoos.mybeautip.word;
 
-import java.util.Hashtable;
-
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.notification.MessageService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.exception.BadRequestException;
+import java.util.Hashtable;
 
 @Slf4j
 @Service
 public class BannedWordService {
 
-  private final MessageService messageService;
-  private final BannedWordRepository bannedWordRepository;
+    private static final String USERNAME_BANNED_WORD = "username.banned_word";
+    private final MessageService messageService;
+    private final BannedWordRepository bannedWordRepository;
 
-  private static final String USERNAME_BANNED_WORD = "username.banned_word";
-
-  public BannedWordService(MessageService messageService,
-                           BannedWordRepository bannedWordRepository) {
-    this.messageService = messageService;
-    this.bannedWordRepository = bannedWordRepository;
-  }
-
-  public String findWordAndThrowException(String word, String lang) {
-    if (StringUtils.isBlank(word)) {
-      return word;
+    public BannedWordService(MessageService messageService,
+                             BannedWordRepository bannedWordRepository) {
+        this.messageService = messageService;
+        this.bannedWordRepository = bannedWordRepository;
     }
 
-    String lowerCase = word.toLowerCase();
-    getDictionary(BannedWord.CATEGORY_USERNAME).forEach((key, value) -> {
-      if (lowerCase.contains(value.getWord().toLowerCase())) {
-        throw new BadRequestException("banned_word", messageService.getMessage(USERNAME_BANNED_WORD, lang));
-      }
-    });
+    public String findWordAndThrowException(String word, String lang) {
+        if (StringUtils.isBlank(word)) {
+            return word;
+        }
 
-    return word;
-  }
+        String lowerCase = word.toLowerCase();
+        getDictionary(BannedWord.CATEGORY_USERNAME).forEach((key, value) -> {
+            if (lowerCase.contains(value.getWord().toLowerCase())) {
+                throw new BadRequestException("banned_word", messageService.getMessage(USERNAME_BANNED_WORD, lang));
+            }
+        });
 
-  public String findWordAndReplaceWord(String word) {
-    // TODO: Find word and replace later
+        return word;
+    }
 
-    return word;
-  }
+    public String findWordAndReplaceWord(String word) {
+        // TODO: Find word and replace later
 
-  @Cacheable("banned_word")
-  public Hashtable<String, BannedWord> getDictionary(int category) {
-    Hashtable<String, BannedWord> dictionary = new Hashtable<>();
-    bannedWordRepository.findByCategory(category).stream().forEach(
-       word -> dictionary.put(word.getWord(), word)
-    );
-    return dictionary;
-  }
+        return word;
+    }
+
+    @Cacheable("banned_word")
+    public Hashtable<String, BannedWord> getDictionary(int category) {
+        Hashtable<String, BannedWord> dictionary = new Hashtable<>();
+        bannedWordRepository.findByCategory(category).stream().forEach(
+                word -> dictionary.put(word.getWord(), word)
+        );
+        return dictionary;
+    }
 }

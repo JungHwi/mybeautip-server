@@ -1,58 +1,57 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.data.rest.core.config.Projection;
-
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.post.PostContent;
+import org.springframework.data.rest.core.config.Projection;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Projection(name = "post_details", types = Post.class)
 public interface PostExcerpt {
 
-  Long getId();
+    Long getId();
 
-  String getTitle();
+    String getTitle();
 
-  String getDescription();
+    String getDescription();
 
-  String getThumbnailUrl();
+    String getThumbnailUrl();
 
-  int getCategory();
+    int getCategory();
 
-  int getProgress();
+    int getProgress();
 
-  int getViewCount();
+    int getViewCount();
 
-  int getLikeCount();
+    int getLikeCount();
 
-  int getCommentCount();
+    int getCommentCount();
 
-  Banner getBanner();
+    Banner getBanner();
 
-  Set<PostContent> getContents();
+    Set<PostContent> getContents();
 
-  Set<Long> getWinners();
+    Set<Long> getWinners();
 
-  List<String> getGoods();
+    List<String> getGoods();
 
-  String getTagInfo();
+    String getTagInfo();
 
-  Member getCreatedBy();
+    Member getCreatedBy();
 
-  boolean isOpened();
+    boolean isOpened();
 
-  Date getStartedAt();
+    Date getStartedAt();
 
-  Date getEndedAt();
+    Date getEndedAt();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 
-  Date getModifiedAt();
+    Date getModifiedAt();
 
-  Date getDeletedAt();
+    Date getDeletedAt();
 }

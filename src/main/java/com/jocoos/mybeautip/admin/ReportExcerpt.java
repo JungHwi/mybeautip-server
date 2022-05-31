@@ -1,20 +1,19 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-
-import org.springframework.data.rest.core.config.Projection;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.report.Report;
+import org.springframework.data.rest.core.config.Projection;
+
+import java.util.Date;
 
 @Projection(name = "reported_member", types = Report.class)
 public interface ReportExcerpt {
 
-  String getReason();
+    String getReason();
 
-  Member getYou();
+    Member getYou();
 
-  Member getMe();
+    Member getMe();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 }

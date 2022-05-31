@@ -16,35 +16,35 @@ import java.util.Date;
 @Table(name = "accounts")
 public class Account {
 
-  @Id
-  @Column(name = "member_id")
-  private Long memberId;
+    @Id
+    @Column(name = "member_id")
+    private Long memberId;
 
-  @Column
-  private String bankName;
-  
-  @Transient
-  private String bankCode;
+    @Column
+    private String bankName;
 
-  @Column
-  private String bankAccount;
+    @Transient
+    private String bankCode;
 
-  @Column
-  private String bankDepositor;
+    @Column
+    private String bankAccount;
 
-  @Column
-  private boolean validity;
+    @Column
+    private String bankDepositor;
 
-  @Column
-  @CreatedDate
-  private Date createdAt;
+    @Column
+    private boolean validity;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    @CreatedDate
+    private Date createdAt;
 
-  public Account(Long memberId, boolean validity) {
-    this.memberId = memberId;
-    this.validity = validity;
-  }
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
+
+    public Account(Long memberId, boolean validity) {
+        this.memberId = memberId;
+        this.validity = validity;
+    }
 }

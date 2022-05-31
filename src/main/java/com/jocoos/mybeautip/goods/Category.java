@@ -13,18 +13,18 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "goods_categories")
 public class Category {
-  @Id
-  private String code;
-  
-  @Column(name = "parent_code")
-  private String group;
+    @Id
+    private String code;
 
-  @Column
-  private int seq;
+    @Column(name = "parent_code")
+    private String group;
 
-  @Column(name = "category_name")
-  private String name;
+    @Column
+    private int seq;
 
-  @Column
-  private String thumbnailUrl;
+    @Column(name = "category_name")
+    private String name;
+
+    @Column
+    private String thumbnailUrl;
 }

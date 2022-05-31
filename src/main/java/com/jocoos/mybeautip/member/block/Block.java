@@ -1,15 +1,13 @@
 package com.jocoos.mybeautip.member.block;
 
-import javax.persistence.*;
-import java.util.Date;
-
+import com.jocoos.mybeautip.member.Member;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import com.jocoos.mybeautip.member.Member;
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data
@@ -17,25 +15,23 @@ import com.jocoos.mybeautip.member.Member;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member_blocks")
 public class Block {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-  private Long me;
+    @Column
+    @CreatedDate
+    public Date createdAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Long me;
+    @ManyToOne
+    @JoinColumn(name = "you")
+    private Member memberYou;
 
-  @ManyToOne
-  @JoinColumn(name = "you")
-  private Member memberYou;
+    public Block(Long me, Member memberYou) {
+        this.me = me;
+        this.memberYou = memberYou;
+    }
 
-  @Column
-  @CreatedDate
-  public Date createdAt;
-
-  public Long getYouId() {
-    return memberYou.getId();
-  }
-
-  public Block(Long me, Member memberYou) {
-    this.me = me;
-    this.memberYou = memberYou;
-  }
+    public Long getYouId() {
+        return memberYou.getId();
+    }
 }

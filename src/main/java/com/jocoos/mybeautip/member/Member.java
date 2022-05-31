@@ -30,132 +30,103 @@ import java.util.Date;
 @Table(name = "members")
 public class Member {
 
-  public static final int LINK_FACEBOOK = 1;
-  public static final int LINK_NAVER = 2;
-  public static final int LINK_KAKAO = 4;
-  public static final int LINK_APPLE = 8;
+    public static final int LINK_FACEBOOK = 1;
+    public static final int LINK_NAVER = 2;
+    public static final int LINK_KAKAO = 4;
+    public static final int LINK_APPLE = 8;
+    public static final int CHAT_POST = 1;
+    public static final int COMMENT_POST = 2;
+    public static final int LIVE_POST = 4;
+    public static final int MOTD_POST = 8;
+    public static final int REVENUE_RETURN = 16;
+    public static final int PERMISSION_ALL = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
+    // Changed store link from 8 to 32
+    static final int LINK_STORE = 32;
+    @Transient
+    @JsonIgnore
+    private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
 
-  // Changed store link from 8 to 32
-  static final int LINK_STORE = 32;
-  
-  public static final int CHAT_POST = 1;
-  public static final int COMMENT_POST = 2;
-  public static final int LIVE_POST = 4;
-  public static final int MOTD_POST = 8;
-  public static final int REVENUE_RETURN = 16;
-  public static final int PERMISSION_ALL = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(length = 7)
+    private String tag;
 
+    @JsonIgnore
+    @Column(nullable = false)
+    private boolean visible;
 
-  @Transient
-  @JsonIgnore
-  private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
+    @Column(length = 50, nullable = false)
+    private String username;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Column
+    @Convert(converter = BirthdayAttributeConverter.class)
+    private Birthday birthday;
 
-  @Column(length = 7)
-  private String tag;
+    @Column(length = 200)
+    private String avatarUrl;
 
-  @JsonIgnore
-  @Column(nullable = false)
-  private boolean visible;
+    @Column(length = 50)
+    private String email;
 
-  @Column(length = 50, nullable = false)
-  private String username;
+    @Column(length = 20)
+    private String phoneNumber;
 
-  @Column
-  @Convert(converter = BirthdayAttributeConverter.class)
-  private Birthday birthday;
+    @Column
+    private int point;
 
-  @Column(length = 200)
-  private String avatarUrl;
+    @Column(length = 200)
+    private String intro;
 
-  @Column(length = 50)
-  private String email;
-  
-  @Column(length = 20)
-  private String phoneNumber;
-  
-  @Column
-  private int point;
+    @Column(nullable = false)
+    private int link;
 
-  @Column(length = 200)
-  private String intro;
+    @Column
+    private int permission;
 
-  @Column(nullable = false)
-  private int link;
-  
-  @Column
-  private int permission;
-  
-  @Column(nullable = false)
-  private int followerCount;
+    @Column(nullable = false)
+    private int followerCount;
 
-  @Column(nullable = false)
-  private int followingCount;
+    @Column(nullable = false)
+    private int followingCount;
 
-  @Column(nullable = false)
-  private int reportCount;
+    @Column(nullable = false)
+    private int reportCount;
 
-  @Column(nullable = false)
-  private int publicVideoCount;
+    @Column(nullable = false)
+    private int publicVideoCount;
 
-  @JsonIgnore
-  @Column(nullable = false)
-  private int totalVideoCount;
+    @JsonIgnore
+    @Column(nullable = false)
+    private int totalVideoCount;
 
-  @Column
-  private int revenue;
+    @Column
+    private int revenue;
 
-  @Column
-  private Date revenueModifiedAt;
-  
-  @Column
-  private Boolean pushable;
+    @Column
+    private Date revenueModifiedAt;
 
-  @Column
-  @CreatedDate
-  private Date createdAt;
+    @Column
+    private Boolean pushable;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    @CreatedDate
+    private Date createdAt;
 
-  @Column
-  private ZonedDateTime lastLoggedAt;
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
 
-  @Column
-  private Date deletedAt;
+    @Column
+    private ZonedDateTime lastLoggedAt;
 
-  public int parseLink(String grantType) {
-    switch (grantType) {
-      case "facebook": {
-        return LINK_FACEBOOK;
-      }
-      case "naver": {
-        return LINK_NAVER;
-      }
-      case "kakao": {
-        return LINK_KAKAO;
-      }
-      case "apple": {
-        return LINK_APPLE;
-      }
-      default: {
-        throw new IllegalArgumentException("Unknown grant type");
-      }
+    @Column
+    private Date deletedAt;
+
+    public Member() {
+        setTag();
     }
-  }
-
-  public void setTag() {
-    this.tag = RandomUtils.generateTag();
-  }
-
-  public Member() {
-    setTag();
-  }
 
     public Member(SignupRequest request) {
         this.link = parseLink(request.getGrantType());
@@ -170,7 +141,33 @@ public class Member {
         setTag();
     }
 
+    public int parseLink(String grantType) {
+        switch (grantType) {
+            case "facebook": {
+                return LINK_FACEBOOK;
+            }
+            case "naver": {
+                return LINK_NAVER;
+            }
+            case "kakao": {
+                return LINK_KAKAO;
+            }
+            case "apple": {
+                return LINK_APPLE;
+            }
+            default: {
+                throw new IllegalArgumentException("Unknown grant type");
+            }
+        }
+    }
 
+    public void setTag() {
+        this.tag = RandomUtils.generateTag();
+    }
 
-
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber.trim()
+                .replace("-", "")
+                .replace(" ", "");
+    }
 }

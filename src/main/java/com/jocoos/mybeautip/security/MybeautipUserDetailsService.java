@@ -22,23 +22,23 @@ public class MybeautipUserDetailsService implements UserDetailsService {
         log.debug("load user by username: {}", username);
         if (StringUtils.startsWith(username, "guest:")) {
             return createGuestUserDetails(username);
-    }
+        }
 
-    return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(username))
-        .map(m -> {
-          switch (m.getLink()) {
-            case 0: {
-              return new MyBeautipUserDetails(m, "ROLE_ADMIN");
-            }
-            case 32: {
-              return new MyBeautipUserDetails(m, "ROLE_STORE");
-            }
-            default: {
-              return new MyBeautipUserDetails(m);
-            }
-          }
-        })
-        .orElseThrow(() -> new AuthenticationException("username not found"));
+        return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(username))
+                .map(m -> {
+                    switch (m.getLink()) {
+                        case 0: {
+                            return new MyBeautipUserDetails(m, "ROLE_ADMIN");
+                        }
+                        case 32: {
+                            return new MyBeautipUserDetails(m, "ROLE_STORE");
+                        }
+                        default: {
+                            return new MyBeautipUserDetails(m);
+                        }
+                    }
+                })
+                .orElseThrow(() -> new AuthenticationException("username not found"));
     }
 
     private MyBeautipUserDetails createGuestUserDetails(String username) {
