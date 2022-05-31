@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRep
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
@@ -27,6 +28,7 @@ import com.jocoos.mybeautip.support.RandomUtils;
 import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.word.BannedWord;
 import com.jocoos.mybeautip.word.BannedWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -39,10 +41,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -202,40 +201,15 @@ public class MemberService {
     }
 
     public void checkUsernameValidation(@RequestParam String username, String lang) {
-        Member me = currentMember();
-
-        if (username.length() < 2 || username.length() > 25) {
-            throw new BadRequestException("invalid_length", messageService.getMessage(USERNAME_INVALID_LENGTH, lang));
-        }
-
-        if (StringUtils.isNumeric(username)) {
-            throw new BadRequestException("invalid_number", messageService.getMessage(USERNAME_INVALID_FORMAT, lang));
-        }
-
-        String regex = "^[\\w가-힣!_~]+$";
-        if (!(username.matches(regex))) {
+        if (!(username.matches(RegexConstants.regexForUsername))) {
             throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
         }
 
-        if (me.isVisible()) { // Already registered member
-            if (!me.getUsername().equals(username)) {
-                if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
-                    throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
-                }
-                if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
-                    throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
-                }
-            }
-        } else {
-            if (memberRepository.countByVisibleIsTrueAndUsernameAndDeletedAtIsNull(username) > 0) {
-                throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
-            }
-            if (memberRepository.countByUsernameAndLinkAndDeletedAtIsNull(username, Member.LINK_STORE) > 0) {
-                throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
-            }
+        if (memberRepository.existsByUsername(username)) {
+            throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
         }
 
-        bannedWordService.findWordAndThrowException(username, lang);
+        bannedWordService.findWordAndThrowException(BannedWord.CATEGORY_USERNAME, username, lang);
     }
 
     public void checkEmailValidation(String email, String lang) {
@@ -253,7 +227,7 @@ public class MemberService {
         List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
 
         for (Member member : noTagMembers) {
-            adjustTag(member);
+            member = adjustTag(member);
             memberRepository.save(member);
         }
     }
@@ -261,7 +235,7 @@ public class MemberService {
     @Transactional
     public Member register(SocialMember socialMember) {
         Member member = socialMember.toMember();
-        adjustUniqueInfo(member);
+        member = adjustUniqueInfo(member);
         Member registeredMember = memberRepository.save(member);
 
         switch (registeredMember.getLink()) {
@@ -282,29 +256,41 @@ public class MemberService {
         return registeredMember;
     }
 
-    public void adjustUniqueInfo(Member member) {
-        adjustTag(member);
-        adjustUserName(member);
+    public Member adjustUniqueInfo(Member member) {
+        member = adjustTag(member);
+        return adjustUserName(member);
     }
 
     // TODO Migration 하고 나면 private 으로 변경.
     public Member adjustTag(Member member) {
         String tag = member.getTag();
         for (int retry = 0; retry < 5; retry++) {
-            if (StringUtils.isNotBlank(tag) && memberRepository.countByTag(tag) == 0) {
+            if (StringUtils.isNotBlank(tag) && !memberRepository.existsByTag(tag)) {
                 member.setTag(tag);
                 return member;
             }
             tag = RandomUtils.generateTag();
         }
 
-        log.warn("Duplicate Tag : " + member.getUsername());
-        slackService.duplicateTag(member.getUsername());
+        log.warn("Member is Duplicate Tag. Id : " + member.getId());
+        slackService.duplicateTag(member.getId());
         return member;
     }
 
     public Member adjustUserName(Member member) {
-
+        String username = member.getUsername();
+        try {
+            checkUsernameValidation(username, Locale.KOREAN.getLanguage());
+        } catch (BadRequestException ex) {
+            for (int retry = 0; retry < 5; retry++) {
+                username = RandomUtils.generateUsername();
+                if (!memberRepository.existsByUsername(username)) {
+                    member.setUsername(username);
+                    return member;
+                }
+            }
+        }
+        slackService.duplicateUsername(member.getId());
         return member;
     }
 

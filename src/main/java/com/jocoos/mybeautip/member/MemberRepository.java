@@ -14,9 +14,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     List<Member> findByIdIn(Set<Long> ids);
 
-    long countByTag(String tag);
+    boolean existsByTag(String tag);
 
     boolean existsByPhoneNumber(String phoneNumber);
+
+    boolean existsByUsername(String username);
 
     Optional<Member> findByTag(String tag);
 

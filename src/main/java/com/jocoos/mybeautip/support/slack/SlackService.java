@@ -333,10 +333,17 @@ public class SlackService {
         send(message);
     }
 
-    public void duplicateTag(String name) {
+    public void duplicateTag(Long id) {
         String message = String.format("*TAG 중복 발생*" +
-                        "```Member Name: %s```",
-                name);
+                        "```Member Id: %d```",
+                id);
+        send(message);
+    }
+
+    public void duplicateUsername(Long id) {
+        String message = String.format("*Username 중복 발생*" +
+                        "```Member Id: %d```",
+                id);
         send(message);
     }
 
