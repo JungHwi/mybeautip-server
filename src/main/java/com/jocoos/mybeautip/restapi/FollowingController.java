@@ -3,10 +3,10 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingMemberRequest;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
@@ -34,16 +34,16 @@ public class FollowingController {
     private static final String MEMBER_NOT_FOUND = "member.not_found";
     private static final String MEMBER_FOLLOWING_BAD_REQUEST = "member.following_bad_request";
     private static final String FOLLOWING_NOT_FOUND = "following.not_found";
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MessageService messageService;
     private final MemberRepository memberRepository;
     private final FollowingRepository followingRepository;
 
-    public FollowingController(MemberService memberService,
+    public FollowingController(LegacyMemberService legacyMemberService,
                                MessageService messageService,
                                MemberRepository memberRepository,
                                FollowingRepository followingRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
         this.memberRepository = memberRepository;
         this.followingRepository = followingRepository;
@@ -52,7 +52,7 @@ public class FollowingController {
     @PostMapping("/me/followings")
     public FollowingResponse followMember(@Valid @RequestBody FollowingMemberRequest followingMemberRequest,
                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         if (me.getId().equals(followingMemberRequest.getMemberId())) {
             throw new BadRequestException("following_bad_request", messageService.getMessage(MEMBER_FOLLOWING_BAD_REQUEST, lang));
         }
@@ -62,7 +62,7 @@ public class FollowingController {
         Following following = followingRepository.findByMemberMeIdAndMemberYouId(me.getId(), you.getId()).orElse(null);
 
         if (following == null) {
-            return new FollowingResponse(memberService.followMember(me, you).getId());
+            return new FollowingResponse(legacyMemberService.followMember(me, you).getId());
         } else {  // Already followed
             return new FollowingResponse(following.getId());
         }
@@ -71,7 +71,7 @@ public class FollowingController {
     @DeleteMapping("/me/followings/{id}")
     public void unFollowMember(@PathVariable("id") Long id,
                                @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         Following following = followingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("following_not_found", messageService.getMessage(FOLLOWING_NOT_FOUND, lang)));
 
@@ -79,14 +79,14 @@ public class FollowingController {
             throw new BadRequestException("following_not_found", messageService.getMessage(FOLLOWING_NOT_FOUND, lang));
         }
 
-        memberService.unFollowMember(following);
+        legacyMemberService.unFollowMember(following);
     }
 
     @GetMapping("/me/followings")
     public CursorResponse getFollowing(@RequestParam(defaultValue = "50") int count,
                                        @RequestParam(required = false) String cursor,
                                        HttpServletRequest httpServletRequest) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         return getFollowings(httpServletRequest.getRequestURI(), memberId, cursor, count);
     }
 
@@ -94,7 +94,7 @@ public class FollowingController {
     public CursorResponse getFollowers(@RequestParam(defaultValue = "50") int count,
                                        @RequestParam(required = false) String cursor,
                                        HttpServletRequest httpServletRequest) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         return getFollowers(httpServletRequest.getRequestURI(), memberId, cursor, count);
     }
 
@@ -126,7 +126,7 @@ public class FollowingController {
 
         for (Following following : slice.getContent()) {
             // Add following id when I follow you
-            result.add(memberService.getMemberInfo(following.getMemberYou()));
+            result.add(legacyMemberService.getMemberInfo(following.getMemberYou()));
         }
 
         String nextCursor = null;
@@ -149,7 +149,7 @@ public class FollowingController {
 
         for (Following follower : slice.getContent()) {
             // Add following id when I follow
-            result.add(memberService.getMemberInfo(follower.getMemberMe()));
+            result.add(legacyMemberService.getMemberInfo(follower.getMemberMe()));
         }
 
         String nextCursor = null;

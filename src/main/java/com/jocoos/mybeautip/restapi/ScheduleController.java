@@ -3,8 +3,8 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.config.InstantNotificationConfig;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.recommendation.MemberRecommendation;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import com.jocoos.mybeautip.schedules.Schedule;
@@ -38,18 +38,18 @@ import static com.jocoos.mybeautip.schedules.ScheduleService.DIRECTION_PREV;
 public class ScheduleController {
     private static final int LIVE_INTERVAL_MIN = 10; //mins
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final ScheduleService scheduleService;
     private final MemberRecommendationRepository memberRecommendationRepository;
     private final VideoRepository videoRepository;
     private final InstantNotificationConfig config;
 
-    public ScheduleController(MemberService memberService,
+    public ScheduleController(LegacyMemberService legacyMemberService,
                               ScheduleService scheduleService,
                               MemberRecommendationRepository memberRecommendationRepository,
                               VideoRepository videoRepository,
                               InstantNotificationConfig config) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.scheduleService = scheduleService;
         this.videoRepository = videoRepository;
         this.memberRecommendationRepository = memberRecommendationRepository;
@@ -94,7 +94,7 @@ public class ScheduleController {
                     });
 
                     // check if I(or guest) am following scheduler
-                    scheduleInfo.setFollowingId(memberService.getFollowingId(s.getCreatedBy()));
+                    scheduleInfo.setFollowingId(legacyMemberService.getFollowingId(s.getCreatedBy()));
 
                     // check if scheduled video exists
                     if (srt.checkVideo(s.getStartedAt())) {
@@ -148,7 +148,7 @@ public class ScheduleController {
     public CursorResponse getMySchedules(@RequestParam(defaultValue = "10") int count,
                                          @RequestParam(required = false) Long cursor) {
         List<ScheduleInfo> result = scheduleService
-                .getSchedulesByMember(memberService.currentMemberId(), count, cursor)
+                .getSchedulesByMember(legacyMemberService.currentMemberId(), count, cursor)
                 .stream()
                 .map(ScheduleInfo::new)
                 .collect(Collectors.toList());
@@ -167,7 +167,7 @@ public class ScheduleController {
     @PostMapping("/members/me/schedules")
     public ResponseEntity createSchedule(@RequestBody CreateScheduleRequest request) {
         log.debug("{}", request);
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         if (member == null) {
             throw new MemberNotFoundException("member_not_found");
         }
@@ -196,7 +196,7 @@ public class ScheduleController {
             throw new BadRequestException("invalid_values", "All values are null.");
         }
 
-        Schedule schedule = scheduleService.updateSchedule(id, memberService.currentMemberId(), request, lang);
+        Schedule schedule = scheduleService.updateSchedule(id, legacyMemberService.currentMemberId(), request, lang);
 
         ScheduleInfo scheduleInfo = new ScheduleInfo(schedule);
         scheduleInfo.recommended = null;
@@ -207,7 +207,7 @@ public class ScheduleController {
     @DeleteMapping("/members/me/schedules/{id}")
     public ResponseEntity deleteSchedule(@PathVariable Long id,
                                          @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        scheduleService.delete(id, memberService.currentMemberId(), lang);
+        scheduleService.delete(id, legacyMemberService.currentMemberId(), lang);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

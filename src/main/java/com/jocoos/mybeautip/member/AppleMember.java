@@ -1,10 +1,11 @@
 package com.jocoos.mybeautip.member;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.restapi.dto.SignupRequest;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,8 +16,9 @@ import javax.persistence.Table;
 @Table(name = "apple_members")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class AppleMember extends CreatedDateAuditable {
+public class AppleMember extends CreatedDateAuditable implements SocialMember {
 
     @Id
     @Column
@@ -31,15 +33,14 @@ public class AppleMember extends CreatedDateAuditable {
     @Column(nullable = false)
     private Long memberId;
 
-    public AppleMember(String appleId, String email, String name, Long memberId) {
-        this.appleId = appleId;
-        this.memberId = memberId;
-        if (!StringUtils.isBlank(email)) {
-            this.email = email;
-        }
+    public String getSocialId() {
+        return appleId;
+    }
 
-        if (!StringUtils.isBlank(name)) {
-            this.name = name;
-        }
+    public AppleMember(SignupRequest request, long memberId) {
+        this.appleId = request.getSocialId();
+        this.email = request.getEmail();
+        this.name = request.getUsername();
+        this.memberId = memberId;
     }
 }

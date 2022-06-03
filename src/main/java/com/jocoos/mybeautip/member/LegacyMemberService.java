@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.SettingNotificationDto;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
+import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
+import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
@@ -20,9 +23,8 @@ import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.LegacyMemberController;
-import com.jocoos.mybeautip.security.LoginServiceFactory;
+import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
-import com.jocoos.mybeautip.security.SocialMember;
 import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.support.RandomUtils;
 import com.jocoos.mybeautip.support.slack.SlackService;
@@ -45,7 +47,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class MemberService {
+public class LegacyMemberService {
 
     private static final String USERNAME_INVALID_LENGTH = "username.invalid_length";
     private static final String USERNAME_INVALID_FORMAT = "username.invalid_format";
@@ -66,28 +68,31 @@ public class MemberService {
     private final NaverMemberRepository naverMemberRepository;
     private final AppleMemberRepository appleMemberRepository;
     private final MemberLeaveLogRepository memberLeaveLogRepository;
-    private final LoginServiceFactory loginServiceFactory;
+    private final MemberConverter memberConverter;
     private final AttachmentService attachmentService;
     private final SlackService slackService;
+    private final SocialMemberFactory socialMemberFactory;
     private final String PATH_AVATAR = "avatar";
     private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
     private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
 
-    public MemberService(BannedWordService bannedWordService,
-                         MessageService messageService,
-                         TagService tagService,
-                         MemberRepository memberRepository,
-                         MemberDetailRepository memberDetailRepository,
-                         FollowingRepository followingRepository,
-                         ReportRepository reportRepository,
-                         BlockService blockService,
-                         FacebookMemberRepository facebookMemberRepository,
-                         KakaoMemberRepository kakaoMemberRepository,
-                         NaverMemberRepository naverMemberRepository,
-                         AppleMemberRepository appleMemberRepository, MemberLeaveLogRepository memberLeaveLogRepository,
-                         LoginServiceFactory loginServiceFactory,
-                         AttachmentService attachmentService,
-                         SlackService slackService) {
+    public LegacyMemberService(BannedWordService bannedWordService,
+                               MessageService messageService,
+                               TagService tagService,
+                               MemberRepository memberRepository,
+                               MemberDetailRepository memberDetailRepository,
+                               FollowingRepository followingRepository,
+                               ReportRepository reportRepository,
+                               BlockService blockService,
+                               FacebookMemberRepository facebookMemberRepository,
+                               KakaoMemberRepository kakaoMemberRepository,
+                               NaverMemberRepository naverMemberRepository,
+                               AppleMemberRepository appleMemberRepository,
+                               MemberLeaveLogRepository memberLeaveLogRepository,
+                               MemberConverter memberConverter,
+                               AttachmentService attachmentService,
+                               SlackService slackService,
+                               SocialMemberFactory socialMemberFactory) {
         this.bannedWordService = bannedWordService;
         this.messageService = messageService;
         this.tagService = tagService;
@@ -101,9 +106,10 @@ public class MemberService {
         this.naverMemberRepository = naverMemberRepository;
         this.appleMemberRepository = appleMemberRepository;
         this.memberLeaveLogRepository = memberLeaveLogRepository;
+        this.memberConverter = memberConverter;
         this.attachmentService = attachmentService;
         this.slackService = slackService;
-        this.loginServiceFactory = loginServiceFactory;
+        this.socialMemberFactory = socialMemberFactory;
     }
 
     public Long currentMemberId() {
@@ -233,25 +239,13 @@ public class MemberService {
     }
 
     @Transactional
-    public Member register(SocialMember socialMember) {
-        Member member = socialMember.toMember();
+    public Member register(SignupRequest signupRequest) {
+        Member member = memberConverter.convertToMember(signupRequest);
         member = adjustUniqueInfo(member);
         Member registeredMember = memberRepository.save(member);
 
-        switch (registeredMember.getLink()) {
-            case Member.LINK_FACEBOOK:
-                facebookMemberRepository.save(new FacebookMember(socialMember.getId(), registeredMember.getId()));
-                break;
-            case Member.LINK_NAVER:
-                naverMemberRepository.save(new NaverMember(socialMember, registeredMember.getId()));
-                break;
-            case Member.LINK_KAKAO:
-                kakaoMemberRepository.save(new KakaoMember(socialMember.getId(), registeredMember.getId()));
-                break;
-            case Member.LINK_APPLE:
-                appleMemberRepository.save(new AppleMember(socialMember.getId(), socialMember.getEmail(), socialMember.getName(), registeredMember.getId()));
-                break;
-        }
+        SocialMemberService socialMemberService = socialMemberFactory.getSocialMemberService(member.getLink());
+        socialMemberService.save(signupRequest, member.getId());
 
         return registeredMember;
     }

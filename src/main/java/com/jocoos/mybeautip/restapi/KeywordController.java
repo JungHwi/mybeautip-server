@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
 import com.jocoos.mybeautip.search.SearchHistory;
@@ -27,14 +27,14 @@ import java.util.*;
 @RequestMapping(value = "/api/1/keywords", produces = MediaType.APPLICATION_JSON_VALUE)
 public class KeywordController {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final SearchHistoryRepository searchHistoryRepository;
     private final KeywordRecommendationRepository keywordRecommendationRepository;
 
-    public KeywordController(MemberService memberService,
+    public KeywordController(LegacyMemberService legacyMemberService,
                              SearchHistoryRepository searchHistoryRepository,
                              KeywordRecommendationRepository keywordRecommendationRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.searchHistoryRepository = searchHistoryRepository;
         this.keywordRecommendationRepository = keywordRecommendationRepository;
     }
@@ -47,7 +47,7 @@ public class KeywordController {
 
         count = validateRequestAndGetValidCount(count, scope, keyword, method);
         PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "modifiedAt"));
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
 
         switch (scope) {
             case "me":
@@ -85,7 +85,7 @@ public class KeywordController {
         if ("contain".equals(method)) {
             list = searchHistoryRepository.findByCreatedByAndKeywordContaining(me, keyword, page);
         } else {
-            list = searchHistoryRepository.findByCreatedByAndKeywordStartingWith(memberService.currentMember(), keyword, page);
+            list = searchHistoryRepository.findByCreatedByAndKeywordStartingWith(legacyMemberService.currentMember(), keyword, page);
         }
         return getDistinctKeywordInfoList(list);
     }

@@ -4,9 +4,9 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.goods.GoodsRepository;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 public class VideoService {
 
     private static final String VIDEO_NOT_FOUND = "video.not_found";
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final TagService tagService;
     private final FeedService feedService;
     private final SlackService slackService;
@@ -75,7 +75,7 @@ public class VideoService {
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
 
-    public VideoService(MemberService memberService,
+    public VideoService(LegacyMemberService legacyMemberService,
                         TagService tagService,
                         FeedService feedService,
                         SlackService slackService,
@@ -95,7 +95,7 @@ public class VideoService {
                         VideoDataService videoDataService,
                         VideoCategoryRepository videoCategoryRepository,
                         VideoScrapRepository videoScrapRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.tagService = tagService;
         this.feedService = feedService;
         this.slackService = slackService;
@@ -295,7 +295,7 @@ public class VideoService {
         Long scrapId = null;
         boolean blocked = false;
 
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         // Set likeID
         if (me != null) {
             Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me);
@@ -311,7 +311,7 @@ public class VideoService {
             video.setWatchCount(videoWatchRepository.countByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration)));
         }
 
-        VideoController.VideoInfo videoInfo = new VideoController.VideoInfo(video, memberService.getMemberInfo(video.getMember()), likeId, blocked);
+        VideoController.VideoInfo videoInfo = new VideoController.VideoInfo(video, legacyMemberService.getMemberInfo(video.getMember()), likeId, blocked);
         if (scrapId != null) {
             videoInfo.setScrapId(scrapId);
         }
@@ -393,7 +393,7 @@ public class VideoService {
 
     @Transactional
     public Video create(VideoController.CreateVideoRequest request) {
-        Video video = new Video(memberService.currentMember());
+        Video video = new Video(legacyMemberService.currentMember());
         BeanUtils.copyProperties(request, video);
 
         // Set categories after video is saved

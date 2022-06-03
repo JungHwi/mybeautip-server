@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SocialMember {
+public class SocialMemberRequest {
     private String id;
     private String email;
     private String name;

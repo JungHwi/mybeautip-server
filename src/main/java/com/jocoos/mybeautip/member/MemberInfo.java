@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.restapi.VideoController;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.List;
 public class MemberInfo {
     private Long id;
     private String tag;
+    private MemberStatus status;
     private String username;
     private String email;
     private String phoneNumber;
@@ -34,6 +36,7 @@ public class MemberInfo {
     public MemberInfo(Member member) {
         this.id = member.getId();
         this.tag = member.getTag();
+        this.status = member.getStatus();
         this.username = StringUtils.isBlank(member.getUsername()) ? "" : member.getUsername();
         this.email = StringUtils.isBlank(member.getEmail()) ? "" : member.getEmail();
         this.phoneNumber = StringUtils.isBlank(member.getPhoneNumber()) ? "" : member.getPhoneNumber();

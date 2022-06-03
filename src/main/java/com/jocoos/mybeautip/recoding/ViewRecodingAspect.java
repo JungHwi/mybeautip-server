@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.recoding;
 
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ViewRecodingAspect {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final ViewRecodingService viewRecodingService;
 
-    public ViewRecodingAspect(MemberService memberService,
+    public ViewRecodingAspect(LegacyMemberService legacyMemberService,
                               ViewRecodingService viewRecodingService) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.viewRecodingService = viewRecodingService;
     }
 
@@ -38,9 +38,9 @@ public class ViewRecodingAspect {
                 ResponseEntity response = (ResponseEntity) result;
                 if (response.getStatusCode() == HttpStatus.OK) {
                     log.debug("response status code: {}", response.getStatusCode());
-                    if (memberService.currentMemberId() != null) {
+                    if (legacyMemberService.currentMemberId() != null) {
                         viewRecodingService.insertOrUpdate(String.valueOf(postId),
-                                ViewRecoding.CATEGORY_POST, memberService.currentMember());
+                                ViewRecoding.CATEGORY_POST, legacyMemberService.currentMember());
                     }
                 }
             } else {
@@ -67,9 +67,9 @@ public class ViewRecodingAspect {
                 ResponseEntity response = (ResponseEntity) result;
                 if (response.getStatusCode() == HttpStatus.OK) {
                     log.debug("response status code: {}", response.getStatusCode());
-                    if (memberService.currentMemberId() != null) {
+                    if (legacyMemberService.currentMemberId() != null) {
                         viewRecodingService.insertOrUpdate(goodsNo,
-                                ViewRecoding.CATEGORY_GOODS, memberService.currentMember());
+                                ViewRecoding.CATEGORY_GOODS, legacyMemberService.currentMember());
                     }
                 }
             } else {
@@ -97,9 +97,9 @@ public class ViewRecodingAspect {
                 ResponseEntity response = (ResponseEntity) result;
                 if (response.getStatusCode() == HttpStatus.OK) {
                     log.debug("response status code: {}", response.getStatusCode());
-                    if (memberService.currentMemberId() != null) {
+                    if (legacyMemberService.currentMemberId() != null) {
                         viewRecodingService.insertOrUpdate(String.valueOf(String.valueOf(videoId)),
-                                ViewRecoding.CATEGORY_VIDEO, memberService.currentMember());
+                                ViewRecoding.CATEGORY_VIDEO, legacyMemberService.currentMember());
                     }
                 }
             } else {

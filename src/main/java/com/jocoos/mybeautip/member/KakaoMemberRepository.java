@@ -8,5 +8,7 @@ public interface KakaoMemberRepository extends PagingAndSortingRepository<KakaoM
 
     boolean existsByKakaoId(String kakaoId);
 
+    KakaoMember getByKakaoId(String kakaoId);
+
     Optional<KakaoMember> findByMemberId(Long memberId);
 }

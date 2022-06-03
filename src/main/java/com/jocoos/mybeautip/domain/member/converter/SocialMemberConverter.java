@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.member.converter;
 
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
-import com.jocoos.mybeautip.security.SocialMember;
+import com.jocoos.mybeautip.security.SocialMemberRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -15,6 +15,6 @@ public interface SocialMemberConverter {
             @Mapping(target = "picture", source = "avatarUrl"),
             @Mapping(target = "provider", source = "grantType"),
     })
-    SocialMember convert(SignupRequest signupRequest);
+    SocialMemberRequest convert(SignupRequest signupRequest);
 }
 

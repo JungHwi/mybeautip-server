@@ -3,9 +3,9 @@ package com.jocoos.mybeautip.security;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.member.FacebookMemberRepository;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +18,7 @@ import java.util.Map;
 @Slf4j
 public class FacebookTokenGranter extends AbstractTokenGranter {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MemberRepository memberRepository;
     private final FacebookMemberRepository facebookMemberRepository;
 
@@ -26,11 +26,11 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
             AuthorizationServerTokenServices tokenServices,
             ClientDetailsService clientDetailsService,
             OAuth2RequestFactory requestFactory,
-            MemberService memberService,
+            LegacyMemberService legacyMemberService,
             MemberRepository memberRepository,
             FacebookMemberRepository facebookMemberRepository) {
         super(tokenServices, clientDetailsService, requestFactory, "facebook");
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.memberRepository = memberRepository;
         this.facebookMemberRepository = facebookMemberRepository;
     }

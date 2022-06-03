@@ -8,7 +8,7 @@ import lombok.Setter;
 public class WebSocialLoginResponse {
 
     private boolean result;
-    private SocialMember socialMember;
+    private SocialMemberRequest socialMember;
     private AccessTokenResponse token;
 
     WebSocialLoginResponse(AccessTokenResponse token) {
@@ -16,8 +16,8 @@ public class WebSocialLoginResponse {
         this.token = token;
     }
 
-    WebSocialLoginResponse(SocialMember socialMember) {
+    WebSocialLoginResponse(SocialMemberRequest socialMemberRequest) {
         this.result = false;
-        this.socialMember = socialMember;
+        this.socialMember = socialMemberRequest;
     }
 }

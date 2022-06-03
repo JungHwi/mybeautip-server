@@ -22,61 +22,61 @@ public class SocialLoginService {
 
     public WebSocialLoginResponse webSocialLogin(String provider, String code, String state) {
         WebSocialLoginResponse response;
-        SocialMember socialMember = loadMember(provider, code, state);
+        SocialMemberRequest socialMemberRequest = loadMember(provider, code, state);
 
         try {
-            Member member = saveOrUpdate(socialMember);
+            Member member = saveOrUpdate(socialMemberRequest);
             AccessTokenResponse accessTokenResponse = jwtTokenProvider.auth(member);
             response = new WebSocialLoginResponse(accessTokenResponse);
         } catch (MemberNotFoundException ex) {
-            response = new WebSocialLoginResponse(socialMember);
+            response = new WebSocialLoginResponse(socialMemberRequest);
         }
 
         return response;
     }
 
     @Transactional
-    public SocialMember loadMember(String provider, String code, String state) {
+    public SocialMemberRequest loadMember(String provider, String code, String state) {
         LoginService loginService = loginServiceFactory.getLoginService(provider);
 
-        SocialMember socialMember = loginService.getMember(code, state);
-        log.debug("{}", socialMember);
+        SocialMemberRequest socialMemberRequest = loginService.getMember(code, state);
+        log.debug("{}", socialMemberRequest);
 
-        return socialMember;
+        return socialMemberRequest;
     }
 
-    private Member saveOrUpdate(SocialMember socialMember) {
-        Member member = findMember(socialMember);
+    private Member saveOrUpdate(SocialMemberRequest socialMemberRequest) {
+        Member member = findMember(socialMemberRequest);
 
         return memberRepository.save(member);
     }
 
-    private Member findMember(SocialMember socialMember) {
+    private Member findMember(SocialMemberRequest socialMemberRequest) {
         Member member = null;
         Long memberId = null;
 
-        switch (socialMember.getProvider()) {
+        switch (socialMemberRequest.getProvider()) {
             case KakaoLoginService.PROVIDER_TYPE:
-                memberId = kakaoMemberRepository.findById(socialMember.getId())
+                memberId = kakaoMemberRepository.findById(socialMemberRequest.getId())
                         .map(s -> s.getMemberId())
-                        .orElseThrow(() -> new MemberNotFoundException("No such kakao member. kakao id - " + socialMember.getId()));
+                        .orElseThrow(() -> new MemberNotFoundException("No such kakao member. kakao id - " + socialMemberRequest.getId()));
                 break;
             case NaverLoginService.PROVIDER_TYPE:
-                memberId = naverMemberRepository.findById(socialMember.getId())
+                memberId = naverMemberRepository.findById(socialMemberRequest.getId())
                         .map(s -> s.getMemberId())
-                        .orElseThrow(() -> new MemberNotFoundException("No such naver member. naver id - " + socialMember.getId()));
+                        .orElseThrow(() -> new MemberNotFoundException("No such naver member. naver id - " + socialMemberRequest.getId()));
                 break;
             case FacebookLoginService.PROVIDER_TYPE:
-                memberId = facebookMemberRepository.findById(socialMember.getId())
+                memberId = facebookMemberRepository.findById(socialMemberRequest.getId())
                         .map(s -> s.getMemberId())
-                        .orElseThrow(() -> new MemberNotFoundException("No such facebook member. facebook id - " + socialMember.getId()));
+                        .orElseThrow(() -> new MemberNotFoundException("No such facebook member. facebook id - " + socialMemberRequest.getId()));
                 break;
             default:
                 throw new MybeautipRuntimeException("Unsupported provider type");
         }
 
         member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
-                .orElse(socialMember.toMember());
+                .orElse(socialMemberRequest.toMember());
 
         return member;
     }

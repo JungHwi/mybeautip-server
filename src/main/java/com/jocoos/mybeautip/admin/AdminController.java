@@ -9,10 +9,10 @@ import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.member.report.ReportRepository;
@@ -77,7 +77,7 @@ public class AdminController {
     private final VideoService videoService;
     private final TagService tagService;
     private final GoodsService goodsService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
 
     public AdminController(PostRepository postRepository,
                            BannerRepository bannerRepository,
@@ -95,7 +95,7 @@ public class AdminController {
                            ScheduleRepository scheduleRepository, OrderRepository orderRepository, TagRepository tagRepository,
                            VideoService videoService,
                            TagService tagService,
-                           GoodsService goodsService, MemberService memberService) {
+                           GoodsService goodsService, LegacyMemberService legacyMemberService) {
         this.postRepository = postRepository;
         this.bannerRepository = bannerRepository;
         this.memberRepository = memberRepository;
@@ -115,7 +115,7 @@ public class AdminController {
         this.tagService = tagService;
         this.videoService = videoService;
         this.goodsService = goodsService;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
     }
 
     @DeleteMapping("/posts/{id:.+}")
@@ -147,7 +147,7 @@ public class AdminController {
             tagService.addHistory(request.getDescription(), TagService.TAG_POST, post.getId(), post.getCreatedBy());
         }
 
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         List<GoodsInfo> goodsInfoList = new ArrayList<>();
         List<String> goodsList = post.getGoods();
         for (String info : goodsList) {
@@ -630,7 +630,7 @@ public class AdminController {
 
     private ResponseEntity<Page<MotdDetailInfo>> responseVideos(Page<Video> videos) {
 
-        Member admin = memberService.currentMember();
+        Member admin = legacyMemberService.currentMember();
         Page<MotdDetailInfo> details = videos.map(v -> {
             MotdDetailInfo info = new MotdDetailInfo(v);
             motdRecommendationRepository.findByVideoId(v.getId())

@@ -2,8 +2,8 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.account.Account;
 import com.jocoos.mybeautip.member.account.AccountRepository;
 import com.jocoos.mybeautip.member.account.AccountService;
@@ -35,7 +35,7 @@ public class AccountController {
     private static final String ACCOUNT_BANK_NOT_SUPPORTED = "account.not_supported_bank_code";
     private static final String ACCOUNT_INVALID_INFO = "account.invalid_info";
     private static final String BANK_CODE_ETC = "000";
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MessageService messageService;
     private final IamportService iamportService;
     private final AccountService accountService;
@@ -65,12 +65,12 @@ public class AccountController {
         }
     };
 
-    public AccountController(MemberService memberService,
+    public AccountController(LegacyMemberService legacyMemberService,
                              MessageService messageService,
                              IamportService iamportService,
                              AccountService accountService,
                              AccountRepository accountRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
         this.iamportService = iamportService;
         this.accountService = accountService;
@@ -79,7 +79,7 @@ public class AccountController {
 
     @GetMapping
     public ResponseEntity<AccountInfo> getAccount(@RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         return accountRepository.findById(me.getId())
                 .map(account -> {
                     log.debug("account: {}", account);
@@ -105,7 +105,7 @@ public class AccountController {
 
         boolean valid = validAccount(updateAccountInfo, lang);
 
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         return accountRepository.findById(me.getId())
                 .map(account -> {
                     account.setMemberId(me.getId());

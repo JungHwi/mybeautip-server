@@ -3,8 +3,8 @@ package com.jocoos.mybeautip.recommendation;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.restapi.CursorResponse;
 import com.jocoos.mybeautip.restapi.VideoController;
 import com.jocoos.mybeautip.tag.Tag;
@@ -40,7 +40,7 @@ public class RecommendationController {
     private static final String RESOURCE_TYPE_TAG = "tag";
     private static final String DEFAULT_HASHTAG_IMG_URL = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/app/img_hashtag_default.png";
     private final GoodsService goodsService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final VideoService videoService;
     private final VideoRepository videoRepository;
     private final MemberRecommendationRepository memberRecommendationRepository;
@@ -52,7 +52,7 @@ public class RecommendationController {
     private final int MAX_RECOMMENDED_KEYWORD_COUNT = 100;
 
     public RecommendationController(GoodsService goodsService,
-                                    MemberService memberService,
+                                    LegacyMemberService legacyMemberService,
                                     VideoService videoService,
                                     VideoRepository videoRepository,
                                     MemberRecommendationRepository memberRecommendationRepository,
@@ -61,7 +61,7 @@ public class RecommendationController {
                                     MotdRecommendationBaseRepository motdRecommendationBaseRepository,
                                     KeywordRecommendationRepository keywordRecommendationRepository) {
         this.goodsService = goodsService;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.videoService = videoService;
         this.videoRepository = videoRepository;
         this.memberRecommendationRepository = memberRecommendationRepository;
@@ -80,7 +80,7 @@ public class RecommendationController {
         List<MemberInfo> result = new ArrayList<>();
 
         members.forEach(r -> {
-            MemberInfo memberInfo = memberService.getMemberInfo(r.getMember());
+            MemberInfo memberInfo = legacyMemberService.getMemberInfo(r.getMember());
             if (memberInfo.getVideoCount() > 0) {
                 List<VideoController.VideoInfo> videoList = new ArrayList<>();
                 Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
@@ -101,7 +101,7 @@ public class RecommendationController {
             Collections.shuffle(members);
 
             members.forEach(r -> {
-                MemberInfo memberInfo = memberService.getMemberInfo(r.getMember());
+                MemberInfo memberInfo = legacyMemberService.getMemberInfo(r.getMember());
                 if (memberInfo.getVideoCount() > 0) {
                     List<VideoController.VideoInfo> videoList = new ArrayList<>();
                     Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
@@ -201,7 +201,7 @@ public class RecommendationController {
             switch (keyword.getCategory()) {
                 case 1:
                     if (keyword.getMember().isVisible()) {
-                        result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+                        result.add(new KeywordInfo(keyword, legacyMemberService.getMemberInfo(keyword.getMember())));
                     }
                     break;
                 case 2:
@@ -223,7 +223,7 @@ public class RecommendationController {
                 switch (keyword.getCategory()) {
                     case 1:
                         if (keyword.getMember().isVisible()) {
-                            result.add(new KeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+                            result.add(new KeywordInfo(keyword, legacyMemberService.getMemberInfo(keyword.getMember())));
                         }
                         break;
                     case 2:
@@ -247,7 +247,7 @@ public class RecommendationController {
             switch (keyword.getCategory()) {
                 case 1:
                     if (keyword.getMember().isVisible()) {
-                        result.add(new SearchKeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+                        result.add(new SearchKeywordInfo(keyword, legacyMemberService.getMemberInfo(keyword.getMember())));
                     }
                     break;
                 case 2:
@@ -268,7 +268,7 @@ public class RecommendationController {
                 switch (keyword.getCategory()) {
                     case 1:
                         if (keyword.getMember().isVisible()) {
-                            result.add(new SearchKeywordInfo(keyword, memberService.getMemberInfo(keyword.getMember())));
+                            result.add(new SearchKeywordInfo(keyword, legacyMemberService.getMemberInfo(keyword.getMember())));
                         }
                         break;
                     case 2:

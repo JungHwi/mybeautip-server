@@ -6,7 +6,7 @@ import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.store.*;
 import lombok.Data;
@@ -36,7 +36,7 @@ public class StoreController {
 
     private static final String STORE_NOT_FOUND = "store.not_found";
     private static final String ALREADY_LIKED = "like.already_liked";
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
     private final MessageService messageService;
     private final StoreService storeService;
@@ -44,14 +44,14 @@ public class StoreController {
     private final StoreLikeRepository storeLikeRepository;
     private final GoodsRepository goodsRepository;
 
-    public StoreController(MemberService memberService,
+    public StoreController(LegacyMemberService legacyMemberService,
                            GoodsService goodsService,
                            MessageService messageService,
                            StoreService storeService,
                            StoreRepository storeRepository,
                            StoreLikeRepository storeLikeRepository,
                            GoodsRepository goodsRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
         this.messageService = messageService;
         this.storeService = storeService;
@@ -63,7 +63,7 @@ public class StoreController {
     @GetMapping("/{id:.+}")
     public ResponseEntity<StoreController.StoreInfo> getStore(@PathVariable Integer id,
                                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         Optional<Store> optional = storeRepository.findById(id);
         StoreInfo storeInfo;
         Long likeId = null;
@@ -125,7 +125,7 @@ public class StoreController {
     @PostMapping("/{id:.+}/likes")
     public ResponseEntity<StoreController.StoreLikeInfo> addStoreLike(@PathVariable Integer id,
                                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         return storeRepository.findById(id)
                 .map(store -> {
                     Integer storeId = store.getId();
@@ -141,7 +141,7 @@ public class StoreController {
     @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeStoreLike(@PathVariable Integer id,
                                              @PathVariable Long likeId) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         storeLikeRepository.findByIdAndStoreIdAndCreatedById(likeId, id, memberId)
                 .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id or like id"));
 

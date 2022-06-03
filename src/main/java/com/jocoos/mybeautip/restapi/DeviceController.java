@@ -5,8 +5,8 @@ import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.devices.DeviceService;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +27,14 @@ import javax.validation.constraints.Size;
 public class DeviceController {
 
     private final DeviceService deviceService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final DeviceRepository deviceRepository;
 
     public DeviceController(DeviceService deviceService,
-                            MemberService memberService,
+                            LegacyMemberService legacyMemberService,
                             DeviceRepository deviceRepository) {
         this.deviceService = deviceService;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.deviceRepository = deviceRepository;
     }
 
@@ -46,7 +46,7 @@ public class DeviceController {
             throw new BadRequestException(bindingResult.getFieldError());
         }
 
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         if (me != null) {
             // Check member's devices validity
             deviceService.checkDevicesValidity(me.getId());

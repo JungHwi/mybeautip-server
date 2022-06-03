@@ -14,14 +14,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class MemberServiceTest {
+public class LegacyMemberServiceTest {
     @Autowired
-    private MemberService memberService;
+    private LegacyMemberService legacyMemberService;
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     public void updateLastLoggedAt() {
-        memberService.updateLastLoggedAt();
+        legacyMemberService.updateLastLoggedAt();
     }
 
     @Test
@@ -32,6 +32,6 @@ public class MemberServiceTest {
 
     @Test
     public void tagMigration() {
-        memberService.tagMigration();
+        legacyMemberService.tagMigration();
     }
 }

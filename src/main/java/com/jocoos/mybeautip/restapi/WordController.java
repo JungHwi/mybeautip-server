@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.*;
 public class WordController {
 
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
 
-    public WordController(MemberService memberService) {
-        this.memberService = memberService;
+    public WordController(LegacyMemberService legacyMemberService) {
+        this.legacyMemberService = legacyMemberService;
     }
 
     @GetMapping
@@ -27,11 +27,11 @@ public class WordController {
         }
 
         if (email != null) {
-            memberService.checkEmailValidation(email, lang);
+            legacyMemberService.checkEmailValidation(email, lang);
         }
 
         if (username != null) {
-            memberService.checkUsernameValidation(username, lang);
+            legacyMemberService.checkUsernameValidation(username, lang);
         }
     }
 }

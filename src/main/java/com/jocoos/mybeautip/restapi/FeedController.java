@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.feed.FeedService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,21 +21,21 @@ import java.util.List;
 public class FeedController {
 
     private final FeedService feedService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final VideoService videoService;
 
     public FeedController(FeedService feedService,
-                          MemberService memberService,
+                          LegacyMemberService legacyMemberService,
                           VideoService videoService) {
         this.feedService = feedService;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.videoService = videoService;
     }
 
     @GetMapping
     public CursorResponse getFeeds(@RequestParam(defaultValue = "20") int count,
                                    @RequestParam(required = false) String cursor) {
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
 
 //    if (me.getFollowingCount() == 0) {
 //      List<VideoController.VideoInfo> videos = new ArrayList<>();

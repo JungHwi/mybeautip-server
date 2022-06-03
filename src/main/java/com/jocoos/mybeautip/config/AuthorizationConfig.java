@@ -43,7 +43,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
 
     @Autowired
-    private MemberService memberService;
+    private LegacyMemberService legacyMemberService;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -163,28 +163,28 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
                                 endpoints.getOAuth2RequestFactory(),
-                                memberService,
+                                legacyMemberService,
                                 memberRepository,
                                 facebookMemberRepository),
                         new NaverTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
                                 endpoints.getOAuth2RequestFactory(),
-                                memberService,
+                                legacyMemberService,
                                 memberRepository,
                                 naverMemberRepository),
                         new KakaoTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
                                 endpoints.getOAuth2RequestFactory(),
-                                memberService,
+                                legacyMemberService,
                                 memberRepository,
                                 kakaoMemberRepository),
                         new AppleTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
                                 endpoints.getOAuth2RequestFactory(),
-                                memberService,
+                                legacyMemberService,
                                 memberRepository,
                                 appleMemberRepository),
                         new ClientTokenGranter(
