@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.goods.*;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.*;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
@@ -34,7 +34,7 @@ public class RecodingController {
     private static final String RESOURCE_TYPE_VIDEO = "video";
 
     private final ViewRecodingService viewRecodingService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final PostService postService;
     private final GoodsService goodsService;
     private final MessageService messageService;
@@ -46,7 +46,7 @@ public class RecodingController {
     private final VideoLikeRepository videoLikeRepository;
 
     public RecodingController(ViewRecodingService viewRecodingService,
-                              MemberService memberService,
+                              LegacyMemberService legacyMemberService,
                               PostService postService,
                               GoodsService goodsService,
                               MessageService messageService,
@@ -57,7 +57,7 @@ public class RecodingController {
                               GoodsLikeRepository goodsLikeRepository,
                               VideoLikeRepository videoLikeRepository) {
         this.viewRecodingService = viewRecodingService;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.postService = postService;
         this.goodsService = goodsService;
         this.messageService = messageService;
@@ -80,7 +80,7 @@ public class RecodingController {
     public CursorResponse findAllMyViews(@RequestParam(defaultValue = "20") int count,
                                          @RequestParam(required = false) String cursor,
                                          @RequestParam(required = false) Integer category) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
 
         Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(memberId, count, cursor, category);
         List<RecodingInfo> result = new ArrayList<>();
@@ -109,7 +109,7 @@ public class RecodingController {
     public CursorResponse findAllMyViewsLog(@RequestParam(defaultValue = "20") int count,
                                             @RequestParam(required = false) String cursor,
                                             @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
 
         Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(memberId, count, cursor, null);
         List<ViewsLogInfo> result = new ArrayList<>();
@@ -131,7 +131,7 @@ public class RecodingController {
     public CursorResponse findAllMyViewsLogForGoods(@RequestParam(defaultValue = "20") int count,
                                                     @RequestParam(required = false) String cursor,
                                                     @RequestParam(name = "broker", required = false) Long broker) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
 
         Slice<ViewRecoding> recodings = viewRecodingService.findByWeekAgo(memberId, count, cursor, 2);
         List<GoodsInfo> result = new ArrayList<>();
@@ -153,7 +153,7 @@ public class RecodingController {
     }
 
     private RecodingInfo getBasicInfo(ViewRecoding recoding) {
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         switch (recoding.getCategory()) {
             case 1:
                 return postRepository.findById(Long.parseLong(recoding.getItemId()))
@@ -187,7 +187,7 @@ public class RecodingController {
     }
 
     private ViewsLogInfo getViewsLogInfo(ViewRecoding recoding, String lang) {
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         switch (recoding.getCategory()) {
             case 1:
                 return postRepository.findById(Long.parseLong(recoding.getItemId()))

@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.notification;
 
 import com.jocoos.mybeautip.devices.DeviceService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
@@ -35,7 +35,7 @@ public class LegacyNotificationService {
     private final FollowingRepository followingRepository;
     private final NotificationRepository notificationRepository;
     private final MemberRepository memberRepository;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MemberRecommendationRepository memberRecommendationRepository;
     private final InstantMessageService instantMessageService;
     private final TaskScheduler taskScheduler;
@@ -49,7 +49,7 @@ public class LegacyNotificationService {
                                      FollowingRepository followingRepository,
                                      NotificationRepository notificationRepository,
                                      MemberRepository memberRepository,
-                                     MemberService memberService,
+                                     LegacyMemberService legacyMemberService,
                                      MemberRecommendationRepository memberRecommendationRepository,
                                      InstantMessageService instantMessageService,
                                      TaskScheduler taskScheduler) {
@@ -60,7 +60,7 @@ public class LegacyNotificationService {
         this.followingRepository = followingRepository;
         this.notificationRepository = notificationRepository;
         this.memberRepository = memberRepository;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.memberRecommendationRepository = memberRecommendationRepository;
         this.instantMessageService = instantMessageService;
         this.taskScheduler = taskScheduler;

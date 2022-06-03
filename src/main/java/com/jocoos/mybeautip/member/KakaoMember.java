@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ import javax.persistence.Table;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class KakaoMember extends CreatedDateAuditable {
+public class KakaoMember extends CreatedDateAuditable implements SocialMember {
 
     @Id
     @Column(nullable = false, length = 30)
@@ -24,8 +25,12 @@ public class KakaoMember extends CreatedDateAuditable {
     @Column(nullable = false)
     private Long memberId;
 
-    public KakaoMember(String kakaoId, Long memberId) {
-        this.kakaoId = kakaoId;
+    public String getSocialId() {
+        return kakaoId;
+    }
+
+    public KakaoMember(SignupRequest request, long memberId) {
+        this.kakaoId = request.getSocialId();
         this.memberId = memberId;
     }
 }

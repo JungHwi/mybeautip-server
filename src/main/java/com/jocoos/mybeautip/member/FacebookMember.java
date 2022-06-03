@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ import javax.persistence.Table;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class FacebookMember extends CreatedDateAuditable {
+public class FacebookMember extends CreatedDateAuditable implements SocialMember {
 
     @Id
     @Column(nullable = false, length = 20)
@@ -24,8 +25,12 @@ public class FacebookMember extends CreatedDateAuditable {
     @Column(nullable = false)
     private Long memberId;
 
-    public FacebookMember(String facebookId, Long memberId) {
-        this.facebookId = facebookId;
+    public String getSocialId() {
+        return facebookId;
+    }
+
+    public FacebookMember(SignupRequest request, long memberId) {
+        this.facebookId = request.getSocialId();
         this.memberId = memberId;
     }
 }

@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.address.Address;
 import com.jocoos.mybeautip.member.address.AddressRepository;
 import com.jocoos.mybeautip.member.address.AddressService;
@@ -27,16 +27,16 @@ public class AddressController {
 
     private static final String ADDRESS_TOO_MANY_ADDRESS = "address.too_many_addresses";
     private final AddressService addressService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MessageService messageService;
     private final AddressRepository addressRepository;
 
     public AddressController(AddressService addressService,
-                             MemberService memberService,
+                             LegacyMemberService legacyMemberService,
                              MessageService messageService,
                              AddressRepository addressRepository) {
         this.addressService = addressService;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
         this.addressRepository = addressRepository;
     }
@@ -46,10 +46,10 @@ public class AddressController {
         List<Address> addresses = new ArrayList<>();
         if (type != null && type.equals("base")) {
             Address address = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(
-                    memberService.currentMemberId()).orElse(null);
+                    legacyMemberService.currentMemberId()).orElse(null);
             addresses.add(address);
         } else {
-            addresses = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(memberService.currentMemberId());
+            addresses = addressRepository.findByCreatedByIdAndDeletedAtIsNullOrderByIdDesc(legacyMemberService.currentMemberId());
         }
 
         List<AddressInfo> addressInfos = addresses.stream().map(AddressInfo::new).collect(Collectors.toList());
@@ -60,11 +60,11 @@ public class AddressController {
     @PostMapping
     public ResponseEntity<AddressInfo> createAddress(@RequestBody CreateAddressRequest request,
                                                      @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        if (addressRepository.countByCreatedByIdAndDeletedAtIsNull(memberService.currentMemberId()) >= 10) {
+        if (addressRepository.countByCreatedByIdAndDeletedAtIsNull(legacyMemberService.currentMemberId()) >= 10) {
             throw new BadRequestException("too_many_addresses", messageService.getMessage(ADDRESS_TOO_MANY_ADDRESS, lang));
         }
 
-        return new ResponseEntity<>(new AddressInfo(addressService.create(request, memberService.currentMember())), HttpStatus.OK);
+        return new ResponseEntity<>(new AddressInfo(addressService.create(request, legacyMemberService.currentMember())), HttpStatus.OK);
     }
 
     @PatchMapping("/{id:.+}")
@@ -78,7 +78,7 @@ public class AddressController {
     public ResponseEntity<?> deleteAddress(@PathVariable Long id,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         log.debug("id to delete: {}", id);
-        addressService.delete(id, lang, memberService.currentMemberId());
+        addressService.delete(id, lang, legacyMemberService.currentMemberId());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

@@ -2,8 +2,8 @@ package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
 import com.jocoos.mybeautip.recoding.ViewRecodingRepository;
 import com.jocoos.mybeautip.restapi.VideoController;
@@ -35,16 +35,16 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/admin/manual/videos")
 public class AdminVideoController {
     private final VideoService videoService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final VideoRepository videoRepository;
     private final ViewRecodingRepository viewRecodingRepository;
 
     public AdminVideoController(VideoService videoService,
-                                MemberService memberService,
+                                LegacyMemberService legacyMemberService,
                                 VideoRepository videoRepository,
                                 ViewRecodingRepository viewRecodingRepository) {
         this.videoService = videoService;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.videoRepository = videoRepository;
         this.viewRecodingRepository = viewRecodingRepository;
     }
@@ -159,7 +159,7 @@ public class AdminVideoController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
         Page<ViewRecoding> viewRecodings = viewRecodingRepository.findByItemIdAndCategoryAndCreatedAtLessThanEqual(
                 video.getId().toString(), ViewRecoding.CATEGORY_VIDEO, endedAt, pageable);
-        Page<MemberInfo> watchers = viewRecodings.map(m -> memberService.getMemberInfo(m.getCreatedBy()));
+        Page<MemberInfo> watchers = viewRecodings.map(m -> legacyMemberService.getMemberInfo(m.getCreatedBy()));
 
         return new ResponseEntity<>(watchers, HttpStatus.OK);
     }

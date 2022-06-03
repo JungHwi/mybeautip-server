@@ -2,9 +2,9 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.billing.MemberBilling;
 import com.jocoos.mybeautip.member.billing.MemberBillingService;
 import com.jocoos.mybeautip.member.order.*;
@@ -47,7 +47,7 @@ public class OrderController {
     private static final String INVALID_ORDER_STATE = "order.invalid_order_state";
     private static final String INVALID_PURCHASE_STATE = "order.invalid_purchase_state";
     private static final String ATTACHMENT_DELIMITER = ",";
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final OrderService orderService;
     private final MessageService messageService;
     private final OrderRepository orderRepository;
@@ -58,7 +58,7 @@ public class OrderController {
     private final StorageService storageService;
     private final AttachmentService attachmentService;
 
-    public OrderController(MemberService memberService,
+    public OrderController(LegacyMemberService legacyMemberService,
                            OrderService orderService,
                            MessageService messageService,
                            OrderRepository orderRepository,
@@ -67,7 +67,7 @@ public class OrderController {
                            OrderInquiryRepository orderInquiryRepository,
                            MemberBillingService memberBillingService,
                            StorageService storageService, AttachmentService attachmentService) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.orderService = orderService;
         this.messageService = messageService;
         this.orderRepository = orderRepository;
@@ -88,7 +88,7 @@ public class OrderController {
             throw new BadRequestException(bindingResult.getFieldError());
         }
 
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         Order order = orderService.create(request, member, lang);
         log.debug("order: {}", order);
         if (order.getPrice() <= 0) {
@@ -107,7 +107,7 @@ public class OrderController {
             throw new BadRequestException(bindingResult.getFieldError());
         }
 
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         Order order = orderService.create(request, member, lang);
 
         if (order.getPrice() <= 0) {
@@ -127,7 +127,7 @@ public class OrderController {
     @GetMapping("/orders/{id:.+}")
     public ResponseEntity<OrderInfo> getOrder(@PathVariable Long id,
                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         return orderRepository.findByIdAndCreatedById(id, memberId)
                 .map(order -> {
                     Payment payment = paymentRepository.findById(order.getId())
@@ -150,7 +150,7 @@ public class OrderController {
     @PatchMapping("/orders/{id:.+}")
     public ResponseEntity<OrderInfo> confirmOrder(@PathVariable Long id,
                                                   @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         Order order = orderRepository.findByIdAndCreatedById(id, memberId)
                 .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
 
@@ -184,7 +184,7 @@ public class OrderController {
                                     @RequestParam(defaultValue = "") String category,
                                     @RequestParam(defaultValue = "12") int within,
                                     @RequestParam(required = false) Long cursor) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
         Slice<Order> orders;
         List<OrderInfo> result = new ArrayList<>();
@@ -251,7 +251,7 @@ public class OrderController {
             throw new BadRequestException(bindingResult.getFieldError());
         }
 
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         Order order = orderRepository.findByIdAndCreatedById(id, me)
                 .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
         OrderInquiry inquiry;
@@ -303,7 +303,7 @@ public class OrderController {
             throw new BadRequestException("inquire_image_upload_fail", "state_required");
         }
 
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         Order order = orderRepository.findByIdAndCreatedById(id, me)
                 .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
         OrderInquiry inquiry;
@@ -330,7 +330,7 @@ public class OrderController {
                                       @RequestParam(defaultValue = "20") int count,
                                       @RequestParam(required = false) Long cursor) {
 
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
         Slice<OrderInquiry> inquiries;
         switch (category) {
@@ -375,7 +375,7 @@ public class OrderController {
     @GetMapping("/inquiries/{id:.+}")
     public ResponseEntity<OrderInquiryInfo> getInquiry(@PathVariable Long id,
                                                        @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        return orderInquiryRepository.findByIdAndCreatedById(id, memberService.currentMemberId())
+        return orderInquiryRepository.findByIdAndCreatedById(id, legacyMemberService.currentMemberId())
                 .map(orderInquiry -> new ResponseEntity<>(new OrderInquiryInfo(orderInquiry), HttpStatus.OK))
                 .orElseThrow(() -> new NotFoundException("inquiry_not_found", messageService.getMessage(ORDER_INQUIRY_NOT_FOUND, lang)));
     }

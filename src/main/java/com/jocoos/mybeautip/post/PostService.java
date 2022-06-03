@@ -2,8 +2,8 @@ package com.jocoos.mybeautip.post;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.*;
@@ -38,7 +38,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final MentionService mentionService;
     private final CommentService commentService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final CommentLikeRepository commentLikeRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostReportRepository postReportRepository;
@@ -64,7 +64,7 @@ public class PostService {
         Comment comment = commentRepository.findByIdAndPostId(id, postId)
                 .orElseThrow(() -> new NotFoundException("No such Comment. postId - " + postId + ", commentId - " + id));
 
-        CommentInfo commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+        CommentInfo commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()));
         boolean isChangeableComment = true;
 
         String content = commentService.getBlindContent(comment, lang, null);

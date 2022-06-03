@@ -2,8 +2,8 @@ package com.jocoos.mybeautip.restapi;
 
 
 import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.following.Following;
@@ -41,7 +41,7 @@ public class LegacyNotificationController {
     private final NotificationRepository notificationRepository;
     private final FollowingRepository followingRepository;
     private final CommentRepository commentRepository;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MessageService messageService;
     private final LegacyNotificationService legacyNotificationService;
     private final MentionService mentionService;
@@ -49,14 +49,14 @@ public class LegacyNotificationController {
     public LegacyNotificationController(NotificationRepository notificationRepository,
                                         FollowingRepository followingRepository,
                                         CommentRepository commentRepository,
-                                        MemberService memberService,
+                                        LegacyMemberService legacyMemberService,
                                         MessageService messageService,
                                         LegacyNotificationService legacyNotificationService,
                                         MentionService mentionService) {
         this.notificationRepository = notificationRepository;
         this.followingRepository = followingRepository;
         this.commentRepository = commentRepository;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
         this.legacyNotificationService = legacyNotificationService;
         this.mentionService = mentionService;
@@ -67,7 +67,7 @@ public class LegacyNotificationController {
                                            @RequestParam(required = false) String cursor,
                                            @RequestParam(defaultValue = "0") int step) {
         PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id"));
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         List<NotificationInfo> result = new ArrayList<>();
 
         Slice<Notification> notifications;
@@ -125,9 +125,9 @@ public class LegacyNotificationController {
                     String message = messageService.getMessage(n);
                     Optional<Following> following = followingRepository.findByMemberMeIdAndMemberYouId(n.getTargetMember().getId(), n.getResourceOwner().getId());
                     if (following.isPresent()) {
-                        result.add(new NotificationInfo(n, message, following.get().getId(), memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner()), mentionInfo));
+                        result.add(new NotificationInfo(n, message, following.get().getId(), legacyMemberService.getMemberInfo(n.getTargetMember()), legacyMemberService.getMemberInfo(n.getResourceOwner()), mentionInfo));
                     } else {
-                        result.add(new NotificationInfo(n, message, memberService.getMemberInfo(n.getTargetMember()), memberService.getMemberInfo(n.getResourceOwner()), mentionInfo));
+                        result.add(new NotificationInfo(n, message, legacyMemberService.getMemberInfo(n.getTargetMember()), legacyMemberService.getMemberInfo(n.getResourceOwner()), mentionInfo));
                     }
                 });
 
@@ -146,7 +146,7 @@ public class LegacyNotificationController {
     @Deprecated
     @PatchMapping("/{id:.+}")
     public ResponseEntity readNotification(@PathVariable Long id) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         return notificationRepository.findByIdAndTargetMemberId(id, memberId)
                 .map(n -> {
                     n.setRead(true);

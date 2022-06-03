@@ -3,8 +3,8 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.address.Address;
 import com.jocoos.mybeautip.member.address.AddressRepository;
 import com.jocoos.mybeautip.member.cart.Cart;
@@ -41,7 +41,7 @@ public class CartController {
     private static final String CART_ITEM_NOT_FOUND = "cart.item_not_found";
     private static final String STORE_NOT_FOUND = "store.not_found";
     private static final String ADDRESS_NOT_FOUND = "address.not_found";
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final CartService cartService;
     private final MessageService messageService;
     private final CartRepository cartRepository;
@@ -50,7 +50,7 @@ public class CartController {
     private final StoreRepository storeRepository;
     private final AddressRepository addressRepository;
 
-    public CartController(MemberService memberService,
+    public CartController(LegacyMemberService legacyMemberService,
                           CartService cartService,
                           MessageService messageService,
                           CartRepository cartRepository,
@@ -58,7 +58,7 @@ public class CartController {
                           GoodsOptionRepository goodsOptionRepository,
                           StoreRepository storeRepository,
                           AddressRepository addressRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.cartService = cartService;
         this.messageService = messageService;
         this.cartRepository = cartRepository;
@@ -70,43 +70,43 @@ public class CartController {
 
     @GetMapping("/count")
     public CartCountResponse getCartItemCount() {
-        return new CartCountResponse(cartRepository.countByCreatedById(memberService.currentMemberId()));
+        return new CartCountResponse(cartRepository.countByCreatedById(legacyMemberService.currentMemberId()));
     }
 
     @GetMapping
     public CartService.CartInfo getCartItemList() {
-        return cartService.getCartItemList(memberService.currentMemberId());
+        return cartService.getCartItemList(legacyMemberService.currentMemberId());
     }
 
     @PostMapping
     public CartService.CartInfo addCart(@Valid @RequestBody AddCartRequest request,
                                         @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        if (request.getItems().size() + cartRepository.countByCreatedById(memberService.currentMemberId()) > 100) {
+        if (request.getItems().size() + cartRepository.countByCreatedById(legacyMemberService.currentMemberId()) > 100) {
             throw new BadRequestException("too_many_items", messageService.getMessage(CART_TOO_MANY_ITEMS, lang));
         }
-        cartService.addItems(request, memberService.currentMemberId(), lang);
-        return cartService.getCartItemList(memberService.currentMemberId());
+        cartService.addItems(request, legacyMemberService.currentMemberId(), lang);
+        return cartService.getCartItemList(legacyMemberService.currentMemberId());
     }
 
     @PatchMapping("/all")
     public CartService.CartInfo updateAllCart(@Valid @RequestBody UpdateCartRequest request) {
-        cartService.updateAllItems(request, memberService.currentMember());
-        return cartService.getCartItemList(memberService.currentMember().getId());
+        cartService.updateAllItems(request, legacyMemberService.currentMember());
+        return cartService.getCartItemList(legacyMemberService.currentMember().getId());
     }
 
     @PatchMapping("{id}")
     public CartService.CartInfo updateCart(@PathVariable Long id,
                                            @Valid @RequestBody UpdateCartRequest request,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        cartService.updateItem(id, memberService.currentMemberId(), request, lang);
-        return cartService.getCartItemList(memberService.currentMemberId());
+        cartService.updateItem(id, legacyMemberService.currentMemberId(), request, lang);
+        return cartService.getCartItemList(legacyMemberService.currentMemberId());
     }
 
     @DeleteMapping("{id}")
     public CartService.CartInfo removeCart(@PathVariable Long id,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        cartService.removeItem(id, memberService.currentMemberId(), lang);
-        return cartService.getCartItemList(memberService.currentMemberId());
+        cartService.removeItem(id, legacyMemberService.currentMemberId(), lang);
+        return cartService.getCartItemList(legacyMemberService.currentMemberId());
     }
 
     @PostMapping("/now")
@@ -135,7 +135,7 @@ public class CartController {
         CartService.CartInfo cartInfo = cartService.getCartItemList(list, TimeSaleCondition.createWithBroker(broker));
 
         // check area shipping
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         Address address = null;
         if (request.addressId != null) {
             address = addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(request.addressId, member.getId())

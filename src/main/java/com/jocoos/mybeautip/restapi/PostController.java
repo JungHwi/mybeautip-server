@@ -9,10 +9,10 @@ import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.comment.*;
@@ -67,7 +67,7 @@ public class PostController {
     private final CommentLikeRepository commentLikeRepository;
     private final GoodsService goodsService;
     private final GoodsRepository goodsRepository;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MemberRepository memberRepository;
     private final CommentService commentService;
     private final MentionService mentionService;
@@ -87,7 +87,7 @@ public class PostController {
                           CommentLikeRepository commentLikeRepository,
                           GoodsService goodsService,
                           GoodsRepository goodsRepository,
-                          MemberService memberService,
+                          LegacyMemberService legacyMemberService,
                           MemberRepository memberRepository,
                           CommentService commentService,
                           MentionService mentionService,
@@ -106,7 +106,7 @@ public class PostController {
         this.commentLikeRepository = commentLikeRepository;
         this.goodsService = goodsService;
         this.goodsRepository = goodsRepository;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.memberRepository = memberRepository;
         this.commentService = commentService;
         this.mentionService = mentionService;
@@ -128,7 +128,7 @@ public class PostController {
                                    @RequestParam(defaultValue = "0") int label,
                                    @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         final Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me.getId()) : null;
 
         Slice<Post> posts = findPosts(count, category, label, keyword, cursor);
@@ -138,7 +138,7 @@ public class PostController {
             List<GoodsInfo> goodsInfo = new ArrayList<>();
             post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
 
-            PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
+            PostInfo info = new PostInfo(post, legacyMemberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
 
             if (me != null) {
                 postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
@@ -221,7 +221,7 @@ public class PostController {
     @GetMapping("/{id:.+}")
     public ResponseEntity<PostInfo> getPost(@PathVariable Long id,
                                             @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
 
         final Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me.getId()) : null;
 
@@ -232,7 +232,7 @@ public class PostController {
                     List<GoodsInfo> goodsInfo = new ArrayList<>();
                     post.getGoods().forEach(goodsNo -> goodsService.generateGoodsInfo(goodsNo).ifPresent(goodsInfo::add));
 
-                    PostInfo info = new PostInfo(post, memberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
+                    PostInfo info = new PostInfo(post, legacyMemberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
                     log.debug("post info: {}", info);
 
                     if (me != null) {
@@ -277,7 +277,7 @@ public class PostController {
                     List<MemberInfo> result = new ArrayList<>();
                     post.getWinners().stream().forEach(mid -> {
                         memberRepository.findByIdAndDeletedAtIsNull(mid).ifPresent(m -> {
-                            result.add(memberService.getMemberInfo(m));
+                            result.add(legacyMemberService.getMemberInfo(m));
                         });
                     });
                     return new ResponseEntity<>(result, HttpStatus.OK);
@@ -302,7 +302,7 @@ public class PostController {
     @PostMapping("/{id:.+}/likes")
     public ResponseEntity<PostLikeInfo> addPostLike(@PathVariable Long id,
                                                     @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         Date now = new Date();
         return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
                 .map(post -> {
@@ -312,8 +312,8 @@ public class PostController {
                     }
 
                     PostLike postLike = postService.likePost(post, me.getId());
-                    return new ResponseEntity<>(new PostLikeInfo(postLike, memberService.getMemberInfo(me),
-                            memberService.getMemberInfo(post.getCreatedBy())), HttpStatus.OK);
+                    return new ResponseEntity<>(new PostLikeInfo(postLike, legacyMemberService.getMemberInfo(me),
+                            legacyMemberService.getMemberInfo(post.getCreatedBy())), HttpStatus.OK);
                 })
                 .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
     }
@@ -322,7 +322,7 @@ public class PostController {
     public ResponseEntity<?> removePostLike(@PathVariable Long id,
                                             @PathVariable Long likeId,
                                             @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         postLikeRepository.findByIdAndPostIdAndCreatedById(likeId, id, memberId)
                 .map(liked -> {
                     postService.unLikePost(liked);
@@ -352,7 +352,7 @@ public class PostController {
         }
 
         Slice<Comment> comments;
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me) : new HashMap<>();
 
         if (parentId != null) {
@@ -369,14 +369,14 @@ public class PostController {
                 if (mentionResult != null) {
                     String content = commentService.getBlindContent(comment, lang, mentionResult.getComment());
                     comment.setComment(content);
-                    commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+                    commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
                 } else {
                     log.warn("mention result not found - {}", comment);
                 }
             } else {
                 String content = commentService.getBlindContent(comment, lang, null);
                 comment.setComment(content);
-                commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+                commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()));
             }
 
             if (me != null) {
@@ -417,7 +417,7 @@ public class PostController {
                                                       @PathVariable long id,
                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
 
         CommentInfo commentInfo = postService.getPostComment(postId, id, member, lang);
 
@@ -433,8 +433,8 @@ public class PostController {
             throw new BadRequestException(bindingResult.getFieldError());
         }
 
-        Member member = memberService.currentMember();
-        if (!memberService.hasCommentPostPermission(member)) {
+        Member member = legacyMemberService.currentMember();
+        if (!legacyMemberService.hasCommentPostPermission(member)) {
             throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
         }
 
@@ -458,8 +458,8 @@ public class PostController {
             throw new BadRequestException(bindingResult.getFieldError());
         }
 
-        Member member = memberService.currentMember();
-        if (!memberService.hasCommentPostPermission(member)) {
+        Member member = legacyMemberService.currentMember();
+        if (!legacyMemberService.hasCommentPostPermission(member)) {
             throw new BadRequestException("invalid_permission", messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
         }
 
@@ -470,7 +470,7 @@ public class PostController {
                     }
                     comment = commentService.updateComment(request, comment);
                     return new ResponseEntity<>(
-                            new CommentInfo(commentRepository.save(comment), memberService.getMemberInfo(comment.getCreatedBy())),
+                            new CommentInfo(commentRepository.save(comment), legacyMemberService.getMemberInfo(comment.getCreatedBy())),
                             HttpStatus.OK
                     );
                 })
@@ -481,7 +481,7 @@ public class PostController {
     public ResponseEntity<?> removeComment(@PathVariable Long postId,
                                            @PathVariable Long id,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, memberService.currentMemberId())
+        return commentRepository.findByIdAndPostIdAndCreatedById(id, postId, legacyMemberService.currentMemberId())
                 .map(comment -> {
                     if (comment.getLocked()) {
                         throw new BadRequestException("comment_locked", messageService.getMessage(COMMENT_LOCKED, lang));
@@ -496,7 +496,7 @@ public class PostController {
     public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long postId,
                                                           @PathVariable Long commentId,
                                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         return commentRepository.findByIdAndPostId(commentId, postId)
                 .map(comment -> {
                     if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
@@ -513,7 +513,7 @@ public class PostController {
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,
                                                @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         Comment comment = commentRepository.findByIdAndPostId(commentId, postId)
                 .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
 
@@ -545,7 +545,7 @@ public class PostController {
                                                 @Valid @RequestBody PostController.ReportRequest request,
                                                 @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
 
         Post post = postRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));
@@ -564,7 +564,7 @@ public class PostController {
                                                                @Valid @RequestBody ReportRequest request,
                                                                @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
 
         Comment comment = commentRepository.findByIdAndPostId(id, postId)
                 .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
@@ -609,7 +609,7 @@ public class PostController {
     public ResponseEntity removePost(@PathVariable Long id,
                                      @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         log.debug("post id: {}, member id: {}", id, memberId);
         Post post = postRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberId)
                 .orElseThrow(() -> new NotFoundException("post_not_found", messageService.getMessage(POST_NOT_FOUND, lang)));

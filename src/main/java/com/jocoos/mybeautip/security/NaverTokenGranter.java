@@ -2,9 +2,9 @@ package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.NaverMemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +19,7 @@ import java.util.Map;
 @Slf4j
 public class NaverTokenGranter extends AbstractTokenGranter {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MemberRepository memberRepository;
     private final NaverMemberRepository naverMemberRepository;
 
@@ -27,12 +27,12 @@ public class NaverTokenGranter extends AbstractTokenGranter {
             AuthorizationServerTokenServices tokenServices,
             ClientDetailsService clientDetailsService,
             OAuth2RequestFactory requestFactory,
-            MemberService memberService,
+            LegacyMemberService legacyMemberService,
             MemberRepository memberRepository,
             NaverMemberRepository naverMemberRepository) {
 
         super(tokenServices, clientDetailsService, requestFactory, "naver");
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.memberRepository = memberRepository;
         this.naverMemberRepository = naverMemberRepository;
     }

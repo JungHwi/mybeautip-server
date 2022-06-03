@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
 import com.jocoos.mybeautip.tag.Tag;
@@ -31,16 +31,16 @@ import java.util.*;
 @RequestMapping(value = "/api/1/tags", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TagController {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final TagRepository tagRepository;
     private final TagHistoryRepository tagHistoryRepository;
     private final KeywordRecommendationRepository keywordRecommendationRepository;
 
-    public TagController(MemberService memberService,
+    public TagController(LegacyMemberService legacyMemberService,
                          TagRepository tagRepository,
                          TagHistoryRepository tagHistoryRepository,
                          KeywordRecommendationRepository keywordRecommendationRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.tagRepository = tagRepository;
         this.tagHistoryRepository = tagHistoryRepository;
         this.keywordRecommendationRepository = keywordRecommendationRepository;
@@ -54,7 +54,7 @@ public class TagController {
 
         count = validateRequestAndGetValidCount(count, scope, keyword, method);
         PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "modifiedAt"));
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
 
         switch (scope) {
             case "me":

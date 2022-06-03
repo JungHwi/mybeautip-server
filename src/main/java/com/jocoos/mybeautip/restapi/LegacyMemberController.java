@@ -54,7 +54,7 @@ import java.util.*;
 public class LegacyMemberController {
 
     private static final String MEMBER_NOT_FOUND = "member.not_found";
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
     private final VideoService videoService;
     private final PostProcessService postProcessService;
@@ -87,7 +87,7 @@ public class LegacyMemberController {
     @Value("${mybeautip.revenue.revenue-ratio-live}")
     private int revenueRatio;
 
-    public LegacyMemberController(MemberService memberService,
+    public LegacyMemberController(LegacyMemberService legacyMemberService,
                                   GoodsService goodsService,
                                   VideoService videoService,
                                   MemberRepository memberRepository,
@@ -107,7 +107,7 @@ public class LegacyMemberController {
                                   RevenuePaymentRepository revenuePaymentRepository,
                                   VideoScrapService videoScrapService,
                                   CommentService commentService) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
         this.videoService = videoService;
         this.memberRepository = memberRepository;
@@ -145,7 +145,7 @@ public class LegacyMemberController {
         List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
 
         for (Member member : noTagMembers) {
-            memberService.adjustTag(member);
+            legacyMemberService.adjustTag(member);
             log.debug("Member id - " + member.getId() + ", Member tag - " + member.getTag());
             memberRepository.save(member);
         }
@@ -155,9 +155,9 @@ public class LegacyMemberController {
     @PatchMapping()
     public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
                                                    @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        log.debug("member id: {}", memberService.currentMemberId());
+        log.debug("member id: {}", legacyMemberService.currentMemberId());
 
-        Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
+        Member member = memberRepository.findByIdAndDeletedAtIsNull(legacyMemberService.currentMemberId())
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
         if (!member.isVisible()) { // when first called
@@ -166,15 +166,15 @@ public class LegacyMemberController {
             }
         }
 
-        memberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
+        legacyMemberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
 
-        member = memberService.updateMember(updateMemberRequest, member);
-        return new ResponseEntity<>(memberService.getMemberInfo(member), HttpStatus.OK);
+        member = legacyMemberService.updateMember(updateMemberRequest, member);
+        return new ResponseEntity<>(legacyMemberService.getMemberInfo(member), HttpStatus.OK);
     }
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, String>> uploadAvatar(@RequestBody MultipartFile avatar) {
-        String avatarUrl = memberService.uploadAvatar(avatar);
+        String avatarUrl = legacyMemberService.uploadAvatar(avatar);
         Map<String, String> result = new HashMap<>();
         result.put("avatar_url", avatarUrl);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -183,18 +183,18 @@ public class LegacyMemberController {
 
     @PutMapping(value = "/detail")
     public ResponseEntity updateDetailInfo(@RequestBody MemberDetailRequest request) {
-        long memberId = memberService.currentMemberId();
+        long memberId = legacyMemberService.currentMemberId();
         request.setMemberId(memberId);
 
-        memberService.updateDetailInfo(request);
+        legacyMemberService.updateDetailInfo(request);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping(value = "/detail")
     public ResponseEntity<MemberDetailResponse> getDetailInfo() {
-        long memberId = memberService.currentMemberId();
+        long memberId = legacyMemberService.currentMemberId();
 
-        MemberDetailResponse result = memberService.getDetailInfo(memberId);
+        MemberDetailResponse result = legacyMemberService.getDetailInfo(memberId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -213,7 +213,7 @@ public class LegacyMemberController {
 
         if (keyword == null || (!StringUtils.containsWhitespace(keyword) && StringUtils.isNotEmpty(keyword))) {
             Slice<Member> list = findMembers(keyword, cursor, count);
-            list.stream().forEach(m -> members.add(memberService.getMemberInfo(m)));
+            list.stream().forEach(m -> members.add(legacyMemberService.getMemberInfo(m)));
 
             if (members.size() > 0) {
                 nextCursor = String.valueOf(members.get(members.size() - 1).getCreatedAt().getTime());
@@ -224,7 +224,7 @@ public class LegacyMemberController {
             keyword = keyword.trim();
             try {
                 keywordService.updateKeywordCount(keyword);
-                keywordService.logHistory(keyword, KeywordService.KeywordCategory.MEMBER, memberService.currentMember());
+                keywordService.logHistory(keyword, KeywordService.KeywordCategory.MEMBER, legacyMemberService.currentMember());
             } catch (ConcurrencyFailureException e) { // Ignore
                 log.warn("getMembers throws ConcurrencyFailureException: " + keyword);
             }
@@ -278,17 +278,17 @@ public class LegacyMemberController {
     @GetMapping("/{id:.+}")
     public MemberInfo getMember(@PathVariable Long id,
                                 @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        return memberRepository.findByIdAndDeletedAtIsNull(id).map(memberService::getMemberInfo)
+        return memberRepository.findByIdAndDeletedAtIsNull(id).map(legacyMemberService::getMemberInfo)
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     }
 
     @GetMapping(value = "/me/like_count")
     public LikeCountResponse getMyLikesCount() {
         LikeCountResponse response = new LikeCountResponse();
-        response.setGoods(goodsLikeRepository.countByCreatedById(memberService.currentMemberId()));
-        response.setStore(storeLikeRepository.countByCreatedById(memberService.currentMemberId()));
-        response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(memberService.currentMemberId()));
-        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(memberService.currentMemberId()));
+        response.setGoods(goodsLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
+        response.setStore(storeLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
+        response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(legacyMemberService.currentMemberId()));
+        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(legacyMemberService.currentMemberId()));
         return response;
     }
 
@@ -309,7 +309,7 @@ public class LegacyMemberController {
                                      @RequestParam(defaultValue = "20") int count,
                                      @RequestParam(required = false) Long cursor,
                                      @RequestParam(name = "broker", required = false) Long broker) {
-        return createLikeResponse(memberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes", broker);
+        return createLikeResponse(legacyMemberService.currentMemberId(), category, count, cursor, "/api/1/members/me/likes", broker);
     }
 
     @GetMapping(value = "/{id:.+}/likes")
@@ -327,7 +327,7 @@ public class LegacyMemberController {
                                       @RequestParam(required = false) String cursor,
                                       @RequestParam(required = false) String type,
                                       @RequestParam(required = false) String state) {
-        Slice<Video> list = videoService.findMyVideos(memberService.currentMember(), type, state, cursor, count);
+        Slice<Video> list = videoService.findMyVideos(legacyMemberService.currentMember(), type, state, cursor, count);
         List<VideoController.VideoInfo> videos = new ArrayList<>();
         list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
 
@@ -371,7 +371,7 @@ public class LegacyMemberController {
 
     @GetMapping(value = "/me/members")
     public CursorResponse getMyMembers(@RequestParam(required = false) String keyword) {
-        long me = memberService.currentMemberId();
+        long me = legacyMemberService.currentMemberId();
         PageRequest pageable = PageRequest.of(0, 100, Sort.by("createdAt").descending());
 
         LinkedHashSet<Member> members = new LinkedHashSet<>();
@@ -386,7 +386,7 @@ public class LegacyMemberController {
             }
 
             for (Member member : members) {
-                info.add(memberService.getMemberInfo(member));
+                info.add(legacyMemberService.getMemberInfo(member));
             }
         } else {
             for (Following f : followingRepository.findByMemberMeId(me, pageable)) {
@@ -397,7 +397,7 @@ public class LegacyMemberController {
             }
 
             for (Member member : members) {
-                info.add(memberService.getMemberInfo(member));
+                info.add(legacyMemberService.getMemberInfo(member));
             }
         }
 
@@ -408,10 +408,10 @@ public class LegacyMemberController {
     @DeleteMapping("/me")
     public ResponseEntity deleteMe(@Valid @RequestBody DeleteMemberRequest request,
                                    @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
+        Member member = memberRepository.findByIdAndDeletedAtIsNull(legacyMemberService.currentMemberId())
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
-        memberService.deleteMember(request, member);
+        legacyMemberService.deleteMember(request, member);
         legacyNotificationService.readAllNotification(member.getId());
 
         // Async processing after response
@@ -422,10 +422,10 @@ public class LegacyMemberController {
     @PutMapping("/me/delete")
     public ResponseEntity deleteMember(@Valid @RequestBody DeleteMemberRequest request,
                                        @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberRepository.findByIdAndDeletedAtIsNull(memberService.currentMemberId())
+        Member member = memberRepository.findByIdAndDeletedAtIsNull(legacyMemberService.currentMemberId())
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
-        memberService.deleteMember(request, member);
+        legacyMemberService.deleteMember(request, member);
         legacyNotificationService.readAllNotification(member.getId());
 
         // Async processing after response
@@ -438,7 +438,7 @@ public class LegacyMemberController {
                                         @RequestParam(required = false) String cursor,
                                         @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         Slice<Comment> comments;
         if (StringUtils.isNumeric(cursor)) {
             Date createdAt = new Date(Long.parseLong(cursor));
@@ -467,15 +467,15 @@ public class LegacyMemberController {
                 if (mentionResult != null) {
                     String content = commentService.getBlindContent(comment, lang, mentionResult.getComment());
                     comment.setComment(content);
-                    commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+                    commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
                 } else {
                     log.warn("mention result not found - {}", comment);
-                    commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+                    commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()));
                 }
             } else {
                 String content = commentService.getBlindContent(comment, lang, null);
                 comment.setComment(content);
-                commentInfo = new CommentInfo(comment, memberService.getMemberInfo(comment.getCreatedBy()));
+                commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()));
             }
 
             if (me != null) {
@@ -520,7 +520,7 @@ public class LegacyMemberController {
     @GetMapping("/me/revenues")
     public CursorResponse getRevenueSummaries(@RequestParam(defaultValue = "12") int count,
                                               @RequestParam(required = false) String cursor) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
 
         PageRequest pageable = PageRequest.of(0, count, Sort.by("date").descending());
         Slice<RevenuePayment> list;
@@ -535,7 +535,7 @@ public class LegacyMemberController {
         list.forEach(r -> revenues.add(new RevenuePaymentInfo(r)));
 
 
-        memberService.readMemberRevenue(member);
+        legacyMemberService.readMemberRevenue(member);
 
         String nextCursor = null;
         if (revenues.size() > 0) {
@@ -577,7 +577,7 @@ public class LegacyMemberController {
         PageRequest pageRequest = PageRequest.of(0, count, Sort.by("id").descending());
 
         log.debug("count: {}, cursor: {}", count, cursor);
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
         List<VideoController.VideoScrapInfo> scraps = new ArrayList<>();
         list.stream().forEach(scrap -> scraps.add(
@@ -621,7 +621,7 @@ public class LegacyMemberController {
 
         postLikes.stream().forEach(like -> {
             PostController.PostLikeInfo info = new PostController.PostLikeInfo(like,
-                    memberService.getMemberInfo(like.getCreatedBy()), memberService.getMemberInfo(like.getPost().getCreatedBy()));
+                    legacyMemberService.getMemberInfo(like.getCreatedBy()), legacyMemberService.getMemberInfo(like.getPost().getCreatedBy()));
             postLikeRepository.findByPostIdAndCreatedById(like.getPost().getId(), memberId)
                     .ifPresent(likeByMe -> info.getPost().setLikeId(likeByMe.getId()));
             result.add(info);
@@ -677,7 +677,7 @@ public class LegacyMemberController {
         }
 
         Long likeId = null;
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         for (StoreLike like : storeLikes) {
             if (me != null) {
                 likeId = me.equals(like.getCreatedBy().getId()) ? like.getId() : null;

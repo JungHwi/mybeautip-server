@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.restapi;
 
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberMeInfo;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.coupon.Coupon;
 import com.jocoos.mybeautip.member.coupon.CouponService;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
@@ -36,7 +36,7 @@ import java.util.*;
 @RequestMapping(value = "/api/1/members/me", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MemberShoppingController {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final CouponService couponService;
     private final MemberPointService memberPointService;
     private final OrderRepository orderRepository;
@@ -44,13 +44,13 @@ public class MemberShoppingController {
     private final MessageService messageService;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public MemberShoppingController(MemberService memberService,
+    public MemberShoppingController(LegacyMemberService legacyMemberService,
                                     CouponService couponService,
                                     MemberPointService memberPointService,
                                     OrderRepository orderRepository,
                                     MemberPointRepository memberPointRepository,
                                     MessageService messageService) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.couponService = couponService;
         this.memberPointService = memberPointService;
         this.orderRepository = orderRepository;
@@ -61,7 +61,7 @@ public class MemberShoppingController {
     @GetMapping("/coupons")
     public ResponseEntity<List<MemberCouponInfo>> getCoupons() {
         List<MemberCouponInfo> coupons = new ArrayList<>();
-        List<MemberCoupon> memberCoupons = couponService.findMemberCouponsByMember(memberService.currentMember());
+        List<MemberCoupon> memberCoupons = couponService.findMemberCouponsByMember(legacyMemberService.currentMember());
         log.debug("coupons: {}", memberCoupons);
 
         if (!CollectionUtils.isEmpty(memberCoupons)) {
@@ -74,7 +74,7 @@ public class MemberShoppingController {
 
     @GetMapping("/shoppings")
     public ResponseEntity<ShoppingInfo> getShopping() {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         Date weekAgo = DateUtils.addDays(new Date(), -7);
 
         int couponCount = couponService.countByCoupons(member);
@@ -104,7 +104,7 @@ public class MemberShoppingController {
     public CursorResponse getPoints(@RequestParam(defaultValue = "50") int count,
                                     @RequestParam(required = false) Long cursor,
                                     @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member me = memberService.currentMember();
+        Member me = legacyMemberService.currentMember();
         PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Date createdAt;

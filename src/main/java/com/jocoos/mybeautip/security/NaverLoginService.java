@@ -20,7 +20,7 @@ public class NaverLoginService implements LoginService {
     private final Oauth2Client oauth2Client;
 
     @Override
-    public SocialMember getMember(String code, String state) {
+    public SocialMemberRequest getMember(String code, String state) {
         oauth2Client.setProviderConfig(oauth2Config.getNaver());
 
         String accessToken = oauth2Client.getAccessToken(code, state);
@@ -32,18 +32,18 @@ public class NaverLoginService implements LoginService {
         return getUserData(accessToken);
     }
 
-    private SocialMember getUserData(String accessToken) {
+    private SocialMemberRequest getUserData(String accessToken) {
         HashMap<String, Object> body = oauth2Client.getUserData(accessToken);
         return toSocialMember(body);
     }
 
     @SuppressWarnings("unchecked")
-    private SocialMember toSocialMember(Map<String, Object> attributes) {
+    private SocialMemberRequest toSocialMember(Map<String, Object> attributes) {
         log.debug("{}", attributes);
         Map<String, Object> profile = (Map<String, Object>) attributes.get("response");
         log.debug("{}", profile);
 
-        return SocialMember.builder()
+        return SocialMemberRequest.builder()
                 .id(String.valueOf(profile.get("id")))
                 .provider(PROVIDER_TYPE)
                 .name((String) profile.get("nickname"))

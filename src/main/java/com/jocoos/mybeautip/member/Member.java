@@ -1,12 +1,12 @@
 package com.jocoos.mybeautip.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.member.vo.BirthdayAttributeConverter;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,6 @@ import java.util.Date;
 
 
 @Data
-@Builder
 @AllArgsConstructor
 @Slf4j
 @EqualsAndHashCode(callSuper = false)
@@ -52,6 +51,10 @@ public class Member {
 
     @Column(length = 7)
     private String tag;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private MemberStatus status;
 
     @JsonIgnore
     @Column(nullable = false)
@@ -125,10 +128,13 @@ public class Member {
     private Date deletedAt;
 
     public Member() {
+        this.status = MemberStatus.ACTIVE;
+        this.pushable = true;
         setTag();
     }
 
     public Member(SignupRequest request) {
+        this.status = MemberStatus.ACTIVE;
         this.link = parseLink(request.getGrantType());
         this.username = StringUtils.isBlank(request.getUsername()) ? RandomUtils.generateUsername() : request.getUsername();
         this.email = StringUtils.isBlank(request.getEmail()) ? "" : request.getEmail();
@@ -139,6 +145,14 @@ public class Member {
         this.pushable = true; // default true
         this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
         setTag();
+    }
+
+    public void setLink(int link) {
+        this.link = link;
+    }
+
+    public void setLink(String grantType) {
+        this.link = parseLink(grantType);
     }
 
     public int parseLink(String grantType) {

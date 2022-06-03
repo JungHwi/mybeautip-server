@@ -15,16 +15,31 @@ public class SocialMemberFactory {
 
     public SocialMemberService getSocialMemberService(String provider) {
         switch (provider) {
-            case "naver" :
-                return naverSocialMemberService;
-            case "kakao" :
-                return kakaoSocialMemberService;
-            case "apple" :
-                return appleSocialMemberService;
-            case "facebook" :
+            case "facebook":
                 return facebookSocialMemberService;
+            case "naver":
+                return naverSocialMemberService;
+            case "kakao":
+                return kakaoSocialMemberService;
+            case "apple":
+                return appleSocialMemberService;
             default:
                 throw new IllegalArgumentException("Unknown grant type");
+        }
+    }
+
+    public SocialMemberService getSocialMemberService(int memberLink) {
+        switch (memberLink) {
+            case 1:
+                return facebookSocialMemberService;
+            case 2:
+                return naverSocialMemberService;
+            case 4:
+                return kakaoSocialMemberService;
+            case 8:
+                return appleSocialMemberService;
+            default:
+                throw new IllegalArgumentException("Unknown member link");
         }
     }
 }

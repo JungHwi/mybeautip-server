@@ -3,7 +3,7 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.app.AppInfo;
 import com.jocoos.mybeautip.app.AppInfoRepository;
 import com.jocoos.mybeautip.devices.NoticeService;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/api/1/notices", produces = MediaType.APPLICATION_JSON_VALUE)
 public class NoticeController {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final NoticeService noticeService;
     private final MessageService messageService;
     private final AppInfoRepository appInfoRepository;
@@ -47,7 +47,7 @@ public class NoticeController {
                         messageService.getMessage(input.getMessage(), language)))
                 .collect(Collectors.toList());
 
-        memberService.updateLastLoggedAt();
+        legacyMemberService.updateLastLoggedAt();
 
         NoticeResponse response = new NoticeResponse();
         PageRequest pageable = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdAt"));

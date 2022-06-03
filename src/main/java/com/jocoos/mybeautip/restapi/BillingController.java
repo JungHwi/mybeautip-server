@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.billing.MemberBilling;
 import com.jocoos.mybeautip.member.billing.MemberBillingAuth;
 import com.jocoos.mybeautip.member.billing.MemberBillingAuthService;
@@ -25,21 +25,21 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/api/1/members/me", produces = MediaType.APPLICATION_JSON_VALUE)
 public class BillingController {
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MemberBillingService memberBillingService;
     private final MemberBillingAuthService memberBillingAuthService;
 
-    public BillingController(MemberService memberService,
+    public BillingController(LegacyMemberService legacyMemberService,
                              MemberBillingService memberBillingService,
                              MemberBillingAuthService memberBillingAuthService) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.memberBillingService = memberBillingService;
         this.memberBillingAuthService = memberBillingAuthService;
     }
 
     @GetMapping("/billings")
     public ResponseEntity<List<BillingInfo>> list() {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         List<BillingInfo> result = memberBillingService.getCards(member.getId()).stream()
                 .map(BillingInfo::new).collect(Collectors.toList());
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -47,7 +47,7 @@ public class BillingController {
 
     @PostMapping("/billings")
     public ResponseEntity<LinkInfo> create() {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         MemberBilling memberBilling = memberBillingService.createCustomerId(member.getId());
         String customerId = memberBillingService.getCustomerId(memberBilling);
         return new ResponseEntity<>(new LinkInfo(memberBilling.getId(), customerId), HttpStatus.OK);
@@ -56,7 +56,7 @@ public class BillingController {
     @DeleteMapping("/billings/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id,
                                     @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         memberBillingAuthService.remove(member.getId());
         memberBillingService.deleteBillingInfo(member.getId(), id, lang);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -65,7 +65,7 @@ public class BillingController {
     @PostMapping("/billings/{id}/complete")
     public ResponseEntity<BillingInfo> complete(@PathVariable Long id,
                                                 @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         MemberBilling mb = memberBillingService.completeBillingInfo(member.getId(), id, lang);
         return new ResponseEntity<>(new BillingInfo(mb), HttpStatus.OK);
     }
@@ -74,7 +74,7 @@ public class BillingController {
     public ResponseEntity<BillingInfo> update(@PathVariable Long id,
                                               @Valid @RequestBody UpdateBillingRequest request,
                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
 
         if (request.base) {
             MemberBilling memberBilling = memberBillingService.updateBillingToBase(member.getId(), id, lang);
@@ -86,14 +86,14 @@ public class BillingController {
 
     @GetMapping("/billings/base")
     public ResponseEntity<BillingInfo> getBaseBilling(@RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         MemberBilling mb = memberBillingService.getBaseBillingInfo(member.getId(), lang);
         return new ResponseEntity<>(new BillingInfo(mb), HttpStatus.OK);
     }
 
     @PostMapping("/billings/auth")
     public ResponseEntity<BillingAuthInfo> createAuth(@Valid @RequestBody CreateBillingAuthRequest request) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
 
         MemberBillingAuth billingAuth = memberBillingAuthService.create(member.getId(), request);
         return new ResponseEntity<>(new BillingAuthInfo(billingAuth), HttpStatus.OK);
@@ -102,7 +102,7 @@ public class BillingController {
     @PatchMapping("/billings/auth")
     public ResponseEntity<BillingAuthInfo> updateAuth(@Valid @RequestBody UpdateBillingAuthRequest request,
                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
 
         MemberBillingAuth billingAuth = memberBillingAuthService.update(member.getId(), request, lang);
         return new ResponseEntity<>(new BillingAuthInfo(billingAuth), HttpStatus.OK);
@@ -110,7 +110,7 @@ public class BillingController {
 
     @GetMapping("/billings/auth")
     public ResponseEntity<BillingAuthInfo> getAuth(@RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
 
         MemberBillingAuth billingAuth = memberBillingAuthService.get(member.getId(), lang);
         return new ResponseEntity<>(new BillingAuthInfo(billingAuth), HttpStatus.OK);
@@ -123,7 +123,7 @@ public class BillingController {
         if (pw == null) {
             throw new BadRequestException("billing_auth_invalid", "password field does not exist");
         }
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         BillingAuthRequest request = new BillingAuthRequest();
         request.setPassword(pw);
         MemberBillingAuth billingAuth = memberBillingAuthService.auth(member.getId(), request, lang);
@@ -132,7 +132,7 @@ public class BillingController {
 
     @PostMapping("/billings/auth/reset")
     public ResponseEntity<?> reset(@RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
         memberBillingAuthService.resetPasswordAsync(member.getId(), lang);
         return new ResponseEntity<>(HttpStatus.OK);
     }

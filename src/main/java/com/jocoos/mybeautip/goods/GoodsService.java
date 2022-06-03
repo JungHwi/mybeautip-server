@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.goods;
 
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.store.Store;
 import com.jocoos.mybeautip.store.StoreRepository;
@@ -25,7 +25,7 @@ import static org.springframework.data.domain.PageRequest.of;
 @Slf4j
 public class GoodsService {
     private static final String BEST_CATEGORY = "001";
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MessageService messageService;
     private final TimeSaleService timeSaleService;
     private final GoodsRepository goodsRepository;
@@ -45,7 +45,7 @@ public class GoodsService {
     @Value("${mybeautip.goods.max-valid-state}")
     private Integer maxValidState;
 
-    public GoodsService(MemberService memberService,
+    public GoodsService(LegacyMemberService legacyMemberService,
                         MessageService messageService,
                         TimeSaleService timeSaleService,
                         GoodsRepository goodsRepository,
@@ -53,7 +53,7 @@ public class GoodsService {
                         GoodsLikeRepository goodsLikeRepository,
                         StoreRepository storeRepository,
                         DeliveryChargeOptionRepository deliveryChargeOptionRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
         this.timeSaleService = timeSaleService;
         this.goodsRepository = goodsRepository;
@@ -230,7 +230,7 @@ public class GoodsService {
     private GoodsInfo generateGoodsInfo0(Goods goods) {
         // Set like ID if exist
         Long likeId = null;
-        Long me = memberService.currentMemberId();
+        Long me = legacyMemberService.currentMemberId();
         if (me != null) {
             Optional<GoodsLike> optional = goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goods.getGoodsNo(), me);
             likeId = optional.map(GoodsLike::getId).orElse(null);

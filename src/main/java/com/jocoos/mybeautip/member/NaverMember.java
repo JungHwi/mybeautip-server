@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.member;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import com.jocoos.mybeautip.security.SocialMember;
+import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class NaverMember extends CreatedDateAuditable {
+public class NaverMember extends CreatedDateAuditable implements SocialMember {
 
     @Id
     @Column(nullable = false, length = 30)
@@ -28,15 +28,13 @@ public class NaverMember extends CreatedDateAuditable {
     @Column(nullable = false)
     private Long memberId;
 
-    public NaverMember(String naverId, String nickname, Long memberId) {
-        this.naverId = naverId;
-        this.nickname = nickname;
+    public NaverMember(SignupRequest signupRequest, long memberId) {
+        this.naverId = signupRequest.getSocialId();
+        this.nickname = signupRequest.getUsername();
         this.memberId = memberId;
     }
 
-    public NaverMember(SocialMember socialMember, long memberId) {
-        this.naverId = socialMember.getId();
-        this.nickname = socialMember.getName();
-        this.memberId = memberId;
+    public String getSocialId() {
+        return naverId;
     }
 }

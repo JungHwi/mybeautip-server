@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.member.report.ReportRepository;
@@ -27,17 +27,17 @@ public class ReportController {
     private static final String MEMBER_NOT_FOUND = "member.not_found";
     private static final String MEMBER_ALREADY_REPORTED = "member.already_reported";
     private final BlockService blockService;
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MessageService messageService;
     private final ReportRepository reportRepository;
     private final VideoRepository videoRepository;
 
-    public ReportController(MemberService memberService,
+    public ReportController(LegacyMemberService legacyMemberService,
                             MessageService messageService,
                             BlockService blockService,
                             ReportRepository reportRepository,
                             VideoRepository videoRepository) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
         this.blockService = blockService;
         this.reportRepository = reportRepository;
@@ -54,12 +54,12 @@ public class ReportController {
             video = videoRepository.findById(request.getVideoId()).orElse(null);
         }
 
-        if (reportRepository.findByMeIdAndYouId(memberService.currentMemberId(), request.getMemberId()).isPresent()) {
+        if (reportRepository.findByMeIdAndYouId(legacyMemberService.currentMemberId(), request.getMemberId()).isPresent()) {
             throw new BadRequestException("already_reported", messageService.getMessage(MEMBER_ALREADY_REPORTED, lang));
         }
-        Member member = memberService.currentMember();
+        Member member = legacyMemberService.currentMember();
 
-        Report report = memberService.reportMember(member, request.getMemberId(), reasonCode,
+        Report report = legacyMemberService.reportMember(member, request.getMemberId(), reasonCode,
                 request.getReason(), video, lang);
 
         return new ReportResponse(report.getId());
@@ -68,7 +68,7 @@ public class ReportController {
     @GetMapping("/{id:.+}")
     public ReportResponse didReport(@PathVariable Integer id) {
         ReportResponse response = new ReportResponse(false);
-        reportRepository.findByMeIdAndYouId(memberService.currentMemberId(), id)
+        reportRepository.findByMeIdAndYouId(legacyMemberService.currentMemberId(), id)
                 .ifPresent(report -> response.setReported(true));
         return response;
     }

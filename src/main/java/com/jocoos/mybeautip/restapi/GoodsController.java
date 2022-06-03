@@ -4,9 +4,9 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.godo.GoodsDetailService;
 import com.jocoos.mybeautip.goods.*;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.video.VideoGoods;
@@ -44,7 +44,7 @@ public class GoodsController {
     private static final int MAX_REVIEWER_COUNT = 6;
     private static final List<String> validSort
             = Arrays.asList("like", "order", "hit", "review", "high-price", "low-price", "latest");
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
     private final VideoService videoService;
     private final GoodsOptionService goodsOptionService;
@@ -55,7 +55,7 @@ public class GoodsController {
     private final GoodsDetailService goodsDetailService;
     private final KeywordService keywordService;
 
-    public GoodsController(MemberService memberService,
+    public GoodsController(LegacyMemberService legacyMemberService,
                            GoodsService goodsService,
                            VideoService videoService,
                            GoodsOptionService goodsOptionService,
@@ -65,7 +65,7 @@ public class GoodsController {
                            VideoGoodsRepository videoGoodsRepository,
                            GoodsDetailService goodsDetailService,
                            KeywordService keywordService) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
         this.videoService = videoService;
         this.goodsOptionService = goodsOptionService;
@@ -110,7 +110,7 @@ public class GoodsController {
 
             try {
                 keywordService.updateKeywordCount(keyword);
-                keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, memberService.currentMember());
+                keywordService.logHistory(keyword, KeywordService.KeywordCategory.GOODS, legacyMemberService.currentMember());
             } catch (ConcurrencyFailureException e) { // Ignore
                 log.warn("getGoods throws ConcurrencyFailureException: " + keyword);
             }
@@ -223,7 +223,7 @@ public class GoodsController {
 
                     List<MemberInfo> result = new ArrayList<>();
                     for (Member m : memberSet) {
-                        result.add(memberService.getMemberInfo(m));
+                        result.add(legacyMemberService.getMemberInfo(m));
                         count++;
                         if (count >= MAX_REVIEWER_COUNT) {
                             break;
@@ -280,7 +280,7 @@ public class GoodsController {
     public ResponseEntity<GoodsLikeInfo> addGoodsLike(@PathVariable String goodsNo,
                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang,
                                                       @RequestParam(name = "broker", required = false) Long broker) {
-        Long memberId = memberService.currentMemberId();
+        Long memberId = legacyMemberService.currentMemberId();
         return goodsRepository.findByGoodsNo(goodsNo)
                 .map(goods -> {
                     if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goodsNo, memberId).isPresent()) {
@@ -297,7 +297,7 @@ public class GoodsController {
     public ResponseEntity<?> removeGoodsLike(@PathVariable String goodsNo,
                                              @PathVariable Long likeId,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        GoodsLike like = goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, memberService.currentMemberId())
+        GoodsLike like = goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, legacyMemberService.currentMemberId())
                 .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
         goodsService.removeLike(like);
         return new ResponseEntity(HttpStatus.OK);

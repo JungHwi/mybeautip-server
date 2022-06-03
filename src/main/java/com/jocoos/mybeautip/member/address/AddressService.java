@@ -3,8 +3,8 @@ package com.jocoos.mybeautip.member.address;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.DeliveryChargeArea;
 import com.jocoos.mybeautip.goods.DeliveryChargeAreaRepository;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.AddressController;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.util.List;
 @Service
 public class AddressService {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final MessageService messageService;
     private final AddressRepository addressRepository;
     private final DeliveryChargeAreaRepository deliveryChargeAreaRepository;
@@ -28,11 +28,11 @@ public class AddressService {
     private final String ADDRESS_NOT_FOUND = "address.not_found";
 
     public AddressService(AddressRepository addressRepository,
-                          MemberService memberService,
+                          LegacyMemberService legacyMemberService,
                           MessageService messageService,
                           DeliveryChargeAreaRepository deliveryChargeAreaRepository) {
         this.addressRepository = addressRepository;
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
         this.deliveryChargeAreaRepository = deliveryChargeAreaRepository;
     }
@@ -70,21 +70,21 @@ public class AddressService {
         log.info("UpdateAddressRequest: {}", request);
 
         if (request.getBase() != null && request.getBase()) {
-            addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId())
+            addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(legacyMemberService.currentMemberId())
                     .ifPresent(prevBaseAddress -> {
                         prevBaseAddress.setBase(false);
                         addressRepository.save(prevBaseAddress);
                     });
         }
 
-        return addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId())
+        return addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, legacyMemberService.currentMemberId())
                 .map(address -> {
                     boolean originalBase = address.getBase();
                     BeanUtils.copyProperties(request, address);
                     if (request.getBase() == null) {
                         address.setBase(originalBase);
                     }
-                    if (addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberService.currentMemberId()) == 0) {
+                    if (addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(legacyMemberService.currentMemberId()) == 0) {
                         address.setBase(true);
                     }
                     address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
@@ -95,7 +95,7 @@ public class AddressService {
 
     @Transactional
     public void delete(Long id, String lang, Long memberId) {
-        addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, memberService.currentMemberId())
+        addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, legacyMemberService.currentMemberId())
                 .map(address -> {
                     address.setDeletedAt(new Date());
                     return addressRepository.save(address);

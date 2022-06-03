@@ -2,10 +2,10 @@ package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.MemberRoleInfo;
-import com.jocoos.mybeautip.member.MemberService;
 import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.following.FollowingRepository;
 import com.jocoos.mybeautip.member.point.MemberPointService;
@@ -32,20 +32,20 @@ import java.util.Date;
 @RequestMapping("/api/admin")
 public class AdminMemberController {
 
-    private final MemberService memberService;
+    private final LegacyMemberService legacyMemberService;
     private final PasswordEncoder passwordEncoder;
     private final AdminMemberRepository adminMemberRepository;
     private final MemberRepository memberRepository;
     private final FollowingRepository followingRepository;
     private final MemberPointService memberPointService;
 
-    public AdminMemberController(MemberService memberService,
+    public AdminMemberController(LegacyMemberService legacyMemberService,
                                  PasswordEncoder passwordEncoder,
                                  AdminMemberRepository adminMemberRepository,
                                  MemberRepository memberRepository,
                                  FollowingRepository followingRepository,
                                  MemberPointService memberPointService) {
-        this.memberService = memberService;
+        this.legacyMemberService = legacyMemberService;
         this.passwordEncoder = passwordEncoder;
         this.adminMemberRepository = adminMemberRepository;
         this.memberRepository = memberRepository;
@@ -55,7 +55,7 @@ public class AdminMemberController {
 
     @GetMapping("/me")
     public ResponseEntity<MemberRoleInfo> getMe() {
-        MyBeautipUserDetails myBeautipUserDetails = memberService.currentUserDetails();
+        MyBeautipUserDetails myBeautipUserDetails = legacyMemberService.currentUserDetails();
 
         GrantedAuthority authority = myBeautipUserDetails.getAuthorities().stream().findAny().orElseThrow(() ->
                 new MemberNotFoundException("role not found"));
@@ -126,7 +126,7 @@ public class AdminMemberController {
         Following following = followingRepository.findByMemberMeIdAndMemberYouId(me.getId(), you.getId()).orElse(null);
 
         if (following == null) {
-            memberService.followMember(me, you);
+            legacyMemberService.followMember(me, you);
         } else {  // Already followed
             throw new BadRequestException("bad_request", "Already follow");
         }
