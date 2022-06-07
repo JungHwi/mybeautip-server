@@ -1,40 +1,39 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-
-import org.springframework.data.rest.core.config.Projection;
-
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.post.Post;
+import org.springframework.data.rest.core.config.Projection;
+
+import java.util.Date;
 
 @Projection(name = "banner_details", types = Banner.class)
 public interface BannerExceprt {
 
-  Long getId();
+    Long getId();
 
-  String getTitle();
+    String getTitle();
 
-  String getDescription();
+    String getDescription();
 
-  String getThumbnailUrl();
+    String getThumbnailUrl();
 
-  int getCategory();
+    int getCategory();
 
-  int getSeq();
+    int getSeq();
 
-  int getViewCount();
+    int getViewCount();
 
-  String getLink();
+    String getLink();
 
-  Post getPost();
+    Post getPost();
 
-  Date getStartedAt();
+    Date getStartedAt();
 
-  Date getEndedAt();
+    Date getEndedAt();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 
-  Date getModifiedAt();
+    Date getModifiedAt();
 
-  Date getDeletedAt();
+    Date getDeletedAt();
 }

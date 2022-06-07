@@ -1,20 +1,13 @@
 package com.jocoos.mybeautip.recoding;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.util.Date;
-
-import org.springframework.data.annotation.LastModifiedDate;
-
+import com.jocoos.mybeautip.audit.MemberAuditable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
-import com.jocoos.mybeautip.audit.MemberAuditable;
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data
@@ -23,33 +16,33 @@ import com.jocoos.mybeautip.audit.MemberAuditable;
 @Table(name = "view_recodings")
 public class ViewRecoding extends MemberAuditable {
 
-  public static final int CATEGORY_POST = 1;
-  public static final int CATEGORY_GOODS = 2;
-  public static final int CATEGORY_VIDEO = 3;
+    public static final int CATEGORY_POST = 1;
+    public static final int CATEGORY_GOODS = 2;
+    public static final int CATEGORY_VIDEO = 3;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private String itemId;
+    @Column(nullable = false)
+    private String itemId;
 
-  /**
-   * 1. Post, 2. Goods, 3. Video
-   */
-  @Column(nullable = false)
-  private int category;
-  
-  @Column(nullable = false)
-  private int viewCount;
-  
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    /**
+     * 1. Post, 2. Goods, 3. Video
+     */
+    @Column(nullable = false)
+    private int category;
 
-  public ViewRecoding(String itemId, int category) {
-    this.itemId = itemId;
-    this.category = category;
-    this.viewCount = 1; // default value
-  }
+    @Column(nullable = false)
+    private int viewCount;
+
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
+
+    public ViewRecoding(String itemId, int category) {
+        this.itemId = itemId;
+        this.category = category;
+        this.viewCount = 1; // default value
+    }
 }

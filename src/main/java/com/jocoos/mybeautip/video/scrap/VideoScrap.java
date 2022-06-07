@@ -15,13 +15,15 @@ import javax.persistence.*;
 @EqualsAndHashCode(callSuper = false)
 public class VideoScrap extends MemberAuditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "video_id")
-  private Video video;
+    @ManyToOne
+    @JoinColumn(name = "video_id")
+    private Video video;
 
-  public VideoScrap(Video video) { this.video = video; }
+    public VideoScrap(Video video) {
+        this.video = video;
+    }
 }

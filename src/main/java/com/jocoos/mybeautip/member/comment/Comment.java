@@ -16,81 +16,85 @@ import java.util.Date;
 @Table(name = "comments")
 public class Comment extends MemberAuditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column
-  private Long postId;
+    @Column
+    private Long postId;
 
-  @Column
-  private Long videoId;
-  
-  @Column
-  private Boolean locked = false;
+    @Column
+    private Long videoId;
 
-  @Column(nullable = false)
-  private String comment;
-  
-  @Column
-  private String originalComment;
-  
-  @Column
-  private Long parentId;
+    @Column
+    private Boolean locked = false;
 
-  @Column
-  private int commentCount;
+    @Column(nullable = false)
+    private String comment;
 
-  @Column
-  private int likeCount;
+    @Column
+    private String originalComment;
 
-  /**
-   * 0: Default, 1: Deleted 2: Blinded, 4: Blinded by Admin
-   */
-  @Column
-  private int state;
+    @Column
+    private Long parentId;
 
-  @Column(nullable = false)
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    private int commentCount;
 
-  public enum CommentState {
-    DEFAULT(0),
-    DELETED(1),
-    BLINDED(2),
-    BLINDED_BY_ADMIN(4);
+    @Column
+    private int likeCount;
 
-    private int value;
-    CommentState(int value) {
-      this.value = value;
+    @Column
+    private int reportCount;
+
+    /**
+     * 0: Default, 1: Deleted 2: Blinded, 4: Blinded by Admin
+     */
+    @Column
+    private int state;
+
+    @Column(nullable = false)
+    @LastModifiedDate
+    private Date modifiedAt;
+
+    public void setState(CommentState commentState) {
+        this.state = commentState.value();
     }
 
-    public int value() {
-      return this.value;
+    public boolean isBlinded() {
+        return CommentState.BLINDED.value() == this.state || CommentState.BLINDED_BY_ADMIN.value() == this.state;
     }
 
-    public static CommentState getType(int value) {
-      CommentState state = DEFAULT;
-      for (CommentState v: CommentState.values()) {
-        if (v.value() == value) {
-          state = v;
-          break;
+    public CommentState getCommentState() {
+        return CommentState.BLINDED.getType(this.state);
+    }
+
+    public enum CommentState {
+        DEFAULT(0),
+        DELETED(1),
+        BLINDED(2),
+        BLINDED_BY_ADMIN(4);
+
+        private int value;
+
+        CommentState(int value) {
+            this.value = value;
         }
-      }
 
-      return state;
+        public static CommentState getType(int value) {
+            CommentState state = DEFAULT;
+            for (CommentState v : CommentState.values()) {
+                if (v.value() == value) {
+                    state = v;
+                    break;
+                }
+            }
+
+            return state;
+        }
+
+        public int value() {
+            return this.value;
+        }
     }
-  }
-
-  public void setState(CommentState commentState) {
-    this.state = commentState.value();
-  }
-
-  public boolean isBlinded() {
-    return CommentState.BLINDED.value() == this.state || CommentState.BLINDED_BY_ADMIN.value() == this.state;
-  }
-
-  public CommentState getCommentState() {
-    return CommentState.BLINDED.getType(this.state);
-  }
 }

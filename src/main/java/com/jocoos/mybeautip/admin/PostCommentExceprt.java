@@ -1,32 +1,31 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.comment.Comment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.comment.Comment;
+import java.util.Date;
 
 @Projection(name = "post_comment_details", types = Comment.class)
 public interface PostCommentExceprt {
 
-  Long getId();
+    Long getId();
 
-  @Value("#{target.createdBy}")
-  Member getMember();
+    @Value("#{target.createdBy}")
+    Member getMember();
 
-  String getComment();
+    String getComment();
 
-  Long getPostId();
+    Long getPostId();
 
-  Long getVideoId();
+    Long getVideoId();
 
-  Long getParentId();
+    Long getParentId();
 
-  int getCommentCount();
+    int getCommentCount();
 
-  int getLikeCount();
+    int getLikeCount();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 }

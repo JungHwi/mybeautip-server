@@ -17,36 +17,36 @@ import java.util.Date;
 @Entity
 @Table(name = "carts")
 public class Cart extends MemberAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private Boolean checked;
+    @Column(nullable = false)
+    private Boolean checked;
 
-  @ManyToOne
-  @JoinColumn(name = "goods_no")
-  private Goods goods;
+    @ManyToOne
+    @JoinColumn(name = "goods_no")
+    private Goods goods;
 
-  @ManyToOne
-  @JoinColumn(name = "option_id")
-  private GoodsOption option;
+    @ManyToOne
+    @JoinColumn(name = "option_id")
+    private GoodsOption option;
 
-  @ManyToOne
-  @JoinColumn(name = "store_id")
-  private Store store;
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store;
 
-  @Column(nullable = false)
-  private Integer quantity;
+    @Column(nullable = false)
+    private Integer quantity;
 
-  @Column
-  private Date modifiedAt;
+    @Column
+    private Date modifiedAt;
 
-  public Cart(Goods goods, GoodsOption option, Store store, int quantity) {
-    this.checked = true;
-    this.goods = goods;
-    this.option = option;
-    this.store = store;
-    this.quantity = quantity;
-  }
+    public Cart(Goods goods, GoodsOption option, Store store, int quantity) {
+        this.checked = true;
+        this.goods = goods;
+        this.option = option;
+        this.store = store;
+        this.quantity = quantity;
+    }
 }

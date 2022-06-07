@@ -1,46 +1,46 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.restapi.dto.SignupRequest;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.google.common.base.Strings;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-
 @Entity
 @Table(name = "apple_members")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class AppleMember extends CreatedDateAuditable {
+public class AppleMember extends CreatedDateAuditable implements SocialMember {
 
-  @Id
-  @Column
-  private String appleId;
+    @Id
+    @Column
+    private String appleId;
 
-  @Column(nullable = false)
-  private String email;
+    @Column(nullable = false)
+    private String email;
 
-  @Column
-  private String name;
+    @Column
+    private String name;
 
-  @Column(nullable = false)
-  private Long memberId;
+    @Column(nullable = false)
+    private Long memberId;
 
-  public AppleMember(String appleId, String email, String name, Long memberId) {
-    this.appleId = appleId;
-    this.memberId = memberId;
-    if (!Strings.isNullOrEmpty(email)) {
-      this.email = email;
+    public String getSocialId() {
+        return appleId;
     }
 
-    if (!Strings.isNullOrEmpty(name)) {
-      this.name = name;
+    public AppleMember(SignupRequest request, long memberId) {
+        this.appleId = request.getSocialId();
+        this.email = request.getEmail();
+        this.name = request.getUsername();
+        this.memberId = memberId;
     }
-  }
 }

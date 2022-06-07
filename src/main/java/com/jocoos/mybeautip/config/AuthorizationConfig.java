@@ -1,13 +1,9 @@
 package com.jocoos.mybeautip.config;
 
-import javax.annotation.PostConstruct;
-
-import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-
 import com.jocoos.mybeautip.admin.AdminMemberRepository;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.security.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,169 +22,186 @@ import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticat
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+
 @Slf4j
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
-  static final String SCOPE_READ = "read";
-  static final String SCOPE_WRITE = "write";
-  static final String SCOPE_ADMIN = "admin";
+    static final String SCOPE_READ = "read";
+    static final String SCOPE_WRITE = "write";
+    static final String SCOPE_ADMIN = "admin";
 
-  static final String GRANT_TYPE_FACEBOOK = "facebook";
-  static final String GRANT_TYPE_NAVER = "naver";
-  static final String GRANT_TYPE_KAKAO = "kakao";
-  static final String GRANT_TYPE_APPLE = "apple";
-  static final String GRANT_TYPE_CLIENT = "client";
-  static final String GRANT_TYPE_ADMIN = "admin";
-  static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
+    static final String GRANT_TYPE_FACEBOOK = "facebook";
+    static final String GRANT_TYPE_NAVER = "naver";
+    static final String GRANT_TYPE_KAKAO = "kakao";
+    static final String GRANT_TYPE_APPLE = "apple";
+    static final String GRANT_TYPE_CLIENT = "client";
+    static final String GRANT_TYPE_ADMIN = "admin";
+    static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
 
-  @Autowired
-  private MemberRepository memberRepository;
+    @Autowired
+    private LegacyMemberService legacyMemberService;
 
-  @Autowired
-  private FacebookMemberRepository facebookMemberRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
-  @Autowired
-  private NaverMemberRepository naverMemberRepository;
+    @Autowired
+    private FacebookMemberRepository facebookMemberRepository;
 
-  @Autowired
-  private KakaoMemberRepository kakaoMemberRepository;
+    @Autowired
+    private NaverMemberRepository naverMemberRepository;
 
-  @Autowired
-  private AppleMemberRepository appleMemberRepository;
+    @Autowired
+    private KakaoMemberRepository kakaoMemberRepository;
 
-  @Autowired
-  private AdminMemberRepository adminMemberRepository;
+    @Autowired
+    private AppleMemberRepository appleMemberRepository;
 
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+    @Autowired
+    private AdminMemberRepository adminMemberRepository;
 
-  @Value("${security.oauth2.private-key}")
-  private String privateKey;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-  @Value("${security.oauth2.public-key}")
-  private String publicKey;
+    @Value("${security.oauth2.private-key}")
+    private String privateKey;
 
-  @Autowired
-  private AuthenticationManager authenticationManager;
+    @Value("${security.oauth2.public-key}")
+    private String publicKey;
 
-  @Autowired
-  private MybeautipUserDetailsService userDetailService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-  @Value("${mybeautip.security.access-token-validity-seconds}")
-  private int accessTokenValiditySeconds;
+    @Autowired
+    private MybeautipUserDetailsService userDetailService;
 
-  @Value("${mybeautip.security.refresh-token-validity-seconds}")
-  private int refreshTokenValiditySeconds;
+    @Value("${mybeautip.security.access-token-validity-seconds}")
+    private int accessTokenValiditySeconds;
 
-  @PostConstruct
-  public void postConstruct() {
-    log.debug("accessTokenValiditySeconds: {}, refreshTokenValiditySeconds: {}", accessTokenValiditySeconds, refreshTokenValiditySeconds);
-  }
+    @Value("${mybeautip.security.refresh-token-validity-seconds}")
+    private int refreshTokenValiditySeconds;
 
-  @Override
-  public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
-    endpoints
-        .pathMapping("/oauth/token", "/api/1/token")
-        .authenticationManager(authenticationManager)
-        .accessTokenConverter(jwtTokenEnhencer())
-        .tokenGranter(tokenGranter(endpoints))
-        .tokenStore(jwtTokenStore())
-        .userDetailsService(userDetailService);
-  }
+    @PostConstruct
+    public void postConstruct() {
+        log.debug("accessTokenValiditySeconds: {}, refreshTokenValiditySeconds: {}", accessTokenValiditySeconds, refreshTokenValiditySeconds);
+    }
 
-  @Override
-  public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-    clients.inMemory()
-        .withClient("mybeautip-ios")
-        .secret(passwordEncoder.encode("akdlqbxlqdkdldhdptm"))
-        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_APPLE, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
-        .scopes(SCOPE_READ, SCOPE_WRITE)
-        .accessTokenValiditySeconds(accessTokenValiditySeconds)
-        .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
-        .and()
-        .withClient("mybeautip-android")
-        .secret(passwordEncoder.encode("akdlqbxlqdksemfhdlem"))
-        .scopes(SCOPE_READ, SCOPE_WRITE)
-        .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
-        .accessTokenValiditySeconds(accessTokenValiditySeconds)
-        .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
-        .and()
-        .withClient("mybeautip-web")
-        .secret(passwordEncoder.encode("akdlqbxlqdjemals"))
-        .scopes(SCOPE_READ, SCOPE_WRITE, SCOPE_ADMIN)
-        .authorizedGrantTypes(GRANT_TYPE_ADMIN, GRANT_TYPE_REFRESH_TOKEN)
-        .accessTokenValiditySeconds(accessTokenValiditySeconds)
-        .refreshTokenValiditySeconds(refreshTokenValiditySeconds);
-  }
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
+        endpoints
+                .pathMapping("/oauth/token", "/api/1/token")
+                .authenticationManager(authenticationManager)
+                .accessTokenConverter(jwtTokenEnhancer())
+                .tokenGranter(tokenGranter(endpoints))
+                .tokenStore(jwtTokenStore())
+                .userDetailsService(userDetailService);
+    }
 
-  @Bean
-  public JwtAccessTokenConverter jwtTokenEnhencer() {
-    JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-    jwtAccessTokenConverter.setSigningKey(privateKey);
-    jwtAccessTokenConverter.setVerifierKey(publicKey);
-    jwtAccessTokenConverter.setAccessTokenConverter(accessTokenConverter());
-    return jwtAccessTokenConverter;
-  }
+    @Override
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        clients.inMemory()
+                .withClient("mybeautip-ios")
+                .secret(passwordEncoder.encode("akdlqbxlqdkdldhdptm"))
+                .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_APPLE, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
+                .scopes(SCOPE_READ, SCOPE_WRITE)
+                .accessTokenValiditySeconds(accessTokenValiditySeconds)
+                .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
+                .and()
+                .withClient("mybeautip-android")
+                .secret(passwordEncoder.encode("akdlqbxlqdksemfhdlem"))
+                .scopes(SCOPE_READ, SCOPE_WRITE)
+                .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
+                .accessTokenValiditySeconds(accessTokenValiditySeconds)
+                .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
+                .and()
+                .withClient("mybeautip-mobile")
+                .secret(passwordEncoder.encode("akdlqbxlqahqkdlf"))
+                .scopes(SCOPE_READ, SCOPE_WRITE, SCOPE_ADMIN)
+                .authorizedGrantTypes(GRANT_TYPE_FACEBOOK, GRANT_TYPE_NAVER, GRANT_TYPE_KAKAO, GRANT_TYPE_CLIENT, GRANT_TYPE_REFRESH_TOKEN)
+                .accessTokenValiditySeconds(accessTokenValiditySeconds)
+                .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
+                .and()
+                .withClient("mybeautip-web")
+                .secret(passwordEncoder.encode("akdlqbxlqdjemals"))
+                .scopes(SCOPE_READ, SCOPE_WRITE, SCOPE_ADMIN)
+                .authorizedGrantTypes(GRANT_TYPE_ADMIN, GRANT_TYPE_REFRESH_TOKEN)
+                .accessTokenValiditySeconds(accessTokenValiditySeconds)
+                .refreshTokenValiditySeconds(refreshTokenValiditySeconds);
+    }
 
-  @Bean
-  public JwtTokenStore jwtTokenStore() {
-    return new JwtTokenStore(jwtTokenEnhencer());
-  }
+    @Bean
+    public JwtAccessTokenConverter jwtTokenEnhancer() {
+        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+        jwtAccessTokenConverter.setSigningKey(privateKey);
+        jwtAccessTokenConverter.setVerifierKey(publicKey);
+        jwtAccessTokenConverter.setAccessTokenConverter(accessTokenConverter());
+        return jwtAccessTokenConverter;
+    }
 
-  private AccessTokenConverter accessTokenConverter() {
-    DefaultUserAuthenticationConverter userAuthenticationConverter = new DefaultUserAuthenticationConverter();
-    userAuthenticationConverter.setUserDetailsService(userDetailService);
+    @Bean
+    public JwtTokenStore jwtTokenStore() {
+        return new JwtTokenStore(jwtTokenEnhancer());
+    }
 
-    DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
-    accessTokenConverter.setUserTokenConverter(userAuthenticationConverter);
-    return accessTokenConverter;
-  }
+    private AccessTokenConverter accessTokenConverter() {
+        DefaultUserAuthenticationConverter userAuthenticationConverter = new DefaultUserAuthenticationConverter();
+        userAuthenticationConverter.setUserDetailsService(userDetailService);
+
+        DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+        accessTokenConverter.setUserTokenConverter(userAuthenticationConverter);
+        return accessTokenConverter;
+    }
 
     private CompositeTokenGranter tokenGranter(AuthorizationServerEndpointsConfigurer endpoints) {
 
-    return new CompositeTokenGranter(
-        Lists.newArrayList(
-            new FacebookTokenGranter(
-                endpoints.getTokenServices(),
-                endpoints.getClientDetailsService(),
-                endpoints.getOAuth2RequestFactory(),
-                memberRepository,
-                facebookMemberRepository),
-            new NaverTokenGranter(
-                endpoints.getTokenServices(),
-                endpoints.getClientDetailsService(),
-                endpoints.getOAuth2RequestFactory(),
-                memberRepository,
-                naverMemberRepository),
-            new KakaoTokenGranter(
-                endpoints.getTokenServices(),
-                endpoints.getClientDetailsService(),
-                endpoints.getOAuth2RequestFactory(),
-                memberRepository,
-                kakaoMemberRepository),
-            new AppleTokenGranter(
-                endpoints.getTokenServices(),
-                endpoints.getClientDetailsService(),
-                endpoints.getOAuth2RequestFactory(),
-                memberRepository,
-                appleMemberRepository),
-            new ClientTokenGranter(
-                endpoints.getTokenServices(),
-                endpoints.getClientDetailsService(),
-                endpoints.getOAuth2RequestFactory()),
-             new AdminTokenGranter(
-                endpoints.getTokenServices(),
-                endpoints.getClientDetailsService(),
-                endpoints.getOAuth2RequestFactory(),
-                memberRepository,
-                adminMemberRepository,
-                passwordEncoder),
-             new RefreshTokenGranter(endpoints.getTokenServices(),
-                endpoints.getClientDetailsService(),
-                endpoints.getOAuth2RequestFactory())
-        )
-    );
-  }
+        return new CompositeTokenGranter(
+                Arrays.asList(
+                        new FacebookTokenGranter(
+                                endpoints.getTokenServices(),
+                                endpoints.getClientDetailsService(),
+                                endpoints.getOAuth2RequestFactory(),
+                                legacyMemberService,
+                                memberRepository,
+                                facebookMemberRepository),
+                        new NaverTokenGranter(
+                                endpoints.getTokenServices(),
+                                endpoints.getClientDetailsService(),
+                                endpoints.getOAuth2RequestFactory(),
+                                legacyMemberService,
+                                memberRepository,
+                                naverMemberRepository),
+                        new KakaoTokenGranter(
+                                endpoints.getTokenServices(),
+                                endpoints.getClientDetailsService(),
+                                endpoints.getOAuth2RequestFactory(),
+                                legacyMemberService,
+                                memberRepository,
+                                kakaoMemberRepository),
+                        new AppleTokenGranter(
+                                endpoints.getTokenServices(),
+                                endpoints.getClientDetailsService(),
+                                endpoints.getOAuth2RequestFactory(),
+                                legacyMemberService,
+                                memberRepository,
+                                appleMemberRepository),
+                        new ClientTokenGranter(
+                                endpoints.getTokenServices(),
+                                endpoints.getClientDetailsService(),
+                                endpoints.getOAuth2RequestFactory()),
+                        new AdminTokenGranter(
+                                endpoints.getTokenServices(),
+                                endpoints.getClientDetailsService(),
+                                endpoints.getOAuth2RequestFactory(),
+                                memberRepository,
+                                adminMemberRepository,
+                                passwordEncoder),
+                        new RefreshTokenGranter(endpoints.getTokenServices(),
+                                endpoints.getClientDetailsService(),
+                                endpoints.getOAuth2RequestFactory())
+                )
+        );
+    }
 }

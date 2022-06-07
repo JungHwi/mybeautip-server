@@ -14,35 +14,35 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AwsConfig {
 
-  @Value("${cloud.aws.credentials.accessKey}")
-  private String accessKey;
+    @Value("${cloud.aws.credentials.accessKey}")
+    private String accessKey;
 
-  @Value("${cloud.aws.credentials.secretKey}")
-  private String secretKey;
+    @Value("${cloud.aws.credentials.secretKey}")
+    private String secretKey;
 
-  @Value("${cloud.aws.region.static}")
-  private String region;
+    @Value("${cloud.aws.region.static}")
+    private String region;
 
-  @Bean
-  public AmazonSNS amazonSNS() {
-    return AmazonSNSClientBuilder.standard()
-       .withRegion(region)
-       .withCredentials(
-       new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))
-    ).build();
-  }
+    @Bean
+    public AmazonSNS amazonSNS() {
+        return AmazonSNSClientBuilder.standard()
+                .withRegion(region)
+                .withCredentials(
+                        new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))
+                ).build();
+    }
 
-  @Bean
-  public AWSSecurityTokenService awsSTS() {
-    return AWSSecurityTokenServiceClientBuilder.standard()
-      .withRegion(region)
-      .withCredentials(
-        new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))
-      ).build();
-  }
+    @Bean
+    public AWSSecurityTokenService awsSTS() {
+        return AWSSecurityTokenServiceClientBuilder.standard()
+                .withRegion(region)
+                .withCredentials(
+                        new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))
+                ).build();
+    }
 
-  @Bean
-  public NotificationMessagingTemplate notificationMessagingTemplate(AmazonSNS amazonSNS) {
-    return new NotificationMessagingTemplate(amazonSNS);
-  }
+    @Bean
+    public NotificationMessagingTemplate notificationMessagingTemplate(AmazonSNS amazonSNS) {
+        return new NotificationMessagingTemplate(amazonSNS);
+    }
 }

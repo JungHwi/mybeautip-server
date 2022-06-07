@@ -15,12 +15,12 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class ModifiedDateAuditable {
 
-  @Column(nullable = false)
-  @CreatedDate
-  protected Date createdAt;
+    @Column(nullable = false)
+    @CreatedDate
+    protected Date createdAt;
 
-  @Column
-  @LastModifiedDate
-  protected Date modifiedAt;
+    @Column
+    @LastModifiedDate
+    protected Date modifiedAt;
 
 }

@@ -1,9 +1,13 @@
 package com.jocoos.mybeautip.member;
 
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface NaverMemberRepository extends JpaRepository<NaverMember, String> {
-  Optional<NaverMember> findByMemberId(Long memberId);
+    boolean existsByNaverId(String id);
+
+    NaverMember getByNaverId(String naverId);
+
+    Optional<NaverMember> findByMemberId(Long memberId);
 }

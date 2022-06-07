@@ -1,23 +1,21 @@
 package com.jocoos.mybeautip.audit;
 
-import java.util.Optional;
-
+import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.Member;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
 
-import lombok.extern.slf4j.Slf4j;
-
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberService;
+import java.util.Optional;
 
 @Slf4j
 public class AuditorAwareImpl implements AuditorAware<Member> {
 
-  @Autowired
-  private MemberService memberService;
+    @Autowired
+    private LegacyMemberService legacyMemberService;
 
-  @Override
-  public Optional<Member> getCurrentAuditor() {
-    return Optional.ofNullable(memberService.currentMember());
-  }
+    @Override
+    public Optional<Member> getCurrentAuditor() {
+        return Optional.ofNullable(legacyMemberService.currentMember());
+    }
 }

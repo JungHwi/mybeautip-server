@@ -9,17 +9,17 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 @Slf4j
 public class ClientTokenGranter extends AbstractTokenGranter {
 
-  public ClientTokenGranter(
-      AuthorizationServerTokenServices tokenServices,
-      ClientDetailsService clientDetailsService,
-      OAuth2RequestFactory requestFactory) {
-    super(tokenServices, clientDetailsService, requestFactory, "client");
-  }
+    public ClientTokenGranter(
+            AuthorizationServerTokenServices tokenServices,
+            ClientDetailsService clientDetailsService,
+            OAuth2RequestFactory requestFactory) {
+        super(tokenServices, clientDetailsService, requestFactory, "client");
+    }
 
-  @Override
-  protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
-    UsernamePasswordAuthenticationToken authenticationToken
-      = new UsernamePasswordAuthenticationToken("guest:" + System.currentTimeMillis(), "");
-    return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
-  }
+    @Override
+    protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
+        UsernamePasswordAuthenticationToken authenticationToken
+                = new UsernamePasswordAuthenticationToken("guest:" + System.currentTimeMillis(), "");
+        return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
+    }
 }

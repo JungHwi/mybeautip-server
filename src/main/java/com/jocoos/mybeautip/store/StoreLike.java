@@ -13,15 +13,15 @@ import javax.persistence.*;
 @Entity
 @Table(name = "store_likes")
 public class StoreLike extends MemberAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name="store_id")
-  private Store store;
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store;
 
-  public StoreLike(Store store) {
-    this.store = store;
-  }
+    public StoreLike(Store store) {
+        this.store = store;
+    }
 }

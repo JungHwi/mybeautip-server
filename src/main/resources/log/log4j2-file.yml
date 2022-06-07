@@ -13,7 +13,7 @@ Configutation:
             interval: 1
             modulate: true
         ThresholdFilter:
-          level: INFO
+          level: DEBUG
 
       - name: ERROR_FILE
         fileName: ./logs/error.log
@@ -44,7 +44,7 @@ Configutation:
       - name: com.jocoos.mybeautip.devices.DeviceService
         level: debug
       - name: com.jocoos.mybeautip
-        level: info
+        level: debug
       - name: jdbc
         level: info
       - name: org.springframework.web

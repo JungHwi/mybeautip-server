@@ -17,46 +17,46 @@ import java.util.Date;
 @Entity
 @Table(name = "stores")
 public class Store extends ModifiedDateAuditable {
-  @Id
-  private Integer id;
+    @Id
+    private Integer id;
 
-  @Column(nullable = false)
-  private String name;
+    @Column(nullable = false)
+    private String name;
 
-  @Column
-  private String description;
+    @Column
+    private String description;
 
-  @Column
-  private String centerPhone;
-  
-  @Column
-  private String imageUrl;
+    @Column
+    private String centerPhone;
 
-  @Column
-  private String thumbnailUrl;
+    @Column
+    private String imageUrl;
 
-  @Column
-  private String refundUrl;
+    @Column
+    private String thumbnailUrl;
 
-  @Column
-  private String asUrl;
+    @Column
+    private String refundUrl;
 
-  @Column
-  private String deliveryInfo;
+    @Column
+    private String asUrl;
 
-  @Column
-  private String cancelInfo;
+    @Column
+    private String deliveryInfo;
 
-  @Column(nullable = false)
-  private int likeCount;
+    @Column
+    private String cancelInfo;
 
-  @Column(nullable = false)
-  private int goodsCount;
+    @Column(nullable = false)
+    private int likeCount;
 
-  @Column
-  private Date deletedAt;
+    @Column(nullable = false)
+    private int goodsCount;
 
-  public Store(Integer scmNo) {
-    this.setId(scmNo);
-  }
+    @Column
+    private Date deletedAt;
+
+    public Store(Integer scmNo) {
+        this.setId(scmNo);
+    }
 }

@@ -1,33 +1,32 @@
 package com.jocoos.mybeautip.admin;
 
-import java.util.Date;
-
-import org.springframework.data.rest.core.config.Projection;
-
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendation;
 import com.jocoos.mybeautip.tag.Tag;
+import org.springframework.data.rest.core.config.Projection;
+
+import java.util.Date;
 
 @Projection(name = "keyword_details", types = KeywordRecommendation.class)
 public interface KeywordExcerpt {
 
-  Long getId();
+    Long getId();
 
-  int getCategory();
+    int getCategory();
 
-  Member getMember();
+    Member getMember();
 
-  Tag getTag();
+    Tag getTag();
 
-  int getSeq();
+    int getSeq();
 
-  Date getCreatedAt();
+    Date getCreatedAt();
 
-  Date getModifiedAt();
+    Date getModifiedAt();
 
-  Date getStartedAt();
+    Date getStartedAt();
 
-  Date getEndedAt();
+    Date getEndedAt();
 
-  Member getCreatedBy();
+    Member getCreatedBy();
 }

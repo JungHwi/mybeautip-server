@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.member.MemberService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -11,27 +11,27 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/1/words", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WordController {
 
-  
-  private final MemberService memberService;
 
-  public WordController(MemberService memberService) {
-    this.memberService = memberService;
-  }
+    private final LegacyMemberService legacyMemberService;
 
-  @GetMapping
-  public void isValidParams(@RequestParam(required = false) String username,
-                            @RequestParam(required = false) String email,
-                            @RequestHeader(value="Accept-Language", defaultValue = "ko") String lang) {
-    if (username == null && email == null) {
-      throw new BadRequestException("invalid_query_string");
+    public WordController(LegacyMemberService legacyMemberService) {
+        this.legacyMemberService = legacyMemberService;
     }
-    
-    if (email != null) {
-      memberService.checkEmailValidation(email, lang);
+
+    @GetMapping
+    public void isValidParams(@RequestParam(required = false) String username,
+                              @RequestParam(required = false) String email,
+                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        if (username == null && email == null) {
+            throw new BadRequestException("invalid_query_string");
+        }
+
+        if (email != null) {
+            legacyMemberService.checkEmailValidation(email, lang);
+        }
+
+        if (username != null) {
+            legacyMemberService.checkUsernameValidation(username, lang);
+        }
     }
-  
-    if (username != null) {
-      memberService.checkUsernameValidation(username, lang);
-    }
-  }
 }

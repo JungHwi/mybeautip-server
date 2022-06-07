@@ -7,6 +7,9 @@ import java.io.IOException;
 
 public interface StorageService {
 
-  String upload(MultipartFile file, String key) throws IOException;
-  Resource getResource(String key);
+    String upload(MultipartFile file, String key) throws IOException;
+
+    Resource getResource(String key);
+
+    void delete(String key);
 }

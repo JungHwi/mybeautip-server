@@ -8,13 +8,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SearchHistoryRepository extends JpaRepository<SearchHistory, Long> {
-  Optional<SearchHistory> findByKeywordAndCategoryAndCreatedBy(String keyword, int category, Member createdBy);
-  
-  List<SearchHistory> findByCreatedBy(Member createdBy, Pageable pageable);
-  
-  List<SearchHistory> findByCreatedByAndKeywordStartingWith(Member member, String keyword, Pageable pageable);
-  List<SearchHistory> findByCreatedByAndKeywordContaining(Member member, String keyword, Pageable pageable);
-  
-  List<SearchHistory> findByKeywordStartingWith(String keyword, Pageable pageable);
-  List<SearchHistory> findByKeywordContaining(String keyword, Pageable pageable);
+    Optional<SearchHistory> findByKeywordAndCategoryAndCreatedBy(String keyword, int category, Member createdBy);
+
+    List<SearchHistory> findByCreatedBy(Member createdBy, Pageable pageable);
+
+    List<SearchHistory> findByCreatedByAndKeywordStartingWith(Member member, String keyword, Pageable pageable);
+
+    List<SearchHistory> findByCreatedByAndKeywordContaining(Member member, String keyword, Pageable pageable);
+
+    List<SearchHistory> findByKeywordStartingWith(String keyword, Pageable pageable);
+
+    List<SearchHistory> findByKeywordContaining(String keyword, Pageable pageable);
 }

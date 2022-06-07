@@ -19,11 +19,9 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class ScheduleService {
-    private static final String SCHEDULE_ITEM_NOT_FOUND = "schedule.item_not_found";
-
     public static final String DIRECTION_PREV = "prev";
     public static final String DIRECTION_NEXT = "next";
-
+    private static final String SCHEDULE_ITEM_NOT_FOUND = "schedule.item_not_found";
     private final MessageService messageService;
     private final SlackService slackService;
     private final ScheduleRepository scheduleRepository;
@@ -61,10 +59,10 @@ public class ScheduleService {
 
         Page<Schedule> schedules;
         if (DIRECTION_PREV.equals(direction)) {
-            PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "startedAt"));
+            PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "startedAt"));
             schedules = scheduleRepository.findByStartedAtBeforeAndDeletedAtIsNull(startCursor, pageRequest);
         } else {
-            PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.ASC, "startedAt"));
+            PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "startedAt"));
             schedules = scheduleRepository.findByStartedAtAfterAndDeletedAtIsNull(startCursor, pageRequest);
         }
         return schedules;
@@ -77,7 +75,7 @@ public class ScheduleService {
         } else {
             startCursor = getFutureDate();
         }
-        PageRequest pageRequest = PageRequest.of(0, count, new Sort(Sort.Direction.DESC, "startedAt"));
+        PageRequest pageRequest = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "startedAt"));
         return scheduleRepository
                 .findByCreatedByIdAndStartedAtBeforeAndDeletedAtIsNull(memberId, startCursor, pageRequest);
     }
@@ -103,7 +101,7 @@ public class ScheduleService {
                 .orElseThrow(() -> new NotFoundException("schedule_item_not_found",
                         messageService.getMessage(SCHEDULE_ITEM_NOT_FOUND, lang)));
 
-        slackService.sendForUpadtingSchedule(schedule, request);
+        slackService.sendForUpdatingSchedule(schedule, request);
 
         if (request.getTitle() != null) {
             schedule.setTitle(request.getTitle());

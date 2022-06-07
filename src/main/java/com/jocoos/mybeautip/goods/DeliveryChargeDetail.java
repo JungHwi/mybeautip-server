@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.goods;
 
-import javax.persistence.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor
@@ -13,19 +13,19 @@ import lombok.NoArgsConstructor;
 @Table(name = "delivery_charge_details")
 public class DeliveryChargeDetail {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-  @Column(nullable = false)
-  private Integer deliveryChargeId;
+    @Column(nullable = false)
+    private Integer deliveryChargeId;
 
-  @Column(nullable = false)
-  private Integer unitStart;
+    @Column(nullable = false)
+    private Integer unitStart;
 
-  @Column(nullable = false)
-  private Integer unitEnd;
+    @Column(nullable = false)
+    private Integer unitEnd;
 
-  @Column(nullable = false)
-  private Integer price;
+    @Column(nullable = false)
+    private Integer price;
 }

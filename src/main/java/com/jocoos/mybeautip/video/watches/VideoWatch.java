@@ -17,34 +17,34 @@ import java.util.Date;
 @Entity
 @Table(name = "video_watches")
 public class VideoWatch extends MemberAuditable {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "video_id")
-  private Video video;
+    @ManyToOne
+    @JoinColumn(name = "video_id")
+    private Video video;
 
-  // username is used for guest
-  // createdBy is used for member
-  @Column
-  private String username;
+    // username is used for guest
+    // createdBy is used for member
+    @Column
+    private String username;
 
-  @Column
-  private Boolean isGuest = false;
+    @Column
+    private Boolean isGuest = false;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
 
-  public VideoWatch(Video video, Member member) {
-    this.video = video;
-    this.createdBy = member;
-  }
+    public VideoWatch(Video video, Member member) {
+        this.video = video;
+        this.createdBy = member;
+    }
 
-  public VideoWatch(Video video, String guestUsername) {
-    this.video = video;
-    this.username = guestUsername;
-    this.isGuest = true;
-  }
+    public VideoWatch(Video video, String guestUsername) {
+        this.video = video;
+        this.username = guestUsername;
+        this.isGuest = true;
+    }
 }

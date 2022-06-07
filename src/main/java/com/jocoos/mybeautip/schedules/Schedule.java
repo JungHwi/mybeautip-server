@@ -1,16 +1,14 @@
 package com.jocoos.mybeautip.schedules;
 
-import javax.persistence.*;
-import java.util.Date;
-
-import org.springframework.data.annotation.LastModifiedDate;
-
+import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.member.Member;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import com.jocoos.mybeautip.member.Member;
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data
@@ -19,32 +17,28 @@ import com.jocoos.mybeautip.member.Member;
 @Table(name = "schedules")
 public class Schedule extends CreatedDateAuditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    protected Member createdBy;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column
+    private String title;
+    @Column
+    private String thumbnailUrl;
+    @Column
+    private Date startedAt;
 
-  @Column
-  private String title;
+    @LastModifiedDate
+    private Date modifiedAt;
 
-  @Column
-  private String thumbnailUrl;
+    @Column
+    private Date deletedAt;
 
-  @ManyToOne
-  @JoinColumn(name = "created_by")
-  protected Member createdBy;
+    @Column
+    private String instantTitle;
 
-  @Column
-  private Date startedAt;
-
-  @LastModifiedDate
-  private Date modifiedAt;
-
-  @Column
-  private Date deletedAt;
-
-  @Column
-  private String instantTitle;
-
-  @Column
-  private String instantMessage;
+    @Column
+    private String instantMessage;
 }

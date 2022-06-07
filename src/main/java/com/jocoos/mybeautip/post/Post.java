@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.post;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.banner.Banner;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -20,100 +19,103 @@ import java.util.Set;
 @Table(name = "posts")
 public class Post extends MemberAuditable {
 
-  public static final int CATEGORY_TREND = 1;
-  public static final int CATEGORY_CARDNEWS = 2;
-  public static final int CATEGORY_EVENT = 3;
-  public static final int CATEGORY_NOTICE = 4;
-  public static final int CATEGORY_MOTD = 5;
-  public static final int CATEGORY_CURATION = 6;
-  
+    public static final int CATEGORY_TREND = 1;
+    public static final int CATEGORY_CARDNEWS = 2;
+    public static final int CATEGORY_EVENT = 3;
+    public static final int CATEGORY_NOTICE = 4;
+    public static final int CATEGORY_MOTD = 5;
+    public static final int CATEGORY_CURATION = 6;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
-  @Column(nullable = false)
-  private String title;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private String description;
+    @Column(nullable = false)
+    private String title;
 
-  @Column(nullable = false)
-  private String thumbnailUrl;
+    @Column(nullable = false)
+    private String description;
 
-  /**
-   * 1: trend, 2: card news, 3: event, 4: notices, 5: MOTD, 6. curation
-   */
-  @Column(nullable = false)
-  private int category;
+    @Column(nullable = false)
+    private String thumbnailUrl;
 
-  /**
-   * Show post to users whether or not
-   */
-  @Column(nullable = false)
-  private boolean opened;
+    /**
+     * 1: trend, 2: card news, 3: event, 4: notices, 5: MOTD, 6. curation
+     */
+    @Column(nullable = false)
+    private int category;
 
-  @Column
-  private Date startedAt;
+    @Column
+    private int labelId;
 
-  @Column
-  private Date endedAt;
+    @Column(nullable = false)
+    private boolean opened;
 
-  /**
-   * Event progress
-   * 0: default(no event), 1: 진행중 2: 선정중 3: 발표 4:종료
-   */
-  @Column(nullable = false)
-  private int progress;
+    @Column
+    private Date startedAt;
 
-  @Column(nullable = false)
-  private int viewCount;
+    @Column
+    private Date endedAt;
 
-  @Column(nullable = false)
-  private int likeCount;
+    /**
+     * Event progress
+     * 0: default(no event), 1: 진행중 2: 선정중 3: 발표 4:종료
+     */
+    @Column(nullable = false)
+    private int progress;
 
-  @Column(nullable = false)
-  private int commentCount;
+    @Column(nullable = false)
+    private int viewCount;
 
-  @OneToOne(mappedBy = "post")
-  private Banner banner;
+    @Column(nullable = false)
+    private int likeCount;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
-     name = "post_contents",
-     joinColumns = @JoinColumn(name = "post_id")
-  )
-  @AttributeOverrides({
-     @AttributeOverride(name = "category", column = @Column(name = "category")),
-     @AttributeOverride(name = "content", column = @Column(name = "content"))
-  })
-  @OrderBy("seq")
-  private Set<PostContent> contents;
+    @Column(nullable = false)
+    private int commentCount;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
-     name = "post_winners",
-     joinColumns = @JoinColumn(name = "post_id")
-  )
-  @Column(name = "member_id")
-  private Set<Long> winners;
+    @Column(nullable = false)
+    private int reportCount;
 
-  @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
-     name = "post_goods",
-     joinColumns = @JoinColumn(name = "post_id")
-  )
-  @OrderColumn(name = "seq")
-  @Column(name = "goods_no")
-  private List<String> goods;
-  
-  @Column
-  private String tagInfo;
+    @OneToOne(mappedBy = "post")
+    private Banner banner;
 
-  @Column
-  @LastModifiedDate
-  private Date modifiedAt;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "post_contents",
+            joinColumns = @JoinColumn(name = "post_id")
+    )
+    @AttributeOverrides({
+            @AttributeOverride(name = "category", column = @Column(name = "category")),
+            @AttributeOverride(name = "content", column = @Column(name = "content"))
+    })
+    @OrderBy("seq")
+    private Set<PostContent> contents;
 
-  @Column
-  private Date deletedAt;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "post_winners",
+            joinColumns = @JoinColumn(name = "post_id")
+    )
+    @Column(name = "member_id")
+    private Set<Long> winners;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "post_goods",
+            joinColumns = @JoinColumn(name = "post_id")
+    )
+    @OrderColumn(name = "seq")
+    @Column(name = "goods_no")
+    private List<String> goods;
+
+    @Column
+    private String tagInfo;
+
+    @Column
+    @LastModifiedDate
+    private Date modifiedAt;
+
+    @Column
+    private Date deletedAt;
 }

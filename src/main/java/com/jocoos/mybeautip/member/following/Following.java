@@ -1,15 +1,13 @@
 package com.jocoos.mybeautip.member.following;
 
-import javax.persistence.*;
-import java.util.Date;
-
+import com.jocoos.mybeautip.member.Member;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import com.jocoos.mybeautip.member.Member;
+import javax.persistence.*;
+import java.util.Date;
 
 @NoArgsConstructor
 @Data
@@ -17,24 +15,21 @@ import com.jocoos.mybeautip.member.Member;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "member_followings")
 public class Following {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Column
+    @CreatedDate
+    public Date createdAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne
+    @JoinColumn(name = "me")
+    private Member memberMe;
+    @ManyToOne
+    @JoinColumn(name = "you")
+    private Member memberYou;
 
-  @ManyToOne
-  @JoinColumn(name = "me")
-  private Member memberMe;
-
-  @ManyToOne
-  @JoinColumn(name = "you")
-  private Member memberYou;
-
-  @Column
-  @CreatedDate
-  public Date createdAt;
-
-  public Following(Member memberMe, Member memberYou) {
-    this.memberMe = memberMe;
-    this.memberYou = memberYou;
-  }
+    public Following(Member memberMe, Member memberYou) {
+        this.memberMe = memberMe;
+        this.memberYou = memberYou;
+    }
 }

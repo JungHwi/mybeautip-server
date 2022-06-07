@@ -1,9 +1,13 @@
 package com.jocoos.mybeautip.member;
 
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface FacebookMemberRepository extends JpaRepository<FacebookMember, String> {
-  Optional<FacebookMember> findByMemberId(Long memberId);
+    boolean existsByFacebookId(String facebookId);
+
+    FacebookMember getByFacebookId(String facebookId);
+
+    Optional<FacebookMember> findByMemberId(Long memberId);
 }
