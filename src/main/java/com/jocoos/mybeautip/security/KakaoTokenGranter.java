@@ -1,11 +1,9 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.exception.AuthenticationDormantMemberException;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
-import com.jocoos.mybeautip.member.KakaoMemberRepository;
-import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,9 +48,20 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
             throw new AuthenticationException("The kakao ID must be less or equals to 30");
         }
 
-        return kakaoMemberRepository.findById(kakaoId)
-                .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
-                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such kakao member. kakao social id - " + kakaoId));
+        KakaoMember kakaoMember = kakaoMemberRepository.findById(kakaoId)
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such kakao member. kakao id - " + kakaoId));
+
+        Member member = memberRepository.findById(kakaoMember.getMemberId())
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such member. member id - " + kakaoMember.getMemberId()));
+
+        switch (member.getStatus()) {
+            case ACTIVE:
+                return generateToken(member, client, tokenRequest);
+            case DORMANT:
+                throw new AuthenticationDormantMemberException("Dormant Member. member id - " + kakaoMember.getMemberId());
+            default:
+                throw new AuthenticationMemberNotFoundException("No such member. member id - " + kakaoMember.getMemberId());
+        }
     }
 
     private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@RequestMapping("/test/api/")
+@RequestMapping("/api/")
 @RestController
 @RequiredArgsConstructor
 public class SignupController {
