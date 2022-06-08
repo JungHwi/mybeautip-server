@@ -33,5 +33,6 @@ public class Oauth2Config {
         private String authorizationGrantType;
         private String tokenMethod;
         private String fields;
+        private String redirectUri;
     }
 }
