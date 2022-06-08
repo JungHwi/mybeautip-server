@@ -21,3 +21,4 @@ spring:
             client-id: 448301395614533
             client-secret: 8da721bd036785894dda7b8f4963d211
             fields: id,email,name,picture
+            redirect-uri: https://m-dev.mybeautip.com/oauth/facebook
