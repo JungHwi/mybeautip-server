@@ -1,11 +1,9 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.exception.AuthenticationDormantMemberException;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
-import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.NaverMemberRepository;
+import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -54,9 +52,20 @@ public class NaverTokenGranter extends AbstractTokenGranter {
             throw new AuthenticationException("The naver ID must be less or equals to 30");
         }
 
-        return naverMemberRepository.findById(naverId)
-                .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
-                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such naver member. naver social id - " + naverId));
+        NaverMember naverMember = naverMemberRepository.findById(naverId)
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such naver member. naver id - " + naverId));
+
+        Member member = memberRepository.findById(naverMember.getMemberId())
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such member. member id - " + naverMember.getMemberId()));
+
+        switch (member.getStatus()) {
+            case ACTIVE:
+                return generateToken(member, client, tokenRequest);
+            case DORMANT:
+                throw new AuthenticationDormantMemberException("Dormant Member. member id - " + naverMember.getMemberId());
+            default:
+                throw new AuthenticationMemberNotFoundException("No such member. member id - " + naverMember.getMemberId());
+        }
     }
 
     private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
