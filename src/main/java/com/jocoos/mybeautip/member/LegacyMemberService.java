@@ -283,8 +283,8 @@ public class LegacyMemberService {
                     return member;
                 }
             }
+            slackService.duplicateUsername(member.getUsername());
         }
-        slackService.duplicateUsername(member.getId());
         return member;
     }
 

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member.address;
 
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.DeliveryChargeArea;
 import com.jocoos.mybeautip.goods.DeliveryChargeAreaRepository;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+
+import static com.jocoos.mybeautip.global.constant.RegexConstants.regexForPhoneNumber;
 
 @Slf4j
 @Service
@@ -63,6 +66,22 @@ public class AddressService {
         address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
         log.debug("address: {}", address);
         return addressRepository.save(address);
+    }
+
+    public boolean validPhoneNumber(String phone) {
+        phone = phone.trim()
+                .replace("-", "")
+                .replace(" ", "");
+
+        if (!phone.matches(regexForPhoneNumber)) {
+            throw new BadRequestException("wrong_format_phone");
+        }
+
+        if (addressRepository.existsByPhone(phone)) {
+            throw new BadRequestException("duplicate_phone");
+        }
+
+        return true;
     }
 
     @Transactional

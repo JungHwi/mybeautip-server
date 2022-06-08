@@ -57,6 +57,13 @@ public class AddressController {
         return new ResponseEntity<>(addressInfos, HttpStatus.OK);
     }
 
+    @GetMapping("/phone/check")
+    public ResponseEntity checkPhoneNumber(@RequestParam("phone_number") String phoneNumber) {
+        addressService.validPhoneNumber(phoneNumber);
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<AddressInfo> createAddress(@RequestBody CreateAddressRequest request,
                                                      @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
