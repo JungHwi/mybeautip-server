@@ -49,6 +49,7 @@ public class Oauth2Client {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(providerConfig.getTokenUri())
                 .queryParam("grant_type", providerConfig.getAuthorizationGrantType())
                 .queryParam("client_id", providerConfig.getClientId())
+                .queryParam("redirect_uri", providerConfig.getRedirectUri())
                 .queryParam("code", code);
 
         if (!StringUtils.isBlank(providerConfig.getClientSecret())) {

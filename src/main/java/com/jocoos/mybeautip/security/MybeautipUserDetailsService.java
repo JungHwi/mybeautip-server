@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.security;
 
-import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class MybeautipUserDetailsService implements UserDetailsService {
                         }
                     }
                 })
-                .orElseThrow(() -> new AuthenticationException("username not found"));
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such member. id - " + username));
     }
 
     private MyBeautipUserDetails createGuestUserDetails(String username) {

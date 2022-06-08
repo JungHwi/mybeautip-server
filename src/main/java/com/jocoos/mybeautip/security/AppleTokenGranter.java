@@ -1,11 +1,9 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.exception.AuthenticationDormantMemberException;
 import com.jocoos.mybeautip.exception.AuthenticationException;
 import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
-import com.jocoos.mybeautip.member.AppleMemberRepository;
-import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,9 +45,20 @@ public class AppleTokenGranter extends AbstractTokenGranter {
             throw new AuthenticationException("Apple ID is required");
         }
 
-        return appleMemberRepository.findById(appleId)
-                .map(m -> generateToken(memberRepository.getById(m.getMemberId()), client, tokenRequest))
-                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such apple user. apple id - " + appleId));
+        AppleMember appleMember = appleMemberRepository.findById(appleId)
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such apple member. apple id - " + appleId));
+
+        Member member = memberRepository.findById(appleMember.getMemberId())
+                .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such member. member id - " + appleMember.getMemberId()));
+
+        switch (member.getStatus()) {
+            case ACTIVE:
+                return generateToken(member, client, tokenRequest);
+            case DORMANT:
+                throw new AuthenticationDormantMemberException("Dormant Member. member id - " + appleMember.getMemberId());
+            default:
+                throw new AuthenticationMemberNotFoundException("No such member. member id - " + appleMember.getMemberId());
+        }
     }
 
     private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
