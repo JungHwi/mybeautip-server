@@ -67,6 +67,8 @@ public class MemberSignupService {
         member.setTotalVideoCount(0);
         member.setDeletedAt(new Date());
 
+        memberRepository.save(member);
+
         memberLeaveLogRepository.save(new MemberLeaveLog(member, reason));
     }
 
