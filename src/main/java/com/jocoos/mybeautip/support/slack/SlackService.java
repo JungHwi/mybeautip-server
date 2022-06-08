@@ -340,10 +340,9 @@ public class SlackService {
         send(message);
     }
 
-    public void duplicateUsername(Long id) {
+    public void duplicateUsername(String username) {
         String message = String.format("*Username 중복 발생*" +
-                        "```Member Id: %d```",
-                id);
+                        "```Member Id: %s```",  username);
         send(message);
     }
 
