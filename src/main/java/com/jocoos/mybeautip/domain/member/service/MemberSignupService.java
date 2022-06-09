@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.domain.member.service;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
-import com.jocoos.mybeautip.domain.member.converter.SocialMemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.exception.BadRequestException;
@@ -17,15 +16,18 @@ import com.jocoos.mybeautip.security.AccessTokenResponse;
 import com.jocoos.mybeautip.security.JwtTokenProvider;
 import com.jocoos.mybeautip.support.DateUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_URL;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.REJOIN_AVAILABLE_DAYS;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberSignupService {
@@ -39,7 +41,9 @@ public class MemberSignupService {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberConverter memberConverter;
-    private final SocialMemberConverter socialMemberConverter;
+
+    @Value("${mybeautip.service.member.rejoin-available-second}")
+    private long REJOIN_AVAILABLE_SECOND;
 
     @Transactional
     public MemberEntireInfo signup(SignupRequest request) {
@@ -90,8 +94,14 @@ public class MemberSignupService {
             case DORMANT:
                 throw new BadRequestException("dormant_member");
             case WITHDRAWAL:
-                LocalDate availableRejoin = DateUtils.toLocalDate(member.getDeletedAt()).plusDays(REJOIN_AVAILABLE_DAYS);
-                if (availableRejoin.isAfter(LocalDate.now())) {
+
+                LocalDateTime availableRejoin = DateUtils.toLocalDateTime(member.getDeletedAt(), ZoneId.of("UTC")).plusSeconds(REJOIN_AVAILABLE_SECOND);
+                log.debug("===== Breeze =====");
+                log.debug("member.getDeletedAt > " + member.getDeletedAt());
+                log.debug("REJOIN_AVAILABLE_SECOND > " + REJOIN_AVAILABLE_SECOND);
+                log.debug("availableRejoin > " + availableRejoin);
+                log.debug("LocalDateTime.now() > " + LocalDateTime.now());
+                if (availableRejoin.isAfter(LocalDateTime.now())) {
                     throw new BadRequestException("not_yet_rejoin");
                 }
         }

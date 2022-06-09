@@ -39,11 +39,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -206,12 +206,20 @@ public class LegacyMemberService {
         }
     }
 
-    public void checkUsernameValidation(@RequestParam String username, String lang) {
+    public void checkUsernameValidation(String username, String lang) {
+        checkUsernameValidation(0L, username, lang);
+    }
+
+    public void checkUsernameValidation(Long userId, String username, String lang) {
         if (!(username.matches(RegexConstants.regexForUsername))) {
             throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
         }
 
-        if (memberRepository.existsByUsername(username)) {
+        List<Member> otherMembers = memberRepository.findByUsername(username).stream()
+                .filter(i -> i.getId() != userId)
+                .collect(Collectors.toList());
+
+        if (!otherMembers.isEmpty()) {
             throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
         }
 
@@ -274,7 +282,7 @@ public class LegacyMemberService {
     public Member adjustUserName(Member member) {
         String username = member.getUsername();
         try {
-            checkUsernameValidation(username, Locale.KOREAN.getLanguage());
+            checkUsernameValidation(member.getId(), username, Locale.KOREAN.getLanguage());
         } catch (BadRequestException ex) {
             for (int retry = 0; retry < 5; retry++) {
                 username = RandomUtils.generateUsername();

@@ -11,6 +11,9 @@ spring:
     validation-query: SELECT 1
 
 mybeautip:
+  service:
+    member:
+      rejoin-available-second: 30
   security:
     access-token-validity-seconds: 604800     # 7 hours
     refresh-token-validity-seconds: 1814400    # 21 days

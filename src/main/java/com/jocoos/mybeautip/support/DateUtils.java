@@ -9,6 +9,7 @@ import java.util.Date;
 
 public final class DateUtils {
     public static ZoneId ZONE_SEOUL = ZoneId.of("Asia/Seoul");
+    public static ZoneId UTC = ZoneId.of("UTC");
 
     public static Date toDate(String longValue) {
         return toDate(longValue, ZoneId.of("GMT+9"));
