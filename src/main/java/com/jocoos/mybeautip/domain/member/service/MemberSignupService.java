@@ -96,11 +96,6 @@ public class MemberSignupService {
             case WITHDRAWAL:
 
                 LocalDateTime availableRejoin = DateUtils.toLocalDateTime(member.getDeletedAt(), ZoneId.of("UTC")).plusSeconds(REJOIN_AVAILABLE_SECOND);
-                log.debug("===== Breeze =====");
-                log.debug("member.getDeletedAt > " + member.getDeletedAt());
-                log.debug("REJOIN_AVAILABLE_SECOND > " + REJOIN_AVAILABLE_SECOND);
-                log.debug("availableRejoin > " + availableRejoin);
-                log.debug("LocalDateTime.now() > " + LocalDateTime.now());
                 if (availableRejoin.isAfter(LocalDateTime.now())) {
                     throw new BadRequestException("not_yet_rejoin");
                 }
