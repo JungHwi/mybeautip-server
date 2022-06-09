@@ -57,19 +57,13 @@ public class SocialLoginService {
 
         switch (socialMemberRequest.getProvider()) {
             case KakaoLoginService.PROVIDER_TYPE:
-                memberId = kakaoMemberRepository.findById(socialMemberRequest.getId())
-                        .map(s -> s.getMemberId())
-                        .orElseThrow(() -> new MemberNotFoundException("No such kakao member. kakao id - " + socialMemberRequest.getId()));
+                memberId = getMemberIdForKakao(socialMemberRequest.getId());
                 break;
             case NaverLoginService.PROVIDER_TYPE:
-                memberId = naverMemberRepository.findById(socialMemberRequest.getId())
-                        .map(s -> s.getMemberId())
-                        .orElseThrow(() -> new MemberNotFoundException("No such naver member. naver id - " + socialMemberRequest.getId()));
+                memberId = getMemberIdForNaver(socialMemberRequest.getId());
                 break;
             case FacebookLoginService.PROVIDER_TYPE:
-                memberId = facebookMemberRepository.findById(socialMemberRequest.getId())
-                        .map(s -> s.getMemberId())
-                        .orElseThrow(() -> new MemberNotFoundException("No such facebook member. facebook id - " + socialMemberRequest.getId()));
+                memberId = getMemberIdForFacebook(socialMemberRequest.getId());
                 break;
             default:
                 throw new MybeautipRuntimeException("Unsupported provider type");
@@ -79,5 +73,56 @@ public class SocialLoginService {
                 .orElse(socialMemberRequest.toMember());
 
         return member;
+    }
+
+    private long getMemberIdForKakao(String kakaoId) {
+        KakaoMember kakaoMember = kakaoMemberRepository.findById(kakaoId)
+                .orElseThrow(() -> new MemberNotFoundException("No such kakao member. kakao id - " + kakaoId));
+
+        Member member = memberRepository.findById(kakaoMember.getMemberId())
+                .orElseThrow(() -> new MemberNotFoundException("No such member. member id - " + kakaoMember.getMemberId()));
+
+        switch (member.getStatus()) {
+            case ACTIVE:
+                return member.getId();
+            case DORMANT:
+                throw new MemberNotFoundException("Dormant Member. member id - " + kakaoMember.getMemberId());
+            default:
+                throw new MemberNotFoundException("No such member. member id - " + kakaoMember.getMemberId());
+        }
+    }
+
+    private long getMemberIdForNaver(String naverId) {
+        NaverMember naverMember = naverMemberRepository.findById(naverId)
+                .orElseThrow(() -> new MemberNotFoundException("No such naver member. naver id - " + naverId));
+
+        Member member = memberRepository.findById(naverMember.getMemberId())
+                .orElseThrow(() -> new MemberNotFoundException("No such member. member id - " + naverMember.getMemberId()));
+
+        switch (member.getStatus()) {
+            case ACTIVE:
+                return member.getId();
+            case DORMANT:
+                throw new MemberNotFoundException("Dormant Member. member id - " + naverMember.getMemberId());
+            default:
+                throw new MemberNotFoundException("No such member. member id - " + naverMember.getMemberId());
+        }
+    }
+
+    private long getMemberIdForFacebook(String facebookId) {
+        FacebookMember facebookMember = facebookMemberRepository.findById(facebookId)
+                .orElseThrow(() -> new MemberNotFoundException("No such facebook member. facebook id - " + facebookId));
+
+        Member member = memberRepository.findById(facebookMember.getMemberId())
+                .orElseThrow(() -> new MemberNotFoundException("No such member. member id - " + facebookMember.getMemberId()));
+
+        switch (member.getStatus()) {
+            case ACTIVE:
+                return member.getId();
+            case DORMANT:
+                throw new MemberNotFoundException("Dormant Member. member id - " + facebookMember.getMemberId());
+            default:
+                throw new MemberNotFoundException("No such member. member id - " + facebookMember.getMemberId());
+        }
     }
 }
