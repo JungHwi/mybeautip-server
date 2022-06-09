@@ -166,7 +166,7 @@ public class LegacyMemberController {
             }
         }
 
-        legacyMemberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
+        legacyMemberService.checkUsernameValidation(member.getId(), updateMemberRequest.getUsername(), lang);
 
         member = legacyMemberService.updateMember(updateMemberRequest, member);
         return new ResponseEntity<>(legacyMemberService.getMemberInfo(member), HttpStatus.OK);

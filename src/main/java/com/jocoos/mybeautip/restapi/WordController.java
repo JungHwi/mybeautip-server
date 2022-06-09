@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/words", produces = MediaType.APPLICATION_JSON_VALUE)
+@Deprecated
 public class WordController {
 
 
