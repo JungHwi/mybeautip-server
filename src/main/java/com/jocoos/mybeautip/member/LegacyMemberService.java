@@ -166,7 +166,7 @@ public class LegacyMemberService {
                 .replace(" ", "");
 
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new BadRequestException("duplicate_phone");
+            throw new BadRequestException("duplicate_phone", "duplicate_phone");
         }
 
         return true;
