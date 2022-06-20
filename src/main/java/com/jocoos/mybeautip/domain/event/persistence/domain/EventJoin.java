@@ -30,7 +30,7 @@ public class EventJoin extends CreatedDateAuditable {
     private long eventId;
 
     @Column(name = "event_product_id")
-    private long eventProductId;
+    private Long eventProductId;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "event_id", insertable = false, updatable = false)
