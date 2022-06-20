@@ -15,7 +15,7 @@ spring:
             client-secret: S0Ss6qUwsP
             authorization-grant-type: authorization_code
           facebook:
-            token-uri: https://graph.facebook.com/v13.0/oauth/access_token
+            token-uri: https://graph.facebook.com/v14.0/oauth/access_token
             token-method: GET
             user-info-uri: https://graph.facebook.com/me
             client-id: 448301395614533

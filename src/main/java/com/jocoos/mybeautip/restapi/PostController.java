@@ -141,7 +141,7 @@ public class PostController {
             PostInfo info = new PostInfo(post, legacyMemberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
 
             if (me != null) {
-                postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
+                postLikeRepository.findByPostIdAndCreatedByIdAndStatus(post.getId(), me.getId(), PostLikeStatus.LIKE)
                         .ifPresent(like -> info.setLikeId(like.getId()));
 
                 Block block = blackList != null ? blackList.get(post.getCreatedBy().getId()) : null;

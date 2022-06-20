@@ -62,6 +62,8 @@ public class Oauth2Client {
 
         String uri = uriBuilder.toUriString();
         log.debug("{}", uri);
+
+
         ResponseEntity<AccessTokenResponse> response = restTemplate
                 .exchange(uri, HttpMethod.GET, entity, AccessTokenResponse.class);
 

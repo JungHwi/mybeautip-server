@@ -45,6 +45,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
+
 @Slf4j
 @Service
 public class LegacyMemberService {
@@ -166,7 +168,7 @@ public class LegacyMemberService {
                 .replace(" ", "");
 
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new BadRequestException("duplicate_phone");
+            throw new BadRequestException("duplicate_phone", "duplicate_phone");
         }
 
         return true;
@@ -248,7 +250,7 @@ public class LegacyMemberService {
 
     @Transactional
     public Member register(SignupRequest signupRequest) {
-        Member member = memberConverter.convertToMember(signupRequest);
+        Member member = new Member(signupRequest);
         member = adjustUniqueInfo(member);
         Member registeredMember = memberRepository.save(member);
 
@@ -331,6 +333,7 @@ public class LegacyMemberService {
     @Transactional
     public Member updateMember(LegacyMemberController.UpdateMemberRequest request, Member member) {
         boolean isFirstUpdate = !member.isVisible();
+        String originalAvatar = member.getAvatarUrl();
 
         if (request.getUsername() != null) {
             member.setUsername(request.getUsername());
@@ -349,6 +352,10 @@ public class LegacyMemberService {
                         followMember(finalMember, adminMember);
                         finalMember.setFollowingCount(1); // for response view
                     });
+        }
+
+        if (StringUtils.isNotBlank(originalAvatar) && !DEFAULT_AVATAR_URL.equals(originalAvatar)) {
+            deleteAvatar(originalAvatar);
         }
 
         return finalMember;
@@ -463,26 +470,6 @@ public class LegacyMemberService {
         memberDetailRepository.save(memberDetail);
     }
 
-    @Transactional
-    public String updateAvatar(long memberId, MultipartFile avatar) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("No such memberId - " + memberId));
-
-        String originalAvatar = member.getAvatarUrl();
-        String path = "";
-
-        try {
-            path = attachmentService.upload(avatar, PATH_AVATAR);
-        } catch (IOException ex) {
-            throw new MybeautipRuntimeException("Member avatar upload Error. id - " + memberId);
-        }
-
-        member.setAvatarUrl(path);
-        memberRepository.save(member);
-
-        deleteAvatar(originalAvatar);
-        return path;
-    }
 
     public String uploadAvatar(MultipartFile avatar) {
         String path = "";

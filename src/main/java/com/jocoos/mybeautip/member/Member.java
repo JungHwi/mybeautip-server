@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.member.vo.BirthdayAttributeConverter;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
@@ -143,7 +144,8 @@ public class Member {
         this.visible = false;
         this.revenueModifiedAt = null;
         this.pushable = true; // default true
-        this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
+        this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.REVENUE_RETURN);
+
         setTag();
     }
 
@@ -183,5 +185,22 @@ public class Member {
         this.phoneNumber = phoneNumber.trim()
                 .replace("-", "")
                 .replace(" ", "");
+    }
+
+    public Member usePoint(int point) {
+        if (this.point < point) {
+            throw new BadRequestException("not_enough_point", "Member has " + this.point + " point. This event need " + point + " point.");
+        }
+
+        this.point = this.point - point;
+        return this;
+    }
+
+    public Member earnPoint(int point) {
+        if (point <= 0) {
+            throw new BadRequestException("not_positive_point", "Points must be positive. earn point - " + point);
+        }
+        this.point = this.point + point;
+        return this;
     }
 }

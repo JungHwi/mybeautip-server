@@ -17,6 +17,7 @@ import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.support.RandomUtils;
+import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.video.Video;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,7 @@ public class VideoUploadNotificationService implements NotificationService<Video
     private final NotificationMessagePushConverter pushConverter;
 
     private final AppPushService pushService;
+    private final SlackService slackService;
 
     private final TemplateType templateType = TemplateType.VIDEO_UPLOAD;
 
@@ -54,13 +56,16 @@ public class VideoUploadNotificationService implements NotificationService<Video
             if (verify(video)) {
                 send(video);
             }
+            slackService.sendForVideo(video);
         } else {
             log.error("Must be Video. But this object is > " + result);
         }
     }
 
     private boolean verify(Video video) {
-        return "UPLOADED".equals(video.getType()) && "VOD".equals(video.getState());
+        return "UPLOADED".equals(video.getType())
+                && "VOD".equals(video.getState())
+                && "PUBLIC".equals(video.getVisibility());
     }
 
     @Override

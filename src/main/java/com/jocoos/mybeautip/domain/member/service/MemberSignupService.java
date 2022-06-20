@@ -90,19 +90,13 @@ public class MemberSignupService {
 
         switch (member.getStatus()) {
             case ACTIVE:
-                throw new BadRequestException("already_member");
+                throw new BadRequestException("already_member", "already_member");
             case DORMANT:
-                throw new BadRequestException("dormant_member");
+                throw new BadRequestException("dormant_member", "dormant_member");
             case WITHDRAWAL:
-
                 LocalDateTime availableRejoin = DateUtils.toLocalDateTime(member.getDeletedAt(), ZoneId.of("UTC")).plusSeconds(REJOIN_AVAILABLE_SECOND);
-                log.debug("===== Breeze =====");
-                log.debug("member.getDeletedAt > " + member.getDeletedAt());
-                log.debug("REJOIN_AVAILABLE_SECOND > " + REJOIN_AVAILABLE_SECOND);
-                log.debug("availableRejoin > " + availableRejoin);
-                log.debug("LocalDateTime.now() > " + LocalDateTime.now());
                 if (availableRejoin.isAfter(LocalDateTime.now())) {
-                    throw new BadRequestException("not_yet_rejoin");
+                    throw new BadRequestException("not_yet_rejoin", "not_yet_rejoin");
                 }
         }
     }
