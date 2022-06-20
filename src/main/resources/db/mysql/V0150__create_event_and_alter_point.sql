@@ -46,3 +46,5 @@ alter table member_point_details add column event_id bigint after order_id;
 # drop table event_product;
 # alter table member_points drop column event_id;
 # alter table member_point_details drop column event_id;
+#
+# delete from flyway_schema_history where version = '0150';
