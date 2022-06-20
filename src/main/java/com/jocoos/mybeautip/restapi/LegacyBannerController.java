@@ -24,15 +24,16 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/banners", produces = MediaType.APPLICATION_JSON_VALUE)
-public class BannerController {
+@Deprecated
+public class LegacyBannerController {
 
     private static final String BANNER_NOT_FOUND = "banner.not_found";
     private final MessageService messageService;
     private final BannerRepository bannerRepository;
     private final PostRepository postRepository;
 
-    public BannerController(MessageService messageService,
-                            BannerRepository bannerRepository, PostRepository postRepository) {
+    public LegacyBannerController(MessageService messageService,
+                                  BannerRepository bannerRepository, PostRepository postRepository) {
         this.messageService = messageService;
         this.bannerRepository = bannerRepository;
         this.postRepository = postRepository;

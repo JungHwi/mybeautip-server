@@ -94,7 +94,6 @@ public class MemberSignupService {
             case DORMANT:
                 throw new BadRequestException("dormant_member", "dormant_member");
             case WITHDRAWAL:
-
                 LocalDateTime availableRejoin = DateUtils.toLocalDateTime(member.getDeletedAt(), ZoneId.of("UTC")).plusSeconds(REJOIN_AVAILABLE_SECOND);
                 if (availableRejoin.isAfter(LocalDateTime.now())) {
                     throw new BadRequestException("not_yet_rejoin", "not_yet_rejoin");

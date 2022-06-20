@@ -65,6 +65,11 @@ public final class DateUtils {
         return toDate(localDateTime);
     }
 
+    public static Date addDay(int days) {
+        LocalDateTime localDateTime = LocalDateTime.now().plusDays(days);
+        return toDate(localDateTime);
+    }
+
     public static String toFormat(Date date) {
         return toFormat(date, "yyyy-MM-dd HH:mm:ss");
     }

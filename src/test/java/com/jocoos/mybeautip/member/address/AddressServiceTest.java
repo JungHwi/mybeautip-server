@@ -3,12 +3,10 @@ package com.jocoos.mybeautip.member.address;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
 class AddressServiceTest {
 
     @Autowired
@@ -17,6 +15,6 @@ class AddressServiceTest {
     @Test
     void validPhoneNumber() {
         assertTrue(addressService.validPhoneNumber("01045739365"));
-        assertThrows(BadRequestException.class, () -> addressService.validPhoneNumber("01211112222"));
+        assertThrows(BadRequestException.class, () -> addressService.validPhoneNumber("01045739365"));
     }
 }
