@@ -32,7 +32,7 @@ create table event_product (
                                type varchar(20) not null comment '이벤트 상품 구분',
                                name varchar(100) not null comment '상품명',
                                quantity int not null comment '수량',
-                               percentage decimal(5,2) not null default 100.00 comment '당첨 확률',
+                               price int comment '상품 가격',
                                image_url varchar(200) comment '상품 이미지 URL'
 ) character set utf8mb4 comment '이벤트 상품 정보';
 

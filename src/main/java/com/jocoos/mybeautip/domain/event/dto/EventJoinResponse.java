@@ -11,7 +11,4 @@ public class EventJoinResponse {
 
     private long result;
 
-    public EventJoinResponse() {
-        this.result = 0L;
-    }
 }

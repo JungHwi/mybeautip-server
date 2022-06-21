@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.domain.event.converter;
 
 import com.jocoos.mybeautip.domain.event.dto.EventJoinHistoryResponse;
+import com.jocoos.mybeautip.domain.event.dto.EventJoinResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
-import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
 import com.jocoos.mybeautip.exception.BadRequestException;
 import org.mapstruct.*;
 
@@ -11,6 +11,9 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface EventJoinConverter {
+
+    @Mapping(target = "result", source = "eventProductId")
+    EventJoinResponse convertsToJoin(EventJoin eventJoin);
 
     @Mappings({
             @Mapping(target = "title", source = "event.title"),
@@ -24,14 +27,13 @@ public interface EventJoinConverter {
     default void convertsToResponse(@MappingTarget EventJoinHistoryResponse eventJoinHistoryResponse, EventJoin eventJoin) {
         String description = "";
         Event event = eventJoin.getEvent();
-        EventProduct eventProduct = eventJoin.getEventProduct();
         switch (event.getType()) {
             case SIGNUP:
             case INVITE:
                 description = "적립 완료";
                 break;
             case ROULETTE:
-                description = eventProduct.getName();
+                description = eventJoin.getEventProduct().getName();
                 break;
             case JOIN:
                 switch (eventJoin.getStatus()) {
@@ -39,7 +41,7 @@ public interface EventJoinConverter {
                         description = "응모 완료";
                         break;
                     case WIN:
-                        description = eventProduct.getName();
+                        description = eventJoin.getEventProduct().getName();
                         break;
                 }
                 break;

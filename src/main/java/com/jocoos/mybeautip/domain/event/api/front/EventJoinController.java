@@ -24,6 +24,9 @@ public class EventJoinController {
 
     @PostMapping("/1/event/join/{eventId}")
     public EventJoinResponse joinEvent(@PathVariable long eventId) {
+        long memberId = legacyMemberService.currentMemberId();
+        service.join(eventId, memberId);
+
         return EventJoinResponse.builder()
                 .result(2)
                 .build();
