@@ -1,13 +1,13 @@
 package com.jocoos.mybeautip.domain.event.persistence.domain;
 
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
+import com.jocoos.mybeautip.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 
 @Getter
 @Builder
@@ -35,8 +35,8 @@ public class EventProduct {
     @Column(nullable = false)
     private int quantity;
 
-    @Column(precision = 5, scale = 2, nullable = false)
-    private BigDecimal percentage;
+    @Column()
+    private int price;
 
     @Column()
     private String imageUrl;
@@ -44,4 +44,14 @@ public class EventProduct {
     @ManyToOne()
     @JoinColumn(name = "event_id", insertable = false, updatable = false)
     private Event event;
+
+    public EventProduct winPrize() {
+        if (quantity <= 0) {
+            throw new BadRequestException("sold_out", this.name + " product sold out.");
+        }
+
+        this.quantity--;
+
+        return this;
+    }
 }

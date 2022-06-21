@@ -80,14 +80,14 @@ public class MemberPointService {
         Member member = memberRepository.findById(memberId)
                         .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + memberId));
 
-        member.earnPoint(eventProduct.getQuantity());
+        member.earnPoint(eventProduct.getPrice());
         memberRepository.save(member);
 
         Date expiryDate = DateUtils.addDay(EVENT_POINT_EXPIRATION_DAY);
         MemberPoint memberPoint = MemberPoint.builder()
                 .member(member)
                 .eventId(eventId)
-                .point(eventProduct.getQuantity())
+                .point(eventProduct.getPrice())
                 .state(STATE_EARNED_POINT)
                 .earnedAt(new Date())
                 .expiryAt(expiryDate)
@@ -101,7 +101,7 @@ public class MemberPointService {
                 .eventId(eventId)
                 .parentId(memberPoint.getId())
                 .memberPointId(memberPoint.getId())
-                .point(eventProduct.getQuantity())
+                .point(eventProduct.getPrice())
                 .state(STATE_EARNED_POINT)
                 .expiryAt(expiryDate)
                 .build();
@@ -109,11 +109,10 @@ public class MemberPointService {
         memberPointDetailRepository.save(memberPointDetail);
     }
 
-    public void usePoints(EventJoin eventJoin) {
-        Event event = eventJoin.getEvent();
-
-        Member member = memberRepository.findById(eventJoin.getMemberId())
-                .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + eventJoin.getMemberId()));
+    public void usePoints(Event event, Member member) {
+        if (event.getNeedPoint() <= 0) {
+            return;
+        }
 
         member.usePoint(event.getNeedPoint());
 
