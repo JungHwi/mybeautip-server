@@ -7,7 +7,7 @@ import com.jocoos.mybeautip.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -24,23 +24,23 @@ public abstract class EventTypeAbstractService implements EventTypeService {
         }
     }
 
-    private void validEventPeriod(LocalDateTime startAt,LocalDateTime endAt) {
+    private void validEventPeriod(ZonedDateTime startAt, ZonedDateTime endAt) {
         validEventStartDate(startAt);
         validEventEndDate(endAt);
     }
 
-    private void validEventStartDate(LocalDateTime startAt) {
-        if (!LocalDateTime.now().isAfter(startAt)) {
+    private void validEventStartDate(ZonedDateTime startAt) {
+        if (!ZonedDateTime.now().isAfter(startAt)) {
             throw new BadRequestException("not_started_event", "Event start " + startAt);
         }
     }
 
-    private void validEventEndDate(LocalDateTime endAt) {
+    private void validEventEndDate(ZonedDateTime endAt) {
         if (endAt == null){
             return;
         }
 
-        if (!LocalDateTime.now().isBefore(endAt)) {
+        if (!ZonedDateTime.now().isBefore(endAt)) {
             throw new BadRequestException("already_ended_event", "Event ended " + endAt);
         }
     }

@@ -5,8 +5,8 @@ import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.order.Order;
@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.global.constant.ErrorCodeConstant.MEMBER_NOT_FOUND;
 import static com.jocoos.mybeautip.global.constant.PointConstant.EVENT_POINT_EXPIRATION_DAY;
 import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_EARNED_POINT;
 import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
@@ -78,7 +79,7 @@ public class MemberPointService {
         long eventId = eventJoin.getEventId();
         long memberId = eventJoin.getMemberId();
         Member member = memberRepository.findById(memberId)
-                        .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + memberId));
+                        .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND, "No such member. id - " + memberId));
 
         member.earnPoint(eventProduct.getPrice());
         memberRepository.save(member);
@@ -265,8 +266,9 @@ public class MemberPointService {
             throw new BadRequestException("The point must be greater than 0");
         }
 
-        Member m = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException());
-        m.setPoint(m.getPoint() + point);
+        Member m = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND, "Not found Member. id - " + memberId));
+        m.earnPoint(point);
         memberRepository.save(m);
 
         boolean remind = false;

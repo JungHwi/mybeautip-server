@@ -8,4 +8,6 @@ public class MybeautipConstant {
 
     // String for Number
     public static final String MAX_LONG_STRING = "576460752303423487";
+
+    public static final int RESPONSE_CODE_OK = 0;
 }
