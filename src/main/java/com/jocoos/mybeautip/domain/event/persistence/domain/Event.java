@@ -7,9 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
@@ -33,6 +34,12 @@ public class Event extends ModifiedDateAuditable {
     @Enumerated(EnumType.STRING)
     private EventStatus status;
 
+    @Formula("case status " +
+            "when 'PROGRESS' then 0 " +
+            "when 'END' then 1 " +
+            "else 2 end")
+    private int statusSorting;
+
     @Column
     private Integer sorting;
 
@@ -49,10 +56,10 @@ public class Event extends ModifiedDateAuditable {
     private int needPoint;
 
     @Column(nullable = false)
-    private LocalDateTime startAt;
+    private ZonedDateTime startAt;
 
     @Column
-    private LocalDateTime endAt;
+    private ZonedDateTime endAt;
 
     @OneToMany(mappedBy = "event")
     private List<EventProduct> eventProductList;

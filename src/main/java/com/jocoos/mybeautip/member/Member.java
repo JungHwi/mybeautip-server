@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.member.vo.BirthdayAttributeConverter;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
@@ -19,6 +19,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
+
+import static com.jocoos.mybeautip.global.constant.ErrorCodeConstant.NOT_ENOUGH_POINT;
+import static com.jocoos.mybeautip.global.constant.ErrorCodeConstant.NOT_POSITIVE_POINT;
 
 
 @Data
@@ -189,7 +192,7 @@ public class Member {
 
     public Member usePoint(int point) {
         if (this.point < point) {
-            throw new BadRequestException("not_enough_point", "Member has " + this.point + " point. This event need " + point + " point.");
+            throw new BadRequestException(NOT_ENOUGH_POINT, "Member has " + this.point + " point. This event need " + point + " point.");
         }
 
         this.point = this.point - point;
@@ -198,7 +201,7 @@ public class Member {
 
     public Member earnPoint(int point) {
         if (point <= 0) {
-            throw new BadRequestException("not_positive_point", "Points must be positive. earn point - " + point);
+            throw new BadRequestException(NOT_POSITIVE_POINT, "Points must be positive. earn point - " + point);
         }
         this.point = this.point + point;
         return this;

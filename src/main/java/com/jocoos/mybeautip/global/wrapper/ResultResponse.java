@@ -1,41 +1,30 @@
 package com.jocoos.mybeautip.global.wrapper;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.RESPONSE_CODE_OK;
 
 @Getter
-public class ResultResponse<T> extends ResponseEntity<T> {
+@Builder
+@AllArgsConstructor
+public class ResultResponse<T> {
     private int code;
     private String message;
     private T result;
 
     public ResultResponse() {
-        super(HttpStatus.OK);
-        this.code = HttpStatus.OK.value();
+        this.code = RESPONSE_CODE_OK;
     }
 
     public ResultResponse(T result) {
-        super(HttpStatus.OK);
-        this.code = HttpStatus.OK.value();
+        this.code = RESPONSE_CODE_OK;
         this.message = "success";
         this.result = result;
     }
 
     public ResultResponse(int code, String message) {
-        super(HttpStatus.OK);
-        this.code = code;
-        this.message = message;
-    }
-
-    public ResultResponse(HttpStatus httpStatus) {
-        super(httpStatus);
-        this.code = httpStatus.value();
-        this.message = httpStatus.name();
-    }
-
-    public ResultResponse(HttpStatus httpStatus, int code, String message) {
-        super(httpStatus);
         this.code = code;
         this.message = message;
     }
