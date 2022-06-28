@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.member.billing;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.BillingController;
 import com.jocoos.mybeautip.support.RandomUtils;

@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.security;
 
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.member.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +66,7 @@ public class SocialLoginService {
                 memberId = getMemberIdForFacebook(socialMemberRequest.getId());
                 break;
             default:
-                throw new MybeautipRuntimeException("Unsupported provider type");
+                throw new MybeautipException("Unsupported provider type");
         }
 
         member = memberRepository.findByIdAndDeletedAtIsNull(memberId)

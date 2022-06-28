@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.admin;
 
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatchService;
 import lombok.Data;

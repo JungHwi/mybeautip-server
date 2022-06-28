@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.security;
 
-import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

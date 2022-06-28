@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.event.dto.EventJoinHistoryResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventJoinResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import org.mapstruct.*;
 
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.member.cart;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.notification.MessageService;

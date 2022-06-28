@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.admin;
 
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.order.*;
 import com.jocoos.mybeautip.restapi.OrderController;
 import lombok.Data;

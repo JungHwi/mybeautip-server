@@ -1,19 +1,30 @@
 package com.jocoos.mybeautip.global.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import static com.jocoos.mybeautip.global.constant.ErrorCodeConstant.DEFAULT_ERROR_CODE;
-
+@Getter
+@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class BadRequestException extends MybeautipException {
-    public BadRequestException() {
-        super(HttpStatus.BAD_REQUEST, DEFAULT_ERROR_CODE, HttpStatus.BAD_REQUEST.getReasonPhrase());
+
+    static final String DEFAULT_MESSAGE = "bad_request";
+
+    public BadRequestException(String description) {
+        super(DEFAULT_MESSAGE, description);
     }
 
-    public BadRequestException(String message) {
-        super(HttpStatus.BAD_REQUEST, DEFAULT_ERROR_CODE, message);
+    public BadRequestException(String message, String description) {
+        super(message, description);
     }
 
-    public BadRequestException(int code, String message) {
-        super(HttpStatus.BAD_REQUEST, code, message);
+    public BadRequestException(FieldError error) {
+        super(DEFAULT_MESSAGE, "");
+        this.description = createErrorDescription(error);
+    }
+
+    private String createErrorDescription(FieldError error) {
+        return String.format("%s %s", error.getField(), error.getDefaultMessage());
     }
 }

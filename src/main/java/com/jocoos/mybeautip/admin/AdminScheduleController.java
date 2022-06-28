@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.admin;
 
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.schedules.ScheduleRepository;

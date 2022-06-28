@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.schedules;
 
 import com.jocoos.mybeautip.config.InstantNotificationConfig;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.ScheduleController;
 import com.jocoos.mybeautip.support.slack.SlackService;

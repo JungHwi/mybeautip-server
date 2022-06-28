@@ -3,10 +3,13 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.app.AppInfo;
 import com.jocoos.mybeautip.app.AppInfoRepository;
 import com.jocoos.mybeautip.devices.NoticeService;
+import com.jocoos.mybeautip.domain.popup.dto.PopupResponse;
+import com.jocoos.mybeautip.domain.popup.service.PopupService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.notification.MessageService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.jocoos.mybeautip.restapi.dto.NoticeInfo;
+import com.jocoos.mybeautip.restapi.dto.NoticeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +33,7 @@ public class NoticeController {
     private final NoticeService noticeService;
     private final MessageService messageService;
     private final AppInfoRepository appInfoRepository;
+    private final PopupService popupService;
     @Value("${mybeautip.revenue.revenue-ratio-live}")
     private int revenueRatioForLive;
     @Value("${mybeautip.revenue.revenue-ratio-vod}")
@@ -41,6 +45,8 @@ public class NoticeController {
                                                      @RequestParam(defaultValue = "ko") String lang,
                                                      @RequestHeader(value = "Accept-Language", defaultValue = "ko") String language) {
         deviceOs = deviceOs.trim();
+        Member member = legacyMemberService.currentMember();
+        List<PopupResponse> popupList = popupService.getPopup(member);
 
         List<NoticeInfo> notices = noticeService.findByOs(deviceOs, appVersion)
                 .stream().map(input -> new NoticeInfo(input.getType(),
@@ -53,28 +59,9 @@ public class NoticeController {
         PageRequest pageable = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<AppInfo> list = appInfoRepository.findByOs(deviceOs, pageable);
         response.setLatestVersion((list.size() > 0) ? list.get(0).getVersion() : "");
-        response.setRevenueRatio(revenueRatioForLive);
-        response.setRevenueRatioForLive(revenueRatioForLive);
-        response.setRevenueRatioForVod(revenueRatioForVod);
         response.setContent(notices);
+        response.setPopupList(popupList);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
-    }
-
-    @Data
-    public static class NoticeResponse {
-        private String latestVersion;
-        @Deprecated
-        private Integer revenueRatio;
-        private Integer revenueRatioForLive;
-        private Integer revenueRatioForVod;
-        private List<NoticeInfo> content;
-    }
-
-    @AllArgsConstructor
-    @Data
-    public static class NoticeInfo {
-        private String type;
-        private String message;
     }
 }

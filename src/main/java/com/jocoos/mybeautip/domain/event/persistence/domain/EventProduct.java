@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.event.persistence.domain;
 
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

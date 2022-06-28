@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.post.PostRepository;
 import lombok.Data;

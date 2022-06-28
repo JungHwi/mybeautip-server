@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.member.revenue;
 
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class RevenuePaymentService {
     @Transactional
     public RevenuePayment appendEstimatedAmount(RevenuePayment revenuePayment, int revenuePrice) {
         if (revenuePayment.getState() != NOT_PAID) {
-            throw new MybeautipRuntimeException("invalid_revenue_payments_state", "Invalid Revenue payment state: " + revenuePayment.getState());
+            throw new MybeautipException("invalid_revenue_payments_state", "Invalid Revenue payment state: " + revenuePayment.getState());
         }
         revenuePayment.setEstimatedAmount(revenuePayment.getEstimatedAmount() + revenuePrice);
         return revenuePaymentRepository.save(revenuePayment);
@@ -48,7 +48,7 @@ public class RevenuePaymentService {
     @Transactional
     public RevenuePayment pay(RevenuePayment revenuePayment, String paymentMethod, Date paymentDate, int finalAmount) {
         if (revenuePayment.getEstimatedAmount() != finalAmount) {
-            throw new MybeautipRuntimeException(String.format("price not match! estimated: %d final: %d",
+            throw new MybeautipException(String.format("price not match! estimated: %d final: %d",
                     revenuePayment.getEstimatedAmount(), finalAmount));
         }
 
