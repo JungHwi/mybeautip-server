@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.popup.dto.PopupResponse;
 import com.jocoos.mybeautip.domain.popup.persistence.domain.Popup;
 import com.jocoos.mybeautip.domain.popup.persistence.domain.PopupButton;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public interface PopupConverter {
 
     List<PopupResponse> convert(List<Popup> popupList);
 
+    @Mapping(target = "parameter", source = "linkArgument")
     PopupButtonResponse convertToButton(PopupButton button);
 
     List<PopupButtonResponse> convertToButton(List<PopupButton> buttonList);

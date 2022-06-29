@@ -12,5 +12,5 @@ public class PopupButtonResponse {
 
     private ButtonLinkType linkType;
 
-    private String argument;
+    private String parameter;
 }
