@@ -3,7 +3,7 @@ package com.jocoos.mybeautip.domain.event.service;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.service.impl.InviteEventService;
 import com.jocoos.mybeautip.domain.event.service.impl.JoinEventService;
-import com.jocoos.mybeautip.domain.event.service.impl.RouletteEventServiceType;
+import com.jocoos.mybeautip.domain.event.service.impl.RouletteEventService;
 import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ public class EventTypeFactory {
 
     private final SignupEventService signupEventService;
     private final InviteEventService inviteEventService;
-    private final RouletteEventServiceType rouletteEventService;
+    private final RouletteEventService rouletteEventService;
     private final JoinEventService joinEventService;
 
     public EventTypeService getEventTypeService(EventType eventType) {

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.event.service;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
+import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.converter.EventConverter;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
@@ -25,7 +26,7 @@ public class EventService {
 
     private final EventConverter eventConverter;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<EventListResponse> getEventList(long cursor, int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Order.asc("statusSorting"), Sort.Order.asc("sorting"), Sort.Order.desc("id"), Sort.Order.desc("endAt")));
         Slice<Event> eventSlice = eventRepository.findByIdLessThanAndStatusIn(cursor, EventStatus.visibleEventStatus, pageable);
@@ -33,11 +34,16 @@ public class EventService {
         return eventConverter.convertToListResponse(eventSlice.getContent());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public EventResponse getEvent(long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("event_not_found", "Not found event. id - " + eventId));
 
         return eventConverter.convertToResponse(event);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Event> getProgressEventByType(EventType type) {
+        return eventRepository.findByTypeAndStatus(type, EventStatus.PROGRESS);
     }
 }
