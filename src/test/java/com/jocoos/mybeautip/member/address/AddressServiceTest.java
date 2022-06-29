@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.member.address;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

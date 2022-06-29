@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.video;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.feed.FeedService;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;

@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;

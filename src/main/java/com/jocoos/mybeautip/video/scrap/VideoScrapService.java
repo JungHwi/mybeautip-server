@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.video.scrap;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;

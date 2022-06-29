@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.member.revenue;
 
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.order.Purchase;

@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Category;
 import com.jocoos.mybeautip.goods.CategoryGroup;
 import com.jocoos.mybeautip.goods.CategoryRepository;

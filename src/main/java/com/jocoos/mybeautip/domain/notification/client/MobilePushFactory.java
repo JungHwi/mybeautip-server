@@ -2,8 +2,8 @@ package com.jocoos.mybeautip.domain.notification.client;
 
 import com.jocoos.mybeautip.domain.notification.client.impl.AndroidPushService;
 import com.jocoos.mybeautip.domain.notification.client.impl.IosPushService;
-import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.global.code.DeviceOs;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

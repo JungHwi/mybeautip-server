@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.domain.event.api.front;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
 import com.jocoos.mybeautip.domain.event.service.EventService;
-import com.jocoos.mybeautip.global.wrapper.ResultResponse;
 import com.jocoos.mybeautip.restapi.CursorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ public class EventController {
 
     private final EventService eventService;
 
-    @GetMapping("/3/event")
+    @GetMapping("/1/event")
     public ResponseEntity getEventList(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
                                        @RequestParam(defaultValue = "20") int size) {
         List<EventListResponse> result = eventService.getEventList(cursor, size);
@@ -29,12 +28,12 @@ public class EventController {
                 .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size() - 1).getId()) : null)
                 .toBuild();
 
-        return ResponseEntity.ok(new ResultResponse<>(cursorResponse));
+        return ResponseEntity.ok(cursorResponse);
     }
 
-    @GetMapping("/3/event/{eventId}")
+    @GetMapping("/1/event/{eventId}")
     public ResponseEntity get(@PathVariable long eventId) {
         EventResponse result = eventService.getEvent(eventId);
-        return ResponseEntity.ok(new ResultResponse<>(result));
+        return ResponseEntity.ok(result);
     }
 }

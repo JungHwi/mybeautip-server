@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.member.service;
 
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;

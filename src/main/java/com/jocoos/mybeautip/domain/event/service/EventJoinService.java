@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -19,9 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static com.jocoos.mybeautip.global.constant.ErrorCodeConstant.EVENT_NOT_FOUND;
-import static com.jocoos.mybeautip.global.constant.ErrorCodeConstant.MEMBER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +37,10 @@ public class EventJoinService {
     @Transactional
     public EventJoinResponse join(long eventId, long memberId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND, "Not found event - " + eventId));
+                .orElseThrow(() -> new NotFoundException("event_not_found", "Not found event - " + eventId));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND, "No such member. id - " + memberId));
+                .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + memberId));
 
         EventTypeService eventTypeService = eventTypeFactory.getEventTypeService(event.getType());
 

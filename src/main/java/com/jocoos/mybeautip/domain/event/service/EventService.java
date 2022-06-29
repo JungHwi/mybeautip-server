@@ -17,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.global.constant.ErrorCodeConstant.EVENT_NOT_FOUND;
-
 @Service
 @RequiredArgsConstructor
 public class EventService {
@@ -38,7 +36,7 @@ public class EventService {
     @Transactional
     public EventResponse getEvent(long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND, "Not found event. id - " + eventId));
+                .orElseThrow(() -> new NotFoundException("event_not_found", "Not found event. id - " + eventId));
 
         return eventConverter.convertToResponse(event);
     }

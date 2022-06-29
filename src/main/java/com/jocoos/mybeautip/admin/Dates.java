@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.admin;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;

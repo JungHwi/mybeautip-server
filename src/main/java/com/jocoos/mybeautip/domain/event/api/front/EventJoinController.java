@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.domain.event.api.front;
 import com.jocoos.mybeautip.domain.event.dto.EventJoinHistoryResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventJoinResponse;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
-import com.jocoos.mybeautip.global.wrapper.ResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.restapi.CursorResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +23,15 @@ public class EventJoinController {
     private final LegacyMemberService legacyMemberService;
     private final EventJoinService service;
 
-    @PostMapping("/3/event/join/{eventId}")
+    @PostMapping("/1/event/join/{eventId}")
     public ResponseEntity joinEvent(@PathVariable long eventId) {
         long memberId = legacyMemberService.currentMemberId();
         EventJoinResponse result = service.join(eventId, memberId);
 
-        return ResponseEntity.ok(new ResultResponse<>(result));
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/3/event/join/history")
+    @GetMapping("/1/event/join/history")
     public ResponseEntity getJoinEventList(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
                                                            @RequestParam(defaultValue = "20") int size) {
 
@@ -49,6 +48,6 @@ public class EventJoinController {
                 .withCursor(nextCursor)
                 .toBuild();
 
-        return ResponseEntity.ok(new ResultResponse<>(cursorResponse));
+        return ResponseEntity.ok(cursorResponse);
     }
 }

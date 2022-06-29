@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.block.BlockService;

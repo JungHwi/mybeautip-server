@@ -8,10 +8,10 @@ import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
 import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
@@ -46,6 +46,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_URL;
 
 @Slf4j
 @Service
@@ -354,10 +355,7 @@ public class LegacyMemberService {
                     });
         }
 
-        if (StringUtils.isNotBlank(originalAvatar) && !DEFAULT_AVATAR_URL.equals(originalAvatar)) {
-            deleteAvatar(originalAvatar);
-        }
-
+        deleteAvatar(originalAvatar);
         return finalMember;
     }
 
@@ -481,14 +479,16 @@ public class LegacyMemberService {
             }
 
         } catch (IOException ex) {
-            throw new MybeautipRuntimeException("Member avatar upload Error.");
+            throw new MybeautipException("Member avatar upload Error.");
         }
 
         return path;
     }
 
     public void deleteAvatar(String avatar) {
-        attachmentService.deleteAttachments(StringConvertUtil.getPath(avatar));
+        if (StringUtils.isNotBlank(avatar) && !DEFAULT_AVATAR_URL.equals(avatar) && !DELETED_AVATAR_URL.equals(avatar)) {
+            attachmentService.deleteAttachments(StringConvertUtil.getPath(avatar));
+        }
     }
 
     @Transactional

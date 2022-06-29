@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.goods;
 
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.AllArgsConstructor;
 import lombok.Data;

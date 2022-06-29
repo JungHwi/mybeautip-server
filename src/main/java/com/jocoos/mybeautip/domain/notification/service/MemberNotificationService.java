@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.devices.Device;
 import com.jocoos.mybeautip.devices.DeviceRepository;
 import com.jocoos.mybeautip.domain.notification.converter.MemberNotificationInfoConverter;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;

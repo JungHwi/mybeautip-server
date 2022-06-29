@@ -15,7 +15,7 @@ import com.jocoos.mybeautip.domain.notification.persistence.repository.Notificat
 import com.jocoos.mybeautip.domain.notification.service.MemberNotificationService;
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
