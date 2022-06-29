@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.member.*;
@@ -19,6 +20,7 @@ public class SocialLoginService {
     private final NaverMemberRepository naverMemberRepository;
     private final FacebookMemberRepository facebookMemberRepository;
     private final LoginServiceFactory loginServiceFactory;
+    private final SignupEventService signupEventService;
 
     public WebSocialLoginResponse webSocialLogin(String provider, String code, String state) {
         WebSocialLoginResponse response;
@@ -28,6 +30,7 @@ public class SocialLoginService {
             Member member = saveOrUpdate(socialMemberRequest);
             AccessTokenResponse accessTokenResponse = jwtTokenProvider.auth(member);
             response = new WebSocialLoginResponse(accessTokenResponse);
+            signupEventService.join(member);
         } catch (MemberNotFoundException ex) {
             response = new WebSocialLoginResponse(socialMemberRequest);
         }
