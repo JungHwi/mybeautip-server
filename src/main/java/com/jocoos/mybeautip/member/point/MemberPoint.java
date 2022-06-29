@@ -47,7 +47,6 @@ public class MemberPoint extends CreatedDateAuditable {
     @Column
     private Long eventId;
 
-
     @Column
     private Date earnedAt;
 

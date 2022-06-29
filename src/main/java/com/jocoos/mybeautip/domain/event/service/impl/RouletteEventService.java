@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class RouletteEventServiceType extends EventTypeAbstractService {
+public class RouletteEventService extends EventTypeAbstractService {
 
     private final MemberPointService memberPointService;
     private final EventJoinRepository eventJoinRepository;
@@ -45,7 +45,8 @@ public class RouletteEventServiceType extends EventTypeAbstractService {
         return eventJoin;
     }
 
-    private EventProduct winPrize(List<EventProduct> productList) {
+    @Override
+    public EventProduct winPrize(List<EventProduct> productList) {
         int total = productList.stream()
                 .mapToInt(EventProduct::getQuantity)
                 .sum();
