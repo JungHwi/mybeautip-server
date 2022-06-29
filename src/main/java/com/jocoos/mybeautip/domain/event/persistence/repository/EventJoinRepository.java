@@ -10,5 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface EventJoinRepository extends DefaultJpaRepository<EventJoin, Long> {
 
     Slice<EventJoin> findByMemberIdAndIdLessThan(long memberId, long cursor, Pageable pageable);
+    boolean existsByMemberIdAndEventId(Long memberId, Long eventId);
 
 }
