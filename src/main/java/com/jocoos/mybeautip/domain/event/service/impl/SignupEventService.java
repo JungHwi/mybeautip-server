@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.domain.event.service.impl;
 
 import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
+import com.jocoos.mybeautip.domain.event.code.EventStatus;
+import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
+import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.service.PresentFactory;
 import com.jocoos.mybeautip.domain.event.service.PresentService;
 import com.jocoos.mybeautip.member.Member;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SignupEventService extends EventTypeAbstractService {
 
+    private final EventRepository eventRepository;
     private final EventJoinRepository eventJoinRepository;
     private final PresentFactory presentFactory;
 
@@ -43,10 +47,20 @@ public class SignupEventService extends EventTypeAbstractService {
         return eventJoin;
     }
 
+    public EventJoin join(Member member) {
+        Event event = eventRepository.findTopByTypeAndStatus(EventType.SIGNUP, EventStatus.PROGRESS);
+        if (duplicateSignup(event, member)) {
+            return null;
+        }
+
+        return this.join(event, member);
+    }
+
     private void valid(Event event) {
         super.validEvent(event);
     }
 
-
-
+    private boolean duplicateSignup(Event event, Member member) {
+        return eventJoinRepository.existsByMemberIdAndEventId(member.getId(), event.getId());
+    }
 }

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
 import com.jocoos.mybeautip.global.exception.AuthenticationDormantMemberException;
 import com.jocoos.mybeautip.global.exception.AuthenticationException;
 import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
@@ -19,6 +20,7 @@ public class AppleTokenGranter extends AbstractTokenGranter {
     private final LegacyMemberService legacyMemberService;
     private final MemberRepository memberRepository;
     private final AppleMemberRepository appleMemberRepository;
+    private final SignupEventService signupEventService;
 
     public AppleTokenGranter(
             AuthorizationServerTokenServices tokenServices,
@@ -26,11 +28,13 @@ public class AppleTokenGranter extends AbstractTokenGranter {
             OAuth2RequestFactory requestFactory,
             LegacyMemberService legacyMemberService,
             MemberRepository memberRepository,
-            AppleMemberRepository appleMemberRepository) {
+            AppleMemberRepository appleMemberRepository,
+            SignupEventService signupEventService) {
         super(tokenServices, clientDetailsService, requestFactory, "apple");
         this.legacyMemberService = legacyMemberService;
         this.memberRepository = memberRepository;
         this.appleMemberRepository = appleMemberRepository;
+        this.signupEventService = signupEventService;
     }
 
     @Override
@@ -53,6 +57,7 @@ public class AppleTokenGranter extends AbstractTokenGranter {
 
         switch (member.getStatus()) {
             case ACTIVE:
+                signupEventService.join(member);
                 return generateToken(member, client, tokenRequest);
             case DORMANT:
                 throw new AuthenticationDormantMemberException("Dormant Member. member id - " + appleMember.getMemberId());
