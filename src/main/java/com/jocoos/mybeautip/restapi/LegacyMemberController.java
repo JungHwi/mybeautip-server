@@ -139,19 +139,6 @@ public class LegacyMemberController {
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     }
 
-    // 최초에 TAG 없는 멤버들 TAG 생성
-    @PatchMapping("/tag/migration")
-    public ResponseEntity migrationTag() {
-        List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
-
-        for (Member member : noTagMembers) {
-            legacyMemberService.adjustTag(member);
-            log.debug("Member id - " + member.getId() + ", Member tag - " + member.getTag());
-            memberRepository.save(member);
-        }
-        return new ResponseEntity(HttpStatus.ACCEPTED);
-    }
-
     @PatchMapping()
     public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
                                                    @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
