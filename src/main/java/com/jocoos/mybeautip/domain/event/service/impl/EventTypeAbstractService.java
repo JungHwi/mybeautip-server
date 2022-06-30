@@ -17,6 +17,10 @@ import java.util.List;
 public abstract class EventTypeAbstractService implements EventTypeService {
 
     public EventProduct winPrize(List<EventProduct> productList) {
+        if (productList.size() == 1) {
+            return productList.get(0);
+        }
+
         int winningIndex = RandomUtils.getRandomIndex(productList.size());
         EventProduct winningProduct = productList.get(winningIndex);
         return winningProduct.winPrize();

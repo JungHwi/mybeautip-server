@@ -39,4 +39,8 @@ public class MemberDetail {
             this.inviterId = inviterId;
         }
     }
+
+    public MemberDetail(long memberId) {
+        this.memberId = memberId;
+    }
 }

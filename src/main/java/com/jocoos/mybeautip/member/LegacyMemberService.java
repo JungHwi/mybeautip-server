@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
 import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
+import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -249,6 +250,7 @@ public class LegacyMemberService {
         }
     }
 
+    // Check ASPECT
     @Transactional
     public Member register(SignupRequest signupRequest) {
         Member member = new Member(signupRequest);
@@ -266,8 +268,7 @@ public class LegacyMemberService {
         return adjustUserName(member);
     }
 
-    // TODO Migration 하고 나면 private 으로 변경.
-    public Member adjustTag(Member member) {
+    private Member adjustTag(Member member) {
         String tag = member.getTag();
         for (int retry = 0; retry < 5; retry++) {
             if (StringUtils.isNotBlank(tag) && !memberRepository.existsByTag(tag)) {
@@ -439,35 +440,50 @@ public class LegacyMemberService {
     }
 
     @Transactional
-    public void updateDetailInfo(MemberDetailRequest request) {
+    public MemberDetailResponse updateDetailInfo(MemberDetailRequest request) {
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + request.getMemberId()));
 
         member.setBirthday(new Birthday(request.getAgeGroup()));
         memberRepository.save(member);
 
-        Long inviterId = null;
+        MemberDetail memberDetail = memberDetailRepository.findByMemberId(request.getMemberId())
+                .orElse(new MemberDetail(request.getMemberId()));
+
+        // FIXME 친구초대 이벤트를 위해서 회원 상세 정보 수정 메소드에서 이벤트 Aspect 에서 쓸 데이터(ChangedTagInfo)를 가공한다. 꼴뵈기 싫으...
+        Member targetMember = null;
+        boolean isTagChanged = false;
         if (StringUtils.isNotBlank(request.getInviterTag())) {
-            inviterId = memberRepository.findByTag(request.getInviterTag())
-                    .orElseThrow(() -> new MemberNotFoundException("No such Member. tag - " + request.getInviterTag()))
-                    .getId();
+            targetMember = memberRepository.findByTag(request.getInviterTag())
+                    .orElseThrow(() -> new MemberNotFoundException("No such Member. tag - " + request.getInviterTag()));
+
+            if (memberDetail.getInviterId() == null) {
+                isTagChanged = true;
+            }
         }
 
-        MemberDetail memberDetail = memberDetailRepository.findByMemberId(request.getMemberId())
-                .orElse(MemberDetail.builder()
-                        .memberId(request.getMemberId())
-                        .skinType(request.getSkinType())
-                        .skinWorry(request.getSkinWorry())
-                        .inviterId(inviterId)
-                        .build());
+        ChangedTagInfo changedTagInfo = ChangedTagInfo.builder()
+                .isChanged(isTagChanged)
+                .member(member)
+                .targetMember(targetMember)
+                .build();
 
         memberDetail.setSkinType(request.getSkinType());
         memberDetail.setSkinWorry(request.getSkinWorry());
-        memberDetail.setInviterId(inviterId);
+        if (targetMember != null) {
+            memberDetail.setInviterId(targetMember.getId());
+        }
 
-        memberDetailRepository.save(memberDetail);
+        memberDetail = memberDetailRepository.save(memberDetail);
+
+        return MemberDetailResponse.builder()
+                .ageGroup(member.getBirthday().getAgeGroupByTen())
+                .skinType(memberDetail.getSkinType())
+                .skinWorry(memberDetail.getSkinWorry())
+                .inviterTag(request.getInviterTag())
+                .changedTagInfo(changedTagInfo)
+                .build();
     }
-
 
     public String uploadAvatar(MultipartFile avatar) {
         String path = "";
