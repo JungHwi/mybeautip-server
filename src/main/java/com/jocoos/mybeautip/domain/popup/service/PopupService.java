@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,17 +21,17 @@ public class PopupService {
     private final PopupTypeServiceFactory popupTypeServiceFactory;
 
     @Transactional
-    public List<PopupResponse> getPopup(Member member) {
+    public PopupResponse getPopup(Member member) {
         List<Popup> popupList = repository.findByActivePopup();
-        List<PopupResponse> result = new ArrayList<>();
+
         for (Popup popup : popupList) {
             PopupTypeService popupLinkService = popupTypeServiceFactory.getPopupLinkService(popup.getType());
             if (popupLinkService.isPopup(member)) {
-                result.add(converter.convert(popup));
+                return converter.convert(popup);
             }
         }
 
-        return result;
+        return null;
     }
 }
 

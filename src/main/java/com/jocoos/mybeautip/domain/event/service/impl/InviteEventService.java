@@ -8,18 +8,24 @@ import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinReposit
 import com.jocoos.mybeautip.domain.event.service.PresentFactory;
 import com.jocoos.mybeautip.domain.event.service.PresentService;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.address.Address;
+import com.jocoos.mybeautip.member.address.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class InviteEventService extends EventTypeAbstractService {
+    private final AddressRepository addressRepository;
     private final EventJoinRepository eventJoinRepository;
     private final PresentFactory presentFactory;
 
     @Override
     public EventJoin join(Event event, Member member) {
-        valid(event);
+        Address address = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId())
+                .orElse(null);
+
+        valid(event, address);
 
         EventProduct eventProduct = super.winPrize(event.getEventProductList());
 
@@ -39,7 +45,7 @@ public class InviteEventService extends EventTypeAbstractService {
         return eventJoin;
     }
 
-    private void valid(Event event) {
-        super.validEvent(event);
+    private void valid(Event event, Address address) {
+        super.validEvent(event, address);
     }
 }

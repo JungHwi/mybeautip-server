@@ -8,10 +8,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum EventType implements CodeValue {
 
-    SIGNUP("회원가입"),
-    INVITE("초대"),
-    ROULETTE("룰렛"),
-    JOIN("참가");
+    SIGNUP("회원가입", false),
+    INVITE("초대", false),
+    ROULETTE("룰렛", true),
+    JOIN("참가", true);
 
     private final String description;
+    private final boolean directJoin;
 }
