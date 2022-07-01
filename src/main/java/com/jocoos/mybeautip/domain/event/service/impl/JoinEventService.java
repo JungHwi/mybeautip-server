@@ -5,6 +5,8 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.address.Address;
+import com.jocoos.mybeautip.member.address.AddressRepository;
 import com.jocoos.mybeautip.member.point.MemberPointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,18 +15,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class JoinEventService extends EventTypeAbstractService {
 
+    private final AddressRepository addressRepository;
     private final MemberPointService memberPointService;
     private final EventJoinRepository eventJoinRepository;
 
     @Override
     public EventJoin join(Event event, Member member) {
-        valid(event);
+        Address address = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId())
+                .orElse(null);
+
+        valid(event, address);
+
         memberPointService.usePoints(event, member);
 
         EventJoin eventJoin = EventJoin.builder()
                 .memberId(member.getId())
                 .eventId(event.getId())
                 .status(EventJoinStatus.JOIN)
+                .recipientInfo(super.getRecipientInfo(address))
                 .build();
 
         eventJoin = eventJoinRepository.save(eventJoin);
@@ -32,7 +40,7 @@ public class JoinEventService extends EventTypeAbstractService {
         return eventJoin;
     }
 
-    private void valid(Event event) {
-        super.validEvent(event);
+    private void valid(Event event, Address address) {
+        super.validEvent(event, address);
     }
 }

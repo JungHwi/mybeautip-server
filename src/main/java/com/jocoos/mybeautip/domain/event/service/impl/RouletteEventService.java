@@ -8,6 +8,8 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.address.Address;
+import com.jocoos.mybeautip.member.address.AddressRepository;
 import com.jocoos.mybeautip.member.point.MemberPointService;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +21,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RouletteEventService extends EventTypeAbstractService {
 
+    private final AddressRepository addressRepository;
     private final MemberPointService memberPointService;
     private final EventJoinRepository eventJoinRepository;
 
     @Override
     public EventJoin join(Event event, Member member) {
-        valid(event);
+        Address address = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId())
+                .orElse(null);
+
+        valid(event, address);
         memberPointService.usePoints(event, member);
         EventProduct eventProduct = winPrize(event.getEventProductList());
 
@@ -34,6 +40,7 @@ public class RouletteEventService extends EventTypeAbstractService {
                 .status(EventJoinStatus.WIN)
                 .eventProductId(eventProduct.getId())
                 .eventProduct(eventProduct)
+                .recipientInfo(super.getRecipientInfo(eventProduct, address))
                 .build();
 
         eventJoin = eventJoinRepository.save(eventJoin);
@@ -62,8 +69,8 @@ public class RouletteEventService extends EventTypeAbstractService {
         throw new BadRequestException("sold_out", "All product is sold out.");
     }
 
-    private void valid(Event event) {
-        super.validEvent(event);
+    private void valid(Event event, Address address) {
+        super.validEvent(event, address);
         validEventProduct(event.getEventProductList());
     }
 

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.popup.persistence.domain;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.domain.popup.code.PopupDisplayType;
 import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
 import com.jocoos.mybeautip.domain.popup.code.PopupType;
 import lombok.AllArgsConstructor;
@@ -23,11 +24,17 @@ public class Popup extends CreatedDateAuditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column
     @Enumerated(EnumType.STRING)
     private PopupType type;
 
+    @Column
     @Enumerated(EnumType.STRING)
     private PopupStatus status;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private PopupDisplayType displayType;
 
     @Column
     private String imageUrl;
