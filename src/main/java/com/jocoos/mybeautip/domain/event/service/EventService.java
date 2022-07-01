@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +48,15 @@ public class EventService {
     @Transactional(readOnly = true)
     public List<Event> getProgressEventByType(EventType type) {
         return eventRepository.findByTypeAndStatus(type, EventStatus.PROGRESS);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Event> getEventTitle(Set<Long> eventIds) {
+        return eventRepository.findByIdIn(eventIds);
+    }
+
+    public Map<Long, String> getEventTitleMap(Set<Long> eventIds) {
+        return getEventTitle(eventIds).stream()
+                .collect(Collectors.toMap(Event::getId, Event::getTitle));
     }
 }

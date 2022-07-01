@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> {
 
@@ -26,7 +27,18 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
 
     List<MemberPoint> findByStateInAndExpiryAtBeforeAndRemindIsFalseAndExpiredAtIsNull(List<Integer> states, Date earnedAt);
 
-    Page<MemberPoint> findByMemberId(Long memberId, Pageable pageable);
+    @Query("SELECT memberPoint " +
+            "FROM MemberPoint AS memberPoint " +
+            "WHERE memberPoint.member.id = :memberId " +
+            "   AND memberPoint.id < :cursor ")
+    Slice<MemberPoint> findByMemberId(Long memberId, Long cursor, Pageable pageable);
+
+    @Query("SELECT memberPoint " +
+            "FROM MemberPoint AS memberPoint " +
+            "WHERE memberPoint.member.id = :memberId " +
+            "   AND memberPoint.id < :cursor " +
+            "   AND memberPoint.state in :state")
+    Slice<MemberPoint> findByMemberIdAndStateIn(long memberId, Set<Integer> state, Long cursor, Pageable pageable);
 
     Page<MemberPoint> findByMemberIdAndState(Long memberId, int state, Pageable pageable);
 
@@ -44,5 +56,20 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
     // admin api
     Page<MemberPoint> findByStateAndOrderIsNull(int state, Pageable pageable);
 
+    @Query("SELECT memberPoint " +
+            "FROM MemberPoint as memberPoint " +
+            "WHERE memberPoint.member.id = :memberId " +
+            "   AND memberPoint.state in :state " +
+            "   AND memberPoint.createdAt > :startAt " +
+            "   AND memberPoint.createdAt < :endAt")
+    List<MemberPoint> findByMemberPointHistory(long memberId, Set<Integer> state, Date startAt, Date endAt, Pageable pageable);
+
+    @Query("SELECT memberPoint " +
+            "FROM MemberPoint as memberPoint " +
+            "WHERE memberPoint.member.id = :memberId " +
+            "   AND memberPoint.state in :state " +
+            "   AND memberPoint.expiryAt > :startAt " +
+            "   AND memberPoint.expiryAt < :endAt")
+    List<MemberPoint> findByExpiryPoint(long memberId, Set<Integer> state, Date startAt, Date endAt, Pageable pageable);
 
 }

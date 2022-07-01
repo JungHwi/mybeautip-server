@@ -750,4 +750,22 @@ public class OrderService {
                     });
         }
     }
+
+    @Transactional(readOnly = true)
+    public Map<Long, String> getPurchaseNameMap(Set<Long> orderIds) {
+        Map<Long, String> result = new HashMap<>();
+        List<Order> orderList = orderRepository.findByIdIn(orderIds);
+
+        for (Order order : orderList) {
+            String goodsName = order.getPurchases().stream()
+                    .findFirst()
+                    .map(Purchase::getGoodsName)
+                    .orElse("");
+
+            result.put(order.getId(), goodsName);
+        }
+
+        return result;
+    }
+
 }

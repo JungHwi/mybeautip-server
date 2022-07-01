@@ -15,6 +15,8 @@ public interface MemberPointDetailRepository extends JpaRepository<MemberPointDe
 
     List<MemberPointDetail> findByParentId(Long parentId);
 
+    List<MemberPointDetail> findByParentIdInAndState(List<Long> parentIds, int state);
+
     List<MemberPointDetail> findByParentIdAndState(Long parentId, int state);
 
     @Query("select sum(mpd.point) as pointSum, max(mpd.expiryAt) as expiryAt from MemberPointDetail mpd where mpd.memberPointId = ?1 group by mpd.memberPointId")
