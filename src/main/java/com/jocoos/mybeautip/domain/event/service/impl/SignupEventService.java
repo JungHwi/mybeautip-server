@@ -26,7 +26,6 @@ public class SignupEventService extends EventTypeAbstractService {
     @Override
     @Transactional
     public EventJoin join(Event event, Member member) {
-
         valid(event);
 
         EventProduct eventProduct = super.winPrize(event.getEventProductList());
@@ -47,6 +46,7 @@ public class SignupEventService extends EventTypeAbstractService {
         return eventJoin;
     }
 
+    @Transactional
     public EventJoin join(Member member) {
         Event event = eventRepository.findTopByTypeAndStatus(EventType.SIGNUP, EventStatus.PROGRESS);
         if (duplicateSignup(event, member)) {

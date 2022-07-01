@@ -11,12 +11,15 @@ import org.springframework.stereotype.Component;
 public class PopupTypeServiceFactory {
 
     private final SignupPopupService signupPopupService;
+    private final ComebackPopupService comebackPopupService;
     private final LoginPopupService loginPopupService;
 
     public final PopupTypeService getPopupLinkService(PopupType popupType) {
         switch (popupType) {
             case SIGNUP:
                 return signupPopupService;
+            case COMEBACK:
+                return comebackPopupService;
             case LOGIN:
                 return loginPopupService;
             default:

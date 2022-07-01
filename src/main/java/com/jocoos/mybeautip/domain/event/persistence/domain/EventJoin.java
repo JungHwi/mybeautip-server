@@ -39,6 +39,9 @@ public class EventJoin extends CreatedDateAuditable {
     @Column(nullable = false)
     private long memberId;
 
+    @Column
+    private String recipientInfo;
+
     @ManyToOne()
     @JoinColumn(name = "event_product_id", insertable = false, updatable = false)
     private EventProduct eventProduct;
