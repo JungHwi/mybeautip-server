@@ -3,8 +3,8 @@ package com.jocoos.mybeautip.domain.point.service;
 import com.jocoos.mybeautip.domain.event.service.EventService;
 import com.jocoos.mybeautip.domain.point.code.PointStatus;
 import com.jocoos.mybeautip.domain.point.converter.MemberPointConverter;
-import com.jocoos.mybeautip.domain.point.dto.PointHistoryListResponse;
 import com.jocoos.mybeautip.domain.point.dto.PointHistoryResponse;
+import com.jocoos.mybeautip.domain.point.dto.PointMonthlyHistoryResponse;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderService;
 import com.jocoos.mybeautip.member.point.MemberPoint;
@@ -37,20 +37,19 @@ public class PointService {
     private final MemberPointConverter memberPointConverter;
 
     @Transactional(readOnly = true)
-    public PointHistoryResponse getPointHistory(long memberId, PointStatus pointStatus, int size, long cursor) {
+    public PointMonthlyHistoryResponse getPointMonthlyHistory(long memberId) {
         int earnedPoint = getEarnedPoint(memberId);
         int expiryPoint = getExpiryPoint(memberId);
 
-        List<PointHistoryListResponse> pointHistoryList = getPointHistoryList(memberId, pointStatus, size, cursor);
-
-        return PointHistoryResponse.builder()
+        return PointMonthlyHistoryResponse.builder()
                 .earnedPoint(earnedPoint)
                 .expiryPoint(expiryPoint)
-                .pointHistoryList(pointHistoryList)
                 .build();
     }
 
-    public List<PointHistoryListResponse> getPointHistoryList(long memberId, PointStatus pointStatus, int size, long cursor) {
+
+    @Transactional(readOnly = true)
+    public List<PointHistoryResponse> getPointHistoryList(long memberId, PointStatus pointStatus, int size, long cursor) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
 
         Slice<MemberPoint> memberPointList;
@@ -60,12 +59,12 @@ public class PointService {
             memberPointList = pointRepository.findByMemberIdAndStateIn(memberId, pointStatus.getLegacyCodeGroup(), cursor, pageable);
         }
 
-        List<PointHistoryListResponse> result = memberPointConverter.convertToResponse(memberPointList.getContent());
+        List<PointHistoryResponse> result = memberPointConverter.convertToResponse(memberPointList.getContent());
 
         Map<Long, String> eventTitleMap = getEventTitleMap(memberPointList);
         Map<Long, String> orderPurchaseMap = getOrderTitleMap(memberPointList);
 
-        for (PointHistoryListResponse response : result) {
+        for (PointHistoryResponse response : result) {
             if (response.getOrder() != null) {
                 response.setTitle(orderPurchaseMap.get(response.getOrder().getId()));
             }

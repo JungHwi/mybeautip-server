@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.point.converter;
 
-import com.jocoos.mybeautip.domain.point.dto.PointHistoryListResponse;
+import com.jocoos.mybeautip.domain.point.dto.PointHistoryResponse;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,7 +14,7 @@ public interface MemberPointConverter {
     @Mappings({
             @Mapping(target = "title", ignore = true)
     })
-    PointHistoryListResponse convertToResponse(MemberPoint memberPoint);
+    PointHistoryResponse convertToResponse(MemberPoint memberPoint);
 
-    List<PointHistoryListResponse> convertToResponse(List<MemberPoint> memberPointList);
+    List<PointHistoryResponse> convertToResponse(List<MemberPoint> memberPointList);
 }

@@ -1,17 +1,34 @@
 package com.jocoos.mybeautip.domain.point.dto;
 
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.member.order.Order;
 import lombok.Getter;
+import lombok.Setter;
 
-import java.util.List;
+import java.time.ZonedDateTime;
+
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 @Getter
-@Builder
+@Setter
 public class PointHistoryResponse {
 
-    private int earnedPoint;
+    private long id;
 
-    private int expiryPoint;
+    private String title;
 
-    private List<PointHistoryListResponse> pointHistoryList;
+    private int state;
+
+    private int point;
+
+    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
+    private ZonedDateTime createdAt;
+
+    @JsonIgnore
+    private Order order;
+
+    @JsonIgnore
+    private Long eventId;
+
 }
