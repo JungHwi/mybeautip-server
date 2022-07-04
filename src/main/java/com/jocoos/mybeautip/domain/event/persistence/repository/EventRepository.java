@@ -17,4 +17,5 @@ public interface EventRepository extends DefaultJpaRepository<Event, Long> {
     Slice<Event> findByIdLessThanAndStatusIn(long eventId, Set<EventStatus> statusSet, Pageable pageable);
     List<Event> findByTypeAndStatus(EventType type, EventStatus status);
     Event findTopByTypeAndStatus(EventType type, EventStatus status);
+    List<Event> findByIdIn(Set<Long> eventIds);
 }

@@ -23,7 +23,7 @@ public class EventController {
     public ResponseEntity getEventList(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
                                        @RequestParam(defaultValue = "20") int size) {
         List<EventListResponse> result = eventService.getEventList(cursor, size);
-        CursorResponse cursorResponse = new CursorResponse.Builder<>("/api/3/event/", result)
+        CursorResponse cursorResponse = new CursorResponse.Builder<>("/api/1/event/", result)
                 .withCount(size)
                 .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size() - 1).getId()) : null)
                 .toBuild();

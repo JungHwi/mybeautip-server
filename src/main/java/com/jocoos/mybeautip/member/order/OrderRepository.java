@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -41,4 +42,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByStateLessThanEqualAndCreatedById(int state, Long memberId, Pageable page);
 
     int countByCreatedByIdAndStateLessThanEqual(Long createdBy, int state);
+
+    List<Order> findByIdIn(Set<Long> ids);
 }
