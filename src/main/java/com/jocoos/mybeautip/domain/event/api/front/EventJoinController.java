@@ -43,7 +43,7 @@ public class EventJoinController {
             nextCursor = String.valueOf(content.get(content.size()-1).getId());
         }
 
-        CursorResponse cursorResponse = new CursorResponse.Builder<>("/api/3/event/join/history", content)
+        CursorResponse cursorResponse = new CursorResponse.Builder<>("/api/1/event/join/history", content)
                 .withCount(size)
                 .withCursor(nextCursor)
                 .toBuild();

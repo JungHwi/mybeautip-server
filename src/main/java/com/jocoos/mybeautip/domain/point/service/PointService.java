@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.domain.point.service;
 
 import com.jocoos.mybeautip.domain.event.service.EventService;
-import com.jocoos.mybeautip.domain.point.code.PointStatus;
+import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.domain.point.converter.MemberPointConverter;
 import com.jocoos.mybeautip.domain.point.dto.PointHistoryResponse;
-import com.jocoos.mybeautip.domain.point.dto.PointMonthlyHistoryResponse;
+import com.jocoos.mybeautip.domain.point.dto.PointMonthlyStatisticsResponse;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderService;
 import com.jocoos.mybeautip.member.point.MemberPoint;
@@ -37,11 +37,11 @@ public class PointService {
     private final MemberPointConverter memberPointConverter;
 
     @Transactional(readOnly = true)
-    public PointMonthlyHistoryResponse getPointMonthlyHistory(long memberId) {
+    public PointMonthlyStatisticsResponse getPointMonthlyHistory(long memberId) {
         int earnedPoint = getEarnedPoint(memberId);
         int expiryPoint = getExpiryPoint(memberId);
 
-        return PointMonthlyHistoryResponse.builder()
+        return PointMonthlyStatisticsResponse.builder()
                 .earnedPoint(earnedPoint)
                 .expiryPoint(expiryPoint)
                 .build();
@@ -49,14 +49,14 @@ public class PointService {
 
 
     @Transactional(readOnly = true)
-    public List<PointHistoryResponse> getPointHistoryList(long memberId, PointStatus pointStatus, int size, long cursor) {
+    public List<PointHistoryResponse> getPointHistoryList(long memberId, PointStatusGroup pointStatusGroup, int size, long cursor) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
 
         Slice<MemberPoint> memberPointList;
-        if (pointStatus == null) {
+        if (pointStatusGroup == null) {
             memberPointList = pointRepository.findByMemberId(memberId, cursor, pageable);
         } else {
-            memberPointList = pointRepository.findByMemberIdAndStateIn(memberId, pointStatus.getLegacyCodeGroup(), cursor, pageable);
+            memberPointList = pointRepository.findByMemberIdAndStateIn(memberId, pointStatusGroup.getLegacyCodeGroup(), cursor, pageable);
         }
 
         List<PointHistoryResponse> result = memberPointConverter.convertToResponse(memberPointList.getContent());
@@ -98,8 +98,6 @@ public class PointService {
         return orderService.getPurchaseNameMap(orderIds);
     }
 
-
-
     private int getEarnedPoint(long memberId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
         List<MemberPoint> memberPointList = pointRepository.findByMemberPointHistory(memberId, new HashSet<>(Collections.singletonList(MemberPoint.STATE_EARNED_POINT)), LocalDateTimeUtils.getStartDateByMonth(), LocalDateTimeUtils.getEndDateByMonth(), pageable);
@@ -123,9 +121,9 @@ public class PointService {
                 .sum();
 
         int totalUsed = memberPointDetailList.stream()
-                .mapToInt(detail -> Math.abs(detail.getPoint()))
+                .mapToInt(MemberPointDetail::getPoint)
                 .sum();
 
-        return totalEarned - totalUsed;
+        return totalEarned + totalUsed;
     }
 }

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.point.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.point.code.PointStatus;
 import com.jocoos.mybeautip.member.order.Order;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +19,7 @@ public class PointHistoryResponse {
 
     private String title;
 
-    private int state;
+    private PointStatus status;
 
     private int point;
 

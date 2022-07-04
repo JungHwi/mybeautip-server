@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class PointMonthlyHistoryResponse {
+public class PointMonthlyStatisticsResponse {
 
     private int earnedPoint;
 

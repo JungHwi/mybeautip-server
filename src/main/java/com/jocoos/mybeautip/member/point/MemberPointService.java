@@ -173,7 +173,7 @@ public class MemberPointService {
                 break;
             }
 
-            int remainingPoint = pointDetailMap.get(availablePoint.getId()) == null ? availablePoint.getPoint() : availablePoint.getPoint() - Math.abs((pointDetailMap.get(availablePoint.getId())));
+            int remainingPoint = pointDetailMap.get(availablePoint.getId()) == null ? availablePoint.getPoint() : availablePoint.getPoint() + (pointDetailMap.get(availablePoint.getId()));
             if (remainingPoint > 0) {
                 if (remainingPoint > memberPoint.getPoint() - usedPoint) {
                     detailList.add(new MemberPointDetail(availablePoint, memberPoint.getId(), memberPoint.getPoint() - usedPoint, usePointService, usePointServiceId));
