@@ -19,6 +19,7 @@ public class SocialLoginService {
     private final KakaoMemberRepository kakaoMemberRepository;
     private final NaverMemberRepository naverMemberRepository;
     private final FacebookMemberRepository facebookMemberRepository;
+    private final AppleMemberRepository appleMemberRepository;
     private final LoginServiceFactory loginServiceFactory;
     private final SignupEventService signupEventService;
 
@@ -67,6 +68,9 @@ public class SocialLoginService {
                 break;
             case FacebookLoginService.PROVIDER_TYPE:
                 memberId = getMemberIdForFacebook(socialMemberRequest.getId());
+                break;
+            case AppleLoginService.PROVIDER_TYPE:
+                memberId = getMemberIdForApple(socialMemberRequest.getId());
                 break;
             default:
                 throw new MybeautipException("Unsupported provider type");
@@ -126,6 +130,23 @@ public class SocialLoginService {
                 throw new MemberNotFoundException("Dormant Member. member id - " + facebookMember.getMemberId());
             default:
                 throw new MemberNotFoundException("No such member. member id - " + facebookMember.getMemberId());
+        }
+    }
+
+    private long getMemberIdForApple(String appleId) {
+        AppleMember appleMember = appleMemberRepository.findById(appleId)
+                .orElseThrow(() -> new MemberNotFoundException("No such facebook member. facebook id - " + appleId));
+
+        Member member = memberRepository.findById(appleMember.getMemberId())
+                .orElseThrow(() -> new MemberNotFoundException("No such member. member id - " + appleMember.getMemberId()));
+
+        switch (member.getStatus()) {
+            case ACTIVE:
+                return member.getId();
+            case DORMANT:
+                throw new MemberNotFoundException("Dormant Member. member id - " + appleMember.getMemberId());
+            default:
+                throw new MemberNotFoundException("No such member. member id - " + appleMember.getMemberId());
         }
     }
 }

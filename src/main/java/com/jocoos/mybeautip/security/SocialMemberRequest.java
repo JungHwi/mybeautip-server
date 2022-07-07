@@ -18,6 +18,7 @@ public class SocialMemberRequest {
     private String name;
     private String picture;
     private String provider;
+    private String refreshToken;
 
     public Member toMember() {
         Member member = new Member();

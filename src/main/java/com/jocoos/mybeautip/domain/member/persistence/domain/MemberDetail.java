@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.member.persistence.domain;
 
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.code.SkinType;
 import com.jocoos.mybeautip.member.code.SkinWorry;
 import com.jocoos.mybeautip.member.code.converter.SkinWorrySetConverter;
@@ -42,5 +43,13 @@ public class MemberDetail {
 
     public MemberDetail(long memberId) {
         this.memberId = memberId;
+    }
+
+    public void setSkinWorry(Set<SkinWorry> skinWorrySet) {
+        if (skinWorrySet.size() > 3) {
+            throw new BadRequestException("too_many_worry", "SkinWorry size id - " + skinWorrySet.size());
+        }
+
+        this.skinWorry = skinWorrySet;
     }
 }

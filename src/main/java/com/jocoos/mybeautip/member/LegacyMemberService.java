@@ -240,16 +240,6 @@ public class LegacyMemberService {
         return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
     }
 
-    @Transactional
-    public void tagMigration() {
-        List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
-
-        for (Member member : noTagMembers) {
-            member = adjustTag(member);
-            memberRepository.save(member);
-        }
-    }
-
     // Check ASPECT
     @Transactional
     public Member register(SignupRequest signupRequest) {
@@ -456,6 +446,10 @@ public class LegacyMemberService {
         if (StringUtils.isNotBlank(request.getInviterTag())) {
             targetMember = memberRepository.findByTag(request.getInviterTag())
                     .orElseThrow(() -> new MemberNotFoundException("No such Member. tag - " + request.getInviterTag()));
+
+            if (member.getId().equals(targetMember.getId())) {
+                throw new BadRequestException("my_tag", "Target member is me.");
+            }
 
             if (memberDetail.getInviterId() == null) {
                 isTagChanged = true;

@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.MemberSignupService;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import javax.validation.Valid;
 @RequestMapping("/api/")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class SignupController {
 
     private final MemberSignupService memberSignupService;

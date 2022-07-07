@@ -12,5 +12,4 @@ public interface SocialMemberService<T extends SocialMember> {
     T findById(String id);
 
     T save(SignupRequest request, long memberId);
-
 }

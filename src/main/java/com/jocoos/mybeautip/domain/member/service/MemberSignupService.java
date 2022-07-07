@@ -7,12 +7,10 @@ import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
-import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
-import com.jocoos.mybeautip.member.SocialMember;
+import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import com.jocoos.mybeautip.security.AccessTokenResponse;
+import com.jocoos.mybeautip.security.AppleLoginService;
 import com.jocoos.mybeautip.security.JwtTokenProvider;
 import com.jocoos.mybeautip.support.DateUtils;
 import lombok.RequiredArgsConstructor;
@@ -35,12 +33,14 @@ public class MemberSignupService {
     private final SocialMemberFactory socialMemberFactory;
     private final MemberService memberService;
     private final LegacyMemberService legacyMemberService;
+    private final AppleLoginService appleLoginService;
 
     private final MemberRepository memberRepository;
     private final MemberLeaveLogRepository memberLeaveLogRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberConverter memberConverter;
+    private final KakaoMemberRepository kakaoMemberRepository;
 
     @Value("${mybeautip.service.member.rejoin-available-second}")
     private long REJOIN_AVAILABLE_SECOND;
@@ -73,6 +73,9 @@ public class MemberSignupService {
 
         memberRepository.save(member);
 
+        if (member.getLink() == Member.LINK_APPLE) {
+            appleLoginService.revoke(member.getId());
+        }
         memberLeaveLogRepository.save(new MemberLeaveLog(member, reason));
     }
 
@@ -94,7 +97,7 @@ public class MemberSignupService {
             case DORMANT:
                 throw new BadRequestException("dormant_member", "dormant_member");
             case WITHDRAWAL:
-                LocalDateTime availableRejoin = DateUtils.toLocalDateTime(member.getDeletedAt(), ZoneId.of("UTC")).plusSeconds(REJOIN_AVAILABLE_SECOND);
+                LocalDateTime availableRejoin = DateUtils.toLocalDateTime(member.getDeletedAt(), ZoneId.systemDefault()).plusSeconds(REJOIN_AVAILABLE_SECOND);
                 if (availableRejoin.isAfter(LocalDateTime.now())) {
                     throw new BadRequestException("not_yet_rejoin", "not_yet_rejoin");
                 }

@@ -20,7 +20,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
@@ -100,7 +102,7 @@ public class PointService {
 
     private int getEarnedPoint(long memberId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        List<MemberPoint> memberPointList = pointRepository.findByMemberPointHistory(memberId, new HashSet<>(Collections.singletonList(MemberPoint.STATE_EARNED_POINT)), LocalDateTimeUtils.getStartDateByMonth(), LocalDateTimeUtils.getEndDateByMonth(), pageable);
+        List<MemberPoint> memberPointList = pointRepository.findByMemberPointHistory(memberId, PointStatusGroup.EARN.getLegacyCodeGroup(), LocalDateTimeUtils.getStartDateByMonth(), LocalDateTimeUtils.getEndDateByMonth(), pageable);
 
         return memberPointList.stream()
                 .mapToInt(MemberPoint::getPoint)
@@ -109,7 +111,7 @@ public class PointService {
 
     private int getExpiryPoint(long memberId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        List<MemberPoint> memberPointList = pointRepository.findByExpiryPoint(memberId, new HashSet<>(Collections.singletonList(MemberPoint.STATE_EARNED_POINT)), LocalDateTimeUtils.getStartDateByMonth(), LocalDateTimeUtils.getEndDateByMonth(), pageable);
+        List<MemberPoint> memberPointList = pointRepository.findByExpiryPoint(memberId, PointStatusGroup.EARN.getLegacyCodeGroup(), LocalDateTimeUtils.getStartDateByMonth(), LocalDateTimeUtils.getEndDateByMonth(), pageable);
         List<Long> pointIds = memberPointList.stream()
                 .map(MemberPoint::getId)
                 .collect(Collectors.toList());

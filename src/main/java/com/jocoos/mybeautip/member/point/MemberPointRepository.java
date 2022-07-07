@@ -44,13 +44,13 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
 
     Optional<MemberPoint> findByMemberAndOrderAndPointAndState(Member member, Order order, int point, int state);
 
-    @Query("SELECT point " +
-            "FROM MemberPoint as point " +
-            "WHERE point.state = 1 " +
-            "   AND point.member.id = ?1 " +
-            "   AND point.id >= ?2 " +
-            "ORDER BY point.id")
-    List<MemberPoint> getAvailablePoint(long memberId, Long id);
+    @Query("SELECT memberPoint " +
+            "FROM MemberPoint AS memberPoint " +
+            "WHERE memberPoint.member.id = :memberId " +
+            "   AND memberPoint.id >= :cursor " +
+            "   AND memberPoint.state in :state " +
+            "ORDER BY memberPoint.id ")
+    List<MemberPoint> getAvailablePoint(long memberId, Set<Integer> state, Long cursor);
 
 
     // admin api
