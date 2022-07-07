@@ -29,9 +29,4 @@ public class LegacyMemberServiceTest {
     public void report() {
 
     }
-
-    @Test
-    public void tagMigration() {
-        legacyMemberService.tagMigration();
-    }
 }

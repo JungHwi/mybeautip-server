@@ -33,6 +33,9 @@ public class AppleMember extends CreatedDateAuditable implements SocialMember {
     @Column(nullable = false)
     private Long memberId;
 
+    @Column (nullable = false)
+    private String refreshToken;
+
     public String getSocialId() {
         return appleId;
     }
@@ -42,5 +45,9 @@ public class AppleMember extends CreatedDateAuditable implements SocialMember {
         this.email = request.getEmail();
         this.name = request.getUsername();
         this.memberId = memberId;
+    }
+
+    public void revoke() {
+        this.refreshToken = "";
     }
 }

@@ -13,6 +13,7 @@ public interface MemberDetailConverter {
     @Mappings({
             @Mapping(target = "ageGroup", ignore = true),
             @Mapping(target = "inviterTag", ignore = true),
+            @Mapping(target = "changedTagInfo", ignore = true)
     })
     MemberDetailResponse convert(MemberDetail entity);
 

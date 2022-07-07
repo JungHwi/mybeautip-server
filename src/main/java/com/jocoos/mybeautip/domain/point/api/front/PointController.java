@@ -35,7 +35,7 @@ public class PointController {
     }
 
     @GetMapping("/1/point/history")
-    public ResponseEntity getPointHistory(@RequestParam(required = false) PointStatusGroup pointStatusGroup,
+    public ResponseEntity getPointHistory(@RequestParam(name = "point_status_group", required = false) PointStatusGroup pointStatusGroup,
                                           @RequestParam(defaultValue = "20") int size,
                                           @RequestParam(defaultValue = MAX_LONG_STRING) long cursor) {
 

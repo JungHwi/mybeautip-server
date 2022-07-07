@@ -1,11 +1,16 @@
 package com.jocoos.mybeautip;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Random;
-
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.jocoos.mybeautip.config.ApplicationConfig;
+import com.jocoos.mybeautip.restapi.VideoController;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,18 +22,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import com.jocoos.mybeautip.config.ApplicationConfig;
-import com.jocoos.mybeautip.restapi.VideoController;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Random;
 
 
 @RunWith(SpringRunner.class)

@@ -84,9 +84,4 @@ class LegacyMemberControllerTest {
         ResponseEntity result = legacyMemberController.updateDetailInfo(request);
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
-
-    @Test
-    public void migrationTag() {
-        legacyMemberController.migrationTag();
-    }
 }

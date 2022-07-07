@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
+import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
@@ -162,7 +163,7 @@ public class MemberPointService {
             cursor = lastUsedPoint.getParentId();
         }
 
-        List<MemberPoint> pointList = memberPointRepository.getAvailablePoint(memberPoint.getMember().getId(), cursor);
+        List<MemberPoint> pointList = memberPointRepository.getAvailablePoint(memberPoint.getMember().getId(), PointStatusGroup.EARN.getLegacyCodeGroup(), cursor);
 
         List<MemberPointDetail> pointDetailList = memberPointDetailRepository.findByParentIdAndState(cursor, STATE_USE_POINT);
         Map<Long, Integer> pointDetailMap = pointDetailList.stream()
