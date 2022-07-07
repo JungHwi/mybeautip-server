@@ -54,14 +54,21 @@ public class AppleLoginService implements LoginService {
                 .client_secret(makeClientSecret())
                 .build();
 
-        Claims Claims = getClaimsBy(identityToken);
+        Claims claims = getClaimsBy(identityToken);
         AppleTokenResponse tokenResponse = appleClient.getToken(tokenRequest);
         String refreshToken = tokenResponse.getRefreshToken();
         if (StringUtils.isBlank(refreshToken)) {
             throw new AuthenticationException("Refresh token required");
         }
 
-        return toSocialMember(Claims, refreshToken);
+        // FIXME 기존 회원들 refreshToken 저장을 위해 코드 추가. 적당한 시점에 코드 삭제.
+        String appleId = claims.get("sub", String.class);
+        AppleMember appleMember = repository.findById(appleId).orElseGet(null);
+        if (appleMember != null) {
+            appleMember.setRefreshToken(refreshToken);
+        }
+
+        return toSocialMember(claims, refreshToken);
     }
 
     public void revoke(long memberId) {
@@ -72,9 +79,10 @@ public class AppleLoginService implements LoginService {
     }
 
     public void revoke(AppleMember appleMember) {
-        if (appleMember == null) {
+        if (appleMember == null || StringUtils.isBlank(appleMember.getRefreshToken())) {
             return;
         }
+
         RevokeRequest revokeRequest = RevokeRequest.builder()
                 .client_id(oauth2Config.getApple().getAppBundleId())
                 .client_secret(makeClientSecret())
