@@ -68,6 +68,7 @@ public class VideoUploadNotificationService implements NotificationService<Video
     private void send(NotificationMessageCenterEntity messageCenter, NotificationMessagePushEntity pushMessage, NotificationTargetInfo targetInfo, Video video) {
         Map<String, String> arguments = getArgument(targetInfo.getNickname(), video);
         NotificationCenterEntity notificationCenterEntity = sendCenter(messageCenter, video.getThumbnailUrl(), targetInfo, arguments);
+        log.debug("{}", notificationCenterEntity);
         sendAppPush(pushMessage, video.getThumbnailUrl(), notificationCenterEntity.getId(), targetInfo, arguments);
     }
 
@@ -81,8 +82,6 @@ public class VideoUploadNotificationService implements NotificationService<Video
                 .messageId(messageInfo.getId())
                 .build();
 
-        log.debug("{}", messageInfo);
-        log.debug("{}", entity);
         return notificationCenterRepository.save(entity);
     }
 

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
-import com.jocoos.mybeautip.domain.member.service.MemberService;
 import com.jocoos.mybeautip.domain.notification.service.impl.VideoUploadNotificationService;
 import com.jocoos.mybeautip.support.AsyncService;
 import com.jocoos.mybeautip.support.slack.SlackService;
@@ -38,7 +37,7 @@ public class VideoUploadNotificationAspect {
 
     if (result instanceof Video) {
       Video video = (Video) result;
-      if (verify(video)) {
+      if (verifyPublicVideo(video)) {
         send(video);
       }
 
@@ -73,15 +72,10 @@ public class VideoUploadNotificationAspect {
     return proceed;
   }
 
-  private boolean verify(Video video) {
+  private boolean verifyPublicVideo(Video video) {
     return "UPLOADED".equals(video.getType()) &&
-        "VOD".equals(video.getState());
+        "VOD".equals(video.getState()) && "PUBLIC".equals(video.getVisibility());
   }
-
-//  private boolean verify(Video video) {
-//    return "UPLOADED".equals(video.getType()) &&
-//        "VOD".equals(video.getState()) && "PUBLIC".equals(video.getVisibility());
-//  }
 
   @Async
   public void send(Video video) {
