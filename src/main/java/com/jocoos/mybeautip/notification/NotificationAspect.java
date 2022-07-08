@@ -40,8 +40,7 @@ public class NotificationAspect {
         this.feedService = feedService;
     }
 
-    @AfterReturning(value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.startVideo(..))",
-            returning = "result")
+    @Deprecated
     public void onAfterReturningStartVideo(JoinPoint joinPoint, Object result) {
         log.debug("joinPoint: {}", joinPoint.toLongString());
 

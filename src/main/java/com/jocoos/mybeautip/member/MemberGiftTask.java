@@ -48,7 +48,7 @@ public class MemberGiftTask {
     /**
      * Remove member coupons based on expiry date at midnight
      */
-    @Scheduled(cron = "0 0 0 * * *")
+//    @Scheduled(cron = "0 0 0 * * *")
     public void removeMemberCouponIsExpired() {
         Date now = new Date();
         List<MemberCoupon> expiredCoupons = memberCouponRepository.findByUsedAtIsNullAndExpiredAtIsNullAndExpiryAtBefore(new Date());
@@ -63,7 +63,7 @@ public class MemberGiftTask {
         }
     }
 
-    @Scheduled(fixedDelay = 60 * 1000)
+//    @Scheduled(fixedDelay = 60 * 1000)
     public void expirePoints() {
         Date now = new Date();
         List<MemberPoint> expires = memberPointRepository.findByStateInAndExpiryAtBeforeAndExpiredAtIsNull(getTotalEarnedStates(), now);
@@ -76,7 +76,7 @@ public class MemberGiftTask {
         }
     }
 
-    @Scheduled(fixedDelay = 60 * 1000)
+//    @Scheduled(fixedDelay = 60 * 1000)
     public void remindPoints() {
         Date before = getDays(reminder);
         List<MemberPoint> reminders = memberPointRepository.findByStateInAndExpiryAtBeforeAndRemindIsFalseAndExpiredAtIsNull(getTotalEarnedStates(), before);

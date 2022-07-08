@@ -63,9 +63,9 @@ public class SlackService {
         }
 
         StringBuilder sb = new StringBuilder(String.format("*%s*", header));
-        sb.append(String.format("```사용자: %s/%d\n", video.getMember().getUsername(), video.getMember().getId()));
+        sb.append(String.format("```사용자: %s / %d\n", video.getMember().getUsername(), video.getMember().getId()));
         if (isPrivateVideo) {
-            sb.append(String.format("영상제목: %s, 공개일: %s\n", video.getTitle(), DateUtils.toFormat(video.getStartedAt())));
+            sb.append(String.format("영상제목: %s, 비디오 키: %s, 공개일: %s\n", video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())));
         } else {
             sb.append(String.format("영상제목: %s\n", video.getTitle()));
         }
@@ -359,9 +359,9 @@ public class SlackService {
 
     public void makeVideoPublic(Video v) {
         String title = String.format("비공개 컨텐츠(%d)가 공개되었습니다.", v.getId());
-        String message = String.format("사용자: %s/%d, 영상제목: %s, 공개일: %s, visibility: %s",
-            v.getMember().getUsername(), v.getMember().getId(),
-            v.getTitle(), DateUtils.toLocalDateTime(v.getStartedAt()), v.getVisibility());;
+        String message = String.format("사용자: %s / %d, 비디오 키: %s, 영상제목: %s, visibility: %s",
+            v.getMember().getUsername(), v.getMember().getId(), v.getVideoKey(),
+            v.getTitle(), v.getVisibility());;
 
         SlackMessageFormat slackMessage = new SlackMessageFormat(title, message);
         send(slackMessage);

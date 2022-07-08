@@ -1,5 +1,13 @@
 package com.jocoos.mybeautip.domain.notification.service.impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.jocoos.mybeautip.domain.member.service.MemberService;
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -16,23 +24,17 @@ import com.jocoos.mybeautip.domain.notification.service.MemberNotificationServic
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
+import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
+import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.video.Video;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
-@Aspect
-@Component
+@Service
 @RequiredArgsConstructor
 public class VideoUploadNotificationService implements NotificationService<Video> {
 
@@ -40,44 +42,37 @@ public class VideoUploadNotificationService implements NotificationService<Video
     private final NotificationCenterRepository notificationCenterRepository;
     private final NotificationMessageCenterRepository messageCenterRepository;
     private final NotificationMessagePushRepository messagePushRepository;
-
     private final NotificationMessagePushConverter pushConverter;
-
     private final AppPushService pushService;
-
     private final TemplateType templateType = TemplateType.VIDEO_UPLOAD;
 
-    @AfterReturning(returning = "result", value = "execution(* com.jocoos.mybeautip.restapi.CallbackController.startVideo(..))")
-    public void occurs(Object result) {
-        if (result instanceof Video) {
-            Video video = (Video) result;
-            if (verify(video)) {
-                send(video);
-            }
-        } else {
-            log.error("Must be Video. But this object is > " + result);
-        }
-    }
-
-    private boolean verify(Video video) {
-        return "UPLOADED".equals(video.getType()) && "VOD".equals(video.getState());
-    }
-
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(Video video) {
         int messageIndex = getMessageRandomIndex();
+        NotificationMessageCenterEntity centerMessage = getCenterMessage(messageIndex);
+        log.debug("{}", centerMessage);
+
+        NotificationMessagePushEntity pushMessage = getMessagePushEntity(messageIndex);
+        log.debug("{}", pushMessage);
+
         List<NotificationTargetInfo> targetInfoList = getTargetInfo();
+        log.debug("target list size: {}", targetInfoList.size());
 
         for (NotificationTargetInfo targetInfo : targetInfoList) {
-            Map<String, String> arguments = getArgument(targetInfo.getNickname(), video);
-            NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, video.getThumbnailUrl(), targetInfo, arguments);
-            sendAppPush(messageIndex, video.getThumbnailUrl(), notificationCenterEntity.getId(), targetInfo, arguments);
+            log.info("{}", targetInfo);
+            send(centerMessage, pushMessage, targetInfo, video);
         }
     }
 
-    private NotificationCenterEntity sendCenter(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
-        NotificationMessageCenterEntity messageInfo = getCenterMessage(messageIndex);
+    @Transactional
+    private void send(NotificationMessageCenterEntity messageCenter, NotificationMessagePushEntity pushMessage, NotificationTargetInfo targetInfo, Video video) {
+        Map<String, String> arguments = getArgument(targetInfo.getNickname(), video);
+        NotificationCenterEntity notificationCenterEntity = sendCenter(messageCenter, video.getThumbnailUrl(), targetInfo, arguments);
+        sendAppPush(pushMessage, video.getThumbnailUrl(), notificationCenterEntity.getId(), targetInfo, arguments);
+    }
+
+    private NotificationCenterEntity
+    sendCenter(NotificationMessageCenterEntity messageInfo, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
         NotificationCenterEntity entity = NotificationCenterEntity.builder()
                 .userId(targetInfo.getMemberId())
                 .status(NotificationStatus.NOT_READ)
@@ -86,11 +81,13 @@ public class VideoUploadNotificationService implements NotificationService<Video
                 .messageId(messageInfo.getId())
                 .build();
 
+        log.debug("{}", messageInfo);
+        log.debug("{}", entity);
         return notificationCenterRepository.save(entity);
     }
 
-    private void sendAppPush(int messageIndex, String imageUrl, Long notificationId, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
-        AppPushMessage pushMessage = getAppPushMessage(messageIndex, imageUrl, notificationId, arguments);
+    private void sendAppPush(NotificationMessagePushEntity entity, String imageUrl, Long notificationId, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
+        AppPushMessage pushMessage = getAppPushMessage(entity, imageUrl, notificationId, arguments);
         pushService.send(targetInfo, pushMessage);
     }
 
@@ -104,11 +101,14 @@ public class VideoUploadNotificationService implements NotificationService<Video
         return entities.get(index);
     }
 
-    private AppPushMessage getAppPushMessage(int index, String imageUrl, Long notificationId, Map<String, String> arguments) {
-        List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
-        NotificationMessagePushEntity entity = entities.get(index);
+    private AppPushMessage getAppPushMessage(NotificationMessagePushEntity entity, String imageUrl, Long notificationId, Map<String, String> arguments) {
         AppPushMessage message = pushConverter.convert(entity, imageUrl, notificationId);
         return message.setArguments(arguments);
+    }
+
+    private NotificationMessagePushEntity getMessagePushEntity(int index) {
+        List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
+        return entities.get(index);
     }
 
     private List<NotificationTargetInfo> getTargetInfo() {

@@ -8,16 +8,16 @@ import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberNotificationService {
@@ -41,9 +41,9 @@ public class MemberNotificationService {
         return converter.convert(members, devices);
     }
 
-    @Transactional(readOnly = true)
     public List<NotificationTargetInfo> getMemberNotificationInfo() {
-        List<Member> members = memberRepository.findAll();
+        // FIXME: find all available members who don't withdraw
+        List<Member> members = memberRepository.findByVisibleIsTrueAndPushableIsTrue();
         List<Device> devices = deviceRepository.findByPushableAndValidAndCreatedByPushable(true, true, true);
 
         return converter.convert(members, devices);

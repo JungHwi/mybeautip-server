@@ -132,11 +132,18 @@ public class VideoUpdateService {
     if (isWrongUser(video.getMember().getId(), request.getUserId().longValue())) {
       log.error("Invalid UserID: " + request.getUserId());
       throw new MemberNotFoundException();
-
     }
 
     if (isLockedVideo(video, request.getVisibility())) {
       throw new BadRequestException("video_locked", "");
+    }
+
+    /**
+     * Requested by mybeautip-batch server at started time of video
+     */
+    if (request.isFirstOpen()) {
+      video.setFirstOpen(true);
+      video.setStartedAt(null);
     }
 
     VideoExtraData extraData = null;
@@ -144,17 +151,12 @@ public class VideoUpdateService {
       extraData = videoDataService.getDataObject(request.getData());
       log.info("{}", extraData);
 
-      /**
-       * Requested by mybeautip-batch server at started time of video
-       */
       if (request.isFirstOpen()) {
-        video.setFirstOpen(true);
-        video.setStartedAt(null);
-
         extraData.setStartedAt(null);
       }
     }
 
+    log.debug("{}", video);
     String oldState = video.getState();
 
     video = videoService.updateVideoProperties(request, video, extraData);
@@ -167,16 +169,19 @@ public class VideoUpdateService {
       videoService.clearVideoGoods(video);
     }
 
-    // Send on-live stats using slack when LIVE ended
-    if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(oldState) && "VOD".equals(request.getState())) {
-      videoService.sendStats(video);
+    if ("BROADCASTED".equals(video.getType())) {
+      // Send on-live stats using slack when LIVE ended
+      if ("LIVE".equals(oldState) && "VOD".equals(request.getState())) {
+        videoService.sendStats(video);
+      }
+
+      // Send collect watch counts on LIVE
+      if ("LIVE".equals(request.getState())) {
+        videoWatchService.collectVideoWatchCount(video);
+      }
     }
 
-    // Send collect watch counts on LIVE
-    if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(request.getState())) {
-      videoWatchService.collectVideoWatchCount(video);
-    }
-
+    log.debug("{}", video);
     return video;
   }
 
