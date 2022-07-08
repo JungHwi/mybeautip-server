@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Aspect
-@Component
+@Deprecated
 public class FeedAspect {
 
     private final FeedService feedService;

@@ -42,7 +42,7 @@ spring:
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hibernate.jdbc.batch_versioned_data: false
       hibernate.format_sql: true
-    show-sql: false
+    show-sql: true
   servlet:
     multipart:
       maxFileSize: 30MB
@@ -120,10 +120,10 @@ mybeautip:
   shipping:
     fixed: 2500 # 원(₩)
   slack:
-    key:
-    channel:
-    order-key:
-    order-channel:
+    key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
+    channel: "#mybeautip-dev"
+    order-key: T02GN94AU/BJA6YDJPJ/7L197lsrvR2X5yBsZpA2wdH0
+    order-channel: "#z-mybeautip-dev"
   notification:
     duplicate-limit-duration: 600000 # 10 min (milliseconds)
     instant-message:
