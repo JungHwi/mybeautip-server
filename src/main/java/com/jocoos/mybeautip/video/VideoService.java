@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.domain.notification.service.impl.VideoUploadNotificationService;
 import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.exception.NotFoundException;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -28,6 +30,8 @@ import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -47,6 +51,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class VideoService {
@@ -72,50 +77,9 @@ public class VideoService {
     private final VideoDataService videoDataService;
     private final VideoCategoryRepository videoCategoryRepository;
     private final VideoScrapRepository videoScrapRepository;
+
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
-
-    public VideoService(LegacyMemberService legacyMemberService,
-                        TagService tagService,
-                        FeedService feedService,
-                        SlackService slackService,
-                        VideoRepository videoRepository,
-                        CommentRepository commentRepository,
-                        VideoLikeRepository videoLikeRepository,
-                        VideoWatchRepository videoWatchRepository,
-                        BlockRepository blockRepository,
-                        MemberRepository memberRepository,
-                        GoodsRepository goodsRepository,
-                        VideoGoodsRepository videoGoodsRepository,
-                        VideoViewRepository videoViewRepository,
-                        CommentLikeRepository commentLikeRepository,
-                        VideoReportRepository videoReportRepository,
-                        ViewRecodingRepository viewRecodingRepository,
-                        OrderRepository orderRepository,
-                        VideoDataService videoDataService,
-                        VideoCategoryRepository videoCategoryRepository,
-                        VideoScrapRepository videoScrapRepository) {
-        this.legacyMemberService = legacyMemberService;
-        this.tagService = tagService;
-        this.feedService = feedService;
-        this.slackService = slackService;
-        this.videoRepository = videoRepository;
-        this.commentRepository = commentRepository;
-        this.videoLikeRepository = videoLikeRepository;
-        this.videoWatchRepository = videoWatchRepository;
-        this.blockRepository = blockRepository;
-        this.memberRepository = memberRepository;
-        this.goodsRepository = goodsRepository;
-        this.videoGoodsRepository = videoGoodsRepository;
-        this.videoViewRepository = videoViewRepository;
-        this.commentLikeRepository = commentLikeRepository;
-        this.videoReportRepository = videoReportRepository;
-        this.viewRecodingRepository = viewRecodingRepository;
-        this.orderRepository = orderRepository;
-        this.videoDataService = videoDataService;
-        this.videoCategoryRepository = videoCategoryRepository;
-        this.videoScrapRepository = videoScrapRepository;
-    }
 
     public Slice<Video> findVideosWithKeyword(String keyword, String cursor, int count) {
         Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
@@ -441,109 +405,9 @@ public class VideoService {
         return createdVideo;
     }
 
-    @Transactional
-    public Video startVideo(CallbackController.CallbackStartVideoRequest request, Member member) {
-        Video video;
-
-        if ("UPLOADED".equals(request.getType())) {
-            video = new Video(member);
-            BeanUtils.copyProperties(request, video);
-            Video createdVideo = videoRepository.save(video);
-
-            if (StringUtils.isNotEmpty(createdVideo.getContent())) {
-                tagService.increaseRefCount(createdVideo.getContent());
-                tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());
-            }
-
-            // Set related goods info
-            log.info("data: {}", request.getData());
-            if (StringUtils.isNotEmpty(request.getData())) {
-                VideoExtraData extraData = videoDataService.getDataObject(request.getData());
-                log.info("{}", extraData);
-                List<VideoCategory> categories = new ArrayList<>();
-                if (!StringUtils.isBlank(extraData.getStartedAt())) {
-                    String startedAt = String.valueOf(extraData.getStartedAt());
-
-                    log.info("startedAt: {}", startedAt);
-                    Date date = DateUtils.stringFormatToDate(startedAt);
-                    video.setStartedAt(date);
-                }
-
-                // if data had category array
-                if (!StringUtils.isBlank(extraData.getCategory())) {
-                    categories = parseCategory(video.getId(), extraData.getCategory());
-                    log.info("categories: {}", categories);
-                    video.setCategory(categories);
-                }
-
-                List<VideoGoods> videoGoods = new ArrayList<>();
-                if (!StringUtils.isBlank(extraData.getGoods())) {
-                    String[] userData = StringUtils.deleteWhitespace(String.valueOf(extraData.getGoods())).split(",");
-                    for (String goodsNo : userData) {
-                        if (goodsNo.length() != 10) { // invalid goodsNo
-                            continue;
-                        }
-                        goodsRepository.findByGoodsNo(goodsNo).ifPresent(g -> {
-                            videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
-                        });
-                    }
-
-                    if (videoGoods.size() > 0) {
-                        videoGoodsRepository.saveAll(videoGoods);
-
-                        // Set related goods count & one thumbnail image
-                        String url = videoGoods.get(0).getGoods().getListImageData().toString();
-                        createdVideo.setRelatedGoodsThumbnailUrl(url);
-                        createdVideo.setRelatedGoodsCount(videoGoods.size());
-                    }
-                }
-                if (videoGoods.size() > 0 || categories.size() > 0 || video.getStartedAt() != null) {
-                    videoRepository.save(createdVideo);
-                }
-            }
-        } else {
-            Optional<Video> videoByKey = videoRepository.findByVideoKey(request.getVideoKey());
-            if (videoByKey.isPresent()) {
-                video = videoByKey.get();
-            } else {
-                video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
-                        .orElseGet(() -> {
-                            log.error("Cannot find videoId: " + request.getVideoKey());
-                            throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
-                        });
-            }
-
-            BeanUtils.copyProperties(request, video);
-        }
-
-        if ("PUBLIC".equals(request.getVisibility())) {
-            memberRepository.updatePublicVideoCount(member.getId(), 1);
-        }
-
-        memberRepository.updateTotalVideoCount(member.getId(), 1);
-
-        if (!StringUtils.isBlank(request.getData2())) {
-            List<Integer> category = videoDataService.getCategory(request.getData2());
-            video.setCategory(createCategory(video.getId(), category));
-        }
-
-        return videoRepository.save(video);
-    }
-
     private Date parseStartedAt(String date) {
         LocalDateTime dateTime = LocalDateTime.parse("2018-05-05T11:50:55");
         return new Date();
-    }
-
-    private List<VideoCategory> parseCategory(Long videoId, String category) {
-        if (StringUtils.isBlank(category)) {
-            return new ArrayList<>();
-        }
-        String[] categories = category.split(",");
-        List<Integer> collect = Arrays.stream(categories)
-                .filter(c -> !"0".equals(c)).map(c -> Integer.valueOf(c))
-                .collect(Collectors.toList());
-        return createCategory(videoId, collect);
     }
 
     private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {

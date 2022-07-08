@@ -17,6 +17,8 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.report.VideoReport;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -33,6 +35,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.time.ZoneId;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class SlackService {
@@ -47,12 +50,6 @@ public class SlackService {
     private String orderSlackKey;
     @Value("${mybeautip.slack.order-channel}")
     private String orderSlackChannel;
-
-    public SlackService(VideoGoodsRepository videoGoodsRepository,
-                        RestTemplate restTemplate) {
-        this.videoGoodsRepository = videoGoodsRepository;
-        this.restTemplate = restTemplate;
-    }
 
     public void sendForVideo(Video video) {
         String header;
@@ -360,6 +357,16 @@ public class SlackService {
         send(message);
     }
 
+    public void makeVideoPublic(Video v) {
+        String title = String.format("비공개 컨텐츠(%d)가 공개되었습니다.", v.getId());
+        String message = String.format("사용자: %s/%d, 영상제목: %s, 공개일: %s, visibility: %s",
+            v.getMember().getUsername(), v.getMember().getId(),
+            v.getTitle(), DateUtils.toLocalDateTime(v.getStartedAt()), v.getVisibility());;
+
+        SlackMessageFormat slackMessage = new SlackMessageFormat(title, message);
+        send(slackMessage);
+    }
+
     private String getPurchaseInfo(List<Purchase> purchases) {
         StringBuilder sb = new StringBuilder();
         for (Purchase purchase : purchases) {
@@ -372,7 +379,7 @@ public class SlackService {
         return sb.toString();
     }
 
-    private void send(String message) {
+    public void send(String message) {
         UriComponents uriComponents = UriComponentsBuilder.newInstance()
                 .scheme("https").host("hooks.slack.com").path("services/").path(slackKey).build(true);
 
@@ -388,6 +395,12 @@ public class SlackService {
         } catch (RestClientException e) {
             log.warn("Send slack message throws exception: " + e.getMessage());
             // Do not throw exception
+        }
+    }
+
+    public void send(SlackMessageFormat slackMessageFormat) {
+        if (slackMessageFormat != null) {
+            send(slackMessageFormat.toString());
         }
     }
 
