@@ -94,6 +94,9 @@ public class Video {
     @JoinColumn(name = "owner")
     private Member member;
 
+    @Transient
+    private boolean isFirstOpen;
+
     public Video(Member owner) {
         this.member = owner;
         this.videoKey = "";
