@@ -3,8 +3,6 @@ package com.jocoos.mybeautip.domain.notification.service;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.TimeUnit;
-
 import com.jocoos.mybeautip.domain.notification.service.impl.VideoUploadNotificationService;
 import com.jocoos.mybeautip.support.AsyncService;
 import com.jocoos.mybeautip.support.slack.SlackService;
@@ -12,11 +10,8 @@ import com.jocoos.mybeautip.video.Video;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.StopWatch;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 
 
@@ -61,15 +56,6 @@ public class VideoUploadNotificationAspect {
         slackService.makeVideoPublic(video);
       }
     }
-  }
-
-  @Around(value = "execution(* com.jocoos.mybeautip.video.VideoService.*(..))")
-  public Object time(ProceedingJoinPoint joinPoint) throws Throwable {
-    StopWatch stopwatch = StopWatch.createStarted();
-    Object proceed = joinPoint.proceed();
-    stopwatch.stop();
-    log.debug("{}, time: {} ms", joinPoint.toLongString(), stopwatch.getTime(TimeUnit.MILLISECONDS));
-    return proceed;
   }
 
   private boolean verifyPublicVideo(Video video) {
