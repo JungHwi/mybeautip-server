@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.client.apple.dto.AppleTokenResponse;
 import com.jocoos.mybeautip.client.apple.dto.RevokeRequest;
 import com.jocoos.mybeautip.config.Oauth2Config;
 import com.jocoos.mybeautip.global.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.AppleMember;
 import com.jocoos.mybeautip.member.AppleMemberRepository;
 import io.jsonwebtoken.*;
@@ -34,6 +35,7 @@ import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -63,17 +65,17 @@ public class AppleLoginService implements LoginService {
 
         // FIXME 기존 회원들 refreshToken 저장을 위해 코드 추가. 적당한 시점에 코드 삭제.
         String appleId = claims.get("sub", String.class);
-        AppleMember appleMember = repository.findById(appleId).orElseGet(null);
-        if (appleMember != null) {
-            appleMember.setRefreshToken(refreshToken);
-        }
+        Optional<AppleMember> appleMember = repository.findById(appleId);
+        appleMember.ifPresent(
+                m -> m.setRefreshToken(refreshToken)
+        );
 
         return toSocialMember(claims, refreshToken);
     }
 
     public void revoke(long memberId) {
         AppleMember appleMember = repository.findByMemberId(memberId)
-                .orElseGet(null);
+                .orElseThrow(() -> new MemberNotFoundException("no such member. id - " + memberId));
 
         revoke(appleMember);
     }
