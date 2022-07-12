@@ -2,16 +2,16 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.global.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.video.*;
-import com.jocoos.mybeautip.video.watches.VideoWatchService;
+
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,98 +22,49 @@ import java.util.Locale;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/api/1/callbacks/video", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CallbackController {
     private static final String VIDEO_LOCKED = "video.locked";
     private static final String MEMBER_NOT_FOUND = "member.not_found";
     private static final String LIVE_NOT_ALLOWED = "video.live_not_allowed";
     private static final String MOTD_UPLOAD_NOT_ALLOWED = "video.motd_upload_not_allowed";
+
     private final VideoService videoService;
     private final MessageService messageService;
-    private final MemberRepository memberRepository;
-    private final VideoRepository videoRepository;
-    private final VideoWatchService videoWatchService;
-    private final VideoDataService videoDataService;
-
-    public CallbackController(VideoService videoService,
-                              MessageService messageService,
-                              VideoRepository videoRepository,
-                              MemberRepository memberRepository,
-                              VideoWatchService videoWatchService,
-                              VideoDataService videoDataService) {
-        this.videoService = videoService;
-        this.messageService = messageService;
-        this.videoRepository = videoRepository;
-        this.memberRepository = memberRepository;
-        this.videoWatchService = videoWatchService;
-        this.videoDataService = videoDataService;
-    }
+    private final VideoUpdateService videoUpdateService;
 
     @PostMapping
-    public Video startVideo(@Valid @RequestBody CallbackStartVideoRequest request,
-                            BindingResult bindingResult,
-                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+    public ResponseEntity startVideo(@Valid @RequestBody CallbackStartVideoRequest request,
+                                           BindingResult bindingResult,
+                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         if (bindingResult.hasErrors()) {
             log.info("{}", bindingResult.getTarget());
         }
         log.info("callback startVideo: {}", request.toString());
 
-        Member member = memberRepository.findByIdAndDeletedAtIsNull(request.getUserId())
-                .orElseGet(() -> {
-                    log.error("Invalid UserID: " + request.getUserId());
-                    throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
-                });
+        try {
+            videoUpdateService.created(request);
+        } catch (MemberNotFoundException e) {
+            log.error("Invalid UserID: " + request.getUserId());
+            throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
+        }
 
-        return videoService.startVideo(request, member);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PatchMapping
-    public Video updateVideo(@Valid @RequestBody CallbackUpdateVideoRequest request) {
+    public ResponseEntity updateVideo(@Valid @RequestBody CallbackUpdateVideoRequest request) {
         log.info("callback updateVideo: {}", request.toString());
-        Video video = videoRepository.findByVideoKeyAndDeletedAtIsNull(request.getVideoKey())
-                .orElseGet(() -> {
-                    log.error("Cannot find video " + request.getVideoKey());
-                    throw new NotFoundException("video_not_found", "video not found, videoKey: " + request.getVideoKey());
-                });
-
-        if (video.getMember().getId() != request.getUserId().longValue()) {
-            log.error("Invalid UserID: " + request.getUserId());
-            throw new BadRequestException("invalid_user_id", "Invalid user_id: " + request.getUserId());
-        }
-
-        if (video.getLocked() && "VOD".equals(video.getState()) && "PUBLIC".equals(request.getVisibility())) {
+        try {
+            videoUpdateService.updated(request);
+        } catch (BadRequestException e) {
             throw new BadRequestException("video_locked", messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
+        } catch (MemberNotFoundException e) {
+            throw new MemberNotFoundException("invalid_user_id", "Invalid user_id: " + request.getUserId());
         }
 
-        VideoExtraData extraData = null;
-        if (!StringUtils.isBlank(request.getData())) {
-            extraData = videoDataService.getDataObject(request.getData());
-            log.info("{}", extraData);
-        }
-
-        String oldState = video.getState();
-
-        video = videoService.updateVideoProperties(request, video, extraData);
-        video = videoService.update(video);
-
-        if (extraData != null && !StringUtils.isBlank(extraData.getGoods())) {
-            log.info("goods {}, request goods: {}", video.getData(), extraData.getGoods());
-            videoService.updateVideoGoods(video, extraData.getGoods());
-        } else {
-            videoService.clearVideoGoods(video);
-        }
-
-        // Send on-live stats using slack when LIVE ended
-        if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(oldState) && "VOD".equals(request.getState())) {
-            videoService.sendStats(video);
-        }
-
-        // Send collect watch counts on LIVE
-        if ("BROADCASTED".equals(video.getType()) && "LIVE".equals(request.getState())) {
-            videoWatchService.collectVideoWatchCount(video);
-        }
-
-        return video;
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @DeleteMapping
@@ -179,6 +130,8 @@ public class CallbackController {
         Integer watchCount;
         Integer heartCount;
         Integer viewCount;
+
+        boolean isFirstOpen;
     }
 
     @Data

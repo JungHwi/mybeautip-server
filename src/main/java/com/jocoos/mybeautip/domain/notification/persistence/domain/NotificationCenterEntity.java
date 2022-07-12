@@ -2,13 +2,12 @@ package com.jocoos.mybeautip.domain.notification.persistence.domain;
 
 import com.jocoos.mybeautip.domain.notification.code.NotificationStatus;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 import javax.persistence.*;
 
+@ToString
 @Getter
 @Entity
 @Builder

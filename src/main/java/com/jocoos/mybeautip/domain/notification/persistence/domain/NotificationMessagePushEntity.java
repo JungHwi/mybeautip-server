@@ -6,10 +6,12 @@ import com.jocoos.mybeautip.domain.notification.code.TemplateType;
 import com.jocoos.mybeautip.domain.notification.persistence.converter.NotificationLinkTypeListConverter;
 import com.jocoos.mybeautip.global.code.Language;
 import lombok.Getter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.List;
 
+@ToString
 @Getter
 @Entity
 @Table(name = "notification_message_push")
