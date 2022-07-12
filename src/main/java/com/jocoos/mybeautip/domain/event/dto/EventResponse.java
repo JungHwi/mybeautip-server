@@ -19,6 +19,8 @@ public class EventResponse {
     private EventStatus status;
     private String title;
     private String imageUrl;
+    private String shareSquareImageUrl;
+    private String shareRectangleImageUrl;
     private int needPoint;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)

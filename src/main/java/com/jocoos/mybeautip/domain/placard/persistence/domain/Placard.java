@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,9 +36,6 @@ public class Placard extends CreatedDateAuditable {
     private String linkArgument;
 
     @Column
-    private String imageUrl;
-
-    @Column
     private String description;
 
     @Column(nullable = false, columnDefinition="TIMESTAMP")
@@ -45,5 +43,8 @@ public class Placard extends CreatedDateAuditable {
 
     @Column(nullable = false, columnDefinition="TIMESTAMP")
     private ZonedDateTime endedAt;
+
+    @OneToMany(mappedBy = "placard")
+    private List<PlacardDetail> detailList;
 
 }

@@ -5,8 +5,7 @@ import com.jocoos.mybeautip.domain.event.dto.EventProductResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
-import com.jocoos.mybeautip.global.util.ImageFileConvertUtil;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
 
 import java.util.List;
 
@@ -15,15 +14,7 @@ public interface EventConverter {
 
     EventResponse convertToResponse(Event event);
 
-    @Mappings({
-            @Mapping(target = "imageUrl", ignore = true)
-    })
     EventListResponse convertToListResponse(Event event);
-
-    @AfterMapping
-    default void convertToListResponse(@MappingTarget EventListResponse response, Event event) {
-        response.setImageUrl(ImageFileConvertUtil.convertToThumbnail(event.getImageUrl()));
-    }
 
     List<EventListResponse> convertToListResponse(List<Event> eventList);
 
