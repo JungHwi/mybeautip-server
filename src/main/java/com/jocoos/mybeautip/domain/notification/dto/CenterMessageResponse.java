@@ -7,10 +7,10 @@ import com.jocoos.mybeautip.domain.notification.vo.NotificationLink;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
-import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.LOCAL_DATE_TIME_FORMAT;
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 @Getter
 @Builder
@@ -28,6 +28,6 @@ public class CenterMessageResponse {
 
     private List<NotificationLink> notificationLink;
 
-    @JsonFormat(pattern = LOCAL_DATE_TIME_FORMAT)
-    private LocalDateTime createdAt;
+    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
+    private ZonedDateTime createdAt;
 }

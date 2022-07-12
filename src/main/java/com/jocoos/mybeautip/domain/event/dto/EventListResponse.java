@@ -17,7 +17,7 @@ public class EventListResponse {
     private EventType type;
     private EventStatus status;
     private String title;
-    private String imageUrl;
+    private String thumbnailImageUrl;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime startAt;

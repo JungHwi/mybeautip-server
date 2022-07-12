@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.placard.service;
 
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
+import com.jocoos.mybeautip.domain.placard.code.PlacardTabType;
 import com.jocoos.mybeautip.domain.placard.converter.PlacardConverter;
 import com.jocoos.mybeautip.domain.placard.dto.PlacardResponse;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
@@ -18,9 +19,9 @@ public class PlacardService {
 
     private final PlacardConverter placardConverter;
 
-    public List<PlacardResponse> getPlacardList() {
-        List<Placard> placardList = placardRepository.findByActivePlacard(PlacardStatus.ACTIVE);
+    public List<PlacardResponse> getPlacardList(PlacardTabType tabType) {
+        List<Placard> placardList = placardRepository.findByActivePlacard(PlacardStatus.ACTIVE, tabType);
 
-        return placardConverter.convertToResponse(placardList);
+        return placardConverter.convertToResponse(placardList, tabType);
     }
 }
