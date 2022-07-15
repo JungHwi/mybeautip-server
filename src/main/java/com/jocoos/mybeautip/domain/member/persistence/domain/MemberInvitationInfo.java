@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.friend.persistence.domain;
+package com.jocoos.mybeautip.domain.member.persistence.domain;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class FriendInviteInfo {
+public class MemberInvitationInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

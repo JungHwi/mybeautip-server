@@ -1,10 +1,10 @@
-package com.jocoos.mybeautip.domain.friend.dto;
+package com.jocoos.mybeautip.domain.member.dto;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class FriendInviteInfoResponse {
+public class MemberInvitationInfoResponse {
 
     private final String title;
 
@@ -16,10 +16,10 @@ public class FriendInviteInfoResponse {
 
 
     @Builder
-    public FriendInviteInfoResponse(String title,
-                                    String description,
-                                    String shareSquareImageUrl,
-                                    String shareRectangleImageUrl) {
+    public MemberInvitationInfoResponse(String title,
+                                        String description,
+                                        String shareSquareImageUrl,
+                                        String shareRectangleImageUrl) {
         this.title = title;
         this.description = description;
         this.shareSquareImageUrl = shareSquareImageUrl;
