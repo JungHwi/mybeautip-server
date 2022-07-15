@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class MemberInvitationInfoResponse {
 
     private final String title;
@@ -14,15 +15,4 @@ public class MemberInvitationInfoResponse {
 
     private final String shareRectangleImageUrl;
 
-
-    @Builder
-    public MemberInvitationInfoResponse(String title,
-                                        String description,
-                                        String shareSquareImageUrl,
-                                        String shareRectangleImageUrl) {
-        this.title = title;
-        this.description = description;
-        this.shareSquareImageUrl = shareSquareImageUrl;
-        this.shareRectangleImageUrl = shareRectangleImageUrl;
-    }
 }
