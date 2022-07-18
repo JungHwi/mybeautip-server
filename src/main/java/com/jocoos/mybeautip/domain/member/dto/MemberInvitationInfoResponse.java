@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.domain.member.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Builder

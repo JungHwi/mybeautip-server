@@ -2,9 +2,9 @@ package com.jocoos.mybeautip.domain.member.converter;
 
 import com.jocoos.mybeautip.domain.member.dto.MemberInvitationInfoResponse;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberInvitationInfo;
-import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
-import org.mapstruct.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import static com.jocoos.mybeautip.global.code.UrlDirectory.SHARE;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
