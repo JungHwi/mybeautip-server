@@ -22,9 +22,9 @@ public class MemberInvitationInfo {
     private String description;
 
     @Column
-    private String shareSquareImageUrl;
+    private String shareSquareImageFilename;
 
     @Column
-    private String shareRectangleImageUrl;
+    private String shareRectangleImageFilename;
 
 }

@@ -14,8 +14,8 @@ public interface MemberInvitationInfoConverter {
 
     String CONVERT_TO_URL = "convertToUrl";
 
-    @Mapping(source = "shareSquareImageUrl", target = "shareSquareImageUrl", qualifiedByName = CONVERT_TO_URL)
-    @Mapping(source = "shareRectangleImageUrl", target = "shareRectangleImageUrl", qualifiedByName = CONVERT_TO_URL)
+    @Mapping(source = "shareSquareImageFilename", target = "shareSquareImageUrl", qualifiedByName = CONVERT_TO_URL)
+    @Mapping(source = "shareRectangleImageFilename", target = "shareRectangleImageUrl", qualifiedByName = CONVERT_TO_URL)
     MemberInvitationInfoResponse convertToResponse(MemberInvitationInfo info);
 
     @Named(CONVERT_TO_URL)

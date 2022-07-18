@@ -33,7 +33,7 @@ public class GoodsService {
     private final GoodsLikeRepository goodsLikeRepository;
     private final StoreRepository storeRepository;
     private final DeliveryChargeOptionRepository deliveryChargeOptionRepository;
-    @Value("${mybeautip.store.image-path.prefix}")
+    @Value("${mybeautip.store.image-path.domain}")
     private String storeImagePrefix;
 
     @Value("${mybeautip.store.image-path.refund-suffix}")
