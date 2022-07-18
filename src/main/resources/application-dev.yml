@@ -13,7 +13,7 @@ spring:
 mybeautip:
   store:
     image-path:
-      prefix: https://mybeautip-dev.s3.ap-northeast-2.amazonaws.com/
+      domain: https://mybeautip-dev.s3.ap-northeast-2.amazonaws.com/
   service:
     member:
       rejoin-available-second: 30

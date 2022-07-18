@@ -12,8 +12,8 @@ public class MemberInvitationInfoResponse {
 
     private final String description;
 
-    @Setter private String shareSquareImageUrl;
+    private final String shareSquareImageUrl;
 
-    @Setter private String shareRectangleImageUrl;
+    private final String shareRectangleImageUrl;
 
 }

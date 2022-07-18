@@ -74,7 +74,7 @@ public class LegacyMemberController {
     private final RevenuePaymentRepository revenuePaymentRepository;
     private final VideoScrapService videoScrapService;
     private final CommentService commentService;
-    @Value("${mybeautip.store.image-path.prefix}")
+    @Value("${mybeautip.store.image-path.domain}")
     private String storeImagePrefix;
     @Value("${mybeautip.store.image-path.cover-suffix}")
     private String storeImageSuffix;

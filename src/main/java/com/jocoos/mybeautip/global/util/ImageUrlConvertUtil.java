@@ -10,7 +10,7 @@ public class ImageUrlConvertUtil {
 
     private static String IMAGE_BASE_URL;
 
-    @Value("${mybeautip.store.image-path.prefix}")
+    @Value("${mybeautip.store.image-path.domain}")
     private void setImageBaseUrl(String injectUrl) {
         IMAGE_BASE_URL = injectUrl;
     }
