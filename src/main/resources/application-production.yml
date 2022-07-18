@@ -27,6 +27,9 @@ mybeautip:
     s3:
       bucket: 'mybeautip-prod'
       region: 'ap-northeast-2'
+  store:
+    image-path:
+      domain: https://mybeautip.s3.ap-northeast-2.amazonaws.com/
   slack:
     key: T03FMJ9ANNR/B03FT8YFXC5/GFY50VQh98iRpEs4XbmxmrYP
     channel: "#mybeautip-prod"
