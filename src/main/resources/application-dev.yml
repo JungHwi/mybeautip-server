@@ -11,6 +11,9 @@ spring:
     validation-query: SELECT 1
 
 mybeautip:
+  store:
+    image-path:
+      domain: https://mybeautip-dev.s3.ap-northeast-2.amazonaws.com/
   service:
     member:
       rejoin-available-second: 30
@@ -25,3 +28,5 @@ mybeautip:
 
 logging:
   config: classpath:log/log4j2-file.yml
+
+
