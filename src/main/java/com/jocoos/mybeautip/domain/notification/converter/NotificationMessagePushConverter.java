@@ -10,7 +10,6 @@ import org.mapstruct.Mappings;
 public interface NotificationMessagePushConverter {
 
     @Mappings({
-            @Mapping(target = "messageType", source = "entity.messageType"),
             @Mapping(target = "title", source = "entity.title"),
             @Mapping(target = "message", source = "entity.message"),
             @Mapping(target = "notificationLinkType", source = "entity.notificationLinkType"),
@@ -21,7 +20,6 @@ public interface NotificationMessagePushConverter {
     AppPushMessage convert(NotificationMessagePushEntity entity, String imageUrl, Long notificationId);
 
     @Mappings({
-            @Mapping(target = "messageType", source = "entity.messageType"),
             @Mapping(target = "title", source = "entity.title"),
             @Mapping(target = "message", source = "entity.message"),
             @Mapping(target = "notificationLinkType", source = "entity.notificationLinkType"),
