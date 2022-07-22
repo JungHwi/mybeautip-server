@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum TermUsedType {
+public enum TermUsedInType {
     SIGNUP("회원가입");
 
     private final String description;

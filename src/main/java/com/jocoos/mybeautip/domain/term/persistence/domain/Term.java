@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.term.persistence.domain;
 
 import com.jocoos.mybeautip.domain.term.code.TermStatus;
-import com.jocoos.mybeautip.domain.term.code.TermUsedType;
+import com.jocoos.mybeautip.domain.term.code.TermUsedInType;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,7 +32,7 @@ public class Term extends BaseEntity {
     private TermStatus currentTermStatus;
 
     @Enumerated(EnumType.STRING)
-    private TermUsedType usedType;
+    private TermUsedInType usedInType;
 
     private float version;
 
