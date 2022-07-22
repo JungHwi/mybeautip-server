@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.notification.client.vo;
 
-import com.jocoos.mybeautip.domain.notification.code.MessageType;
 import com.jocoos.mybeautip.domain.notification.code.NotificationLinkType;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationLink;
 import com.jocoos.mybeautip.global.util.NotificationConvertUtil;
@@ -15,7 +14,7 @@ import java.util.Map;
 @Builder
 public class AppPushMessage {
 
-    private MessageType messageType;
+//    private MessageType messageType; // ios 에서 message_type 이 예약어라서 필요하면 이름 바꿔야 함.
     private String title;
     private String message;
     private String imageUrl;
@@ -27,7 +26,7 @@ public class AppPushMessage {
 
     public AppPushMessage setArguments(Map<String, String> arguments) {
         return AppPushMessage.builder()
-                .messageType(this.messageType)
+//                .messageType(this.messageType)
                 .imageUrl(this.imageUrl)
                 .notificationId(this.notificationId)
                 .title(NotificationConvertUtil.generateStringByArguments(this.title, arguments))

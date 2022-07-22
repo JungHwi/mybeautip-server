@@ -1,5 +1,15 @@
 # mybeautip Server #
 
+## Download MySQL Image ##
+```
+docker pull mysql
+```
+
+## DB Run ##
+```
+docker run -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=PASSWORD --name mybeautip-db -v ~/mysql8:/var/lib/mysql mysql --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+```
+
 ## DB on docker with charset ##
 ```
 docker exec -it mybeautip-db mysql -u mybeautip -p mybeautip --default-character-set=utf8
@@ -8,7 +18,7 @@ docker exec -it mybeautip-db mysql -u mybeautip -p mybeautip --default-character
 ## DB setting ##
 ```
 create database mybeautip charset=utf8;
-create user mybeautip@'%' identified by 'akdlqbxlq#1@Jocoos';
+create user mybeautip@'%' identified by 'PASSWORD'; 
 grant all privileges on mybeautip.* to mybeautip@'%';
 ```
 
