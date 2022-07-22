@@ -11,7 +11,9 @@ import javax.persistence.*;
 
 /*
     약관 테이블
-    isRequired - 필수 여부
+    currentTermStatus - 현재 약관의 타입
+    usedInType - 약관 사용처, jpa method query 에서 in이 지정 단어라 usedInType 으로 정의
+    versionChangeStatus - 약관 업데이트 내용의 타입
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,16 +29,15 @@ public class Term extends BaseEntity {
 
     private String content;
 
-    // 현재 약관의 타입
     @Enumerated(EnumType.STRING)
     private TermStatus currentTermStatus;
 
+    @Column(name = "used_in")
     @Enumerated(EnumType.STRING)
     private TermUsedInType usedInType;
 
     private float version;
 
-    // 약관 업데이트 내용의 타입
     @Enumerated(EnumType.STRING)
     private TermStatus versionChangeStatus;
 }

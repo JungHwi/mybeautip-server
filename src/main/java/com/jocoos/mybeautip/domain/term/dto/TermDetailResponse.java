@@ -6,12 +6,16 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class TermResponse {
+public class TermDetailResponse {
 
     private final long id;
 
     private final String title;
 
+    private final String content;
+
     private final TermStatus currentTermStatus;
+
+    private final float version;
 
 }

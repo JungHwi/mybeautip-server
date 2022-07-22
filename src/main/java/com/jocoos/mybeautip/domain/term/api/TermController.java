@@ -1,14 +1,12 @@
 package com.jocoos.mybeautip.domain.term.api;
 
 import com.jocoos.mybeautip.domain.term.code.TermUsedInType;
+import com.jocoos.mybeautip.domain.term.dto.TermDetailResponse;
 import com.jocoos.mybeautip.domain.term.dto.TermResponse;
 import com.jocoos.mybeautip.domain.term.service.TermService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,10 +17,14 @@ public class TermController {
 
     private final TermService termService;
 
-    @GetMapping("/1/terms/{usedIn}")
-    public ResponseEntity<List<TermResponse>> getTermsUsedIn(@PathVariable TermUsedInType usedIn) {
-        return ResponseEntity.ok(termService.getTermsUsedIn(usedIn));
+    @GetMapping("/1/{usedIn}/terms")
+    public ResponseEntity<List<TermResponse>> getTermsUsedIn(@PathVariable String usedIn) {
+        return ResponseEntity.ok(termService.getTermsUsedIn(TermUsedInType.getBy(usedIn)));
     }
 
+    @GetMapping("1/terms/{termId}")
+    public ResponseEntity<TermDetailResponse> getTerm(@PathVariable long termId) {
+        return ResponseEntity.ok(termService.getTerm(termId));
+    }
 
 }
