@@ -9,8 +9,6 @@ public class MemberTermRequest {
 
     private final long termId;
 
-    private final boolean isAccept;
-
-    private final float version;
+    private final Boolean isAccept;
 
 }

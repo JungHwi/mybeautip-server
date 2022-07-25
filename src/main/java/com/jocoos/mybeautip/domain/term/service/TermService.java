@@ -12,6 +12,7 @@ import com.jocoos.mybeautip.domain.term.persistence.domain.Term;
 import com.jocoos.mybeautip.domain.term.persistence.repository.MemberTermRepository;
 import com.jocoos.mybeautip.domain.term.persistence.repository.TermRepository;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import static com.jocoos.mybeautip.domain.term.code.TermStatus.DELETE;
 public class TermService {
 
     private final TermRepository termRepository;
+    private final LegacyMemberService legacyMemberService;
     private final MemberTermRepository memberTermRepository;
     private final MemberTermConverter memberTermConverter;
     private final TermConverter termConverter;
@@ -55,6 +57,13 @@ public class TermService {
 
     }
 
+    @Transactional
+    public MemberTermResponse changeOptionalTermStatus(long termId) {
+        MemberTerm memberTerm = getMemberTermWithValid(termId);
+        memberTerm.changeAcceptStatus();
+        return memberTermConverter.convertToResponse(memberTerm);
+    }
+
 
     private void valid(List<MemberTermRequest> requests, List<Term> terms) {
         if (terms.size() != requests.size())
@@ -64,11 +73,11 @@ public class TermService {
     private List<MemberTerm> createMemberTerms(List<MemberTermRequest> requests, List<Term> terms) {
         List<MemberTerm> memberTerms = new ArrayList<>();
         for (int i = 0; i < requests.size(); i++) {
-            MemberTermRequest request = requests.get(i);
+            Term term = terms.get(i);
             memberTerms.add(MemberTerm.builder()
-                    .term(terms.get(i))
-                    .isAccept(request.isAccept())
-                    .version(request.getVersion())
+                    .term(term)
+                    .isAccept(requests.get(i).getIsAccept())
+                    .version(term.getVersion())
                     .build());
         }
         return memberTerms;
@@ -81,6 +90,13 @@ public class TermService {
     private Term getTermWithValid(long termId) {
         return termRepository.findById(termId).orElseThrow(
                 () -> new NotFoundException("term not found, termId : " + termId)
+        );
+    }
+
+    private MemberTerm getMemberTermWithValid(long termId) {
+        Long memberId = legacyMemberService.currentMemberId();
+        return memberTermRepository.findByTermIdAndMemberId(termId, memberId).orElseThrow(
+                () -> new NotFoundException("member term not found, termId : " + termId + " memberId : " + memberId)
         );
     }
 }

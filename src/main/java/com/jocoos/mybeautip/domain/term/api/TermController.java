@@ -28,16 +28,22 @@ public class TermController {
         return ResponseEntity.ok(termService.getTermsUsedIn(TermUsedInType.getBy(usedIn)));
     }
 
-    @GetMapping("1/terms/{termId}")
+    @GetMapping("/1/terms/{termId}")
     public ResponseEntity<TermDetailResponse> getTerm(@PathVariable long termId) {
         return ResponseEntity.ok(termService.getTerm(termId));
     }
 
-    @PostMapping("1/terms")
+    @PostMapping("/1/terms")
     public ResponseEntity<List<MemberTermResponse>> chooseTerms(
             @RequestBody List<MemberTermRequest> requests) {
-        return ResponseEntity
-                .ok(termService.chooseTerms(requests));
+        return ResponseEntity.ok(termService.chooseTerms(requests));
     }
+
+    @PatchMapping("/1/terms/{termId}")
+    public ResponseEntity<MemberTermResponse> changeOptionalTermStatus(@PathVariable long termId) {
+        return ResponseEntity.ok(termService.changeOptionalTermStatus(termId));
+    }
+
+
 
 }

@@ -11,6 +11,6 @@ public class MemberTermResponse {
 
     private final long termId;
 
-    private final boolean isAccept;
+    private final Boolean isAccept;
 
 }

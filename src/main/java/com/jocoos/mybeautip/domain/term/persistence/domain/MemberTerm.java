@@ -17,7 +17,7 @@ public class MemberTerm extends CreatedByBaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private boolean isAccept;
+    private Boolean isAccept;
 
     private float version;
 
@@ -30,5 +30,9 @@ public class MemberTerm extends CreatedByBaseEntity {
         this.isAccept = isAccept;
         this.version = version;
         this.term = term;
+    }
+
+    public void changeAcceptStatus() {
+        this.isAccept = !this.isAccept;
     }
 }
