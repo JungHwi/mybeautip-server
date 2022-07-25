@@ -4,8 +4,8 @@ spring:
       on-profile: dev
     import: classpath:application-oauth-dev.yml
   datasource:
-    url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
-    username: mybeautip
+    url: jdbc:mysql://mybeautip-dev.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    username: mybeautip_service
     password: akdlqbxlq#1@Jocoos
     test-on-borrow: true
     validation-query: SELECT 1
