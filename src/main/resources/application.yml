@@ -21,7 +21,7 @@ spring:
   config:
     import: classpath:application-oauth-dev.yml
   datasource:
-    url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    url: jdbc:mysql://localhost:3306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
     username: mybeautip
     password: akdlqbxlq#1@Jocoos
     test-on-borrow: true

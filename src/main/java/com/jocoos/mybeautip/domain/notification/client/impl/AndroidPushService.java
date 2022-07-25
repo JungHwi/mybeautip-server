@@ -60,7 +60,6 @@ public class AndroidPushService implements MobilePushService {
         Map<String, String> messageMap = new HashMap<>();
         Map<String, Map<String, String>> data = new HashMap<>();
 
-        messageMap.put(KEY_MESSAGE_TYPE, message.getMessageType().name());
         messageMap.put(KEY_TITLE, message.getTitle());
         messageMap.put(KEY_BODY, message.getMessage());
         messageMap.put(KEY_IMAGE, message.getImageUrl());
