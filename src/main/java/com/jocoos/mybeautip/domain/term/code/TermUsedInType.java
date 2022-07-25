@@ -11,6 +11,7 @@ public enum TermUsedInType {
 
     private final String description;
 
+
     public static TermUsedInType getBy(String s) {
         try {
             return TermUsedInType.valueOf(s.toUpperCase());

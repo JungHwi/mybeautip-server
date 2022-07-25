@@ -10,4 +10,6 @@ import java.util.List;
 public interface TermRepository extends JpaRepository<Term, Long> {
 
     List<Term> findAllByUsedInTypeAndCurrentTermStatusNot(TermUsedInType type, TermStatus status);
+
+    List<Term> findAllByIdIn(List<Long> terms);
 }
