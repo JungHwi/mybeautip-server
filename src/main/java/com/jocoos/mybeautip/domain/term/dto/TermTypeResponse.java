@@ -9,6 +9,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class TermTypeResponse {
-    private TermType type;
+    private TermType termType;
     private Boolean isAccept;
 }
