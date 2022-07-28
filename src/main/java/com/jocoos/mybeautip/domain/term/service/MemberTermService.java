@@ -153,6 +153,7 @@ public class MemberTermService {
 
 
     // 2021-07-28 현재 서버에서 약관 관리하지 않기 때문에 임시로 만듦, 추후 서버에서 약관 관리한다면 삭제
+    @Transactional
     public TermTypeResponse changeOptionalTermByType(TermType type, Long memberId, boolean isAccept) {
         validTypeOptional(type);
         Term term = termService.getTermByType(type);
