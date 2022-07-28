@@ -15,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 
-import static com.jocoos.mybeautip.domain.term.code.TermStatus.DELETE;
-
 @RequiredArgsConstructor
 @Service
 public class TermService {
@@ -27,7 +25,7 @@ public class TermService {
 
     @Transactional(readOnly = true)
     public List<TermResponse> getTermsUsedIn(TermUsedInType usedIn) {
-        List<Term> terms = termRepository.findAllByUsedInAndStatusNot(usedIn.name(), DELETE);
+        List<Term> terms = termRepository.findAllByUsedIn(usedIn.name());
         return termConverter.convertToListResponse(terms);
     }
 
@@ -38,7 +36,7 @@ public class TermService {
 
 
     public List<Term> getAllTerms() {
-        return termRepository.findAllByCurrentTermStatusNot(DELETE);
+        return termRepository.findAll();
     }
 
     public List<Term> getTerms(List<Long> termIds) {

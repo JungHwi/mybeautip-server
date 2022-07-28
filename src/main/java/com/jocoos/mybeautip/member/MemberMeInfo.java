@@ -22,19 +22,11 @@ public class MemberMeInfo extends MemberInfo {
 
     private Date revenueModifiedAt;
     private Boolean pushable;
-    private List<MemberTermResponse> memberTermResponses = new ArrayList<>();
 
     public MemberMeInfo(Member member) {
         BeanUtils.copyProperties(member, this);
         this.setVideoCount(member.getTotalVideoCount());
         this.setPermission(new PermissionInfo(member.getPermission()));
-    }
-
-    public MemberMeInfo(Member member, int pointRatio, int revenueRatio, List<MemberTermResponse> memberTermResponses) {
-        this(member);
-        this.pointRatio = pointRatio;
-        this.revenueRatio = revenueRatio;
-        this.memberTermResponses = memberTermResponses;
     }
 
     public MemberMeInfo(Member member, int pointRatio, int revenueRatio) {

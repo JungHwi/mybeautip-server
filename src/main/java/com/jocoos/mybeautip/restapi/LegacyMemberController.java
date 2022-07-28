@@ -2,12 +2,6 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
-import com.jocoos.mybeautip.domain.term.converter.MemberTermConverter;
-import com.jocoos.mybeautip.domain.term.dto.MemberTermResponse;
-import com.jocoos.mybeautip.domain.term.persistence.domain.MemberTerm;
-import com.jocoos.mybeautip.domain.term.persistence.domain.Term;
-import com.jocoos.mybeautip.domain.term.persistence.repository.MemberTermRepository;
-import com.jocoos.mybeautip.domain.term.persistence.repository.TermRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -54,9 +48,6 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static com.jocoos.mybeautip.domain.term.code.TermStatus.DELETE;
-import static com.jocoos.mybeautip.domain.term.code.TermUsedInType.OPTION;
-
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,11 +72,6 @@ public class LegacyMemberController {
     private final CommentLikeRepository commentLikeRepository;
     private final RevenueRepository revenueRepository;
     private final RevenuePaymentRepository revenuePaymentRepository;
-
-    private final MemberTermRepository memberTermRepository;
-    private final TermRepository termRepository;
-
-    private final MemberTermConverter memberTermConverter;
     private final VideoScrapService videoScrapService;
     private final CommentService commentService;
     @Value("${mybeautip.store.image-path.domain}")
@@ -113,9 +99,6 @@ public class LegacyMemberController {
                                   CommentRepository commentRepository,
                                   CommentLikeRepository commentLikeRepository,
                                   RevenueRepository revenueRepository,
-                                  MemberTermRepository memberTermRepository,
-                                  TermRepository termRepository,
-                                  MemberTermConverter memberTermConverter,
                                   PostProcessService postProcessService,
                                   MessageService messageService,
                                   MentionService mentionService,
@@ -144,20 +127,14 @@ public class LegacyMemberController {
         this.revenuePaymentRepository = revenuePaymentRepository;
         this.videoScrapService = videoScrapService;
         this.commentService = commentService;
-        this.memberTermRepository = memberTermRepository;
-        this.termRepository = termRepository;
-        this.memberTermConverter = memberTermConverter;
     }
 
     @GetMapping("/me")
     public EntityModel<MemberMeInfo> getMe(Principal principal,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         log.debug("member id: {}", principal.getName());
-        List<Term> terms = termRepository.findAllByUsedInAndStatusNot(OPTION.name(), DELETE);
-        List<MemberTerm> memberTerms = memberTermRepository.findAllByMemberIdAndTermIn(Long.parseLong(principal.getName()), terms);
-        List<MemberTermResponse> memberTermResponses = memberTermConverter.convertToListResponse(memberTerms);
         return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-                .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio, memberTermResponses)))
+                .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     }
 

@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.term.persistence.repository;
 
-import com.jocoos.mybeautip.domain.term.code.TermStatus;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.term.persistence.domain.Term;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,14 +12,12 @@ import java.util.Set;
 
 public interface TermRepository extends JpaRepository<Term, Long> {
 
-    @Query("select t from Term t where :type in t.usedInType and not t.currentTermStatus = :status")
-    List<Term> findAllByUsedInAndStatusNot(@Param("type") String type,
-                                           @Param("status") TermStatus status);
+    // 상태 축소하면서 삭제 상태 제외, 추후 추가
+    @Query("select t from Term t where :type in t.usedInType")
+    List<Term> findAllByUsedIn(@Param("type") String type);
 
     boolean existsById(long termId);
     List<Term> findAllByIdIn(List<Long> termIds);
-
-    List<Term> findAllByCurrentTermStatusNot(TermStatus status);
 
     Optional<Term> findTopByOrderByModifiedAtDesc();
 
