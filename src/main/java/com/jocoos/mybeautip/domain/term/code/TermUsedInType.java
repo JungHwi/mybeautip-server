@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum TermUsedInType {
-    SIGNUP("signup");
+    SIGNUP("signup"),
+    OPTION("option");
+
 
     private final String description;
 

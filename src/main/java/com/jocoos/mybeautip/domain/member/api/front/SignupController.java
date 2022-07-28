@@ -22,7 +22,6 @@ public class SignupController {
     @PostMapping("/1/member/signup")
     public ResponseEntity<MemberEntireInfo> signup(@RequestBody @Valid SignupRequest request) {
         MemberEntireInfo result = memberSignupService.signup(request);
-
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

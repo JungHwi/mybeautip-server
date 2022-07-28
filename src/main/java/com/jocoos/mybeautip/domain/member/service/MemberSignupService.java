@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
+import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
@@ -41,6 +42,7 @@ public class MemberSignupService {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberConverter memberConverter;
     private final KakaoMemberRepository kakaoMemberRepository;
+    private final MemberTermService memberTermService;
 
     @Value("${mybeautip.service.member.rejoin-available-second}")
     private long REJOIN_AVAILABLE_SECOND;
@@ -56,6 +58,7 @@ public class MemberSignupService {
         AccessTokenResponse accessTokenResponse = jwtTokenProvider.auth(member);
         memberEntireInfo.setToken(accessTokenResponse);
 
+        memberTermService.chooseTermsByTermType(request.getTermTypes(), member);
         return memberEntireInfo;
     }
 

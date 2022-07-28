@@ -1,9 +1,11 @@
 package com.jocoos.mybeautip.restapi.dto;
 
+import com.jocoos.mybeautip.domain.term.code.TermType;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,4 +17,5 @@ public class SignupRequest {
     private String email;
     private String avatarUrl;
     private String refreshToken;
+    private Set<TermType> termTypes;
 }

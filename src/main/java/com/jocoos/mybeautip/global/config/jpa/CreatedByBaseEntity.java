@@ -16,4 +16,8 @@ public abstract class CreatedByBaseEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    public void setMemberManually(Member member) {
+        this.member = member;
+    }
 }
