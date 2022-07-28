@@ -8,9 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum TermStatus implements CodeValue {
     REQUIRED("필수"),
-    OPTIONAL("선택"),
-    GUIDANCE("읽기"),
-    DELETE("삭제");
+    OPTIONAL("선택");
 
     private final String description;
 }
