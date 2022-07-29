@@ -1,14 +1,11 @@
 package com.jocoos.mybeautip.member;
 
-import com.jocoos.mybeautip.domain.term.dto.MemberTermResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
