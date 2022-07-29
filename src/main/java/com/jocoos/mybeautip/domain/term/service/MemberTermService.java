@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.term.service;
 
 import com.jocoos.mybeautip.domain.term.code.TermType;
+import com.jocoos.mybeautip.domain.term.code.TermTypeGroup;
 import com.jocoos.mybeautip.domain.term.converter.MemberTermConverter;
 import com.jocoos.mybeautip.domain.term.converter.TermConverter;
 import com.jocoos.mybeautip.domain.term.dto.MemberTermResponse;
@@ -160,7 +161,7 @@ public class MemberTermService {
         MemberTerm memberTerm = getOrCreateMemberTerm(term.getId(), memberId);
         memberTerm.changeAcceptStatus(isAccept);
         memberTermRepository.save(memberTerm);
-        return new TermTypeResponse(type, memberTerm.getIsAccept());
+        return TermTypeResponse.builder().termType(type).isAccept(memberTerm.getIsAccept()).build();
     }
 
     @Transactional
@@ -172,6 +173,20 @@ public class MemberTermService {
         List<MemberTerm> memberTerms = createMemberTermsByType(requestTermTypes, termMap, member);
 
         memberTermRepository.saveAll(memberTerms);
+    }
+
+    public List<TermTypeResponse> getOptionalTermAcceptStatus(long memberId) {
+        List<Term> optionTerms = termService.getTermsByType(TermTypeGroup.OPTIONAL.getTypes());
+        List<MemberTerm> memberTerms =
+                memberTermRepository.findAllByMemberIdAndTermIn(memberId, optionTerms);
+        Map<Long, MemberTerm> memberTermMap = toMap(memberTerms, memberTerm -> memberTerm.getTerm().getId());
+
+        return optionTerms.stream().map(term -> {
+            MemberTerm memberTerm = memberTermMap.get(term.getId());
+            boolean isAccept = memberTerm != null && memberTerm.getIsAccept();
+            return TermTypeResponse.builder().termType(term.getType()).isAccept(isAccept).build();
+        }).collect(Collectors.toList());
+
     }
 
     private List<MemberTerm> createMemberTermsByType(Set<TermType> termTypes,
