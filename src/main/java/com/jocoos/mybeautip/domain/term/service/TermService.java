@@ -56,11 +56,6 @@ public class TermService {
                 .orElseThrow(() -> new NotFoundException("no term found"));
     }
 
-    public void validTermExist(long termId) {
-        if (!termRepository.existsById(termId))
-            throw new NotFoundException("term not found, termId : " + termId);
-    }
-
     public void validTermsExist(int requestSize, int dataSize) {
         if (requestSize != dataSize)
             throw new NotFoundException("terms not found. check the ids");
