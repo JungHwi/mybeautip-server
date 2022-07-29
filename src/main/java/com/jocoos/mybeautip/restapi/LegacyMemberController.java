@@ -133,7 +133,6 @@ public class LegacyMemberController {
     public EntityModel<MemberMeInfo> getMe(Principal principal,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         log.debug("member id: {}", principal.getName());
-
         return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
                 .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));

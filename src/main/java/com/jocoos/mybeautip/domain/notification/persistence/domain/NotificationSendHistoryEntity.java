@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "notification_send_history")
 public class NotificationSendHistoryEntity extends CreatedAtBaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, updatable = false)
