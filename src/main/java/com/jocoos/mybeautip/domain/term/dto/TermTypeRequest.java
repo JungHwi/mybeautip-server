@@ -8,4 +8,5 @@ import lombok.Getter;
 @Getter
 public class TermTypeRequest {
     private TermType termType;
+    private Boolean isAccept;
 }
