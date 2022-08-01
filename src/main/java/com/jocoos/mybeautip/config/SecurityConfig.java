@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
 @Order(-10)
@@ -51,9 +52,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .requestMatchers()
-                .antMatchers(POST, "/api/1/payments/notification")
                 .and()
                 .authorizeRequests()
+                .antMatchers(GET, "/docs/**").permitAll()
+                .antMatchers(POST, "/api/1/payments/notification").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .csrf().disable();

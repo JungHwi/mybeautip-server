@@ -12,4 +12,9 @@ public enum MemberStatus implements CodeValue {
     WITHDRAWAL("탈퇴 상태");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

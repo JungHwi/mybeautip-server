@@ -30,4 +30,9 @@ public enum DeviceOs implements CodeValue {
     public boolean equal(final String legacyCode) {
         return this.legacyCode.equals(legacyCode);
     }
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

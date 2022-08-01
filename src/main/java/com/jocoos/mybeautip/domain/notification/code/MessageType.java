@@ -13,4 +13,9 @@ public enum MessageType implements CodeValue {
     LOGIN("로그인");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

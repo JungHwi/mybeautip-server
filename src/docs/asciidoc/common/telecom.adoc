@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[telecom]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-telecom.adoc[]

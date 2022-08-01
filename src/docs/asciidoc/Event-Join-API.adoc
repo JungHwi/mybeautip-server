@@ -1,6 +1,0 @@
-[[Event-Join-API]]
-== Event Join API
-
-[[Event-Join]]
-=== Event Join
-operation::event-join[snippets='http-request,path-parameters,http-response,response-fields']

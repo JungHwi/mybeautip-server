@@ -10,4 +10,9 @@ public enum UrlDirectory implements CodeValue {
     SHARE("share/");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

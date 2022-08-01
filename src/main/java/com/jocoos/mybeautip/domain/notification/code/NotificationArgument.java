@@ -16,4 +16,9 @@ public enum NotificationArgument implements CodeValue {
     REPLY_ID("대댓글의 ID. comments.id");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

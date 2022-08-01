@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[device_os]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-device_os.adoc[]

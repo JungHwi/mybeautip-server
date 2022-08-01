@@ -13,4 +13,9 @@ public enum SkinType implements CodeValue {
     COMBINATION("복합성");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

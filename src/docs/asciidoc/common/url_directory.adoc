@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[url_directory]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-url_directory.adoc[]

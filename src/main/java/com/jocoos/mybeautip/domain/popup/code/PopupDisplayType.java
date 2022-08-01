@@ -12,4 +12,9 @@ public enum PopupDisplayType implements CodeValue {
     DAILY("매일");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

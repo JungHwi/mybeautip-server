@@ -12,4 +12,9 @@ public enum PopupStatus implements CodeValue {
     INACTIVE("비활성");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

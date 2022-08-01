@@ -23,4 +23,9 @@ public enum EventStatus implements CodeValue {
 
     public static final Set<EventStatus> visibleEventStatus = Arrays.stream(EventStatus.values()).filter(EventStatus::isVisible).collect(Collectors.toSet());
 
+    @Override
+    public String getName() {
+        return this.name();
+    }
+
 }

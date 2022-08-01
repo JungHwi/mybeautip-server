@@ -28,4 +28,9 @@ public enum PointStatusGroup implements CodeValue {
         }
         return null;
     }
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

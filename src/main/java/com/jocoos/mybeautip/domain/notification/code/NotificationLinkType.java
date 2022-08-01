@@ -15,4 +15,9 @@ public enum NotificationLinkType implements CodeValue {
 
     private final String description;
     private final NotificationArgument parameter;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

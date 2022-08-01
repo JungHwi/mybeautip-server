@@ -1,0 +1,22 @@
+package com.jocoos.mybeautip.domain.community.code;
+
+import com.jocoos.mybeautip.global.code.CodeValue;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public enum CommunityCategoryType implements CodeValue {
+
+    NORMAL("일반"),
+    BLIND("블라인드"),
+    DRIP("드립"),
+    EVENT("이벤트");
+
+    private String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
+}

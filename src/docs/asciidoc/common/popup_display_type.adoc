@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[popup_display_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-popup_display_type.adoc[]

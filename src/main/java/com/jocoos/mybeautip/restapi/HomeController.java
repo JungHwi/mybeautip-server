@@ -9,7 +9,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class HomeController {
 
     @GetMapping("/")
-    public RedirectView swaggerUi() {
-        return new RedirectView("/swagger-ui.html");
+    public RedirectView restDocs() {
+        return new RedirectView("/docs/index.html");
     }
 }

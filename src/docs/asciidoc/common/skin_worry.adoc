@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[skin_worry]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-skin_worry.adoc[]

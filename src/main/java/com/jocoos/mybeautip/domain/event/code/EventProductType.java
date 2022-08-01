@@ -13,4 +13,9 @@ public enum EventProductType implements CodeValue {
     POINT("마이뷰팁 포인트");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

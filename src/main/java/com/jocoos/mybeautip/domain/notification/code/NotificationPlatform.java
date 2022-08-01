@@ -16,4 +16,9 @@ public enum NotificationPlatform implements CodeValue {
 
     private final String description;
 
+    @Override
+    public String getName() {
+        return this.name();
+    }
+
 }

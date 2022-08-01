@@ -12,4 +12,10 @@ public enum EventJoinStatus implements CodeValue {
     WIN("이벤트 당첨");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
+
 }
