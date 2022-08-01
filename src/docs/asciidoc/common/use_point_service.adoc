@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[use_point_service]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-use_point_service.adoc[]

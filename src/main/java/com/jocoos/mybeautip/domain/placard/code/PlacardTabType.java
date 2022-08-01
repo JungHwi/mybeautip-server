@@ -12,4 +12,9 @@ public enum PlacardTabType implements CodeValue {
     COMMUNITY("커뮤니티 화면");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

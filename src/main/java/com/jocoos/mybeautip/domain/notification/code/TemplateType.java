@@ -21,6 +21,11 @@ public enum TemplateType implements CodeValue {
     private final String description;
     private final Set<SendType> sendTypes;
     private final Set<NotificationArgument> arguments;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }
 
 

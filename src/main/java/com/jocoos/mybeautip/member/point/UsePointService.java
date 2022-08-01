@@ -12,4 +12,9 @@ public enum UsePointService implements CodeValue {
     EVENT("이벤트");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

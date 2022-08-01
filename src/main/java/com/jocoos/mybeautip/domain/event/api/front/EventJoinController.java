@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.event.api.front;
 
 import com.jocoos.mybeautip.domain.event.dto.EventJoinHistoryResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventJoinResponse;
+import com.jocoos.mybeautip.domain.event.dto.TempRequest;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.restapi.CursorResponse;
@@ -24,7 +25,7 @@ public class EventJoinController {
     private final EventJoinService service;
 
     @PostMapping("/1/event/join/{eventId}")
-    public ResponseEntity joinEvent(@PathVariable long eventId) {
+    public ResponseEntity joinEvent(@PathVariable long eventId, @RequestBody TempRequest request) {
         long memberId = legacyMemberService.currentMemberId();
         EventJoinResponse result = service.join(eventId, memberId);
 

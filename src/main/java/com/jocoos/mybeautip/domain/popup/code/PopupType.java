@@ -14,4 +14,9 @@ public enum PopupType implements CodeValue {
     LOGIN("로그인 한 뒤");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

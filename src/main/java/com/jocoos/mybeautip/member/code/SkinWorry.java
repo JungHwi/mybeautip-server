@@ -21,4 +21,9 @@ public enum SkinWorry implements CodeValue {
     SEBUM("피지");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

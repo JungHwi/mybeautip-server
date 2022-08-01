@@ -12,4 +12,9 @@ public enum PlacardLinkType implements CodeValue {
     EXTERNAL("외부 링크");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

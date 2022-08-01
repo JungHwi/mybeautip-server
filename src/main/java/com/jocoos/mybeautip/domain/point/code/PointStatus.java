@@ -29,4 +29,9 @@ public enum PointStatus implements CodeValue {
     public static PointStatus getPointStatus(int legacyCode) {
         return pointStatusMap.get(legacyCode);
     }
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

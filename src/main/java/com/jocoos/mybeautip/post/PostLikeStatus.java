@@ -12,4 +12,9 @@ public enum PostLikeStatus implements CodeValue {
     UNLIKE("");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

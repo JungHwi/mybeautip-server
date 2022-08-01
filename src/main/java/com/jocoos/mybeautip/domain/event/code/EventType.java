@@ -15,4 +15,9 @@ public enum EventType implements CodeValue {
 
     private final String description;
     private final boolean directJoin;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }
