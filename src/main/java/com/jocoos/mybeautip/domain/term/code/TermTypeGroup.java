@@ -5,7 +5,10 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.jocoos.mybeautip.domain.term.code.TermType.*;
 
@@ -28,5 +31,10 @@ public enum TermTypeGroup implements CodeValue {
         if (!TermTypeGroup.OPTIONAL.getTypes().contains(type)) {
             throw new BadRequestException("only optional term can change status");
         }
+    }
+
+    @Override
+    public String getName() {
+        return this.name();
     }
 }

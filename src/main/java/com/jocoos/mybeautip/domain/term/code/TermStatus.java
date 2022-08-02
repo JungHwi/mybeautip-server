@@ -11,4 +11,9 @@ public enum TermStatus implements CodeValue {
     OPTIONAL("선택");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

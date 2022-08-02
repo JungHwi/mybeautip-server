@@ -14,4 +14,9 @@ public enum TermType implements CodeValue {
     MARKETING_INFO("마케팅 정보 활용 동의");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }
