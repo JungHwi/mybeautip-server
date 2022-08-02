@@ -48,8 +48,6 @@ $ docker exec -it mybeautip-redis redis-cli
 ```
 {server_ip:port}/swagger-ui.html
 ```
-
-
 ## Build and run with docker ##
 ```
 ./gradlew clean build
@@ -57,31 +55,39 @@ docker build -t dev.jocoos.com/mybeautip-server:develop .
 docker run --name mybeautip-server --net=host -d dev.jocoos.com/mybeautip-server:develop
 ```
 
-## distribute in development server ##
-```
-// local build and push to docker registry
+## Build and run with docker to ECR ##
+``` 
 ./gradlew clean build
-docker build -t dev.jocoos.com/mybeautip-server:develop .
-docker push dev.jocoos.com/mybeautip-server:develop
+docker build -t {ecr_address}/mybeautip-api:develop .
+
+// Requrired aws cli installed and configured by user iam access_key
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin {ecr_address}
+docker push {ecr_address}/mybeautip-api:develop
 
 // in dev server
-docker pull dev.jocoos.com/mybeautip-server:develop
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin {ecr_address}
+docker pull {ecr_address}/mybeautip-api:develop
+
 docker rm -f mybeautip-server
-docker run --name mybeautip-server -v /var/log/mybeautip-server:/mybeautip-server/logs --net=host -d dev.jocoos.com/mybeautip-server:develop
+docker run --name mybeautip-server -v /var/log/mybeautip-server:/mybeautip-server/logs --net=host -d {ecr_address}/mybeautip-api:develop
 
 or
 
 docker-compose -f mybeautip-server-dev.yml up -d
-
 ```
 
-## distribute for production ##
+## distribute for production to ECR ##
 ```
 ./gradlew clean build
-docker build -t dev.jocoos.com/mybeautip-server:production .
-docker push dev.jocoos.com/mybeautip-server:production
+docker build -t {ecr_address}/mybeautip-api:production .
+
+// Requrired aws cli installed and configured by user iam access_key
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin {ecr_address}
+docker push {ecr_address}/mybeautip-api:production
+
 
 // in prod server
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin {ecr_address}
 docker pull dev.jocoos.com/mybeautip-server:production
 docker rm -f mybeautip-server
 docker run --name mybeautip-server -e SERVER_PROFILE=production -v /var/log/mybeautip-server:/mybeautip-server/logs --net=host -d dev.jocoos.com/mybeautip-server:production
@@ -90,3 +96,5 @@ or
 
 docker-compose -f mybeautip-server-prod.yml up -d
 ```
+
+
