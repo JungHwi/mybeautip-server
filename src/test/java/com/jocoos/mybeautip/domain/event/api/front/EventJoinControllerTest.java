@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.event.api.front;
 
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -15,6 +16,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SpringBootTest
 class EventJoinControllerTest extends RestDocsTestSupport {
 
     @Test

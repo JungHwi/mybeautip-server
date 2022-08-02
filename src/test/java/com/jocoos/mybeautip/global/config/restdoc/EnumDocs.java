@@ -56,4 +56,6 @@ public class EnumDocs {
     Map<String, String> popupDisplayType;
     Map<String, String> popupStatus;
 
+    // Term
+    Map<String, String> termType;
 }

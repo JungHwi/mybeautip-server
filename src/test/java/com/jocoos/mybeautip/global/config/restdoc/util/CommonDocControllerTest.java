@@ -154,7 +154,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         customResponseFields("custom-response", beneathPath("data.popup_status").withSubsectionId("popup_status"),
                                 attributes(key("title").value("PopupStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getPopupStatus()))
-                        )
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.term_type").withSubsectionId("term_type"),
+                                attributes(key("title").value("TermType")),
+                                enumConvertFieldDescriptor((enumDocs.getTermType())))
                 ));
     }
 

@@ -15,6 +15,7 @@ import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.domain.popup.code.ButtonLinkType;
 import com.jocoos.mybeautip.domain.popup.code.PopupDisplayType;
 import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
+import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.global.code.*;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
 import com.jocoos.mybeautip.member.code.SkinType;
@@ -78,6 +79,9 @@ public class CommonDocController {
         Map<String, String> popupDisplayType = getDocs(PopupDisplayType.values());
         Map<String, String> popupStatus = getDocs(PopupStatus.values());
 
+        // Term
+        Map<String, String> termType = getDocs(TermType.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .deviceOs(deviceOs)
@@ -115,6 +119,8 @@ public class CommonDocController {
                         .buttonLinkType(buttonLinkType)
                         .popupDisplayType(popupDisplayType)
                         .popupStatus(popupStatus)
+                // Term
+                        .termType(termType)
                 .build()
         );
     }
