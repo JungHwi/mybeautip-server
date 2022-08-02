@@ -23,6 +23,8 @@ public class CommunityResponse {
 
     private List<String> fileUrl;
 
+    private Integer viewCount;
+
     private Integer likeCount;
 
     private Integer commentCount;

@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,4 +37,22 @@ public class CommunityController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping(value = "/1/community/{community_id}")
+    public ResponseEntity<CommunityResponse> getCommunity(@PathVariable(name = "community_id") Long communityId) {
+
+        CommunityResponse response = service.getCommunity(communityId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping(value = "/1/community/{community_id}")
+    public ResponseEntity deleteCommunity(@PathVariable(name = "community_id") Long communityId) {
+
+        service.deleteCommunity(communityId);
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+
 }

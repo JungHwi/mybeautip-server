@@ -10,6 +10,8 @@ public class WriteCommunityRequest {
 
     private Long categoryId;
 
+    private Long eventId;
+
     private String title;
 
     private String contents;

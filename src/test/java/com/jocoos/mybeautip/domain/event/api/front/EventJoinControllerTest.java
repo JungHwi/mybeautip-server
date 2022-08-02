@@ -26,8 +26,6 @@ class EventJoinControllerTest extends RestDocsTestSupport {
                 .andExpect(status().isOk())
                 .andDo(print());
 
-
-
         result.andDo(document("event_join",
                         pathParameters(
                                 parameterWithName("eventId").description("Event ID")
