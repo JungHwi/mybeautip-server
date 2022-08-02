@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.event.api.front;
 
+import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
 import com.jocoos.mybeautip.domain.event.service.EventService;
@@ -20,7 +21,8 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping("/1/event")
-    public ResponseEntity getEventList(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
+    public ResponseEntity getEventList(@RequestParam(name = "event_type", required = false) EventType eventType,
+                                       @RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
                                        @RequestParam(defaultValue = "20") int size) {
         List<EventListResponse> result = eventService.getEventList(cursor, size);
         CursorResponse cursorResponse = new CursorResponse.Builder<>("/api/1/event/", result)

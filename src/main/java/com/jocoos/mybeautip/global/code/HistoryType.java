@@ -12,4 +12,9 @@ public enum HistoryType implements CodeValue {
     DELETE("삭제");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }
