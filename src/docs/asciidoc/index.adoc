@@ -25,3 +25,5 @@ include::overview.adoc[]
 === Event Join API
 * link:event/event_join_api.html[이벤트 참여 API, window=_blank]
 
+=== Term API
+* link:term/change_choice_of_optional_term.html[선택 약관 동의 여부 변경 API, window=_blank]

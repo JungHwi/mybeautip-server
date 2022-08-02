@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -27,13 +28,12 @@ import static com.jocoos.mybeautip.domain.term.code.TermType.OVER_14;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Slf4j
-@AutoConfigureMockMvc(addFilters = false)
+//@AutoConfigureMockMvc(addFilters = false)
 //@WebMvcTest(value = MemberTermController.class,
 //        excludeFilters = {
 //                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
@@ -73,8 +73,7 @@ class MemberTermControllerTest extends RestDocsTestSupport {
                         .patch("/api/1/members/me/terms/option/change")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("utf-8")
-                        .content(objectMapper.writeValueAsString(request))
-                        .with(csrf()))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.term_type").value(MARKETING_INFO.toString()))
@@ -99,8 +98,7 @@ class MemberTermControllerTest extends RestDocsTestSupport {
         mockMvc.perform(patch("/api/1/members/me/terms/option/change")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("utf-8")
-                        .content(objectMapper.writeValueAsString(request))
-                        .with(csrf()))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.error").value(exception.getMessage()))
