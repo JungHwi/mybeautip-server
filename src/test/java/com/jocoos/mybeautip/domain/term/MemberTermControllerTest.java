@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.term.dto.TermTypeRequest;
 import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.security.annotation.WithMockCustomUser;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -116,11 +117,15 @@ class MemberTermControllerTest extends RestDocsTestSupport {
     private void restDocs(ResultActions resultActions) throws Exception {
         resultActions.andDo(document("change_choice_optional_term",
                 requestFields(
-                        fieldWithPath("term_type").type(JsonFieldType.STRING).description("약관 타입"),
+                        fieldWithPath("term_type").type(JsonFieldType.STRING).description("약관 타입")
+                                .description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.TERM_TYPE))
+                        ,
                         fieldWithPath("is_accept").type(JsonFieldType.BOOLEAN).description("동의 여부")
                 ),
                 responseFields(
-                        fieldWithPath("term_type").type(JsonFieldType.STRING).description("약관 타입"),
+                        fieldWithPath("term_type").type(JsonFieldType.STRING).description("약관 타입")
+                                .description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.TERM_TYPE))
+                        ,
                         fieldWithPath("is_accept").type(JsonFieldType.BOOLEAN).description("동의 여부")
                 )
         ));
