@@ -95,4 +95,30 @@ public class CommunityService {
 
         return communityResponseList;
     }
+
+    public CommunityResponse getCommunity(Long communityId) {
+        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
+                .id(100L)
+                .username("MockMember")
+                .avatarUrl(DEFAULT_AVATAR_URL)
+                .build();
+
+        CommunityResponse result = CommunityResponse.builder()
+                .id(1L)
+                .title("Mock Title")
+                .contents("Mock Contents")
+                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
+                .viewCount(1234)
+                .likeCount(20)
+                .commentCount(3)
+                .createdAt(ZonedDateTime.now())
+                .member(memberResponse)
+                .build();
+
+        return result;
+    }
+
+    public void deleteCommunity(Long communityId) {
+        return;
+    }
 }
