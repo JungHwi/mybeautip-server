@@ -221,7 +221,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 parameterWithName("community_id").description("Community ID")
                         ),
                         requestFields(
-                                fieldWithPath("bool").description(JsonFieldType.BOOLEAN)
+                                fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("좋아요 여부")
                         ))
         );
     }
@@ -243,7 +243,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         parameterWithName("community_id").description("Community ID")
                 ),
                 requestFields(
-                        fieldWithPath("bool").description(JsonFieldType.BOOLEAN)
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("신고 여부")
                 ))
         );
     }
