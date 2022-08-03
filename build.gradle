@@ -151,6 +151,8 @@ build {
 }
 
 bootJar {
+  baseName = 'mybeautip-server'
+  version = '1.1.1'
   dependsOn asciidoctor
   from ("${asciidoctor.outputDir}/html5") {
     into 'static/docs'
