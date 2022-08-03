@@ -17,6 +17,7 @@ public class DocumentLinkGenerator {
         MEMBER_STATUS("member_status", "회원 상태"),
         EVENT_STATUS("event_status", "이벤트 상태"),
         COMMUNITY_CATEGORY_TYPE("community_category_type", "커뮤니티 카테고리 구분"),
+        FILE_OPERATION_TYPE("file_operation_type", "파일 작업 구분"),
         TERM_TYPE("term_type", "약관 타입")
         ;
 
