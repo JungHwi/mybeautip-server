@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.domain.community.api.front;
 
 
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -25,17 +28,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CommunityControllerTest extends RestDocsTestSupport {
 
     @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void writeCommunity() throws Exception {
-        Map<String, Object> map = new HashMap<>();
-        map.put("category_id", 3);
-        map.put("title", "Test Title");
-        map.put("contents", "Test Contents");
-        map.put("files", null);
+        WriteCommunityRequest request = WriteCommunityRequest.builder()
+                .categoryId(3L)
+                .title("Mock Title")
+                .contents("Mock Contents")
+                .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .post("/api/1/community")
-                        .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                        .content(objectMapper.writeValueAsString(map)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -45,13 +49,37 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("event_id").type(JsonFieldType.NUMBER).description("이벤트 아이디. 드립N드림 일때 관련된 이벤트 아이디.").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목. 수근수근에서만 필수").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("이미지 파일").optional()
+                                fieldWithPath("['files']").type(JsonFieldType.ARRAY).description("파일 작업 정보 목록").optional(),
+                                fieldWithPath("['files'].operation").type(JsonFieldType.STRING).description("파일 상태").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.FILE_OPERATION_TYPE)),
+                                fieldWithPath("['files'].url").type(JsonFieldType.STRING).description("파일 URL")
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("file_url").type(JsonFieldType.ARRAY).description("파일 URL List").optional()
+                        )
+                )
+        );
+    }
+
+    @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void uploadFiles() throws Exception {
+        MockMultipartFile image = new MockMultipartFile("image", "image.png", "image/png", "<<png data>>".getBytes());
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .multipart("/api/1/community/files")
+                        .file("files", "mockup".getBytes()))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("upload_file_community",
+                requestParts(
+                        partWithName("files").description("The file to upload")
+                ),
+                        responseFields(
+                                fieldWithPath("[]").type(JsonFieldType.ARRAY).description("UPLOAD 된 파일 URL")
                         )
                 )
         );
@@ -139,4 +167,87 @@ public class CommunityControllerTest extends RestDocsTestSupport {
             )
         );
     }
+
+    @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void editCommunity() throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("title", "Test Title");
+        map.put("contents", "Test Contents");
+        map.put("files", null);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .put("/api/1/community/{community_id}", 3)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(map)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("edit_community",
+                        pathParameters(
+                                parameterWithName("community_id").description("Community ID")
+                        ),
+                        requestFields(
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
+                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("['files']").type(JsonFieldType.ARRAY).description("파일 작업 정보 목록").optional(),
+                                fieldWithPath("['files'].operation").type(JsonFieldType.STRING).description("파일 상태").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.FILE_OPERATION_TYPE)),
+                                fieldWithPath("['files'].url").type(JsonFieldType.STRING).description("파일 URL")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
+                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("file_url").type(JsonFieldType.ARRAY).description("파일 URL List").optional()
+                        )
+                )
+        );
+    }
+
+    @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void likeCommunity() throws Exception {
+        BooleanDto bool = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/api/1/community/{community_id}/like", 3)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bool)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("like_community",
+                        pathParameters(
+                                parameterWithName("community_id").description("Community ID")
+                        ),
+                        requestFields(
+                                fieldWithPath("bool").description(JsonFieldType.BOOLEAN)
+                        ))
+        );
+    }
+
+    @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void reportCommunity() throws Exception {
+        BooleanDto bool = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/api/1/community/{community_id}/report", 3)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bool)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("report_community",
+                pathParameters(
+                        parameterWithName("community_id").description("Community ID")
+                ),
+                requestFields(
+                        fieldWithPath("bool").description(JsonFieldType.BOOLEAN)
+                ))
+        );
+    }
+
 }
+
+

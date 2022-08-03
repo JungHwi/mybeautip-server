@@ -1,12 +1,10 @@
 package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
-import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
-import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
-import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
-import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
+import com.jocoos.mybeautip.domain.community.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -21,6 +19,20 @@ import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVA
 public class CommunityService {
 
     public CommunityResponse write(WriteCommunityRequest request) {
+
+        return CommunityResponse.builder()
+                .id(1L)
+                .title("Mock Title")
+                .contents("Mock Contents")
+                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
+                .build();
+    }
+
+    public List<String> upload(List<MultipartFile> files) {
+        return Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL);
+    }
+
+    public CommunityResponse edit(EditCommunityRequest request) {
 
         return CommunityResponse.builder()
                 .id(1L)
@@ -96,7 +108,7 @@ public class CommunityService {
         return communityResponseList;
     }
 
-    public CommunityResponse getCommunity(Long communityId) {
+    public CommunityResponse get(Long communityId) {
         CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
                 .id(100L)
                 .username("MockMember")
@@ -118,7 +130,15 @@ public class CommunityService {
         return result;
     }
 
-    public void deleteCommunity(Long communityId) {
+    public void delete(Long communityId) {
+        return;
+    }
+
+    public void like(long memberId, long communityId, boolean isLike) {
+        return;
+    }
+
+    public void report(long memberId, long communityId, boolean isReport) {
         return;
     }
 }
