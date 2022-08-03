@@ -9,10 +9,8 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.security.annotation.WithMockCustomUser;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
@@ -20,7 +18,6 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.context.WebApplicationContext;
 
 import static com.jocoos.mybeautip.domain.term.code.TermType.MARKETING_INFO;
 import static com.jocoos.mybeautip.domain.term.code.TermType.OVER_14;
@@ -31,28 +28,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Slf4j
-//@AutoConfigureMockMvc(addFilters = false)
-//@WebMvcTest(value = MemberTermController.class,
-//        excludeFilters = {
-//                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)},
-//        excludeAutoConfiguration = SecurityAutoConfiguration.class)
 class MemberTermControllerTest extends RestDocsTestSupport {
-
-    @Autowired
-    private WebApplicationContext context;
     @MockBean
     private MemberTermService memberTermService;
 
     @MockBean
     private LegacyMemberService legacyMemberService;
-
-//    @BeforeEach
-//    void init() {
-//        mvc = MockMvcBuilders.webAppContextSetup(context)
-//                .apply(SecurityMockMvcConfigurers.springSecurity())
-//                .build();
-//    }
 
     @DisplayName("[PATCH] /api/1/members/me/terms/option/change - 선택 약관 동의로 변경 성공")
     @WithMockCustomUser

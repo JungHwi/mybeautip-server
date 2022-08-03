@@ -114,7 +114,8 @@ public class LegacyMemberController {
                                   LegacyNotificationService legacyNotificationService,
                                   RevenuePaymentRepository revenuePaymentRepository,
                                   VideoScrapService videoScrapService,
-                                  CommentService commentService, MemberTermService memberTermService) {
+                                  CommentService commentService,
+                                  MemberTermService memberTermService) {
         this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
         this.videoService = videoService;
