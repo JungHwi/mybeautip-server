@@ -16,6 +16,7 @@ public class EnumDocs {
     Map<String, String> language;
     Map<String, String> telecom;
     Map<String, String> urlDirectory;
+    Map<String, String> fileOperationType;
 
     // Member
     Map<String, String> memberStatus;

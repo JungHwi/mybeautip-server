@@ -39,6 +39,7 @@ public class CommonDocController {
         Map<String, String> language = getDocs(Language.values());
         Map<String, String> telecom = getDocs(Telecom.values());
         Map<String, String> urlDirectory = getDocs(UrlDirectory.values());
+        Map<String, String> fileOperationType = getDocs(FileOperationType.values());
 
         // Member
         Map<String, String> memberStatus = getDocs(MemberStatus.values());
@@ -84,6 +85,7 @@ public class CommonDocController {
                         .language(language)
                         .telecom(telecom)
                         .urlDirectory(urlDirectory)
+                        .fileOperationType(fileOperationType)
                 // Member
                         .memberStatus(memberStatus)
                         .skinType(skinType)

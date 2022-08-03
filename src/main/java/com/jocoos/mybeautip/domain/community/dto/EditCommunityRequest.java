@@ -1,18 +1,12 @@
 package com.jocoos.mybeautip.domain.community.dto;
 
 import com.jocoos.mybeautip.global.dto.FileDto;
-import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-@Builder
-public class WriteCommunityRequest {
-
-    private Long categoryId;
-
-    private Long eventId;
+public class EditCommunityRequest {
 
     private String title;
 

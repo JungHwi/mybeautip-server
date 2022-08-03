@@ -52,6 +52,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("UrlDirectory")),
                                 enumConvertFieldDescriptor((enumDocs.getUrlDirectory()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.file_operation_type").withSubsectionId("file_operation_type"),
+                                attributes(key("title").value("FileOperationType")),
+                                enumConvertFieldDescriptor((enumDocs.getFileOperationType()))
+                        ),
                         // Member
                         customResponseFields("custom-response", beneathPath("data.member_status").withSubsectionId("member_status"),
                                 attributes(key("title").value("MemberStatus")),
