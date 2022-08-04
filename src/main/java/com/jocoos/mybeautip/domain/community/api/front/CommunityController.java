@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.community.api.front;
 
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.EditCommunityRequest;
+import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
@@ -87,10 +88,10 @@ public class CommunityController {
 
     @PatchMapping(value = "/1/community/{community_id}/report")
     public ResponseEntity reportCommunity(@PathVariable(name = "community_id") long communityId,
-                                          @RequestBody BooleanDto isReport) {
+                                          @RequestBody ReportRequest report) {
         long memberId = legacyMemberService.currentMemberId();
 
-        service.report(memberId, communityId, isReport.isBool());
+        service.report(memberId, communityId, report);
 
         return new ResponseEntity(HttpStatus.OK);
     }

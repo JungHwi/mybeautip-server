@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
@@ -13,29 +12,18 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommunityResponse {
+public class CommunityCommentReplyResponse {
 
     private Long id;
 
-    private String title;
-
     private String contents;
-
-    private List<String> fileUrl;
 
     private Boolean isLike;
 
-    private Integer viewCount;
-
     private Integer likeCount;
-
-    private Integer commentCount;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime createdAt;
 
     private CommunityMemberResponse member;
-
-    private CommunityCategoryResponse category;
-
 }

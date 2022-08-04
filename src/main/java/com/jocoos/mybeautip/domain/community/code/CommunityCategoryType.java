@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public enum CommunityCategoryType implements CodeValue {
 
+    TOTAL("전체"),
     NORMAL("일반"),
     BLIND("블라인드"),
     DRIP("드립"),
