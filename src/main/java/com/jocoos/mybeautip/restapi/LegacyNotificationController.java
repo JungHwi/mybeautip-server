@@ -36,7 +36,7 @@ import static com.jocoos.mybeautip.notification.Notification.*;
 @RestController
 @RequestMapping("/api/1/members/me/notifications")
 public class LegacyNotificationController {
-    private static final String NOTICE_IMG = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_notice.png";
+    private static final String NOTICE_IMG = "https://static.mybeautip.com/common/avatar/img_profile_notice.png";
 
     private final NotificationRepository notificationRepository;
     private final FollowingRepository followingRepository;

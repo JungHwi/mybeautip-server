@@ -20,6 +20,8 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
+
 
 @Data
 @AllArgsConstructor
@@ -42,9 +44,6 @@ public class Member {
     public static final int PERMISSION_ALL = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
     // Changed store link from 8 to 32
     static final int LINK_STORE = 32;
-    @Transient
-    @JsonIgnore
-    private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -139,7 +138,7 @@ public class Member {
         this.link = parseLink(request.getGrantType());
         this.username = StringUtils.isBlank(request.getUsername()) ? RandomUtils.generateUsername() : request.getUsername();
         this.email = StringUtils.isBlank(request.getEmail()) ? "" : request.getEmail();
-        this.avatarUrl = StringUtils.isBlank(request.getAvatarUrl()) ? defaultAvatarUrl : request.getAvatarUrl();
+        this.avatarUrl = StringUtils.isBlank(request.getAvatarUrl()) ? DEFAULT_AVATAR_URL : request.getAvatarUrl();
         this.point = 0;
         this.visible = false;
         this.revenueModifiedAt = null;

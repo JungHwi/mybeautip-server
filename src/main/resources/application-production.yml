@@ -29,7 +29,7 @@ mybeautip:
       region: 'ap-northeast-2'
   store:
     image-path:
-      domain: https://mybeautip.s3.ap-northeast-2.amazonaws.com/
+      domain: https://static.mybeautip.com/common/
   slack:
     key: T03FMJ9ANNR/B03FT8YFXC5/GFY50VQh98iRpEs4XbmxmrYP
     channel: "#mybeautip-prod"
@@ -48,7 +48,7 @@ cloud:
 flipflop:
   app-key: 9z27htVnKe
   video:
-    thumbnail-format: https://flipflop-prod.s3.ap-northeast-2.amazonaws.com/${flipflop.app-key}/videos/%s/thumbnail.jpg
+    thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 redis:
   host: 172.31.2.106

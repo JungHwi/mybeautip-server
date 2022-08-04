@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRep
 import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
+import com.jocoos.mybeautip.global.constant.MybeautipConstant;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -78,7 +79,6 @@ public class LegacyMemberService {
     private final SocialMemberFactory socialMemberFactory;
     private final String PATH_AVATAR = "avatar";
     private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
-    private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
 
     public LegacyMemberService(BannedWordService bannedWordService,
                                MessageService messageService,
@@ -331,7 +331,7 @@ public class LegacyMemberService {
             member.setUsername(request.getUsername());
         }
 
-        String avatarUrl = request.getAvatarUrl() != null ? request.getAvatarUrl() : defaultAvatarUrl;
+        String avatarUrl = request.getAvatarUrl() != null ? request.getAvatarUrl() : DEFAULT_AVATAR_URL;
         member.setAvatarUrl(avatarUrl);
 
         member.setVisible(true);
@@ -375,7 +375,7 @@ public class LegacyMemberService {
         }
 
         member.setIntro("");
-        member.setAvatarUrl("https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_deleted.png");
+        member.setAvatarUrl(DELETED_AVATAR_URL);
         member.setVisible(false);
         member.setFollowingCount(0);
         member.setFollowerCount(0);
@@ -485,7 +485,7 @@ public class LegacyMemberService {
             if (avatar != null) {
                 path = attachmentService.upload(avatar, PATH_AVATAR);
             } else {
-                path = defaultAvatarUrl;
+                path = DEFAULT_AVATAR_URL;
             }
 
         } catch (IOException ex) {
