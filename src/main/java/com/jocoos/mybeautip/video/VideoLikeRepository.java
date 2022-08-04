@@ -20,5 +20,7 @@ public interface VideoLikeRepository extends JpaRepository<VideoLike, Long> {
 
     Integer countByCreatedByIdAndVideoDeletedAtIsNull(Long memberId);
 
+    boolean existsByVideoIdAndCreatedById(long videoId, long memberId);
+
     void deleteByVideoId(Long videoId);
 }

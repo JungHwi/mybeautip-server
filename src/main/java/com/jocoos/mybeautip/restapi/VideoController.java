@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
+import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ConflictException;
@@ -90,6 +91,9 @@ public class VideoController {
     private final VideoScrapService videoScrapService;
     private final CommentReportRepository commentReportRepository;
     private final BlockService blockService;
+
+    private final ActivityPointService activityPointService;
+
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
 
@@ -116,7 +120,8 @@ public class VideoController {
                            TimeSaleService timeSaleService,
                            VideoScrapService videoScrapService,
                            CommentReportRepository commentReportRepository,
-                           BlockService blockService) {
+                           BlockService blockService,
+                           ActivityPointService activityPointService) {
         this.legacyMemberService = legacyMemberService;
         this.videoService = videoService;
         this.messageService = messageService;
@@ -141,6 +146,7 @@ public class VideoController {
         this.videoScrapService = videoScrapService;
         this.commentReportRepository = commentReportRepository;
         this.blockService = blockService;
+        this.activityPointService = activityPointService;
     }
 
     @PostMapping
@@ -354,7 +360,7 @@ public class VideoController {
 
         }
 
-        Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_VIDEO, id);
+        Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_VIDEO, id, member);
         return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
     }
 
@@ -407,21 +413,21 @@ public class VideoController {
     @PostMapping("/{videoId:.+}/likes")
     public ResponseEntity<VideoLikeInfo> addVideoLike(@PathVariable Long videoId,
                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = legacyMemberService.currentMemberId();
+        Member member = legacyMemberService.currentMember();
 
         return videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .map(video -> {
-                    if (videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), memberId).isPresent()) {
+                    if (videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), member.getId()).isPresent()) {
                         throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
                     }
-                    VideoLike videoLike = videoService.likeVideo(video);
+                    VideoLike videoLike = videoService.likeVideo(video, member);
                     VideoLikeInfo info = new VideoLikeInfo(videoLike, videoService.generateVideoInfo(video));
                     return new ResponseEntity<>(info, HttpStatus.OK);
                 })
                 .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
     }
 
-    @DeleteMapping("/{videoId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/{videoId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeVideoLike(@PathVariable Long videoId,
                                              @PathVariable Long likeId,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
@@ -471,13 +477,13 @@ public class VideoController {
                     if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
                         throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
                     }
-                    CommentLike commentLike = videoService.likeVideoComment(comment);
+                    CommentLike commentLike = videoService.likeVideoComment(comment, member);
                     return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
                 })
                 .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));
     }
 
-    @DeleteMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeCommentLike(@PathVariable Long videoId,
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,
@@ -707,12 +713,12 @@ public class VideoController {
     @PostMapping("/{videoId:.+}/scraps")
     public ResponseEntity<VideoScrapInfo> addVideoScrap(@PathVariable Long videoId,
                                                         @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = legacyMemberService.currentMemberId();
+        Member member = legacyMemberService.currentMember();
         Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            VideoScrap scrap = videoScrapService.scrapVideo(video, memberId);
+            VideoScrap scrap = videoScrapService.scrapVideo(video, member);
             VideoScrapInfo info = new VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()));
             return new ResponseEntity<>(info, HttpStatus.OK);
         } catch (BadRequestException e) {
@@ -720,16 +726,16 @@ public class VideoController {
         }
     }
 
-    @DeleteMapping("/{videoId:.+}/scraps")
+    @PatchMapping("/{videoId:.+}/scraps")
     public ResponseEntity<?> removeVideoScrap(@PathVariable Long videoId,
                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = legacyMemberService.currentMemberId();
+        Member member = legacyMemberService.currentMember();
 
         Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            videoScrapService.deleteScrap(video, memberId);
+            videoScrapService.deleteScrap(video, member);
             return new ResponseEntity(HttpStatus.OK);
         } catch (NotFoundException e) {
             throw new NotFoundException("scrap_not_found", messageService.getMessage(SCRAP_NOT_FOUND, lang));
