@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member.point;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -41,6 +42,9 @@ public class MemberPointDetail extends CreatedDateAuditable {
     @Column
     private Long eventId;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ActivityPointType activityType;
     @Column
     private Date expiryAt;
 
@@ -86,8 +90,10 @@ public class MemberPointDetail extends CreatedDateAuditable {
         this.expiryAt = memberPoint.getExpiryAt();
         if (userPointService == UsePointService.ORDER) {
             this.orderId = usePointServiceId;
-        } else {
+        } else if (userPointService == UsePointService.EVENT){
             this.eventId = usePointServiceId;
+        } else {
+            this.activityType = ActivityPointType.getActivityPointType(Math.toIntExact(usePointServiceId));
         }
         setPointAndState(point, STATE_USE_POINT);
     }

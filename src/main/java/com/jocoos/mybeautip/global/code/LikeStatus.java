@@ -1,15 +1,14 @@
-package com.jocoos.mybeautip.post;
+package com.jocoos.mybeautip.global.code;
 
-import com.jocoos.mybeautip.global.code.CodeValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum PostLikeStatus implements CodeValue {
+public enum LikeStatus implements CodeValue {
 
-    LIKE(""),
-    UNLIKE("");
+    LIKE("좋아요"),
+    UNLIKE("좋아요 취소");
 
     private final String description;
 

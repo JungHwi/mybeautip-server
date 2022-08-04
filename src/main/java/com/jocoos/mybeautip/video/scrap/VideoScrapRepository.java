@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface VideoScrapRepository extends JpaRepository<VideoScrap, Long> {
 
-    boolean existsByVideoIdAndCreatedById(Long videoId, Long member);
+    boolean existsByVideoIdAndCreatedByIdAndStatus(Long videoId, Long member, ScrapStatus status);
 
     Optional<VideoScrap> findByVideoIdAndCreatedById(Long videoId, Long member);
 

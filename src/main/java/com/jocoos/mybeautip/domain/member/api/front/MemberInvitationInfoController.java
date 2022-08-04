@@ -16,7 +16,7 @@ public class MemberInvitationInfoController {
 
     private final MemberInvitationInfoService memberInvitationInfoService;
 
-    @GetMapping("/1/members/invitation-info")
+    @GetMapping("/1/member/invitation-info")
     public ResponseEntity<MemberInvitationInfoResponse> getMemberInvitationInfo() {
         return ResponseEntity.ok(memberInvitationInfoService.getMemberInvitationInfo());
     }

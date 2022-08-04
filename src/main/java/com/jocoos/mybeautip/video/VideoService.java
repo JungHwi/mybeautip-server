@@ -1,9 +1,6 @@
 package com.jocoos.mybeautip.video;
 
-import com.jocoos.mybeautip.domain.notification.service.impl.VideoUploadNotificationService;
-import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.global.exception.NotFoundException;
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -32,7 +29,6 @@ import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +48,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -79,6 +77,8 @@ public class VideoService {
     private final VideoDataService videoDataService;
     private final VideoCategoryRepository videoCategoryRepository;
     private final VideoScrapRepository videoScrapRepository;
+
+    private final ActivityPointService activityPointService;
 
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
@@ -709,29 +709,44 @@ public class VideoService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public VideoLike likeVideo(Video video) {
+    public VideoLike likeVideo(Video video, Member member) {
         videoRepository.updateLikeCount(video.getId(), 1);
         video.setLikeCount(video.getLikeCount() + 1);
-        return videoLikeRepository.save(new VideoLike(video));
+
+        VideoLike videoLike = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), member.getId())
+                .orElse(new VideoLike(video));
+        videoLike.like();
+        videoLikeRepository.save(videoLike);
+
+        gainLikeActivityPoint(member, videoLike.getId(), video);
+        return videoLike;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikeVideo(VideoLike liked) {
-        videoLikeRepository.delete(liked);
+        liked.unlike();
         if (liked.getVideo().getLikeCount() > 0) {
             videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
         }
+        activityPointService.retrieveActivityPoint(VIDEO_LIKE, liked.getId(), liked.getCreatedBy());
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public CommentLike likeVideoComment(Comment comment) {
+    public CommentLike likeVideoComment(Comment comment, Member member) {
         commentRepository.updateLikeCount(comment.getId(), 1);
-        return commentLikeRepository.save(new CommentLike(comment));
+
+        CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
+                .orElse(new CommentLike(comment));
+        commentLike.like();
+
+        commentLikeRepository.save(commentLike);
+        activityPointService.gainActivityPoint(GET_LIKE_COMMENT, commentLike.getId(), comment.getCreatedBy());
+        return commentLike;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikeVideoComment(CommentLike liked) {
-        commentLikeRepository.delete(liked);
+        liked.unlike();
         if (liked.getComment().getLikeCount() > 0) {
             commentRepository.updateLikeCount(liked.getComment().getId(), -1);
         }
@@ -835,5 +850,11 @@ public class VideoService {
     public Video saveWithDeletedAt(Video video) {
         video.setDeletedAt(new Date());
         return videoRepository.save(video);
+    }
+
+
+    private void gainLikeActivityPoint(Member me, Long videoLikeId, Video video) {
+        activityPointService.gainActivityPoint(VIDEO_LIKE, videoLikeId, me);
+        activityPointService.gainActivityPoint(GET_LIKE_VIDEO, videoLikeId, video.getMember());
     }
 }

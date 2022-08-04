@@ -54,7 +54,7 @@ public class MemberTermController {
 
 
     // 2021-07-28 현재 서버에서 약관 관리하지 않기 때문에 임시로 만듦, 추후 서버에서 약관 관리한다면 삭제
-    @PatchMapping("/1/members/me/terms/option/change")
+    @PatchMapping("/1/member/me/term/option/change")
     public ResponseEntity<TermTypeResponse> changeOptionalTermByType(@RequestBody TermTypeRequest request) {
         return ResponseEntity
                 .ok(memberTermService.changeOptionalTermByType(

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.post;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.global.code.LikeStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class PostLike extends MemberAuditable {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private PostLikeStatus status;
+    private LikeStatus status;
 
     @ManyToOne
     @JoinColumn(name = "post_id")
