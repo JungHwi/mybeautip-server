@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.comment;
 
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
+import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
+
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMENT;
 
 @Slf4j
 @Service
@@ -39,6 +42,8 @@ public class CommentService {
     private final CommentReportRepository commentReportRepository;
     private final CommentLikeRepository commentLikeRepository;
 
+    private final ActivityPointService activityPointService;
+
     @Transactional
     public void lockComment(Comment comment) {
         comment.setLocked(true);
@@ -48,7 +53,7 @@ public class CommentService {
     }
 
     @Transactional
-    public Comment addComment(CreateCommentRequest request, int type, long id) {
+    public Comment addComment(CreateCommentRequest request, int type, long id, Member member) {
         if (request.getParentId() != null) {
             commentRepository.findById(request.getParentId())
                     .ifPresent(parent -> commentRepository.updateCommentCount(parent.getId(), 1));
@@ -76,7 +81,7 @@ public class CommentService {
         } else {
             legacyNotificationService.notifyAddComment(comment);
         }
-
+        gainWriteActivityPoint(comment.getComment(), comment.getId(), member);
         return comment;
     }
 
@@ -120,6 +125,8 @@ public class CommentService {
 
         int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
         log.debug("child count: {}", childCount);
+
+        activityPointService.retrieveActivityPoint(WRITE_COMMENT, comment.getId(), comment.getCreatedBy());
 
         if (childCount == 0) {
             return deleteCommentAndChildren(comment);
@@ -178,5 +185,14 @@ public class CommentService {
         }
 
         return Comment.CommentState.DELETED.value();
+    }
+
+    private void gainWriteActivityPoint(String comment, Long commentId, Member member) {
+        if (validContentLength(comment))
+            activityPointService.gainActivityPoint(WRITE_COMMENT, commentId, member);
+    }
+
+    private boolean validContentLength(String comment) {
+        return comment != null && comment.length() >= 5;
     }
 }
