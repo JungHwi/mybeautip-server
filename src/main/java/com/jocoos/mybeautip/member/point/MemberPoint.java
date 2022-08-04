@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member.point;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.order.Order;
 import lombok.*;
@@ -46,6 +47,13 @@ public class MemberPoint extends CreatedDateAuditable {
 
     @Column
     private Long eventId;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ActivityPointType activityType;
+
+    @Column
+    private Long activityDomainId;
 
     @Column
     private Date earnedAt;
