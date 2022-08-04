@@ -10,4 +10,9 @@ public enum DateLimit implements CodeValue {
     ALL_TIME_ONCE("최초 1회"), DAY("1일 최대"), NO_LIMIT("무한정");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

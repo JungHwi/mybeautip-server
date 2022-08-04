@@ -9,4 +9,9 @@ import lombok.RequiredArgsConstructor;
 public enum ScrapStatus implements CodeValue {
     SCRAP("스크랩"), NOT_SCRAP("스크랩 취소");
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

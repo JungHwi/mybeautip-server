@@ -11,4 +11,9 @@ public enum LikeStatus implements CodeValue {
     UNLIKE("좋아요 취소");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

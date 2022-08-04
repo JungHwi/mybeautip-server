@@ -53,6 +53,11 @@ public enum ActivityPointType implements CodeValue {
     public boolean isPerDomainRestrict() {
         return this.perDomainRestriction.isRestrict();
     }
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }
 
 
