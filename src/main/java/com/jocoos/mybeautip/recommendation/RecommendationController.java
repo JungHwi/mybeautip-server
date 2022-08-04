@@ -38,7 +38,7 @@ public class RecommendationController {
 
     private static final String RESOURCE_TYPE_MEMBER = "member";
     private static final String RESOURCE_TYPE_TAG = "tag";
-    private static final String DEFAULT_HASHTAG_IMG_URL = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/app/img_hashtag_default.png";
+    private static final String DEFAULT_HASHTAG_IMG_URL = "https://static.mybeautip.com/common/app/img_hashtag_default.png";
     private final GoodsService goodsService;
     private final LegacyMemberService legacyMemberService;
     private final VideoService videoService;
