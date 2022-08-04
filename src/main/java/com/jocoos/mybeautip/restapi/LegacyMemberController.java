@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
+import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
+import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -48,6 +50,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -74,6 +77,11 @@ public class LegacyMemberController {
     private final RevenuePaymentRepository revenuePaymentRepository;
     private final VideoScrapService videoScrapService;
     private final CommentService commentService;
+
+    private final MemberTermService memberTermService;
+
+
+
     @Value("${mybeautip.store.image-path.domain}")
     private String storeImagePrefix;
     @Value("${mybeautip.store.image-path.cover-suffix}")
@@ -106,7 +114,8 @@ public class LegacyMemberController {
                                   LegacyNotificationService legacyNotificationService,
                                   RevenuePaymentRepository revenuePaymentRepository,
                                   VideoScrapService videoScrapService,
-                                  CommentService commentService) {
+                                  CommentService commentService,
+                                  MemberTermService memberTermService) {
         this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
         this.videoService = videoService;
@@ -127,14 +136,19 @@ public class LegacyMemberController {
         this.revenuePaymentRepository = revenuePaymentRepository;
         this.videoScrapService = videoScrapService;
         this.commentService = commentService;
+        this.memberTermService = memberTermService;
     }
 
     @GetMapping("/me")
     public EntityModel<MemberMeInfo> getMe(Principal principal,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         log.debug("member id: {}", principal.getName());
+
+        List<TermTypeResponse> termTypeResponses =
+                memberTermService.getOptionalTermAcceptStatus(Long.parseLong(principal.getName()));
+
         return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-                .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
+                .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio, termTypeResponses)))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     }
 

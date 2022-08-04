@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[term_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-term_type.adoc[]

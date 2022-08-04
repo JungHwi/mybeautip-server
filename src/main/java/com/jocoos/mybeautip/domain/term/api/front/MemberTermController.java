@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.domain.term.api.front;
 
 import com.jocoos.mybeautip.domain.term.dto.*;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
-import com.jocoos.mybeautip.domain.term.service.TermService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,6 @@ import static com.jocoos.mybeautip.domain.term.dto.MemberTermRequest.getTermIds;
 @RestController
 public class MemberTermController {
 
-    private final TermService termService;
     private final MemberTermService memberTermService;
     private final LegacyMemberService legacyMemberService;
 
@@ -44,35 +42,24 @@ public class MemberTermController {
 
 //    @PatchMapping("/1/members/me/terms/{termId}/agree")
     public ResponseEntity<MemberTermResponse> changeOptionalTermTrue(@PathVariable long termId) {
-        termService.validTermExist(termId);
         return ResponseEntity
                 .ok(memberTermService.changeOptionalTerm(termId, legacyMemberService.currentMemberId(), true));
     }
 
 //    @PatchMapping("/1/members/me/terms/{termId}/disagree")
     public ResponseEntity<MemberTermResponse> changeOptionalTermFalse(@PathVariable long termId) {
-        termService.validTermExist(termId);
         return ResponseEntity
                 .ok(memberTermService.changeOptionalTerm(termId, legacyMemberService.currentMemberId(), false));
     }
 
 
     // 2021-07-28 현재 서버에서 약관 관리하지 않기 때문에 임시로 만듦, 추후 서버에서 약관 관리한다면 삭제
-    @PatchMapping("/1/members/me/terms/option/agree")
-    public ResponseEntity<TermTypeResponse> changeOptionalTermTrueByType(@RequestBody TermTypeRequest request) {
+    @PatchMapping("/1/members/me/terms/option/change")
+    public ResponseEntity<TermTypeResponse> changeOptionalTermByType(@RequestBody TermTypeRequest request) {
         return ResponseEntity
                 .ok(memberTermService.changeOptionalTermByType(
                         request.getTermType(),
                         legacyMemberService.currentMemberId(),
-                        true));
-    }
-
-    @PatchMapping("/1/members/me/terms/option/disagree")
-    public ResponseEntity<TermTypeResponse> changeOptionalTermFalseByType(@RequestBody TermTypeRequest request) {
-        return ResponseEntity
-                .ok(memberTermService.changeOptionalTermByType(
-                        request.getTermType(),
-                        legacyMemberService.currentMemberId(),
-                        false));
+                        request.getIsAccept()));
     }
 }
