@@ -1,0 +1,3 @@
+== Get Community Comment API
+
+operation::get_community_comment[snippets='http-request,path-parameters,http-response,response-fields']

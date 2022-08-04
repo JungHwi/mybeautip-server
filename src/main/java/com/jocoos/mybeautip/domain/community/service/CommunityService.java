@@ -18,30 +18,6 @@ import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVA
 @RequiredArgsConstructor
 public class CommunityService {
 
-    public CommunityResponse write(WriteCommunityRequest request) {
-
-        return CommunityResponse.builder()
-                .id(1L)
-                .title("Mock Title")
-                .contents("Mock Contents")
-                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .build();
-    }
-
-    public List<String> upload(List<MultipartFile> files) {
-        return Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL);
-    }
-
-    public CommunityResponse edit(EditCommunityRequest request) {
-
-        return CommunityResponse.builder()
-                .id(1L)
-                .title("Mock Title")
-                .contents("Mock Contents")
-                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .build();
-    }
-
     public List<CommunityResponse> getCommunities() {
         List<CommunityResponse> communityResponseList = new ArrayList<>();
 
@@ -73,6 +49,7 @@ public class CommunityService {
                 .id(3L)
                 .contents("Mock Normal Contents 1")
                 .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
+                .isLike(false)
                 .member(memberResponse)
                 .category(normalCategory)
                 .createdAt(ZonedDateTime.now())
@@ -85,6 +62,7 @@ public class CommunityService {
         CommunityResponse blindCommunity = CommunityResponse.builder()
                 .id(2L)
                 .title("Mock Blind Title")
+                .isLike(false)
                 .category(blindCategory)
                 .createdAt(ZonedDateTime.now().minusMinutes(10))
                 .likeCount(10)
@@ -96,6 +74,7 @@ public class CommunityService {
         CommunityResponse dripCommunity = CommunityResponse.builder()
                 .id(1L)
                 .category(dripCategory)
+                .isLike(false)
                 .contents("Mock Drip Contents")
                 .createdAt(ZonedDateTime.now().minusMinutes(100))
                 .likeCount(20)
@@ -115,19 +94,87 @@ public class CommunityService {
                 .avatarUrl(DEFAULT_AVATAR_URL)
                 .build();
 
+        CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
+                .id(1L)
+                .title("Mock Normal")
+                .type(CommunityCategoryType.NORMAL)
+                .build();
+
         CommunityResponse result = CommunityResponse.builder()
                 .id(1L)
-                .title("Mock Title")
                 .contents("Mock Contents")
+                .isLike(false)
                 .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
                 .viewCount(1234)
                 .likeCount(20)
                 .commentCount(3)
                 .createdAt(ZonedDateTime.now())
                 .member(memberResponse)
+                .category(normalCategory)
                 .build();
 
         return result;
+    }
+
+    public CommunityResponse write(WriteCommunityRequest request) {
+
+        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
+                .id(100L)
+                .username("MockMember")
+                .avatarUrl(DEFAULT_AVATAR_URL)
+                .build();
+
+        CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
+                .id(1L)
+                .title("Mock Normal")
+                .type(CommunityCategoryType.NORMAL)
+                .build();
+
+        return CommunityResponse.builder()
+                .id(1L)
+                .title("Mock Title")
+                .contents("Mock Contents")
+                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
+                .isLike(false)
+                .viewCount(123)
+                .likeCount(12)
+                .commentCount(1)
+                .createdAt(ZonedDateTime.now())
+                .member(memberResponse)
+                .category(normalCategory)
+                .build();
+    }
+
+    public List<String> upload(List<MultipartFile> files) {
+        return Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL);
+    }
+
+    public CommunityResponse edit(EditCommunityRequest request) {
+        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
+                .id(100L)
+                .username("MockMember")
+                .avatarUrl(DEFAULT_AVATAR_URL)
+                .build();
+
+        CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
+                .id(1L)
+                .title("Mock Normal")
+                .type(CommunityCategoryType.NORMAL)
+                .build();
+
+        return CommunityResponse.builder()
+                .id(1L)
+                .title("Mock Title")
+                .contents("Mock Contents")
+                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
+                .isLike(false)
+                .viewCount(123)
+                .likeCount(12)
+                .commentCount(1)
+                .createdAt(ZonedDateTime.now())
+                .member(memberResponse)
+                .category(normalCategory)
+                .build();
     }
 
     public void delete(Long communityId) {
@@ -138,7 +185,7 @@ public class CommunityService {
         return;
     }
 
-    public void report(long memberId, long communityId, boolean isReport) {
+    public void report(long memberId, long communityId, ReportRequest report) {
         return;
     }
 }

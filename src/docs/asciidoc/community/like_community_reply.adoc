@@ -1,0 +1,3 @@
+== Like Community Reply API
+
+operation::like_community_reply[snippets='http-request,path-parameters,request-fields,http-response']

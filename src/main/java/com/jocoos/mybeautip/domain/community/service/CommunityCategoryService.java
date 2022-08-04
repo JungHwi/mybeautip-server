@@ -17,7 +17,7 @@ public class CommunityCategoryService {
 
         CommunityCategoryResponse total = CommunityCategoryResponse.builder()
                 .id(1L)
-                .type(CommunityCategoryType.NORMAL)
+                .type(CommunityCategoryType.TOTAL)
                 .title("전체")
                 .build();
         result.add(total);
@@ -42,6 +42,13 @@ public class CommunityCategoryService {
                 .title("내돈내산")
                 .build();
         result.add(review);
+
+        CommunityCategoryResponse event = CommunityCategoryResponse.builder()
+                .id(5L)
+                .type(CommunityCategoryType.EVENT)
+                .title("내돈내산")
+                .build();
+        result.add(event);
 
         return result;
     }

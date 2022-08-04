@@ -1,0 +1,3 @@
+== Report Community Reply API
+
+operation::report_community_reply[snippets='http-request,path-parameters,request-fields,http-response']
