@@ -23,7 +23,20 @@ public class VideoScrap extends MemberAuditable {
     @JoinColumn(name = "video_id")
     private Video video;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ScrapStatus status;
+
     public VideoScrap(Video video) {
         this.video = video;
+        this.status = ScrapStatus.SCRAP;
+    }
+
+    public void scrap() {
+        this.status = ScrapStatus.SCRAP;
+    }
+
+    public void notScrap() {
+        this.status = ScrapStatus.NOT_SCRAP;
     }
 }

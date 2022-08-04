@@ -141,7 +141,7 @@ public class PostController {
             PostInfo info = new PostInfo(post, legacyMemberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
 
             if (me != null) {
-                postLikeRepository.findByPostIdAndCreatedByIdAndStatus(post.getId(), me.getId(), PostLikeStatus.LIKE)
+                postLikeRepository.findByPostIdAndCreatedByIdAndStatus(post.getId(), me.getId(), LikeStatus.LIKE)
                         .ifPresent(like -> info.setLikeId(like.getId()));
 
                 Block block = blackList != null ? blackList.get(post.getCreatedBy().getId()) : null;
@@ -307,7 +307,7 @@ public class PostController {
         return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
                 .map(post -> {
                     Long postId = post.getId();
-                    if (postLikeRepository.findByPostIdAndStatusAndCreatedById(postId, PostLikeStatus.LIKE, me.getId()).isPresent()) {
+                    if (postLikeRepository.findByPostIdAndStatusAndCreatedById(postId, LikeStatus.LIKE, me.getId()).isPresent()) {
                         throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
                     }
 

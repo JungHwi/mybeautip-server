@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.post;
 
+import com.jocoos.mybeautip.global.code.LikeStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -134,13 +135,13 @@ public class PostService {
         post.setLikeCount(post.getLikeCount() + 1);
         PostLike postLike = postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
                 .orElse(new PostLike(post));
-        postLike.setStatus(PostLikeStatus.LIKE);
+        postLike.setStatus(LikeStatus.LIKE);
         return postLikeRepository.save(postLike);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikePost(PostLike liked) {
-        liked.setStatus(PostLikeStatus.UNLIKE);
+        liked.setStatus(LikeStatus.UNLIKE);
         postLikeRepository.save(liked);
         if (liked.getPost().getLikeCount() > 0) {
             postRepository.updateLikeCount(liked.getPost().getId(), -1);
