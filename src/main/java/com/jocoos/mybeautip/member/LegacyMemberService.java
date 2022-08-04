@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRep
 import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
+import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointService;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -46,6 +47,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_URL;
 
@@ -76,6 +79,9 @@ public class LegacyMemberService {
     private final AttachmentService attachmentService;
     private final SlackService slackService;
     private final SocialMemberFactory socialMemberFactory;
+
+    private final ActivityPointService activityPointService;
+
     private final String PATH_AVATAR = "avatar";
     private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
     private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
@@ -96,7 +102,8 @@ public class LegacyMemberService {
                                MemberConverter memberConverter,
                                AttachmentService attachmentService,
                                SlackService slackService,
-                               SocialMemberFactory socialMemberFactory) {
+                               SocialMemberFactory socialMemberFactory,
+                               ActivityPointService activityPointService) {
         this.bannedWordService = bannedWordService;
         this.messageService = messageService;
         this.tagService = tagService;
@@ -114,6 +121,7 @@ public class LegacyMemberService {
         this.attachmentService = attachmentService;
         this.slackService = slackService;
         this.socialMemberFactory = socialMemberFactory;
+        this.activityPointService = activityPointService;
     }
 
     public Long currentMemberId() {
@@ -347,6 +355,7 @@ public class LegacyMemberService {
         }
 
         deleteAvatar(originalAvatar);
+        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, member.getId(), member);
         return finalMember;
     }
 
@@ -468,7 +477,10 @@ public class LegacyMemberService {
             memberDetail.setInviterId(targetMember.getId());
         }
 
+        activityPointService.gainActivityPoint(INPUT_EXTRA_INFO, member.getId(), member);
+
         memberDetail = memberDetailRepository.save(memberDetail);
+
 
         return MemberDetailResponse.builder()
                 .ageGroup(member.getBirthday().getAgeGroupByTen())
