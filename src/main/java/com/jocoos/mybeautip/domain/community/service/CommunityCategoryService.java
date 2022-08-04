@@ -1,55 +1,28 @@
 package com.jocoos.mybeautip.domain.community.service;
 
-import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
+import com.jocoos.mybeautip.domain.community.converter.CommunityCategoryConverter;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
+import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CommunityCategoryService {
 
+    private final CommunityCategoryRepository repository;
+    private final CommunityCategoryConverter converter;
+
     public List<CommunityCategoryResponse> getCommunityCategoryList() {
-        List<CommunityCategoryResponse> result = new ArrayList<>();
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.ASC, "sort"));
+        List<CommunityCategory> categories = repository.findAllBy(pageable);
 
-        CommunityCategoryResponse total = CommunityCategoryResponse.builder()
-                .id(1L)
-                .type(CommunityCategoryType.TOTAL)
-                .title("전체")
-                .build();
-        result.add(total);
-
-        CommunityCategoryResponse blind = CommunityCategoryResponse.builder()
-                .id(2L)
-                .type(CommunityCategoryType.BLIND)
-                .title("속닥속닥🙈")
-                .build();
-        result.add(blind);
-
-        CommunityCategoryResponse drip = CommunityCategoryResponse.builder()
-                .id(3L)
-                .type(CommunityCategoryType.DRIP)
-                .title("드립N드림")
-                .build();
-        result.add(drip);
-
-        CommunityCategoryResponse review = CommunityCategoryResponse.builder()
-                .id(4L)
-                .type(CommunityCategoryType.NORMAL)
-                .title("내돈내산")
-                .build();
-        result.add(review);
-
-        CommunityCategoryResponse event = CommunityCategoryResponse.builder()
-                .id(5L)
-                .type(CommunityCategoryType.EVENT)
-                .title("내돈내산")
-                .build();
-        result.add(event);
-
-        return result;
+        return converter.convert(categories);
     }
 }
