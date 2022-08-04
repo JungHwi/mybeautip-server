@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.video;
 
-import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointService;
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;

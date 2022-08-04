@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.member.comment;
 
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
-import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointService;
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;

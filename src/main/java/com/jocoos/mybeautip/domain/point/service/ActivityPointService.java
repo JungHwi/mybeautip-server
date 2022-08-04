@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.point.service.activity;
+package com.jocoos.mybeautip.domain.point.service;
 
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.member.Member;

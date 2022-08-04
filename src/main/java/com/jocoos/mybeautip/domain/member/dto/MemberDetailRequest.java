@@ -8,8 +8,8 @@ import java.util.Set;
 
 @Getter
 @Builder
-//@NoArgsConstructor
-//@AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class MemberDetailRequest {
 
     @Setter
