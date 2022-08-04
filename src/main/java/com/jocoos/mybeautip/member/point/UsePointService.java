@@ -9,7 +9,9 @@ import lombok.Getter;
 public enum UsePointService implements CodeValue {
 
     ORDER("주문"),
-    EVENT("이벤트");
+    EVENT("이벤트"),
+
+    ACTIVITY("활동");
 
     private final String description;
 
