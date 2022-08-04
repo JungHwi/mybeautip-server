@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
+import com.jocoos.mybeautip.global.code.LikeStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ConflictException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -443,7 +444,7 @@ public class PostController {
                     .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
         }
 
-        Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_POST, id);
+        Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_POST, id, member);
         return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
     }
 
@@ -583,8 +584,9 @@ public class PostController {
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 
         log.debug("{}", request);
+        Member member = legacyMemberService.currentMember();
         Post post = createPersonalPost(request);
-        postService.savePost(post, request.getFiles());
+        postService.savePost(post, request.getFiles(), member);
 
         return new ResponseEntity<>(new PostInfo(post), HttpStatus.OK);
     }
