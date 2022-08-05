@@ -32,4 +32,7 @@ public class CommunityCategory {
 
     @Column
     private String description;
+
+    @Column
+    private String hint;
 }

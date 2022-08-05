@@ -10,7 +10,7 @@ public class WriteCommunityCommentRequest {
 
     private Long communityId;
 
-    private Long commentId;
+    private Long parentId;
 
     private String contents;
 

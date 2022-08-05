@@ -16,4 +16,6 @@ public class CommunityCategoryResponse {
 
     private String title;
 
+    private String hint;
+
 }

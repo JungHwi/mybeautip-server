@@ -92,6 +92,8 @@ mybeautip:
       region: 'ap-northeast-2'
     sts:
       token-validity-duration-seconds: 129600 # 30days
+    cf:
+      domain: "https://static-dev.mybeautip.com/"
   store:
     image-path:
       domain: "https://static.mybeautip.com/common/store"
