@@ -27,7 +27,8 @@ class CommunityCategoryControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("[]").type(JsonFieldType.ARRAY).description("커뮤니티 카테고리 목록"),
                                 fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
                                 fieldWithPath("[].type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                                fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목")
+                                fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목"),
+                                fieldWithPath("[].hint").type(JsonFieldType.STRING).description("힌트")
                         )
                 )
         );

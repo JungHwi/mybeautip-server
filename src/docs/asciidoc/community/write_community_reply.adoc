@@ -1,3 +1,0 @@
-== Write Community Reply API
-
-operation::write_community_reply[snippets='http-request,path-parameters,request-fields,http-response,response-fields']

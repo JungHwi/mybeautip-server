@@ -58,12 +58,15 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
                                 fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글수"),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                                fieldWithPath("relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
+                                fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
+                                fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
+                                fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
@@ -71,7 +74,8 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
                                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                                fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목")
+                                fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
+                                fieldWithPath("category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                         )
                 )
         );
@@ -114,23 +118,31 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 parameterWithName("size").description("").optional().attributes(getDefault(20))
                         ),
                         responseFields(
-                                fieldWithPath("[]").type(JsonFieldType.ARRAY).description("커뮤니티 글 목록"),
-                                fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("글 ID"),
-                                fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목").optional(),
-                                fieldWithPath("[].contents").type(JsonFieldType.STRING).description("내용").optional(),
-                                fieldWithPath("[].is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
-                                fieldWithPath("[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
-                                fieldWithPath("[].like_count").type(JsonFieldType.NUMBER).description("좋아요 카운트").optional(),
-                                fieldWithPath("[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글 카운트").optional(),
-                                fieldWithPath("[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
-                                fieldWithPath("[].member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
-                                fieldWithPath("[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
-                                fieldWithPath("[].member.username").type(JsonFieldType.STRING).description("작성자 이름"),
-                                fieldWithPath("[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
-                                fieldWithPath("[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
-                                fieldWithPath("[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                                fieldWithPath("[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                                fieldWithPath("[].category.title").type(JsonFieldType.STRING).description("카테고리 제목")
+                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),
+                                fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 글 목록"),
+                                fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
+                                fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
+                                fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
+                                fieldWithPath("content.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("content.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
+                                fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
+                                fieldWithPath("content.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
+                                fieldWithPath("content.[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
+                                fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                                fieldWithPath("content.[].relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
+                                fieldWithPath("content.[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
+                                fieldWithPath("content.[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
+                                fieldWithPath("content.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                                fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보.").optional(),
+                                fieldWithPath("content.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description("작성자 상태"),
+                                fieldWithPath("content.[].member.username").type(JsonFieldType.STRING).description("작성자 이름"),
+                                fieldWithPath("content.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
+                                fieldWithPath("content.[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                                fieldWithPath("content.[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                                fieldWithPath("content.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                                fieldWithPath("content.[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
+                                fieldWithPath("content.[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                         )
                 )
         );
@@ -156,8 +168,13 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
                                 fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                                fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글수"),
+                                fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
+                                fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                                fieldWithPath("relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
+                                fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
+                                fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
+                                fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
@@ -165,7 +182,8 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
                                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                                fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목")
+                                fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
+                                fieldWithPath("category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                         )
                 )
         );
@@ -201,12 +219,16 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
                                 fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                                fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글수"),
+                                fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
+                                fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                                fieldWithPath("relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
+                                fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
+                                fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
+                                fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
@@ -214,7 +236,8 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
                                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                                fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목")
+                                fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
+                                fieldWithPath("category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                         )
                 )
         );
@@ -255,6 +278,10 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         ),
                         requestFields(
                                 fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("좋아요 여부")
+                        ),
+                        responseFields(
+                                fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                                fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요 수")
                         ))
         );
     }

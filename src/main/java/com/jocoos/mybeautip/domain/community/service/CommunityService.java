@@ -1,7 +1,10 @@
 package com.jocoos.mybeautip.domain.community.service;
 
+import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.dto.*;
+import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
+import com.jocoos.mybeautip.global.code.UrlDirectory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +21,8 @@ import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVA
 @RequiredArgsConstructor
 public class CommunityService {
 
+    private final AwsS3Handler awsS3Handler;
+
     public List<CommunityResponse> getCommunities() {
         List<CommunityResponse> communityResponseList = new ArrayList<>();
 
@@ -31,30 +36,42 @@ public class CommunityService {
                 .id(1L)
                 .title("Mock Normal")
                 .type(CommunityCategoryType.NORMAL)
+                .hint("Mock Normal Hint")
                 .build();
 
         CommunityCategoryResponse blindCategory = CommunityCategoryResponse.builder()
                 .id(2L)
                 .title("Mock Blind")
                 .type(CommunityCategoryType.BLIND)
+                .hint("Mock Blind Hint")
                 .build();
 
         CommunityCategoryResponse dripCategory = CommunityCategoryResponse.builder()
                 .id(3L)
                 .title("Mock Drip")
                 .type(CommunityCategoryType.DRIP)
+                .hint("Mock DRIP Hint")
+                .build();
+
+        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
+                .isLike(true)
+                .isBlock(false)
+                .isReport(false)
                 .build();
 
         CommunityResponse normalCommunity = CommunityResponse.builder()
                 .id(3L)
                 .contents("Mock Normal Contents 1")
                 .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .isLike(false)
-                .member(memberResponse)
-                .category(normalCategory)
                 .createdAt(ZonedDateTime.now())
+                .viewCount(1000)
                 .likeCount(50)
                 .commentCount(5)
+                .reportCount(5)
+                .sortedAt(ZonedDateTime.now())
+                .relationInfo(relationInfo)
+                .member(memberResponse)
+                .category(normalCategory)
                 .build();
 
         communityResponseList.add(normalCommunity);
@@ -62,24 +79,30 @@ public class CommunityService {
         CommunityResponse blindCommunity = CommunityResponse.builder()
                 .id(2L)
                 .title("Mock Blind Title")
-                .isLike(false)
-                .category(blindCategory)
                 .createdAt(ZonedDateTime.now().minusMinutes(10))
+                .viewCount(1000)
                 .likeCount(10)
                 .commentCount(2)
+                .reportCount(0)
+                .sortedAt(ZonedDateTime.now())
+                .relationInfo(relationInfo)
+                .category(normalCategory)
                 .build();
 
         communityResponseList.add(blindCommunity);
 
         CommunityResponse dripCommunity = CommunityResponse.builder()
                 .id(1L)
-                .category(dripCategory)
-                .isLike(false)
                 .contents("Mock Drip Contents")
                 .createdAt(ZonedDateTime.now().minusMinutes(100))
+                .viewCount(1000)
                 .likeCount(20)
                 .commentCount(3)
+                .reportCount(0)
+                .sortedAt(ZonedDateTime.now())
+                .relationInfo(relationInfo)
                 .member(memberResponse)
+                .category(normalCategory)
                 .build();
 
         communityResponseList.add(dripCommunity);
@@ -98,17 +121,25 @@ public class CommunityService {
                 .id(1L)
                 .title("Mock Normal")
                 .type(CommunityCategoryType.NORMAL)
+                .hint("Mock Normal Hint")
+                .build();
+
+        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
+                .isLike(true)
+                .isBlock(false)
+                .isReport(false)
                 .build();
 
         CommunityResponse result = CommunityResponse.builder()
                 .id(1L)
                 .contents("Mock Contents")
-                .isLike(false)
                 .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
                 .viewCount(1234)
                 .likeCount(20)
                 .commentCount(3)
+                .reportCount(0)
                 .createdAt(ZonedDateTime.now())
+                .relationInfo(relationInfo)
                 .member(memberResponse)
                 .category(normalCategory)
                 .build();
@@ -118,6 +149,12 @@ public class CommunityService {
 
     public CommunityResponse write(WriteCommunityRequest request) {
 
+        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
+                .isLike(true)
+                .isBlock(false)
+                .isReport(false)
+                .build();
+
         CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
                 .id(100L)
                 .username("MockMember")
@@ -128,6 +165,7 @@ public class CommunityService {
                 .id(1L)
                 .title("Mock Normal")
                 .type(CommunityCategoryType.NORMAL)
+                .hint("Mock Normal Hint")
                 .build();
 
         return CommunityResponse.builder()
@@ -135,21 +173,27 @@ public class CommunityService {
                 .title("Mock Title")
                 .contents("Mock Contents")
                 .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .isLike(false)
                 .viewCount(123)
                 .likeCount(12)
                 .commentCount(1)
                 .createdAt(ZonedDateTime.now())
+                .relationInfo(relationInfo)
                 .member(memberResponse)
                 .category(normalCategory)
                 .build();
     }
 
     public List<String> upload(List<MultipartFile> files) {
-        return Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL);
+        return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
     }
 
     public CommunityResponse edit(EditCommunityRequest request) {
+        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
+                .isLike(true)
+                .isBlock(false)
+                .isReport(false)
+                .build();
+
         CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
                 .id(100L)
                 .username("MockMember")
@@ -160,6 +204,7 @@ public class CommunityService {
                 .id(1L)
                 .title("Mock Normal")
                 .type(CommunityCategoryType.NORMAL)
+                .hint("Mock Normal Hint")
                 .build();
 
         return CommunityResponse.builder()
@@ -167,11 +212,12 @@ public class CommunityService {
                 .title("Mock Title")
                 .contents("Mock Contents")
                 .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .isLike(false)
                 .viewCount(123)
                 .likeCount(12)
                 .commentCount(1)
+                .reportCount(0)
                 .createdAt(ZonedDateTime.now())
+                .relationInfo(relationInfo)
                 .member(memberResponse)
                 .category(normalCategory)
                 .build();
@@ -181,8 +227,11 @@ public class CommunityService {
         return;
     }
 
-    public void like(long memberId, long communityId, boolean isLike) {
-        return;
+    public LikeResponse like(long memberId, long communityId, boolean isLike) {
+        return LikeResponse.builder()
+                .isLike(isLike)
+                .likeCount(10)
+                .build();
     }
 
     public void report(long memberId, long communityId, ReportRequest report) {

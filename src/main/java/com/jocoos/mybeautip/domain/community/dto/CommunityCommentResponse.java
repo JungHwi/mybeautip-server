@@ -1,6 +1,10 @@
 package com.jocoos.mybeautip.domain.community.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
+import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
+import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import lombok.*;
 
 import java.time.ZonedDateTime;
@@ -12,20 +16,30 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommunityCommentResponse {
+public class CommunityCommentResponse implements CursorInterface {
 
     private Long id;
 
-    private String contents;
+    private CommunityStatus status;
 
-    private Boolean isLike;
+    private String contents;
 
     private Integer likeCount;
 
-    private Integer commentCount;
+    private Integer replyCount;
+
+    private Integer reportCount;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime createdAt;
 
+    private CommunityRelationInfo relationInfo;
+
     private CommunityMemberResponse member;
+
+    @Override
+    @JsonIgnore
+    public String getCursor() {
+        return String.valueOf(this.id);
+    }
 }

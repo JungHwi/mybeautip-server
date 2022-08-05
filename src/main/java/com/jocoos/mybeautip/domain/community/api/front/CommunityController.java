@@ -1,11 +1,9 @@
 package com.jocoos.mybeautip.domain.community.api.front;
 
-import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
-import com.jocoos.mybeautip.domain.community.dto.EditCommunityRequest;
-import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
-import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
+import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
+import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,13 +41,15 @@ public class CommunityController {
     }
 
     @GetMapping(value = "/1/community")
-    public ResponseEntity<List<CommunityResponse>> getCommunities(@RequestParam(required = false, name = "category_id") Long categoryId,
-                                                                  @RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
-                                                                  @RequestParam(required = false, defaultValue = "20") long size) {
+    public ResponseEntity<CursorResultResponse<CommunityResponse>> getCommunities(@RequestParam(required = false, name = "category_id") Long categoryId,
+                                                                                  @RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
+                                                                                  @RequestParam(required = false, defaultValue = "20") long size) {
 
         List<CommunityResponse> response = service.getCommunities();
 
-        return ResponseEntity.ok(response);
+        CursorResultResponse<CommunityResponse> result = new CursorResultResponse<>(response);
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/1/community/{community_id}")
@@ -77,13 +77,13 @@ public class CommunityController {
     }
 
     @PatchMapping(value = "/1/community/{community_id}/like")
-    public ResponseEntity likeCommunity(@PathVariable(name = "community_id") long communityId,
-                                        @RequestBody BooleanDto isLike) {
+    public ResponseEntity<LikeResponse> likeCommunity(@PathVariable(name = "community_id") long communityId,
+                                                      @RequestBody BooleanDto isLike) {
         long memberId = legacyMemberService.currentMemberId();
 
-        service.like(memberId, communityId, isLike.isBool());
+        LikeResponse result = service.like(memberId, communityId, isLike.isBool());
 
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity.ok(result);
     }
 
     @PatchMapping(value = "/1/community/{community_id}/report")
