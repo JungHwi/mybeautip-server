@@ -80,6 +80,9 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 parameterWithName("community_id").description("글 ID"),
                                 parameterWithName("comment_id").description("댓글 ID")
                         ),
+                        requestParameters(
+                                parameterWithName("parent_id").description("부모 댓글 아이디").optional()
+                        ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
