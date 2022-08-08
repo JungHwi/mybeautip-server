@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -21,4 +22,17 @@ public class SignupRequest {
 
     @NotNull
     private Set<TermType> termTypes;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SignupRequest that = (SignupRequest) o;
+        return socialId.equals(that.socialId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(socialId);
+    }
 }

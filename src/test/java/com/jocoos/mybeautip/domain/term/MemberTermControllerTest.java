@@ -35,7 +35,7 @@ class MemberTermControllerTest extends RestDocsTestSupport {
     @MockBean
     private LegacyMemberService legacyMemberService;
 
-    @DisplayName("[PATCH] /api/1/members/me/terms/option/change - 선택 약관 동의로 변경 성공")
+    @DisplayName("[PATCH] /api/1/member/me/term/option/change - 선택 약관 동의로 변경 성공")
     @WithMockCustomUser
     @Test
     void changeOptionalTermTrueByTypeSuccess() throws Exception {
@@ -50,7 +50,7 @@ class MemberTermControllerTest extends RestDocsTestSupport {
                 .willReturn(response);
 
         ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/api/1/members/me/terms/option/change")
+                        .patch("/api/1/member/me/term/option/change")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("utf-8")
                         .content(objectMapper.writeValueAsString(request)))
@@ -63,7 +63,7 @@ class MemberTermControllerTest extends RestDocsTestSupport {
         restDocs(resultActions);
     }
 
-    @DisplayName("[PATCH] /api/1/members/me/terms/option/change - 필수 약관은 선택 변경 불가")
+    @DisplayName("[PATCH] /api/1/member/me/term/option/change - 필수 약관은 선택 변경 불가")
     @WithMockCustomUser
     @Test
     void changeOptionalTermFail() throws Exception {
@@ -75,7 +75,7 @@ class MemberTermControllerTest extends RestDocsTestSupport {
         given(memberTermService.changeOptionalTermByType(request.getTermType(), userId, request.getIsAccept()))
                 .willThrow(exception);
 
-        mockMvc.perform(patch("/api/1/members/me/terms/option/change")
+        mockMvc.perform(patch("/api/1/member/me/term/option/change")
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("utf-8")
                         .content(objectMapper.writeValueAsString(request)))
