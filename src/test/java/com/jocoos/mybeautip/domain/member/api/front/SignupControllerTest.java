@@ -101,7 +101,7 @@ class SignupControllerTest extends RestDocsTestSupport {
                 .andExpect(jsonPath("$.member.username").value(member.getUsername()))
                 .andExpect(jsonPath("$.member.email").value(member.getEmail()))
                 .andExpect(jsonPath("$.member.phone_number").value(memberInfo.getPhoneNumber()))
-                .andExpect(jsonPath("$.member.avatar_url").value(member.getAvatarUrl()))
+                .andExpect(jsonPath("$.member.avatar_url").value(memberInfo.getAvatarUrl()))
                 .andExpect(jsonPath("$.member.permission.chat_post").value(memberInfo.getPermission().getChatPost()))
                 .andExpect(jsonPath("$.member.permission.comment_post").value(memberInfo.getPermission().getCommentPost()))
                 .andExpect(jsonPath("$.member.permission.live_post").value(memberInfo.getPermission().getLivePost()))

@@ -40,7 +40,7 @@ public class MemberInfo {
         this.username = StringUtils.isBlank(member.getUsername()) ? "" : member.getUsername();
         this.email = StringUtils.isBlank(member.getEmail()) ? "" : member.getEmail();
         this.phoneNumber = StringUtils.isBlank(member.getPhoneNumber()) ? "" : member.getPhoneNumber();
-        this.avatarUrl = StringUtils.isBlank(member.getAvatarUrl()) ? "" : member.getAvatarUrl();
+        this.avatarUrl = member.getAvatarUrl();
         this.createdAt = member.getCreatedAt();
         this.modifiedAt = member.getModifiedAt();
         this.deletedAt = member.getDeletedAt();

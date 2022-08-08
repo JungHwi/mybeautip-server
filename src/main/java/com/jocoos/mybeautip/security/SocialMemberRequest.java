@@ -27,7 +27,7 @@ public class SocialMemberRequest {
         member.setEmail(this.email);
         member.setUsername(this.name);
         member.setPushable(true);
-        member.setAvatarUrl(this.picture);
+        member.setAvatarFilenameFromUrl(this.picture);
         member.setPermission(Member.PERMISSION_ALL);
 
         return member;
