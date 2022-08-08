@@ -41,6 +41,7 @@ include::overview.adoc[]
 * link:event/event_join_api.html[이벤트 참여 API, window=_blank]
 
 === Member API
+* link:member/signup.html[회원가입 API,window=_blank]
 * link:member/get_my_setting.html[내 설정 API,window=_blank]
 
 === Term API

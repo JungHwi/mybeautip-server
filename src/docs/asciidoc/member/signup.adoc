@@ -1,0 +1,3 @@
+== Signup API
+
+operation::signup[snippets='http-request,request-headers,request-fields,http-response,response-fields']
