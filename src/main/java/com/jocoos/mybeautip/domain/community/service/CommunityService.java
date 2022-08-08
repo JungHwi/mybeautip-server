@@ -2,11 +2,20 @@ package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
+import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
+import com.jocoos.mybeautip.domain.community.dao.CommunityDao;
+import com.jocoos.mybeautip.domain.community.dao.CommunityLikeDao;
+import com.jocoos.mybeautip.domain.community.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.community.dto.*;
+import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
+import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
@@ -17,20 +26,58 @@ import java.util.List;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_URL;
 
+
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
 
+    private final CommunityDao communityDao;
+    private final CommunityLikeDao likeDao;
+    private final CommunityReportDao reportDao;
+    private final MemberBlockDao blockDao;
+
+    private final CommunityConverter converter;
     private final AwsS3Handler awsS3Handler;
+
+    @Transactional
+    public CommunityResponse write(WriteCommunityRequest request) {
+        Community community = communityDao.write(request);
+
+        awsS3Handler.copy(request.getFiles(), UrlDirectory.COMMUNITY.getDirectory(community.getId()));
+
+        return getCommunity(community.getMember(), community);
+    }
+
+    @Transactional(readOnly = true)
+    public CommunityResponse getCommunity(Member member, long communityId) {
+        Community community = communityDao.get(communityId);
+        return getCommunity(member, community);
+    }
+
+    private CommunityResponse getCommunity(Member member, Community community) {
+        CommunityResponse response = converter.convert(community);
+        response.setRelationInfo(generationRelationInfo(member, community));
+
+        return response;
+    }
+
+    private CommunityRelationInfo generationRelationInfo(Member member, Community community) {
+        if (member == null) {
+            return new CommunityRelationInfo();
+        }
+
+        return CommunityRelationInfo.builder()
+                .isLike(likeDao.isLike(member.getId(), community.getId()))
+                .isReport(reportDao.isReport(member.getId(), community.getId()))
+                .isBlock(community.getCategory().getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), community.getMember().getId()))
+                .build();
+    }
+
 
     public List<CommunityResponse> getCommunities() {
         List<CommunityResponse> communityResponseList = new ArrayList<>();
 
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
-                .id(100L)
-                .username("MockMember")
-                .avatarUrl(DEFAULT_AVATAR_URL)
-                .build();
+        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
 
         CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
                 .id(1L)
@@ -110,78 +157,9 @@ public class CommunityService {
         return communityResponseList;
     }
 
-    public CommunityResponse get(Long communityId) {
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
-                .id(100L)
-                .username("MockMember")
-                .avatarUrl(DEFAULT_AVATAR_URL)
-                .build();
 
-        CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
-                .id(1L)
-                .title("Mock Normal")
-                .type(CommunityCategoryType.NORMAL)
-                .hint("Mock Normal Hint")
-                .build();
 
-        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
-                .isLike(true)
-                .isBlock(false)
-                .isReport(false)
-                .build();
 
-        CommunityResponse result = CommunityResponse.builder()
-                .id(1L)
-                .contents("Mock Contents")
-                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .viewCount(1234)
-                .likeCount(20)
-                .commentCount(3)
-                .reportCount(0)
-                .createdAt(ZonedDateTime.now())
-                .relationInfo(relationInfo)
-                .member(memberResponse)
-                .category(normalCategory)
-                .build();
-
-        return result;
-    }
-
-    public CommunityResponse write(WriteCommunityRequest request) {
-
-        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
-                .isLike(true)
-                .isBlock(false)
-                .isReport(false)
-                .build();
-
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
-                .id(100L)
-                .username("MockMember")
-                .avatarUrl(DEFAULT_AVATAR_URL)
-                .build();
-
-        CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
-                .id(1L)
-                .title("Mock Normal")
-                .type(CommunityCategoryType.NORMAL)
-                .hint("Mock Normal Hint")
-                .build();
-
-        return CommunityResponse.builder()
-                .id(1L)
-                .title("Mock Title")
-                .contents("Mock Contents")
-                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .viewCount(123)
-                .likeCount(12)
-                .commentCount(1)
-                .createdAt(ZonedDateTime.now())
-                .relationInfo(relationInfo)
-                .member(memberResponse)
-                .category(normalCategory)
-                .build();
-    }
 
     public List<String> upload(List<MultipartFile> files) {
         return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
@@ -194,11 +172,7 @@ public class CommunityService {
                 .isReport(false)
                 .build();
 
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
-                .id(100L)
-                .username("MockMember")
-                .avatarUrl(DEFAULT_AVATAR_URL)
-                .build();
+        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
 
         CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
                 .id(1L)

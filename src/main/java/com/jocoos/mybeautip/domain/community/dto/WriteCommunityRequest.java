@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.community.dto;
 
 import com.jocoos.mybeautip.global.dto.FileDto;
+import com.jocoos.mybeautip.member.Member;
 import lombok.Builder;
 import lombok.Data;
 
@@ -19,4 +20,6 @@ public class WriteCommunityRequest {
     private String contents;
 
     private List<FileDto> files;
+
+    private Member member;
 }

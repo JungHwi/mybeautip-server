@@ -24,7 +24,7 @@ public class Event extends ModifiedDateAuditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, updatable = false)
-    public long id;
+    private long id;
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)

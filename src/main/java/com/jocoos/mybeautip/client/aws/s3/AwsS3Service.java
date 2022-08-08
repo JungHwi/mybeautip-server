@@ -43,18 +43,21 @@ public class AwsS3Service {
     }
 
     public String copy(String sourceKey, String destinationKey) {
-        return copy(bucketName, sourceKey, bucketName, destinationKey);
+        CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
+        copyObjectRequest.withCannedAccessControlList(CannedAccessControlList.PublicRead);
+
+        return copy(copyObjectRequest);
     }
 
-    private String copy(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey) {
+    private String copy(CopyObjectRequest copyObjectRequest) {
         AmazonS3 s3Client = credentialService.getS3Client();
-        CopyObjectResult result = s3Client.copyObject(sourceBucketName, sourceKey, destinationBucketName, destinationKey);
+        CopyObjectResult result = s3Client.copyObject(copyObjectRequest);
 
         if (result == null) {
             throw new RuntimeException("AWS S3 ERROR!! - COPY");
         }
 
-        s3Client.deleteObject(sourceBucketName, sourceKey);
-        return destinationKey;
+        s3Client.deleteObject(copyObjectRequest.getSourceBucketName(), copyObjectRequest.getSourceKey());
+        return copyObjectRequest.getDestinationKey();
     }
 }

@@ -32,7 +32,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void writeCommunity() throws Exception {
         WriteCommunityRequest request = WriteCommunityRequest.builder()
-                .categoryId(3L)
+                .categoryId(4L)
                 .title("Mock Title")
                 .contents("Mock Contents")
                 .build();
@@ -56,12 +56,14 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
                                 fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글수"),
+                                fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
                                 fieldWithPath("relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
                                 fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
@@ -69,6 +71,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
@@ -135,7 +138,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보.").optional(),
                                 fieldWithPath("content.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
-                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description("작성자 상태"),
+                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("content.[].member.username").type(JsonFieldType.STRING).description("작성자 이름"),
                                 fieldWithPath("content.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
                                 fieldWithPath("content.[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
@@ -151,7 +154,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     void getCommunity() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community/{community_id}", 3)
+                        .get("/api/1/community/{community_id}", 30)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -162,6 +165,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
@@ -177,6 +181,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
@@ -231,6 +236,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),

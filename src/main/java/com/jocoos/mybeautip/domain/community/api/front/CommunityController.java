@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.community.service.CommunityService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ public class CommunityController {
 
     @PostMapping(value = "/1/community")
     public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody WriteCommunityRequest request) {
+        request.setMember(legacyMemberService.currentMember());
 
         CommunityResponse response = service.write(request);
 
@@ -55,7 +57,8 @@ public class CommunityController {
     @GetMapping(value = "/1/community/{community_id}")
     public ResponseEntity<CommunityResponse> getCommunity(@PathVariable(name = "community_id") long communityId) {
 
-        CommunityResponse response = service.get(communityId);
+        Member member = legacyMemberService.currentMember();
+        CommunityResponse response = service.getCommunity(member, communityId);
 
         return ResponseEntity.ok(response);
     }

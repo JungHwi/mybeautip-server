@@ -1,14 +1,22 @@
 package com.jocoos.mybeautip.domain.community.vo;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class CommunityRelationInfo {
     private Boolean isLike;
-    private Boolean isBlock;
     private Boolean isReport;
+    private Boolean isBlock;
+
+    public CommunityRelationInfo() {
+        this.isLike = false;
+        this.isReport = false;
+        this.isBlock = false;
+    }
 }

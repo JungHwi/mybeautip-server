@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +25,7 @@ public class CommunityCommentService {
                 .isReport(false)
                 .build();
 
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
-                .id(100L)
-                .username("MockMember")
-                .avatarUrl(DEFAULT_AVATAR_URL)
-                .build();
+        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
 
         CommunityCommentResponse item = CommunityCommentResponse.builder()
                 .id(1L)
@@ -53,11 +50,7 @@ public class CommunityCommentService {
                 .isReport(false)
                 .build();
 
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
-                .id(100L)
-                .username("MockMember")
-                .avatarUrl(DEFAULT_AVATAR_URL)
-                .build();
+        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
 
         CommunityCommentResponse result = CommunityCommentResponse.builder()
                 .id(1L)
@@ -80,11 +73,7 @@ public class CommunityCommentService {
                 .isReport(false)
                 .build();
 
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
-                .id(100L)
-                .username("MockMember")
-                .avatarUrl(DEFAULT_AVATAR_URL)
-                .build();
+        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
 
         CommunityCommentResponse result = CommunityCommentResponse.builder()
                 .id(1L)
@@ -107,11 +96,7 @@ public class CommunityCommentService {
                 .isReport(false)
                 .build();
 
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.builder()
-                .id(100L)
-                .username("MockMember")
-                .avatarUrl(DEFAULT_AVATAR_URL)
-                .build();
+        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
 
         CommunityCommentResponse result = CommunityCommentResponse.builder()
                 .id(1L)
