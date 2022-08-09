@@ -51,6 +51,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
 
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/videos", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -294,7 +296,7 @@ public class VideoController {
             }
 
             if (me != null) {
-                Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me, LIKE)
                         .map(CommentLike::getId).orElse(null);
                 commentInfo.setLikeId(likeId);
 
@@ -449,7 +451,7 @@ public class VideoController {
                                              @RequestParam(required = false) String cursor) {
         Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
         PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Slice<VideoLike> slice = videoLikeRepository.findByVideoIdAndCreatedAtBeforeAndVideoDeletedAtIsNull(id, startCursor, pageable);
+        Slice<VideoLike> slice = videoLikeRepository.findByVideoIdAndCreatedAtBeforeAndVideoDeletedAtIsNullAndStatus(id, startCursor, pageable, LIKE);
         List<MemberInfo> members = new ArrayList<>();
         slice.stream().forEach(view -> members.add(legacyMemberService.getMemberInfo(view.getCreatedBy())));
 

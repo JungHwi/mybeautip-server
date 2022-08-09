@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
-import com.jocoos.mybeautip.global.code.LikeStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ConflictException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -46,6 +45,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 
 @Slf4j
 @RestController
@@ -142,7 +143,7 @@ public class PostController {
             PostInfo info = new PostInfo(post, legacyMemberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
 
             if (me != null) {
-                postLikeRepository.findByPostIdAndCreatedByIdAndStatus(post.getId(), me.getId(), LikeStatus.LIKE)
+                postLikeRepository.findByPostIdAndCreatedByIdAndStatus(post.getId(), me.getId(), LIKE)
                         .ifPresent(like -> info.setLikeId(like.getId()));
 
                 Block block = blackList != null ? blackList.get(post.getCreatedBy().getId()) : null;
@@ -308,7 +309,7 @@ public class PostController {
         return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
                 .map(post -> {
                     Long postId = post.getId();
-                    if (postLikeRepository.findByPostIdAndStatusAndCreatedById(postId, LikeStatus.LIKE, me.getId()).isPresent()) {
+                    if (postLikeRepository.findByPostIdAndStatusAndCreatedById(postId, LIKE, me.getId()).isPresent()) {
                         throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
                     }
 
@@ -381,7 +382,7 @@ public class PostController {
             }
 
             if (me != null) {
-                Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me, LIKE)
                         .map(CommentLike::getId).orElse(null);
                 commentInfo.setLikeId(likeId);
 

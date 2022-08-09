@@ -69,8 +69,8 @@ public class VideoScrapService {
         if (!StringUtils.isBlank(cursor)) {
             Date createdAtBefore = DateUtils.toDate(cursor);
             log.debug("cursor: {}", createdAtBefore);
-            return videoScrapRepository.findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNull(memberId, createdAtBefore, visibilityName, pageable);
+            return videoScrapRepository.findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNullAndStatus(memberId, createdAtBefore, visibilityName, pageable, SCRAP);
         }
-        return videoScrapRepository.findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNull(memberId, visibilityName, pageable);
+        return videoScrapRepository.findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNullAndStatus(memberId, visibilityName, pageable, SCRAP);
     }
 }

@@ -50,6 +50,8 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+
 
 @Slf4j
 @RestController
@@ -288,7 +290,7 @@ public class LegacyMemberController {
         response.setGoods(goodsLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
         response.setStore(storeLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
         response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(legacyMemberService.currentMemberId()));
-        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(legacyMemberService.currentMemberId()));
+        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNullAndStatus(legacyMemberService.currentMemberId(), LIKE));
         return response;
     }
 
@@ -300,7 +302,7 @@ public class LegacyMemberController {
         response.setGoods(goodsLikeRepository.countByCreatedById(id));
         response.setStore(storeLikeRepository.countByCreatedById(id));
         response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(id));
-        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(id));
+        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNullAndStatus(id, LIKE));
         return response;
     }
 
@@ -479,7 +481,7 @@ public class LegacyMemberController {
             }
 
             if (me != null) {
-                Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me, LIKE)
                         .map(CommentLike::getId).orElse(null);
                 commentInfo.setLikeId(likeId);
             }
@@ -702,10 +704,10 @@ public class LegacyMemberController {
         List<VideoController.VideoInfo> result = new ArrayList<>();
 
         if (cursor != null) {
-            videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndVideoDeletedAtIsNull(
-                    new Date(cursor), memberId, pageable);
+            videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndVideoDeletedAtIsNullAndStatus(
+                    new Date(cursor), memberId, pageable, LIKE);
         } else {
-            videoLikes = videoLikeRepository.findByCreatedByIdAndVideoDeletedAtIsNull(memberId, pageable);
+            videoLikes = videoLikeRepository.findByCreatedByIdAndVideoDeletedAtIsNullAndStatus(memberId, pageable, LIKE);
         }
 
         for (VideoLike like : videoLikes) {
