@@ -498,18 +498,15 @@ public class PostController {
                                                           @PathVariable Long commentId,
                                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
-        return commentRepository.findByIdAndPostId(commentId, postId)
-                .map(comment -> {
-                    if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
-                        throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
-                    }
-                    CommentLike commentLike = postService.likeCommentPost(comment);
-                    return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
-                })
-                .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
+        try {
+            CommentLike commentLike = postService.likeCommentPost(commentId, postId, member);
+            return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
+        }
     }
 
-    @DeleteMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeCommentLike(@PathVariable Long postId,
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,

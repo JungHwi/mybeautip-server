@@ -29,7 +29,6 @@ public class CommentLike extends MemberAuditable {
 
     public CommentLike(Comment comment) {
         this.comment = comment;
-        this.status = LikeStatus.LIKE;
     }
 
     public void like() {

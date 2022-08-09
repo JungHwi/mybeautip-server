@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.feed.FeedService;
+import com.jocoos.mybeautip.global.code.LikeStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -715,6 +716,9 @@ public class VideoService {
 
         VideoLike videoLike = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), member.getId())
                 .orElse(new VideoLike(video));
+        if (LikeStatus.LIKE.equals(videoLike.getStatus())) {
+            throw new BadRequestException("already_liked");
+        }
         videoLike.like();
         videoLikeRepository.save(videoLike);
 
@@ -732,14 +736,20 @@ public class VideoService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public CommentLike likeVideoComment(Comment comment, Member member) {
+    public CommentLike likeVideoComment(Long commentId, Long videoId, Member member) {
+
+        Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
+                .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));
         commentRepository.updateLikeCount(comment.getId(), 1);
 
         CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
                 .orElse(new CommentLike(comment));
+        if (LikeStatus.LIKE.equals(commentLike.getStatus())) {
+            throw new BadRequestException("already_liked");
+        }
         commentLike.like();
-
         commentLikeRepository.save(commentLike);
+
         activityPointService.gainActivityPoint(GET_LIKE_COMMENT, commentLike.getId(), comment.getCreatedBy());
         return commentLike;
     }
@@ -850,6 +860,11 @@ public class VideoService {
     public Video saveWithDeletedAt(Video video) {
         video.setDeletedAt(new Date());
         return videoRepository.save(video);
+    }
+
+    public Video getByVideoId(Long videoId) {
+        return videoRepository.findByIdAndDeletedAtIsNull(videoId)
+                .orElseThrow(() -> new NotFoundException("video_not_found"));
     }
 
 
