@@ -65,6 +65,9 @@ public class CommunityController {
 
     @PutMapping(value = "/1/community/{community_id}")
     public ResponseEntity<CommunityResponse> editCommunity(@PathVariable(name = "community_id") long communityId, EditCommunityRequest request) {
+        Member member = legacyMemberService.currentMember();
+        request.setMember(member);
+        request.setCommunityId(communityId);
 
         CommunityResponse response = service.edit(request);
 

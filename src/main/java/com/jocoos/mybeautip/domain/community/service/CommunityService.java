@@ -57,7 +57,6 @@ public class CommunityService {
     private CommunityResponse getCommunity(Member member, Community community) {
         CommunityResponse response = converter.convert(community);
         response.setRelationInfo(generationRelationInfo(member, community));
-
         return response;
     }
 
@@ -133,7 +132,7 @@ public class CommunityService {
                 .reportCount(0)
                 .sortedAt(ZonedDateTime.now())
                 .relationInfo(relationInfo)
-                .category(normalCategory)
+                .category(blindCategory)
                 .build();
 
         communityResponseList.add(blindCommunity);
@@ -141,15 +140,15 @@ public class CommunityService {
         CommunityResponse dripCommunity = CommunityResponse.builder()
                 .id(1L)
                 .contents("Mock Drip Contents")
-                .createdAt(ZonedDateTime.now().minusMinutes(100))
                 .viewCount(1000)
                 .likeCount(20)
                 .commentCount(3)
                 .reportCount(0)
                 .sortedAt(ZonedDateTime.now())
+                .createdAt(ZonedDateTime.now().minusMinutes(100))
                 .relationInfo(relationInfo)
                 .member(memberResponse)
-                .category(normalCategory)
+                .category(dripCategory)
                 .build();
 
         communityResponseList.add(dripCommunity);
@@ -157,15 +156,18 @@ public class CommunityService {
         return communityResponseList;
     }
 
-
-
-
-
     public List<String> upload(List<MultipartFile> files) {
         return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
     }
 
+    @Transactional
     public CommunityResponse edit(EditCommunityRequest request) {
+//        Community community = communityDao.get(request.getCommunityId());
+//
+//        if (!community.getMember().equals(community.getMember())) {
+//            throw new AccessDeniedException("dont_have_access", "This is not yours.");
+//        }
+
         CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
                 .isLike(true)
                 .isBlock(false)
