@@ -9,7 +9,7 @@ public enum UrlDirectory implements CodeValue {
 
     SHARE("친구 초대 공유", "share/"),
     AVATAR("아바타", "avatar/"),
-    COMMUNITY("커뮤니티", "community/%s"),
+    COMMUNITY("커뮤니티", "community/%s/"),
     TEMP("임시 폴더", "temp/");
 
     private final String description;
@@ -20,10 +20,10 @@ public enum UrlDirectory implements CodeValue {
         return this.name();
     }
 
-    public String getDirectory(String id) {
+    public String getDirectory(Long id) {
         switch (this) {
             case COMMUNITY:
-                return String.format(this.directory, id);
+                return String.format(this.directory, String.valueOf(id));
             default:
                 return this.directory;
         }

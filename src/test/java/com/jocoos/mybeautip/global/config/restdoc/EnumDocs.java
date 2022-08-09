@@ -30,8 +30,8 @@ public class EnumDocs {
     Map<String, String> eventType;
 
     // Community
+    Map<String, String> communityStatus;
     Map<String, String> communityCategoryType;
-    Map<String, String> postLikeStatus;
 
     // Notification
     Map<String, String> notificationLinkType;

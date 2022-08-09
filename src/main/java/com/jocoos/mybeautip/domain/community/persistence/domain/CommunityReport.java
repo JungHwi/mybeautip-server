@@ -1,38 +1,32 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
-import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
+import com.jocoos.mybeautip.global.config.jpa.ModifiedAtBaseEntity;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Getter
-@Builder
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "community_category")
-public class CommunityCategory {
+@Table(name = "community_report")
+public class CommunityReport extends ModifiedAtBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, updatable = false)
-    public Long id;
-
-    @Enumerated(EnumType.STRING)
-    private CommunityCategoryType type;
+    private Long id;
 
     @Column
-    private Integer sort;
+    private long memberId;
 
     @Column
-    private String title;
+    private long communityId;
 
     @Column
-    private String description;
-
-    @Column
-    private String hint;
+    private boolean isReport;
 }

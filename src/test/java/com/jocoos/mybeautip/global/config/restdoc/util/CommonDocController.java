@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.global.config.restdoc.util;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
@@ -55,6 +56,7 @@ public class CommonDocController {
 
         // Community
         Map<String, String> communityCategoryType = getDocs(CommunityCategoryType.values());
+        Map<String, String> communityStatus = getDocs(CommunityStatus.values());
 
         // Notification
         Map<String, String> notificationLinkType = getDocs(NotificationLinkType.values());
@@ -101,6 +103,7 @@ public class CommonDocController {
                         .eventType(eventType)
                 // Community
                         .communityCategoryType(communityCategoryType)
+                        .communityStatus(communityStatus)
                 // Notification
                         .notificationLinkType(notificationLinkType)
                         .messageType(messageType)
