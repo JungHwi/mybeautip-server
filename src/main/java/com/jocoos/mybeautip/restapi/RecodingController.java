@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/members/me")
@@ -175,7 +177,7 @@ public class RecodingController {
             case 3:
                 return videoRepository.findById(Long.parseLong(recoding.getItemId()))
                         .map(video -> {
-                            Long likeId = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me)
+                            Long likeId = videoLikeRepository.findByVideoIdAndCreatedByIdAndStatus(video.getId(), me, LIKE)
                                     .map(VideoLike::getId).orElse(null);
                             return new RecodingInfo(recoding, video, likeId);
                         })
@@ -211,7 +213,7 @@ public class RecodingController {
             case 3:
                 return videoRepository.findById(Long.parseLong(recoding.getItemId()))
                         .map(video -> {
-                            Long likeId = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me)
+                            Long likeId = videoLikeRepository.findByVideoIdAndCreatedByIdAndStatus(video.getId(), me, LIKE)
                                     .map(VideoLike::getId).orElse(null);
                             return new ViewsLogInfo(recoding, video, likeId);
                         })

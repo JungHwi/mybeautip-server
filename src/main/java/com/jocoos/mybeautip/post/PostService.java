@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 @Slf4j
@@ -79,7 +80,7 @@ public class PostService {
 
         String content = commentService.getBlindContent(comment, lang, null);
         if (me != null) {
-            Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me.getId())
+            Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me.getId(), LIKE)
                     .map(CommentLike::getId).orElse(null);
             commentInfo.setLikeId(likeId);
 
@@ -144,7 +145,7 @@ public class PostService {
         post.setLikeCount(post.getLikeCount() + 1);
         PostLike postLike = postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
                 .orElse(new PostLike(post));
-        postLike.setStatus(LikeStatus.LIKE);
+        postLike.setStatus(LIKE);
 
         PostLike savedLike = postLikeRepository.save(postLike);
         activityPointService.gainActivityPoint(GET_LIKE_POST, savedLike.getId(), post.getCreatedBy());
@@ -170,7 +171,7 @@ public class PostService {
         CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
                 .orElse(new CommentLike(comment));
 
-        if (LikeStatus.LIKE.equals(commentLike.getStatus())) {
+        if (LIKE.equals(commentLike.getStatus())) {
             throw new BadRequestException("already liked");
         }
 

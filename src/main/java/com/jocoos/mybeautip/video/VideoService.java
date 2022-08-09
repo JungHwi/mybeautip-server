@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.feed.FeedService;
-import com.jocoos.mybeautip.global.code.LikeStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -51,6 +50,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -265,9 +266,9 @@ public class VideoService {
         Long me = legacyMemberService.currentMemberId();
         // Set likeID
         if (me != null) {
-            Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me);
+            Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedByIdAndStatus(video.getId(), me, LIKE);
             likeId = optional.map(VideoLike::getId).orElse(null);
-            scrapId = videoScrapRepository.findByVideoIdAndCreatedById(video.getId(), me)
+            scrapId = videoScrapRepository.findByVideoIdAndCreatedByIdAndStatus(video.getId(), me, SCRAP)
                     .map(s -> s.getId()).orElse(null);
             log.debug("{}, {}, {}", video.getId(), me, scrapId);
             blocked = blockRepository.findByMeAndMemberYouId(video.getMember().getId(), me).isPresent();
@@ -716,7 +717,7 @@ public class VideoService {
 
         VideoLike videoLike = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), member.getId())
                 .orElse(new VideoLike(video));
-        if (LikeStatus.LIKE.equals(videoLike.getStatus())) {
+        if (LIKE.equals(videoLike.getStatus())) {
             throw new BadRequestException("already_liked");
         }
         videoLike.like();
@@ -744,7 +745,7 @@ public class VideoService {
 
         CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
                 .orElse(new CommentLike(comment));
-        if (LikeStatus.LIKE.equals(commentLike.getStatus())) {
+        if (LIKE.equals(commentLike.getStatus())) {
             throw new BadRequestException("already_liked");
         }
         commentLike.like();
