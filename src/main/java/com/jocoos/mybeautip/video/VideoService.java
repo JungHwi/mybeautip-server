@@ -50,8 +50,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
+
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
+import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -271,7 +273,7 @@ public class VideoService {
             scrapId = videoScrapRepository.findByVideoIdAndCreatedByIdAndStatus(video.getId(), me, SCRAP)
                     .map(s -> s.getId()).orElse(null);
             log.debug("{}, {}, {}", video.getId(), me, scrapId);
-            blocked = blockRepository.findByMeAndMemberYouId(video.getMember().getId(), me).isPresent();
+            blocked = blockRepository.findByMeAndMemberYouIdAndStatus(video.getMember().getId(), me, BLOCK).isPresent();
         }
         // Set Watch count
         if ("live".equalsIgnoreCase(video.getState())) {

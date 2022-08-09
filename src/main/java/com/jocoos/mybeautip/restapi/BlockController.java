@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.block.BlockService;
+import com.jocoos.mybeautip.member.block.BlockStatus;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +29,8 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,8 +88,19 @@ public class BlockController {
         Long me = legacyMemberService.currentMemberId();
         Block block = blockRepository.findByIdAndMe(id, me)
                 .orElseThrow(() -> new NotFoundException("block_not_found", messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
-
         blockRepository.delete(block);
+    }
+
+    @PatchMapping("/block/{blockMemberId}")
+    public ResponseEntity<BlockResponse> block(@PathVariable Long blockMemberId) {
+        Block block = blockService.blockMember(legacyMemberService.currentMemberId(), blockMemberId);
+        return ResponseEntity.ok(new BlockResponse(block.getId(), block.getStatus()));
+    }
+
+    @PatchMapping("/unblock/{blockMemberId}")
+    public ResponseEntity<BlockResponse> unblock(@PathVariable Long blockMemberId) {
+        Block block = blockService.unblockMember(legacyMemberService.currentMemberId(), blockMemberId);
+        return ResponseEntity.ok(new BlockResponse(block.getId(), block.getStatus()));
     }
 
     @GetMapping("/me/blocks")
@@ -99,7 +114,7 @@ public class BlockController {
     public BlockResponse isBlocked(@RequestParam(name = "member_id") Long memberId) {
         Long me = legacyMemberService.currentMemberId();
         BlockResponse response = new BlockResponse(false);
-        blockRepository.findByMeAndMemberYouId(memberId, me)
+        blockRepository.findByMeAndMemberYouIdAndStatus(memberId, me, BLOCK)
                 .ifPresent(block -> response.setBlocked(true));
         return response;
     }
@@ -110,7 +125,8 @@ public class BlockController {
                 new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
         PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Block> page = blockRepository.findByCreatedAtBeforeAndMe(startCursor, legacyMemberService.currentMemberId(), pageable);
+        Page<Block> page = blockRepository
+                .findByCreatedAtBeforeAndMeAndStatus(startCursor, legacyMemberService.currentMemberId(), pageable, BLOCK);
         List<BlockInfo> result = new ArrayList<>();
         for (Block block : page.getContent()) {
             result.add(new BlockInfo(block, legacyMemberService.getMemberInfo(block.getMemberYou())));
@@ -157,6 +173,11 @@ public class BlockController {
 
         BlockResponse(Boolean blocked) {
             this.blocked = blocked;
+        }
+
+        public BlockResponse(Long id, BlockStatus status) {
+            this.id = id;
+            this.blocked = BLOCK.equals(status);
         }
     }
 }
