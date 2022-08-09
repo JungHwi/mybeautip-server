@@ -503,13 +503,13 @@ public class PostController {
                     if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
                         throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
                     }
-                    CommentLike commentLike = postService.likeCommentPost(comment);
+                    CommentLike commentLike = postService.likeCommentPost(comment, member);
                     return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
                 })
                 .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
     }
 
-    @DeleteMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeCommentLike(@PathVariable Long postId,
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,

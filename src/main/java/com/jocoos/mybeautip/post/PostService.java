@@ -161,16 +161,19 @@ public class PostService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public CommentLike likeCommentPost(Comment comment) {
+    public CommentLike likeCommentPost(Comment comment, Member member) {
         commentRepository.updateLikeCount(comment.getId(), 1);
-        CommentLike commentLike = commentLikeRepository.save(new CommentLike(comment));
+        CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
+                .orElse(new CommentLike(comment));
+        commentLike.like();
+        commentLikeRepository.save(commentLike);
         activityPointService.gainActivityPoint(GET_LIKE_COMMENT, commentLike.getId(), comment.getCreatedBy());
         return commentLike;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikeCommentPost(CommentLike liked) {
-        commentLikeRepository.delete(liked);
+        liked.unlike();
         if (liked.getComment().getCommentCount() > 0) {
             commentRepository.updateLikeCount(liked.getComment().getId(), -1);
         }
