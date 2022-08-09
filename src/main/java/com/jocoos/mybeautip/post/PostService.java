@@ -161,10 +161,9 @@ public class PostService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public CommentLike likeCommentPost(Comment comment, Member member) {
+    public CommentLike likeCommentPost(Comment comment, CommentLike commentLike) {
         commentRepository.updateLikeCount(comment.getId(), 1);
-        CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
-                .orElse(new CommentLike(comment));
+
         commentLike.like();
         commentLikeRepository.save(commentLike);
         activityPointService.gainActivityPoint(GET_LIKE_COMMENT, commentLike.getId(), comment.getCreatedBy());

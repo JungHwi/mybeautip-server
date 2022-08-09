@@ -500,8 +500,15 @@ public class PostController {
         Member member = legacyMemberService.currentMember();
         return commentRepository.findByIdAndPostId(commentId, postId)
                 .map(comment -> {
-                    CommentLike commentLike = postService.likeCommentPost(comment, member);
-                    return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
+                    CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
+                            .orElse(new CommentLike(comment));
+
+                    if (LikeStatus.LIKE.equals(commentLike.getStatus())) {
+                        throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
+                    }
+
+                    CommentLike savedCommentLike = postService.likeCommentPost(comment, commentLike);
+                    return new ResponseEntity<>(new CommentLikeInfo(savedCommentLike), HttpStatus.OK);
                 })
                 .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
     }

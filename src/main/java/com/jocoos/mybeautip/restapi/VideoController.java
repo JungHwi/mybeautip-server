@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.global.code.LikeStatus;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ConflictException;
@@ -474,10 +475,14 @@ public class VideoController {
 
         return commentRepository.findByIdAndVideoId(commentId, videoId)
                 .map(comment -> {
-                    if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
+                    CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
+                            .orElse(new CommentLike(comment));
+
+                    if (LikeStatus.LIKE.equals(commentLike.getStatus())) {
                         throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
                     }
-                    CommentLike commentLike = videoService.likeVideoComment(comment, member);
+
+                    CommentLike savedCommentLike = videoService.likeVideoComment(comment, commentLike);
                     return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
                 })
                 .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));

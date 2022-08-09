@@ -732,11 +732,8 @@ public class VideoService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public CommentLike likeVideoComment(Comment comment, Member member) {
+    public CommentLike likeVideoComment(Comment comment, CommentLike commentLike) {
         commentRepository.updateLikeCount(comment.getId(), 1);
-
-        CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
-                .orElse(new CommentLike(comment));
         commentLike.like();
 
         commentLikeRepository.save(commentLike);
