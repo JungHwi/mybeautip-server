@@ -161,8 +161,18 @@ public class PostService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public CommentLike likeCommentPost(Comment comment, CommentLike commentLike) {
+    public CommentLike likeCommentPost(Long commentId, Long postId, Member member) {
+
+        Comment comment = commentRepository.findByIdAndPostId(commentId, postId)
+                .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
         commentRepository.updateLikeCount(comment.getId(), 1);
+
+        CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
+                .orElse(new CommentLike(comment));
+
+        if (LikeStatus.LIKE.equals(commentLike.getStatus())) {
+            throw new BadRequestException("already liked");
+        }
 
         commentLike.like();
         commentLikeRepository.save(commentLike);

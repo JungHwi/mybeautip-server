@@ -28,7 +28,6 @@ public class VideoLike extends MemberAuditable {
 
     public VideoLike(Video video) {
         this.video = video;
-        this.status = LikeStatus.LIKE;
     }
 
     public void like() {

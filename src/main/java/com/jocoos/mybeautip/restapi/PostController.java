@@ -498,19 +498,12 @@ public class PostController {
                                                           @PathVariable Long commentId,
                                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
-        return commentRepository.findByIdAndPostId(commentId, postId)
-                .map(comment -> {
-                    CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
-                            .orElse(new CommentLike(comment));
-
-                    if (LikeStatus.LIKE.equals(commentLike.getStatus())) {
-                        throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
-                    }
-
-                    CommentLike savedCommentLike = postService.likeCommentPost(comment, commentLike);
-                    return new ResponseEntity<>(new CommentLikeInfo(savedCommentLike), HttpStatus.OK);
-                })
-                .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
+        try {
+            CommentLike commentLike = postService.likeCommentPost(commentId, postId, member);
+            return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
+        }
     }
 
     @PatchMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
