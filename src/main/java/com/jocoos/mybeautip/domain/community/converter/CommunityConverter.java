@@ -53,6 +53,8 @@ public interface CommunityConverter {
     })
     CommunityResponse convert(Community community);
 
+    List<CommunityResponse> convert(List<Community> community);
+
     @Named("convert_community_file")
     default String convertToUrl(CommunityFile file) {
         return toUrl(file.getFile(), COMMUNITY, file.getCommunity().getId());

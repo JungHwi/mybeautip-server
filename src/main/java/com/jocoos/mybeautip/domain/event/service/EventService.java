@@ -30,9 +30,16 @@ public class EventService {
     private final EventConverter eventConverter;
 
     @Transactional(readOnly = true)
-    public List<EventListResponse> getEventList(long cursor, int size) {
+    public List<EventListResponse> getEventList(EventType eventType, long cursor, int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Order.asc("statusSorting"), Sort.Order.asc("sorting"), Sort.Order.desc("id"), Sort.Order.desc("endAt")));
-        Slice<Event> eventSlice = eventRepository.findByIdLessThanAndStatusIn(cursor, EventStatus.visibleEventStatus, pageable);
+
+        // FIXME Dynamic Query to QueryDSL
+        Slice<Event> eventSlice;
+        if (eventType == null) {
+            eventSlice = eventRepository.findByIdLessThanAndStatusIn(cursor, EventStatus.visibleEventStatus, pageable);
+        } else {
+            eventSlice = eventRepository.findByTypeAndIdLessThanAndStatusIn(eventType, cursor, EventStatus.visibleEventStatus, pageable);
+        }
 
         return eventConverter.convertToListResponse(eventSlice.getContent());
     }

@@ -7,15 +7,17 @@ import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.ZonedDateTime;
 import java.util.List;
-
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_LONG_STRING;
 
 @RestController
 @RequestMapping("/api")
@@ -43,11 +45,23 @@ public class CommunityController {
     }
 
     @GetMapping(value = "/1/community")
-    public ResponseEntity<CursorResultResponse<CommunityResponse>> getCommunities(@RequestParam(required = false, name = "category_id") Long categoryId,
-                                                                                  @RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
-                                                                                  @RequestParam(required = false, defaultValue = "20") long size) {
+    public ResponseEntity<CursorResultResponse<CommunityResponse>> getCommunities(@RequestParam(required = false, defaultValue = "1", name = "category_id") Long categoryId,
+                                                                                  @RequestParam(required = false, name = "event_id") Long eventId,
+                                                                                  @RequestParam(required = false, defaultValue = "#{T(java.time.ZonedDateTime).now()}") ZonedDateTime cursor,
+                                                                                  @RequestParam(required = false, defaultValue = "20") int size) {
 
-        List<CommunityResponse> response = service.getCommunities();
+        Member member = legacyMemberService.currentMember();
+
+        SearchCommunityRequest request = SearchCommunityRequest.builder()
+                .member(member)
+                .categoryId(categoryId)
+                .eventId(eventId)
+                .cursor(cursor)
+                .build();
+
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "sortedAt"));
+
+        List<CommunityResponse> response = service.getCommunities(request, pageable);
 
         CursorResultResponse<CommunityResponse> result = new CursorResultResponse<>(response);
 

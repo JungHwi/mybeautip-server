@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.community.dao;
+package com.jocoos.mybeautip.domain.community.service.dao;
 
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityLikeRepository;
@@ -21,7 +21,7 @@ public class CommunityLikeDao {
     }
 
     @Transactional(readOnly = true)
-    public List<CommunityLike> isLike(long memberId, List<Long> communityIdList) {
+    public List<CommunityLike> likeCommunities(long memberId, List<Long> communityIdList) {
         return repository.findByMemberIdAndCommunityIdInAndIsLikeIsTrue(memberId, communityIdList);
     }
 }

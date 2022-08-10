@@ -15,4 +15,13 @@ public class ZonedDateTimeUtil {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         return zonedDateTime.format(formatter);
     }
+
+    public static ZonedDateTime toZonedDateTime(String dateTime) {
+        return toZonedDateTime(dateTime, ZONE_DATE_TIME_FORMAT);
+    }
+
+    public static ZonedDateTime toZonedDateTime(String dateTime, String format) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        return ZonedDateTime.parse(dateTime, formatter);
+    }
 }

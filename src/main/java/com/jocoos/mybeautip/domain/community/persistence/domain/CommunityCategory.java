@@ -21,6 +21,9 @@ public class CommunityCategory {
     @Column(insertable = false, updatable = false)
     public Long id;
 
+    @Column
+    public Long parentId;
+
     @Enumerated(EnumType.STRING)
     private CommunityCategoryType type;
 
