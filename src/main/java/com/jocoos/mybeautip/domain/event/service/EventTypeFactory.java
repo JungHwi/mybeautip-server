@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.domain.event.service;
 
 import com.jocoos.mybeautip.domain.event.code.EventType;
-import com.jocoos.mybeautip.domain.event.service.impl.InviteEventService;
-import com.jocoos.mybeautip.domain.event.service.impl.JoinEventService;
-import com.jocoos.mybeautip.domain.event.service.impl.RouletteEventService;
-import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
+import com.jocoos.mybeautip.domain.event.service.impl.*;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +14,7 @@ public class EventTypeFactory {
     private final InviteEventService inviteEventService;
     private final RouletteEventService rouletteEventService;
     private final JoinEventService joinEventService;
+    private final DripEventService dripEventService;
 
     public EventTypeService getEventTypeService(EventType eventType) {
         switch (eventType) {
@@ -28,6 +26,8 @@ public class EventTypeFactory {
                 return rouletteEventService;
             case JOIN:
                 return joinEventService;
+            case DRIP:
+                return dripEventService;
             default:
                 throw new BadRequestException("not_support_event", "Not support event. type is " + eventType);
         }

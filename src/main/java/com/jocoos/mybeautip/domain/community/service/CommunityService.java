@@ -3,23 +3,24 @@ package com.jocoos.mybeautip.domain.community.service;
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
-import com.jocoos.mybeautip.domain.community.dao.CommunityDao;
-import com.jocoos.mybeautip.domain.community.dao.CommunityLikeDao;
-import com.jocoos.mybeautip.domain.community.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
+import com.jocoos.mybeautip.domain.event.service.EventJoinService;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,10 +32,11 @@ import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVA
 @RequiredArgsConstructor
 public class CommunityService {
 
+    private final CommunityRelationService relationService;
+    private final EventJoinService eventJoinService;
+
+    private final CommunityCategoryDao categoryDao;
     private final CommunityDao communityDao;
-    private final CommunityLikeDao likeDao;
-    private final CommunityReportDao reportDao;
-    private final MemberBlockDao blockDao;
 
     private final CommunityConverter converter;
     private final AwsS3Handler awsS3Handler;
@@ -44,6 +46,10 @@ public class CommunityService {
         Community community = communityDao.write(request);
 
         awsS3Handler.copy(request.getFiles(), UrlDirectory.COMMUNITY.getDirectory(community.getId()));
+
+        if (community.getEventId() != null) {
+            eventJoinService.join(community.getEventId(), request.getMember().getId());
+        }
 
         return getCommunity(community.getMember(), community);
     }
@@ -56,104 +62,38 @@ public class CommunityService {
 
     private CommunityResponse getCommunity(Member member, Community community) {
         CommunityResponse response = converter.convert(community);
-        response.setRelationInfo(generationRelationInfo(member, community));
-        return response;
+        return relationService.setRelationInfo(member, response);
     }
 
-    private CommunityRelationInfo generationRelationInfo(Member member, Community community) {
-        if (member == null) {
-            return new CommunityRelationInfo();
+    public List<CommunityResponse> getCommunities(SearchCommunityRequest request, Pageable pageable) {
+        // FIXME Dynamic Query to QueryDSL
+        List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
+        List<Community> communityList;
+
+        if (categories.size() == 1) {
+            CommunityCategory category = categories.get(0);
+            if (category.getType() == CommunityCategoryType.DRIP) {
+                if (request.getEventId() == null || request.getEventId() < 1) {
+                    throw new BadRequestException("need_event_info", "event_id is required to search DRIP category.");
+                }
+                communityList = communityDao.getCommunityForEvent(request.getEventId(), categories, request.getCursor(), pageable);
+            } else {
+                communityList = communityDao.get(categories, request.getCursor(), pageable);
+            }
+        } else {
+            communityList = communityDao.get(categories, request.getCursor(), pageable);
         }
 
-        return CommunityRelationInfo.builder()
-                .isLike(likeDao.isLike(member.getId(), community.getId()))
-                .isReport(reportDao.isReport(member.getId(), community.getId()))
-                .isBlock(community.getCategory().getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), community.getMember().getId()))
-                .build();
+
+
+        return getCommunity(request.getMember(), communityList);
+
     }
 
+    private List<CommunityResponse> getCommunity(Member member, List<Community> communities) {
+        List<CommunityResponse> responses = converter.convert(communities);
 
-    public List<CommunityResponse> getCommunities() {
-        List<CommunityResponse> communityResponseList = new ArrayList<>();
-
-        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
-
-        CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
-                .id(1L)
-                .title("Mock Normal")
-                .type(CommunityCategoryType.NORMAL)
-                .hint("Mock Normal Hint")
-                .build();
-
-        CommunityCategoryResponse blindCategory = CommunityCategoryResponse.builder()
-                .id(2L)
-                .title("Mock Blind")
-                .type(CommunityCategoryType.BLIND)
-                .hint("Mock Blind Hint")
-                .build();
-
-        CommunityCategoryResponse dripCategory = CommunityCategoryResponse.builder()
-                .id(3L)
-                .title("Mock Drip")
-                .type(CommunityCategoryType.DRIP)
-                .hint("Mock DRIP Hint")
-                .build();
-
-        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
-                .isLike(true)
-                .isBlock(false)
-                .isReport(false)
-                .build();
-
-        CommunityResponse normalCommunity = CommunityResponse.builder()
-                .id(3L)
-                .contents("Mock Normal Contents 1")
-                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .createdAt(ZonedDateTime.now())
-                .viewCount(1000)
-                .likeCount(50)
-                .commentCount(5)
-                .reportCount(5)
-                .sortedAt(ZonedDateTime.now())
-                .relationInfo(relationInfo)
-                .member(memberResponse)
-                .category(normalCategory)
-                .build();
-
-        communityResponseList.add(normalCommunity);
-
-        CommunityResponse blindCommunity = CommunityResponse.builder()
-                .id(2L)
-                .title("Mock Blind Title")
-                .createdAt(ZonedDateTime.now().minusMinutes(10))
-                .viewCount(1000)
-                .likeCount(10)
-                .commentCount(2)
-                .reportCount(0)
-                .sortedAt(ZonedDateTime.now())
-                .relationInfo(relationInfo)
-                .category(blindCategory)
-                .build();
-
-        communityResponseList.add(blindCommunity);
-
-        CommunityResponse dripCommunity = CommunityResponse.builder()
-                .id(1L)
-                .contents("Mock Drip Contents")
-                .viewCount(1000)
-                .likeCount(20)
-                .commentCount(3)
-                .reportCount(0)
-                .sortedAt(ZonedDateTime.now())
-                .createdAt(ZonedDateTime.now().minusMinutes(100))
-                .relationInfo(relationInfo)
-                .member(memberResponse)
-                .category(dripCategory)
-                .build();
-
-        communityResponseList.add(dripCommunity);
-
-        return communityResponseList;
+        return relationService.setRelationInfo(member, responses);
     }
 
     public List<String> upload(List<MultipartFile> files) {

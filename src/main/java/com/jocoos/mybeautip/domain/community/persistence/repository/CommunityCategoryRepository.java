@@ -11,6 +11,10 @@ import java.util.List;
 public interface CommunityCategoryRepository extends DefaultJpaRepository<CommunityCategory, Long> {
 
     List<CommunityCategory> findAllBy(Pageable pageable);
+
+    List<CommunityCategory> findAllByIdIn(List<Long> categoryIds);
+
+    List<CommunityCategory> findAllByParentId(Long parentId);
 }
 
 

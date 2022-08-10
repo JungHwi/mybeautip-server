@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
-import com.jocoos.mybeautip.global.config.jpa.ModifiedAtBaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "community_report")
-public class CommunityReport extends ModifiedAtBaseEntity {
+public class CommunityReport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
