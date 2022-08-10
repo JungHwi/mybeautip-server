@@ -224,6 +224,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
