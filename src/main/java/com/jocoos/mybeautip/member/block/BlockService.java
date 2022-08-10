@@ -75,12 +75,12 @@ public class BlockService {
             return false;
         }
 
-        return memberBlockDao.isBlocked(memberId, targetMember);
+        return memberBlockDao.isBlock(memberId, targetMember);
     }
 
     @Transactional(readOnly = true)
     public boolean isBlocked(long memberId, Member targetMember) {
-        return memberBlockDao.isBlocked(memberId, targetMember);
+        return memberBlockDao.isBlock(memberId, targetMember);
     }
 
     private void validAlreadyBlocked(Block block) {

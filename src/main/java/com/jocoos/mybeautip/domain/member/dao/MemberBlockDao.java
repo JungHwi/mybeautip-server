@@ -43,7 +43,7 @@ public class MemberBlockDao {
     }
 
     @Transactional(readOnly = true)
-    public boolean isBlocked(Long memberId, Member targetMember) {
+    public boolean isBlock(Long memberId, Member targetMember) {
         return repository.countByMeAndMemberYouAndStatus(memberId, targetMember, BLOCK) > 0;
     }
 }

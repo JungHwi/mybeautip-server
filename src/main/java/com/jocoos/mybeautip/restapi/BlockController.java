@@ -11,6 +11,7 @@ import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.block.BlockStatus;
+import com.jocoos.mybeautip.member.block.dto.BlockResponseDto;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -92,15 +93,15 @@ public class BlockController {
     }
 
     @PatchMapping("/block/{blockMemberId}")
-    public ResponseEntity<BlockResponse> block(@PathVariable Long blockMemberId) {
+    public ResponseEntity<BlockResponseDto> block(@PathVariable Long blockMemberId) {
         Block block = blockService.blockMember(legacyMemberService.currentMemberId(), blockMemberId);
-        return ResponseEntity.ok(new BlockResponse(block.getId(), block.getStatus()));
+        return ResponseEntity.ok(BlockResponseDto.from(block));
     }
 
     @PatchMapping("/unblock/{blockMemberId}")
-    public ResponseEntity<BlockResponse> unblock(@PathVariable Long blockMemberId) {
+    public ResponseEntity<BlockResponseDto> unblock(@PathVariable Long blockMemberId) {
         Block block = blockService.unblockMember(legacyMemberService.currentMemberId(), blockMemberId);
-        return ResponseEntity.ok(new BlockResponse(block.getId(), block.getStatus()));
+        return ResponseEntity.ok(BlockResponseDto.from(block));
     }
 
     @GetMapping("/me/blocks")
