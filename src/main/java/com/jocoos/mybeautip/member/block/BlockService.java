@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.member.block;
 
+import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import static com.jocoos.mybeautip.member.block.BlockStatus.UNBLOCK;
 @RequiredArgsConstructor
 public class BlockService {
 
-    private final BlockRepository blockRepository;
+    private final MemberBlockDao memberBlockDao;
     private final MemberRepository memberRepository;
 
     @Transactional
@@ -38,23 +38,23 @@ public class BlockService {
 
     @Transactional
     public Block blockMember(long memberId, Member targetMember) {
-        Block block = getBlockOrElseNewBlock(memberId, targetMember);
+        Block block = memberBlockDao.getBlockOrElseNewBlock(memberId, targetMember);
 
         validAlreadyBlocked(block);
         block.changeStatus(BLOCK);
-        blockRepository.save(block);
+        memberBlockDao.save(block);
         return block;
     }
 
     @Transactional
     public Block unblockMember(Long memberId, Long unblockMemberId) {
-        Block block = getBlock(memberId, unblockMemberId);
+        Block block = memberBlockDao.getBlock(memberId, unblockMemberId);
         block.changeStatus(UNBLOCK);
         return block;
     }
 
     public Map<Long, Block> getBlackListByMe(Long me) {
-        List<Block> blocks = blockRepository.findByMeAndStatus(me, BLOCK);
+        List<Block> blocks = memberBlockDao.findAllMyBlock(me);
         Map<Long, Block> map = blocks != null ?
                 blocks.stream().collect(Collectors.toMap(Block::getYouId, Function.identity())) :
                 new HashMap<>();
@@ -63,7 +63,6 @@ public class BlockService {
         if (map.keySet().size() > 0) {
             log.debug("{} blocked by {}", new ArrayList<>(map.keySet()), me);
         }
-
         return map;
     }
 
@@ -76,25 +75,12 @@ public class BlockService {
             return false;
         }
 
-        return isBlocked(memberId, targetMember);
-
+        return memberBlockDao.isBlocked(memberId, targetMember);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public boolean isBlocked(long memberId, Member targetMember) {
-        return blockRepository.countByMeAndMemberYouAndStatus(memberId, targetMember, BLOCK) > 0;
-    }
-
-
-    private Block getBlock(Long memberId, Long unblockMemberId) {
-        return blockRepository.findByMeAndMemberYouId(memberId, unblockMemberId).orElseThrow(
-                () -> new NotFoundException("block info not found, memberId : " + memberId + " , unblockMemberId : " + unblockMemberId)
-        );
-    }
-
-    private Block getBlockOrElseNewBlock(long memberId, Member targetMember) {
-        return blockRepository.findByMeAndMemberYouId(memberId, targetMember.getId())
-                .orElse(new Block(memberId, targetMember));
+        return memberBlockDao.isBlocked(memberId, targetMember);
     }
 
     private void validAlreadyBlocked(Block block) {

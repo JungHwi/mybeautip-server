@@ -1,13 +1,16 @@
 package com.jocoos.mybeautip.domain.member.dao;
 
+import com.jocoos.mybeautip.global.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 
 
 @Service
@@ -16,17 +19,31 @@ public class MemberBlockDao {
 
     private final BlockRepository repository;
 
-    @Transactional(readOnly = true)
-    public boolean isBlock(long memberId, long targetId) {
-
-        // FIXME 재훈님 여기도 Repository 에서 조회해서 가져오는 것으로 해주세요.
-        return false;
+    @Transactional
+    public Block save(Block block) {
+        return repository.save(block);
     }
 
     @Transactional(readOnly = true)
-    public List<Block> isBlock(long memberId, List<Long> targetIdList) {
+    public Block getBlock(Long memberId, Long targetId) {
+        return repository.findByMeAndMemberYouId(memberId, targetId).orElseThrow(() ->
+                new NotFoundException("block info not found, memberId : " + memberId + " , unblockMemberId : " + targetId)
+        );
+    }
 
-        // FIXME 재훈님 여기도 Repository 에서 조회해서 가져오는 것으로 해주세요.
-        return new ArrayList<>();
+    @Transactional(readOnly = true)
+    public Block getBlockOrElseNewBlock(Long memberId, Member targetMember) {
+        return repository.findByMeAndMemberYouId(memberId, targetMember.getId())
+                .orElse(new Block(memberId, targetMember));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Block> findAllMyBlock(Long me) {
+        return repository.findByMeAndStatus(me, BLOCK);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isBlocked(Long memberId, Member targetMember) {
+        return repository.countByMeAndMemberYouAndStatus(memberId, targetMember, BLOCK) > 0;
     }
 }
