@@ -1,7 +1,9 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
+import com.jocoos.mybeautip.domain.community.dto.EditCommunityRequest;
 import com.jocoos.mybeautip.global.config.jpa.ModifiedAtBaseEntity;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
@@ -12,6 +14,8 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.List;
+
+import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
 
 @Getter
 @Setter
@@ -70,12 +74,28 @@ public class Community extends ModifiedAtBaseEntity {
     @ManyToOne
     @JoinColumn(name = "category_id", insertable = false, updatable = false)
     private CommunityCategory category;
+//
+//    public Community update(EditCommunityRequest request) {
+//        if (!this.id.equals(request.getCommunityId())) {
+//            throw new RuntimeException("This community id is " + this.id +". But request id is" + request.getCommunityId());
+//        }
+//
+//        this.title = request.getTitle();
+//        this.contents = request.getTitle();
+//        this.files =
+//
+//
+//
+//    }
 
-    @PostPersist
-    public void postPersist() {
-        if (communityFileList != null) {
-            communityFileList.forEach(file -> file.setCommunity(this));
-        }
+    public void addFile(String fileName) {
+        CommunityFile communityFile = new CommunityFile(getFilename(fileName));
+        communityFile.setCommunity(this);
+        this.getCommunityFileList().add(communityFile);
+    }
+
+    public void removeFile(String fileName) {
+        this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFilename(fileName)));
     }
 
     public void valid() {
@@ -108,6 +128,13 @@ public class Community extends ModifiedAtBaseEntity {
     private void validDrip() {
         if (this.eventId == null || this.eventId < 1) {
             throw new BadRequestException("need_event_id", "Community of drip category needs event_id.");
+        }
+    }
+
+    @PostPersist
+    public void postPersist() {
+        if (communityFileList != null) {
+            communityFileList.forEach(file -> file.setCommunity(this));
         }
     }
 }

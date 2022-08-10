@@ -25,6 +25,7 @@ mybeautip:
       application:
         gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip"
     s3:
+      domain: 'https://mybeautip-prod.s3.ap-northeast-2.amazonaws.com/'
       bucket: 'mybeautip-prod'
       region: 'ap-northeast-2'
     cf:

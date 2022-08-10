@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.client.aws.s3;
 import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.getUri;
 
 @Component
 @RequiredArgsConstructor
@@ -67,5 +69,31 @@ public class AwsS3Handler {
         }
 
         return result;
+    }
+
+    public List<String> editFiles(List<FileDto> fileDtoList, String destination) {
+        if (CollectionUtils.isEmpty(fileDtoList)) {
+            return null;
+        }
+
+        List<String> result = new ArrayList<>();
+        for (FileDto fileDto : fileDtoList) {
+            switch (fileDto.getOperation()) {
+                case UPLOAD:
+                    result.add(copy(fileDto, destination));
+                    break;
+                case DELETE:
+                    delete(fileDto);
+                    break;
+                default:
+                    throw new BadRequestException("not_support_file_operation");
+            }
+        }
+        return result;
+    }
+
+    public void delete(FileDto fileDto) {
+        String filename = getUri(fileDto.getUrl());
+        service.delete(filename);
     }
 }

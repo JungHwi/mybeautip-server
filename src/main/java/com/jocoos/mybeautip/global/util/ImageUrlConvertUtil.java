@@ -8,18 +8,25 @@ import org.springframework.stereotype.Component;
 public class ImageUrlConvertUtil {
 
 
-    private static String IMAGE_BASE_URL;
+    private static String CF_DOMAIN;
+    private static String S3_DOMAIN;
 
-    @Value("${mybeautip.aws.cf.domain}")
-    private void setImageBaseUrl(String injectUrl) {
-        IMAGE_BASE_URL = injectUrl;
+    public ImageUrlConvertUtil(@Value("${mybeautip.aws.cf.domain}") String cf,
+                               @Value("${mybeautip.aws.s3.domain}") String s3) {
+        CF_DOMAIN = cf;
+        S3_DOMAIN = s3;
     }
 
     public static String toUrl(String filename, UrlDirectory directory) {
-        return IMAGE_BASE_URL + directory.getDirectory() + filename;
+        return CF_DOMAIN + directory.getDirectory() + filename;
     }
 
     public static String toUrl(String filename, UrlDirectory directory, Long id) {
-        return IMAGE_BASE_URL + directory.getDirectory(id) + filename;
+        return CF_DOMAIN + directory.getDirectory(id) + filename;
     }
+
+    public static String getUri(String Url) {
+        return Url.replace(CF_DOMAIN, "").replace(S3_DOMAIN, "");
+    }
+
 }

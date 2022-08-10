@@ -6,15 +6,20 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
+import com.jocoos.mybeautip.global.dto.FileDto;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +27,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_URL;
+import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
 
 
 @Service
@@ -84,10 +93,7 @@ public class CommunityService {
             communityList = communityDao.get(categories, request.getCursor(), pageable);
         }
 
-
-
         return getCommunity(request.getMember(), communityList);
-
     }
 
     private List<CommunityResponse> getCommunity(Member member, List<Community> communities) {
@@ -100,47 +106,28 @@ public class CommunityService {
         return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
     }
 
-    @Transactional
-    public CommunityResponse edit(EditCommunityRequest request) {
-//        Community community = communityDao.get(request.getCommunityId());
-//
-//        if (!community.getMember().equals(community.getMember())) {
-//            throw new AccessDeniedException("dont_have_access", "This is not yours.");
-//        }
+    public void delete(long communityId) {
 
-        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
-                .isLike(true)
-                .isBlock(false)
-                .isReport(false)
-                .build();
-
-        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
-
-        CommunityCategoryResponse normalCategory = CommunityCategoryResponse.builder()
-                .id(1L)
-                .title("Mock Normal")
-                .type(CommunityCategoryType.NORMAL)
-                .hint("Mock Normal Hint")
-                .build();
-
-        return CommunityResponse.builder()
-                .id(1L)
-                .title("Mock Title")
-                .contents("Mock Contents")
-                .fileUrl(Arrays.asList(DEFAULT_AVATAR_URL, DELETED_AVATAR_URL))
-                .viewCount(123)
-                .likeCount(12)
-                .commentCount(1)
-                .reportCount(0)
-                .createdAt(ZonedDateTime.now())
-                .relationInfo(relationInfo)
-                .member(memberResponse)
-                .category(normalCategory)
-                .build();
     }
 
-    public void delete(Long communityId) {
-        return;
+    @Transactional
+    public CommunityResponse edit(EditCommunityRequest request) {
+        Community community = communityDao.get(request.getCommunityId());
+
+        if (!community.getMember().equals(community.getMember())) {
+            throw new AccessDeniedException("access_denied", "This is not yours.");
+        }
+
+        community.setTitle(request.getTitle());
+        community.setContents(request.getContents());
+        editFiles(community, request.getFiles());
+
+        communityDao.save(community);
+
+        CommunityResponse result = getCommunity(community.getMember(), community);
+
+        return result;
+
     }
 
     public LikeResponse like(long memberId, long communityId, boolean isLike) {
@@ -152,5 +139,25 @@ public class CommunityService {
 
     public void report(long memberId, long communityId, ReportRequest report) {
         return;
+    }
+
+    @Transactional
+    public void editFiles(Community community, List<FileDto> fileDtoList) {
+        if (CollectionUtils.isEmpty(fileDtoList)) {
+            return;
+        }
+
+        awsS3Handler.editFiles(fileDtoList, UrlDirectory.COMMUNITY.getDirectory(community.getId()));
+
+        for (FileDto fileDto : fileDtoList) {
+            switch (fileDto.getOperation()) {
+                case UPLOAD:
+                    community.addFile(fileDto.getUrl());
+                    break;
+                case DELETE:
+                    community.removeFile(fileDto.getUrl());
+                    break;
+            }
+        }
     }
 }
