@@ -1,0 +1,3 @@
+== Block Target Member API
+
+operation::block_target_member[snippets='http-request,path-parameters,http-response,response-fields']

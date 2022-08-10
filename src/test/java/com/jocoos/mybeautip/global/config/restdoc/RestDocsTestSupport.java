@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.global.config.restdoc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,5 +60,25 @@ public class RestDocsTestSupport {
 
     protected String createJson(Object dto) throws JsonProcessingException {
         return objectMapper.writeValueAsString(dto);
+    }
+
+    protected Member defaultMember(Long memberId, String socialId) {;
+        final String grantType = "naver";
+        final String empty = "";
+        SignupRequest request = createRequest(socialId, grantType, empty);
+
+        Member member = new Member(request);
+        member.setId(memberId);
+        return member;
+    }
+
+    private SignupRequest createRequest(String socialId, String grantType, String empty) {
+        SignupRequest request = new SignupRequest();
+        request.setSocialId(socialId);
+        request.setGrantType(grantType);
+        request.setUsername(empty);
+        request.setEmail(empty);
+        request.setAvatarUrl(empty);
+        return request;
     }
 }
