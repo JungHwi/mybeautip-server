@@ -117,13 +117,15 @@ public class CommunityControllerTest extends RestDocsTestSupport {
         result.andDo(document("get_communities",
                         requestParameters(
                                 parameterWithName("category_id").description("카테고리 아이디").optional(),
-                                parameterWithName("cursor").description("커서").optional().attributes(getDefault(MAX_LONG_STRING)),
+                                parameterWithName("event_id").description("이벤트 아이디. Drip Category 일때만 필수.").optional(),
+                                parameterWithName("cursor").description("커서").optional().attributes(getZonedDateFormat(), getDefault("현재 시간")),
                                 parameterWithName("size").description("").optional().attributes(getDefault(20))
                         ),
                         responseFields(
                                 fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),
                                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 글 목록"),
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
+                                fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
                                 fieldWithPath("content.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
@@ -154,7 +156,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     void getCommunity() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community/{community_id}", 30)
+                        .get("/api/1/community/{community_id}", 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
