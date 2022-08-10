@@ -37,6 +37,11 @@ public class CommunityDao {
         return repository.save(community);
     }
 
+    @Transactional
+    public Community save(Community community) {
+        return repository.save(community);
+    }
+
     @Transactional(readOnly = true)
     public Community get(long communityId) {
         return repository.findById(communityId)
