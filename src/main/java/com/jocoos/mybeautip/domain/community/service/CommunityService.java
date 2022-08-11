@@ -6,13 +6,9 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
-import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
-import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
-import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
@@ -25,16 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_URL;
-import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
 
 
 @Service
@@ -66,6 +53,8 @@ public class CommunityService {
     @Transactional(readOnly = true)
     public CommunityResponse getCommunity(Member member, long communityId) {
         Community community = communityDao.get(communityId);
+        communityDao.read(communityId);
+
         return getCommunity(member, community);
     }
 
@@ -106,8 +95,15 @@ public class CommunityService {
         return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
     }
 
-    public void delete(long communityId) {
+    @Transactional
+    public void delete(Member member, long communityId) {
+        Community community = communityDao.get(communityId);
 
+        if (!community.getMember().getId().equals(member.getId())) {
+            throw new AccessDeniedException("access_denied", "This is not yours.");
+        }
+
+        community.delete();
     }
 
     @Transactional

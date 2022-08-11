@@ -1,15 +1,14 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
-import com.jocoos.mybeautip.domain.community.dto.EditCommunityRequest;
 import com.jocoos.mybeautip.global.config.jpa.ModifiedAtBaseEntity;
-import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
@@ -88,6 +87,11 @@ public class Community extends ModifiedAtBaseEntity {
 //
 //    }
 
+    public Community delete() {
+        this.status = CommunityStatus.DELETE;
+        return this;
+    }
+
     public void addFile(String fileName) {
         CommunityFile communityFile = new CommunityFile(getFilename(fileName));
         communityFile.setCommunity(this);
@@ -120,7 +124,7 @@ public class Community extends ModifiedAtBaseEntity {
     }
 
     private void validBlind() {
-        if (this.title.length() < 5) {
+        if (StringUtils.isBlank(this.title) || this.title.length() < 5) {
             throw new BadRequestException("not_enough_title", "Community title of Blind Category must be over 5 length");
         }
     }

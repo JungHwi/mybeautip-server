@@ -29,7 +29,8 @@ public interface CommunityConverter {
             @Mapping(target = "commentCount", ignore = true),
             @Mapping(target = "reportCount", ignore = true),
             @Mapping(target = "sortedAt", ignore = true),
-            @Mapping(target = "communityFileList", ignore = true)
+            @Mapping(target = "communityFileList", ignore = true),
+            @Mapping(target = "category", ignore = true)
     })
     Community convert(WriteCommunityRequest request);
 

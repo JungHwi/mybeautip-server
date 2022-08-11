@@ -48,6 +48,15 @@ public class ControllerExceptionAdvice {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public final ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(e.getMessage())
+                .errorDescription(e.getDescription())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(MemberNotFoundException.class)
     public final ResponseEntity<ErrorResponse> handleMemberNotFoundException(MemberNotFoundException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
