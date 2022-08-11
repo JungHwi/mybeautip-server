@@ -92,7 +92,8 @@ public class CommunityController {
     @DeleteMapping(value = "/1/community/{community_id}")
     public ResponseEntity deleteCommunity(@PathVariable(name = "community_id") long communityId) {
 
-        service.delete(communityId);
+        Member member = legacyMemberService.currentMember();
+        service.delete(member, communityId);
 
         return new ResponseEntity(HttpStatus.OK);
     }
