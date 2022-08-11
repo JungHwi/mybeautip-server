@@ -28,4 +28,14 @@ public class CommunityReport {
 
     @Column
     private boolean isReport;
+
+    @Column
+    private String description;
+
+    public CommunityReport(long memberId, long communityId) {
+        this.memberId = memberId;
+        this.communityId = communityId;
+        this.isReport = false;
+        this.description = "";
+    }
 }

@@ -109,12 +109,22 @@ public class CommunityController {
     }
 
     @PatchMapping(value = "/1/community/{community_id}/report")
-    public ResponseEntity reportCommunity(@PathVariable(name = "community_id") long communityId,
+    public ResponseEntity<ReportResponse> reportCommunity(@PathVariable(name = "community_id") long communityId,
                                           @RequestBody ReportRequest report) {
         long memberId = legacyMemberService.currentMemberId();
 
-        service.report(memberId, communityId, report);
+        ReportResponse result = service.report(memberId, communityId, report);
 
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = "/1/community/{community_id}/report")
+    public ResponseEntity<ReportResponse> isReportCommunity(@PathVariable(name = "community_id") long communityId,
+                                                          @RequestBody ReportRequest report) {
+        long memberId = legacyMemberService.currentMemberId();
+
+        ReportResponse result = service.isReport(memberId, communityId);
+
+        return ResponseEntity.ok(result);
     }
 }

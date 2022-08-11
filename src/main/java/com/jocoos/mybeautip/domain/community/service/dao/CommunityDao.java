@@ -59,7 +59,22 @@ public class CommunityDao {
     }
 
     @Transactional()
-    public void read(long communityId) {
-        read(communityId);
+    public void readCount(long communityId) {
+        repository.readCount(communityId);
+    }
+
+    @Transactional()
+    public void likeCount(long communityId, int count) {
+        repository.likeCount(communityId, count);
+    }
+
+    @Transactional()
+    public void reportCount(long communityId, int count) {
+        repository.reportCount(communityId, count);
+    }
+
+    @Transactional()
+    public void commentCount(long communityId, int count) {
+        repository.commentCount(communityId, count);
     }
 }

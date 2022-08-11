@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_LONG_STRING;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -290,7 +289,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
-                                fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요 수")
+                                fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("커뮤니티 좋아요 수")
                         ))
         );
     }
@@ -304,7 +303,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/api/1/community/{community_id}/report", 3)
+                        .patch("/api/1/community/{community_id}/report", 10)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(report)))
                 .andExpect(status().isOk())
@@ -317,6 +316,36 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                 requestFields(
                         fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
                         fieldWithPath("description").type(JsonFieldType.STRING).description("신고 사유. 신고여부가 true 일때만 필수").optional()
+                ),
+                responseFields(
+                        fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
+                        fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("커뮤니티 신고수")
+                ))
+        );
+    }
+
+    @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void isReportCommunity() throws Exception {
+        ReportRequest report = ReportRequest.builder()
+                .isReport(true)
+                .description("신고사유")
+                .build();
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/api/1/community/{community_id}/report", 10)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(report)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("check_report_community",
+                pathParameters(
+                        parameterWithName("community_id").description("글 ID")
+                ),
+                responseFields(
+                        fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
+                        fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("커뮤니티 신고수")
                 ))
         );
     }

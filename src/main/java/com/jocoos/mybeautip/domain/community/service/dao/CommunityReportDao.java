@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service.dao;
 
+import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityReportRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,30 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityReportDao {
 
+    private final CommunityDao communityDao;
     private final CommunityReportRepository repository;
+
+    @Transactional
+    public CommunityReport report(long memberId, long communityId, ReportRequest reportRequest) {
+        CommunityReport communityReport = getReport(memberId, communityId);
+
+        if (communityReport.isReport() == reportRequest.getIsReport()) {
+            return communityReport;
+        }
+
+        communityReport.setReport(reportRequest.getIsReport());
+        communityReport.setDescription(reportRequest.getDescription());
+
+        communityDao.reportCount(communityId, reportRequest.getIsReport() ? 1 : -1);
+
+        return repository.save(communityReport);
+    }
+
+    @Transactional(readOnly = true)
+    public CommunityReport getReport(long memberId, long communityId) {
+        return repository.findByMemberIdAndCommunityId(memberId, communityId)
+                .orElse(new CommunityReport(memberId, communityId));
+    }
 
     @Transactional(readOnly = true)
     public boolean isReport(long memberId, long communityId) {

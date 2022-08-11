@@ -13,7 +13,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityLikeDao {
 
+    private final CommunityDao communityDao;
     private final CommunityLikeRepository repository;
+
+    @Transactional
+    public CommunityLike like(long memberId, long communityId, boolean isLike) {
+        CommunityLike communityLike = getLike(memberId, communityId);
+
+        if (communityLike.isLike() == isLike) {
+            return communityLike;
+        }
+
+        communityLike.setLike(isLike);
+
+        communityDao.likeCount(communityId, isLike ? 1 : -1);
+
+        return repository.save(communityLike);
+    }
 
     @Transactional(readOnly = true)
     public boolean isLike(long memberId, long communityId) {
@@ -23,5 +39,11 @@ public class CommunityLikeDao {
     @Transactional(readOnly = true)
     public List<CommunityLike> likeCommunities(long memberId, List<Long> communityIdList) {
         return repository.findByMemberIdAndCommunityIdInAndIsLikeIsTrue(memberId, communityIdList);
+    }
+
+    @Transactional(readOnly = true)
+    public CommunityLike getLike(long memberId, long communityId) {
+        return repository.findByMemberIdAndCommunityId(memberId, communityId)
+                .orElse(new CommunityLike(memberId, communityId));
     }
 }
