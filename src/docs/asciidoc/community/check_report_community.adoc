@@ -1,0 +1,3 @@
+== Check Report Community API
+
+operation::check_report_community[snippets='http-request,path-parameters,http-response,response-fields']

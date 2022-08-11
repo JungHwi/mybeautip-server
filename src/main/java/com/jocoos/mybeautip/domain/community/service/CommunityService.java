@@ -6,8 +6,11 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
@@ -33,6 +36,8 @@ public class CommunityService {
 
     private final CommunityCategoryDao categoryDao;
     private final CommunityDao communityDao;
+    private final CommunityLikeDao likeDao;
+    private final CommunityReportDao reportDao;
 
     private final CommunityConverter converter;
     private final AwsS3Handler awsS3Handler;
@@ -50,10 +55,10 @@ public class CommunityService {
         return getCommunity(community.getMember(), community);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional()
     public CommunityResponse getCommunity(Member member, long communityId) {
         Community community = communityDao.get(communityId);
-        communityDao.read(communityId);
+        communityDao.readCount(communityId);
 
         return getCommunity(member, community);
     }
@@ -123,18 +128,46 @@ public class CommunityService {
         CommunityResponse result = getCommunity(community.getMember(), community);
 
         return result;
-
     }
 
+    @Transactional
     public LikeResponse like(long memberId, long communityId, boolean isLike) {
+        likeDao.like(memberId, communityId, isLike);
+
+        Community community = communityDao.get(communityId);
+
         return LikeResponse.builder()
                 .isLike(isLike)
-                .likeCount(10)
+                .likeCount(community.getLikeCount())
                 .build();
     }
 
-    public void report(long memberId, long communityId, ReportRequest report) {
-        return;
+    @Transactional
+    public ReportResponse report(long memberId, long communityId, ReportRequest reportRequest) {
+        reportDao.report(memberId, communityId, reportRequest);
+
+        Community community = communityDao.get(communityId);
+
+        communityDao.readCount(communityId);
+
+        return ReportResponse.builder()
+                .isReport(reportRequest.getIsReport())
+                .reportCount(community.getReportCount())
+                .build();
+    }
+
+    @Transactional
+    public ReportResponse isReport(long memberId, long communityId) {
+        CommunityReport communityReport = reportDao.getReport(memberId, communityId);
+
+        Community community = communityDao.get(communityId);
+
+        communityDao.readCount(communityId);
+
+        return ReportResponse.builder()
+                .isReport(communityReport.isReport())
+                .reportCount(community.getReportCount())
+                .build();
     }
 
     @Transactional

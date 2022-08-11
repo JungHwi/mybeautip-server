@@ -28,4 +28,12 @@ public class CommunityLike {
 
     @Column
     private boolean isLike;
+
+    public CommunityLike(long memberId, long communityId) {
+        this.memberId = memberId;
+        this.communityId = communityId;
+        this.isLike = false;
+    }
+
+
 }
