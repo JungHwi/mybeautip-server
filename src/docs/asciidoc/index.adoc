@@ -37,6 +37,13 @@ include::overview.adoc[]
 * link:community/like_community_comment.html[커뮤니티 댓글 좋아요 API, window=_blank]
 * link:community/report_community_comment.html[커뮤니티 댓글 신고하기 API, window=_blank]
 
+
+=== 이벤트 API
+* link:event/get_events.html[이벤트 목록 조회 API, window=_blank]
+* link:event/get_event.html[이벤트 단건 조회 API, window=_blank]
+
+* link:event/event_join.html[이벤트 참여하기 API, window=_blank]
+
 === Member API
 * link:member/signup.html[회원가입 API,window=_blank]
 * link:member/get_my_setting.html[내 설정 API,window=_blank]

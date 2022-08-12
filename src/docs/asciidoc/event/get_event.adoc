@@ -1,0 +1,3 @@
+== Get Event API
+
+operation::get_event[snippets='http-request,http-responsepath-parameters,http-response,response-fields']

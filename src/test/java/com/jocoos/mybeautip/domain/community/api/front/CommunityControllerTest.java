@@ -204,7 +204,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
         map.put("files", null);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .put("/api/1/community/{community_id}", 3)
+                        .put("/api/1/community/{community_id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(map)))
                 .andExpect(status().isOk())
@@ -255,7 +255,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void deleteCommunity() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .delete("/api/1/community/{community_id}", 3)
+                        .delete("/api/1/community/{community_id}", 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -274,7 +274,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
         BooleanDto bool = new BooleanDto(true);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/api/1/community/{community_id}/like", 3)
+                        .patch("/api/1/community/{community_id}/like", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bool)))
                 .andExpect(status().isOk())
@@ -303,7 +303,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/api/1/community/{community_id}/report", 10)
+                        .patch("/api/1/community/{community_id}/report", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(report)))
                 .andExpect(status().isOk())
@@ -333,7 +333,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community/{community_id}/report", 10)
+                        .get("/api/1/community/{community_id}/report", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(report)))
                 .andExpect(status().isOk())

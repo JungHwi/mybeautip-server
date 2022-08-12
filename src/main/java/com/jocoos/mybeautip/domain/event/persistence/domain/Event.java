@@ -50,19 +50,19 @@ public class Event extends ModifiedDateAuditable {
     private String description;
 
     @Column
-    private String imageUrl;
+    private String imageFile;
 
     @Column
-    private String thumbnailImageUrl;
+    private String thumbnailImageFile;
 
     @Column
     private String bannerImageFile;
 
     @Column
-    private String shareSquareImageUrl;
+    private String shareSquareImageFile;
 
     @Column
-    private String shareRectangleImageUrl;
+    private String shareRectangleImageFile;
 
     @Column
     private int needPoint;

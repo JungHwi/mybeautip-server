@@ -39,7 +39,7 @@ public class EventProduct {
     private int price;
 
     @Column()
-    private String imageUrl;
+    private String imageFile;
 
     @ManyToOne()
     @JoinColumn(name = "event_id", insertable = false, updatable = false)

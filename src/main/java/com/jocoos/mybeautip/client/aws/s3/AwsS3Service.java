@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.client.aws.s3;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.jocoos.mybeautip.global.config.aws.AwsCredentialService;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -56,13 +57,18 @@ public class AwsS3Service {
 
     private String copy(CopyObjectRequest copyObjectRequest) {
         AmazonS3 s3Client = credentialService.getS3Client();
-        CopyObjectResult result = s3Client.copyObject(copyObjectRequest);
+        try {
+            CopyObjectResult result = s3Client.copyObject(copyObjectRequest);
 
-        if (result == null) {
-            throw new RuntimeException("AWS S3 ERROR!! - COPY");
+            if (result == null) {
+                throw new RuntimeException("AWS S3 ERROR!! - COPY");
+            }
+
+            delete(copyObjectRequest.getSourceKey());
+        } catch (AmazonS3Exception ex) {
+            throw new BadRequestException("s3_error", ex.getErrorMessage());
         }
 
-        delete(copyObjectRequest.getSourceKey());
         return copyObjectRequest.getDestinationKey();
     }
 }

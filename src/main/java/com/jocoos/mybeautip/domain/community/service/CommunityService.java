@@ -123,8 +123,6 @@ public class CommunityService {
         community.setContents(request.getContents());
         editFiles(community, request.getFiles());
 
-        communityDao.save(community);
-
         CommunityResponse result = getCommunity(community.getMember(), community);
 
         return result;
@@ -176,8 +174,6 @@ public class CommunityService {
             return;
         }
 
-        awsS3Handler.editFiles(fileDtoList, UrlDirectory.COMMUNITY.getDirectory(community.getId()));
-
         for (FileDto fileDto : fileDtoList) {
             switch (fileDto.getOperation()) {
                 case UPLOAD:
@@ -188,5 +184,7 @@ public class CommunityService {
                     break;
             }
         }
+
+        awsS3Handler.editFiles(fileDtoList, UrlDirectory.COMMUNITY.getDirectory(community.getId()));
     }
 }

@@ -20,6 +20,7 @@ public class EventResponse {
     private String title;
     private String description;
     private String imageUrl;
+    private String bannerImageUrl;
     private String shareSquareImageUrl;
     private String shareRectangleImageUrl;
     private int needPoint;

@@ -1,6 +1,0 @@
-//[[Event_Join_Api]]
-//== Event Join API
-//
-//[[Event_Join]]
-//=== Event Join
-//operation::event_join[snippets='http-request,http-responsepath-parameters,http-response,response-fields']Event_Join_Api

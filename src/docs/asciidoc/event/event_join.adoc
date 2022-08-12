@@ -1,0 +1,3 @@
+== Event Join API
+
+operation::event_join[snippets='http-request,http-responsepath-parameters,http-response,response-fields']

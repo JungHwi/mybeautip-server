@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
 import com.jocoos.mybeautip.domain.event.service.EventService;
-import com.jocoos.mybeautip.restapi.CursorResponse;
+import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,16 +21,14 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping("/1/event")
-    public ResponseEntity getEventList(@RequestParam(name = "event_type", required = false) EventType eventType,
-                                       @RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
-                                       @RequestParam(defaultValue = "20") int size) {
-        List<EventListResponse> result = eventService.getEventList(eventType, cursor, size);
-        CursorResponse cursorResponse = new CursorResponse.Builder<>("/api/1/event/", result)
-                .withCount(size)
-                .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size() - 1).getId()) : null)
-                .toBuild();
+    public ResponseEntity<CursorResultResponse<EventListResponse>> getEventList(@RequestParam(name = "event_type", required = false) EventType eventType,
+                                                                               @RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
+                                                                               @RequestParam(defaultValue = "20") int size) {
+        List<EventListResponse> response = eventService.getEventList(eventType, cursor, size);
 
-        return ResponseEntity.ok(cursorResponse);
+        CursorResultResponse<EventListResponse> result = new CursorResultResponse<>(response);
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/1/event/{eventId}")

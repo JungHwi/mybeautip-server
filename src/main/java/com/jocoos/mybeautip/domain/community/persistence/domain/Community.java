@@ -73,19 +73,6 @@ public class Community extends ModifiedAtBaseEntity {
     @ManyToOne
     @JoinColumn(name = "category_id", insertable = false, updatable = false)
     private CommunityCategory category;
-//
-//    public Community update(EditCommunityRequest request) {
-//        if (!this.id.equals(request.getCommunityId())) {
-//            throw new RuntimeException("This community id is " + this.id +". But request id is" + request.getCommunityId());
-//        }
-//
-//        this.title = request.getTitle();
-//        this.contents = request.getTitle();
-//        this.files =
-//
-//
-//
-//    }
 
     public Community delete() {
         this.status = CommunityStatus.DELETE;

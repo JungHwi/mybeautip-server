@@ -15,6 +15,7 @@ public class DocumentLinkGenerator {
     @RequiredArgsConstructor
     public enum DocUrl {
         MEMBER_STATUS("member_status", "회원 상태"),
+        EVENT_TYPE("event_type", "이벤트 구분"),
         EVENT_STATUS("event_status", "이벤트 상태"),
         COMMUNITY_STATUS("community_status", "커뮤니티 상태"),
         COMMUNITY_CATEGORY_TYPE("community_category_type", "커뮤니티 카테고리 구분"),

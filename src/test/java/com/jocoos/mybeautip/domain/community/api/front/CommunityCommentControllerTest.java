@@ -31,7 +31,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
     void getComments() throws Exception {
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community/{community_id}/comment", 3)
+                        .get("/api/1/community/{community_id}/comment", 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -72,7 +72,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
     void getComment() throws Exception {
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community/{community_id}/comment/{comment_id}", 3, 1)
+                        .get("/api/1/community/{community_id}/comment/{comment_id}", 1, 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -114,7 +114,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .post("/api/1/community/{community_id}/comment", 3)
+                        .post("/api/1/community/{community_id}/comment", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -157,7 +157,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
         map.put("contents", "Test Contents");
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .put("/api/1/community/{community_id}/comment/{comment_id}", 3, 1)
+                        .put("/api/1/community/{community_id}/comment/{comment_id}", 1, 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(map)))
                 .andExpect(status().isOk())
@@ -197,7 +197,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
     @Test
     void deleteComment() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .delete("/api/1/community/{community_id}/comment/{comment_id}", 3, 1)
+                        .delete("/api/1/community/{community_id}/comment/{comment_id}", 1, 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -217,7 +217,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
         BooleanDto bool = new BooleanDto(true);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/api/1/community/{community_id}/comment/{comment_id}/like", 3, 1)
+                        .patch("/api/1/community/{community_id}/comment/{comment_id}/like", 1, 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bool)))
                 .andExpect(status().isOk())
@@ -246,7 +246,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/api/1/community/{community_id}/comment/{comment_id}/report", 3, 1)
+                        .patch("/api/1/community/{community_id}/comment/{comment_id}/report", 1, 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(report)))
                 .andExpect(status().isOk())
