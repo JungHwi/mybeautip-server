@@ -119,8 +119,7 @@ public class CommunityController {
     }
 
     @GetMapping(value = "/1/community/{community_id}/report")
-    public ResponseEntity<ReportResponse> isReportCommunity(@PathVariable(name = "community_id") long communityId,
-                                                          @RequestBody ReportRequest report) {
+    public ResponseEntity<ReportResponse> isReportCommunity(@PathVariable(name = "community_id") long communityId) {
         long memberId = legacyMemberService.currentMemberId();
 
         ReportResponse result = service.isReport(memberId, communityId);

@@ -327,15 +327,9 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void isReportCommunity() throws Exception {
-        ReportRequest report = ReportRequest.builder()
-                .isReport(true)
-                .description("신고사유")
-                .build();
-
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .get("/api/1/community/{community_id}/report", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(report)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
 

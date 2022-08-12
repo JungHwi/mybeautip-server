@@ -27,6 +27,7 @@ public interface EventConverter {
 
     @Mappings({
             @Mapping(target = "thumbnailImageUrl", source = "thumbnailImageFile", qualifiedByName = "fileToUrl"),
+            @Mapping(target = "bannerImageUrl", source = "bannerImageFile", qualifiedByName = "fileToUrl"),
     })
     EventListResponse convertToListResponse(Event event);
 

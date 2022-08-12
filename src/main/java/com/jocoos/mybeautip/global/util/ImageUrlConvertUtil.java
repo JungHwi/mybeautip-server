@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImageUrlConvertUtil {
 
-
     private static String CF_DOMAIN;
     private static String S3_DOMAIN;
 
