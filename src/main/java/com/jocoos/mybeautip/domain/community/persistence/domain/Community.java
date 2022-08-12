@@ -63,7 +63,7 @@ public class Community extends ModifiedAtBaseEntity {
     @Column
     private ZonedDateTime sortedAt;
 
-    @OneToMany(mappedBy = "community", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "community", cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityFile> communityFileList;
 
     @ManyToOne
