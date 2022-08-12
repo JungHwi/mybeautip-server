@@ -4,7 +4,7 @@ WORKDIR /mybeautip-server
 
 ADD build/libs/mybeautip-server-1.1.1.jar app.jar
 
-ENV SERVER_PROFILE local-mysql
+ENV SERVER_PROFILE dev
 
 ENV PORT 8080
 
