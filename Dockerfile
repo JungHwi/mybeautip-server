@@ -10,5 +10,5 @@ ENV PORT 8080
 
 EXPOSE 8080
 
-# CMD java -jar -Xms1024m -Xmx2048m app.jar --spring.profiles.active=$SERVER_PROFILE --port=$PORT
-ENTRYPOINT ["java", "-Dspring.profiles.active=${SERVER_PROFILE}", "-Xms1024M", "-Xmx2048M", "-jar", "app.jar"]
+CMD java -jar -Xms1024m -Xmx2048m app.jar --spring.profiles.active=$SERVER_PROFILE --port=$PORT
+#ENTRYPOINT ["java", "-Dspring.profiles.active=${SERVER_PROFILE}", "-Xms1024M", "-Xmx2048M", "-jar", "app.jar"]
