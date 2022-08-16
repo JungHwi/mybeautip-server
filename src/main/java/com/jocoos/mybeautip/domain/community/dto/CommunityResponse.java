@@ -66,21 +66,21 @@ public class CommunityResponse implements CursorInterface {
             this.contents = "차단된 사용자의 글이에요.";
             return this;
         } else if (this.reportCount > 3) {
-            this.contents = "";
+            this.contents = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             if (this.category.getType() == CommunityCategoryType.BLIND) {
-                this.title = "";
+                this.title = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             }
             return this;
         } else if (this.member.getStatus() == MemberStatus.WITHDRAWAL) {
-            this.contents = "";
+            this.contents = "탈퇴한 사용자의 글이에요.";
             if (this.category.getType() == CommunityCategoryType.BLIND) {
-                this.title = "";
+                this.title = "탈퇴한 사용자의 글이에요.";
             }
             return this;
         } else if (this.status == CommunityStatus.DELETE) {
-            this.contents = "";
+            this.contents = "삭제된 게시물이에요.";
             if (this.category.getType() == CommunityCategoryType.BLIND) {
-                this.title = "";
+                this.title = "삭제된 게시물이에요.";
             }
             return this;
         }

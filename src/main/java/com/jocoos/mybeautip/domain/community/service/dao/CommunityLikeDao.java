@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.community.service.dao;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityLikeRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,7 @@ public class CommunityLikeDao {
 
         communityLike.setLike(isLike);
 
-        communityDao.likeCount(communityId, isLike ? 1 : -1);
+        communityDao.likeCount(communityId, isLike ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_MINUS_ONE);
 
         return repository.save(communityLike);
     }

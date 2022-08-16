@@ -44,7 +44,9 @@ public class CommunityCommentController {
     @PostMapping("/1/community/{community_id}/comment")
     public ResponseEntity<CommunityCommentResponse> writeComment(@PathVariable("community_id") long communityId,
                                                                  @RequestBody WriteCommunityCommentRequest request) {
-        return ResponseEntity.ok(communityCommentService.write(communityId, request));
+        request.setCommunityId(communityId);
+
+        return ResponseEntity.ok(communityCommentService.write(request));
     }
 
     @PutMapping("/1/community/{community_id}/comment/{comment_id}")

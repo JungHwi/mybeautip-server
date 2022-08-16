@@ -48,7 +48,7 @@ public class CommunityService {
 
         awsS3Handler.copy(request.getFiles(), UrlDirectory.COMMUNITY.getDirectory(community.getId()));
 
-        if (community.getEventId() != null) {
+        if (community.getCategory().getType() == CommunityCategoryType.DRIP) {
             eventJoinService.join(community.getEventId(), request.getMember().getId());
         }
 
@@ -115,7 +115,7 @@ public class CommunityService {
     public CommunityResponse edit(EditCommunityRequest request) {
         Community community = communityDao.get(request.getCommunityId());
 
-        if (!community.getMember().equals(community.getMember())) {
+        if (!community.getMember().getId().equals(request.getMember().getId())) {
             throw new AccessDeniedException("access_denied", "This is not yours.");
         }
 
