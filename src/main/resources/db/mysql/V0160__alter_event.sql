@@ -5,6 +5,12 @@ alter table event rename column share_square_image_url to share_square_image_fil
 alter table event rename column share_rectangle_image_url to share_rectangle_image_file;
 alter table event_product rename column image_url to image_file;
 
+alter table mybeautip.member_blocks add column  status varchar(20) not null comment '블락 여부' after you;
+
+# alter table member_blocks drop column status;
+#
+# delete from flyway_schema_history where version = '0160';
+
 # alter table event drop column banner_image_file;
 # alter table event rename column image_file to image_url;
 # alter table event rename column thumbnail_image_file to thumbnail_image_url;
