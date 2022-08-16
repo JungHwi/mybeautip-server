@@ -15,6 +15,6 @@ alter table mybeautip.member_blocks add column  status varchar(20) not null comm
 # alter table event rename column image_file to image_url;
 # alter table event rename column thumbnail_image_file to thumbnail_image_url;
 # alter table event rename column share_square_image_file to share_square_image_url;
-# alter table event rename column sharer_ectangle_image_file to sharer_ectangle_image_url;
+# alter table event rename column sharer_rectangle_image_file to sharer_rectangle_image_url;
 #
 # delete from flyway_schema_history where version = '0160';
