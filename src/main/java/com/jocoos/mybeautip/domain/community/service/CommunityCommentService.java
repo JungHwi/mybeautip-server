@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.converter.CommunityCommentConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
@@ -94,7 +95,12 @@ public class CommunityCommentService {
         Community community = communityDao.get(request.getCommunityId());
 
         CommunityComment communityComment = dao.write(request);
+
         CommunityCommentResponse response = converter.convert(communityComment);
+
+        if (community.getCategory().getType() == CommunityCategoryType.BLIND) {
+            communityDao.updateSortedAt(community.getId());
+        }
 
         return relationService.setRelationInfo(member, community, response);
     }

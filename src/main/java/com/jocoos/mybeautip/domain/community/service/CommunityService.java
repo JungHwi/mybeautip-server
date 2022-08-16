@@ -92,7 +92,6 @@ public class CommunityService {
 
     private List<CommunityResponse> getCommunity(Member member, List<Community> communities) {
         List<CommunityResponse> responses = converter.convert(communities);
-
         return relationService.setRelationInfo(member, responses);
     }
 

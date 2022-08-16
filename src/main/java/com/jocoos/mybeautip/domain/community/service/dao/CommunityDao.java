@@ -77,4 +77,9 @@ public class CommunityDao {
     public void commentCount(long communityId, int count) {
         repository.commentCount(communityId, count);
     }
+
+    @Transactional
+    public void updateSortedAt(long communityId) {
+        repository.updateSortedAt(communityId);
+    }
 }

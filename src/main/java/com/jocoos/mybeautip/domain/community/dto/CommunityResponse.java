@@ -64,25 +64,25 @@ public class CommunityResponse implements CursorInterface {
         // FIXME 관계나 상태에 따라 Title / Contents 변경. 어디다 치워 버리고 싶다.
         if (relationInfo.getIsBlock()) {
             this.contents = "차단된 사용자의 글이에요.";
-            return this;
-        } else if (this.reportCount > 3) {
+        } else if (this.reportCount >= 3) {
             this.contents = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             }
-            return this;
         } else if (this.member.getStatus() == MemberStatus.WITHDRAWAL) {
             this.contents = "탈퇴한 사용자의 글이에요.";
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "탈퇴한 사용자의 글이에요.";
             }
-            return this;
         } else if (this.status == CommunityStatus.DELETE) {
             this.contents = "삭제된 게시물이에요.";
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "삭제된 게시물이에요.";
             }
-            return this;
+        }
+
+        if (this.category.getType() == CommunityCategoryType.BLIND) {
+            this.member = null;
         }
 
         return this;

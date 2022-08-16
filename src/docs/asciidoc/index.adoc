@@ -53,3 +53,5 @@ include::overview.adoc[]
 
 === Term API
 * link:term/change_choice_of_optional_term.html[선택 약관 동의 여부 변경 API, window=_blank]
+
+=== 왜 안댐?

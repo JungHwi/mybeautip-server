@@ -34,4 +34,8 @@ public interface CommunityRepository extends DefaultJpaRepository<Community, Lon
     @Query("UPDATE Community community SET community.commentCount = community.commentCount + :count WHERE community.id = :communityId")
     void commentCount(@Param("communityId") long communityId, @Param("count") int count);
 
+    @Modifying
+    @Query("UPDATE Community community SET community.sortedAt = CURRENT_TIMESTAMP WHERE community.id = :communityId")
+    void updateSortedAt(@Param("communityId") long communityId);
+
 }
