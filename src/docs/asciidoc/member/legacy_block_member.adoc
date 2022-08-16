@@ -1,0 +1,3 @@
+== Legacy Unblock Target Member API
+
+operation::legacy_member_unblock[snippets='http-request,path-parameters,http-response']

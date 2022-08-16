@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 @Slf4j
@@ -84,7 +85,8 @@ public class PostService {
                     .map(CommentLike::getId).orElse(null);
             commentInfo.setLikeId(likeId);
 
-            Block block = blockRepository.findByMeAndMemberYouId(me.getId(), comment.getCreatedBy().getId())
+            Block block = blockRepository
+                    .findByMeAndMemberYouIdAndStatus(me.getId(), comment.getCreatedBy().getId(), BLOCK)
                     .orElse(null);
             if (block != null) {
                 commentInfo.setBlockId(block.getId());
