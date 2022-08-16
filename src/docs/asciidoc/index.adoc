@@ -47,6 +47,9 @@ include::overview.adoc[]
 === Member API
 * link:member/signup.html[회원가입 API,window=_blank]
 * link:member/get_my_setting.html[내 설정 API,window=_blank]
+* link:member/change_target_block_status.html[블락 & 언블락 멤버 API, window=_blank]
+* link:member/legacy_block_member.html[레거시 블락 멤버 API,window=_blank]
+* link:member/legacy_unblock_member.html[레거시 언블락 멤버 API,window=_blank]
 
 === Term API
 * link:term/change_choice_of_optional_term.html[선택 약관 동의 여부 변경 API, window=_blank]

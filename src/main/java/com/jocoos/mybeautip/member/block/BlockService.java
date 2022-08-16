@@ -29,6 +29,15 @@ public class BlockService {
     private final MemberRepository memberRepository;
 
     @Transactional
+    public Block changeTargetBlockStatus(Long currentMemberId, Long targetId, boolean isBlock) {
+        if (isBlock) {
+            return blockMember(currentMemberId, targetId);
+        } else {
+            return unblockMember(currentMemberId, targetId);
+        }
+    }
+
+    @Transactional
     public Block blockMember(long userId, long targetId) {
         Member targetMember = memberRepository.findById(targetId)
                 .orElseThrow(() -> new MemberNotFoundException("No such target member. id - " + targetId));
@@ -39,7 +48,6 @@ public class BlockService {
     @Transactional
     public Block blockMember(long memberId, Member targetMember) {
         Block block = memberBlockDao.getBlockOrElseNewBlock(memberId, targetMember);
-
         validAlreadyBlocked(block);
         block.changeStatus(BLOCK);
         memberBlockDao.save(block);
@@ -51,6 +59,12 @@ public class BlockService {
         Block block = memberBlockDao.getBlock(memberId, unblockMemberId);
         block.changeStatus(UNBLOCK);
         return block;
+    }
+
+    @Transactional
+    public void unblock(Block block) {
+        block.changeStatus(UNBLOCK);
+        memberBlockDao.save(block);
     }
 
     public Map<Long, Block> getBlackListByMe(Long me) {

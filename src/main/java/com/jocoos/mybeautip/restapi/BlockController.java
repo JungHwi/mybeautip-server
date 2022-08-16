@@ -11,7 +11,6 @@ import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.block.BlockStatus;
-import com.jocoos.mybeautip.member.block.dto.BlockResponseDto;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,19 +87,7 @@ public class BlockController {
         Long me = legacyMemberService.currentMemberId();
         Block block = blockRepository.findByIdAndMe(id, me)
                 .orElseThrow(() -> new NotFoundException("block_not_found", messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
-        blockRepository.delete(block);
-    }
-
-    @PatchMapping("/block/{blockMemberId}")
-    public ResponseEntity<BlockResponseDto> block(@PathVariable Long blockMemberId) {
-        Block block = blockService.blockMember(legacyMemberService.currentMemberId(), blockMemberId);
-        return ResponseEntity.ok(BlockResponseDto.from(block));
-    }
-
-    @PatchMapping("/unblock/{blockMemberId}")
-    public ResponseEntity<BlockResponseDto> unblock(@PathVariable Long blockMemberId) {
-        Block block = blockService.unblockMember(legacyMemberService.currentMemberId(), blockMemberId);
-        return ResponseEntity.ok(BlockResponseDto.from(block));
+        blockService.unblock(block);
     }
 
     @GetMapping("/me/blocks")
