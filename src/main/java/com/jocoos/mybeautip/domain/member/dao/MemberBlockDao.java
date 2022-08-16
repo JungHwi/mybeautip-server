@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
@@ -45,5 +46,15 @@ public class MemberBlockDao {
     @Transactional(readOnly = true)
     public boolean isBlock(Long memberId, Member targetMember) {
         return repository.countByMeAndMemberYouAndStatus(memberId, targetMember, BLOCK) > 0;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isBlock(Long memberId, Long targetMemberId) {
+        return false;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Block> isBlock(Long memberId, List<Long> targetMemberIds) {
+        return new ArrayList<>();
     }
 }
