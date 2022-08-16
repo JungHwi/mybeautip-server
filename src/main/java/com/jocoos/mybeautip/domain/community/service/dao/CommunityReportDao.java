@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityReportRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ public class CommunityReportDao {
         communityReport.setReport(reportRequest.getIsReport());
         communityReport.setDescription(reportRequest.getDescription());
 
-        communityDao.reportCount(communityId, reportRequest.getIsReport() ? 1 : -1);
+        communityDao.reportCount(communityId, reportRequest.getIsReport() ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_MINUS_ONE);
 
         return repository.save(communityReport);
     }

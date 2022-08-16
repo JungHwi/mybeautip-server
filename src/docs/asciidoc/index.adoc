@@ -31,7 +31,7 @@ include::overview.adoc[]
 ==== 커뮤니티 댓글 API
 * link:community/get_community_comments.html[커뮤니티 댓글 목록 조회 MOCK API, window=_blank]
 * link:community/get_community_comment.html[커뮤니티 댓글 조회 MOCK API, window=_blank]
-* link:community/write_community_comment.html[커뮤니티 댓글 작성 MOCK API, window=_blank]
+* link:community/write_community_comment.html[커뮤니티 댓글 작성 API, window=_blank]
 * link:community/edit_community_comment.html[커뮤니티 댓글 수정 MOCK API, window=_blank]
 * link:community/delete_community_comment.html[커뮤니티 댓글 삭제 MOCK API, window=_blank]
 * link:community/like_community_comment.html[커뮤니티 댓글 좋아요 MOCK API, window=_blank]

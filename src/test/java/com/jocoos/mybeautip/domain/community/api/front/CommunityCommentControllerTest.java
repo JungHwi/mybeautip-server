@@ -51,7 +51,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                                fieldWithPath("content.[].reply_count").type(JsonFieldType.NUMBER).description("대댓글수"),
+                                fieldWithPath("content.[].comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
                                 fieldWithPath("content.[].report_count").type(JsonFieldType.NUMBER).description("대댓글수"),
                                 fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
                                 fieldWithPath("content.[].relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
@@ -90,7 +90,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                                fieldWithPath("reply_count").type(JsonFieldType.NUMBER).description("대댓글수"),
+                                fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
                                 fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
                                 fieldWithPath("relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
@@ -108,6 +108,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
     }
 
     @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void writeComment() throws Exception {
         WriteCommunityCommentRequest request = WriteCommunityCommentRequest.builder()
                 .contents("Mock Comment Contents")
@@ -130,10 +131,13 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
+                                fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
+                                fieldWithPath("parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                                fieldWithPath("reply_count").type(JsonFieldType.NUMBER).description("대댓글수"),
+                                fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
                                 fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
                                 fieldWithPath("relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
@@ -176,7 +180,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                                fieldWithPath("reply_count").type(JsonFieldType.NUMBER).description("대댓글수"),
+                                fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
                                 fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
                                 fieldWithPath("relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
