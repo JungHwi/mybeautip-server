@@ -22,4 +22,8 @@ public interface BlockRepository extends CrudRepository<Block, Long> {
     Optional<Block> findByMeAndMemberYouIdAndStatus(Long memberId, Long targetId, BlockStatus status);
 
     Optional<Block> findByMeAndMemberYouId(Long memberId, Long targetId);
+
+    boolean existsByMeAndMemberYouIdAndStatus(Long memberId, Long targetId, BlockStatus status);
+
+    List<Block> findAllByMeAndMemberYouIdInAndStatus(Long memberId, List<Long> targetIds, BlockStatus status);
 }

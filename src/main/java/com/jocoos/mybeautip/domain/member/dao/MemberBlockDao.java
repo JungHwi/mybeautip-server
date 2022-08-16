@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
@@ -50,11 +49,11 @@ public class MemberBlockDao {
 
     @Transactional(readOnly = true)
     public boolean isBlock(Long memberId, Long targetMemberId) {
-        return false;
+        return repository.existsByMeAndMemberYouIdAndStatus(memberId, targetMemberId, BLOCK);
     }
 
     @Transactional(readOnly = true)
     public List<Block> isBlock(Long memberId, List<Long> targetMemberIds) {
-        return new ArrayList<>();
+        return repository.findAllByMeAndMemberYouIdInAndStatus(memberId, targetMemberIds, BLOCK);
     }
 }
