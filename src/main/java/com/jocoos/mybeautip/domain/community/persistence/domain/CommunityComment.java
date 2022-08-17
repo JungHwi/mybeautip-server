@@ -23,6 +23,9 @@ public class CommunityComment extends ModifiedAtBaseEntity {
     private Long id;
 
     @Column
+    private long categoryId;
+
+    @Column
     private long communityId;
 
     @Column(name = "member_id")

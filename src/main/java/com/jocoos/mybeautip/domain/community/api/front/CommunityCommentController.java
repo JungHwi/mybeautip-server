@@ -1,13 +1,12 @@
 package com.jocoos.mybeautip.domain.community.api.front;
 
-import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
-import com.jocoos.mybeautip.domain.community.dto.LikeResponse;
-import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
-import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
+import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityCommentService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +26,17 @@ public class CommunityCommentController {
     public ResponseEntity<CursorResultResponse<CommunityCommentResponse>> getComments(@PathVariable("community_id") long communityId,
                                                                                       @RequestParam(value = "parent_id", required = false) Long parentId,
                                                                                       @RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
-                                                                                      @RequestParam(required = false, defaultValue = "20") long size) {
+                                                                                      @RequestParam(required = false, defaultValue = "20") int size,
+                                                                                      @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction) {
 
-        List<CommunityCommentResponse> response = communityCommentService.getComments(communityId);
+        SearchCommentRequest request = SearchCommentRequest.builder()
+                .communityId(communityId)
+                .parentId(parentId)
+                .cursor(cursor)
+                .pageable(PageRequest.of(0, size, Sort.by(direction, "id")))
+                .build();
+
+        List<CommunityCommentResponse> response = communityCommentService.getComments(request);
         CursorResultResponse<CommunityCommentResponse> result = new CursorResultResponse<>(response);
 
         return ResponseEntity.ok(result);

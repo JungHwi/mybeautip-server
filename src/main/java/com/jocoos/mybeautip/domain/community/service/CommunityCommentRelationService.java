@@ -3,10 +3,11 @@ package com.jocoos.mybeautip.domain.community.service;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
-import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentLike;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentReport;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommunityCommentRelationService {
 
+    private final CommunityCategoryDao categoryDao;
     private final CommunityCommentLikeDao likeDao;
     private final CommunityCommentReportDao reportDao;
     private final MemberBlockDao blockDao;
@@ -33,7 +35,7 @@ public class CommunityCommentRelationService {
     @Transactional(readOnly = true)
     public CommunityCommentResponse setRelationInfo(Member member, Community community, CommunityCommentResponse communityCommentResponse) {
         if (member == null) {
-            return communityCommentResponse.setRelationInfo(new CommunityRelationInfo());
+            return communityCommentResponse.setRelationInfo(new CommunityRelationInfo(), community.getCategory().getType());
         }
 
         CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
@@ -42,44 +44,58 @@ public class CommunityCommentRelationService {
                 .isBlock(community.getCategory().getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), communityCommentResponse.getMember().getId()))
                 .build();
 
-        return communityCommentResponse.setRelationInfo(relationInfo);
+        return communityCommentResponse.setRelationInfo(relationInfo, community.getCategory().getType());
     }
 
     @Transactional(readOnly = true)
-    public List<CommunityResponse> setRelationInfo(Member member, List<CommunityResponse> communityResponseList) {
+    public List<CommunityCommentResponse> setRelationInfo(Member member, List<CommunityCommentResponse> communityCommentResponses) {
         CommunityRelationInfo relationInfo = new CommunityRelationInfo();
         if (member == null) {
-            for (CommunityResponse communityResponse : communityResponseList) {
-                communityResponse.setRelationInfo(relationInfo);
+            for (CommunityCommentResponse communityCommentResponse : communityCommentResponses) {
+                communityCommentResponse.setRelationInfo(relationInfo);
             }
-            return communityResponseList;
+            return communityCommentResponses;
         }
 
-        List<Long> communityIds = communityResponseList.stream()
-                .map(CommunityResponse::getId)
+        List<Long> categoryIds = communityCommentResponses.stream()
+                .map(CommunityCommentResponse::getCategoryId)
                 .collect(Collectors.toList());
 
-        List<Long> writerIds = communityResponseList.stream()
-                .map(CommunityResponse::getMember)
+        List<Long> commentIds = communityCommentResponses.stream()
+                .map(CommunityCommentResponse::getId)
+                .collect(Collectors.toList());
+
+        List<Long> writerIds = communityCommentResponses.stream()
+                .map(CommunityCommentResponse::getMember)
                 .collect(Collectors.toList()).stream()
                 .map(CommunityMemberResponse::getId)
                 .collect(Collectors.toList());
 
-        Map<Long, CommunityCommentLike> likeMap = getLikeMap(member.getId(), communityIds);
-        Map<Long, CommunityCommentReport> reportMap = getReportMap(member.getId(), communityIds);
+        Map<Long, CommunityCategoryType> categoryTypeMap = getCategoryMap(communityCommentResponses, categoryIds);
+        Map<Long, CommunityCommentLike> likeMap = getLikeMap(member.getId(), commentIds);
+        Map<Long, CommunityCommentReport> reportMap = getReportMap(member.getId(), commentIds);
         Map<Long, Block> blockMap = getBlockMap(member.getId(), writerIds);
 
-        for (CommunityResponse communityResponse : communityResponseList) {
+        for (CommunityCommentResponse communityCommentResponse : communityCommentResponses) {
             relationInfo = CommunityRelationInfo.builder()
-                    .isLike(likeMap.containsKey(communityResponse.getId()))
-                    .isReport(reportMap.containsKey(communityResponse.getId()))
-                    .isBlock(communityResponse.getCategory().getType() != CommunityCategoryType.BLIND && blockMap.containsKey(communityResponse.getMember().getId()))
+                    .isLike(likeMap.containsKey(communityCommentResponse.getId()))
+                    .isReport(reportMap.containsKey(communityCommentResponse.getId()))
+                    .isBlock(categoryTypeMap.get(communityCommentResponse.getId()) != CommunityCategoryType.BLIND && blockMap.containsKey(communityCommentResponse.getMember().getId()))
                     .build();
 
-            communityResponse.setRelationInfo(relationInfo);
+            communityCommentResponse.setRelationInfo(relationInfo, categoryTypeMap.get(communityCommentResponse.getId()));
         }
 
-        return communityResponseList;
+        return communityCommentResponses;
+    }
+
+    private Map<Long, CommunityCategoryType> getCategoryMap(List<CommunityCommentResponse> communityCommentResponses, List<Long> categoryIds) {
+        List<CommunityCategory> categoryList = categoryDao.getCommunityCategory(categoryIds);
+        Map<Long, CommunityCategoryType> communityCategoryTypeMap = categoryList.stream()
+                        .collect(Collectors.toMap(CommunityCategory::getId, CommunityCategory::getType));
+
+        return communityCommentResponses.stream()
+                .collect(Collectors.toMap(CommunityCommentResponse::getId, commentResponse -> communityCategoryTypeMap.get(commentResponse.getCategoryId())));
     }
 
     private Map<Long, CommunityCommentLike> getLikeMap(long memberId, List<Long> commentIds) {

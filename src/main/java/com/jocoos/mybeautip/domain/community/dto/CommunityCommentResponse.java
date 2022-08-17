@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.community.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
@@ -20,6 +21,8 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 public class CommunityCommentResponse implements CursorInterface {
 
     private Long id;
+
+    private Long categoryId;
 
     private Long communityId;
 
@@ -48,7 +51,7 @@ public class CommunityCommentResponse implements CursorInterface {
         return String.valueOf(this.id);
     }
 
-    public CommunityCommentResponse setRelationInfo(CommunityRelationInfo relationInfo) {
+    public CommunityCommentResponse setRelationInfo(CommunityRelationInfo relationInfo, CommunityCategoryType categoryType) {
         this.relationInfo = relationInfo;
 
         // FIXME 관계나 상태에 따라 Title / Contents 변경. 어디다 치워 버리고 싶다.
@@ -64,6 +67,10 @@ public class CommunityCommentResponse implements CursorInterface {
         } else if (this.status == CommunityStatus.DELETE) {
             this.contents = "삭제된 게시물이에요.";
             return this;
+        }
+
+        if (categoryType == CommunityCategoryType.BLIND) {
+            this.member = null;
         }
 
         return this;

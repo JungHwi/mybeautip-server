@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = {MemberConverter.class})
 public interface CommunityCommentConverter {
 
@@ -25,4 +27,6 @@ public interface CommunityCommentConverter {
         @Mapping(target = "relationInfo", ignore = true)
     })
     CommunityCommentResponse convert(CommunityComment entity);
+
+    List<CommunityCommentResponse> convert(List<CommunityComment> entity);
 }
