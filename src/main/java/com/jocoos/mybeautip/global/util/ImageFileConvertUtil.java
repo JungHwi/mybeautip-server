@@ -1,10 +1,16 @@
 package com.jocoos.mybeautip.global.util;
 
+import org.springframework.util.StringUtils;
+
 public class ImageFileConvertUtil {
     private static final String POSTFIX_THUMBNAIL = "_thumbnail";
 
     public static String convertToThumbnail(String original) {
         return convertImageFileName(original, POSTFIX_THUMBNAIL);
+    }
+
+    public static String toFileName(String imgUrl) {
+        return StringUtils.getFilename(imgUrl);
     }
 
     private static String convertImageFileName(String original, String postfix) {

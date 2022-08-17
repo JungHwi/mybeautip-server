@@ -20,7 +20,11 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.HTTP_PREFIX;
+import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 
 @Data
@@ -67,8 +71,9 @@ public class Member {
     @Convert(converter = BirthdayAttributeConverter.class)
     private Birthday birthday;
 
-    @Column(length = 200)
-    private String avatarUrl;
+    // 디비에 이미지 파일명만 저장하기로 변경, 컬럼명은 일단 그대로둠
+    @Column(name = "avatar_url", length = 200)
+    private String avatarFilename;
 
     @Column(length = 50)
     private String email;
@@ -138,7 +143,6 @@ public class Member {
         this.link = parseLink(request.getGrantType());
         this.username = StringUtils.isBlank(request.getUsername()) ? RandomUtils.generateUsername() : request.getUsername();
         this.email = StringUtils.isBlank(request.getEmail()) ? "" : request.getEmail();
-        this.avatarUrl = StringUtils.isBlank(request.getAvatarUrl()) ? DEFAULT_AVATAR_URL : request.getAvatarUrl();
         this.point = 0;
         this.visible = false;
         this.revenueModifiedAt = null;
@@ -146,6 +150,7 @@ public class Member {
         this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.REVENUE_RETURN);
 
         setTag();
+        setAvatarFilenameFromUrl(request.getAvatarUrl());
     }
 
     public void setLink(int link) {
@@ -201,5 +206,27 @@ public class Member {
         }
         this.point = this.point + point;
         return this;
+    }
+
+    public void setAvatarFilenameFromUrl(String imgUrl) {
+        if (StringUtils.isBlank(imgUrl)) {
+            this.avatarFilename = DEFAULT_AVATAR_FILE_NAME;
+        } else{
+            this.avatarFilename = toFileName(imgUrl);
+        }
+    }
+
+    public String getAvatarUrl() {
+        if (StringUtils.isBlank(this.avatarFilename)) {
+            return "";
+        } else if (isUrl()) {
+            return this.avatarFilename;
+        } else {
+            return toUrl(this.avatarFilename, AVATAR);
+        }
+    }
+
+    private boolean isUrl() {
+        return this.avatarFilename.startsWith(HTTP_PREFIX);
     }
 }

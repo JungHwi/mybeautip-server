@@ -72,6 +72,6 @@ public interface MemberConverter {
 
     @AfterMapping
     default void convertToCommunityMember(@MappingTarget CommunityMemberResponse response, Member member) {
-        response.setAvatarUrl(toUrl(member.getAvatarUrl(), AVATAR));
+        response.setAvatarUrl(toUrl(member.getAvatarFilename(), AVATAR));
     }
 }

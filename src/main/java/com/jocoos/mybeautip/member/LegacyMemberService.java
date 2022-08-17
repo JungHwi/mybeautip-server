@@ -49,8 +49,7 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_URL;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.*;
 
 @Slf4j
 @Service
@@ -338,8 +337,7 @@ public class LegacyMemberService {
             member.setUsername(request.getUsername());
         }
 
-        String avatarUrl = request.getAvatarUrl() != null ? request.getAvatarUrl() : DEFAULT_AVATAR_URL;
-        member.setAvatarUrl(avatarUrl);
+        member.setAvatarFilenameFromUrl(request.getAvatarUrl());
 
         member.setVisible(true);
         Member finalMember = memberRepository.save(member);
@@ -383,7 +381,7 @@ public class LegacyMemberService {
         }
 
         member.setIntro("");
-        member.setAvatarUrl(DELETED_AVATAR_URL);
+        member.setAvatarFilename(DELETED_AVATAR_FILE_NAME);
         member.setVisible(false);
         member.setFollowingCount(0);
         member.setFollowerCount(0);
