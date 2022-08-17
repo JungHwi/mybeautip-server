@@ -22,6 +22,7 @@ import java.util.Date;
 
 import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.HTTP_PREFIX;
 import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
@@ -70,7 +71,8 @@ public class Member {
     @Convert(converter = BirthdayAttributeConverter.class)
     private Birthday birthday;
 
-    @Column(length = 200)
+    // 디비에 이미지 파일명만 저장하기로 변경, 컬럼명은 일단 그대로둠
+    @Column(name = "avatar_url", length = 200)
     private String avatarFilename;
 
     @Column(length = 50)
@@ -217,8 +219,14 @@ public class Member {
     public String getAvatarUrl() {
         if (StringUtils.isBlank(this.avatarFilename)) {
             return "";
+        } else if (isUrl()) {
+            return this.avatarFilename;
         } else {
             return toUrl(this.avatarFilename, AVATAR);
         }
+    }
+
+    private boolean isUrl() {
+        return this.avatarFilename.startsWith(HTTP_PREFIX);
     }
 }

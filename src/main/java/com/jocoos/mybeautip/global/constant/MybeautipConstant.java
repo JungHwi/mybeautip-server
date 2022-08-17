@@ -12,6 +12,8 @@ public class MybeautipConstant {
     public static final String DEFAULT_AVATAR_URL = toUrl(DEFAULT_AVATAR_FILE_NAME, AVATAR);
     public static final String DELETED_AVATAR_URL = toUrl(DELETED_AVATAR_FILE_NAME, AVATAR);
 
+    public static final String HTTP_PREFIX = "http";
+
     // String for Number
     public static final String MAX_LONG_STRING = "576460752303423487";
 
