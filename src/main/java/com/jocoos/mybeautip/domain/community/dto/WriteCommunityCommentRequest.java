@@ -9,6 +9,8 @@ import lombok.Data;
 @Builder
 public class WriteCommunityCommentRequest {
 
+    private Long categoryId;
+
     private Long communityId;
 
     private Long parentId;

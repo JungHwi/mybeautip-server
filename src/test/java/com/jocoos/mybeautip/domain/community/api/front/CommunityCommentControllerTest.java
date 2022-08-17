@@ -43,12 +43,17 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         requestParameters(
                                 parameterWithName("parent_id").description("부모 댓글 아이디").optional(),
                                 parameterWithName("cursor").description("커서").optional().attributes(getDefault(MAX_LONG_STRING)),
-                                parameterWithName("size").description("").optional().attributes(getDefault(20))
+                                parameterWithName("size").description("페이지 사이즈").optional().attributes(getDefault(20)),
+                                parameterWithName("direction").description("정렬 방향").optional().attributes(getDefault("DESC"))
                         ),
                         responseFields(
                                 fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),
                                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 댓글 목록"),
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
+                                fieldWithPath("content.[].category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                                fieldWithPath("content.[].community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
+                                fieldWithPath("content.[].parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
+                                fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("content.[].comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
@@ -87,6 +92,10 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
+                                fieldWithPath("category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                                fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
+                                fieldWithPath("parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
@@ -131,6 +140,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
+                                fieldWithPath("category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
                                 fieldWithPath("parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
                                 fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),

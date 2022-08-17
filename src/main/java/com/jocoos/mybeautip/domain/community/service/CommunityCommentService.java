@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
@@ -35,55 +34,34 @@ public class CommunityCommentService {
 
     private final CommunityCommentConverter converter;
 
+    @Transactional(readOnly = true)
+    public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
+        Member member = legacyMemberService.currentMember();
 
-    public List<CommunityCommentResponse> getComments(long communityId) {
-        List<CommunityCommentResponse> result = new ArrayList<>();
+        List<CommunityComment> communityComments = dao.getComments(request);
 
-        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
-                .isLike(true)
-                .isBlock(false)
-                .isReport(false)
-                .build();
-
-        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
-
-        CommunityCommentResponse item = CommunityCommentResponse.builder()
-                .id(1L)
-                .contents("Mock Contents 1")
-                .createdAt(ZonedDateTime.now())
-                .likeCount(10)
-                .commentCount(3)
-                .reportCount(0)
-                .relationInfo(relationInfo)
-                .member(memberResponse)
-                .build();
-
-        result.add(item);
-
-        return result;
+        return getComments(member, communityComments);
     }
 
+    private List<CommunityCommentResponse> getComments(Member member, List<CommunityComment> comments) {
+        List<CommunityCommentResponse> responses = converter.convert(comments);
+        return relationService.setRelationInfo(member, responses);
+    }
+
+    @Transactional
     public CommunityCommentResponse getComment(long communityId, long commentId) {
-        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
-                .isLike(true)
-                .isBlock(false)
-                .isReport(false)
-                .build();
+        Member member = legacyMemberService.currentMember();
 
-        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
+        Community community = communityDao.get(communityId);
+        CommunityComment communityComment = dao.get(commentId);
 
-        CommunityCommentResponse result = CommunityCommentResponse.builder()
-                .id(1L)
-                .contents("Mock Contents 1")
-                .likeCount(10)
-                .commentCount(3)
-                .reportCount(0)
-                .createdAt(ZonedDateTime.now())
-                .relationInfo(relationInfo)
-                .member(memberResponse)
-                .build();
+        CommunityCommentResponse response = converter.convert(communityComment);
 
-        return result;
+        if (community.getCategory().getType() == CommunityCategoryType.BLIND) {
+            communityDao.updateSortedAt(community.getId());
+        }
+
+        return relationService.setRelationInfo(member, community, response);
     }
 
     @Transactional
@@ -93,6 +71,7 @@ public class CommunityCommentService {
         request.setMember(member);
 
         Community community = communityDao.get(request.getCommunityId());
+        request.setCategoryId(community.getCategoryId());
 
         CommunityComment communityComment = dao.write(request);
 

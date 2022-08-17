@@ -24,6 +24,11 @@ public class CommunityCategoryDao {
     }
 
     @Transactional(readOnly = true)
+    public List<CommunityCategory> getCommunityCategory(List<Long> categoryIds) {
+        return repository.findAllByIdIn(categoryIds);
+    }
+
+    @Transactional(readOnly = true)
     public List<CommunityCategory> getCategoryForSearchCommunity(Long communityCategoryId) {
         CommunityCategory category = getCommunityCategory(communityCategoryId);
 
