@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member.comment;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.point.util.ValidObject;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
@@ -81,7 +82,8 @@ public class CommentService {
         } else {
             legacyNotificationService.notifyAddComment(comment);
         }
-        gainWriteActivityPoint(comment.getComment(), comment.getId(), member);
+
+        activityPointService.gainActivityPoint(WRITE_COMMENT, ValidObject.validDomainId(comment.getId(), member));
         return comment;
     }
 
@@ -185,14 +187,5 @@ public class CommentService {
         }
 
         return Comment.CommentState.DELETED.value();
-    }
-
-    private void gainWriteActivityPoint(String comment, Long commentId, Member member) {
-        if (validContentLength(comment))
-            activityPointService.gainActivityPoint(WRITE_COMMENT, commentId, member);
-    }
-
-    private boolean validContentLength(String comment) {
-        return comment != null && comment.length() >= 5;
     }
 }

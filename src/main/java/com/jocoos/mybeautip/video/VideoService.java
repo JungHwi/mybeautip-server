@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.point.util.ValidObject;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -872,7 +873,7 @@ public class VideoService {
 
 
     private void gainLikeActivityPoint(Member me, Long videoLikeId, Video video) {
-        activityPointService.gainActivityPoint(VIDEO_LIKE, videoLikeId, me);
-        activityPointService.gainActivityPoint(GET_LIKE_VIDEO, videoLikeId, video.getMember());
+        activityPointService.gainActivityPoint(VIDEO_LIKE, ValidObject.validDomainId(videoLikeId, me));
+        activityPointService.gainActivityPoint(GET_LIKE_VIDEO, ValidObject.validDomainId(videoLikeId, video.getMember()));
     }
 }

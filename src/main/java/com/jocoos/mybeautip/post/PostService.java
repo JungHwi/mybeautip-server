@@ -150,7 +150,7 @@ public class PostService {
         postLike.setStatus(LIKE);
 
         PostLike savedLike = postLikeRepository.save(postLike);
-        activityPointService.gainActivityPoint(GET_LIKE_POST, savedLike.getId(), post.getCreatedBy());
+        activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY, savedLike.getId(), post.getCreatedBy());
         return savedLike;
     }
 
@@ -310,7 +310,7 @@ public class PostService {
         post.setDeletedAt(new Date());
         postRepository.save(post);
         activityPointService.retrieveActivityPoint(
-                Arrays.asList(WRITE_POST, WRITE_PHOTO_POST),
+                Arrays.asList(WRITE_COMMUNITY, WRITE_PHOTO_COMMUNITY),
                 post.getId(),
                 post.getCreatedBy());
     }
@@ -318,9 +318,9 @@ public class PostService {
     private void gainWriteActivityPoint(Post post, List<String> attachments, Member member) {
         if (validTextLength(post.getDescription())) {
             if (validImageExists(attachments))
-                activityPointService.gainActivityPoint(WRITE_PHOTO_POST, post.getId(), member);
+                activityPointService.gainActivityPoint(WRITE_PHOTO_COMMUNITY, post.getId(), member);
             else
-                activityPointService.gainActivityPoint(WRITE_POST, post.getId(), member);
+                activityPointService.gainActivityPoint(WRITE_COMMUNITY, post.getId(), member);
         }
     }
 

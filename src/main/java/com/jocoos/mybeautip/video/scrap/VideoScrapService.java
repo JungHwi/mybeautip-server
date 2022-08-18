@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.video.scrap;
 
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.point.util.ValidObject;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
@@ -38,7 +39,7 @@ public class VideoScrapService {
             throw new BadRequestException("already_scrap");
         }
         VideoScrap videoScrap = saveScrapVideo(video, member);
-        activityPointService.gainActivityPoint(VIDEO_SCRAP, videoScrap.getId(), member);
+        activityPointService.gainActivityPoint(VIDEO_SCRAP, ValidObject.validDomainId(videoScrap.getId(), member));
         return videoScrap;
     }
 
