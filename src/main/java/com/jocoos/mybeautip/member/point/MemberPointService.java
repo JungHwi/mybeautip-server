@@ -143,6 +143,34 @@ public class MemberPointService {
         memberPointDetailRepository.save(memberPointDetail);
     }
 
+    public void earnPoint(ActivityPointType type, Member member) {
+        member.earnPoint(type.getGivenPoint());
+        memberRepository.save(member);
+
+        Date expiryDate = DateUtils.addDay(DEFAULT_POINT_EXPIRATION_DAY);
+        MemberPoint memberPoint = MemberPoint.builder()
+                .member(member)
+                .activityType(type)
+                .point(type.getGivenPoint())
+                .state(STATE_EARNED_POINT)
+                .earnedAt(new Date())
+                .expiryAt(expiryDate)
+                .remind(true)
+                .build();
+        memberPointRepository.save(memberPoint);
+
+        MemberPointDetail memberPointDetail = MemberPointDetail.builder()
+                .memberId(member.getId())
+                .activityType(type)
+                .parentId(memberPoint.getId())
+                .memberPointId(memberPoint.getId())
+                .point(memberPoint.getPoint())
+                .state(STATE_EARNED_POINT)
+                .expiryAt(expiryDate)
+                .build();
+        memberPointDetailRepository.save(memberPointDetail);
+    }
+
     public void usePoints(Event event, Member member) {
         if (event.getNeedPoint() <= 0) {
             return;
