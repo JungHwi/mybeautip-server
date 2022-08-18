@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.domain.community.service;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
-import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentLike;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentReport;
@@ -33,18 +32,19 @@ public class CommunityCommentRelationService {
     private final MemberBlockDao blockDao;
 
     @Transactional(readOnly = true)
-    public CommunityCommentResponse setRelationInfo(Member member, Community community, CommunityCommentResponse communityCommentResponse) {
+    public CommunityCommentResponse setRelationInfo(Member member, CommunityCommentResponse communityCommentResponse) {
+        CommunityCategory category = categoryDao.getCommunityCategory(communityCommentResponse.getCategoryId());
         if (member == null) {
-            return communityCommentResponse.setRelationInfo(new CommunityRelationInfo(), community.getCategory().getType());
+            return communityCommentResponse.setRelationInfo(new CommunityRelationInfo(), category.getType());
         }
 
         CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
                 .isLike(likeDao.isLike(member.getId(), communityCommentResponse.getId()))
                 .isReport(reportDao.isReport(member.getId(), communityCommentResponse.getId()))
-                .isBlock(community.getCategory().getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), communityCommentResponse.getMember().getId()))
+                .isBlock(category.getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), communityCommentResponse.getMember().getId()))
                 .build();
 
-        return communityCommentResponse.setRelationInfo(member, relationInfo, community.getCategory().getType());
+        return communityCommentResponse.setRelationInfo(member, relationInfo, category.getType());
     }
 
     @Transactional(readOnly = true)

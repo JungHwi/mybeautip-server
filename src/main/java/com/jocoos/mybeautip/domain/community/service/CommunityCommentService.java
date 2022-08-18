@@ -7,8 +7,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
-import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
-import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
@@ -17,10 +16,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
 import java.util.List;
-
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +49,7 @@ public class CommunityCommentService {
         Member member = legacyMemberService.currentMember();
 
         Community community = communityDao.get(communityId);
-        CommunityComment communityComment = dao.get(commentId);
+        CommunityComment communityComment = dao.get(communityId, commentId);
 
         CommunityCommentResponse response = converter.convert(communityComment);
 
@@ -61,7 +57,7 @@ public class CommunityCommentService {
             communityDao.updateSortedAt(community.getId());
         }
 
-        return relationService.setRelationInfo(member, community, response);
+        return relationService.setRelationInfo(member, response);
     }
 
     @Transactional
@@ -81,7 +77,7 @@ public class CommunityCommentService {
             communityDao.updateSortedAt(community.getId());
         }
 
-        return relationService.setRelationInfo(member, community, response);
+        return relationService.setRelationInfo(member, response);
     }
 
     @Transactional(readOnly = true)
@@ -99,31 +95,35 @@ public class CommunityCommentService {
         }
     }
 
-    public CommunityCommentResponse edit(long communityId, long commentId, WriteCommunityCommentRequest request) {
-        CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
-                .isLike(true)
-                .isBlock(false)
-                .isReport(false)
-                .build();
+    @Transactional
+    public CommunityCommentResponse edit(EditCommunityCommentRequest request) {
+        Member member = legacyMemberService.currentMember();
+        CommunityComment communityComment = dao.get(request.getCommunityId(), request.getCommentId());
 
-        CommunityMemberResponse memberResponse = new CommunityMemberResponse(100L, MemberStatus.ACTIVE, "MockMember", DEFAULT_AVATAR_URL);
+        if (!communityComment.getMember().getId().equals(member.getId())) {
+            throw new AccessDeniedException("access_denied", "This is not yours.");
+        }
 
-        CommunityCommentResponse result = CommunityCommentResponse.builder()
-                .id(1L)
-                .contents("Mock Contents 1")
-                .likeCount(10)
-                .commentCount(2)
-                .reportCount(0)
-                .createdAt(ZonedDateTime.now())
-                .relationInfo(relationInfo)
-                .member(memberResponse)
-                .build();
+        communityComment.setContents(request.getContents());
 
-        return result;
+        return getComment(member, communityComment);
     }
 
+    private CommunityCommentResponse getComment(Member member, CommunityComment communityComment) {
+        CommunityCommentResponse response = converter.convert(communityComment);
+        return relationService.setRelationInfo(member, response);
+    }
+
+    @Transactional
     public void delete(long communityId, long commentId) {
-        return;
+        Member member = legacyMemberService.currentMember();
+        CommunityComment communityComment = dao.get(communityId, commentId);
+
+        if (!communityComment.getMember().getId().equals(member.getId())) {
+            throw new AccessDeniedException("access_denied", "This is not yours.");
+        }
+
+        communityComment.delete();
     }
 
     public LikeResponse like(long communityId, long commentId, boolean isLike) {
