@@ -20,6 +20,7 @@ import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,7 +84,7 @@ public class CommunityService {
         if (categories.size() == 1) {
             CommunityCategory category = categories.get(0);
             if (category.getType() == CommunityCategoryType.DRIP) {
-                if (request.getEventId() == null || request.getEventId() < 1) {
+                if (request.getEventId() == null || request.getEventId() < NumberUtils.LONG_ONE) {
                     throw new BadRequestException("need_event_info", "event_id is required to search DRIP category.");
                 }
                 if (request.isFirstSearch()) {
@@ -132,9 +133,7 @@ public class CommunityService {
         community.setContents(request.getContents());
         editFiles(community, request.getFiles());
 
-        CommunityResponse result = getCommunity(community.getMember(), community);
-
-        return result;
+        return getCommunity(community.getMember(), community);
     }
 
     @Transactional

@@ -187,6 +187,10 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 ID"),
+                                fieldWithPath("category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                                fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
+                                fieldWithPath("parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),

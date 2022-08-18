@@ -59,9 +59,11 @@ public class CommunityCommentController {
     @PutMapping("/1/community/{community_id}/comment/{comment_id}")
     public ResponseEntity<CommunityCommentResponse> editComment(@PathVariable("community_id") long communityId,
                                                                 @PathVariable("comment_id") long commentId,
-                                                                @RequestBody WriteCommunityCommentRequest request) {
+                                                                @RequestBody EditCommunityCommentRequest request) {
+        request.setCommunityId(communityId);
+        request.setCommentId(commentId);
 
-        return ResponseEntity.ok(communityCommentService.edit(communityId, commentId, request));
+        return ResponseEntity.ok(communityCommentService.edit(request));
     }
 
     @DeleteMapping("/1/community/{community_id}/comment/{comment_id}")
