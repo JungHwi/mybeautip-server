@@ -18,6 +18,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AwsS3Service {
@@ -26,6 +27,12 @@ public class AwsS3Service {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
+
+    @Value("${mybeautip.aws.s3.connection-timeout-ms}")
+    private int connectionTimeout;
+
+    @Value("${mybeautip.aws.s3.read-timeout-ms}")
+    private int readTimeout;
 
     public String upload(MultipartFile file, String key) {
         AmazonS3 s3Client = credentialService.getS3Client();
@@ -109,8 +116,8 @@ public class AwsS3Service {
     private HttpURLConnection getHeadHttpURLConnection(URL url) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("HEAD");
-        conn.setConnectTimeout(100);
-        conn.setReadTimeout(1000);
+        conn.setConnectTimeout(this.connectionTimeout);
+        conn.setReadTimeout(this.readTimeout);
         return conn;
     }
 
