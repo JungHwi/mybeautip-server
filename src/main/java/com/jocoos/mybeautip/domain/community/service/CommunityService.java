@@ -16,6 +16,7 @@ import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -33,6 +35,7 @@ public class CommunityService {
 
     private final CommunityRelationService relationService;
     private final EventJoinService eventJoinService;
+    private final LegacyMemberService legacyMemberService;
 
     private final CommunityCategoryDao categoryDao;
     private final CommunityDao communityDao;
@@ -68,10 +71,14 @@ public class CommunityService {
         return relationService.setRelationInfo(member, response);
     }
 
+    @Transactional(readOnly = true)
     public List<CommunityResponse> getCommunities(SearchCommunityRequest request, Pageable pageable) {
+        Member member = legacyMemberService.currentMember();
+        request.setMember(member);
+
         // FIXME Dynamic Query to QueryDSL
         List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
-        List<Community> communityList;
+        List<Community> communityList = new ArrayList<>();
 
         if (categories.size() == 1) {
             CommunityCategory category = categories.get(0);
@@ -79,7 +86,10 @@ public class CommunityService {
                 if (request.getEventId() == null || request.getEventId() < 1) {
                     throw new BadRequestException("need_event_info", "event_id is required to search DRIP category.");
                 }
-                communityList = communityDao.getCommunityForEvent(request.getEventId(), categories, request.getCursor(), pageable);
+                if (request.isFirstSearch()) {
+                    communityList = communityDao.getCommunityForEvent(request.getEventId(), categories, true, request.getCursor(), pageable);
+                }
+                communityList.addAll(communityDao.getCommunityForEvent(request.getEventId(), categories, null, request.getCursor(), pageable));
             } else {
                 communityList = communityDao.get(categories, request.getCursor(), pageable);
             }

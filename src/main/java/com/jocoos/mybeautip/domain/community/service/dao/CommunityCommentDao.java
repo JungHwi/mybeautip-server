@@ -36,18 +36,10 @@ public class CommunityCommentDao {
 
         switch (direction) {
             case ASC:
-                if (request.getParentId() == null) {
-                    result = repository.findByCommunityIdAndIdGreaterThan(request.getCommunityId(), request.getCursor(), request.getPageable());
-                } else {
-                    result = repository.findByCommunityIdAndParentIdAndIdGreaterThan(request.getCommunityId(), request.getParentId(), request.getCursor(), request.getPageable());
-                }
+                result = repository.findByCommunityIdAndParentIdAndIdGreaterThan(request.getCommunityId(), request.getParentId(), request.getCursor(), request.getPageable());
                 break;
             case DESC:
-                if (request.getParentId() == null) {
-                    result = repository.findByCommunityIdAndIdLessThan(request.getCommunityId(), request.getCursor(), request.getPageable());
-                } else {
-                    result = repository.findByCommunityIdAndParentIdAndIdLessThan(request.getCommunityId(), request.getParentId(), request.getCursor(), request.getPageable());
-                }
+                result = repository.findByCommunityIdAndParentIdAndIdLessThan(request.getCommunityId(), request.getParentId(), request.getCursor(), request.getPageable());
         }
 
         return result.getContent();

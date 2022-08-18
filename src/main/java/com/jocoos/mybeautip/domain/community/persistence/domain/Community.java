@@ -35,6 +35,9 @@ public class Community extends ModifiedAtBaseEntity {
     @Column
     private Long eventId;
 
+    @Column
+    private Boolean isWin;
+
     @Column(name = "member_id")
     private Long memberId;
 
@@ -60,7 +63,7 @@ public class Community extends ModifiedAtBaseEntity {
     @Column
     private int reportCount;
 
-    @Column
+    @Column(columnDefinition = "DATETIME(3)")
     private ZonedDateTime sortedAt;
 
     @OneToMany(mappedBy = "community", cascade = {CascadeType.ALL}, orphanRemoval = true)

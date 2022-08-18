@@ -54,8 +54,9 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable) {
-        return repository.findByEventIdAndCategoryInAndSortedAtLessThan(eventId, categoryList, cursor, pageable);
+    public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, Boolean isWin,  ZonedDateTime cursor, Pageable pageable) {
+
+        return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable);
     }
 
     @Transactional()

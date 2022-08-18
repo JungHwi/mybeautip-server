@@ -16,7 +16,7 @@ import java.util.List;
 public interface CommunityRepository extends DefaultJpaRepository<Community, Long> {
 
     List<Community> findByCategoryInAndSortedAtLessThan(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable);
-    List<Community> findByEventIdAndCategoryInAndSortedAtLessThan(Long EventId, List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable);
+    List<Community> findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(Long EventId, List<CommunityCategory> categoryList, Boolean isWin, ZonedDateTime cursor, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Community community SET community.viewCount = community.viewCount + 1 WHERE community.id = :communityId")

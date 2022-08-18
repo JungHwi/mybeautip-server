@@ -23,6 +23,7 @@ public interface CommunityConverter {
     @Mappings({
             @Mapping(target = "memberId", source = "member.id"),
             @Mapping(target = "id", ignore = true),
+            @Mapping(target = "isWin", ignore = true),
             @Mapping(target = "status", constant = "NORMAL"),
             @Mapping(target = "viewCount", ignore = true),
             @Mapping(target = "likeCount", ignore = true),

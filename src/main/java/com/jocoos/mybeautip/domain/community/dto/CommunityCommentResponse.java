@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
+import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 
 import java.time.ZonedDateTime;
@@ -52,6 +53,10 @@ public class CommunityCommentResponse implements CursorInterface {
     }
 
     public CommunityCommentResponse setRelationInfo(CommunityRelationInfo relationInfo, CommunityCategoryType categoryType) {
+        return setRelationInfo(null, relationInfo, categoryType);
+    }
+
+    public CommunityCommentResponse setRelationInfo(Member member, CommunityRelationInfo relationInfo, CommunityCategoryType categoryType) {
         this.relationInfo = relationInfo;
 
         // FIXME 관계나 상태에 따라 Title / Contents 변경. 어디다 치워 버리고 싶다.
@@ -69,7 +74,7 @@ public class CommunityCommentResponse implements CursorInterface {
             return this;
         }
 
-        if (categoryType == CommunityCategoryType.BLIND) {
+        if (categoryType == CommunityCategoryType.BLIND && (member == null || !this.member.getId().equals(member.getId()))) {
             this.member = null;
         }
 

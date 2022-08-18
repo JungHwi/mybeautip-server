@@ -12,10 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommunityCommentRepository extends DefaultJpaRepository<CommunityComment, Long> {
 
-    Slice<CommunityComment> findByCommunityIdAndIdGreaterThan(long communityId, long cursor, Pageable pageable);
-    Slice<CommunityComment> findByCommunityIdAndParentIdAndIdGreaterThan(long communityId, long parentId, long cursor, Pageable pageable);
-    Slice<CommunityComment> findByCommunityIdAndIdLessThan(long communityId, long cursor, Pageable pageable);
-    Slice<CommunityComment> findByCommunityIdAndParentIdAndIdLessThan(long communityId, long parentId, long cursor, Pageable pageable);
+    Slice<CommunityComment> findByCommunityIdAndParentIdAndIdGreaterThan(long communityId, Long parentId, long cursor, Pageable pageable);
+    Slice<CommunityComment> findByCommunityIdAndParentIdAndIdLessThan(long communityId, Long parentId, long cursor, Pageable pageable);
 
     @Modifying
     @Query("UPDATE CommunityComment comment SET comment.likeCount = comment.likeCount + :count WHERE comment.id = :commentId")

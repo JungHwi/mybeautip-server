@@ -17,8 +17,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
-import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -56,6 +55,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
@@ -117,13 +117,14 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         requestParameters(
                                 parameterWithName("category_id").description("카테고리 아이디").optional(),
                                 parameterWithName("event_id").description("이벤트 아이디. Drip Category 일때만 필수.").optional(),
-                                parameterWithName("cursor").description("커서").optional().attributes(getZonedDateFormat(), getDefault("현재 시간")),
+                                parameterWithName("cursor").description("커서").optional().attributes(getZonedDateMilliFormat(), getDefault("현재 시간")),
                                 parameterWithName("size").description("").optional().attributes(getDefault(20))
                         ),
                         responseFields(
-                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),
+                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보").attributes(getZonedDateMilliFormat()),
                                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 글 목록"),
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
+                                fieldWithPath("content.[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                                 fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
@@ -167,6 +168,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
@@ -224,6 +226,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),

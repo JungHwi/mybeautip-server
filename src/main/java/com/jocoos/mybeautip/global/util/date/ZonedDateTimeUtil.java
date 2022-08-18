@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.global.util;
+package com.jocoos.mybeautip.global.util.date;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -6,6 +6,16 @@ import java.time.format.DateTimeFormatter;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 public class ZonedDateTimeUtil {
+
+    public static boolean isZonedDateTime(String dateTime) {
+        return isZonedDateTime(dateTime, ZONE_DATE_TIME_FORMAT);
+    }
+
+    public static boolean isZonedDateTime(String dateTime, String format) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        DateValidatorUsingFormatter validator = new DateValidatorUsingFormatter(formatter);
+        return validator.isValid(dateTime);
+    }
 
     public static String toString(ZonedDateTime zonedDateTime) {
         return toString(zonedDateTime, ZONE_DATE_TIME_FORMAT);
@@ -24,4 +34,6 @@ public class ZonedDateTimeUtil {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         return ZonedDateTime.parse(dateTime, formatter);
     }
+
+
 }

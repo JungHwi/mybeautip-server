@@ -6,14 +6,16 @@ import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.global.util.ZonedDateTimeUtil;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
+import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
 @Getter
 @Setter
@@ -23,6 +25,8 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 public class CommunityResponse implements CursorInterface {
 
     private Long id;
+
+    private Boolean isWin;
 
     private CommunityStatus status;
 
@@ -55,10 +59,14 @@ public class CommunityResponse implements CursorInterface {
     @Override
     @JsonIgnore
     public String getCursor() {
-        return ZonedDateTimeUtil.toString(sortedAt);
+        return ZonedDateTimeUtil.toString(sortedAt, ZONE_DATE_TIME_MILLI_FORMAT);
     }
 
     public CommunityResponse setRelationInfo(CommunityRelationInfo relationInfo) {
+        return setRelationInfo(null, relationInfo);
+    }
+
+    public CommunityResponse setRelationInfo(Member member, CommunityRelationInfo relationInfo) {
         this.relationInfo = relationInfo;
 
         // FIXME 관계나 상태에 따라 Title / Contents 변경. 어디다 치워 버리고 싶다.
@@ -81,7 +89,7 @@ public class CommunityResponse implements CursorInterface {
             }
         }
 
-        if (this.category.getType() == CommunityCategoryType.BLIND) {
+        if (this.category.getType() == CommunityCategoryType.BLIND && (member == null || !this.member.getId().equals(member.getId()))) {
             this.member = null;
         }
 

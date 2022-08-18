@@ -47,16 +47,21 @@ public class CommunityController {
     @GetMapping(value = "/1/community")
     public ResponseEntity<CursorResultResponse<CommunityResponse>> getCommunities(@RequestParam(required = false, defaultValue = "1", name = "category_id") Long categoryId,
                                                                                   @RequestParam(required = false, name = "event_id") Long eventId,
-                                                                                  @RequestParam(required = false, defaultValue = "#{T(java.time.ZonedDateTime).now()}") ZonedDateTime cursor,
+                                                                                  @RequestParam(required = false) ZonedDateTime cursor,
                                                                                   @RequestParam(required = false, defaultValue = "20") int size) {
 
-        Member member = legacyMemberService.currentMember();
+
+        boolean isFirstSearch = false;
+        if (cursor == null) {
+            cursor = ZonedDateTime.now();
+            isFirstSearch = true;
+        }
 
         SearchCommunityRequest request = SearchCommunityRequest.builder()
-                .member(member)
                 .categoryId(categoryId)
                 .eventId(eventId)
                 .cursor(cursor)
+                .isFirstSearch(isFirstSearch)
                 .build();
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "sortedAt"));

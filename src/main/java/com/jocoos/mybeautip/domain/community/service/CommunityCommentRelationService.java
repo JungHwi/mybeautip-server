@@ -44,7 +44,7 @@ public class CommunityCommentRelationService {
                 .isBlock(community.getCategory().getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), communityCommentResponse.getMember().getId()))
                 .build();
 
-        return communityCommentResponse.setRelationInfo(relationInfo, community.getCategory().getType());
+        return communityCommentResponse.setRelationInfo(member, relationInfo, community.getCategory().getType());
     }
 
     @Transactional(readOnly = true)
@@ -83,7 +83,7 @@ public class CommunityCommentRelationService {
                     .isBlock(categoryTypeMap.get(communityCommentResponse.getId()) != CommunityCategoryType.BLIND && blockMap.containsKey(communityCommentResponse.getMember().getId()))
                     .build();
 
-            communityCommentResponse.setRelationInfo(relationInfo, categoryTypeMap.get(communityCommentResponse.getId()));
+            communityCommentResponse.setRelationInfo(member, relationInfo, categoryTypeMap.get(communityCommentResponse.getId()));
         }
 
         return communityCommentResponses;
