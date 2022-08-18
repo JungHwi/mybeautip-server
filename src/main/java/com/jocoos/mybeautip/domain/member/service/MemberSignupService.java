@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.domain.member.service;
 
+import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
+import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
+import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
@@ -19,11 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Set;
 
+import static com.jocoos.mybeautip.domain.term.code.TermTypeGroup.isAllRequiredContains;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_FILE_NAME;
 
 @Slf4j
@@ -44,12 +50,16 @@ public class MemberSignupService {
     private final KakaoMemberRepository kakaoMemberRepository;
     private final MemberTermService memberTermService;
 
+    private final AwsS3Handler awsS3Handler;
+
     @Value("${mybeautip.service.member.rejoin-available-second}")
     private long REJOIN_AVAILABLE_SECOND;
 
     @Transactional
     public MemberEntireInfo signup(SignupRequest request) {
         validSignup(request);
+
+        savaAndSetAvatarUrlIfExists(request);
 
         Member member = legacyMemberService.register(request);
 
@@ -83,6 +93,8 @@ public class MemberSignupService {
     }
 
     private void validSignup(SignupRequest signupRequest) {
+        validAllRequiredTermsExist(signupRequest.getTermTypes());
+
         SocialMemberService socialMemberService = socialMemberFactory.getSocialMemberService(signupRequest.getGrantType());
 
         SocialMember socialMember = socialMemberService.findById(signupRequest.getSocialId());
@@ -104,6 +116,19 @@ public class MemberSignupService {
                 if (availableRejoin.isAfter(LocalDateTime.now())) {
                     throw new BadRequestException("not_yet_rejoin", "not_yet_rejoin");
                 }
+        }
+    }
+
+    private void validAllRequiredTermsExist(Set<TermType> termTypes) {
+        if (!isAllRequiredContains(termTypes)) {
+            throw new BadRequestException("required terms have to all check");
+        }
+    }
+
+    private void savaAndSetAvatarUrlIfExists(SignupRequest request) {
+        if (StringUtils.hasText(request.getAvatarUrl())) {
+            String uploadAvatarUrl = awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory());
+            request.changeAvatarUrl(uploadAvatarUrl);
         }
     }
 }

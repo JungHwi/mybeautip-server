@@ -21,7 +21,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.jocoos.mybeautip.domain.term.code.TermTypeGroup.validAllRequiredContains;
 import static com.jocoos.mybeautip.domain.term.code.TermTypeGroup.validTypeOptional;
 import static com.jocoos.mybeautip.global.util.CollectionConvertUtil.toMap;
 
@@ -166,7 +165,6 @@ public class MemberTermService {
 
     @Transactional
     public void chooseTermsByTermType(Set<TermType> requestTermTypes, Member member) {
-        validAllRequiredContains(requestTermTypes);
         List<Term> terms = termService.getTermsByType(requestTermTypes);
 
         Map<TermType, Term> termMap = toMap(terms, Term::getType);

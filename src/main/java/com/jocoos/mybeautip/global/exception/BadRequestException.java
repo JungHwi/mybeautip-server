@@ -24,6 +24,10 @@ public class BadRequestException extends MybeautipException {
         this.description = createErrorDescription(error);
     }
 
+    public BadRequestException(String message, Throwable e) {
+        super(message, e);
+    }
+
     private String createErrorDescription(FieldError error) {
         return String.format("%s %s", error.getField(), error.getDefaultMessage());
     }

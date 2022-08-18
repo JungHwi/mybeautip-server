@@ -77,7 +77,7 @@ public class SocialLoginService {
         }
 
         member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
-                .orElse(socialMemberRequest.toMember());
+                .orElseThrow(() -> new MemberNotFoundException("No such member, request signup"));
 
         return member;
     }

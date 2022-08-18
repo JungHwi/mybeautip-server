@@ -35,4 +35,8 @@ public class SignupRequest {
     public int hashCode() {
         return Objects.hash(socialId);
     }
+
+    public void changeAvatarUrl(String uploadAvatarUrl) {
+        this.avatarUrl = uploadAvatarUrl;
+    }
 }

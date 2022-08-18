@@ -22,9 +22,8 @@ public enum TermTypeGroup implements CodeValue {
     private final String description;
     private final Set<TermType> types;
 
-    public static void validAllRequiredContains(Set<TermType> types) {
-        if (!types.containsAll(TermTypeGroup.REQUIRED.getTypes()))
-                throw new BadRequestException("required terms have to all check");
+    public static boolean isAllRequiredContains(Set<TermType> types) {
+        return types.containsAll(TermTypeGroup.REQUIRED.getTypes());
     }
 
     public static void validTypeOptional(TermType type) {
