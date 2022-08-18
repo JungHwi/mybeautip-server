@@ -33,6 +33,10 @@ public class SocialMemberRequest {
         return member;
     }
 
+    public void changePictureUrl(String uploadAvatarUrl) {
+        this.picture = uploadAvatarUrl;
+    }
+
     private int getLinkType() {
         switch (provider) {
             case "kakao":

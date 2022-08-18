@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
+import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.member.*;
@@ -9,12 +11,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SocialLoginService {
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final AwsS3Handler awsS3Handler;
     private final MemberRepository memberRepository;
     private final KakaoMemberRepository kakaoMemberRepository;
     private final NaverMemberRepository naverMemberRepository;
@@ -76,8 +82,16 @@ public class SocialLoginService {
                 throw new MybeautipException("Unsupported provider type");
         }
 
-        member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
-                .orElse(socialMemberRequest.toMember());
+        Optional<Member> memberOptional = memberRepository.findByIdAndDeletedAtIsNull(memberId);
+
+        if (memberOptional.isPresent()) {
+            member = memberOptional.get();
+        } else {
+            String uploadAvatarUrl =
+                    awsS3Handler.upload(socialMemberRequest.getPicture(), UrlDirectory.AVATAR.getDirectory());
+            socialMemberRequest.changePictureUrl(uploadAvatarUrl);
+            member = socialMemberRequest.toMember();
+        }
 
         return member;
     }
