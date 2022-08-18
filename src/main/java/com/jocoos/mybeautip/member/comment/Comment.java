@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -67,6 +68,10 @@ public class Comment extends MemberAuditable {
 
     public CommentState getCommentState() {
         return CommentState.BLINDED.getType(this.state);
+    }
+
+    public boolean isCommentSameOrLongerThan(int length) {
+        return StringUtils.trimAllWhitespace(this.comment).length() >= length;
     }
 
     public enum CommentState {
