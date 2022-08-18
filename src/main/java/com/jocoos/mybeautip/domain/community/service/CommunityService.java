@@ -6,7 +6,6 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
-import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
@@ -154,24 +153,20 @@ public class CommunityService {
 
         Community community = communityDao.get(communityId);
 
-        communityDao.readCount(communityId);
-
         return ReportResponse.builder()
                 .isReport(reportRequest.getIsReport())
                 .reportCount(community.getReportCount())
                 .build();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ReportResponse isReport(long memberId, long communityId) {
-        CommunityReport communityReport = reportDao.getReport(memberId, communityId);
+        boolean isReport = reportDao.isReport(memberId, communityId);
 
         Community community = communityDao.get(communityId);
 
-        communityDao.readCount(communityId);
-
         return ReportResponse.builder()
-                .isReport(communityReport.isReport())
+                .isReport(isReport)
                 .reportCount(community.getReportCount())
                 .build();
     }

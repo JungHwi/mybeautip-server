@@ -79,16 +79,25 @@ public class CommunityCommentController {
                                                     @PathVariable("comment_id") long commentId,
                                                     @RequestBody BooleanDto isLike) {
 
-        LikeResponse result = communityCommentService.like(communityId, commentId, isLike.isBool());
+        LikeResponse result = communityCommentService.like(commentId, isLike.isBool());
         return ResponseEntity.ok(result);
     }
 
     @PatchMapping("/1/community/{community_id}/comment/{comment_id}/report")
-    public ResponseEntity reportComment(@PathVariable("community_id") long communityId,
-                                        @PathVariable("comment_id") long commentId,
-                                        @RequestBody ReportRequest report) {
+    public ResponseEntity<ReportResponse> reportComment(@PathVariable("community_id") long communityId,
+                                                        @PathVariable("comment_id") long commentId,
+                                                        @RequestBody ReportRequest report) {
 
-        communityCommentService.report(communityId, commentId, report);
-        return new ResponseEntity(HttpStatus.OK);
+        ReportResponse result = communityCommentService.report(commentId, report);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = "/1/community/{community_id}/comment/{comment_id}/report")
+    public ResponseEntity<ReportResponse> isReportCommunity(@PathVariable("community_id") String communityId,
+                                                            @PathVariable(name = "comment_id") long commentId) {
+        ReportResponse result = communityCommentService.isReport(commentId);
+
+        return ResponseEntity.ok(result);
     }
 }
