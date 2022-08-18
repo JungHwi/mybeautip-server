@@ -14,4 +14,8 @@ public class MybeautipException extends RuntimeException {
         super(message);
         this.description = description;
     }
+
+    public MybeautipException(String message, Throwable e) {
+        super(message, e);
+    }
 }

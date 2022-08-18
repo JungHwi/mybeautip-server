@@ -1,15 +1,22 @@
 package com.jocoos.mybeautip.client.aws.s3;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.jocoos.mybeautip.global.config.aws.AwsCredentialService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Component
 @RequiredArgsConstructor
@@ -43,6 +50,33 @@ public class AwsS3Service {
         return key;
     }
 
+    public String upload(String urlString, String key) {
+        try {
+            AmazonS3 s3Client = credentialService.getS3Client();
+
+            URL url = new URL(urlString);
+            HttpURLConnection conn = getHeadHttpURLConnection(url);
+
+            ObjectMetadata metadata = getMetadata(conn.getContentLengthLong(), conn.getContentType());
+
+            InputStream inputStream = url.openStream();
+            PutObjectRequest request = getPutObjectRequest(key, inputStream, metadata);
+            s3Client.putObject(request);
+
+            closeConnection(conn, inputStream);
+            return key;
+        } catch (MalformedURLException e) {
+            throw new BadRequestException("wrong url : " + urlString, e);
+        } catch (IOException e) {
+            //TODO Exception 정의
+            throw new RuntimeException("File Upload ERROR", e);
+        } catch (AmazonServiceException e) {
+            throw new RuntimeException("AWS S3 ERROR!! - UPLOAD" , e);
+        } catch (SdkClientException e) {
+            throw new RuntimeException("sdk client exception - upload" , e);
+        }
+    }
+
     public String copy(String sourceKey, String destinationKey) {
         CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
         copyObjectRequest.withCannedAccessControlList(CannedAccessControlList.PublicRead);
@@ -70,5 +104,31 @@ public class AwsS3Service {
         }
 
         return copyObjectRequest.getDestinationKey();
+    }
+
+    private HttpURLConnection getHeadHttpURLConnection(URL url) throws IOException {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("HEAD");
+        conn.setConnectTimeout(100);
+        conn.setReadTimeout(1000);
+        return conn;
+    }
+
+    private ObjectMetadata getMetadata(Long contentLength, String contentType) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(contentLength);
+        metadata.setContentType(contentType);
+        return metadata;
+    }
+
+    private PutObjectRequest getPutObjectRequest(String key, InputStream inputStream, ObjectMetadata metadata) {
+        PutObjectRequest request = new PutObjectRequest(bucketName, key, inputStream, metadata);
+        request.setCannedAcl(CannedAccessControlList.PublicRead);
+        return request;
+    }
+
+    private void closeConnection(HttpURLConnection conn, InputStream inputStream) throws IOException {
+        inputStream.close();
+        conn.disconnect();
     }
 }

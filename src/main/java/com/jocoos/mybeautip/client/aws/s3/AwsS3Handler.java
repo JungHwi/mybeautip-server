@@ -44,6 +44,12 @@ public class AwsS3Handler {
         return cloudFront + path;
     }
 
+    public String upload(String url, String directory) {
+        String filename = RandomUtils.generateFilename();
+        String path = service.upload(url, directory + filename);
+        return cloudFront + path;
+    }
+
     public String copy(FileDto fileDto, String destination) {
         if (fileDto.getOperation() == FileOperationType.DELETE) {
             return "";
