@@ -2,11 +2,13 @@ package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.global.config.jpa.ModifiedAtBaseEntity;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 
@@ -57,5 +59,21 @@ public class CommunityComment extends ModifiedAtBaseEntity {
     public CommunityComment delete() {
         this.status = CommunityStatus.DELETE;
         return this;
+    }
+
+    public void setContents(String contents) {
+        validContents(contents);
+
+        this.contents = contents;
+    }
+
+    public void valid() {
+        validContents(this.contents);
+    }
+
+    private void validContents(String contents) {
+        if (StringUtils.isBlank(contents) || contents.length() < 5) {
+            throw new BadRequestException("not_enough_contents", "Content length must be at least 5.");
+        }
     }
 }

@@ -6,6 +6,8 @@ import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -26,6 +28,8 @@ public class CommunityCommentService {
 
     private final CommunityDao communityDao;
     private final CommunityCommentDao dao;
+    private final CommunityCommentLikeDao likeDao;
+    private final CommunityCommentReportDao reportDao;
     private final LegacyMemberService legacyMemberService;
 
     private final CommunityCommentConverter converter;
@@ -126,14 +130,44 @@ public class CommunityCommentService {
         communityComment.delete();
     }
 
-    public LikeResponse like(long communityId, long commentId, boolean isLike) {
+    @Transactional
+    public LikeResponse like(long commentId, boolean isLike) {
+        long memberId = legacyMemberService.currentMemberId();
+        likeDao.like(memberId, commentId, isLike);
+
+        CommunityComment comment = dao.get(commentId);
+
         return LikeResponse.builder()
                 .isLike(isLike)
-                .likeCount(10)
+                .likeCount(comment.getLikeCount())
                 .build();
     }
 
-    public void report(long communityId, long commentId, ReportRequest report) {
-        return;
+    @Transactional
+    public ReportResponse report(long commentId, ReportRequest report) {
+        long memberId = legacyMemberService.currentMemberId();
+
+        reportDao.report(memberId, commentId, report);
+
+        CommunityComment comment = dao.get(commentId);
+
+        return ReportResponse.builder()
+                .isReport(report.getIsReport())
+                .reportCount(comment.getReportCount())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public ReportResponse isReport(long commentId) {
+        Long memberId = legacyMemberService.currentMemberId();
+
+        boolean isReport = reportDao.isReport(memberId, commentId);
+
+        CommunityComment comment = dao.get(commentId);
+
+        return ReportResponse.builder()
+                .isReport(isReport)
+                .reportCount(comment.getReportCount())
+                .build();
     }
 }

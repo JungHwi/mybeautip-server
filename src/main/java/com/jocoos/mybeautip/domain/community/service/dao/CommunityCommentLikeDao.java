@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityCommentLikeDao {
 
-    private final CommunityCommentDao communityDao;
+    private final CommunityCommentDao dao;
     private final CommunityCommentLikeRepository repository;
 
     @Transactional
@@ -27,7 +27,7 @@ public class CommunityCommentLikeDao {
 
         communityCommentLike.setLike(isLike);
 
-        communityDao.likeCount(commentId, isLike ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_MINUS_ONE);
+        dao.likeCount(commentId, isLike ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_MINUS_ONE);
 
         return repository.save(communityCommentLike);
     }

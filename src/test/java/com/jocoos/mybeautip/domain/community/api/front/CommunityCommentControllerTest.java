@@ -213,6 +213,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
     }
 
     @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void deleteComment() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .delete("/api/1/community/{community_id}/comment/{comment_id}", 1, 1)
@@ -257,6 +258,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
     }
 
     @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void reportComment() throws Exception {
         ReportRequest report = ReportRequest.builder()
                 .isReport(true)
@@ -278,6 +280,41 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                 requestFields(
                         fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
                         fieldWithPath("description").type(JsonFieldType.STRING).description("신고 사유. 신고여부가 true 일때만 필수").optional()
+                ),
+                responseFields(
+                        fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
+                        fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수")
+                ))
+        );
+    }
+
+    @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void isReportComment() throws Exception {
+        ReportRequest report = ReportRequest.builder()
+                .isReport(true)
+                .description("신고사유")
+                .build();
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/api/1/community/{community_id}/comment/{comment_id}/report", 1, 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(report)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("check_report_community_comment",
+                pathParameters(
+                        parameterWithName("community_id").description("글 ID"),
+                        parameterWithName("comment_id").description("댓글 ID")
+                ),
+                requestFields(
+                        fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
+                        fieldWithPath("description").type(JsonFieldType.STRING).description("신고 사유. 신고여부가 true 일때만 필수").optional()
+                ),
+                responseFields(
+                        fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
+                        fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수")
                 ))
         );
     }

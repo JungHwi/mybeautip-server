@@ -77,6 +77,11 @@ public class CommunityResponse implements CursorInterface {
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             }
+        } else if (relationInfo.getIsReport()) {
+            this.contents = "신고 접수 된 글이에요.";
+            if (this.category.getType() == CommunityCategoryType.BLIND) {
+                this.title = "신고 접수 된 글이에요.";
+            }
         } else if (this.member.getStatus() == MemberStatus.WITHDRAWAL) {
             this.contents = "탈퇴한 사용자의 글이에요.";
             if (this.category.getType() == CommunityCategoryType.BLIND) {
