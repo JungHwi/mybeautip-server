@@ -1,58 +1,48 @@
 package com.jocoos.mybeautip.domain.point.code;
 
-import com.jocoos.mybeautip.domain.point.util.DateRestriction;
-import com.jocoos.mybeautip.domain.point.util.PerDomainRestriction;
 import com.jocoos.mybeautip.global.code.CodeValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import static com.jocoos.mybeautip.domain.point.util.DateRestriction.*;
-import static com.jocoos.mybeautip.domain.point.util.PerDomainRestriction.noPerDomainLimit;
-import static com.jocoos.mybeautip.domain.point.util.PerDomainRestriction.oncePerDomain;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Getter
 @RequiredArgsConstructor
 public enum ActivityPointType implements CodeValue {
 
-    INPUT_ADDITIONAL_INFO("나의 정보 입력", 100, 0, allTimeOnce(), noPerDomainLimit()),
-    INPUT_EXTRA_INFO("추가 정보 입력", 100, 0, allTimeOnce(), noPerDomainLimit()),
+    INPUT_ADDITIONAL_INFO("나의 정보 입력", 100, 0),
+    INPUT_EXTRA_INFO("추가 정보 입력", 100, 0),
 
-    WRITE_POST("게시물 작성", 50, 25, day(5), noPerDomainLimit()),
-    WRITE_PHOTO_POST("포토 게시물 작성", 100, 50, day(5), noPerDomainLimit()),
-    WRITE_COMMENT("댓글 작성", 2, 1, day(10), noPerDomainLimit()),
+    WRITE_COMMUNITY("게시물 작성", 50, 25),
+    WRITE_PHOTO_COMMUNITY("포토 게시물 작성", 100, 50),
+    WRITE_COMMENT("댓글 작성", 2, 1),
 
-    GET_LIKE_POST("게시글 좋아요 획득", 2, 0, noDateLimit(), oncePerDomain()),
-    GET_LIKE_COMMENT("댓글 좋아요 획득", 2, 0, noDateLimit(), oncePerDomain()),
-    GET_LIKE_VIDEO("비디오 좋아요 획득", 2, 0, noDateLimit(), oncePerDomain()),
+    GET_LIKE_COMMUNITY("게시글 좋아요 획득", 2, 0),
+    GET_LIKE_COMMENT("댓글 좋아요 획득", 2, 0),
+    GET_LIKE_VIDEO("비디오 좋아요 획득", 2, 0),
 
-    VIDEO_LIKE("영상 콘텐츠 좋아요", 10, 5, day(5), oncePerDomain()),
-    VIDEO_SCRAP("영상 콘텐츠 스크랩", 10, 5, day(2), oncePerDomain());
+    VIDEO_LIKE("영상 콘텐츠 좋아요", 10, 5),
+    VIDEO_SCRAP("영상 콘텐츠 스크랩", 10, 5);
 
 
     private final String description;
     private final int givenPoint;
     private final int retrievePoint;
-    private final DateRestriction dateRestriction;
-    private final PerDomainRestriction perDomainRestriction;
 
-    private static final ActivityPointType[] activityPointTypesValues = ActivityPointType.values();
+    private static final ActivityPointType[] ACTIVITY_POINT_TYPES_VALUES = ActivityPointType.values();
+
+    public static final Set<ActivityPointType> WRITE_COMMUNITY_TYPES =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(WRITE_COMMUNITY, WRITE_PHOTO_COMMUNITY)));
+
 
     public static ActivityPointType getActivityPointType(int ordinal) {
-        return activityPointTypesValues[ordinal];
+        return ACTIVITY_POINT_TYPES_VALUES[ordinal];
     }
 
-    public DateLimit getDateLimit() {
-        return this.getDateRestriction().getDateLimit();
-    }
-
-    public long getDateLimitNum() {
-        return this.getDateRestriction().getLimitNum();
-    }
-
-    public boolean isPerDomainRestrict() {
-        return this.perDomainRestriction.isRestrict();
-    }
 
     @Override
     public String getName() {
