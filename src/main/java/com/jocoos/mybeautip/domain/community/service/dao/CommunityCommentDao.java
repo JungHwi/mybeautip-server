@@ -60,6 +60,8 @@ public class CommunityCommentDao {
     @Transactional
     public CommunityComment write(WriteCommunityCommentRequest request) {
         CommunityComment comment = converter.convert(request);
+        comment.valid();
+
         communityDao.commentCount(request.getCommunityId(), NumberUtils.INTEGER_ONE);
 
         if (request.getParentId() != null && request.getParentId() > NumberUtils.LONG_ZERO) {

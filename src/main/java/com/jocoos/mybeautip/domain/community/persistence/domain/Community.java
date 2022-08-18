@@ -107,10 +107,19 @@ public class Community extends ModifiedAtBaseEntity {
         }
     }
 
-    private void validCommunity() {
-        if (this.contents.length() < 5) {
-            throw new BadRequestException("not_enough_contents", "Contents must be over 5 length");
+    public void setContents(String contents) {
+        validContents(contents);
+        this.contents = contents;
+    }
+
+    private void validContents(String contents) {
+        if (StringUtils.isBlank(contents) || contents.length() < 5) {
+            throw new BadRequestException("not_enough_contents", "Content length must be at least 5.");
         }
+    }
+
+    private void validCommunity() {
+        validContents(this.contents);
     }
 
     private void validBlind() {
