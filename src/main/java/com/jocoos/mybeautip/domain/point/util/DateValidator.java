@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
-
 @RequiredArgsConstructor
 @Component
 public class DateValidator {
@@ -17,22 +15,14 @@ public class DateValidator {
     private final MemberPointDao memberPointDao;
 
     public boolean valid(ActivityPointType type, DateRestriction restriction, Member member) {
-        switch (type) {
-            case WRITE_COMMUNITY:
-            case WRITE_PHOTO_COMMUNITY:
-                return validDay(WRITE_COMMUNITY_TYPES, restriction.getLimitNum(), member);
-            default:
-                return validDateLimit(type, restriction, member);
-        }
+        return validDate(type, restriction, member);
     }
 
     public boolean valid(Set<ActivityPointType> types, DateRestriction restriction, Member member) {
-        if (WRITE_COMMUNITY_TYPES.equals(types)) {
-            return validDay(WRITE_COMMUNITY_TYPES, restriction.getLimitNum(), member);
-        } return false;
+        return validDay(types, restriction.getLimitNum(), member);
     }
 
-    private boolean validDateLimit(ActivityPointType type, DateRestriction restriction, Member member) {
+    private boolean validDate(ActivityPointType type, DateRestriction restriction, Member member) {
         switch (restriction.getDateLimit()) {
             case ALL_TIME_ONCE:
                 return validAllTimeOnce(type, member);

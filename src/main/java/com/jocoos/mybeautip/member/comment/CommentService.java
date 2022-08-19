@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.member.comment;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
-import com.jocoos.mybeautip.domain.point.util.ValidObject;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
@@ -22,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Locale;
 
-import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMENT;
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
+import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainAndReceiver;
 
 @Slf4j
 @Service
@@ -83,7 +83,7 @@ public class CommentService {
             legacyNotificationService.notifyAddComment(comment);
         }
 
-        activityPointService.gainActivityPoint(WRITE_COMMENT, ValidObject.validDomainId(comment.getId(), member));
+        activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, member));
         return comment;
     }
 
@@ -128,7 +128,8 @@ public class CommentService {
         int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
         log.debug("child count: {}", childCount);
 
-        activityPointService.retrieveActivityPoint(WRITE_COMMENT, comment.getId(), comment.getCreatedBy());
+        activityPointService.retrieveActivityPoint(WRITE_VIDEO_COMMENT,
+                                                   comment.getId(), comment.getCreatedBy());
 
         if (childCount == 0) {
             return deleteCommentAndChildren(comment);

@@ -4,26 +4,26 @@ import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointValidator
 import com.jocoos.mybeautip.domain.point.util.PerDomainValidator;
 import com.jocoos.mybeautip.domain.point.util.ValidObject;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.video.VideoLike;
+import com.jocoos.mybeautip.member.comment.CommentLike;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_VIDEO;
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_VIDEO_COMMENT;
 
 @RequiredArgsConstructor
 @Component
-public class GetLikeVideoPointValidator implements ActivityPointValidator {
+public class GetLikeVideoCommentPointValidator implements ActivityPointValidator {
 
     private final PerDomainValidator perDomainValidator;
 
     @Override
     public boolean valid(ValidObject validObject) {
-        VideoLike like = (VideoLike) validObject.getDomain();
+        CommentLike like = (CommentLike) validObject.getDomain();
         return validLikeByMe(like, validObject.getReceiveMember()) &&
-                perDomainValidator.valid(GET_LIKE_VIDEO, like.getId(), validObject.getReceiveMember());
+                perDomainValidator.valid(GET_LIKE_VIDEO_COMMENT, like.getId(), validObject.getReceiveMember());
     }
 
-    private boolean validLikeByMe(VideoLike like, Member receiveMember) {
+    private boolean validLikeByMe(CommentLike like, Member receiveMember) {
         return !like.getCreatedBy().equals(receiveMember);
     }
 }

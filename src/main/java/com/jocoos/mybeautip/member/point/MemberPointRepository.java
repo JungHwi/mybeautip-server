@@ -84,13 +84,13 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
                                                                      Member member,
                                                                      int state);
 
-    @Query("select count(mp) < :limit from MemberPoint mp " +
+    @Query("select count(mp) from MemberPoint mp " +
             "where mp.member = :member and mp.activityType = :activity and mp.createdAt > current_date() and mp.state = 1")
     Long countActivityPointDailyByType(
             @Param("activity") ActivityPointType activity,
             @Param("member") Member member);
 
-    @Query("select count(mp) < :limit from MemberPoint mp " +
+    @Query("select count(mp) from MemberPoint mp " +
             "where mp.activityType in :types and mp.createdAt > current_date() and mp.member = :member and mp.state = 1")
     Long countActivityPointDailyByTypes(
             @Param("types") Set<ActivityPointType> types,

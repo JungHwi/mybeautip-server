@@ -13,6 +13,6 @@ public class PerDomainValidator {
     private final MemberPointDao memberPointDao;
 
     public boolean valid(ActivityPointType type, Long domainId, Member member) {
-        return memberPointDao.isExistByTypeAndDomainIdAndMember(type, domainId, member);
+        return !memberPointDao.isExistByTypeAndDomainIdAndMember(type, domainId, member);
     }
 }

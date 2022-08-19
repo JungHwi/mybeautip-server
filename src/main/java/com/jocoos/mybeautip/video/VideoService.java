@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
-import com.jocoos.mybeautip.domain.point.util.ValidObject;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -51,10 +51,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
-
+import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
-import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
+import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -754,7 +755,8 @@ public class VideoService {
         commentLike.like();
         commentLikeRepository.save(commentLike);
 
-        activityPointService.gainActivityPoint(GET_LIKE_COMMENT, commentLike.getId(), comment.getCreatedBy());
+        activityPointService.gainActivityPoint(GET_LIKE_VIDEO_COMMENT, validDomainAndReceiver(commentLike, comment.getCreatedBy()));
+
         return commentLike;
     }
 
@@ -873,7 +875,11 @@ public class VideoService {
 
 
     private void gainLikeActivityPoint(Member me, Long videoLikeId, Video video) {
-        activityPointService.gainActivityPoint(VIDEO_LIKE, ValidObject.validDomainId(videoLikeId, me));
-        activityPointService.gainActivityPoint(GET_LIKE_VIDEO, ValidObject.validDomainId(videoLikeId, video.getMember()));
+        gainActivityPoint(VIDEO_LIKE, videoLikeId, me);
+        gainActivityPoint(GET_LIKE_VIDEO, videoLikeId, video.getMember());
+    }
+
+    private void gainActivityPoint(ActivityPointType type, Long domainId, Member receiver) {
+        activityPointService.gainActivityPoint(type, validDomainIdAndReceiver(domainId, receiver));
     }
 }

@@ -27,7 +27,7 @@ public class ActivityPointService {
     public void gainActivityPoint(ActivityPointType type, ValidObject validObject) {
         ActivityPointValidator validator = activityPointFactory.getValidator(type);
         if (validator.valid(validObject)) {
-            memberPointService.earnPoint(type, validObject.getDomainId(), validObject.getMember());
+            memberPointService.earnPoint(type, validObject.getDomainId(), validObject.getReceiveMember());
         }
     }
 
@@ -47,6 +47,6 @@ public class ActivityPointService {
     public void retrieveActivityPoint(Set<ActivityPointType> types, ValidObject validObject) {
         MultiTypeActivityPointValidator validator = activityPointFactory.getValidator(types);
         ActivityPointType type = validator.getRetrieveType(validObject);
-        retrieveActivityPoint(type, validObject.getDomainId(), validObject.getMember());
+        retrieveActivityPoint(type, validObject.getDomainId(), validObject.getReceiveMember());
     }
 }

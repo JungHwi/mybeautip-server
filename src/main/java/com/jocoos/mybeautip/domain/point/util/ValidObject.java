@@ -10,32 +10,31 @@ public class ValidObject {
     private final Object domain;
 
     private final Long domainId;
-
-    private final Member member;
+    private final Member receiveMember;
 
     @Builder
-    private ValidObject(Object domain, Long domainId, Member member) {
+    private ValidObject(Object domain, Long domainId, Member receiveMember) {
         this.domain = domain;
         this.domainId = domainId;
-        this.member = member;
+        this.receiveMember = receiveMember;
     }
 
-    public static ValidObject noDomain(Member member) {
+    public static ValidObject validReceiver(Member member) {
         return ValidObject.builder()
-                .member(member)
+                .receiveMember(member)
                 .build();
     }
 
-    public static ValidObject validDomainId(Long domainId, Member member) {
+    public static ValidObject validDomainIdAndReceiver(Long domainId, Member member) {
         return ValidObject.builder()
-                .member(member)
+                .receiveMember(member)
                 .domainId(domainId)
                 .build();
     }
 
-    public static ValidObject validDomain(Object domain, Member member) {
+    public static ValidObject validDomainAndReceiver(Object domain, Member member) {
         return ValidObject.builder()
-                .member(member)
+                .receiveMember(member)
                 .domain(domain)
                 .build();
     }

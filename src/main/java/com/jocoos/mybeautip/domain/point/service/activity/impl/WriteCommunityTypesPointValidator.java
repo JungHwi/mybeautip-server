@@ -23,7 +23,7 @@ public class WriteCommunityTypesPointValidator implements MultiTypeActivityPoint
 
     @Override
     public boolean valid(ValidObject validObject) {
-        return dateValidator.valid(WRITE_COMMUNITY_TYPES, day(DATE_LIMIT_NUM), validObject.getMember());
+        return dateValidator.valid(WRITE_COMMUNITY_TYPES, day(DATE_LIMIT_NUM), validObject.getReceiveMember());
     }
 
     @Override

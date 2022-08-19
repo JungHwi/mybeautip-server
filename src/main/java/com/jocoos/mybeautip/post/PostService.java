@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.post;
 
-import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.code.LikeStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -31,10 +29,8 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
-import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 @Slf4j
 @Service
@@ -55,8 +51,6 @@ public class PostService {
     private final BlockRepository blockRepository;
     private final AttachmentService attachmentService;
     private final MessageService messageService;
-
-    private final ActivityPointService activityPointService;
 
     public Slice<Comment> findCommentsByPostId(Long id, Long cursor, Pageable pageable, String direction) {
         Slice<Comment> comments;
@@ -150,7 +144,6 @@ public class PostService {
         postLike.setStatus(LIKE);
 
         PostLike savedLike = postLikeRepository.save(postLike);
-        activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY, savedLike.getId(), post.getCreatedBy());
         return savedLike;
     }
 
@@ -179,7 +172,6 @@ public class PostService {
 
         commentLike.like();
         commentLikeRepository.save(commentLike);
-        activityPointService.gainActivityPoint(GET_LIKE_COMMENT, commentLike.getId(), comment.getCreatedBy());
         return commentLike;
     }
 
@@ -225,8 +217,6 @@ public class PostService {
             post.setContents(contents);
             postRepository.save(post);
         }
-
-        gainWriteActivityPoint(post, attachments, member);
 
         return post;
     }
@@ -309,26 +299,5 @@ public class PostService {
     public void removePost(Post post) {
         post.setDeletedAt(new Date());
         postRepository.save(post);
-        activityPointService.retrieveActivityPoint(
-                Arrays.asList(WRITE_COMMUNITY, WRITE_PHOTO_COMMUNITY),
-                post.getId(),
-                post.getCreatedBy());
-    }
-
-    private void gainWriteActivityPoint(Post post, List<String> attachments, Member member) {
-        if (validTextLength(post.getDescription())) {
-            if (validImageExists(attachments))
-                activityPointService.gainActivityPoint(WRITE_PHOTO_COMMUNITY, post.getId(), member);
-            else
-                activityPointService.gainActivityPoint(WRITE_COMMUNITY, post.getId(), member);
-        }
-    }
-
-    private boolean validImageExists(List<String> attachments) {
-        return !CollectionUtils.isEmpty(attachments);
-    }
-
-    private boolean validTextLength(String contents) {
-        return trimAllWhitespace(contents).length() >= CONTENT_LENGTH_POINT_RESTRICTION;
     }
 }

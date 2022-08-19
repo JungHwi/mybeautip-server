@@ -21,7 +21,7 @@ public class VideoScrapPointValidator implements ActivityPointValidator {
 
     @Override
     public boolean valid(ValidObject validObject) {
-        return perDomainValidator.valid(VIDEO_SCRAP, validObject.getDomainId(), validObject.getMember()) &&
-                dateValidator.valid(VIDEO_SCRAP, day(DATE_LIMIT_NUM), validObject.getMember());
+        return perDomainValidator.valid(VIDEO_SCRAP, validObject.getDomainId(), validObject.getReceiveMember()) &&
+                dateValidator.valid(VIDEO_SCRAP, day(DATE_LIMIT_NUM), validObject.getReceiveMember());
     }
 }

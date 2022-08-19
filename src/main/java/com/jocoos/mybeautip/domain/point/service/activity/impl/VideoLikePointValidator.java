@@ -21,7 +21,7 @@ public class VideoLikePointValidator implements ActivityPointValidator {
 
     @Override
     public boolean valid(ValidObject validObject) {
-        return perDomainValidator.valid(VIDEO_LIKE, validObject.getDomainId(), validObject.getMember()) &&
-                dateValidator.valid(VIDEO_LIKE, day(DATE_LIMIT_NUM), validObject.getMember());
+        return perDomainValidator.valid(VIDEO_LIKE, validObject.getDomainId(), validObject.getReceiveMember()) &&
+                dateValidator.valid(VIDEO_LIKE, day(DATE_LIMIT_NUM), validObject.getReceiveMember());
     }
 }

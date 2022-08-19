@@ -141,7 +141,7 @@ public class Community extends ModifiedAtBaseEntity {
     }
 
     public boolean isImageExist() {
-        return CollectionUtils.isEmpty(this.communityFileList);
+        return !CollectionUtils.isEmpty(this.communityFileList);
     }
 
     @PostPersist

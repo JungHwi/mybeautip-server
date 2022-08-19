@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
+import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.*;
 
 @Slf4j
@@ -353,7 +354,7 @@ public class LegacyMemberService {
         }
 
         deleteAvatar(originalAvatar);
-        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.noDomain(member));
+        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
         return finalMember;
     }
 
@@ -475,10 +476,8 @@ public class LegacyMemberService {
             memberDetail.setInviterId(targetMember.getId());
         }
 
-        activityPointService.gainActivityPoint(INPUT_EXTRA_INFO, ValidObject.noDomain(member));
-
         memberDetail = memberDetailRepository.save(memberDetail);
-
+        activityPointService.gainActivityPoint(INPUT_EXTRA_INFO, validDomainIdAndReceiver(memberDetail.getId(), member));
 
         return MemberDetailResponse.builder()
                 .ageGroup(member.getBirthday().getAgeGroupByTen())

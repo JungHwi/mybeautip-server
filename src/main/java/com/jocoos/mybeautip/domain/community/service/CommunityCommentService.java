@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -22,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_COMMENT;
+import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainAndReceiver;
+
 @Service
 @RequiredArgsConstructor
 public class CommunityCommentService {
@@ -33,6 +37,8 @@ public class CommunityCommentService {
     private final CommunityCommentLikeDao likeDao;
     private final CommunityCommentReportDao reportDao;
     private final LegacyMemberService legacyMemberService;
+
+    private final ActivityPointService activityPointService;
 
     private final CommunityCommentConverter converter;
 
@@ -96,6 +102,8 @@ public class CommunityCommentService {
             communityDao.updateSortedAt(community.getId());
         }
 
+        activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT, validDomainAndReceiver(communityComment, member));
+
         return relationService.setRelationInfo(member, response);
     }
 
@@ -143,6 +151,7 @@ public class CommunityCommentService {
         }
 
         communityComment.delete();
+        activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_COMMENT, communityComment.getId(), member);
     }
 
     @Transactional

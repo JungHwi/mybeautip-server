@@ -17,6 +17,6 @@ public class InputAdditionalInfoPointValidator implements ActivityPointValidator
 
     @Override
     public boolean valid(ValidObject validObject) {
-        return dateValidator.valid(INPUT_ADDITIONAL_INFO, allTimeOnce(), validObject.getMember());
+        return dateValidator.valid(INPUT_ADDITIONAL_INFO, allTimeOnce(), validObject.getReceiveMember());
     }
 }

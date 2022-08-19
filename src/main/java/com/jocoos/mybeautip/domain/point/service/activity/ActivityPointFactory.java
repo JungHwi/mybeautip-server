@@ -21,10 +21,11 @@ public class ActivityPointFactory {
     private final InputExtraInfoPointValidator inputExtraInfoPointValidator;
 
     private final WriteCommunityTypesPointValidator writeCommunityTypesPointValidator;
-    private final WriteCommentPointValidator writeCommentPointValidator;
+    private final WriteCommunityCommentPointValidator writeCommunityCommentPointValidator;
+    private final WriteVideoCommentPointValidator writeVideoCommentPointValidator;
 
     private final GetLikeCommunityPointValidator getLikeCommunityPointValidator;
-    private final GetLikeCommentPointValidator getLikeCommentPointValidator;
+    private final GetLikeVideoCommentPointValidator getLikeVideoCommentPointValidator;
     private final GetLikeVideoPointValidator getLikeVideoPointValidator;
 
     private final VideoLikePointValidator videoLikePointValidator;
@@ -40,10 +41,11 @@ public class ActivityPointFactory {
 
         temp.put(WRITE_COMMUNITY, writeCommunityTypesPointValidator);
         temp.put(WRITE_PHOTO_COMMUNITY, writeCommunityTypesPointValidator);
-        temp.put(WRITE_COMMENT, writeCommentPointValidator);
+        temp.put(WRITE_COMMUNITY_COMMENT, writeCommunityCommentPointValidator);
+        temp.put(WRITE_VIDEO_COMMENT, writeVideoCommentPointValidator);
 
         temp.put(GET_LIKE_COMMUNITY, getLikeCommunityPointValidator);
-        temp.put(GET_LIKE_COMMENT, getLikeCommentPointValidator);
+        temp.put(GET_LIKE_VIDEO_COMMENT, getLikeVideoCommentPointValidator);
         temp.put(GET_LIKE_VIDEO, getLikeVideoPointValidator);
 
         temp.put(VIDEO_LIKE, videoLikePointValidator);
