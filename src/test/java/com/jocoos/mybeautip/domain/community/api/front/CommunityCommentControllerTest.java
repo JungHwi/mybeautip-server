@@ -308,10 +308,6 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         parameterWithName("community_id").description("글 ID"),
                         parameterWithName("comment_id").description("댓글 ID")
                 ),
-                requestFields(
-                        fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
-                        fieldWithPath("description").type(JsonFieldType.STRING).description("신고 사유. 신고여부가 true 일때만 필수").optional()
-                ),
                 responseFields(
                         fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
                         fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수")

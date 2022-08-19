@@ -4,14 +4,11 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
 import com.jocoos.mybeautip.domain.event.service.EventService;
-import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_LONG_STRING;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,14 +18,10 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping("/1/event")
-    public ResponseEntity<CursorResultResponse<EventListResponse>> getEventList(@RequestParam(name = "event_type", required = false) EventType eventType,
-                                                                               @RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
-                                                                               @RequestParam(defaultValue = "20") int size) {
-        List<EventListResponse> response = eventService.getEventList(eventType, cursor, size);
+    public ResponseEntity<List<EventListResponse>> getEventList(@RequestParam(name = "event_type", required = false) EventType eventType) {
+        List<EventListResponse> response = eventService.getEventList(eventType);
 
-        CursorResultResponse<EventListResponse> result = new CursorResultResponse<>(response);
-
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/1/event/{eventId}")
