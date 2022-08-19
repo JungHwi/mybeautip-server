@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service.dao;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
@@ -49,14 +50,18 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
+    public List<Community> get(long memberId, long id, Pageable pageable) {
+        return repository.findByMemberIdAndStatusAndIdLessThan(memberId, CommunityStatus.NORMAL, id, pageable).getContent();
+    }
+
+    @Transactional(readOnly = true)
     public List<Community> get(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable) {
-        return repository.findByCategoryInAndSortedAtLessThan(categoryList, cursor, pageable);
+        return repository.findByCategoryInAndSortedAtLessThan(categoryList, cursor, pageable).getContent();
     }
 
     @Transactional(readOnly = true)
     public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, Boolean isWin,  ZonedDateTime cursor, Pageable pageable) {
-
-        return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable);
+        return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable).getContent();
     }
 
     @Transactional()

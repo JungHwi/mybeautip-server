@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
+import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.*;
@@ -56,6 +57,21 @@ public interface CommunityConverter {
     CommunityResponse convert(Community community);
 
     List<CommunityResponse> convert(List<Community> community);
+
+    @Mappings({
+            @Mapping(target = "fileUrl", source = "communityFileList", qualifiedByName = "convert_community_main_file")
+    })
+    MyCommunityResponse convertToMyCommunity(Community community);
+
+    List<MyCommunityResponse> convertToMyCommunity(List<Community> community);
+
+    @Named("convert_community_main_file")
+    default String convertToUrl(List<CommunityFile> file) {
+        if (CollectionUtils.isEmpty(file)) {
+            return null;
+        }
+        return convertToUrl(file.get(0));
+    }
 
     @Named("convert_community_file")
     default String convertToUrl(CommunityFile file) {

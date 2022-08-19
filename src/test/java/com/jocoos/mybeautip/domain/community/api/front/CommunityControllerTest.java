@@ -306,7 +306,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/api/1/community/{community_id}/report", 1)
+                        .patch("/api/1/community/{community_id}/report", 2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(report)))
                 .andExpect(status().isOk())

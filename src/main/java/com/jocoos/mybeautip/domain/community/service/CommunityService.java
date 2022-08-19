@@ -11,6 +11,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
+import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
@@ -100,6 +101,20 @@ public class CommunityService {
         return getCommunity(request.getMember(), communityList);
     }
 
+    @Transactional(readOnly = true)
+    public List<MyCommunityResponse> getMyCommunities(long cursor, Pageable pageable) {
+        Member member = legacyMemberService.currentMember();
+
+        List<Community> communityList = communityDao.get(member.getId(), cursor, pageable);
+        List<MyCommunityResponse> communityResponses = converter.convertToMyCommunity(communityList);
+
+        for (MyCommunityResponse response : communityResponses) {
+            response.changeContents();
+        }
+
+        return communityResponses;
+    }
+
     private List<CommunityResponse> getCommunity(Member member, List<Community> communities) {
         List<CommunityResponse> responses = converter.convert(communities);
         return relationService.setRelationInfo(member, responses);
@@ -149,9 +164,12 @@ public class CommunityService {
 
     @Transactional
     public ReportResponse report(long memberId, long communityId, ReportRequest reportRequest) {
-        reportDao.report(memberId, communityId, reportRequest);
-
         Community community = communityDao.get(communityId);
+        if (community.getMemberId().equals(memberId)) {
+            throw new BadRequestException("this is my community.");
+        }
+
+        reportDao.report(memberId, communityId, reportRequest);
 
         return ReportResponse.builder()
                 .isReport(reportRequest.getIsReport())

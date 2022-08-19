@@ -9,12 +9,14 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
+import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,19 @@ public class CommunityCommentService {
         List<CommunityComment> communityComments = dao.getComments(request);
 
         return getComments(member, communityComments);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyCommunityCommentResponse> getMyComments(long cursor, Pageable pageable) {
+        Member member = legacyMemberService.currentMember();
+
+        List<CommunityComment> communityComments = dao.getMyComments(member.getId(), cursor, pageable);
+        List<MyCommunityCommentResponse> responses = converter.convertToMyComment(communityComments);
+        for (MyCommunityCommentResponse response : responses) {
+            response.changeContents();
+        }
+
+        return responses;
     }
 
     private List<CommunityCommentResponse> getComments(Member member, List<CommunityComment> comments) {
@@ -146,10 +161,12 @@ public class CommunityCommentService {
     @Transactional
     public ReportResponse report(long commentId, ReportRequest report) {
         long memberId = legacyMemberService.currentMemberId();
+        CommunityComment comment = dao.get(commentId);
+        if (comment.getMemberId() == memberId) {
+            throw new BadRequestException("this is my comment.");
+        }
 
         reportDao.report(memberId, commentId, report);
-
-        CommunityComment comment = dao.get(commentId);
 
         return ReportResponse.builder()
                 .isReport(report.getIsReport())
