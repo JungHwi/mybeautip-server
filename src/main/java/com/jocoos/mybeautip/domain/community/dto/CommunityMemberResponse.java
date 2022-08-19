@@ -19,4 +19,10 @@ public class CommunityMemberResponse {
     private String username;
 
     private String avatarUrl;
+
+    public void blind() {
+        this.id = null;
+        this.username = null;
+        this.avatarUrl = null;
+    }
 }

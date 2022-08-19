@@ -73,7 +73,7 @@ public class CommunityCommentResponse implements CursorInterface {
         }
 
         if (categoryType == CommunityCategoryType.BLIND && (member == null || !this.member.getId().equals(member.getId()))) {
-            this.member = null;
+            this.member.blind();
         }
 
         return this;

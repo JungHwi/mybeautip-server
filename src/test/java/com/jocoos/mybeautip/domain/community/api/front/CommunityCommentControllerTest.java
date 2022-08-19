@@ -63,11 +63,11 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                                 fieldWithPath("content.[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                                 fieldWithPath("content.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
-                                fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
-                                fieldWithPath("content.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
-                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description("작성자 상태"),
-                                fieldWithPath("content.[].member.username").type(JsonFieldType.STRING).description("작성자 이름"),
-                                fieldWithPath("content.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL")
+                                fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("content.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
+                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("content.[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
+                                fieldWithPath("content.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
                         )
                 )
         );
@@ -106,11 +106,11 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                                 fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
-                                fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
-                                fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                                 fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
-                                fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
-                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL")
+                                fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
+                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
                         )
                 )
         );
@@ -154,11 +154,11 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                                 fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
-                                fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
-                                fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                                 fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
-                                fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
-                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL")
+                                fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
+                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
                         )
                 )
         );
@@ -201,11 +201,11 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                                 fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
-                                fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보").optional(),
-                                fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                                 fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
-                                fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름"),
-                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL")
+                                fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
+                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
 
                         )
                 )
