@@ -6,12 +6,14 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
@@ -29,6 +31,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +42,8 @@ public class CommunityService {
 
     private final CommunityRelationService relationService;
     private final EventJoinService eventJoinService;
+
+    private final ActivityPointService activityPointService;
     private final LegacyMemberService legacyMemberService;
 
     private final CommunityCategoryDao categoryDao;
@@ -55,6 +63,8 @@ public class CommunityService {
         if (community.getCategory().getType() == CommunityCategoryType.DRIP) {
             eventJoinService.join(community.getEventId(), request.getMember().getId());
         }
+
+        activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES, validDomainAndReceiver(community, community.getMember()));
 
         return getCommunity(community.getMember(), community);
     }
@@ -133,6 +143,7 @@ public class CommunityService {
         }
 
         community.delete();
+        activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES, validDomainAndReceiver(community, member));
     }
 
     @Transactional
@@ -152,14 +163,22 @@ public class CommunityService {
 
     @Transactional
     public LikeResponse like(long memberId, long communityId, boolean isLike) {
-        likeDao.like(memberId, communityId, isLike);
+        CommunityLike like = likeDao.like(memberId, communityId, isLike);
 
         Community community = communityDao.get(communityId);
+
+        gainActivityPoint(isLike, like, community.getMember());
 
         return LikeResponse.builder()
                 .isLike(isLike)
                 .likeCount(community.getLikeCount())
                 .build();
+    }
+
+    private void gainActivityPoint(boolean isLike, CommunityLike like, Member member) {
+        if (isLike) {
+            activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY, validDomainAndReceiver(like, member));
+        }
     }
 
     @Transactional

@@ -76,4 +76,8 @@ public class CommunityComment extends ModifiedAtBaseEntity {
             throw new BadRequestException("not_enough_contents", "Content must not be empty.");
         }
     }
+
+    public boolean isCommentSameOrLongerThan(int length) {
+        return this.contents.length() >= length;
+    }
 }

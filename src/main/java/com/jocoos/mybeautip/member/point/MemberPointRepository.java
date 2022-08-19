@@ -84,24 +84,15 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
                                                                      Member member,
                                                                      int state);
 
-    @Query("select case when(count(mp) < :limit) then true else false end from MemberPoint mp " +
+    @Query("select count(mp) from MemberPoint mp " +
             "where mp.member = :member and mp.activityType = :activity and mp.createdAt > current_date() and mp.state = 1")
-    boolean isActivityTodayLessThanLimit(
+    Long countActivityPointDailyByType(
             @Param("activity") ActivityPointType activity,
-            @Param("limit") long limit,
             @Param("member") Member member);
 
-    @Query("select case when(count(mp) < :limit) then true else false end from MemberPoint mp " +
+    @Query("select count(mp) from MemberPoint mp " +
             "where mp.activityType in :types and mp.createdAt > current_date() and mp.member = :member and mp.state = 1")
-    boolean isActivityTodayLessThanLimit(
-            @Param("types") List<ActivityPointType> types,
-            @Param("limit") long limit,
-            @Param("member") Member member);
-
-    @Query("select mp.activityType from MemberPoint mp " +
-            "where mp.activityType in :types and mp.activityDomainId = :domainId and mp.member = :member")
-    Optional<ActivityPointType> findExactTypeByTypesAndDomainIdAndMember(
-            @Param("types") List<ActivityPointType> types,
-            @Param("domainId") Long domainId,
+    Long countActivityPointDailyByTypes(
+            @Param("types") Set<ActivityPointType> types,
             @Param("member") Member member);
 }

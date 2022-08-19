@@ -9,12 +9,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
+import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 @Getter
 @Setter
@@ -132,6 +134,14 @@ public class Community extends ModifiedAtBaseEntity {
         if (this.eventId == null || this.eventId < 1) {
             throw new BadRequestException("need_event_id", "Community of drip category needs event_id.");
         }
+    }
+
+    public boolean isContentLongerThanOrSame(int length) {
+        return trimAllWhitespace(this.contents).length() >= length;
+    }
+
+    public boolean isImageExist() {
+        return !CollectionUtils.isEmpty(this.communityFileList);
     }
 
     @PostPersist
