@@ -33,7 +33,7 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
-import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 
 
 @Service

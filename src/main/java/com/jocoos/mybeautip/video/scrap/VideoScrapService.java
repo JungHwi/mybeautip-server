@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.VIDEO_SCRAP;
-import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainIdAndReceiver;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 
 @Slf4j

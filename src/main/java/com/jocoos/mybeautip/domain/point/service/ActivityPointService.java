@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointFactory;
 import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointValidator;
 import com.jocoos.mybeautip.domain.point.service.activity.MultiTypeActivityPointValidator;
-import com.jocoos.mybeautip.domain.point.util.ValidObject;
+import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.point.MemberPointService;
 import lombok.RequiredArgsConstructor;

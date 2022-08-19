@@ -2,11 +2,10 @@ package com.jocoos.mybeautip.domain.point.service.activity.impl;
 
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentLike;
 import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointValidator;
-import com.jocoos.mybeautip.domain.point.util.PerDomainValidator;
-import com.jocoos.mybeautip.domain.point.util.ValidObject;
+import com.jocoos.mybeautip.domain.point.valid.PerDomainValidator;
+import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;

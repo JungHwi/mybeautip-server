@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.domain.point.service.activity.impl;
 
 import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointValidator;
-import com.jocoos.mybeautip.domain.point.util.PerDomainValidator;
-import com.jocoos.mybeautip.domain.point.util.ValidObject;
+import com.jocoos.mybeautip.domain.point.valid.PerDomainValidator;
+import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.CommentLike;
 import lombok.RequiredArgsConstructor;

@@ -51,8 +51,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
-import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainAndReceiver;
-import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainIdAndReceiver;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;

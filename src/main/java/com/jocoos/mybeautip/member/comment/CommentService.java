@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
-import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 
 @Slf4j
 @Service

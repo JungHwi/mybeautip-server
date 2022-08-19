@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.point.util;
+package com.jocoos.mybeautip.domain.point.service.activity;
 
 import com.jocoos.mybeautip.member.Member;
 import lombok.Builder;

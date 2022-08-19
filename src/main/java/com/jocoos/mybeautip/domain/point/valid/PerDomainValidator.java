@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.point.util;
+package com.jocoos.mybeautip.domain.point.valid;
 
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;

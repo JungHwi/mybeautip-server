@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 
@@ -57,16 +54,8 @@ public class ActivityPointFactory {
     }
 
     public ActivityPointValidator getValidator(ActivityPointType type) {
-        ActivityPointValidator validator = map.get(type);
-        nullCheck(type, validator);
-        return validator;
-    }
-
-    private void nullCheck(ActivityPointType type, ActivityPointValidator validator) {
-        if (validator == null) {
-            // TODO EXCEPTION 정의
-            throw new RuntimeException("activity point type not correct : " + type);
-        }
+        return Optional.ofNullable(map.get(type)).orElseThrow(
+                () -> new RuntimeException("activity point type not correct : " + type));
     }
 
     // 비슷한 사례 많아지면 리팩토링 예정

@@ -2,8 +2,8 @@ package com.jocoos.mybeautip.domain.point.service.activity.impl;
 
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointValidator;
-import com.jocoos.mybeautip.domain.point.util.PerDomainValidator;
-import com.jocoos.mybeautip.domain.point.util.ValidObject;
+import com.jocoos.mybeautip.domain.point.valid.PerDomainValidator;
+import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
