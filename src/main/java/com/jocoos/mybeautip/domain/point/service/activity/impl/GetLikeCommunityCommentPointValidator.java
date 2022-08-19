@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
 
-@Slf4j
 @RequiredArgsConstructor
 @Component
 public class GetLikeCommunityCommentPointValidator implements ActivityPointValidator {
@@ -25,7 +24,6 @@ public class GetLikeCommunityCommentPointValidator implements ActivityPointValid
     }
 
     private boolean validLikeByMe(CommunityCommentLike like, Member receiveMember) {
-        log.info("{}, {}", like.getMemberId(), receiveMember.getId());
         return like.getMemberId() != receiveMember.getId();
     }
 }
