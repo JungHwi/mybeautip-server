@@ -1,0 +1,3 @@
+== Get My Community Comments API
+
+operation::get_my_community_comments[snippets='http-request,request-parameters,http-response,response-fields']

@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
+import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -29,4 +30,8 @@ public interface CommunityCommentConverter {
     CommunityCommentResponse convert(CommunityComment entity);
 
     List<CommunityCommentResponse> convert(List<CommunityComment> entity);
+
+    MyCommunityCommentResponse convertToMyComment(CommunityComment entity);
+
+    List<MyCommunityCommentResponse> convertToMyComment(List<CommunityComment> entities);
 }

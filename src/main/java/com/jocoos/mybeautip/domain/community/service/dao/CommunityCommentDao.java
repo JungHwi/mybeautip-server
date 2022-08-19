@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service.dao;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.CommunityCommentConverter;
 import com.jocoos.mybeautip.domain.community.dto.SearchCommentRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
@@ -8,6 +9,7 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCom
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,12 @@ public class CommunityCommentDao {
         }
 
         return result.getContent();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityComment> getMyComments(long memberId, long cursor, Pageable pageable) {
+        Slice<CommunityComment> commentSlice = repository.findByMemberIdAndStatusAndIdLessThan(memberId, CommunityStatus.NORMAL, cursor, pageable);
+        return commentSlice.getContent();
     }
 
     @Transactional(readOnly = true)

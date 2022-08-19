@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.persistence.repository;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ public interface CommunityCommentRepository extends DefaultJpaRepository<Communi
 
     Optional<CommunityComment> findByCommunityIdAndId(long communityId, long commentId);
 
+    Slice<CommunityComment> findByMemberIdAndStatusAndIdLessThan(long memberId, CommunityStatus status, long cursor, Pageable pageable);
     Slice<CommunityComment> findByCommunityIdAndParentIdAndIdGreaterThan(long communityId, Long parentId, long cursor, Pageable pageable);
     Slice<CommunityComment> findByCommunityIdAndParentIdAndIdLessThan(long communityId, Long parentId, long cursor, Pageable pageable);
 

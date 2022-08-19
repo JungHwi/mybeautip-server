@@ -72,8 +72,8 @@ public class CommunityComment extends ModifiedAtBaseEntity {
     }
 
     private void validContents(String contents) {
-        if (StringUtils.isBlank(contents) || contents.length() < 5) {
-            throw new BadRequestException("not_enough_contents", "Content length must be at least 5.");
+        if (StringUtils.isBlank(contents)) {
+            throw new BadRequestException("not_enough_contents", "Content must not be empty.");
         }
     }
 }
