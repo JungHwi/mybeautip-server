@@ -755,7 +755,8 @@ public class VideoService {
         commentLike.like();
         commentLikeRepository.save(commentLike);
 
-        activityPointService.gainActivityPoint(GET_LIKE_VIDEO_COMMENT, validDomainAndReceiver(commentLike, comment.getCreatedBy()));
+        activityPointService.gainActivityPoint(GET_LIKE_VIDEO_COMMENT,
+                                               validDomainAndReceiver(commentLike, comment.getCreatedBy()));
 
         return commentLike;
     }

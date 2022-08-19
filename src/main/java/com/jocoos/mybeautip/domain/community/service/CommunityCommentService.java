@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityCommentConverter
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentLike;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY_COMMENT;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_COMMENT;
 import static com.jocoos.mybeautip.domain.point.util.ValidObject.validDomainAndReceiver;
 
@@ -156,15 +158,23 @@ public class CommunityCommentService {
 
     @Transactional
     public LikeResponse like(long commentId, boolean isLike) {
-        long memberId = legacyMemberService.currentMemberId();
-        likeDao.like(memberId, commentId, isLike);
+        Member member = legacyMemberService.currentMember();
+        CommunityCommentLike like = likeDao.like(member.getId(), commentId, isLike);
 
         CommunityComment comment = dao.get(commentId);
+
+        gainActivityPoint(isLike, comment.getMember(), like);
 
         return LikeResponse.builder()
                 .isLike(isLike)
                 .likeCount(comment.getLikeCount())
                 .build();
+    }
+
+    private void gainActivityPoint(boolean isLike, Member receiver, CommunityCommentLike like) {
+        if (isLike) {
+            activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY_COMMENT, validDomainAndReceiver(like, receiver));
+        }
     }
 
     @Transactional

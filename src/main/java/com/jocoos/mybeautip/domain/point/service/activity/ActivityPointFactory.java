@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,6 +25,8 @@ public class ActivityPointFactory {
     private final WriteVideoCommentPointValidator writeVideoCommentPointValidator;
 
     private final GetLikeCommunityPointValidator getLikeCommunityPointValidator;
+
+    private final GetLikeCommunityCommentPointValidator getLikeCommunityCommentPointValidator;
     private final GetLikeVideoCommentPointValidator getLikeVideoCommentPointValidator;
     private final GetLikeVideoPointValidator getLikeVideoPointValidator;
 
@@ -35,7 +37,7 @@ public class ActivityPointFactory {
 
     @PostConstruct
     private void init() {
-        Map<ActivityPointType, ActivityPointValidator> temp = new HashMap<>();
+        Map<ActivityPointType, ActivityPointValidator> temp = new EnumMap<>(ActivityPointType.class);
         temp.put(INPUT_ADDITIONAL_INFO, inputAdditionalInfoPointValidator);
         temp.put(INPUT_EXTRA_INFO, inputExtraInfoPointValidator);
 
@@ -45,6 +47,7 @@ public class ActivityPointFactory {
         temp.put(WRITE_VIDEO_COMMENT, writeVideoCommentPointValidator);
 
         temp.put(GET_LIKE_COMMUNITY, getLikeCommunityPointValidator);
+        temp.put(GET_LIKE_COMMUNITY_COMMENT, getLikeCommunityCommentPointValidator);
         temp.put(GET_LIKE_VIDEO_COMMENT, getLikeVideoCommentPointValidator);
         temp.put(GET_LIKE_VIDEO, getLikeVideoPointValidator);
 
@@ -54,7 +57,16 @@ public class ActivityPointFactory {
     }
 
     public ActivityPointValidator getValidator(ActivityPointType type) {
-        return map.get(type);
+        ActivityPointValidator validator = map.get(type);
+        nullCheck(type, validator);
+        return validator;
+    }
+
+    private void nullCheck(ActivityPointType type, ActivityPointValidator validator) {
+        if (validator == null) {
+            // TODO EXCEPTION 정의
+            throw new RuntimeException("activity point type not correct : " + type);
+        }
     }
 
     // 비슷한 사례 많아지면 리팩토링 예정
