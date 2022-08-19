@@ -11,7 +11,6 @@ import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,18 +29,17 @@ public class EventService {
     private final EventConverter eventConverter;
 
     @Transactional(readOnly = true)
-    public List<EventListResponse> getEventList(EventType eventType, long cursor, int size) {
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Order.asc("statusSorting"), Sort.Order.asc("sorting"), Sort.Order.desc("id"), Sort.Order.desc("endAt")));
-
+    public List<EventListResponse> getEventList(EventType eventType) {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("statusSorting"), Sort.Order.asc("sorting"), Sort.Order.desc("id")));
         // FIXME Dynamic Query to QueryDSL
-        Slice<Event> eventSlice;
+        List<Event> eventList;
         if (eventType == null) {
-            eventSlice = eventRepository.findByIdLessThanAndStatusIn(cursor, EventStatus.visibleEventStatus, pageable);
+            eventList = eventRepository.findByStatusIn(EventStatus.visibleEventStatus, pageable);
         } else {
-            eventSlice = eventRepository.findByTypeAndIdLessThanAndStatusIn(eventType, cursor, EventStatus.visibleEventStatus, pageable);
+            eventList = eventRepository.findByTypeAndStatusIn(eventType, EventStatus.visibleEventStatus, pageable);
         }
 
-        return eventConverter.convertToListResponse(eventSlice.getContent());
+        return eventConverter.convertToListResponse(eventList);
     }
 
     @Transactional(readOnly = true)

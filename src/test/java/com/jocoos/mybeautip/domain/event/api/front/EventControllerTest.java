@@ -8,9 +8,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_LONG_STRING;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -30,21 +28,18 @@ class EventControllerTest extends RestDocsTestSupport {
 
         result.andDo(document("get_events",
                         requestParameters(
-                                parameterWithName("event_type").description("이벤트 타입").optional(),
-                                parameterWithName("cursor").description("커서").optional().attributes(getDefault(MAX_LONG_STRING)),
-                                parameterWithName("size").description("페이지 사이즈").optional().attributes(getDefault(20))
+                                parameterWithName("event_type").description("이벤트 타입").optional()
                         ),
                         responseFields(
-                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),
-                                fieldWithPath("content").type(JsonFieldType.ARRAY).description("이벤트 목록"),
-                                fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("이벤트 ID"),
-                                fieldWithPath("content.[].type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_TYPE)),
-                                fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_STATUS)),
-                                fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목"),
-                                fieldWithPath("content.[].thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
-                                fieldWithPath("content.[].banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL").optional(),
-                                fieldWithPath("content.[].start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
-                                fieldWithPath("content.[].end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat())
+                                fieldWithPath("[]").type(JsonFieldType.ARRAY).description("이벤트 목록"),
+                                fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("이벤트 ID"),
+                                fieldWithPath("[].type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_TYPE)),
+                                fieldWithPath("[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_STATUS)),
+                                fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목"),
+                                fieldWithPath("[].thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
+                                fieldWithPath("[].banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL").optional(),
+                                fieldWithPath("[].start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
+                                fieldWithPath("[].end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat())
                         )
                 )
         );
