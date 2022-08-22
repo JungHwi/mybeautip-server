@@ -67,7 +67,8 @@ public class CommunityService {
             eventJoinService.join(community.getEventId(), request.getMember().getId());
         }
 
-        activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES, validDomainAndReceiver(community, community.getMember()));
+        activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES,
+                                               validDomainAndReceiver(community, community.getId(), community.getMember()));
 
         return getCommunity(community.getMember(), community);
     }
@@ -150,7 +151,8 @@ public class CommunityService {
         }
 
         community.delete();
-        activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES, validDomainAndReceiver(community, member));
+        activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES,
+                                                   validDomainAndReceiver(community, community.getId(), member));
     }
 
     @Transactional
@@ -184,7 +186,7 @@ public class CommunityService {
 
     private void gainActivityPoint(boolean isLike, CommunityLike like, Member member) {
         if (isLike) {
-            activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY, validDomainAndReceiver(like, member));
+            activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY, validDomainAndReceiver(like, like.getId(), member));
         }
     }
 

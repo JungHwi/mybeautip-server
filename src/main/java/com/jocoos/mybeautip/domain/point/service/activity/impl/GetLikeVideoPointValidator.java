@@ -6,10 +6,14 @@ import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.VideoLike;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_VIDEO;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class GetLikeVideoPointValidator implements ActivityPointValidator {
@@ -24,6 +28,6 @@ public class GetLikeVideoPointValidator implements ActivityPointValidator {
     }
 
     private boolean validLikeByMe(VideoLike like, Member receiveMember) {
-        return !like.getCreatedBy().equals(receiveMember);
+        return !Objects.equals(like.getCreatedBy().getId(), receiveMember.getId());
     }
 }
