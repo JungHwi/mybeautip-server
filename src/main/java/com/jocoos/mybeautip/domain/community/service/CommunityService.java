@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
@@ -28,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Service
@@ -80,6 +83,8 @@ public class CommunityService {
         // FIXME Dynamic Query to QueryDSL
         List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
         List<Community> communityList = new ArrayList<>();
+        List<Community> winList = new ArrayList<>();
+        List<Community> loseList = new ArrayList<>();
 
         if (categories.size() == 1) {
             CommunityCategory category = categories.get(0);
@@ -88,9 +93,11 @@ public class CommunityService {
                     throw new BadRequestException("need_event_info", "event_id is required to search DRIP category.");
                 }
                 if (request.isFirstSearch()) {
-                    communityList = communityDao.getCommunityForEvent(request.getEventId(), categories, true, request.getCursor(), pageable);
+                    winList = communityDao.getCommunityForEvent(request.getEventId(), categories, true, request.getCursor(), pageable);
                 }
-                communityList.addAll(communityDao.getCommunityForEvent(request.getEventId(), categories, null, request.getCursor(), pageable));
+                loseList = communityDao.getCommunityForEvent(request.getEventId(), categories, null, request.getCursor(), pageable);
+                communityList = Stream.concat(winList.stream(), loseList.stream())
+                        .collect(Collectors.toList());
             } else {
                 communityList = communityDao.get(categories, request.getCursor(), pageable);
             }
@@ -164,15 +171,15 @@ public class CommunityService {
 
     @Transactional
     public ReportResponse report(long memberId, long communityId, ReportRequest reportRequest) {
+        CommunityReport report = reportDao.report(memberId, communityId, reportRequest);
+
         Community community = communityDao.get(communityId);
         if (community.getMemberId().equals(memberId)) {
             throw new BadRequestException("this is my community.");
         }
 
-        reportDao.report(memberId, communityId, reportRequest);
-
         return ReportResponse.builder()
-                .isReport(reportRequest.getIsReport())
+                .isReport(report.isReport())
                 .reportCount(community.getReportCount())
                 .build();
     }

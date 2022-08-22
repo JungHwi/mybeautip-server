@@ -161,12 +161,12 @@ public class CommunityCommentService {
     @Transactional
     public ReportResponse report(long commentId, ReportRequest report) {
         long memberId = legacyMemberService.currentMemberId();
+
+        reportDao.report(memberId, commentId, report);
         CommunityComment comment = dao.get(commentId);
         if (comment.getMemberId() == memberId) {
             throw new BadRequestException("this is my comment.");
         }
-
-        reportDao.report(memberId, commentId, report);
 
         return ReportResponse.builder()
                 .isReport(report.getIsReport())
