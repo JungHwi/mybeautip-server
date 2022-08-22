@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.video;
 
-import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -52,7 +51,6 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
-import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
@@ -727,7 +725,9 @@ public class VideoService {
         videoLike.like();
         videoLikeRepository.save(videoLike);
 
-        gainLikeActivityPoint(member, videoLike.getId(), video);
+        activityPointService.gainActivityPoint(GET_LIKE_VIDEO, validDomainAndReceiver(videoLike, videoLike.getId(), video.getMember()));
+        activityPointService.gainActivityPoint(VIDEO_LIKE, validDomainAndReceiver(video, videoLike.getId(), member));
+
         return videoLike;
     }
 
@@ -756,7 +756,7 @@ public class VideoService {
         commentLikeRepository.save(commentLike);
 
         activityPointService.gainActivityPoint(GET_LIKE_VIDEO_COMMENT,
-                                               validDomainAndReceiver(commentLike, comment.getCreatedBy()));
+                                               validDomainAndReceiver(commentLike, commentLike.getId(), comment.getCreatedBy()));
 
         return commentLike;
     }
@@ -872,15 +872,5 @@ public class VideoService {
     public Video getByVideoId(Long videoId) {
         return videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .orElseThrow(() -> new NotFoundException("video_not_found"));
-    }
-
-
-    private void gainLikeActivityPoint(Member me, Long videoLikeId, Video video) {
-        gainActivityPoint(VIDEO_LIKE, videoLikeId, me);
-        gainActivityPoint(GET_LIKE_VIDEO, videoLikeId, video.getMember());
-    }
-
-    private void gainActivityPoint(ActivityPointType type, Long domainId, Member receiver) {
-        activityPointService.gainActivityPoint(type, validDomainIdAndReceiver(domainId, receiver));
     }
 }

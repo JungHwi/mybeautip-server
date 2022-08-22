@@ -83,7 +83,7 @@ public class CommentService {
             legacyNotificationService.notifyAddComment(comment);
         }
 
-        activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, member));
+        activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, comment.getId(), member));
         return comment;
     }
 

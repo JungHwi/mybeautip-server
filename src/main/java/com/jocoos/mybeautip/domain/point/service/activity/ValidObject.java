@@ -8,7 +8,6 @@ import lombok.Getter;
 public class ValidObject {
 
     private final Object domain;
-
     private final Long domainId;
     private final Member receiveMember;
 
@@ -32,10 +31,11 @@ public class ValidObject {
                 .build();
     }
 
-    public static ValidObject validDomainAndReceiver(Object domain, Member member) {
+    public static ValidObject validDomainAndReceiver(Object domain, Long domainId, Member member) {
         return ValidObject.builder()
                 .receiveMember(member)
                 .domain(domain)
+                .domainId(domainId)
                 .build();
     }
 }

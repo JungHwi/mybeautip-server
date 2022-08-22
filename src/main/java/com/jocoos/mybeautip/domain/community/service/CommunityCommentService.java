@@ -104,7 +104,8 @@ public class CommunityCommentService {
             communityDao.updateSortedAt(community.getId());
         }
 
-        activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT, validDomainAndReceiver(communityComment, member));
+        activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
+                                               validDomainAndReceiver(communityComment, communityComment.getId(), member));
 
         return relationService.setRelationInfo(member, response);
     }
@@ -173,7 +174,8 @@ public class CommunityCommentService {
 
     private void gainActivityPoint(boolean isLike, Member receiver, CommunityCommentLike like) {
         if (isLike) {
-            activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY_COMMENT, validDomainAndReceiver(like, receiver));
+            activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY_COMMENT,
+                                                   validDomainAndReceiver(like, like.getId(), receiver));
         }
     }
 
