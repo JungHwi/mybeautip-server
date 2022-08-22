@@ -120,7 +120,15 @@ mybeautip:
     earn-after-days: 7
     scheduler-prefix: member-gift-task-pool-
     scheduler-pool-size: 10
-    remind-expiring-point: 3  # days
+    remind-expiring-point: 3
+  activity-point:
+    community-write-date-limit: 5
+    community-valid-length: 30
+    video-like-date-limit: 5
+    video-scrap-date-limit: 2
+    comment-write-date-limit: 10
+    comment-valid-length: 5
+    # days
   revenue:
     revenue-ratio-live: 3    # %
     revenue-ratio-vod: 2    # %

@@ -21,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Locale;
 
-import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMENT;
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 
 @Slf4j
 @Service
@@ -81,7 +82,8 @@ public class CommentService {
         } else {
             legacyNotificationService.notifyAddComment(comment);
         }
-        gainWriteActivityPoint(comment.getComment(), comment.getId(), member);
+
+        activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, member));
         return comment;
     }
 
@@ -126,7 +128,8 @@ public class CommentService {
         int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
         log.debug("child count: {}", childCount);
 
-        activityPointService.retrieveActivityPoint(WRITE_COMMENT, comment.getId(), comment.getCreatedBy());
+        activityPointService.retrieveActivityPoint(WRITE_VIDEO_COMMENT,
+                                                   comment.getId(), comment.getCreatedBy());
 
         if (childCount == 0) {
             return deleteCommentAndChildren(comment);
@@ -185,14 +188,5 @@ public class CommentService {
         }
 
         return Comment.CommentState.DELETED.value();
-    }
-
-    private void gainWriteActivityPoint(String comment, Long commentId, Member member) {
-        if (validContentLength(comment))
-            activityPointService.gainActivityPoint(WRITE_COMMENT, commentId, member);
-    }
-
-    private boolean validContentLength(String comment) {
-        return comment != null && comment.length() >= 5;
     }
 }

@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.point.util;
+package com.jocoos.mybeautip.domain.point.valid;
 
 import com.jocoos.mybeautip.domain.point.code.DateLimit;
 import lombok.Getter;
@@ -13,10 +13,6 @@ public class DateRestriction {
 
     public static DateRestriction allTimeOnce() {
         return new DateRestriction(ALL_TIME_ONCE, 1);
-    }
-
-    public static DateRestriction noDateLimit() {
-        return new DateRestriction(NO_LIMIT, -1);
     }
 
     public static DateRestriction day(long limitNum) {

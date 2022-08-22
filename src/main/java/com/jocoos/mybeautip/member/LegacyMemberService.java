@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -49,6 +50,7 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.*;
 
 @Slf4j
@@ -352,7 +354,7 @@ public class LegacyMemberService {
         }
 
         deleteAvatar(originalAvatar);
-        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, member.getId(), member);
+        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
         return finalMember;
     }
 
@@ -474,10 +476,8 @@ public class LegacyMemberService {
             memberDetail.setInviterId(targetMember.getId());
         }
 
-        activityPointService.gainActivityPoint(INPUT_EXTRA_INFO, member.getId(), member);
-
         memberDetail = memberDetailRepository.save(memberDetail);
-
+        activityPointService.gainActivityPoint(INPUT_EXTRA_INFO, validDomainIdAndReceiver(memberDetail.getId(), member));
 
         return MemberDetailResponse.builder()
                 .ageGroup(member.getBirthday().getAgeGroupByTen())
