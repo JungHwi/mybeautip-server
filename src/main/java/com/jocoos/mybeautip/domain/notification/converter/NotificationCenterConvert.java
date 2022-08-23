@@ -7,7 +7,6 @@ import com.jocoos.mybeautip.domain.notification.vo.NotificationLink;
 import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
 import com.jocoos.mybeautip.global.util.NotificationConvertUtil;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.*;
 import org.springframework.util.CollectionUtils;
 
@@ -35,11 +34,9 @@ public interface NotificationCenterConvert {
 
     @AfterMapping
     default void convert(@MappingTarget CenterMessageResponse response, NotificationCenterEntity entity) {
-        if (StringUtils.isNotBlank(entity.getImageUrl())) {
-            Map<String, String> arguments = StringConvertUtil.convertJsonToMap(entity.getArguments());
-            String imageUrl = ImageUrlConvertUtil.toUrl(entity.getImageUrl(), COMMUNITY, Long.valueOf(arguments.get(COMMUNITY_ID.name())));
-            response.setImageUrl(imageUrl);
-        }
+        Map<String, String> arguments = StringConvertUtil.convertJsonToMap(entity.getArguments());
+        String imageUrl = ImageUrlConvertUtil.toUrl(entity.getImageUrl(), COMMUNITY, Long.valueOf(arguments.get(COMMUNITY_ID.name())));
+        response.setImageUrl(imageUrl);
     }
 
     @Named("mergeMessage")

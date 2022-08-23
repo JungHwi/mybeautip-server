@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityCategoryConverte
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,5 +25,11 @@ public class CommunityCategoryService {
         List<CommunityCategory> categories = repository.findAllBy(pageable);
 
         return converter.convert(categories);
+    }
+
+    public CommunityCategoryResponse getCommunityCategory(long categoryId) {
+        CommunityCategory communityCategory = repository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("not_found_community_category", "Request Id is - " + categoryId));
+        return converter.convert(communityCategory);
     }
 }

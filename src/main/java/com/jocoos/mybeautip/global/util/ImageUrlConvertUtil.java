@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.global.util;
 
 import com.jocoos.mybeautip.global.code.UrlDirectory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +18,23 @@ public class ImageUrlConvertUtil {
     }
 
     public static String toUrl(String filename, UrlDirectory directory) {
-        return CF_DOMAIN + directory.getDirectory() + filename;
+        if (StringUtils.isBlank(filename)) {
+            return null;
+        } else if (filename.startsWith("http")) {
+            return filename;
+        } else {
+            return CF_DOMAIN + directory.getDirectory() + filename;
+        }
     }
 
     public static String toUrl(String filename, UrlDirectory directory, Long id) {
-        return CF_DOMAIN + directory.getDirectory(id) + filename;
+        if (StringUtils.isBlank(filename)) {
+            return null;
+        } else if (filename.startsWith("http")) {
+            return filename;
+        } else {
+            return CF_DOMAIN + directory.getDirectory(id) + filename;
+        }
     }
 
     public static String getUri(String Url) {

@@ -257,18 +257,18 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void deleteCommunity() throws Exception {
-        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .delete("/api/1/community/{community_id}", 1)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
-
-        result.andDo(document("delete_community",
-                        pathParameters(
-                                parameterWithName("community_id").description("글 ID")
-                        )
-                )
-        );
+//        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+//                        .delete("/api/1/community/{community_id}", 1)
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andDo(print());
+//
+//        result.andDo(document("delete_community",
+//                        pathParameters(
+//                                parameterWithName("community_id").description("글 ID")
+//                        )
+//                )
+//        );
     }
 
     @Test

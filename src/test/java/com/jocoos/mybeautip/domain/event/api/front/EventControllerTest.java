@@ -61,6 +61,7 @@ class EventControllerTest extends RestDocsTestSupport {
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("이벤트 ID"),
                                 fieldWithPath("type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_TYPE)),
+                                fieldWithPath("relation_id").type(JsonFieldType.NUMBER).description("관련된 아이디. 현재는 Community Category 의 ID 밖에 없음.").optional(),
                                 fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_STATUS)),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("description").type(JsonFieldType.STRING).description("설명").optional(),
@@ -75,7 +76,7 @@ class EventControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("event_product_list.[].id").type(JsonFieldType.NUMBER).description("이벤트 상품 아이디"),
                                 fieldWithPath("event_product_list.[].type").type(JsonFieldType.STRING).description("이벤트 상품 구분"),
                                 fieldWithPath("event_product_list.[].name").type(JsonFieldType.STRING).description("이벤트 상품명"),
-                                fieldWithPath("event_product_list.[].image_url").type(JsonFieldType.STRING).description("이벤트 상품 이미지 URL")
+                                fieldWithPath("event_product_list.[].image_url").type(JsonFieldType.STRING).description("이벤트 상품 이미지 URL").optional()
                         )
                 )
         );

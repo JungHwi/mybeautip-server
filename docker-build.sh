@@ -5,7 +5,7 @@ TAG="${ENV:=develop}"
 
 echo "docker tag: ${TAG}"
 
-./gradlew build -x test
+./gradlew build 
 
 docker build -t 776875668468.dkr.ecr.ap-northeast-2.amazonaws.com/mybeautip-api:$TAG .
 

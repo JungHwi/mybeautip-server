@@ -103,7 +103,6 @@ public class CommunityService {
         List<Community> loseList = new ArrayList<>();
 
         if (categories.size() == 1) {
-            log.debug("BREEZE >> " + categories.get(0).getTitle());
             CommunityCategory category = categories.get(0);
             if (category.getType() == CommunityCategoryType.DRIP) {
                 if (request.getEventId() == null || request.getEventId() < NumberUtils.LONG_ONE) {

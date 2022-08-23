@@ -11,24 +11,47 @@ import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class CommunityCategoryControllerTest extends RestDocsTestSupport {
 
     @Test
-    void getCommunityCategory() throws Exception {
+    void getCommunityCategories() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .get("/api/1/community/category")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        result.andDo(document("get_community_category",
+        result.andDo(document("get_community_categories",
                         responseFields(
                                 fieldWithPath("[]").type(JsonFieldType.ARRAY).description("커뮤니티 카테고리 목록"),
                                 fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
                                 fieldWithPath("[].type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
                                 fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("[].hint").type(JsonFieldType.STRING).description("힌트")
+                        )
+                )
+        );
+    }
+
+    @Test
+    void getCommunityCategory() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/api/1/community/category/{category_id}", 3)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        result.andDo(document("get_community_category",
+                        pathParameters(
+                                parameterWithName("category_id").description("카테고리 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
+                                fieldWithPath("type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                fieldWithPath("hint").type(JsonFieldType.STRING).description("힌트")
                         )
                 )
         );

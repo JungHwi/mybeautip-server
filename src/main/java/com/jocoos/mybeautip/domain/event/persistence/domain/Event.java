@@ -30,6 +30,9 @@ public class Event extends ModifiedDateAuditable {
     @Enumerated(EnumType.STRING)
     private EventType type;
 
+    @Column
+    private Long relationId;
+
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private EventStatus status;

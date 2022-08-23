@@ -16,6 +16,7 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 public class EventResponse {
     private long id;
     private EventType type;
+    private Long relationId;
     private EventStatus status;
     private String title;
     private String description;
