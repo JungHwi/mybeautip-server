@@ -14,4 +14,6 @@ public interface CommunityLikeRepository extends DefaultJpaRepository<CommunityL
 
     List<CommunityLike> findByMemberIdAndCommunityIdInAndIsLikeIsTrue(long memberId, List<Long> communityId);
 
+    int countByCommunityId(long communityId);
+
 }

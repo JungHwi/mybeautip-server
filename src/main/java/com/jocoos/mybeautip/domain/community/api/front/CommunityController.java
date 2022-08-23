@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.domain.community.service.CommunityService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -76,8 +75,7 @@ public class CommunityController {
     @GetMapping(value = "/1/community/{community_id}")
     public ResponseEntity<CommunityResponse> getCommunity(@PathVariable(name = "community_id") long communityId) {
 
-        Member member = legacyMemberService.currentMember();
-        CommunityResponse response = service.getCommunity(member, communityId);
+        CommunityResponse response = service.getCommunity(communityId);
 
         return ResponseEntity.ok(response);
     }
@@ -85,8 +83,6 @@ public class CommunityController {
     @PutMapping(value = "/1/community/{community_id}")
     public ResponseEntity<CommunityResponse> editCommunity(@PathVariable(name = "community_id") long communityId,
                                                            @RequestBody EditCommunityRequest request) {
-        Member member = legacyMemberService.currentMember();
-        request.setMember(member);
         request.setCommunityId(communityId);
 
         CommunityResponse response = service.edit(request);
@@ -97,8 +93,7 @@ public class CommunityController {
     @DeleteMapping(value = "/1/community/{community_id}")
     public ResponseEntity deleteCommunity(@PathVariable(name = "community_id") long communityId) {
 
-        Member member = legacyMemberService.currentMember();
-        service.delete(member, communityId);
+        service.delete(communityId);
 
         return new ResponseEntity(HttpStatus.OK);
     }

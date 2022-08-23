@@ -59,5 +59,4 @@ public class NotificationController {
         Member member = legacyMemberService.currentMember();
         return new ResponseEntity<>(service.patchReadAll(member.getId()), HttpStatus.OK);
     }
-
 }

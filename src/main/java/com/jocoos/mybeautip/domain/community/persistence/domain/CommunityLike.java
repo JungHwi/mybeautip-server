@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
+import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "community_like")
-public class CommunityLike {
+public class CommunityLike extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +35,4 @@ public class CommunityLike {
         this.communityId = communityId;
         this.isLike = false;
     }
-
-
 }

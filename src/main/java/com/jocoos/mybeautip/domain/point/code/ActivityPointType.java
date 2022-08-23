@@ -29,10 +29,8 @@ public enum ActivityPointType implements CodeValue {
     GET_LIKE_VIDEO("비디오 좋아요 획득", 2, 0),
     GET_LIKE_VIDEO_COMMENT("비디오 댓글 좋아요 획득", 2, 0),
 
-
     VIDEO_LIKE("영상 콘텐츠 좋아요", 10, 5),
     VIDEO_SCRAP("영상 콘텐츠 스크랩", 10, 5);
-
 
     private final String description;
     private final int givenPoint;

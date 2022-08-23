@@ -136,6 +136,8 @@ public class CommunityCommentService {
 
         communityComment.setContents(request.getContents());
 
+        dao.save(communityComment);
+
         return getComment(member, communityComment);
     }
 

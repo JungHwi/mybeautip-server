@@ -47,4 +47,10 @@ public class CommunityLikeDao {
         return repository.findByMemberIdAndCommunityId(memberId, communityId)
                 .orElse(new CommunityLike(memberId, communityId));
     }
+
+    @Transactional(readOnly = true)
+    public int countByCommunityId(long communityId) {
+        return repository.countByCommunityId(communityId);
+
+    }
 }

@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
-import com.jocoos.mybeautip.global.config.jpa.ModifiedAtBaseEntity;
+import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
@@ -24,7 +24,7 @@ import static org.springframework.util.StringUtils.trimAllWhitespace;
 @NoArgsConstructor
 @Entity
 @Table(name = "community")
-public class Community extends ModifiedAtBaseEntity {
+public class Community extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

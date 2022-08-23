@@ -29,7 +29,6 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/test/**").permitAll()
                 .antMatchers(POST, "/api/1/member/signup/**").hasAnyRole("GUEST")
                 .antMatchers(GET, "/api/1/words").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/api/admin/**").hasAnyRole("STORE", "ADMIN")
@@ -54,6 +53,11 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers(PUT, "/api/**").hasAnyRole("USER", "ADMIN")
                 .antMatchers(DELETE, "/api/1/videos/**/watches").hasAnyRole("GUEST", "USER", "ADMIN")
                 .antMatchers(DELETE, "/api/**").hasAnyRole("USER", "ADMIN")
+                .antMatchers(GET, "/api/**/community/**").hasAnyRole("GUEST", "USER")
+                .antMatchers(POST, "/api/**/community/**").hasAnyRole("USER")
+                .antMatchers(PUT, "/api/**/community/**").hasAnyRole("USER")
+                .antMatchers(PATCH, "/api/**/community/**").hasAnyRole("USER")
+                .antMatchers(DELETE, "/api/**/community/**").hasAnyRole("USER")
                 .antMatchers("/api/1/callbacks/video").hasRole("ADMIN");
     }
 }

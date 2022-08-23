@@ -22,6 +22,7 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,7 @@ import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COM
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
@@ -74,8 +76,11 @@ public class CommunityService {
     }
 
     @Transactional()
-    public CommunityResponse getCommunity(Member member, long communityId) {
+    public CommunityResponse getCommunity(long communityId) {
         Community community = communityDao.get(communityId);
+
+        Member member = legacyMemberService.currentMember();
+
         communityDao.readCount(communityId);
 
         return getCommunity(member, community);
@@ -98,6 +103,7 @@ public class CommunityService {
         List<Community> loseList = new ArrayList<>();
 
         if (categories.size() == 1) {
+            log.debug("BREEZE >> " + categories.get(0).getTitle());
             CommunityCategory category = categories.get(0);
             if (category.getType() == CommunityCategoryType.DRIP) {
                 if (request.getEventId() == null || request.getEventId() < NumberUtils.LONG_ONE) {
@@ -143,7 +149,8 @@ public class CommunityService {
     }
 
     @Transactional
-    public void delete(Member member, long communityId) {
+    public void delete(long communityId) {
+        Member member = legacyMemberService.currentMember();
         Community community = communityDao.get(communityId);
 
         if (!community.getMember().getId().equals(member.getId())) {
@@ -157,15 +164,18 @@ public class CommunityService {
 
     @Transactional
     public CommunityResponse edit(EditCommunityRequest request) {
+        Member member = legacyMemberService.currentMember();
         Community community = communityDao.get(request.getCommunityId());
 
-        if (!community.getMember().getId().equals(request.getMember().getId())) {
+        if (!community.getMember().getId().equals(member.getId())) {
             throw new AccessDeniedException("access_denied", "This is not yours.");
         }
 
         community.setTitle(request.getTitle());
         community.setContents(request.getContents());
         editFiles(community, request.getFiles());
+
+        communityDao.save(community);
 
         return getCommunity(community.getMember(), community);
     }
@@ -196,7 +206,7 @@ public class CommunityService {
 
         Community community = communityDao.get(communityId);
         if (community.getMemberId().equals(memberId)) {
-            throw new BadRequestException("this is my community.");
+            throw new BadRequestException("community_i_wrote", "this is my community.");
         }
 
         return ReportResponse.builder()

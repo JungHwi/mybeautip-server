@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.notification.code.MessageType;
 import com.jocoos.mybeautip.domain.notification.code.NotificationStatus;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationLink;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 @Getter
-@Builder
+@Setter
 public class CenterMessageResponse {
 
     private long id;

@@ -21,7 +21,7 @@ class EventJoinControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void joinEvent() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .post("/api/1/event/join/{eventId}", 5)
+                        .post("/api/1/event/join/{eventId}", 4)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());

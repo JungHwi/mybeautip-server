@@ -1,12 +1,5 @@
 package com.jocoos.mybeautip.domain.notification.service.impl;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -25,9 +18,14 @@ import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.support.RandomUtils;
 import com.jocoos.mybeautip.video.Video;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -47,25 +45,20 @@ public class VideoUploadNotificationService implements NotificationService<Video
     public void send(Video video) {
         int messageIndex = getMessageRandomIndex();
         NotificationMessageCenterEntity centerMessage = getCenterMessage(messageIndex);
-        log.debug("{}", centerMessage);
 
         NotificationMessagePushEntity pushMessage = getMessagePushEntity(messageIndex);
-        log.debug("{}", pushMessage);
 
         List<NotificationTargetInfo> targetInfoList = getTargetInfo();
-        log.debug("target list size: {}", targetInfoList.size());
 
         for (NotificationTargetInfo targetInfo : targetInfoList) {
-            log.info("{}", targetInfo);
             send(centerMessage, pushMessage, targetInfo, video);
         }
     }
 
     @Transactional
-    private void send(NotificationMessageCenterEntity messageCenter, NotificationMessagePushEntity pushMessage, NotificationTargetInfo targetInfo, Video video) {
+    public void send(NotificationMessageCenterEntity messageCenter, NotificationMessagePushEntity pushMessage, NotificationTargetInfo targetInfo, Video video) {
         Map<String, String> arguments = getArgument(targetInfo.getNickname(), video);
         NotificationCenterEntity notificationCenterEntity = sendCenter(messageCenter, video.getThumbnailUrl(), targetInfo, arguments);
-        log.debug("{}", notificationCenterEntity);
         sendAppPush(pushMessage, video.getThumbnailUrl(), notificationCenterEntity.getId(), targetInfo, arguments);
     }
 

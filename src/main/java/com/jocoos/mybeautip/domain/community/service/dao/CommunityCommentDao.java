@@ -47,6 +47,12 @@ public class CommunityCommentDao {
         return result.getContent();
     }
 
+    @Transactional
+    public CommunityComment save(CommunityComment communityComment) {
+        return repository.save(communityComment);
+
+    }
+
     @Transactional(readOnly = true)
     public List<CommunityComment> getMyComments(long memberId, long cursor, Pageable pageable) {
         Slice<CommunityComment> commentSlice = repository.findByMemberIdAndStatusAndIdLessThan(memberId, CommunityStatus.NORMAL, cursor, pageable);

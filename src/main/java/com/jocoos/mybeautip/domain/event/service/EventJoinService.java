@@ -7,7 +7,6 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
-import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
@@ -42,10 +41,6 @@ public class EventJoinService {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + memberId));
-
-        if (!event.getType().isDirectJoin()) {
-            throw new BadRequestException("not_support_direct_join", "This event type is " + event.getType());
-        }
 
         EventTypeService eventTypeService = eventTypeFactory.getEventTypeService(event.getType());
 
