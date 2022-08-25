@@ -51,7 +51,8 @@ import java.util.stream.Collectors;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.*;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
 
 @Slf4j
 @Service
@@ -383,7 +384,7 @@ public class LegacyMemberService {
         }
 
         member.setIntro("");
-        member.setAvatarFilename(DELETED_AVATAR_FILE_NAME);
+        member.setAvatarFilename(DEFAULT_AVATAR_FILE_NAME);
         member.setVisible(false);
         member.setFollowingCount(0);
         member.setFollowerCount(0);
@@ -505,7 +506,7 @@ public class LegacyMemberService {
     }
 
     public void deleteAvatar(String avatar) {
-        if (StringUtils.isNotBlank(avatar) && !DEFAULT_AVATAR_URL.equals(avatar) && !DELETED_AVATAR_URL.equals(avatar)) {
+        if (StringUtils.isNotBlank(avatar) && !DEFAULT_AVATAR_URL.equals(avatar)) {
             attachmentService.deleteAttachments(StringConvertUtil.getPath(avatar));
         }
     }
