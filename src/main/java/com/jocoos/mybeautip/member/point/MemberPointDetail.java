@@ -7,6 +7,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.Date;
 
+import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_RETRIEVE_POINT;
 import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
 
 @NoArgsConstructor
@@ -105,6 +106,7 @@ public class MemberPointDetail extends CreatedDateAuditable {
     public void setPointAndState(int point, int state) {
         switch (state) {
             case STATE_USE_POINT:
+            case STATE_RETRIEVE_POINT:
             case MemberPoint.STATE_EXPIRED_POINT:
                 this.state = STATE_USE_POINT;
                 this.point = -point;

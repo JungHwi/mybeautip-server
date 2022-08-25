@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.global.constant.PointConstant.DEFAULT_POINT_EXPIRATION_DAY;
 import static com.jocoos.mybeautip.global.constant.PointConstant.EVENT_POINT_EXPIRATION_DAY;
-import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_EARNED_POINT;
-import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
+import static com.jocoos.mybeautip.member.point.MemberPoint.*;
 import static com.jocoos.mybeautip.member.point.UsePointService.ACTIVITY;
 
 @Slf4j
@@ -171,7 +170,7 @@ public class MemberPointService {
                 .activityType(type)
                 .activityDomainId(domainId)
                 .point(type.getPoint())
-                .state(STATE_USE_POINT)
+                .state(STATE_RETRIEVE_POINT)
                 .build();
 
         memberPointRepository.save(memberPoint);
