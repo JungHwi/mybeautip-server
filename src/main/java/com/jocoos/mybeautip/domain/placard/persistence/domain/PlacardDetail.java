@@ -29,5 +29,5 @@ public class PlacardDetail {
     Placard placard;
 
     @Column
-    String imageUrl;
+    String imageFile;
 }

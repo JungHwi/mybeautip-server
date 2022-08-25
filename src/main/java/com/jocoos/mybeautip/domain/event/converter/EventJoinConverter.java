@@ -45,6 +45,16 @@ public interface EventJoinConverter {
                         break;
                 }
                 break;
+            case DRIP:
+                switch (eventJoin.getStatus()) {
+                    case JOIN:
+                        description = "응모 완료";
+                        break;
+                    case WIN:
+                        description = "이벤트 당첨";
+                        break;
+                }
+                break;
             default:
                 throw new BadRequestException("not_supported_event", "event type is not supported. type - " + event.getType());
         }

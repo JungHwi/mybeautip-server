@@ -1,4 +1,4 @@
-FROM java:8
+FROM amazoncorretto:17
 
 WORKDIR /mybeautip-server
 

@@ -37,7 +37,7 @@ public class Popup extends CreatedDateAuditable {
     private PopupDisplayType displayType;
 
     @Column
-    private String imageUrl;
+    private String imageFile;
 
     @Column
     private String description;

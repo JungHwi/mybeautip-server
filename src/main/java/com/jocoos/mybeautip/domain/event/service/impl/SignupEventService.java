@@ -49,7 +49,7 @@ public class SignupEventService extends EventTypeAbstractService {
     @Transactional
     public EventJoin join(Member member) {
         Event event = eventRepository.findTopByTypeAndStatus(EventType.SIGNUP, EventStatus.PROGRESS);
-        if (duplicateSignup(event, member)) {
+        if (event == null || duplicateSignup(event, member)) {
             return null;
         }
 

@@ -5,7 +5,9 @@ import com.jocoos.mybeautip.domain.placard.dto.PlacardResponse;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.PlacardDetail;
 import com.jocoos.mybeautip.domain.placard.vo.PlacardLink;
+import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public interface PlacardConverter {
                 .findFirst()
                 .orElseThrow(() ->new BadRequestException("no_such_placard_detail"));
 
-        placardResponse.setImageUrl(detail.getImageUrl());
+        placardResponse.setImageUrl(ImageUrlConvertUtil.toUrl(detail.getImageFile(), UrlDirectory.PLACARD));
 
         PlacardLink placardLink = PlacardLink.builder()
                 .linkType(placard.getLinkType())

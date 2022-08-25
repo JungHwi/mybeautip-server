@@ -12,6 +12,8 @@ public enum UrlDirectory implements CodeValue {
     COMMUNITY("커뮤니티", "community/%s/"),
     EVENT("이벤트", "event/"),
     EVENT_PRODUCT("이벤트 상품", "event/product/"),
+    POPUP("팝업", "popup/"),
+    PLACARD("플래카드", "placard/"),
     TEMP("임시 폴더", "temp/");
 
     private final String description;
