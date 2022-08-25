@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.notification.vo.NotificationLink;
 import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
 import com.jocoos.mybeautip.global.util.NotificationConvertUtil;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.*;
 import org.springframework.util.CollectionUtils;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.notification.code.NotificationArgument.COMMUNITY_ID;
+import static com.jocoos.mybeautip.domain.notification.code.NotificationArgument.POST_ID;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.constant.SignConstant.*;
 
@@ -34,8 +36,16 @@ public interface NotificationCenterConvert {
 
     @AfterMapping
     default void convert(@MappingTarget CenterMessageResponse response, NotificationCenterEntity entity) {
+        if (StringUtils.isBlank(entity.getArguments())) {
+            return;
+        }
+
         Map<String, String> arguments = StringConvertUtil.convertJsonToMap(entity.getArguments());
-        String imageUrl = ImageUrlConvertUtil.toUrl(entity.getImageUrl(), COMMUNITY, Long.valueOf(arguments.get(COMMUNITY_ID.name())));
+        // FIXME POST_ID 지울때 같이 수정하기
+        String communityId = arguments.get(COMMUNITY_ID.name());
+        String postId = arguments.get(POST_ID.name());
+        Long id = StringUtils.isNotBlank(communityId) ? Long.valueOf(communityId) : Long.valueOf(postId);
+        String imageUrl = ImageUrlConvertUtil.toUrl(entity.getImageUrl(), COMMUNITY, id);
         response.setImageUrl(imageUrl);
     }
 

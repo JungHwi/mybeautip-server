@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
-import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
@@ -66,8 +65,6 @@ public class CommunityCommentResponse implements CursorInterface {
             this.contents = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
         } else if (relationInfo.getIsReport()) {
             this.contents = "신고 접수 된 글이에요.";
-        } else if (this.member.getStatus() == MemberStatus.WITHDRAWAL) {
-            this.contents = "탈퇴한 사용자의 글이에요.";
         } else if (this.status == CommunityStatus.DELETE) {
             this.contents = "삭제된 게시물이에요.";
         }

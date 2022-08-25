@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
-import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
@@ -72,28 +72,22 @@ public class CommunityResponse implements CursorInterface {
         // FIXME 관계나 상태에 따라 Title / Contents 변경. 어디다 치워 버리고 싶다.
         if (relationInfo.getIsBlock()) {
             this.contents = "차단된 사용자의 글이에요.";
-            this.fileUrl = null;
+            this.fileUrl = new ArrayList<>();
         } else if (this.reportCount >= 3) {
             this.contents = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
-            this.fileUrl = null;
+            this.fileUrl = new ArrayList<>();
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             }
         } else if (relationInfo.getIsReport()) {
             this.contents = "신고 접수 된 글이에요.";
-            this.fileUrl = null;
+            this.fileUrl = new ArrayList<>();
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "신고 접수 된 글이에요.";
             }
-        } else if (this.member.getStatus() == MemberStatus.WITHDRAWAL) {
-            this.contents = "탈퇴한 사용자의 글이에요.";
-            this.fileUrl = null;
-            if (this.category.getType() == CommunityCategoryType.BLIND) {
-                this.title = "탈퇴한 사용자의 글이에요.";
-            }
         } else if (this.status == CommunityStatus.DELETE) {
             this.contents = "삭제된 게시물이에요.";
-            this.fileUrl = null;
+            this.fileUrl = new ArrayList<>();
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "삭제된 게시물이에요.";
             }

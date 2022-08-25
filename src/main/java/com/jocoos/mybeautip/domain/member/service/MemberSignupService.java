@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.Set;
 
 import static com.jocoos.mybeautip.domain.term.code.TermTypeGroup.isAllRequiredContains;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DELETED_AVATAR_FILE_NAME;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 
 @Slf4j
 @Service
@@ -77,7 +77,7 @@ public class MemberSignupService {
         Member member = legacyMemberService.currentMember();
         member.setStatus(MemberStatus.WITHDRAWAL);
         member.setVisible(false);
-        member.setAvatarFilename(DELETED_AVATAR_FILE_NAME);
+        member.setAvatarFilename(DEFAULT_AVATAR_FILE_NAME);
         member.setFollowingCount(0);
         member.setFollowerCount(0);
         member.setPublicVideoCount(0);

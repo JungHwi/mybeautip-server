@@ -57,6 +57,9 @@ public class CommunityComment extends BaseEntity {
     private Member member;
 
     public CommunityComment delete() {
+        if (!this.status.isDeletable()) {
+            throw new BadRequestException("This status can not delete. This Community Status is " + this.status);
+        }
         this.status = CommunityStatus.DELETE;
         return this;
     }

@@ -68,7 +68,7 @@ public class Community extends BaseEntity {
     @Column(columnDefinition = "DATETIME(3)")
     private ZonedDateTime sortedAt;
 
-    @OneToMany(mappedBy = "community", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER ,cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityFile> communityFileList;
 
     @ManyToOne
@@ -80,6 +80,9 @@ public class Community extends BaseEntity {
     private CommunityCategory category;
 
     public Community delete() {
+        if (!this.status.isDeletable()) {
+            throw new BadRequestException("This status can not delete. This Community Status is " + this.status);
+        }
         this.status = CommunityStatus.DELETE;
         return this;
     }

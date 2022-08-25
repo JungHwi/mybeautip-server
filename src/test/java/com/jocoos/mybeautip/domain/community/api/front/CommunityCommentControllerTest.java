@@ -11,6 +11,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -214,20 +215,21 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void deleteComment() throws Exception {
-//        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-//                        .delete("/api/1/community/{community_id}/comment/{comment_id}", 1, 1)
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andDo(print());
-//
-//        result.andDo(document("delete_community_comment",
-//                        pathParameters(
-//                                parameterWithName("community_id").description("글 ID"),
-//                                parameterWithName("comment_id").description("댓글 ID")
-//                        )
-//                )
-//        );
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .delete("/api/1/community/{community_id}/comment/{comment_id}", 1, 1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("delete_community_comment",
+                        pathParameters(
+                                parameterWithName("community_id").description("글 ID"),
+                                parameterWithName("comment_id").description("댓글 ID")
+                        )
+                )
+        );
     }
 
     @Test
