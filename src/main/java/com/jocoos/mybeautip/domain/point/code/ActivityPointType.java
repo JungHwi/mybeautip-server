@@ -21,7 +21,7 @@ public enum ActivityPointType implements CodeValue {
     WRITE_PHOTO_COMMUNITY("포토 게시물 작성", 100),
 
     WRITE_VIDEO_COMMENT("비디오 댓글 작성", 2),
-    WRITE_COMMUNITY_COMMENT("게시글 댓글 작성", 2),
+    WRITE_COMMUNITY_COMMENT("게시물 댓글 작성", 2),
 
     GET_LIKE_COMMUNITY("게시글 좋아요 획득", 2),
     GET_LIKE_COMMUNITY_COMMENT("게시글 댓글 좋아요 획득", 2),
@@ -32,10 +32,10 @@ public enum ActivityPointType implements CodeValue {
     VIDEO_SCRAP("영상 콘텐츠 스크랩", 10),
 
 
-    DELETE_COMMUNITY("게시글 삭제", 25),
-    DELETE_PHOTO_COMMUNITY("포토 게시글 삭제", 50),
-    DELETE_COMMUNITY_COMMENT("댓글 삭제", 1),
-    DELETE_VIDEO_COMMENT("댓글 삭제", 1),
+    DELETE_COMMUNITY("게시물 삭제", 25),
+    DELETE_PHOTO_COMMUNITY("포토 게시물 삭제", 50),
+    DELETE_COMMUNITY_COMMENT("게시물 댓글 삭제", 1),
+    DELETE_VIDEO_COMMENT("비디오 댓글 삭제", 1),
     CANCEL_VIDEO_LIKE("영상 콘텐츠 좋아요 취소", 5),
     CANCEL_VIDEO_SCRAP("영상 콘텐츠 스크랩 취소", 5);
 
