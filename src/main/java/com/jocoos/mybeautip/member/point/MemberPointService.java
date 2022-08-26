@@ -116,7 +116,7 @@ public class MemberPointService {
     @Transactional
     public void earnPoint(ActivityPointType type, Long domainId, Member member) {
         // 업데이트 쿼리 하나로 변경하는게 낫지 않을까 싶음
-        member.earnPoint(type.getGivenPoint());
+        member.earnPoint(type.getPoint());
         memberRepository.save(member);
 
         Date expiryDate = DateUtils.addDay(DEFAULT_POINT_EXPIRATION_DAY);
@@ -124,7 +124,7 @@ public class MemberPointService {
                 .member(member)
                 .activityType(type)
                 .activityDomainId(domainId)
-                .point(type.getGivenPoint())
+                .point(type.getPoint())
                 .state(STATE_EARNED_POINT)
                 .earnedAt(new Date())
                 .expiryAt(expiryDate)
@@ -163,14 +163,14 @@ public class MemberPointService {
 
     @Transactional
     public void retrievePoints(ActivityPointType type, Long domainId, Member member) {
-        member.usePoint(type.getRetrievePoint());
+        member.usePoint(type.getPoint());
         memberRepository.save(member);
 
         MemberPoint memberPoint = MemberPoint.builder()
                 .member(member)
                 .activityType(type)
                 .activityDomainId(domainId)
-                .point(type.getRetrievePoint())
+                .point(type.getPoint())
                 .state(STATE_USE_POINT)
                 .build();
 

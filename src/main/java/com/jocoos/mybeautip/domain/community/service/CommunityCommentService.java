@@ -24,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY_COMMENT;
-import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_COMMENT;
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 
 @Service
@@ -156,7 +155,7 @@ public class CommunityCommentService {
         }
 
         communityComment.delete();
-        activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_COMMENT, communityComment.getId(), member);
+        activityPointService.retrieveActivityPoint(DELETE_COMMUNITY_COMMENT, communityComment.getId(), member);
     }
 
     @Transactional

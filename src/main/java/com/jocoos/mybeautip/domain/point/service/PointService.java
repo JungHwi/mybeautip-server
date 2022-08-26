@@ -74,6 +74,10 @@ public class PointService {
             if (response.getEventId() != null) {
                 response.setTitle(eventTitleMap.get(response.getEventId()));
             }
+
+            if (response.getActivityType() != null) {
+                response.setTitle(response.getActivityType().getDescription());
+            }
         }
 
         return result;
