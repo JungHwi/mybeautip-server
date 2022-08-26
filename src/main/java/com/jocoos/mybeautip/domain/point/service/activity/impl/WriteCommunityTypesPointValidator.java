@@ -24,7 +24,7 @@ public class WriteCommunityTypesPointValidator implements MultiTypeActivityPoint
     private int dateLimitNum;
 
     @Value("${mybeautip.activity-point.community-valid-length}")
-    private int contentMinNum = 30;
+    private int contentMinNum;
 
     @Override
     public boolean valid(ValidObject validObject) {
@@ -41,9 +41,9 @@ public class WriteCommunityTypesPointValidator implements MultiTypeActivityPoint
     public ActivityPointType getRetrieveType(ValidObject validObject) {
         Community community = (Community) validObject.getDomain();
         if (community.isImageExist()) {
-            return WRITE_PHOTO_COMMUNITY;
+            return DELETE_PHOTO_COMMUNITY;
         } else {
-            return WRITE_COMMUNITY;
+            return DELETE_COMMUNITY;
         }
     }
 

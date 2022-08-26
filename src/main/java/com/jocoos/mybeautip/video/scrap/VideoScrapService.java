@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.CANCEL_VIDEO_SCRAP;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.VIDEO_SCRAP;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
@@ -62,7 +63,7 @@ public class VideoScrapService {
         scrap.notScrap();
         video.setScrapCount(video.getScrapCount() - 1);
         videoRepository.save(video);
-        activityPointService.retrieveActivityPoint(VIDEO_SCRAP, scrap.getId(), member);
+        activityPointService.retrieveActivityPoint(CANCEL_VIDEO_SCRAP, scrap.getId(), member);
     }
 
     public List<VideoScrap> findByMemberId(Long memberId, String cursor, Visibility visibility, Pageable pageable) {
