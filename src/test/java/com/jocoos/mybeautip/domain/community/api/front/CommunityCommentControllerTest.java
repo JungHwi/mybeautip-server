@@ -261,6 +261,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void reportComment() throws Exception {
         ReportRequest report = ReportRequest.builder()
                 .isReport(true)

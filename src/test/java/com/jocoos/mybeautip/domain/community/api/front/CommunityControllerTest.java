@@ -277,6 +277,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void likeCommunity() throws Exception {
         BooleanDto bool = new BooleanDto(true);
 
@@ -303,6 +304,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void reportCommunity() throws Exception {
         ReportRequest report = ReportRequest.builder()
                 .isReport(true)
