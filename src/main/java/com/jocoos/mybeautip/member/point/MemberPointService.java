@@ -162,14 +162,20 @@ public class MemberPointService {
 
     @Transactional
     public void retrievePoints(ActivityPointType type, Long domainId, Member member) {
-        member.usePoint(type.getPoint());
+
+        int retrievePoints = type.getPoint();
+        if (retrievePoints > member.getPoint()) {
+            retrievePoints = member.getPoint();
+        }
+
+        member.usePoint(retrievePoints);
         memberRepository.save(member);
 
         MemberPoint memberPoint = MemberPoint.builder()
                 .member(member)
                 .activityType(type)
                 .activityDomainId(domainId)
-                .point(type.getPoint())
+                .point(retrievePoints)
                 .state(STATE_RETRIEVE_POINT)
                 .build();
 
