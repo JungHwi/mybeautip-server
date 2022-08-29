@@ -14,27 +14,33 @@ import java.util.Set;
 @RequiredArgsConstructor
 public enum ActivityPointType implements CodeValue {
 
-    INPUT_ADDITIONAL_INFO("나의 정보 입력", 100, 0),
-    INPUT_EXTRA_INFO("추가 정보 입력", 100, 0),
+    INPUT_ADDITIONAL_INFO("나의 정보 입력", 100),
+    INPUT_EXTRA_INFO("추가 정보 입력", 100),
 
-    WRITE_COMMUNITY("게시물 작성", 50, 25),
-    WRITE_PHOTO_COMMUNITY("포토 게시물 작성", 100, 50),
-//    WRITE_COMMENT("댓글 작성", 2, 1),
+    WRITE_COMMUNITY("게시물 작성", 50),
+    WRITE_PHOTO_COMMUNITY("포토 게시물 작성", 100),
 
-    WRITE_VIDEO_COMMENT("비디오 댓글 작성", 2, 1),
-    WRITE_COMMUNITY_COMMENT("게시글 댓글 작성", 2, 1),
+    WRITE_VIDEO_COMMENT("비디오 댓글 작성", 2),
+    WRITE_COMMUNITY_COMMENT("게시물 댓글 작성", 2),
 
-    GET_LIKE_COMMUNITY("게시글 좋아요 획득", 2, 0),
-    GET_LIKE_COMMUNITY_COMMENT("게시글 댓글 좋아요 획득", 2, 0),
-    GET_LIKE_VIDEO("비디오 좋아요 획득", 2, 0),
-    GET_LIKE_VIDEO_COMMENT("비디오 댓글 좋아요 획득", 2, 0),
+    GET_LIKE_COMMUNITY("게시글 좋아요 획득", 2),
+    GET_LIKE_COMMUNITY_COMMENT("게시글 댓글 좋아요 획득", 2),
+    GET_LIKE_VIDEO("비디오 좋아요 획득", 2),
+    GET_LIKE_VIDEO_COMMENT("비디오 댓글 좋아요 획득", 2),
 
-    VIDEO_LIKE("영상 콘텐츠 좋아요", 10, 5),
-    VIDEO_SCRAP("영상 콘텐츠 스크랩", 10, 5);
+    VIDEO_LIKE("영상 콘텐츠 좋아요", 10),
+    VIDEO_SCRAP("영상 콘텐츠 스크랩", 10),
+
+
+    DELETE_COMMUNITY("게시물 삭제", 25),
+    DELETE_PHOTO_COMMUNITY("포토 게시물 삭제", 50),
+    DELETE_COMMUNITY_COMMENT("게시물 댓글 삭제", 1),
+    DELETE_VIDEO_COMMENT("비디오 댓글 삭제", 1),
+    CANCEL_VIDEO_LIKE("영상 콘텐츠 좋아요 취소", 5),
+    CANCEL_VIDEO_SCRAP("영상 콘텐츠 스크랩 취소", 5);
 
     private final String description;
-    private final int givenPoint;
-    private final int retrievePoint;
+    private final int point;
 
     private static final ActivityPointType[] ACTIVITY_POINT_TYPES_VALUES = ActivityPointType.values();
 

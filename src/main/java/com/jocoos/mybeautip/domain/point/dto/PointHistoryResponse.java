@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.point.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.domain.point.code.PointStatus;
 import com.jocoos.mybeautip.member.order.Order;
 import lombok.Getter;
@@ -31,5 +32,8 @@ public class PointHistoryResponse {
 
     @JsonIgnore
     private Long eventId;
+
+    @JsonIgnore
+    private ActivityPointType activityType;
 
 }

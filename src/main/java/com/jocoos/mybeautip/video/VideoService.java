@@ -737,7 +737,7 @@ public class VideoService {
         if (liked.getVideo().getLikeCount() > 0) {
             videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
         }
-        activityPointService.retrieveActivityPoint(VIDEO_LIKE, liked.getId(), liked.getCreatedBy());
+        activityPointService.retrieveActivityPoint(CANCEL_VIDEO_LIKE, liked.getId(), liked.getCreatedBy());
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Locale;
 
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.DELETE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 
@@ -128,7 +129,7 @@ public class CommentService {
         int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
         log.debug("child count: {}", childCount);
 
-        activityPointService.retrieveActivityPoint(WRITE_VIDEO_COMMENT,
+        activityPointService.retrieveActivityPoint(DELETE_VIDEO_COMMENT,
                                                    comment.getId(), comment.getCreatedBy());
 
         if (childCount == 0) {
