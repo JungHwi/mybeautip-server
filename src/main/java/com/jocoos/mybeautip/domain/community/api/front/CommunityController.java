@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+@Log4j2
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -28,8 +30,6 @@ public class CommunityController {
 
     @PostMapping(value = "/1/community")
     public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody WriteCommunityRequest request) {
-        request.setMember(legacyMemberService.currentMember());
-
         CommunityResponse response = service.write(request);
 
         return ResponseEntity.ok(response);

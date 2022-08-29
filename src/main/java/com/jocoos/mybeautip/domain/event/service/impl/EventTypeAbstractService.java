@@ -67,7 +67,7 @@ public abstract class EventTypeAbstractService implements EventTypeService {
 
     public void validEvent(Event event) {
         if (event == null) {
-            throw new BadRequestException("unable_event", "Event is not available");
+            throw new BadRequestException("Event is not available");
         }
         validEventStatus(event.getStatus());
         validEventPeriod(event.getStartAt(), event.getEndAt());

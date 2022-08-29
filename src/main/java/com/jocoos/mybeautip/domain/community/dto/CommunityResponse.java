@@ -72,7 +72,7 @@ public class CommunityResponse implements CursorInterface {
         this.relationInfo = relationInfo;
 
         // FIXME 관계나 상태에 따라 Title / Contents 변경. 어디다 치워 버리고 싶다.
-        if (relationInfo.getIsBlock()) {
+        if (relationInfo.getIsBlock() && this.category.getType() != CommunityCategoryType.BLIND) {
             this.contents = "차단된 사용자의 글이에요.";
             this.fileUrl = new ArrayList<>();
         } else if (this.reportCount >= 3) {

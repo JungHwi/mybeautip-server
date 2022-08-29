@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.community.service.dao;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentReport;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCommentReportRepository;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,12 @@ public class CommunityCommentReportDao {
     private final CommunityCommentReportRepository repository;
 
     @Transactional
-    public CommunityCommentReport report(long memberId, long communityId, ReportRequest reportRequest) {
-        CommunityCommentReport report = getReport(memberId, communityId);
+    public CommunityCommentReport report(long memberId, long commentId, ReportRequest reportRequest) {
+        CommunityCommentReport report = getReport(memberId, commentId);
+
+        if (report.isReport()) {
+            throw new BadRequestException("already_report", "Already report. Id is " + commentId);
+        }
 
         if (report.isReport() == reportRequest.getIsReport()) {
             return report;
@@ -29,7 +34,7 @@ public class CommunityCommentReportDao {
         report.setReport(reportRequest.getIsReport());
         report.setDescription(reportRequest.getDescription());
 
-        communityDao.reportCount(communityId, reportRequest.getIsReport() ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_MINUS_ONE);
+        communityDao.reportCount(commentId, reportRequest.getIsReport() ? NumberUtils.INTEGER_ONE : NumberUtils.INTEGER_MINUS_ONE);
 
         return repository.save(report);
     }

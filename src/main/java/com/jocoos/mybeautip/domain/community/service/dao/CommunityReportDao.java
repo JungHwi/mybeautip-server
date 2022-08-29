@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.community.service.dao;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityReportRepository;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,9 @@ public class CommunityReportDao {
     @Transactional
     public CommunityReport report(long memberId, long communityId, ReportRequest reportRequest) {
         CommunityReport communityReport = getReport(memberId, communityId);
+        if (communityReport.isReport()) {
+            throw new BadRequestException("already_report", "Already report. Id is " + communityId);
+        }
 
         if (communityReport.isReport() == reportRequest.getIsReport()) {
             return communityReport;

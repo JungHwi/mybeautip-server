@@ -61,6 +61,7 @@ public class CommunityService {
 
     @Transactional
     public CommunityResponse write(WriteCommunityRequest request) {
+        request.setMember(legacyMemberService.currentMember());
         Community community = communityDao.write(request);
 
         awsS3Handler.copy(request.getFiles(), UrlDirectory.COMMUNITY.getDirectory(community.getId()));

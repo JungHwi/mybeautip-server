@@ -22,7 +22,7 @@ create table community (
     like_count int not null default 0 comment '좋아요수',
     comment_count int not null default 0 comment '댓글수',
     report_count int not null default 0 comment '신고수',
-    sorted_at datetime not null comment '정렬용 일시',
+    sorted_at datetime(3) not null comment '정렬용 일시',
     modified_at datetime not null comment '수정 일시',
     created_at datetime not null comment '생성 일시'
 ) comment '커뮤니티 정보' charset = utf8mb4;
