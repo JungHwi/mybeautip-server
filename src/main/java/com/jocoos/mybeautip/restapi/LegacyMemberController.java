@@ -155,7 +155,7 @@ public class LegacyMemberController {
     }
 
     @PatchMapping()
-    public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
+    public ResponseEntity<MemberInfo> updateMember(@RequestBody UpdateMemberRequest updateMemberRequest,
                                                    @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         log.debug("member id: {}", legacyMemberService.currentMemberId());
 
@@ -729,7 +729,6 @@ public class LegacyMemberController {
     @Data
     public static class UpdateMemberRequest {
 
-        @Size(min = 2, max = 10)
         private String username;
 
         private String avatarUrl;
