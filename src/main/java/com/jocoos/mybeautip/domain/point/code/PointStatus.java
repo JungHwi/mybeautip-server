@@ -4,8 +4,7 @@ import com.jocoos.mybeautip.global.code.CodeValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.member.point.MemberPoint.*;
@@ -19,7 +18,8 @@ public enum PointStatus implements CodeValue {
     USED("사용", STATE_USE_POINT),
     EXPIRED("만료", STATE_EXPIRED_POINT),
     REFUNDED("환불", STATE_REFUNDED_POINT),
-    PRESENT("선물", STATE_PRESENT_POINT);
+    PRESENT("선물", STATE_PRESENT_POINT),
+    RETRIEVED("회수", STATE_RETRIEVE_POINT);
 
     private final String description;
     private final int legacyCode;

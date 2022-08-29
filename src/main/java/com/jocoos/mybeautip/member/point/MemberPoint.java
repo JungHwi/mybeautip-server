@@ -26,6 +26,7 @@ public class MemberPoint extends CreatedDateAuditable {
     public static final int STATE_EXPIRED_POINT = 3;
     public static final int STATE_REFUNDED_POINT = 8;
     public static final int STATE_PRESENT_POINT = 9;
+    public static final int STATE_RETRIEVE_POINT = 10;
     private static DecimalFormat POINT_FORMAT = new DecimalFormat("#,###", new DecimalFormatSymbols(Locale.KOREA));
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
