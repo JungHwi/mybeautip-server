@@ -40,7 +40,9 @@ public class ActivityPointService {
 
     @Transactional
     public void retrieveActivityPoint(ActivityPointType type, Long domainId, Member member) {
-        memberPointService.retrievePoints(type, domainId, member);
+        if (member.getPoint() > 0) {
+            memberPointService.retrievePoints(type, domainId, member);
+        }
     }
 
     @Transactional
