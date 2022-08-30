@@ -224,7 +224,7 @@ public class LegacyMemberService {
     }
 
     public void checkUsernameValidation(Long userId, String username, String lang) {
-        if (StringUtils.isBlank(username) || username.length() <= 2 || username.length() > 10) {
+        if (StringUtils.isBlank(username) || username.length() < 2 || username.length() > 10) {
             throw new BadRequestException("username length must be between 2 and 10 characters.");
         }
 
