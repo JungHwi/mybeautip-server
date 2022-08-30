@@ -3,12 +3,13 @@ package com.jocoos.mybeautip.member.point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 public interface MemberPointDetailRepository extends JpaRepository<MemberPointDetail, Long> {
-    Optional<MemberPointDetail> findTopByMemberIdAndStateAndExpiryAtAfterOrderByIdDesc(Long memberId, int state, Date now);
+    Optional<MemberPointDetail> findTopByMemberIdAndStateInAndExpiryAtAfterOrderByIdDesc(Long memberId, List<Integer> states, Date now);
 
     @Query("select min(mpd.id) as id, sum(mpd.point) as pointSum, max(mpd.expiryAt) as expiryAt from MemberPointDetail mpd where mpd.parentId = ?1 group by mpd.parentId")
     Optional<MemberPointSum> getSumByParentId(Long parentId);
@@ -17,7 +18,7 @@ public interface MemberPointDetailRepository extends JpaRepository<MemberPointDe
 
     List<MemberPointDetail> findByParentIdInAndState(List<Long> parentIds, int state);
 
-    List<MemberPointDetail> findByParentIdAndState(Long parentId, int state);
+    List<MemberPointDetail> findByParentIdAndStateOrMemberPointIdAndState(Long parentId, int state, Long memberPointId, int secondState);
 
     @Query("select sum(mpd.point) as pointSum, max(mpd.expiryAt) as expiryAt from MemberPointDetail mpd where mpd.memberPointId = ?1 group by mpd.memberPointId")
     Optional<MemberPointSum> getSumByMemberPointId(Long memberPointId);
@@ -36,5 +37,7 @@ public interface MemberPointDetailRepository extends JpaRepository<MemberPointDe
     List<MemberPointDetail> getAvailablePoint(long memberId, List<Integer> state, Long pointDetailId);
 
     List<MemberPointDetail> findByOrderIdAndStateAndExpiryAtAfter(Long orderId, int state, Date now);
+
+    List<MemberPointDetail> findAllByMemberIdAndStateAndParentIdIsNullOrderByIdAsc(long memberId, int state);
 
 }

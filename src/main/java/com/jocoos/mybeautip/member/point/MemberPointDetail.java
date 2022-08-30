@@ -7,8 +7,8 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.Date;
 
-import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_RETRIEVE_POINT;
-import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
+import static com.jocoos.mybeautip.member.point.MemberPoint.*;
+
 
 @NoArgsConstructor
 @Data
@@ -91,7 +91,7 @@ public class MemberPointDetail extends CreatedDateAuditable {
         this.expiryAt = memberPoint.getExpiryAt();
         if (userPointService == UsePointService.ORDER) {
             this.orderId = usePointServiceId;
-        } else if (userPointService == UsePointService.EVENT){
+        } else if (userPointService == UsePointService.EVENT) {
             this.eventId = usePointServiceId;
         } else {
             this.activityType = ActivityPointType.getActivityPointType(Math.toIntExact(usePointServiceId));
@@ -99,8 +99,75 @@ public class MemberPointDetail extends CreatedDateAuditable {
         setPointAndState(point, STATE_USE_POINT);
     }
 
-    public static int getEarnedState() {
-        return MemberPoint.STATE_EARNED_POINT;
+    @Builder(builderClassName = "withUsePointService", builderMethodName = "withUsePointService")
+    private MemberPointDetail(Long memberId,
+                              Long memberPointId,
+                              Long parentId,
+                              int point,
+                              int state,
+                              UsePointService userPointService,
+                              Long usePointServiceId,
+                              Date expiryAt) {
+        this.memberId = memberId;
+        this.memberPointId = memberPointId;
+        this.parentId = parentId;
+        this.expiryAt = expiryAt;
+        this.point = point;
+        this.state = state;
+
+        if (userPointService == UsePointService.ORDER) {
+            this.orderId = usePointServiceId;
+        } else if (userPointService == UsePointService.EVENT) {
+            this.eventId = usePointServiceId;
+        } else {
+            this.activityType = ActivityPointType.getActivityPointType(Math.toIntExact(usePointServiceId));
+        }
+    }
+
+    public static MemberPointDetail earnStatus(MemberPoint memberPoint,
+                                               int point,
+                                               UsePointService service,
+                                               long serviceId) {
+        return MemberPointDetail.withUsePointService()
+                .memberId(memberPoint.getMember().getId())
+                .memberPointId(memberPoint.getId())
+                .parentId(memberPoint.getId())
+                .point(point)
+                .state(STATE_EARNED_POINT)
+                .userPointService(service)
+                .usePointServiceId(serviceId)
+                .expiryAt(memberPoint.getExpiryAt())
+                .build();
+    }
+
+    public static MemberPointDetail earnUnderZeroStatus(MemberPoint memberPoint,
+                                                        long parentId,
+                                                        int point,
+                                                        UsePointService service,
+                                                        long serviceId) {
+        return MemberPointDetail.withUsePointService()
+                .memberId(memberPoint.getMember().getId())
+                .memberPointId(memberPoint.getId())
+                .parentId(parentId)
+                .point(point)
+                .state(STATE_UNDER_ZERO_POINT)
+                .userPointService(service)
+                .usePointServiceId(serviceId)
+                .build();
+    }
+
+    public static MemberPointDetail useUnderZeroStatus(MemberPoint memberPoint,
+                                                       int point,
+                                                       UsePointService service,
+                                                       long serviceId) {
+        return MemberPointDetail.withUsePointService()
+                .memberId(memberPoint.getMember().getId())
+                .memberPointId(memberPoint.getId())
+                .point(-point)
+                .state(STATE_UNDER_ZERO_POINT)
+                .userPointService(service)
+                .usePointServiceId(serviceId)
+                .build();
     }
 
     public void setPointAndState(int point, int state) {
@@ -122,5 +189,9 @@ public class MemberPointDetail extends CreatedDateAuditable {
 
     public void setCreatedAt(Date date) {
         super.createdAt = date;
+    }
+
+    public void underZeroPointAllAddedUp() {
+        this.parentId = this.getMemberPointId();
     }
 }

@@ -200,6 +200,11 @@ public class Member {
         return this;
     }
 
+    public Member retrievePoint(int point) {
+        this.point -= point;
+        return this;
+    }
+
     public Member earnPoint(int point) {
         if (point <= 0) {
             throw new BadRequestException("not_positive_point", "Points must be positive. earn point - " + point);
