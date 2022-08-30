@@ -62,6 +62,3 @@ redis:
   host: 172.31.2.106
   port: 6379
   password: akdlqbxlq#1@Jocoos
-
-logging:
-  config: classpath:log/log4j2-console.yml
