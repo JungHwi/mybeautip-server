@@ -34,7 +34,7 @@ mybeautip:
       bucket: 'mybeautip-prod'
       region: 'ap-northeast-2'
     cf:
-      domain: "https://static.mybeautip.com"
+      domain: "https://static.mybeautip.com/"
   store:
     image-path:
       domain: https://static.mybeautip.com/common/

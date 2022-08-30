@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinReposit
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.service.PresentFactory;
 import com.jocoos.mybeautip.domain.event.service.PresentService;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,11 @@ public class SignupEventService extends EventTypeAbstractService {
     @Override
     @Transactional
     public EventJoin join(Event event, Member member) {
-        valid(event);
+        try {
+            valid(event);
+        } catch (BadRequestException ex) {
+            return null;
+        }
 
         EventProduct eventProduct = super.winPrize(event.getEventProductList());
 
