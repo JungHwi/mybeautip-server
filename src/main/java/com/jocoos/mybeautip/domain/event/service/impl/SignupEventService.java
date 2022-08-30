@@ -27,9 +27,7 @@ public class SignupEventService extends EventTypeAbstractService {
     @Override
     @Transactional
     public EventJoin join(Event event, Member member) {
-        try {
-            valid(event);
-        } catch (BadRequestException ex) {
+        if(!valid(event)) {
             return null;
         }
 
@@ -61,8 +59,13 @@ public class SignupEventService extends EventTypeAbstractService {
         return this.join(event, member);
     }
 
-    private void valid(Event event) {
-        super.validEvent(event);
+    private boolean valid(Event event) {
+        try {
+            super.validEvent(event);
+            return true;
+        } catch (BadRequestException ex) {
+            return false;
+        }
     }
 
     private boolean duplicateSignup(Event event, Member member) {

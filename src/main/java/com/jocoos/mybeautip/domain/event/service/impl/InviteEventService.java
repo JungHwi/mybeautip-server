@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.domain.event.service.PresentFactory;
 import com.jocoos.mybeautip.domain.event.service.PresentService;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.address.Address;
 import com.jocoos.mybeautip.member.address.AddressRepository;
@@ -25,7 +26,9 @@ public class InviteEventService extends EventTypeAbstractService {
         Address address = addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId())
                 .orElse(null);
 
-        valid(event, address);
+        if(!valid(event, address)) {
+            return null;
+        }
 
         EventProduct eventProduct = super.winPrize(event.getEventProductList());
 
@@ -45,7 +48,12 @@ public class InviteEventService extends EventTypeAbstractService {
         return eventJoin;
     }
 
-    private void valid(Event event, Address address) {
-        super.validEvent(event, address);
+    private boolean valid(Event event, Address address) {
+        try {
+            super.validEvent(event, address);
+            return true;
+        } catch (BadRequestException ex) {
+            return false;
+        }
     }
 }
