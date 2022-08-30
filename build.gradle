@@ -119,6 +119,7 @@ test {
 
 asciidoctor {
   dependsOn test
+  mkdir snippetsDir
   configurations 'asciidoctorExtensions'
   inputs.dir snippetsDir
 
