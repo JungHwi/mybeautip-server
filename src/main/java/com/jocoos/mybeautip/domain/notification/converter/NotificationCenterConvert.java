@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.notification.converter;
 
+import com.jocoos.mybeautip.domain.notification.code.MessageType;
 import com.jocoos.mybeautip.domain.notification.code.NotificationLinkType;
 import com.jocoos.mybeautip.domain.notification.dto.CenterMessageResponse;
 import com.jocoos.mybeautip.domain.notification.persistence.domain.NotificationCenterEntity;
@@ -39,10 +40,12 @@ public interface NotificationCenterConvert {
             return;
         }
 
-        Map<String, String> arguments = StringConvertUtil.convertJsonToMap(entity.getArguments());
-        String communityId = arguments.get(COMMUNITY_ID.name());
-        String imageUrl = ImageUrlConvertUtil.toUrl(entity.getImageUrl(), COMMUNITY, Long.valueOf(communityId));
-        response.setImageUrl(imageUrl);
+        if (response.getMessageType() == MessageType.COMMUNITY) {
+            Map<String, String> arguments = StringConvertUtil.convertJsonToMap(entity.getArguments());
+            String communityId = arguments.get(COMMUNITY_ID.name());
+            String imageUrl = ImageUrlConvertUtil.toUrl(entity.getImageUrl(), COMMUNITY, Long.valueOf(communityId));
+            response.setImageUrl(imageUrl);
+        }
     }
 
     @Named("mergeMessage")
