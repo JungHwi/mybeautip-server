@@ -16,4 +16,9 @@ public enum Telecom implements CodeValue {
     private final boolean isSave;
     private final String description;
 
+    @Override
+    public String getName() {
+        return this.name();
+    }
+
 }

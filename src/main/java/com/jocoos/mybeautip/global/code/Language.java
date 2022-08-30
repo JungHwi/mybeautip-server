@@ -15,4 +15,9 @@ public enum Language implements CodeValue {
     public Language getDefault() {
         return Language.KO;
     }
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }

@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.block.BlockService;
+import com.jocoos.mybeautip.member.block.BlockStatus;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,8 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,8 +87,7 @@ public class BlockController {
         Long me = legacyMemberService.currentMemberId();
         Block block = blockRepository.findByIdAndMe(id, me)
                 .orElseThrow(() -> new NotFoundException("block_not_found", messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
-
-        blockRepository.delete(block);
+        blockService.unblock(block);
     }
 
     @GetMapping("/me/blocks")
@@ -99,7 +101,7 @@ public class BlockController {
     public BlockResponse isBlocked(@RequestParam(name = "member_id") Long memberId) {
         Long me = legacyMemberService.currentMemberId();
         BlockResponse response = new BlockResponse(false);
-        blockRepository.findByMeAndMemberYouId(memberId, me)
+        blockRepository.findByMeAndMemberYouIdAndStatus(memberId, me, BLOCK)
                 .ifPresent(block -> response.setBlocked(true));
         return response;
     }
@@ -110,7 +112,8 @@ public class BlockController {
                 new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
 
         PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Block> page = blockRepository.findByCreatedAtBeforeAndMe(startCursor, legacyMemberService.currentMemberId(), pageable);
+        Page<Block> page = blockRepository
+                .findByCreatedAtBeforeAndMeAndStatus(startCursor, legacyMemberService.currentMemberId(), pageable, BLOCK);
         List<BlockInfo> result = new ArrayList<>();
         for (Block block : page.getContent()) {
             result.add(new BlockInfo(block, legacyMemberService.getMemberInfo(block.getMemberYou())));
@@ -157,6 +160,11 @@ public class BlockController {
 
         BlockResponse(Boolean blocked) {
             this.blocked = blocked;
+        }
+
+        public BlockResponse(Long id, BlockStatus status) {
+            this.id = id;
+            this.blocked = BLOCK.equals(status);
         }
     }
 }

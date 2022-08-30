@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.member.address;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.DeliveryChargeArea;
 import com.jocoos.mybeautip.goods.DeliveryChargeAreaRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -64,6 +64,11 @@ public class AddressService {
         }
 
         address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
+        if (StringUtils.isNotBlank(address.getPhone())) {
+            String phone = address.getPhone();
+            phone = phone.replace("-", "").replace(" ", "");
+            address.setPhone(phone);
+        }
         log.debug("address: {}", address);
         return addressRepository.save(address);
     }
@@ -77,7 +82,7 @@ public class AddressService {
             throw new BadRequestException("wrong_format_phone");
         }
 
-        if (addressRepository.existsByPhone(phone)) {
+        if (addressRepository.existsByPhoneAndDeletedAtIsNull(phone)) {
             throw new BadRequestException("duplicate_phone");
         }
 
@@ -107,6 +112,11 @@ public class AddressService {
                         address.setBase(true);
                     }
                     address.setAreaShipping(calculateAreaShipping(address.getRoadAddrPart1()));
+                    if (StringUtils.isNotBlank(address.getPhone())) {
+                        String phone = address.getPhone();
+                        phone = phone.replace("-", "").replace(" ", "");
+                        address.setPhone(phone);
+                    }
                     return addressRepository.save(address);
                 })
                 .orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));

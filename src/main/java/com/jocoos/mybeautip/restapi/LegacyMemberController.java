@@ -2,9 +2,11 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
+import com.jocoos.mybeautip.domain.term.service.MemberTermService;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.comment.*;
@@ -48,6 +50,9 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+
+
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/members", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -74,7 +79,12 @@ public class LegacyMemberController {
     private final RevenuePaymentRepository revenuePaymentRepository;
     private final VideoScrapService videoScrapService;
     private final CommentService commentService;
-    @Value("${mybeautip.store.image-path.prefix}")
+
+    private final MemberTermService memberTermService;
+
+
+
+    @Value("${mybeautip.store.image-path.domain}")
     private String storeImagePrefix;
     @Value("${mybeautip.store.image-path.cover-suffix}")
     private String storeImageSuffix;
@@ -106,7 +116,8 @@ public class LegacyMemberController {
                                   LegacyNotificationService legacyNotificationService,
                                   RevenuePaymentRepository revenuePaymentRepository,
                                   VideoScrapService videoScrapService,
-                                  CommentService commentService) {
+                                  CommentService commentService,
+                                  MemberTermService memberTermService) {
         this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
         this.videoService = videoService;
@@ -127,6 +138,7 @@ public class LegacyMemberController {
         this.revenuePaymentRepository = revenuePaymentRepository;
         this.videoScrapService = videoScrapService;
         this.commentService = commentService;
+        this.memberTermService = memberTermService;
     }
 
     @GetMapping("/me")
@@ -134,26 +146,16 @@ public class LegacyMemberController {
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         log.debug("member id: {}", principal.getName());
 
+        List<TermTypeResponse> termTypeResponses =
+                memberTermService.getOptionalTermAcceptStatus(Long.parseLong(principal.getName()));
+
         return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-                .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio)))
+                .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio, termTypeResponses)))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
     }
 
-    // 최초에 TAG 없는 멤버들 TAG 생성
-    @PatchMapping("/tag/migration")
-    public ResponseEntity migrationTag() {
-        List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
-
-        for (Member member : noTagMembers) {
-            legacyMemberService.adjustTag(member);
-            log.debug("Member id - " + member.getId() + ", Member tag - " + member.getTag());
-            memberRepository.save(member);
-        }
-        return new ResponseEntity(HttpStatus.ACCEPTED);
-    }
-
     @PatchMapping()
-    public ResponseEntity<MemberInfo> updateMember(@Valid @RequestBody UpdateMemberRequest updateMemberRequest,
+    public ResponseEntity<MemberInfo> updateMember(@RequestBody UpdateMemberRequest updateMemberRequest,
                                                    @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         log.debug("member id: {}", legacyMemberService.currentMemberId());
 
@@ -166,7 +168,7 @@ public class LegacyMemberController {
             }
         }
 
-        legacyMemberService.checkUsernameValidation(updateMemberRequest.getUsername(), lang);
+        legacyMemberService.checkUsernameValidation(member.getId(), updateMemberRequest.getUsername(), lang);
 
         member = legacyMemberService.updateMember(updateMemberRequest, member);
         return new ResponseEntity<>(legacyMemberService.getMemberInfo(member), HttpStatus.OK);
@@ -288,7 +290,7 @@ public class LegacyMemberController {
         response.setGoods(goodsLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
         response.setStore(storeLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
         response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(legacyMemberService.currentMemberId()));
-        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(legacyMemberService.currentMemberId()));
+        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNullAndStatus(legacyMemberService.currentMemberId(), LIKE));
         return response;
     }
 
@@ -300,7 +302,7 @@ public class LegacyMemberController {
         response.setGoods(goodsLikeRepository.countByCreatedById(id));
         response.setStore(storeLikeRepository.countByCreatedById(id));
         response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(id));
-        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNull(id));
+        response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNullAndStatus(id, LIKE));
         return response;
     }
 
@@ -479,7 +481,7 @@ public class LegacyMemberController {
             }
 
             if (me != null) {
-                Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me, LIKE)
                         .map(CommentLike::getId).orElse(null);
                 commentInfo.setLikeId(likeId);
             }
@@ -702,10 +704,10 @@ public class LegacyMemberController {
         List<VideoController.VideoInfo> result = new ArrayList<>();
 
         if (cursor != null) {
-            videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndVideoDeletedAtIsNull(
-                    new Date(cursor), memberId, pageable);
+            videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndVideoDeletedAtIsNullAndStatus(
+                    new Date(cursor), memberId, pageable, LIKE);
         } else {
-            videoLikes = videoLikeRepository.findByCreatedByIdAndVideoDeletedAtIsNull(memberId, pageable);
+            videoLikes = videoLikeRepository.findByCreatedByIdAndVideoDeletedAtIsNullAndStatus(memberId, pageable, LIKE);
         }
 
         for (VideoLike like : videoLikes) {
@@ -727,7 +729,6 @@ public class LegacyMemberController {
     @Data
     public static class UpdateMemberRequest {
 
-        @Size(min = 2, max = 10)
         private String username;
 
         private String avatarUrl;

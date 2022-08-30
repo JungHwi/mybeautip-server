@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
-
 @Slf4j
 @Data
 @Configuration
@@ -17,11 +15,7 @@ public class Oauth2Config {
     private Oauth2ProviderConfig kakao;
     private Oauth2ProviderConfig naver;
     private Oauth2ProviderConfig facebook;
-
-    @PostConstruct
-    public void postConstruct() {
-        log.debug("{}", this);
-    }
+    private Oauth2ProviderConfig apple;
 
     @Data
     @NoArgsConstructor
@@ -34,5 +28,7 @@ public class Oauth2Config {
         private String tokenMethod;
         private String fields;
         private String redirectUri;
+        private String teamId;
+        private String appBundleId;
     }
 }

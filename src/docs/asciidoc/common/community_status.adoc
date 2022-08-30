@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[community_category_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-community_status.adoc[]

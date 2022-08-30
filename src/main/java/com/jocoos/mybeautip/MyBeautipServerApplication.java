@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableFeignClients
 public class MyBeautipServerApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(MyBeautipServerApplication.class, args);
     }

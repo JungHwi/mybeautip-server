@@ -59,4 +59,11 @@ public class Address extends MemberAuditable {
     @Column
     private Date deletedAt;
 
+    public String getDeliveryInfo() {
+        return this.getWholeAddress() + this.recipient + " " + this.phone;
+    }
+
+    public String getWholeAddress() {
+        return "(" + this.zipNo + ")" + this.roadAddrPart1 + " " + this.roadAddrPart2 + " ";
+    }
 }

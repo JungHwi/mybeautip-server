@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.post;
 
+import com.jocoos.mybeautip.global.code.LikeStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -12,7 +13,9 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
     Optional<PostLike> findByPostIdAndCreatedById(Long postId, Long createdBy);
 
-    Optional<PostLike> findByPostIdAndStatusAndCreatedById(Long postId, PostLikeStatus status, Long createdBy);
+    Optional<PostLike> findByPostIdAndCreatedByIdAndStatus(Long postId, Long createdBy, LikeStatus status);
+
+    Optional<PostLike> findByPostIdAndStatusAndCreatedById(Long postId, LikeStatus status, Long createdBy);
 
     Optional<PostLike> findByIdAndPostIdAndCreatedById(Long id, Long postId, Long createdBy);
 
@@ -26,4 +29,5 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
 
     int countByPostId(Long postId);
 
+    boolean existsByPostIdAndCreatedById(long postId, long memberId);
 }

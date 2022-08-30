@@ -14,6 +14,8 @@ public class RandomUtils {
     private static final int USERNAME_ALPHABETIC_LENGTH = 2;
     private static final int USERNAME_MAX_NUMERIC = 99999;
 
+    private static final int FILENAME_ALPHABETIC_LENGTH = 16;
+
     public static int getRandom(int max) {
         return getRandom(MIN_INTEGER, max);
     }
@@ -37,5 +39,9 @@ public class RandomUtils {
         String middleName = RandomStringUtils.randomAlphabetic(USERNAME_ALPHABETIC_LENGTH).toLowerCase();
         int randomNumber = getRandom(USERNAME_MAX_NUMERIC);
         return String.format("%s%s%05d", USERNAME_PREFIX, middleName, randomNumber);
+    }
+
+    public static String generateFilename() {
+        return RandomStringUtils.randomAlphanumeric(FILENAME_ALPHABETIC_LENGTH).toLowerCase();
     }
 }

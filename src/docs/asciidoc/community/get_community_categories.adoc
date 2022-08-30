@@ -1,0 +1,3 @@
+== Get Community Categories API
+
+operation::get_community_categories[snippets='http-request,http-response,response-fields']

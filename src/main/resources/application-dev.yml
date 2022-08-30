@@ -4,21 +4,33 @@ spring:
       on-profile: dev
     import: classpath:application-oauth-dev.yml
   datasource:
-    url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
-    username: mybeautip
-    password: akdlqbxlq#1@Jocoos
-    test-on-borrow: true
-    validation-query: SELECT 1
-
+    master:
+      hikari:
+        username: mybeautipdevsrv
+        password: mybeautipdevsrvpass77
+        jdbc-url: jdbc:mysql://mybeautip-dev.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautipdevsrv
+        password: mybeautipdevsrvpass77
+        jdbc-url: jdbc:mysql://mybeautip-dev.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
 mybeautip:
+  store:
+    image-path:
+      domain: https://static.mybeautip.com/common/
+  service:
+    member:
+      rejoin-available-second: 30
   security:
     access-token-validity-seconds: 604800     # 7 hours
     refresh-token-validity-seconds: 1814400    # 21 days
   slack:
     key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
     channel: "#mybeautip-dev"
-    order-key: T02GN94AU/BJA6YDJPJ/7L197lsrvR2X5yBsZpA2wdH0
-    order-channel: "#z-mybeautip-dev"
+    order-key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
+    order-channel: "#mybeautip-dev"
 
 logging:
   config: classpath:log/log4j2-file.yml
+
+

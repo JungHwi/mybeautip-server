@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.config.Oauth2Config;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +30,7 @@ public class Oauth2Client {
 
     public String getAccessToken(String code, String state) {
         if (providerConfig == null) {
-            throw new MybeautipRuntimeException("Provider config required");
+            throw new MybeautipException("Provider config required");
         }
 
         if ("GET".equals(providerConfig.getTokenMethod())) {
@@ -62,6 +62,8 @@ public class Oauth2Client {
 
         String uri = uriBuilder.toUriString();
         log.debug("{}", uri);
+
+
         ResponseEntity<AccessTokenResponse> response = restTemplate
                 .exchange(uri, HttpMethod.GET, entity, AccessTokenResponse.class);
 

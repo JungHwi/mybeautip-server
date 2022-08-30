@@ -1,7 +1,8 @@
 package com.jocoos.mybeautip.post;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.code.LikeStatus;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.block.Block;
@@ -28,12 +29,17 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private static final String COMMENT_BLOCKED_MESSAGE = "comment.blocked_message";
+
+    private static final int CONTENT_LENGTH_POINT_RESTRICTION = 30;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final MentionService mentionService;
@@ -69,11 +75,12 @@ public class PostService {
 
         String content = commentService.getBlindContent(comment, lang, null);
         if (me != null) {
-            Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me.getId())
+            Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me.getId(), LIKE)
                     .map(CommentLike::getId).orElse(null);
             commentInfo.setLikeId(likeId);
 
-            Block block = blockRepository.findByMeAndMemberYouId(me.getId(), comment.getCreatedBy().getId())
+            Block block = blockRepository
+                    .findByMeAndMemberYouIdAndStatus(me.getId(), comment.getCreatedBy().getId(), BLOCK)
                     .orElse(null);
             if (block != null) {
                 commentInfo.setBlockId(block.getId());
@@ -134,13 +141,15 @@ public class PostService {
         post.setLikeCount(post.getLikeCount() + 1);
         PostLike postLike = postLikeRepository.findByPostIdAndCreatedById(post.getId(), memberId)
                 .orElse(new PostLike(post));
-        postLike.setStatus(PostLikeStatus.LIKE);
-        return postLikeRepository.save(postLike);
+        postLike.setStatus(LIKE);
+
+        PostLike savedLike = postLikeRepository.save(postLike);
+        return savedLike;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikePost(PostLike liked) {
-        liked.setStatus(PostLikeStatus.UNLIKE);
+        liked.setStatus(LikeStatus.UNLIKE);
         postLikeRepository.save(liked);
         if (liked.getPost().getLikeCount() > 0) {
             postRepository.updateLikeCount(liked.getPost().getId(), -1);
@@ -148,14 +157,27 @@ public class PostService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public CommentLike likeCommentPost(Comment comment) {
+    public CommentLike likeCommentPost(Long commentId, Long postId, Member member) {
+
+        Comment comment = commentRepository.findByIdAndPostId(commentId, postId)
+                .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
         commentRepository.updateLikeCount(comment.getId(), 1);
-        return commentLikeRepository.save(new CommentLike(comment));
+
+        CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
+                .orElse(new CommentLike(comment));
+
+        if (LIKE.equals(commentLike.getStatus())) {
+            throw new BadRequestException("already liked");
+        }
+
+        commentLike.like();
+        commentLikeRepository.save(commentLike);
+        return commentLike;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikeCommentPost(CommentLike liked) {
-        commentLikeRepository.delete(liked);
+        liked.unlike();
         if (liked.getComment().getCommentCount() > 0) {
             commentRepository.updateLikeCount(liked.getComment().getId(), -1);
         }
@@ -174,7 +196,7 @@ public class PostService {
     }
 
     @Transactional
-    public Post savePost(Post post, List<MultipartFile> files) {
+    public Post savePost(Post post, List<MultipartFile> files, Member member) {
         postRepository.save(post);
 
         List<String> attachments = null;
@@ -273,6 +295,7 @@ public class PostService {
         return null;
     }
 
+    @Transactional
     public void removePost(Post post) {
         post.setDeletedAt(new Date());
         postRepository.save(post);

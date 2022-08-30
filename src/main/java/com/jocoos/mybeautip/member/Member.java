@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.member.vo.BirthdayAttributeConverter;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
@@ -18,6 +19,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
+
+import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.HTTP_PREFIX;
+import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 
 @Data
@@ -41,9 +48,6 @@ public class Member {
     public static final int PERMISSION_ALL = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
     // Changed store link from 8 to 32
     static final int LINK_STORE = 32;
-    @Transient
-    @JsonIgnore
-    private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,8 +71,9 @@ public class Member {
     @Convert(converter = BirthdayAttributeConverter.class)
     private Birthday birthday;
 
-    @Column(length = 200)
-    private String avatarUrl;
+    // 디비에 이미지 파일명만 저장하기로 변경, 컬럼명은 일단 그대로둠
+    @Column(name = "avatar_url", length = 200)
+    private String avatarFilename;
 
     @Column(length = 50)
     private String email;
@@ -138,13 +143,14 @@ public class Member {
         this.link = parseLink(request.getGrantType());
         this.username = StringUtils.isBlank(request.getUsername()) ? RandomUtils.generateUsername() : request.getUsername();
         this.email = StringUtils.isBlank(request.getEmail()) ? "" : request.getEmail();
-        this.avatarUrl = StringUtils.isBlank(request.getAvatarUrl()) ? defaultAvatarUrl : request.getAvatarUrl();
         this.point = 0;
         this.visible = false;
         this.revenueModifiedAt = null;
         this.pushable = true; // default true
-        this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.LIVE_POST | Member.MOTD_POST | Member.REVENUE_RETURN);
+        this.permission = (Member.CHAT_POST | Member.COMMENT_POST | Member.REVENUE_RETURN);
+
         setTag();
+        setAvatarFilenameFromUrl(request.getAvatarUrl());
     }
 
     public void setLink(int link) {
@@ -183,5 +189,44 @@ public class Member {
         this.phoneNumber = phoneNumber.trim()
                 .replace("-", "")
                 .replace(" ", "");
+    }
+
+    public Member usePoint(int point) {
+        if (this.point < point) {
+            throw new BadRequestException("not_enough_point", "Member has " + this.point + " point. This event need " + point + " point.");
+        }
+
+        this.point = this.point - point;
+        return this;
+    }
+
+    public Member earnPoint(int point) {
+        if (point <= 0) {
+            throw new BadRequestException("not_positive_point", "Points must be positive. earn point - " + point);
+        }
+        this.point = this.point + point;
+        return this;
+    }
+
+    public void setAvatarFilenameFromUrl(String imgUrl) {
+        if (StringUtils.isBlank(imgUrl)) {
+            this.avatarFilename = DEFAULT_AVATAR_FILE_NAME;
+        } else{
+            this.avatarFilename = toFileName(imgUrl);
+        }
+    }
+
+    public String getAvatarUrl() {
+        if (StringUtils.isBlank(this.avatarFilename)) {
+            return "";
+        } else if (isUrl()) {
+            return this.avatarFilename;
+        } else {
+            return toUrl(this.avatarFilename, AVATAR);
+        }
+    }
+
+    private boolean isUrl() {
+        return this.avatarFilename.startsWith(HTTP_PREFIX);
     }
 }

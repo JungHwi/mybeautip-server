@@ -1,0 +1,3 @@
+== Get My Setting API
+
+operation::get my setting[snippets='http-request,http-response,response-fields']

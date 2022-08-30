@@ -21,20 +21,23 @@ spring:
   config:
     import: classpath:application-oauth-dev.yml
   datasource:
-    url: jdbc:mysql://localhost:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
-    username: mybeautip
-    password: akdlqbxlq#1@Jocoos
-    test-on-borrow: true
-    validation-query: SELECT 1
-    time-between-eviction-runs-millis: 60000
-    test-while-idle: true
+    master:
+      hikari:
+        username: mybeautip
+        password: akdlqbxlq#1@Jocoos
+        jdbc-url: jdbc:mysql://localhost:3306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautip
+        password: akdlqbxlq#1@Jocoos
+        jdbc-url: jdbc:mysql://localhost:3306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
   jackson:
     serialization:
       write-dates-as-timestamps: true
     default-property-inclusion: NON_NULL
     property-naming-strategy: SNAKE_CASE
   flyway:
-    baselineOnMigrate: true
+    baselineOnMigrate: false
     locations: classpath:db/mysql
   jpa:
     properties:
@@ -75,6 +78,9 @@ security:
       -----END PUBLIC KEY-----
 
 mybeautip:
+  service:
+    member:
+      rejoin-available-second: 30
   addr:
     confirm-key: U01TX0FVVEgyMDE3MDExMDE1NDM0NTE4MjAx
   security:
@@ -85,20 +91,25 @@ mybeautip:
       application:
         gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip-dev"
     s3:
+      domain: 'https://mybeautip-dev.s3.ap-northeast-2.amazonaws.com/'
       bucket: 'mybeautip-dev'
       region: 'ap-northeast-2'
+      connection-timeout-ms: 10000
+      read-timeout-ms: 10000
     sts:
       token-validity-duration-seconds: 129600 # 30days
+    cf:
+      domain: "https://static-dev.mybeautip.com/"
   store:
     image-path:
-      prefix: "https://mybeautip.s3.ap-northeast-2.amazonaws.com/store/"
+      domain: "https://static.mybeautip.com/common/store"
       cover-suffix: "_cover.png"
       thumbnail-suffix: "_thumbnail.png"
       refund-suffix: "_refund.png"
       as-suffix: "_as.png"
   category:
     image-path:
-      prefix: "https://mybeautip.s3.ap-northeast-2.amazonaws.com/category/"
+      prefix: "https://static.mybeautip.com/common/category/"
       suffix: ".png"
   iamport:
     api: https://api.iamport.kr
@@ -112,7 +123,15 @@ mybeautip:
     earn-after-days: 7
     scheduler-prefix: member-gift-task-pool-
     scheduler-pool-size: 10
-    remind-expiring-point: 3  # days
+    remind-expiring-point: 3
+  activity-point:
+    community-write-date-limit: 5
+    community-valid-length: 30
+    video-like-date-limit: 5
+    video-scrap-date-limit: 2
+    comment-write-date-limit: 10
+    comment-valid-length: 5
+    # days
   revenue:
     revenue-ratio-live: 3    # %
     revenue-ratio-vod: 2    # %
@@ -122,8 +141,8 @@ mybeautip:
   slack:
     key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
     channel: "#mybeautip-dev"
-    order-key: T02GN94AU/BJA6YDJPJ/7L197lsrvR2X5yBsZpA2wdH0
-    order-channel: "#z-mybeautip-dev"
+    order-key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
+    order-channel: "#mybeautip-dev"
   notification:
     duplicate-limit-duration: 600000 # 10 min (milliseconds)
     instant-message:
@@ -147,8 +166,8 @@ mybeautip:
 cloud:
   aws:
     credentials:
-      accessKey: AKIA3JYLF6P2AOO7IAKN #mybeautip
-      secretKey: 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
+      accessKey: AKIA3JYLF6P2BKTHA2DM #mybeautip
+      secretKey: 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
     region:
       static: ap-northeast-2
     s3:

@@ -12,5 +12,10 @@ public enum NotificationStatus implements CodeValue {
     DELETE("삭제");
 
     private final String description;
+
+    @Override
+    public String getName() {
+        return this.name();
+    }
 }
 

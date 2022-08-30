@@ -1,8 +1,9 @@
 package com.jocoos.mybeautip.security;
 
-import com.jocoos.mybeautip.exception.AuthenticationDormantMemberException;
-import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
+import com.jocoos.mybeautip.global.exception.AuthenticationDormantMemberException;
+import com.jocoos.mybeautip.global.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
     private final LegacyMemberService legacyMemberService;
     private final MemberRepository memberRepository;
     private final KakaoMemberRepository kakaoMemberRepository;
+    private final SignupEventService signupEventService;
 
     public KakaoTokenGranter(
             AuthorizationServerTokenServices tokenServices,
@@ -26,11 +28,13 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
             OAuth2RequestFactory requestFactory,
             LegacyMemberService legacyMemberService,
             MemberRepository memberRepository,
-            KakaoMemberRepository kakaoMemberRepository) {
+            KakaoMemberRepository kakaoMemberRepository,
+            SignupEventService signupEventService) {
         super(tokenServices, clientDetailsService, requestFactory, "kakao");
         this.legacyMemberService = legacyMemberService;
         this.memberRepository = memberRepository;
         this.kakaoMemberRepository = kakaoMemberRepository;
+        this.signupEventService = signupEventService;
     }
 
     @Override
@@ -56,6 +60,7 @@ public class KakaoTokenGranter extends AbstractTokenGranter {
 
         switch (member.getStatus()) {
             case ACTIVE:
+                signupEventService.join(member);
                 return generateToken(member, client, tokenRequest);
             case DORMANT:
                 throw new AuthenticationDormantMemberException("Dormant Member. member id - " + kakaoMember.getMemberId());

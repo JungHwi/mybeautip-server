@@ -1,24 +1,34 @@
 package com.jocoos.mybeautip.member.point;
 
 import com.jocoos.mybeautip.admin.Dates;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.domain.event.code.EventProductType;
+import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
+import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
+import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
+import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
+import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.order.Order;
+import com.jocoos.mybeautip.support.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.global.constant.PointConstant.DEFAULT_POINT_EXPIRATION_DAY;
+import static com.jocoos.mybeautip.global.constant.PointConstant.EVENT_POINT_EXPIRATION_DAY;
+import static com.jocoos.mybeautip.member.point.MemberPoint.*;
+import static com.jocoos.mybeautip.member.point.UsePointService.ACTIVITY;
 
 @Slf4j
 @Service
@@ -61,6 +71,118 @@ public class MemberPointService {
         memberPointRepository.save(memberPoint);
     }
 
+    @Transactional
+    public void earnPoint(EventJoin eventJoin) {
+        EventProduct eventProduct = eventJoin.getEventProduct();
+        if (eventProduct.getType() != EventProductType.POINT) {
+            throw new BadRequestException("Event product type is not POINT.");
+        }
+
+        long eventId = eventJoin.getEventId();
+        long memberId = eventJoin.getMemberId();
+        Member member = memberRepository.findById(memberId)
+                        .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + memberId));
+
+        member.earnPoint(eventProduct.getPrice());
+        memberRepository.save(member);
+
+        Date expiryDate = DateUtils.addDay(EVENT_POINT_EXPIRATION_DAY);
+        MemberPoint memberPoint = MemberPoint.builder()
+                .member(member)
+                .eventId(eventId)
+                .point(eventProduct.getPrice())
+                .state(STATE_EARNED_POINT)
+                .earnedAt(new Date())
+                .expiryAt(expiryDate)
+                .remind(true)
+                .build();
+
+        memberPoint = memberPointRepository.save(memberPoint);
+
+        MemberPointDetail memberPointDetail = MemberPointDetail.builder()
+                .memberId(memberId)
+                .eventId(eventId)
+                .parentId(memberPoint.getId())
+                .memberPointId(memberPoint.getId())
+                .point(eventProduct.getPrice())
+                .state(STATE_EARNED_POINT)
+                .expiryAt(expiryDate)
+                .build();
+
+        memberPointDetailRepository.save(memberPointDetail);
+    }
+
+    @Transactional
+    public void earnPoint(ActivityPointType type, Long domainId, Member member) {
+        // 업데이트 쿼리 하나로 변경하는게 낫지 않을까 싶음
+        member.earnPoint(type.getPoint());
+        memberRepository.save(member);
+
+        Date expiryDate = DateUtils.addDay(DEFAULT_POINT_EXPIRATION_DAY);
+        MemberPoint memberPoint = MemberPoint.builder()
+                .member(member)
+                .activityType(type)
+                .activityDomainId(domainId)
+                .point(type.getPoint())
+                .state(STATE_EARNED_POINT)
+                .earnedAt(new Date())
+                .expiryAt(expiryDate)
+                .remind(true)
+                .build();
+        memberPointRepository.save(memberPoint);
+
+        MemberPointDetail memberPointDetail = MemberPointDetail.builder()
+                .memberId(member.getId())
+                .activityType(type)
+                .parentId(memberPoint.getId())
+                .memberPointId(memberPoint.getId())
+                .point(memberPoint.getPoint())
+                .state(STATE_EARNED_POINT)
+                .expiryAt(expiryDate)
+                .build();
+        memberPointDetailRepository.save(memberPointDetail);
+    }
+
+    public void usePoints(Event event, Member member) {
+        if (event.getNeedPoint() <= 0) {
+            return;
+        }
+
+        member.usePoint(event.getNeedPoint());
+
+        MemberPoint memberPoint = MemberPoint.builder()
+                .member(member)
+                .eventId(event.getId())
+                .point(event.getNeedPoint())
+                .state(MemberPoint.STATE_USE_POINT)
+                .build();
+        memberPoint = memberPointRepository.save(memberPoint);
+        usePoints(memberPoint, UsePointService.EVENT, event.getId());
+    }
+
+    @Transactional
+    public void retrievePoints(ActivityPointType type, Long domainId, Member member) {
+
+        int retrievePoints = type.getPoint();
+        if (retrievePoints > member.getPoint()) {
+            retrievePoints = member.getPoint();
+        }
+
+        member.usePoint(retrievePoints);
+        memberRepository.save(member);
+
+        MemberPoint memberPoint = MemberPoint.builder()
+                .member(member)
+                .activityType(type)
+                .activityDomainId(domainId)
+                .point(retrievePoints)
+                .state(STATE_RETRIEVE_POINT)
+                .build();
+
+        memberPointRepository.save(memberPoint);
+        usePoints(memberPoint, ACTIVITY, type.ordinal());
+    }
+
     public void usePoints(Order order, int point) {
         if (order.getCreatedBy() == null) {
             return;
@@ -69,54 +191,56 @@ public class MemberPointService {
         log.debug("member id: {}, order id: {}, use point: {}", order.getCreatedBy().getId(), order.getId(), point);
 
         MemberPoint memberPoint = new MemberPoint(order.getCreatedBy(), order, point, MemberPoint.STATE_USE_POINT);
-        memberPointRepository.save(memberPoint);
+        memberPoint = memberPointRepository.save(memberPoint);
+        usePoints(memberPoint, UsePointService.ORDER, order.getId());
+    }
 
-        // member_point_details
+    private int getRemainingPoint(MemberPointDetail pointDetail) {
+        if (pointDetail.getState() == STATE_USE_POINT) {
+            return memberPointDetailRepository.findByParentId(pointDetail.getParentId()).stream()
+                    .mapToInt(MemberPointDetail::getPoint)
+                    .sum();
+        } else {
+            return memberPointRepository.findById(pointDetail.getParentId())
+                    .orElseThrow(() -> new BadRequestException("No such member point. member point id - " + pointDetail.getParentId()))
+                    .getPoint();
+        }
+    }
+
+    private void usePoints(MemberPoint memberPoint, UsePointService usePointService, long usePointServiceId) {
         long cursor = 0;
         int usedPoint = 0;
         List<MemberPointDetail> detailList = new ArrayList<>();
 
-        Optional<MemberPointDetail> optional = memberPointDetailRepository
-                .findTopByMemberIdAndStateAndExpiryAtAfterOrderByIdDesc(
-                        memberPoint.getMember().getId(), MemberPoint.STATE_USE_POINT, Date.from(Instant.now()));
-        if (optional.isPresent()) {
-            long parentId = optional.get().getParentId();
-            // check point used from parent id
-            Optional<MemberPointSum> optSum = memberPointDetailRepository.getSumByParentId(parentId);
-            if (optSum.isPresent()) {
-                int remainingPoint = optSum.get().getPointSum();
+        MemberPointDetail lastUsedPoint =  memberPointDetailRepository.findTopByMemberIdAndStateAndExpiryAtAfterOrderByIdDesc(memberPoint.getMember().getId(), MemberPoint.STATE_USE_POINT, Date.from(Instant.now()))
+                .orElse(null);
 
-                if (remainingPoint >= point) {
-                    // point can be consumed by remaining point
-                    MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, point, parentId, memberPoint.getId(), optSum.get().getExpiryAt());
-                    memberPointDetailRepository.save(detail);
-                    return;
-                }
-
-                if (remainingPoint > 0) {
-                    detailList.add(new MemberPointDetail(memberPoint, MemberPoint.STATE_USE_POINT, remainingPoint, parentId, memberPoint.getId(), optSum.get().getExpiryAt()));
-                    usedPoint += remainingPoint;
-                }
-
-                cursor = optSum.get().getId();
-            }
+        if (lastUsedPoint != null) {
+            cursor = lastUsedPoint.getParentId();
         }
 
-        // consume earned points from cursor to current until all point is used
-        List<MemberPointDetail> list = memberPointDetailRepository
-                .getAllEarnedPoints(memberPoint.getMember().getId(), MemberPointDetail.getEarnedState(), cursor);
-        if (!CollectionUtils.isEmpty(list)) {
-            for (MemberPointDetail detail : list) {
-                int earnedPoint = detail.getPoint();
-                if (usedPoint + earnedPoint >= point) {
-                    // last point
-                    detailList.add(new MemberPointDetail(detail, MemberPoint.STATE_USE_POINT, memberPoint.getId(), point - usedPoint, order.getId()));
-                    break;
+        List<MemberPoint> pointList = memberPointRepository.getAvailablePoint(memberPoint.getMember().getId(), PointStatusGroup.EARN.getLegacyCodeGroup(), cursor);
+
+        List<MemberPointDetail> pointDetailList = memberPointDetailRepository.findByParentIdAndState(cursor, STATE_USE_POINT);
+        Map<Long, Integer> pointDetailMap = pointDetailList.stream()
+                .collect(Collectors.groupingBy(MemberPointDetail::getParentId, Collectors.summingInt(MemberPointDetail::getPoint)));
+
+        for (MemberPoint availablePoint : pointList) {
+            if (usedPoint == memberPoint.getPoint()) {
+                break;
+            }
+
+            int remainingPoint = pointDetailMap.get(availablePoint.getId()) == null ? availablePoint.getPoint() : availablePoint.getPoint() + (pointDetailMap.get(availablePoint.getId()));
+            if (remainingPoint > 0) {
+                if (remainingPoint > memberPoint.getPoint() - usedPoint) {
+                    detailList.add(new MemberPointDetail(availablePoint, memberPoint.getId(), memberPoint.getPoint() - usedPoint, usePointService, usePointServiceId));
+                    usedPoint += memberPoint.getPoint() - usedPoint;
                 } else {
-                    usedPoint += earnedPoint;
-                    detailList.add(new MemberPointDetail(detail, MemberPoint.STATE_USE_POINT, memberPoint.getId(), earnedPoint, order.getId()));
+                    detailList.add(new MemberPointDetail(availablePoint, memberPoint.getId(), remainingPoint, usePointService, usePointServiceId));
+                    usedPoint += remainingPoint;
                 }
             }
+
         }
 
         if (!CollectionUtils.isEmpty(detailList)) {
@@ -179,11 +303,11 @@ public class MemberPointService {
 
         memberPoint.setEarnedAt(now);
         memberPoint.setExpiryAt(expiry);
-        memberPoint.setState(MemberPoint.STATE_EARNED_POINT);
+        memberPoint.setState(STATE_EARNED_POINT);
         memberPointRepository.save(memberPoint);
 
         // member_point_details
-        MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_EARNED_POINT);
+        MemberPointDetail detail = new MemberPointDetail(memberPoint, STATE_EARNED_POINT);
         memberPointDetailRepository.save(detail);
 
         Member member = memberPoint.getMember();
@@ -195,11 +319,12 @@ public class MemberPointService {
     public MemberPoint presentPoint(Long memberId, int point, Date expiryAt) {
 
         if (point <= 0) {
-            throw new BadRequestException("The point must be greater than 0");
+            throw new BadRequestException("not_positive_point", "The point must be greater than 0");
         }
 
-        Member m = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException());
-        m.setPoint(m.getPoint() + point);
+        Member m = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("Not found Member. id - " + memberId));
+        m.earnPoint(point);
         memberRepository.save(m);
 
         boolean remind = false;
@@ -211,7 +336,7 @@ public class MemberPointService {
         MemberPoint memberPoint = memberPointRepository.save(createPresentPoint(m, point, expiryAt, remind));
 
         // member_point_details
-        MemberPointDetail detail = new MemberPointDetail(memberPoint, MemberPoint.STATE_EARNED_POINT);
+        MemberPointDetail detail = new MemberPointDetail(memberPoint, STATE_EARNED_POINT);
         memberPointDetailRepository.save(detail);
 
         return memberPoint;

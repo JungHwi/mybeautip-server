@@ -1,10 +1,14 @@
 package com.jocoos.mybeautip.domain.member.converter;
 
+import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import org.mapstruct.*;
+
+import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 @Mapper(componentModel = "spring")
 public interface MemberConverter {
@@ -61,5 +65,13 @@ public interface MemberConverter {
     @AfterMapping
     default void convertToInfo(@MappingTarget MemberInfo memberInfo, Member member) {
         memberInfo.setPermission(new MemberInfo.PermissionInfo(member.getPermission()));
+    }
+
+
+    CommunityMemberResponse convertToCommunityMember(Member member);
+
+    @AfterMapping
+    default void convertToCommunityMember(@MappingTarget CommunityMemberResponse response, Member member) {
+        response.setAvatarUrl(toUrl(member.getAvatarFilename(), AVATAR));
     }
 }

@@ -1,20 +1,22 @@
 package com.jocoos.mybeautip.global.config.jpa;
 
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
-import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
+import javax.persistence.PrePersist;
+import java.time.ZonedDateTime;
 
 @Getter
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
-public class CreatedAtBaseEntity {
+public abstract class CreatedAtBaseEntity {
 
-    @Column(nullable = false)
-    @CreatedDate
-    protected LocalDateTime createdAt;
+    @Column(updatable = false, nullable = false)
+    private ZonedDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = ZonedDateTime.now();
+    }
+
 }

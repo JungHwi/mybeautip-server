@@ -3,9 +3,9 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.ConflictException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ConflictException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
@@ -45,6 +45,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 
 @Slf4j
 @RestController
@@ -141,7 +143,7 @@ public class PostController {
             PostInfo info = new PostInfo(post, legacyMemberService.getMemberInfo(post.getCreatedBy()), goodsInfo);
 
             if (me != null) {
-                postLikeRepository.findByPostIdAndCreatedById(post.getId(), me.getId())
+                postLikeRepository.findByPostIdAndCreatedByIdAndStatus(post.getId(), me.getId(), LIKE)
                         .ifPresent(like -> info.setLikeId(like.getId()));
 
                 Block block = blackList != null ? blackList.get(post.getCreatedBy().getId()) : null;
@@ -307,7 +309,7 @@ public class PostController {
         return postRepository.findByIdAndStartedAtBeforeAndEndedAtAfterAndOpenedIsTrueAndDeletedAtIsNull(id, now, now)
                 .map(post -> {
                     Long postId = post.getId();
-                    if (postLikeRepository.findByPostIdAndStatusAndCreatedById(postId, PostLikeStatus.LIKE, me.getId()).isPresent()) {
+                    if (postLikeRepository.findByPostIdAndStatusAndCreatedById(postId, LIKE, me.getId()).isPresent()) {
                         throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
                     }
 
@@ -380,7 +382,7 @@ public class PostController {
             }
 
             if (me != null) {
-                Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me, LIKE)
                         .map(CommentLike::getId).orElse(null);
                 commentInfo.setLikeId(likeId);
 
@@ -443,7 +445,7 @@ public class PostController {
                     .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
         }
 
-        Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_POST, id);
+        Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_POST, id, member);
         return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
     }
 
@@ -497,18 +499,15 @@ public class PostController {
                                                           @PathVariable Long commentId,
                                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
-        return commentRepository.findByIdAndPostId(commentId, postId)
-                .map(comment -> {
-                    if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
-                        throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
-                    }
-                    CommentLike commentLike = postService.likeCommentPost(comment);
-                    return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
-                })
-                .orElseThrow(() -> new NotFoundException("comment_like_not_found", "invalid post or comment id"));
+        try {
+            CommentLike commentLike = postService.likeCommentPost(commentId, postId, member);
+            return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
+        }
     }
 
-    @DeleteMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/{postId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeCommentLike(@PathVariable Long postId,
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,
@@ -583,8 +582,9 @@ public class PostController {
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 
         log.debug("{}", request);
+        Member member = legacyMemberService.currentMember();
         Post post = createPersonalPost(request);
-        postService.savePost(post, request.getFiles());
+        postService.savePost(post, request.getFiles(), member);
 
         return new ResponseEntity<>(new PostInfo(post), HttpStatus.OK);
     }

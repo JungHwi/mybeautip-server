@@ -22,3 +22,16 @@ spring:
             client-secret: 7ed5aebdbcd0ed43efca4238a64c88be
             fields: id,email,name,picture
             redirect-uri: https://m.mybeautip.com/oauth/facebook
+          apple:
+            token-uri: https://appleid.apple.com
+            authorization-grant-type: authorization_code
+            team_id: 5CXMSK555F
+            app_bundle_id: com.jocoos.mybeautip.app
+            client_id: XYNGH6M7VN
+            client_secret: |
+              -----BEGIN PRIVATE KEY-----
+              MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgSoMz+grKMShdMaa9
+              WtERs+VyU5On8E8aLdrssdpUaVagCgYIKoZIzj0DAQehRANCAASeJ30QuZjmrwyo
+              6zs+ElShCSBNMfcv6TCKpvfVhuNpMjHyV7RUVo7H4bRxZM2kp3FVWw//VQZeezwk
+              LVnAF9EF
+              -----END PRIVATE KEY-----

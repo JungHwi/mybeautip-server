@@ -1,7 +1,8 @@
 package com.jocoos.mybeautip.security;
 
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.member.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,9 @@ public class SocialLoginService {
     private final KakaoMemberRepository kakaoMemberRepository;
     private final NaverMemberRepository naverMemberRepository;
     private final FacebookMemberRepository facebookMemberRepository;
+    private final AppleMemberRepository appleMemberRepository;
     private final LoginServiceFactory loginServiceFactory;
+    private final SignupEventService signupEventService;
 
     public WebSocialLoginResponse webSocialLogin(String provider, String code, String state) {
         WebSocialLoginResponse response;
@@ -28,6 +31,7 @@ public class SocialLoginService {
             Member member = saveOrUpdate(socialMemberRequest);
             AccessTokenResponse accessTokenResponse = jwtTokenProvider.auth(member);
             response = new WebSocialLoginResponse(accessTokenResponse);
+            signupEventService.join(member);
         } catch (MemberNotFoundException ex) {
             response = new WebSocialLoginResponse(socialMemberRequest);
         }
@@ -65,12 +69,15 @@ public class SocialLoginService {
             case FacebookLoginService.PROVIDER_TYPE:
                 memberId = getMemberIdForFacebook(socialMemberRequest.getId());
                 break;
+            case AppleLoginService.PROVIDER_TYPE:
+                memberId = getMemberIdForApple(socialMemberRequest.getId());
+                break;
             default:
-                throw new MybeautipRuntimeException("Unsupported provider type");
+                throw new MybeautipException("Unsupported provider type");
         }
 
         member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
-                .orElse(socialMemberRequest.toMember());
+                .orElseThrow(() -> new MemberNotFoundException("No such member, request signup"));
 
         return member;
     }
@@ -123,6 +130,23 @@ public class SocialLoginService {
                 throw new MemberNotFoundException("Dormant Member. member id - " + facebookMember.getMemberId());
             default:
                 throw new MemberNotFoundException("No such member. member id - " + facebookMember.getMemberId());
+        }
+    }
+
+    private long getMemberIdForApple(String appleId) {
+        AppleMember appleMember = appleMemberRepository.findById(appleId)
+                .orElseThrow(() -> new MemberNotFoundException("No such facebook member. facebook id - " + appleId));
+
+        Member member = memberRepository.findById(appleMember.getMemberId())
+                .orElseThrow(() -> new MemberNotFoundException("No such member. member id - " + appleMember.getMemberId()));
+
+        switch (member.getStatus()) {
+            case ACTIVE:
+                return member.getId();
+            case DORMANT:
+                throw new MemberNotFoundException("Dormant Member. member id - " + appleMember.getMemberId());
+            default:
+                throw new MemberNotFoundException("No such member. member id - " + appleMember.getMemberId());
         }
     }
 }

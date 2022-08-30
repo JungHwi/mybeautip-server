@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.member.order;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
 import com.jocoos.mybeautip.goods.GoodsOptionService;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -392,7 +392,7 @@ public class OrderService {
         } else if ((payment.getState() & Payment.STATE_PAID) == Payment.STATE_PAID) {
             try {
                 checkCoupon(order);
-            } catch (MybeautipRuntimeException e) {
+            } catch (MybeautipException e) {
                 cancelOrderInquire(order, OrderInquiry.STATE_CANCEL_ORDER, "쿠폰 중복 사용으로 인한 취소");
             }
 
@@ -411,7 +411,7 @@ public class OrderService {
                 log.warn("{}", memberCoupon);
 
                 slackService.sendUsedCouponUse(memberCoupon);
-                throw new MybeautipRuntimeException("Used coupon used Error");
+                throw new MybeautipException("Used coupon used Error");
             }
         }
     }
@@ -750,4 +750,22 @@ public class OrderService {
                     });
         }
     }
+
+    @Transactional(readOnly = true)
+    public Map<Long, String> getPurchaseNameMap(Set<Long> orderIds) {
+        Map<Long, String> result = new HashMap<>();
+        List<Order> orderList = orderRepository.findByIdIn(orderIds);
+
+        for (Order order : orderList) {
+            String goodsName = order.getPurchases().stream()
+                    .findFirst()
+                    .map(Purchase::getGoodsName)
+                    .orElse("");
+
+            result.put(order.getId(), goodsName);
+        }
+
+        return result;
+    }
+
 }

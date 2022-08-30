@@ -17,4 +17,9 @@ public enum SendType implements CodeValue {
 
     private final String description;
 
+    @Override
+    public String getName() {
+        return this.name();
+    }
+
 }

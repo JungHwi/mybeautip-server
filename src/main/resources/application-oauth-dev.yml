@@ -15,10 +15,28 @@ spring:
             client-secret: S0Ss6qUwsP
             authorization-grant-type: authorization_code
           facebook:
-            token-uri: https://graph.facebook.com/v13.0/oauth/access_token
+            token-uri: https://graph.facebook.com/v14.0/oauth/access_token
             token-method: GET
             user-info-uri: https://graph.facebook.com/me
             client-id: 448301395614533
             client-secret: 8da721bd036785894dda7b8f4963d211
             fields: id,email,name,picture
             redirect-uri: https://m-dev.mybeautip.com/oauth/facebook
+          apple:
+            token-uri: https://appleid.apple.com
+            authorization-grant-type : authorization_code
+            team_id: 5CXMSK555F
+            app_bundle_id: com.jocoos.mybeautip.devs
+            client_id: 2BS6SAHTPF
+            client_secret: |
+              -----BEGIN PRIVATE KEY-----
+              MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgREAQF7Muww8ZFrHF
+              qU4591gNUTa/LI4eFKAmd9GKQxKgCgYIKoZIzj0DAQehRANCAARGvuJTmPuegFyV
+              nHEdjPc9/moA7IO41LLdhrYmt5OvcEALztAB0EFeV6eZxC/p7IJZb8spPs4HHZnT
+              33d1K9pX
+              -----END PRIVATE KEY-----
+
+
+
+
+

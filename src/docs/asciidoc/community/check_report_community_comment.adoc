@@ -1,0 +1,3 @@
+== Check Report Community Comment API
+
+operation::check_report_community_comment[snippets='http-request,path-parameters,http-response,response-fields']

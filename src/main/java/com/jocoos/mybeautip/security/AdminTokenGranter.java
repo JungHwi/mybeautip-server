@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.admin.AdminMemberRepository;
-import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.AuthenticationException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.extern.slf4j.Slf4j;

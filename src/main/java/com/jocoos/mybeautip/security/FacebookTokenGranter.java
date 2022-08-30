@@ -1,8 +1,9 @@
 package com.jocoos.mybeautip.security;
 
-import com.jocoos.mybeautip.exception.AuthenticationDormantMemberException;
-import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
+import com.jocoos.mybeautip.global.exception.AuthenticationDormantMemberException;
+import com.jocoos.mybeautip.global.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
     private final LegacyMemberService legacyMemberService;
     private final MemberRepository memberRepository;
     private final FacebookMemberRepository facebookMemberRepository;
+    private final SignupEventService signupEventService;
 
     public FacebookTokenGranter(
             AuthorizationServerTokenServices tokenServices,
@@ -26,11 +28,14 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
             OAuth2RequestFactory requestFactory,
             LegacyMemberService legacyMemberService,
             MemberRepository memberRepository,
-            FacebookMemberRepository facebookMemberRepository) {
+            FacebookMemberRepository facebookMemberRepository,
+            SignupEventService signupEventService) {
         super(tokenServices, clientDetailsService, requestFactory, "facebook");
         this.legacyMemberService = legacyMemberService;
         this.memberRepository = memberRepository;
         this.facebookMemberRepository = facebookMemberRepository;
+        this.signupEventService = signupEventService;
+
     }
 
     @Override
@@ -56,6 +61,7 @@ public class FacebookTokenGranter extends AbstractTokenGranter {
 
         switch (member.getStatus()) {
             case ACTIVE:
+                signupEventService.join(member);
                 return generateToken(member, client, tokenRequest);
             case DORMANT:
                 throw new AuthenticationDormantMemberException("Dormant Member. member id - " + facebookMember.getMemberId());

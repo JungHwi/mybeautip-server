@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.config;
 
 import com.jocoos.mybeautip.admin.AdminMemberRepository;
+import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.security.*;
 import lombok.extern.slf4j.Slf4j;
@@ -77,6 +78,9 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
     private MybeautipUserDetailsService userDetailService;
+
+    @Autowired
+    private SignupEventService signupEventService;
 
     @Value("${mybeautip.security.access-token-validity-seconds}")
     private int accessTokenValiditySeconds;
@@ -165,28 +169,32 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 endpoints.getOAuth2RequestFactory(),
                                 legacyMemberService,
                                 memberRepository,
-                                facebookMemberRepository),
+                                facebookMemberRepository,
+                                signupEventService),
                         new NaverTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
                                 endpoints.getOAuth2RequestFactory(),
                                 legacyMemberService,
                                 memberRepository,
-                                naverMemberRepository),
+                                naverMemberRepository,
+                                signupEventService),
                         new KakaoTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
                                 endpoints.getOAuth2RequestFactory(),
                                 legacyMemberService,
                                 memberRepository,
-                                kakaoMemberRepository),
+                                kakaoMemberRepository,
+                                signupEventService),
                         new AppleTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
                                 endpoints.getOAuth2RequestFactory(),
                                 legacyMemberService,
                                 memberRepository,
-                                appleMemberRepository),
+                                appleMemberRepository,
+                                signupEventService),
                         new ClientTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),

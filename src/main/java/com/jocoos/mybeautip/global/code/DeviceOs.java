@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.global.code;
 
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -24,10 +24,15 @@ public enum DeviceOs implements CodeValue {
         return Arrays.stream(DeviceOs.values())
                 .filter(os -> os.legacyCode.equals(legacyCode))
                 .findFirst()
-                .orElseThrow(() -> new MybeautipRuntimeException("Not Found DeviceOS. > " + legacyCode));
+                .orElseThrow(() -> new MybeautipException("Not Found DeviceOS. > " + legacyCode));
     }
 
     public boolean equal(final String legacyCode) {
         return this.legacyCode.equals(legacyCode);
+    }
+
+    @Override
+    public String getName() {
+        return this.name();
     }
 }

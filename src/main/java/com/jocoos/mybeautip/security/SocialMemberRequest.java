@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.security;
 
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +18,7 @@ public class SocialMemberRequest {
     private String name;
     private String picture;
     private String provider;
+    private String refreshToken;
 
     public Member toMember() {
         Member member = new Member();
@@ -26,7 +27,7 @@ public class SocialMemberRequest {
         member.setEmail(this.email);
         member.setUsername(this.name);
         member.setPushable(true);
-        member.setAvatarUrl(this.picture);
+        member.setAvatarFilenameFromUrl(this.picture);
         member.setPermission(Member.PERMISSION_ALL);
 
         return member;
@@ -43,7 +44,7 @@ public class SocialMemberRequest {
             case "apple":
                 return Member.LINK_APPLE;
             default:
-                throw new MybeautipRuntimeException("Unsupported provider type");
+                throw new MybeautipException("Unsupported provider type");
         }
     }
 }

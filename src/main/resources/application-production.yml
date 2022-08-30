@@ -4,16 +4,24 @@ spring:
       on-profile: production
     import: classpath:application-oauth-prod.yml
   datasource:
-    url: jdbc:mysql://172.31.2.106:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
-    username: mybeautip
-    password: akdlqbxlq#1@Jocoos
-    test-on-borrow: true
-    validation-query: SELECT 1
+    master:
+      hikari:
+        username: mybeautipsrv
+        password: mybeautipsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-prod.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:33306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautipsrv
+        password: mybeautipsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-prod.cluster-ro-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:33306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
   flyway:
     baselineOnMigrate: false
     locations: classpath:db/mysql
 
 mybeautip:
+  service:
+    member:
+      rejoin-available-second: 7776000  # 90 days
   security:
     access-token-validity-seconds: 15552000      # 180 days
     refresh-token-validity-seconds: 15552000     # 180 days
@@ -22,8 +30,14 @@ mybeautip:
       application:
         gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip"
     s3:
+      domain: 'https://mybeautip-prod.s3.ap-northeast-2.amazonaws.com/'
       bucket: 'mybeautip-prod'
       region: 'ap-northeast-2'
+    cf:
+      domain: "https://static.mybeautip.com"
+  store:
+    image-path:
+      domain: https://static.mybeautip.com/common/
   slack:
     key: T03FMJ9ANNR/B03FT8YFXC5/GFY50VQh98iRpEs4XbmxmrYP
     channel: "#mybeautip-prod"
@@ -42,12 +56,9 @@ cloud:
 flipflop:
   app-key: 9z27htVnKe
   video:
-    thumbnail-format: https://flipflop-prod.s3.ap-northeast-2.amazonaws.com/${flipflop.app-key}/videos/%s/thumbnail.jpg
+    thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 redis:
   host: 172.31.2.106
   port: 6379
   password: akdlqbxlq#1@Jocoos
-
-logging:
-  config: classpath:log/log4j2-file.yml

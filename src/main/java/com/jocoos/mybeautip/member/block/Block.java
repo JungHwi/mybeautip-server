@@ -26,6 +26,9 @@ public class Block {
     @JoinColumn(name = "you")
     private Member memberYou;
 
+    @Enumerated(EnumType.STRING)
+    private BlockStatus status;
+
     public Block(Long me, Member memberYou) {
         this.me = me;
         this.memberYou = memberYou;
@@ -33,5 +36,9 @@ public class Block {
 
     public Long getYouId() {
         return memberYou.getId();
+    }
+
+    public void changeStatus(BlockStatus status) {
+        this.status = status;
     }
 }

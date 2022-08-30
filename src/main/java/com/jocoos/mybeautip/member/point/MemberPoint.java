@@ -1,11 +1,10 @@
 package com.jocoos.mybeautip.member.point;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
+import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.order.Order;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.text.DecimalFormat;
@@ -18,6 +17,8 @@ import java.util.Locale;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "member_points")
+@Builder
+@AllArgsConstructor
 public class MemberPoint extends CreatedDateAuditable {
     public static final int STATE_WILL_BE_EARNED = 0;
     public static final int STATE_EARNED_POINT = 1;
@@ -25,6 +26,7 @@ public class MemberPoint extends CreatedDateAuditable {
     public static final int STATE_EXPIRED_POINT = 3;
     public static final int STATE_REFUNDED_POINT = 8;
     public static final int STATE_PRESENT_POINT = 9;
+    public static final int STATE_RETRIEVE_POINT = 10;
     private static DecimalFormat POINT_FORMAT = new DecimalFormat("#,###", new DecimalFormatSymbols(Locale.KOREA));
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,6 +45,16 @@ public class MemberPoint extends CreatedDateAuditable {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @Column
+    private Long eventId;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ActivityPointType activityType;
+
+    @Column
+    private Long activityDomainId;
 
     @Column
     private Date earnedAt;

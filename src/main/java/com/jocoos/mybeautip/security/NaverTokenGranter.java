@@ -1,8 +1,9 @@
 package com.jocoos.mybeautip.security;
 
-import com.jocoos.mybeautip.exception.AuthenticationDormantMemberException;
-import com.jocoos.mybeautip.exception.AuthenticationException;
-import com.jocoos.mybeautip.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
+import com.jocoos.mybeautip.global.exception.AuthenticationDormantMemberException;
+import com.jocoos.mybeautip.global.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +21,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
     private final LegacyMemberService legacyMemberService;
     private final MemberRepository memberRepository;
     private final NaverMemberRepository naverMemberRepository;
+    private final SignupEventService signupEventService;
 
     public NaverTokenGranter(
             AuthorizationServerTokenServices tokenServices,
@@ -27,12 +29,14 @@ public class NaverTokenGranter extends AbstractTokenGranter {
             OAuth2RequestFactory requestFactory,
             LegacyMemberService legacyMemberService,
             MemberRepository memberRepository,
-            NaverMemberRepository naverMemberRepository) {
+            NaverMemberRepository naverMemberRepository,
+            SignupEventService signupEventService) {
 
         super(tokenServices, clientDetailsService, requestFactory, "naver");
         this.legacyMemberService = legacyMemberService;
         this.memberRepository = memberRepository;
         this.naverMemberRepository = naverMemberRepository;
+        this.signupEventService = signupEventService;
     }
 
     @Override
@@ -60,6 +64,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
 
         switch (member.getStatus()) {
             case ACTIVE:
+                signupEventService.join(member);
                 return generateToken(member, client, tokenRequest);
             case DORMANT:
                 throw new AuthenticationDormantMemberException("Dormant Member. member id - " + naverMember.getMemberId());

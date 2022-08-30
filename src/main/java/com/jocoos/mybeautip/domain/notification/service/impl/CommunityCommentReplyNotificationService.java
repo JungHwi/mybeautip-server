@@ -1,5 +1,8 @@
 package com.jocoos.mybeautip.domain.notification.service.impl;
 
+import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -15,10 +18,7 @@ import com.jocoos.mybeautip.domain.notification.persistence.repository.Notificat
 import com.jocoos.mybeautip.domain.notification.service.MemberNotificationService;
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
-import com.jocoos.mybeautip.exception.BadRequestException;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +36,10 @@ import java.util.Map;
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class CommunityCommentReplyNotificationService implements NotificationService<Comment> {
+public class CommunityCommentReplyNotificationService implements NotificationService<CommunityCommentResponse> {
 
     //    private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
+    private final CommunityCommentDao commentDao;
     private final MemberNotificationService memberNotificationService;
     private final NotificationCenterRepository notificationCenterRepository;
     private final NotificationMessageCenterRepository messageCenterRepository;
@@ -51,10 +51,10 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
 
     private final TemplateType templateType = TemplateType.COMMUNITY_COMMENT_REPLY;
 
-    @AfterReturning(returning = "result", value = "execution(* com.jocoos.mybeautip.member.comment.CommentService.addComment(..))")
+    @AfterReturning(returning = "result", value = "execution(* com.jocoos.mybeautip.domain.community.service.CommunityCommentService.write(..))")
     public void occurs(Object result) {
-        if (result instanceof Comment) {
-            Comment comment = (Comment) result;
+        if (result instanceof CommunityCommentResponse) {
+            CommunityCommentResponse comment = (CommunityCommentResponse) result;
             if (verify(comment)) {
                 send(comment);
             }
@@ -63,20 +63,19 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
         }
     }
 
-    private boolean verify(Comment comment) {
-        return comment.getPostId() != null &&
-                comment.getPostId() > 0 &&
+    private boolean verify(CommunityCommentResponse comment) {
+        return comment.getCommunityId() != null &&
+                comment.getCommunityId() > 0 &&
                 comment.getParentId() != null &&
                 comment.getParentId() > 0;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void send(Comment comment) {
+    public void send(CommunityCommentResponse comment) {
         int messageIndex = getMessageRandomIndex();
-        Comment parentComment = commentRepository.findById(comment.getParentId())
-                .orElseThrow(() -> new BadRequestException("No such Post."));
-        NotificationTargetInfo targetInfo = getTargetInfo(parentComment.getCreatedBy().getId());
+        CommunityComment parentComment = commentDao.get(comment.getParentId());
+        NotificationTargetInfo targetInfo = getTargetInfo(parentComment.getMemberId());
 
         Map<String, String> arguments = getArgument(targetInfo.getNickname(), comment);
         NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, targetInfo, arguments);
@@ -121,10 +120,10 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
         return memberNotificationService.getMemberNotificationInfo(memberId);
     }
 
-    private Map<String, String> getArgument(String nickname, Comment comment) {
+    private Map<String, String> getArgument(String nickname, CommunityCommentResponse comment) {
         Map<String, String> arguments = new HashMap<>();
         arguments.put(NotificationArgument.USER_NICKNAME.name(), nickname);
-        arguments.put(NotificationArgument.POST_ID.name(), String.valueOf(comment.getPostId()));
+        arguments.put(NotificationArgument.COMMUNITY_ID.name(), String.valueOf(comment.getCommunityId()));
         arguments.put(NotificationArgument.COMMENT_ID.name(), String.valueOf(comment.getParentId()));
         arguments.put(NotificationArgument.REPLY_ID.name(), String.valueOf(comment.getId()));
 

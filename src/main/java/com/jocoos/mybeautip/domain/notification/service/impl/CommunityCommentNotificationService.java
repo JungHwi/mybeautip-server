@@ -1,5 +1,9 @@
 package com.jocoos.mybeautip.domain.notification.service.impl;
 
+import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
+import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -15,11 +19,9 @@ import com.jocoos.mybeautip.domain.notification.persistence.repository.Notificat
 import com.jocoos.mybeautip.domain.notification.service.MemberNotificationService;
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
-import com.jocoos.mybeautip.exception.BadRequestException;
+import com.jocoos.mybeautip.global.code.UrlDirectory;
+import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
-import com.jocoos.mybeautip.member.comment.Comment;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +39,9 @@ import java.util.Map;
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class CommunityCommentNotificationService implements NotificationService<Comment> {
+public class CommunityCommentNotificationService implements NotificationService<CommunityCommentResponse> {
 
-    private final PostRepository postRepository;
+    private final CommunityDao communityDao;
     private final MemberNotificationService memberNotificationService;
     private final NotificationCenterRepository notificationCenterRepository;
     private final NotificationMessageCenterRepository messageCenterRepository;
@@ -51,10 +53,10 @@ public class CommunityCommentNotificationService implements NotificationService<
 
     private final TemplateType templateType = TemplateType.COMMUNITY_COMMENT;
 
-    @AfterReturning(returning = "result", value = "execution(* com.jocoos.mybeautip.member.comment.CommentService.addComment(..))")
+    @AfterReturning(returning = "result", value = "execution(* com.jocoos.mybeautip.domain.community.service.CommunityCommentService.write(..))")
     public void occurs(Object result) {
-        if (result instanceof Comment) {
-            Comment comment = (Comment) result;
+        if (result instanceof CommunityCommentResponse) {
+            CommunityCommentResponse comment = (CommunityCommentResponse) result;
             if (verify(comment)) {
                 send(comment);
             }
@@ -63,24 +65,30 @@ public class CommunityCommentNotificationService implements NotificationService<
         }
     }
 
-    private boolean verify(Comment comment) {
-        return comment.getPostId() != null &&
-                comment.getPostId() > 0 &&
+    private boolean verify(CommunityCommentResponse comment) {
+        return comment.getCommunityId() != null &&
+                comment.getCommunityId() > 0 &&
                 comment.getParentId() == null;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void send(Comment comment) {
+    public void send(CommunityCommentResponse comment) {
         int messageIndex = getMessageRandomIndex();
-        Post post = postRepository.findById(comment.getPostId())
-                .orElseThrow(() -> new BadRequestException("No such Post."));
+        Community community = communityDao.get(comment.getCommunityId());
 
-        NotificationTargetInfo targetInfo = getTargetInfo(post.getCreatedBy().getId());
+        NotificationTargetInfo targetInfo = getTargetInfo(community.getMemberId());
 
-        Map<String, String> arguments = getArgument(targetInfo.getNickname(), post);
-        NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, post.getThumbnailUrl(), targetInfo, arguments);
-        sendAppPush(messageIndex, post.getThumbnailUrl(), notificationCenterEntity.getId(), targetInfo, arguments);
+        Map<String, String> arguments = getArgument(targetInfo.getNickname(), community);
+        String thumbnailFile = community.getCommunityFileList().stream()
+                .findFirst()
+                .map(CommunityFile::getFile)
+                .orElse(null);
+
+        String thumbnailFileUrl = ImageUrlConvertUtil.toUrl(thumbnailFile, UrlDirectory.COMMUNITY, community.getId());
+
+        NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, thumbnailFile, targetInfo, arguments);
+        sendAppPush(messageIndex, thumbnailFileUrl, notificationCenterEntity.getId(), targetInfo, arguments);
     }
 
     private NotificationCenterEntity sendCenter(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
@@ -122,10 +130,10 @@ public class CommunityCommentNotificationService implements NotificationService<
         return memberNotificationService.getMemberNotificationInfo(memberId);
     }
 
-    private Map<String, String> getArgument(String nickname, Post post) {
+    private Map<String, String> getArgument(String nickname, Community community) {
         Map<String, String> arguments = new HashMap<>();
         arguments.put(NotificationArgument.USER_NICKNAME.name(), nickname);
-        arguments.put(NotificationArgument.POST_ID.name(), String.valueOf(post.getId()));
+        arguments.put(NotificationArgument.COMMUNITY_ID.name(), String.valueOf(community.getId()));
         return arguments;
     }
 }

@@ -3,10 +3,11 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
-import com.jocoos.mybeautip.exception.AccessDeniedException;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.ConflictException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ConflictException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
@@ -50,6 +51,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
 
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/videos", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -90,6 +93,9 @@ public class VideoController {
     private final VideoScrapService videoScrapService;
     private final CommentReportRepository commentReportRepository;
     private final BlockService blockService;
+
+    private final ActivityPointService activityPointService;
+
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
 
@@ -116,7 +122,8 @@ public class VideoController {
                            TimeSaleService timeSaleService,
                            VideoScrapService videoScrapService,
                            CommentReportRepository commentReportRepository,
-                           BlockService blockService) {
+                           BlockService blockService,
+                           ActivityPointService activityPointService) {
         this.legacyMemberService = legacyMemberService;
         this.videoService = videoService;
         this.messageService = messageService;
@@ -141,6 +148,7 @@ public class VideoController {
         this.videoScrapService = videoScrapService;
         this.commentReportRepository = commentReportRepository;
         this.blockService = blockService;
+        this.activityPointService = activityPointService;
     }
 
     @PostMapping
@@ -288,7 +296,7 @@ public class VideoController {
             }
 
             if (me != null) {
-                Long likeId = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), me)
+                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me, LIKE)
                         .map(CommentLike::getId).orElse(null);
                 commentInfo.setLikeId(likeId);
 
@@ -354,7 +362,7 @@ public class VideoController {
 
         }
 
-        Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_VIDEO, id);
+        Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_VIDEO, id, member);
         return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
     }
 
@@ -407,21 +415,21 @@ public class VideoController {
     @PostMapping("/{videoId:.+}/likes")
     public ResponseEntity<VideoLikeInfo> addVideoLike(@PathVariable Long videoId,
                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = legacyMemberService.currentMemberId();
+        Member member = legacyMemberService.currentMember();
 
-        return videoRepository.findByIdAndDeletedAtIsNull(videoId)
-                .map(video -> {
-                    if (videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), memberId).isPresent()) {
-                        throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
-                    }
-                    VideoLike videoLike = videoService.likeVideo(video);
-                    VideoLikeInfo info = new VideoLikeInfo(videoLike, videoService.generateVideoInfo(video));
-                    return new ResponseEntity<>(info, HttpStatus.OK);
-                })
-                .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+        try {
+            Video video = videoService.getByVideoId(videoId);
+            VideoLike videoLike = videoService.likeVideo(video, member);
+            VideoLikeInfo info = new VideoLikeInfo(videoLike, videoService.generateVideoInfo(video));
+            return new ResponseEntity<>(info, HttpStatus.OK);
+        } catch (NotFoundException e) {
+            throw new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang));
+        } catch (BadRequestException e) {
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
+        }
     }
 
-    @DeleteMapping("/{videoId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/{videoId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeVideoLike(@PathVariable Long videoId,
                                              @PathVariable Long likeId,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
@@ -443,7 +451,7 @@ public class VideoController {
                                              @RequestParam(required = false) String cursor) {
         Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
         PageRequest pageable = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Slice<VideoLike> slice = videoLikeRepository.findByVideoIdAndCreatedAtBeforeAndVideoDeletedAtIsNull(id, startCursor, pageable);
+        Slice<VideoLike> slice = videoLikeRepository.findByVideoIdAndCreatedAtBeforeAndVideoDeletedAtIsNullAndStatus(id, startCursor, pageable, LIKE);
         List<MemberInfo> members = new ArrayList<>();
         slice.stream().forEach(view -> members.add(legacyMemberService.getMemberInfo(view.getCreatedBy())));
 
@@ -465,19 +473,15 @@ public class VideoController {
                                                           @PathVariable Long commentId,
                                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
+        try {
+            CommentLike commentLike = videoService.likeVideoComment(commentId, videoId, member);
+            return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
+        }
+}
 
-        return commentRepository.findByIdAndVideoId(commentId, videoId)
-                .map(comment -> {
-                    if (commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId()).isPresent()) {
-                        throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
-                    }
-                    CommentLike commentLike = videoService.likeVideoComment(comment);
-                    return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
-                })
-                .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));
-    }
-
-    @DeleteMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeCommentLike(@PathVariable Long videoId,
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,
@@ -707,12 +711,12 @@ public class VideoController {
     @PostMapping("/{videoId:.+}/scraps")
     public ResponseEntity<VideoScrapInfo> addVideoScrap(@PathVariable Long videoId,
                                                         @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = legacyMemberService.currentMemberId();
+        Member member = legacyMemberService.currentMember();
         Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            VideoScrap scrap = videoScrapService.scrapVideo(video, memberId);
+            VideoScrap scrap = videoScrapService.scrapVideo(video, member);
             VideoScrapInfo info = new VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()));
             return new ResponseEntity<>(info, HttpStatus.OK);
         } catch (BadRequestException e) {
@@ -720,16 +724,16 @@ public class VideoController {
         }
     }
 
-    @DeleteMapping("/{videoId:.+}/scraps")
+    @PatchMapping("/{videoId:.+}/scraps")
     public ResponseEntity<?> removeVideoScrap(@PathVariable Long videoId,
                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = legacyMemberService.currentMemberId();
+        Member member = legacyMemberService.currentMember();
 
         Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            videoScrapService.deleteScrap(video, memberId);
+            videoScrapService.deleteScrap(video, member);
             return new ResponseEntity(HttpStatus.OK);
         } catch (NotFoundException e) {
             throw new NotFoundException("scrap_not_found", messageService.getMessage(SCRAP_NOT_FOUND, lang));
@@ -782,146 +786,146 @@ public class VideoController {
                 .withCursor(nextCursor).toBuild();
     }
 
-    @Data
-    @NoArgsConstructor
-    public static class VideoInfo {
-        private Long id;
-        private String videoKey;
-        private String type;
-        private String state;
-        private Boolean locked;
-        private Boolean muted;
-        private String visibility;
-        private List<Integer> category;
-        private String title;
-        private String content;
-        private String url;
-        private String originalFilename;
-        private String thumbnailPath;
-        private String thumbnailUrl;
-        private String chatRoomId;
-        private Integer duration;
-        private String liveKey = "";
-        private String outputType = "";
-        private String data;
-        private Integer watchCount;
-        private Integer totalWatchCount;
-        private Integer viewCount;
-        private Integer heartCount;
-        private Integer likeCount;
-        private Integer commentCount;
-        private Integer orderCount;
-        private Long reportCount;
-        private Integer relatedGoodsCount;
-        private String relatedGoodsThumbnailUrl;
-        private Long likeId;
-        private Long scrapId;
-        private MemberInfo owner;
-        private Boolean blocked;
-        private Date createdAt;
-        private Date deletedAt;
-        /**
-         * Real watchers count that was collected for 10 seconds
-         */
-        private Integer realWatchCount;
+@Data
+@NoArgsConstructor
+public static class VideoInfo {
+    private Long id;
+    private String videoKey;
+    private String type;
+    private String state;
+    private Boolean locked;
+    private Boolean muted;
+    private String visibility;
+    private List<Integer> category;
+    private String title;
+    private String content;
+    private String url;
+    private String originalFilename;
+    private String thumbnailPath;
+    private String thumbnailUrl;
+    private String chatRoomId;
+    private Integer duration;
+    private String liveKey = "";
+    private String outputType = "";
+    private String data;
+    private Integer watchCount;
+    private Integer totalWatchCount;
+    private Integer viewCount;
+    private Integer heartCount;
+    private Integer likeCount;
+    private Integer commentCount;
+    private Integer orderCount;
+    private Long reportCount;
+    private Integer relatedGoodsCount;
+    private String relatedGoodsThumbnailUrl;
+    private Long likeId;
+    private Long scrapId;
+    private MemberInfo owner;
+    private Boolean blocked;
+    private Date createdAt;
+    private Date deletedAt;
+    /**
+     * Real watchers count that was collected for 10 seconds
+     */
+    private Integer realWatchCount;
 
-        public VideoInfo(Video video, MemberInfo owner, Long likeId, Boolean blocked) {
-            BeanUtils.copyProperties(video, this);
-            this.owner = owner;
-            this.likeId = likeId;
-            this.blocked = blocked;
-            if (this.relatedGoodsCount == null) {
-                this.relatedGoodsCount = 0;
-            }  // FIXME: check policy
-            if (this.relatedGoodsThumbnailUrl == null) {
-                this.relatedGoodsThumbnailUrl = "";
-            } // FIXME: check policy
-        }
+    public VideoInfo(Video video, MemberInfo owner, Long likeId, Boolean blocked) {
+        BeanUtils.copyProperties(video, this);
+        this.owner = owner;
+        this.likeId = likeId;
+        this.blocked = blocked;
+        if (this.relatedGoodsCount == null) {
+            this.relatedGoodsCount = 0;
+        }  // FIXME: check policy
+        if (this.relatedGoodsThumbnailUrl == null) {
+            this.relatedGoodsThumbnailUrl = "";
+        } // FIXME: check policy
     }
+}
 
-    @Data
-    public static class CreateVideoRequest {
-        @NotNull
-        String type = "BROADCASTED";
-        String visibility = "PUBLIC";
-        List<Integer> category;
-        String title = "";
-        String content = "";
-        String chatRoomId = "";
-        String data = "";
-        Boolean muted = false;
-        Boolean locked = false;
+@Data
+public static class CreateVideoRequest {
+    @NotNull
+    String type = "BROADCASTED";
+    String visibility = "PUBLIC";
+    List<Integer> category;
+    String title = "";
+    String content = "";
+    String chatRoomId = "";
+    String data = "";
+    Boolean muted = false;
+    Boolean locked = false;
+}
+
+@Data
+public static class VideoLikeInfo {
+    private Long id;
+    @Deprecated
+    private Long createdBy;
+    private Date createdAt;
+    private VideoInfo video;
+
+    VideoLikeInfo(VideoLike videoLike, VideoInfo video) {
+        BeanUtils.copyProperties(videoLike, this);
+        this.video = video;
     }
+}
 
-    @Data
-    public static class VideoLikeInfo {
-        private Long id;
-        @Deprecated
-        private Long createdBy;
-        private Date createdAt;
-        private VideoInfo video;
+@Data
+public static class CommentLikeInfo {
+    private Long id;
+    @Deprecated
+    private MemberInfo createdBy;
+    private Date createdAt;
+    private CommentInfo comment;
 
-        VideoLikeInfo(VideoLike videoLike, VideoInfo video) {
-            BeanUtils.copyProperties(videoLike, this);
-            this.video = video;
-        }
+    public CommentLikeInfo(CommentLike commentLike) {
+        BeanUtils.copyProperties(commentLike, this);
+        comment = new CommentInfo(commentLike.getComment());
     }
+}
 
-    @Data
-    public static class CommentLikeInfo {
-        private Long id;
-        @Deprecated
-        private MemberInfo createdBy;
-        private Date createdAt;
-        private CommentInfo comment;
+@Data
+private static class VideoReportRequest {
+    @NotNull
+    @Size(max = 80)
+    private String reason;
 
-        public CommentLikeInfo(CommentLike commentLike) {
-            BeanUtils.copyProperties(commentLike, this);
-            comment = new CommentInfo(commentLike.getComment());
-        }
+    private Integer reasonCode;
+}
+
+@Data
+private static class VideoHeartRequest {
+    private Integer count;
+}
+
+@Data
+public static class VideoScrapInfo {
+    private Long id;
+    @Deprecated
+    private Long createdBy;
+    private Date createdAt;
+    private VideoInfo video;
+
+    VideoScrapInfo(VideoScrap VideoScrap, VideoInfo video) {
+        BeanUtils.copyProperties(VideoScrap, this);
+        this.video = video;
     }
+}
 
-    @Data
-    private static class VideoReportRequest {
-        @NotNull
-        @Size(max = 80)
-        private String reason;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public static class CommentStateInfo {
+    private int state;
+}
 
-        private Integer reasonCode;
-    }
+@Data
+private static class CommentReportRequest {
+    @Size(max = 80)
+    private String reason;
 
-    @Data
-    private static class VideoHeartRequest {
-        private Integer count;
-    }
-
-    @Data
-    public static class VideoScrapInfo {
-        private Long id;
-        @Deprecated
-        private Long createdBy;
-        private Date createdAt;
-        private VideoInfo video;
-
-        VideoScrapInfo(VideoScrap VideoScrap, VideoInfo video) {
-            BeanUtils.copyProperties(VideoScrap, this);
-            this.video = video;
-        }
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class CommentStateInfo {
-        private int state;
-    }
-
-    @Data
-    private static class CommentReportRequest {
-        @Size(max = 80)
-        private String reason;
-
-        @NotNull
-        private Integer reasonCode;
-    }
+    @NotNull
+    private Integer reasonCode;
+}
 }

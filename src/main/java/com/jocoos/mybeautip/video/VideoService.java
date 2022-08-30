@@ -1,10 +1,9 @@
 package com.jocoos.mybeautip.video;
 
-import com.jocoos.mybeautip.domain.notification.service.impl.VideoUploadNotificationService;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.NotFoundException;
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.feed.FeedService;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
@@ -30,7 +29,6 @@ import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatch;
 import com.jocoos.mybeautip.video.watches.VideoWatchRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +48,12 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
+import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -77,6 +81,8 @@ public class VideoService {
     private final VideoDataService videoDataService;
     private final VideoCategoryRepository videoCategoryRepository;
     private final VideoScrapRepository videoScrapRepository;
+
+    private final ActivityPointService activityPointService;
 
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
@@ -262,12 +268,12 @@ public class VideoService {
         Long me = legacyMemberService.currentMemberId();
         // Set likeID
         if (me != null) {
-            Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), me);
+            Optional<VideoLike> optional = videoLikeRepository.findByVideoIdAndCreatedByIdAndStatus(video.getId(), me, LIKE);
             likeId = optional.map(VideoLike::getId).orElse(null);
-            scrapId = videoScrapRepository.findByVideoIdAndCreatedById(video.getId(), me)
+            scrapId = videoScrapRepository.findByVideoIdAndCreatedByIdAndStatus(video.getId(), me, SCRAP)
                     .map(s -> s.getId()).orElse(null);
             log.debug("{}, {}, {}", video.getId(), me, scrapId);
-            blocked = blockRepository.findByMeAndMemberYouId(video.getMember().getId(), me).isPresent();
+            blocked = blockRepository.findByMeAndMemberYouIdAndStatus(video.getMember().getId(), me, BLOCK).isPresent();
         }
         // Set Watch count
         if ("live".equalsIgnoreCase(video.getState())) {
@@ -707,29 +713,57 @@ public class VideoService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public VideoLike likeVideo(Video video) {
+    public VideoLike likeVideo(Video video, Member member) {
         videoRepository.updateLikeCount(video.getId(), 1);
         video.setLikeCount(video.getLikeCount() + 1);
-        return videoLikeRepository.save(new VideoLike(video));
+
+        VideoLike videoLike = videoLikeRepository.findByVideoIdAndCreatedById(video.getId(), member.getId())
+                .orElse(new VideoLike(video));
+        if (LIKE.equals(videoLike.getStatus())) {
+            throw new BadRequestException("already_liked");
+        }
+        videoLike.like();
+        videoLikeRepository.save(videoLike);
+
+        activityPointService.gainActivityPoint(GET_LIKE_VIDEO, validDomainAndReceiver(videoLike, videoLike.getId(), video.getMember()));
+        activityPointService.gainActivityPoint(VIDEO_LIKE, validDomainAndReceiver(video, videoLike.getId(), member));
+
+        return videoLike;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikeVideo(VideoLike liked) {
-        videoLikeRepository.delete(liked);
+        liked.unlike();
         if (liked.getVideo().getLikeCount() > 0) {
             videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
         }
+        activityPointService.retrieveActivityPoint(CANCEL_VIDEO_LIKE, liked.getId(), liked.getCreatedBy());
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public CommentLike likeVideoComment(Comment comment) {
+    public CommentLike likeVideoComment(Long commentId, Long videoId, Member member) {
+
+        Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
+                .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));
         commentRepository.updateLikeCount(comment.getId(), 1);
-        return commentLikeRepository.save(new CommentLike(comment));
+
+        CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
+                .orElse(new CommentLike(comment));
+        if (LIKE.equals(commentLike.getStatus())) {
+            throw new BadRequestException("already_liked");
+        }
+        commentLike.like();
+        commentLikeRepository.save(commentLike);
+
+        activityPointService.gainActivityPoint(GET_LIKE_VIDEO_COMMENT,
+                                               validDomainAndReceiver(commentLike, commentLike.getId(), comment.getCreatedBy()));
+
+        return commentLike;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikeVideoComment(CommentLike liked) {
-        commentLikeRepository.delete(liked);
+        liked.unlike();
         if (liked.getComment().getLikeCount() > 0) {
             commentRepository.updateLikeCount(liked.getComment().getId(), -1);
         }
@@ -833,5 +867,10 @@ public class VideoService {
     public Video saveWithDeletedAt(Video video) {
         video.setDeletedAt(new Date());
         return videoRepository.save(video);
+    }
+
+    public Video getByVideoId(Long videoId) {
+        return videoRepository.findByIdAndDeletedAtIsNull(videoId)
+                .orElseThrow(() -> new NotFoundException("video_not_found"));
     }
 }

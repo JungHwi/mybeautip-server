@@ -8,10 +8,13 @@ import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
 import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.exception.MybeautipRuntimeException;
+import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
@@ -39,11 +42,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
+import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
 
 @Slf4j
 @Service
@@ -72,9 +81,11 @@ public class LegacyMemberService {
     private final AttachmentService attachmentService;
     private final SlackService slackService;
     private final SocialMemberFactory socialMemberFactory;
+
+    private final ActivityPointService activityPointService;
+
     private final String PATH_AVATAR = "avatar";
     private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
-    private final String defaultAvatarUrl = "https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_default.png";
 
     public LegacyMemberService(BannedWordService bannedWordService,
                                MessageService messageService,
@@ -92,7 +103,8 @@ public class LegacyMemberService {
                                MemberConverter memberConverter,
                                AttachmentService attachmentService,
                                SlackService slackService,
-                               SocialMemberFactory socialMemberFactory) {
+                               SocialMemberFactory socialMemberFactory,
+                               ActivityPointService activityPointService) {
         this.bannedWordService = bannedWordService;
         this.messageService = messageService;
         this.tagService = tagService;
@@ -110,6 +122,7 @@ public class LegacyMemberService {
         this.attachmentService = attachmentService;
         this.slackService = slackService;
         this.socialMemberFactory = socialMemberFactory;
+        this.activityPointService = activityPointService;
     }
 
     public Long currentMemberId() {
@@ -166,7 +179,7 @@ public class LegacyMemberService {
                 .replace(" ", "");
 
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new BadRequestException("duplicate_phone");
+            throw new BadRequestException("duplicate_phone", "duplicate_phone");
         }
 
         return true;
@@ -206,12 +219,24 @@ public class LegacyMemberService {
         }
     }
 
-    public void checkUsernameValidation(@RequestParam String username, String lang) {
+    public void checkUsernameValidation(String username, String lang) {
+        checkUsernameValidation(0L, username, lang);
+    }
+
+    public void checkUsernameValidation(Long userId, String username, String lang) {
+        if (StringUtils.isBlank(username) || username.length() < 2 || username.length() > 10) {
+            throw new BadRequestException("username length must be between 2 and 10 characters.");
+        }
+
         if (!(username.matches(RegexConstants.regexForUsername))) {
             throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
         }
 
-        if (memberRepository.existsByUsername(username)) {
+        List<Member> otherMembers = memberRepository.findByUsername(username).stream()
+                .filter(i -> i.getId() != userId)
+                .collect(Collectors.toList());
+
+        if (!otherMembers.isEmpty()) {
             throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
         }
 
@@ -228,19 +253,10 @@ public class LegacyMemberService {
         return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
     }
 
-    @Transactional
-    public void tagMigration() {
-        List<Member> noTagMembers = memberRepository.selectTagIsEmpty();
-
-        for (Member member : noTagMembers) {
-            member = adjustTag(member);
-            memberRepository.save(member);
-        }
-    }
-
+    // Check ASPECT
     @Transactional
     public Member register(SignupRequest signupRequest) {
-        Member member = memberConverter.convertToMember(signupRequest);
+        Member member = new Member(signupRequest);
         member = adjustUniqueInfo(member);
         Member registeredMember = memberRepository.save(member);
 
@@ -255,8 +271,7 @@ public class LegacyMemberService {
         return adjustUserName(member);
     }
 
-    // TODO Migration 하고 나면 private 으로 변경.
-    public Member adjustTag(Member member) {
+    private Member adjustTag(Member member) {
         String tag = member.getTag();
         for (int retry = 0; retry < 5; retry++) {
             if (StringUtils.isNotBlank(tag) && !memberRepository.existsByTag(tag)) {
@@ -274,7 +289,7 @@ public class LegacyMemberService {
     public Member adjustUserName(Member member) {
         String username = member.getUsername();
         try {
-            checkUsernameValidation(username, Locale.KOREAN.getLanguage());
+            checkUsernameValidation(member.getId(), username, Locale.KOREAN.getLanguage());
         } catch (BadRequestException ex) {
             for (int retry = 0; retry < 5; retry++) {
                 username = RandomUtils.generateUsername();
@@ -323,13 +338,13 @@ public class LegacyMemberService {
     @Transactional
     public Member updateMember(LegacyMemberController.UpdateMemberRequest request, Member member) {
         boolean isFirstUpdate = !member.isVisible();
+        String originalAvatar = member.getAvatarUrl();
 
         if (request.getUsername() != null) {
             member.setUsername(request.getUsername());
         }
 
-        String avatarUrl = request.getAvatarUrl() != null ? request.getAvatarUrl() : defaultAvatarUrl;
-        member.setAvatarUrl(avatarUrl);
+        member.setAvatarFilenameFromUrl(request.getAvatarUrl());
 
         member.setVisible(true);
         Member finalMember = memberRepository.save(member);
@@ -343,6 +358,8 @@ public class LegacyMemberService {
                     });
         }
 
+        deleteAvatar(originalAvatar);
+        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
         return finalMember;
     }
 
@@ -371,7 +388,7 @@ public class LegacyMemberService {
         }
 
         member.setIntro("");
-        member.setAvatarUrl("https://mybeautip.s3.ap-northeast-2.amazonaws.com/avatar/img_profile_deleted.png");
+        member.setAvatarFilename(DEFAULT_AVATAR_FILE_NAME);
         member.setVisible(false);
         member.setFollowingCount(0);
         member.setFollowerCount(0);
@@ -426,54 +443,54 @@ public class LegacyMemberService {
     }
 
     @Transactional
-    public void updateDetailInfo(MemberDetailRequest request) {
+    public MemberDetailResponse updateDetailInfo(MemberDetailRequest request) {
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + request.getMemberId()));
 
         member.setBirthday(new Birthday(request.getAgeGroup()));
         memberRepository.save(member);
 
-        Long inviterId = null;
+        MemberDetail memberDetail = memberDetailRepository.findByMemberId(request.getMemberId())
+                .orElse(new MemberDetail(request.getMemberId()));
+
+        // FIXME 친구초대 이벤트를 위해서 회원 상세 정보 수정 메소드에서 이벤트 Aspect 에서 쓸 데이터(ChangedTagInfo)를 가공한다. 꼴뵈기 싫으...
+        Member targetMember = null;
+        boolean isTagChanged = false;
         if (StringUtils.isNotBlank(request.getInviterTag())) {
-            inviterId = memberRepository.findByTag(request.getInviterTag())
-                    .orElseThrow(() -> new MemberNotFoundException("No such Member. tag - " + request.getInviterTag()))
-                    .getId();
+            targetMember = memberRepository.findByTag(request.getInviterTag())
+                    .orElseThrow(() -> new MemberNotFoundException("No such Member. tag - " + request.getInviterTag()));
+
+            if (member.getId().equals(targetMember.getId())) {
+                throw new BadRequestException("my_tag", "Target member is me.");
+            }
+
+            if (memberDetail.getInviterId() == null) {
+                isTagChanged = true;
+            }
         }
 
-        MemberDetail memberDetail = memberDetailRepository.findByMemberId(request.getMemberId())
-                .orElse(MemberDetail.builder()
-                        .memberId(request.getMemberId())
-                        .skinType(request.getSkinType())
-                        .skinWorry(request.getSkinWorry())
-                        .inviterId(inviterId)
-                        .build());
+        ChangedTagInfo changedTagInfo = ChangedTagInfo.builder()
+                .isChanged(isTagChanged)
+                .member(member)
+                .targetMember(targetMember)
+                .build();
 
         memberDetail.setSkinType(request.getSkinType());
         memberDetail.setSkinWorry(request.getSkinWorry());
-        memberDetail.setInviterId(inviterId);
-
-        memberDetailRepository.save(memberDetail);
-    }
-
-    @Transactional
-    public String updateAvatar(long memberId, MultipartFile avatar) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("No such memberId - " + memberId));
-
-        String originalAvatar = member.getAvatarUrl();
-        String path = "";
-
-        try {
-            path = attachmentService.upload(avatar, PATH_AVATAR);
-        } catch (IOException ex) {
-            throw new MybeautipRuntimeException("Member avatar upload Error. id - " + memberId);
+        if (targetMember != null) {
+            memberDetail.setInviterId(targetMember.getId());
         }
 
-        member.setAvatarUrl(path);
-        memberRepository.save(member);
+        memberDetail = memberDetailRepository.save(memberDetail);
+        activityPointService.gainActivityPoint(INPUT_EXTRA_INFO, validDomainIdAndReceiver(memberDetail.getId(), member));
 
-        deleteAvatar(originalAvatar);
-        return path;
+        return MemberDetailResponse.builder()
+                .ageGroup(member.getBirthday().getAgeGroupByTen())
+                .skinType(memberDetail.getSkinType())
+                .skinWorry(memberDetail.getSkinWorry())
+                .inviterTag(request.getInviterTag())
+                .changedTagInfo(changedTagInfo)
+                .build();
     }
 
     public String uploadAvatar(MultipartFile avatar) {
@@ -482,18 +499,20 @@ public class LegacyMemberService {
             if (avatar != null) {
                 path = attachmentService.upload(avatar, PATH_AVATAR);
             } else {
-                path = defaultAvatarUrl;
+                path = DEFAULT_AVATAR_URL;
             }
 
         } catch (IOException ex) {
-            throw new MybeautipRuntimeException("Member avatar upload Error.");
+            throw new MybeautipException("Member avatar upload Error.");
         }
 
         return path;
     }
 
     public void deleteAvatar(String avatar) {
-        attachmentService.deleteAttachments(StringConvertUtil.getPath(avatar));
+        if (StringUtils.isNotBlank(avatar) && !DEFAULT_AVATAR_URL.equals(avatar)) {
+            attachmentService.deleteAttachments(StringConvertUtil.getPath(avatar));
+        }
     }
 
     @Transactional

@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[point_status_group]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-point_status_group.adoc[]

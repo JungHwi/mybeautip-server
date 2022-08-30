@@ -91,7 +91,6 @@ public class S3StorageService implements StorageService {
         if (publicRead) {
             putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
         }
-
         s3Client.putObject(putObjectRequest);
         return s3Client.getUrl(bucketName, key).toString();
     }

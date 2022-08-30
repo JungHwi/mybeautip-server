@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[event_product_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-event_product_type.adoc[]

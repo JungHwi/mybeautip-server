@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[message_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-message_type.adoc[]

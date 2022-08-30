@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[language]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-language.adoc[]

@@ -1,5 +1,10 @@
 package com.jocoos.mybeautip.domain.notification.service.impl;
 
+import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -15,11 +20,9 @@ import com.jocoos.mybeautip.domain.notification.persistence.repository.Notificat
 import com.jocoos.mybeautip.domain.notification.service.MemberNotificationService;
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
+import com.jocoos.mybeautip.global.code.UrlDirectory;
+import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.PostLike;
-import com.jocoos.mybeautip.post.PostLikeRepository;
-import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,10 +42,10 @@ import static com.jocoos.mybeautip.global.constant.SignConstant.ONE;
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class CommunityLikeFirstNotificationService implements NotificationService<PostLike> {
+public class CommunityLikeFirstNotificationService implements NotificationService<CommunityLike> {
 
-    private final PostRepository postRepository;
-    private final PostLikeRepository postLikeRepository;
+    private final CommunityDao communityDao;
+    private final CommunityLikeDao communityLikeDao;
     private final MemberNotificationService memberNotificationService;
     private final NotificationCenterRepository notificationCenterRepository;
     private final NotificationMessageCenterRepository messageCenterRepository;
@@ -54,33 +57,40 @@ public class CommunityLikeFirstNotificationService implements NotificationServic
 
     private final TemplateType templateType = TemplateType.COMMUNITY_LIKE_1;
 
-    @AfterReturning(returning = "result", value = "execution(* com.jocoos.mybeautip.post.PostService.likePost(..))")
+    @AfterReturning(returning = "result", value = "execution(* com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao.like(..))")
     public void occurs(Object result) {
-        if (result instanceof PostLike) {
-            PostLike postLike = (PostLike) result;
-            if (verify(postLike)) {
-                send(postLike);
+        if (result instanceof CommunityLike) {
+            CommunityLike communityLike = (CommunityLike) result;
+            if (verify(communityLike)) {
+                send(communityLike);
             }
         } else {
-            log.error("Must be PostLike. But this object is > " + result);
+            log.error("Must be CommunityLike Object. But this object is > " + result);
         }
     }
 
-    private boolean verify(PostLike postLike) {
-        int countLike = postLikeRepository.countByPostId(postLike.getPost().getId());
-        return countLike == ONE && postLike.getCreatedAt().equals(postLike.getModifiedAt());
+    private boolean verify(CommunityLike communityLike) {
+        int countLike = communityLikeDao.countByCommunityId(communityLike.getCommunityId());
+        return countLike == ONE && communityLike.getCreatedAt().equals(communityLike.getModifiedAt());
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void send(PostLike postLike) {
+    public void send(CommunityLike postLike) {
         int messageIndex = getMessageRandomIndex();
-        Post post = postRepository.getById(postLike.getPost().getId());
-        NotificationTargetInfo targetInfo = getTargetInfo(post.getCreatedBy().getId());
+        Community community = communityDao.get(postLike.getCommunityId());
+        NotificationTargetInfo targetInfo = getTargetInfo(community.getMemberId());
 
-        Map<String, String> arguments = getArgument(targetInfo.getNickname(), post);
-        NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, post.getThumbnailUrl(), targetInfo, arguments);
-        sendAppPush(messageIndex, post.getThumbnailUrl(), notificationCenterEntity.getId(), targetInfo, arguments);
+        Map<String, String> arguments = getArgument(targetInfo.getNickname(), community);
+        String thumbnailFile = community.getCommunityFileList().stream()
+                .findFirst()
+                .map(CommunityFile::getFile)
+                .orElse(null);
+
+        String thumbnailFileUrl = ImageUrlConvertUtil.toUrl(thumbnailFile, UrlDirectory.COMMUNITY, community.getId());
+
+        NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, thumbnailFile, targetInfo, arguments);
+        sendAppPush(messageIndex, thumbnailFileUrl, notificationCenterEntity.getId(), targetInfo, arguments);
     }
 
     private NotificationCenterEntity sendCenter(int messageIndex, String imageUrl, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
@@ -122,10 +132,10 @@ public class CommunityLikeFirstNotificationService implements NotificationServic
         return memberNotificationService.getMemberNotificationInfo(memberId);
     }
 
-    private Map<String, String> getArgument(String nickname, Post post) {
+    private Map<String, String> getArgument(String nickname, Community community) {
         Map<String, String> arguments = new HashMap<>();
         arguments.put(NotificationArgument.USER_NICKNAME.name(), nickname);
-        arguments.put(NotificationArgument.POST_ID.name(), String.valueOf(post.getId()));
+        arguments.put(NotificationArgument.COMMUNITY_ID.name(), String.valueOf(community.getId()));
         return arguments;
     }
 }

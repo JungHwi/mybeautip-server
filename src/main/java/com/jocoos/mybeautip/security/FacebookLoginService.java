@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.config.Oauth2Config;
-import com.jocoos.mybeautip.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.AuthenticationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

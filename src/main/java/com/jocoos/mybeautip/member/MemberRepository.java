@@ -20,6 +20,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByUsername(String username);
 
+    List<Member> findByUsername(String username);
+
     Optional<Member> findByTag(String tag);
 
     Optional<Member> findByIdAndDeletedAtIsNull(Long id);
@@ -37,6 +39,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Slice<Member> findByDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(String username, String intro, Pageable pageable);
 
     Slice<Member> findByCreatedAtBeforeAndDeletedAtIsNullAndVisibleIsTrueAndUsernameContainingOrIntroContaining(Date createdAt, String username, String intro, Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE Member m set m.point = m.point + ?2 WHERE m.id = ?1")
+    void updateMemberPoint(long memberId, int point);
 
     @Modifying
     @Query("update Member m set m.lastLoggedAt = current_timestamp where m.id = ?1")

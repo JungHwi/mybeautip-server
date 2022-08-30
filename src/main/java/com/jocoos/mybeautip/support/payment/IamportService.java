@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.support.payment;
 
-import com.jocoos.mybeautip.exception.BadRequestException;
-import com.jocoos.mybeautip.exception.PaymentConflictException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.PaymentConflictException;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.AccountController;
 import com.jocoos.mybeautip.support.slack.SlackService;
