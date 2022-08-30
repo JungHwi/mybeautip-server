@@ -21,20 +21,23 @@ spring:
   config:
     import: classpath:application-oauth-dev.yml
   datasource:
-    url: jdbc:mysql://localhost:3306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
-    username: mybeautip
-    password: akdlqbxlq#1@Jocoos
-    test-on-borrow: true
-    validation-query: SELECT 1
-    time-between-eviction-runs-millis: 60000
-    test-while-idle: true
+    master:
+      hikari:
+        username: mybeautip
+        password: akdlqbxlq#1@Jocoos
+        jdbc-url: jdbc:mysql://localhost:3306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautip
+        password: akdlqbxlq#1@Jocoos
+        jdbc-url: jdbc:mysql://localhost:3306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
   jackson:
     serialization:
       write-dates-as-timestamps: true
     default-property-inclusion: NON_NULL
     property-naming-strategy: SNAKE_CASE
   flyway:
-    baselineOnMigrate: true
+    baselineOnMigrate: false
     locations: classpath:db/mysql
   jpa:
     properties:

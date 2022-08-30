@@ -4,11 +4,16 @@ spring:
       on-profile: production
     import: classpath:application-oauth-prod.yml
   datasource:
-    url: jdbc:mysql://172.31.2.106:3306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
-    username: mybeautip
-    password: akdlqbxlq#1@Jocoos
-    test-on-borrow: true
-    validation-query: SELECT 1
+    master:
+      hikari:
+        username: mybeautipsrv
+        password: mybeautipsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-prod.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:33306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautipsrv
+        password: mybeautipsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-prod.cluster-ro-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:33306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
   flyway:
     baselineOnMigrate: false
     locations: classpath:db/mysql
@@ -59,4 +64,4 @@ redis:
   password: akdlqbxlq#1@Jocoos
 
 logging:
-  config: classpath:log/log4j2-file.yml
+  config: classpath:log/log4j2-console.yml
