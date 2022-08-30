@@ -135,7 +135,6 @@ public class CommunityLikeTwentyNotificationService implements NotificationServi
     private Map<String, String> getArgument(String nickname, Community community) {
         Map<String, String> arguments = new HashMap<>();
         arguments.put(NotificationArgument.USER_NICKNAME.name(), nickname);
-        arguments.put(NotificationArgument.POST_ID.name(), String.valueOf(community.getId()));
         arguments.put(NotificationArgument.COMMUNITY_ID.name(), String.valueOf(community.getId()));
         return arguments;
     }

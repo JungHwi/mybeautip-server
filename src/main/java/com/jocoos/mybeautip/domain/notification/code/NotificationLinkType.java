@@ -10,8 +10,7 @@ import lombok.Getter;
 public enum NotificationLinkType implements CodeValue {
     HOME("Home 화면", NotificationArgument.NONE),
     VIDEO("비디오 메뉴", NotificationArgument.VIDEO_ID),
-    POST("게시물 메뉴", NotificationArgument.POST_ID),
-//    COMMUNITY("게시물 메뉴", NotificationArgument.COMMUNITY_ID),
+    COMMUNITY("게시물 메뉴", NotificationArgument.COMMUNITY_ID),
     COMMENT("댓글", NotificationArgument.COMMENT_ID);
 
     private final String description;

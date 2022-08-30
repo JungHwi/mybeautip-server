@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.notification.code.NotificationArgument.COMMUNITY_ID;
-import static com.jocoos.mybeautip.domain.notification.code.NotificationArgument.POST_ID;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.constant.SignConstant.*;
 
@@ -41,11 +40,8 @@ public interface NotificationCenterConvert {
         }
 
         Map<String, String> arguments = StringConvertUtil.convertJsonToMap(entity.getArguments());
-        // FIXME POST_ID 지울때 같이 수정하기
         String communityId = arguments.get(COMMUNITY_ID.name());
-        String postId = arguments.get(POST_ID.name());
-        Long id = StringUtils.isNotBlank(communityId) ? Long.valueOf(communityId) : Long.valueOf(postId);
-        String imageUrl = ImageUrlConvertUtil.toUrl(entity.getImageUrl(), COMMUNITY, id);
+        String imageUrl = ImageUrlConvertUtil.toUrl(entity.getImageUrl(), COMMUNITY, Long.valueOf(communityId));
         response.setImageUrl(imageUrl);
     }
 

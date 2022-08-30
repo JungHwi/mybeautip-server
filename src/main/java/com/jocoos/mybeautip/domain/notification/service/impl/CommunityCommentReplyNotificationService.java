@@ -123,7 +123,6 @@ public class CommunityCommentReplyNotificationService implements NotificationSer
     private Map<String, String> getArgument(String nickname, CommunityCommentResponse comment) {
         Map<String, String> arguments = new HashMap<>();
         arguments.put(NotificationArgument.USER_NICKNAME.name(), nickname);
-        arguments.put(NotificationArgument.POST_ID.name(), String.valueOf(comment.getCommunityId()));
         arguments.put(NotificationArgument.COMMUNITY_ID.name(), String.valueOf(comment.getCommunityId()));
         arguments.put(NotificationArgument.COMMENT_ID.name(), String.valueOf(comment.getParentId()));
         arguments.put(NotificationArgument.REPLY_ID.name(), String.valueOf(comment.getId()));
