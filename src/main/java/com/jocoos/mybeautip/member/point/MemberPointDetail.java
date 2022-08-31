@@ -153,6 +153,7 @@ public class MemberPointDetail extends CreatedDateAuditable {
                 .state(STATE_UNDER_ZERO_POINT)
                 .userPointService(service)
                 .usePointServiceId(serviceId)
+                .expiryAt(memberPoint.getExpiryAt())
                 .build();
     }
 
