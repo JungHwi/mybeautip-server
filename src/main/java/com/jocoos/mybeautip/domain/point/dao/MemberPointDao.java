@@ -1,14 +1,11 @@
 package com.jocoos.mybeautip.domain.point.dao;
 
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
-import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 
 import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_EARNED_POINT;
@@ -35,7 +32,4 @@ public class MemberPointDao {
         return repository.existsByActivityTypeAndActivityDomainIdAndMemberAndState(type, domainId, member, STATE_EARNED_POINT);
     }
 
-    public List<MemberPoint> getAvailablePoint(Long memberId, Long cursor) {
-        return repository.getAvailablePoint(memberId, PointStatusGroup.EARN.getLegacyCodeGroup(), cursor);
-    }
 }

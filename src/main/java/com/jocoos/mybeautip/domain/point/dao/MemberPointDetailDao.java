@@ -11,8 +11,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_UNDER_ZERO_POINT;
-import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
+import static com.jocoos.mybeautip.member.point.MemberPoint.*;
 
 @RequiredArgsConstructor
 @Service
@@ -42,9 +41,7 @@ public class MemberPointDetailDao {
 
     @Transactional(readOnly = true)
     public List<MemberPointDetail> findUsedPointOfParent(Long cursor) {
-        return repository.findByParentIdAndStateOrMemberPointIdAndState(
-                cursor, STATE_USE_POINT,
-                cursor, STATE_UNDER_ZERO_POINT);
+        return repository.findByParentIdAndState(cursor, STATE_USE_POINT);
     }
 
     @Transactional(readOnly = true)
@@ -54,5 +51,10 @@ public class MemberPointDetailDao {
                         Arrays.asList(STATE_UNDER_ZERO_POINT, STATE_USE_POINT),
                         Date.from(Instant.now()))
                 .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberPointDetail> findAvailablePointsAfterCursor(Long memberId, Long cursor) {
+        return repository.findAllByMemberIdAndMemberPointIdGreaterThanEqualAndStateOrderById(memberId, cursor, STATE_EARNED_POINT);
     }
 }

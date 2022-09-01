@@ -157,6 +157,23 @@ public class MemberPointDetail extends CreatedDateAuditable {
                 .build();
     }
 
+    public static MemberPointDetail useStatus(MemberPointDetail detail,
+                                              long parentId,
+                                              int point,
+                                              UsePointService service,
+                                              long serviceId) {
+        return MemberPointDetail.withUsePointService()
+                .memberId(detail.getMemberId())
+                .memberPointId(parentId)
+                .parentId(detail.getMemberPointId())
+                .point(-point)
+                .state(STATE_USE_POINT)
+                .userPointService(service)
+                .usePointServiceId(serviceId)
+                .expiryAt(detail.getExpiryAt())
+                .build();
+    }
+
     public static MemberPointDetail useUnderZeroStatus(MemberPoint memberPoint,
                                                        int point,
                                                        UsePointService service,
@@ -194,5 +211,11 @@ public class MemberPointDetail extends CreatedDateAuditable {
 
     public void underZeroPointAllAddedUp() {
         this.parentId = this.getMemberPointId();
+    }
+
+    public void changeParentIdIfAllAddedUp(int inputPoint) {
+        if (inputPoint >= Math.abs(this.point)) {
+            underZeroPointAllAddedUp();
+        }
     }
 }

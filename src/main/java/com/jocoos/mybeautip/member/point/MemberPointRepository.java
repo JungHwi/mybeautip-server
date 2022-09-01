@@ -95,4 +95,6 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
     Long countActivityPointDailyByTypes(
             @Param("types") Set<ActivityPointType> types,
             @Param("member") Member member);
+
+    Optional<MemberPoint> findByMemberAndActivityTypeAndActivityDomainId(Member member, ActivityPointType type, long domainId);
 }
