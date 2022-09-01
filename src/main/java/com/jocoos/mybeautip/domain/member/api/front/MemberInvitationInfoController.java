@@ -20,4 +20,9 @@ public class MemberInvitationInfoController {
     public ResponseEntity<MemberInvitationInfoResponse> getMemberInvitationInfo() {
         return ResponseEntity.ok(memberInvitationInfoService.getMemberInvitationInfo());
     }
+
+    @GetMapping("/1/members/invitation-info")
+    public ResponseEntity<MemberInvitationInfoResponse> getMemberInvitationInfoLegacy() {
+        return ResponseEntity.ok(memberInvitationInfoService.getMemberInvitationInfo());
+    }
 }

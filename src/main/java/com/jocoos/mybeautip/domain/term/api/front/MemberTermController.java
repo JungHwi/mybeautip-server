@@ -62,4 +62,13 @@ public class MemberTermController {
                         legacyMemberService.currentMemberId(),
                         request.getIsAccept()));
     }
+
+    @PatchMapping("/1/members/me/terms/option/change")
+    public ResponseEntity<TermTypeResponse> changeOptionalTermByTypeLegacy(@RequestBody TermTypeRequest request) {
+        return ResponseEntity
+                .ok(memberTermService.changeOptionalTermByType(
+                        request.getTermType(),
+                        legacyMemberService.currentMemberId(),
+                        request.getIsAccept()));
+    }
 }

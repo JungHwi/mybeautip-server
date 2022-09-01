@@ -445,6 +445,22 @@ public class VideoController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @DeleteMapping("/{videoId:.+}/likes/{likeId:.+}")
+    public ResponseEntity<?> removeVideoLikeLegacy(@PathVariable Long videoId,
+                                             @PathVariable Long likeId,
+                                             @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        Long memberId = legacyMemberService.currentMemberId();
+
+        videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
+                .map(liked -> {
+                    videoService.unLikeVideo(liked);
+                    return Optional.empty();
+                })
+                .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @GetMapping("/{id:.+}/likes")
     public CursorResponse getLikedMemberList(@PathVariable Long id,
                                              @RequestParam(defaultValue = "100") int count,
@@ -483,6 +499,25 @@ public class VideoController {
 
     @PatchMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeCommentLike(@PathVariable Long videoId,
+                                               @PathVariable Long commentId,
+                                               @PathVariable Long likeId,
+                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        Member me = legacyMemberService.currentMember();
+
+        Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
+                .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+
+        commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
+                .map(liked -> {
+                    videoService.unLikeVideoComment(liked);
+                    return Optional.empty();
+                })
+                .orElseThrow(() -> new NotFoundException("comment_like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+    public ResponseEntity<?> removeCommentLikeLegacy(@PathVariable Long videoId,
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,
                                                @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
@@ -726,6 +761,22 @@ public class VideoController {
 
     @PatchMapping("/{videoId:.+}/scraps")
     public ResponseEntity<?> removeVideoScrap(@PathVariable Long videoId,
+                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        Member member = legacyMemberService.currentMember();
+
+        Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
+                .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+
+        try {
+            videoScrapService.deleteScrap(video, member);
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            throw new NotFoundException("scrap_not_found", messageService.getMessage(SCRAP_NOT_FOUND, lang));
+        }
+    }
+
+    @DeleteMapping("/{videoId:.+}/scraps")
+    public ResponseEntity<?> removeVideoScrapLegacy(@PathVariable Long videoId,
                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
 
