@@ -379,7 +379,7 @@ public class LegacyMemberService {
 
     private String avatarUrlFromRequest(LegacyMemberController.UpdateMemberRequest request) {
         if (isUrlFromOuter(request)) {
-            return awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory());
+            return awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory(), DEFAULT_AVATAR_FILE_NAME);
         } else {
             return request.getAvatarUrl();
         }

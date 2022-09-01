@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.S3UrlUploadException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,10 +45,14 @@ public class AwsS3Handler {
         return cloudFront + path;
     }
 
-    public String upload(String url, String directory) {
+    public String upload(String url, String directory, String defaultFilename) {
         String filename = RandomUtils.generateFilename();
-        String path = service.upload(url, directory + filename);
-        return cloudFront + path;
+        try {
+            String path = service.upload(url, directory + filename);
+            return cloudFront + path;
+        } catch (S3UrlUploadException e) {
+            return cloudFront + defaultFilename;
+        }
     }
 
     public String copy(FileDto fileDto, String destination) {
