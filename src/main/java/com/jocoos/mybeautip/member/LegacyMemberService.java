@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
@@ -11,6 +12,7 @@ import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
+import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -37,6 +39,7 @@ import com.jocoos.mybeautip.word.BannedWord;
 import com.jocoos.mybeautip.word.BannedWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -84,8 +87,13 @@ public class LegacyMemberService {
 
     private final ActivityPointService activityPointService;
 
+    private final AwsS3Handler awsS3Handler;
+
     private final String PATH_AVATAR = "avatar";
     private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
+
+    @Value("${mybeautip.aws.cf.domain}")
+    private String cloudFront;
 
     public LegacyMemberService(BannedWordService bannedWordService,
                                MessageService messageService,
@@ -104,7 +112,8 @@ public class LegacyMemberService {
                                AttachmentService attachmentService,
                                SlackService slackService,
                                SocialMemberFactory socialMemberFactory,
-                               ActivityPointService activityPointService) {
+                               ActivityPointService activityPointService,
+                               AwsS3Handler awsS3Handler) {
         this.bannedWordService = bannedWordService;
         this.messageService = messageService;
         this.tagService = tagService;
@@ -123,6 +132,7 @@ public class LegacyMemberService {
         this.slackService = slackService;
         this.socialMemberFactory = socialMemberFactory;
         this.activityPointService = activityPointService;
+        this.awsS3Handler = awsS3Handler;
     }
 
     public Long currentMemberId() {
@@ -344,7 +354,7 @@ public class LegacyMemberService {
             member.setUsername(request.getUsername());
         }
 
-        member.setAvatarFilenameFromUrl(request.getAvatarUrl());
+        member.setAvatarFilenameFromUrl(avatarUrlFromRequest(request));
 
         member.setVisible(true);
         Member finalMember = memberRepository.save(member);
@@ -358,9 +368,28 @@ public class LegacyMemberService {
                     });
         }
 
-        deleteAvatar(originalAvatar);
+        deleteOriginalAvatarIfChange(member, originalAvatar);
+
         activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
         return finalMember;
+    }
+
+    private void deleteOriginalAvatarIfChange(Member member, String originalAvatar) {
+        if (!member.isAvatarUrlSame(originalAvatar)) {
+            deleteAvatar(originalAvatar);
+        }
+    }
+
+    private String avatarUrlFromRequest(LegacyMemberController.UpdateMemberRequest request) {
+        if (isUrlFromOuter(request)) {
+            return awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory());
+        } else {
+            return request.getAvatarUrl();
+        }
+    }
+
+    private boolean isUrlFromOuter(LegacyMemberController.UpdateMemberRequest request) {
+        return !StringUtils.isBlank(request.getAvatarUrl()) && !request.getAvatarUrl().startsWith(cloudFront);
     }
 
     @Transactional
