@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.client.aws.s3;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
@@ -15,8 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 
 @Slf4j
 @Component
@@ -72,15 +72,9 @@ public class AwsS3Service {
 
             closeConnection(conn, inputStream);
             return key;
-        } catch (MalformedURLException e) {
-            throw new BadRequestException("wrong url : " + urlString, e);
-        } catch (IOException e) {
-            //TODO Exception 정의
-            throw new RuntimeException("File Upload ERROR", e);
-        } catch (AmazonServiceException e) {
-            throw new RuntimeException("AWS S3 ERROR!! - UPLOAD" , e);
-        } catch (SdkClientException e) {
-            throw new RuntimeException("sdk client exception - upload" , e);
+        } catch (IOException | SdkClientException e) {
+            log.info("{} Cause At Avatar Url Upload, Request URL : {}", e.getClass().getName(), urlString);
+            return DEFAULT_AVATAR_FILE_NAME;
         }
     }
 

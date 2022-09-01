@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.member.address;
 
+import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.DeliveryChargeArea;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
 import static com.jocoos.mybeautip.global.constant.RegexConstants.regexForPhoneNumber;
 
 @Slf4j
@@ -28,16 +31,20 @@ public class AddressService {
     private final AddressRepository addressRepository;
     private final DeliveryChargeAreaRepository deliveryChargeAreaRepository;
 
+    private final ActivityPointService activityPointService;
+
     private final String ADDRESS_NOT_FOUND = "address.not_found";
 
     public AddressService(AddressRepository addressRepository,
                           LegacyMemberService legacyMemberService,
                           MessageService messageService,
-                          DeliveryChargeAreaRepository deliveryChargeAreaRepository) {
+                          DeliveryChargeAreaRepository deliveryChargeAreaRepository,
+                          ActivityPointService activityPointService) {
         this.addressRepository = addressRepository;
         this.legacyMemberService = legacyMemberService;
         this.messageService = messageService;
         this.deliveryChargeAreaRepository = deliveryChargeAreaRepository;
+        this.activityPointService = activityPointService;
     }
 
     @Transactional
@@ -70,6 +77,8 @@ public class AddressService {
             address.setPhone(phone);
         }
         log.debug("address: {}", address);
+
+        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
         return addressRepository.save(address);
     }
 
@@ -100,6 +109,11 @@ public class AddressService {
                         addressRepository.save(prevBaseAddress);
                     });
         }
+
+        //FIXME - DELETE
+        Member member = legacyMemberService.currentMember();
+        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
+        //
 
         return addressRepository.findByIdAndCreatedByIdAndDeletedAtIsNull(id, legacyMemberService.currentMemberId())
                 .map(address -> {
