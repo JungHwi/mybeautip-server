@@ -127,7 +127,8 @@ public class MemberSignupService {
 
     private void savaAndSetAvatarUrlIfExists(SignupRequest request) {
         if (StringUtils.hasText(request.getAvatarUrl())) {
-            String uploadAvatarUrl = awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory());
+            String uploadAvatarUrl =
+                    awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory(), DEFAULT_AVATAR_FILE_NAME);
             request.changeAvatarUrl(uploadAvatarUrl);
         }
     }

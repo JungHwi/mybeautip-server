@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.jocoos.mybeautip.global.config.aws.AwsCredentialService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.S3UrlUploadException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 
 @Slf4j
 @Component
@@ -74,7 +73,7 @@ public class AwsS3Service {
             return key;
         } catch (IOException | SdkClientException e) {
             log.info("{} Cause At Avatar Url Upload, Request URL : {}", e.getClass().getName(), urlString);
-            return DEFAULT_AVATAR_FILE_NAME;
+            throw new S3UrlUploadException(e);
         }
     }
 
