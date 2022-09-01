@@ -229,4 +229,8 @@ public class Member {
     private boolean isUrl() {
         return this.avatarFilename.startsWith(HTTP_PREFIX);
     }
+
+    public boolean isAvatarUrlSame(String originalAvatar) {
+        return getAvatarUrl().equals(originalAvatar);
+    }
 }
