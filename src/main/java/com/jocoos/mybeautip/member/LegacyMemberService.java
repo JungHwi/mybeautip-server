@@ -11,7 +11,6 @@ import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
-import com.jocoos.mybeautip.domain.point.service.activity.ValidObject;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -51,7 +50,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
@@ -370,7 +368,6 @@ public class LegacyMemberService {
 
         deleteOriginalAvatarIfChange(member, originalAvatar);
 
-        activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
         return finalMember;
     }
 
