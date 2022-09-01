@@ -376,17 +376,14 @@ public class LegacyMemberService {
 
     private void deleteOriginalAvatarIfChange(Member member, String originalAvatar) {
         if (!member.isAvatarUrlSame(originalAvatar)) {
-            log.info("delete original : {}", originalAvatar);
             deleteAvatar(originalAvatar);
         }
     }
 
     private String avatarUrlFromRequest(LegacyMemberController.UpdateMemberRequest request) {
         if (isUrlFromOuter(request)) {
-            log.info("fromOuter : {}", request.getAvatarUrl());
             return awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory());
         } else {
-            log.info("fromInner : {}", request.getAvatarUrl());
             return request.getAvatarUrl();
         }
     }
