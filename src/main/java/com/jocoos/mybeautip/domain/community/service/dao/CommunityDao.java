@@ -86,6 +86,6 @@ public class CommunityDao {
 
     @Transactional
     public void updateSortedAt(long communityId) {
-        repository.updateSortedAt(communityId);
+        repository.updateSortedAt(communityId, ZonedDateTime.now());
     }
 }
