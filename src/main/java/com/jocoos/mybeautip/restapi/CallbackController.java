@@ -76,7 +76,7 @@ public class CallbackController {
     @Data
     public static class CallbackStartVideoRequest {
         @NotNull
-        Long userId;
+        String userId;
 
         @NotNull
         String videoKey;
@@ -108,7 +108,7 @@ public class CallbackController {
     @Data
     public static class CallbackUpdateVideoRequest {
         @NotNull
-        Long userId;
+        String userId;
 
         @NotNull
         String videoKey;

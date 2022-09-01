@@ -39,8 +39,7 @@ public class VideoUpdateService {
 
   @Transactional
   public Video created(CallbackController.CallbackStartVideoRequest request) {
-    Member member = memberRepository.findByIdAndDeletedAtIsNull(request.getUserId())
-        .orElseThrow(() -> new MemberNotFoundException());
+    Member member = findMember(Long.parseLong(request.getUserId()));
     Video video;
 
     if ("UPLOADED".equals(request.getType())) {
@@ -128,8 +127,8 @@ public class VideoUpdateService {
 
   public Video updated(CallbackController.CallbackUpdateVideoRequest request) {
     Video video = getVideo(request.getVideoKey());
-
-    if (isWrongUser(video.getMember().getId(), request.getUserId().longValue())) {
+    Member requested = findMember(Long.parseLong(request.getUserId()));
+    if (isWrongUser(video.getMember().getId(), requested.getId())) {
       log.error("Invalid UserID: " + request.getUserId());
       throw new MemberNotFoundException();
     }
@@ -183,6 +182,11 @@ public class VideoUpdateService {
 
     log.debug("{}", video);
     return video;
+  }
+
+  private Member findMember(Long id) {
+    return memberRepository.findByIdAndDeletedAtIsNull(id)
+        .orElseThrow(() -> new MemberNotFoundException());
   }
 
   private boolean isLockedVideo(Video video, String visibility) {
