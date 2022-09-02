@@ -97,7 +97,7 @@ public class MemberPointService {
 
         memberPoint = memberPointRepository.save(memberPoint);
 
-        memberPointDetailService.saveMemberPointDetail(memberPoint, member.getPoint(), EVENT, eventId);
+        memberPointDetailService.earnPoints(memberPoint, member.getPoint(), EVENT, eventId);
 
         member.earnPoint(eventProduct.getPrice());
         memberRepository.save(member);
@@ -119,7 +119,7 @@ public class MemberPointService {
                 .build();
         memberPointRepository.save(memberPoint);
 
-        memberPointDetailService.saveMemberPointDetail(memberPoint, member.getPoint(), ACTIVITY, type.ordinal());
+        memberPointDetailService.earnPoints(memberPoint, member.getPoint(), ACTIVITY, type.ordinal());
 
         // 업데이트 쿼리 하나로 변경하는게 낫지 않을까 싶음
         member.earnPoint(type.getPoint());
@@ -155,7 +155,7 @@ public class MemberPointService {
                 .build();
         memberPointRepository.save(memberPoint);
 
-        memberPointDetailService.retrievePoints(member.getPoint(), memberPoint, type.ordinal());
+        memberPointDetailService.retrievePoints(memberPoint, member.getPoint(), type.ordinal());
 
         member.retrievePoint(type.getPoint());
         memberRepository.save(member);

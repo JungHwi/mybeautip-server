@@ -27,23 +27,22 @@ public class MemberPointDetailService {
     private final EntityManager entityManager;
 
     @Transactional
-    public void saveMemberPointDetail(MemberPoint memberPoint,
-                                      int currentMemberPoint,
-                                      UsePointService service,
-                                      long serviceId) {
-        int earnPoint = memberPoint.getPoint();
+    public void earnPoints(MemberPoint memberPoint,
+                           int currentMemberPoint,
+                           UsePointService service,
+                           long serviceId) {
         if (currentMemberPoint < 0) {
             saveAllWithUnderZero(memberPoint, service, serviceId);
         } else {
             MemberPointDetail memberPointDetail =
-                    MemberPointDetail.earnStatus(memberPoint, earnPoint, service, serviceId);
+                    MemberPointDetail.earnStatus(memberPoint, memberPoint.getPoint(), service, serviceId);
             memberPointDetailDao.save(memberPointDetail);
         }
     }
 
     @Transactional
-    public void retrievePoints(int point, MemberPoint memberPoint, long usePointServiceId) {
-        if (point > 0) {
+    public void retrievePoints(MemberPoint memberPoint, int currentMemberPoint, long usePointServiceId) {
+        if (currentMemberPoint > 0) {
             usePoints(memberPoint, ACTIVITY, usePointServiceId);
         } else {
             MemberPointDetail memberPointDetail =
@@ -64,7 +63,11 @@ public class MemberPointDetailService {
             if (iterator.hasNext()) {
                 MemberPointDetail availablePoint = iterator.next();
                 inputPoint = Math.min(toUsePoint, availablePoint.getPoint());
-                detailList.add(MemberPointDetail.useStatus(availablePoint, memberPoint.getId(), inputPoint, usePointService, usePointServiceId));
+                detailList.add(MemberPointDetail.useStatus(availablePoint,
+                                                           memberPoint.getId(),
+                                                           inputPoint,
+                                                           usePointService,
+                                                           usePointServiceId));
             } else {
                 detailList.add(MemberPointDetail.useUnderZeroStatus(memberPoint, toUsePoint, usePointService, usePointServiceId));
                 break;
@@ -123,12 +126,14 @@ public class MemberPointDetailService {
         while ((earnPoint -= inputPoint) > 0) {
             if (iterator.hasNext()) {
                 MemberPointDetail underZeroDetail = iterator.next();
+                inputPoint = getInputPoint(pointMap, earnPoint, underZeroDetail.getId());
 
-                int underZeroPoint = pointMap.get(underZeroDetail.getId());
-
-                inputPoint = Math.min(Math.abs(underZeroPoint), earnPoint);
                 underZeroDetail.changeParentIdIfAllAddedUp(inputPoint);
-                details.add(MemberPointDetail.earnUnderZeroStatus(memberPoint, underZeroDetail.getId(), inputPoint, usePointService, usePointServiceId));
+                details.add(MemberPointDetail.earnUnderZeroStatus(memberPoint,
+                                                                  underZeroDetail.getMemberPointId(),
+                                                                  inputPoint,
+                                                                  usePointService,
+                                                                  usePointServiceId));
             } else {
                 details.add(MemberPointDetail.earnStatus(memberPoint, earnPoint, usePointService, usePointServiceId));
                 break;
@@ -136,6 +141,11 @@ public class MemberPointDetailService {
         }
 
         memberPointDetailDao.saveAll(details);
+    }
+
+    private int getInputPoint(Map<Long, Integer> pointMap, int earnPoint, long underZeroPointDetailId) {
+        int underZeroPoint = pointMap.get(underZeroPointDetailId);
+        return Math.min(Math.abs(underZeroPoint), earnPoint);
     }
 
     private Map<Long, Integer> getPointMap(List<MemberPointDetail> underZeroPointDetails) {
@@ -151,7 +161,7 @@ public class MemberPointDetailService {
     }
 
     private void subPrevPlusPointAndPut(Map<Long, Integer> pointMap, MemberPointDetail firstElement, int prevPlusPoints) {
-        pointMap.put(firstElement.getId(), firstElement.getPoint() - prevPlusPoints);
+        pointMap.put(firstElement.getId(), firstElement.getPoint() + prevPlusPoints);
     }
 
     private int calPrevPlusPoints(List<MemberPointDetail> underZeroPointDetails) {
