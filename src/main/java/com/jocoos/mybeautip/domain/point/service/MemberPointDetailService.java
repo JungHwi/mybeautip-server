@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_UNDER_ZERO_POINT;
 import static com.jocoos.mybeautip.member.point.UsePointService.ACTIVITY;
@@ -53,23 +54,12 @@ public class MemberPointDetailService {
 
     @Transactional
     public void usePoints(MemberPoint memberPoint, UsePointService usePointService, long usePointServiceId) {
-        final long memberId = memberPoint.getMember().getId();
-        int toUsePoint = memberPoint.getPoint();
-        long cursor = setCursorByLastUsedPoint(memberId);
         List<MemberPointDetail> detailList = new ArrayList<>();
+        ListIterator<MemberPointDetail> iterator = getAvailablePointsIterator(memberPoint.getMember().getId());
 
-        List<MemberPointDetail> availablePoints = memberPointDetailDao.findAvailablePointsAfterCursor(memberId, cursor);
-        final int alreadyUsedPoint = getAlreadyUsedPoint(cursor);
-        availablePoints.stream().findFirst().ifPresent(m -> {
-            entityManager.detach(m);
-            m.setPoint(m.getPoint() + alreadyUsedPoint);
-            if (m.getPoint() == 0) {
-                availablePoints.remove(m);
-            }
-        });
-
-        ListIterator<MemberPointDetail> iterator = availablePoints.listIterator();
+        int toUsePoint = memberPoint.getPoint();
         int inputPoint = 0;
+
         while ((toUsePoint -= inputPoint) > 0) {
             if (iterator.hasNext()) {
                 MemberPointDetail availablePoint = iterator.next();
@@ -82,6 +72,24 @@ public class MemberPointDetailService {
         }
 
         memberPointDetailDao.saveAll(detailList);
+    }
+
+    private ListIterator<MemberPointDetail> getAvailablePointsIterator(long memberId) {
+        long cursor = setCursorByLastUsedPoint(memberId);
+        List<MemberPointDetail> availablePoints = memberPointDetailDao.findAvailablePointsAfterCursor(memberId, cursor);
+        final int alreadyUsedPoint = getAlreadyUsedPoint(cursor);
+        subAlreadyUsedPoint(availablePoints, alreadyUsedPoint);
+        return availablePoints.listIterator();
+    }
+
+    private void subAlreadyUsedPoint(List<MemberPointDetail> availablePoints, int alreadyUsedPoint) {
+        availablePoints.stream().findFirst().ifPresent(m -> {
+            entityManager.detach(m);
+            m.setPoint(m.getPoint() + alreadyUsedPoint);
+            if (m.getPoint() == 0) {
+                availablePoints.remove(m);
+            }
+        });
     }
 
     private int getAlreadyUsedPoint(long cursor) {
@@ -104,27 +112,19 @@ public class MemberPointDetailService {
                                       long usePointServiceId) {
 
         List<MemberPointDetail> details = new ArrayList<>();
-        int earnPoint = memberPoint.getPoint();
-
         List<MemberPointDetail> underZeroPointDetails =
                 memberPointDetailDao.findUnderZeroPoints(memberPoint.getMember().getId());
+        Map<Long, Integer> pointMap = getPointMap(underZeroPointDetails);
 
-        int prevPlusPoint = 0;
-        if (!underZeroPointDetails.isEmpty()) {
-            prevPlusPoint = setPrevPlusPoints(underZeroPointDetails);
-        }
-
+        int earnPoint = memberPoint.getPoint();
         int inputPoint = 0;
+
         Iterator<MemberPointDetail> iterator = underZeroPointDetails.iterator();
         while ((earnPoint -= inputPoint) > 0) {
             if (iterator.hasNext()) {
                 MemberPointDetail underZeroDetail = iterator.next();
 
-                int underZeroPoint = underZeroDetail.getPoint();
-                if (prevPlusPoint > 0) {
-                    underZeroPoint += prevPlusPoint;
-                    prevPlusPoint = 0;
-                }
+                int underZeroPoint = pointMap.get(underZeroDetail.getId());
 
                 inputPoint = Math.min(Math.abs(underZeroPoint), earnPoint);
                 underZeroDetail.changeParentIdIfAllAddedUp(inputPoint);
@@ -138,7 +138,23 @@ public class MemberPointDetailService {
         memberPointDetailDao.saveAll(details);
     }
 
-    private int setPrevPlusPoints(List<MemberPointDetail> underZeroPointDetails) {
+    private Map<Long, Integer> getPointMap(List<MemberPointDetail> underZeroPointDetails) {
+        if (!underZeroPointDetails.isEmpty()) {
+            int prevPlusPoints = calPrevPlusPoints(underZeroPointDetails);
+            Map<Long, Integer> pointMap = underZeroPointDetails.stream()
+                    .collect(Collectors.toMap(MemberPointDetail::getId, MemberPointDetail::getPoint));
+            subPrevPlusPointAndPut(pointMap, underZeroPointDetails.get(NumberUtils.INTEGER_ZERO), prevPlusPoints);
+            return pointMap;
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    private void subPrevPlusPointAndPut(Map<Long, Integer> pointMap, MemberPointDetail firstElement, int prevPlusPoints) {
+        pointMap.put(firstElement.getId(), firstElement.getPoint() - prevPlusPoints);
+    }
+
+    private int calPrevPlusPoints(List<MemberPointDetail> underZeroPointDetails) {
         Long earliestZeroPointId = underZeroPointDetails.get(NumberUtils.INTEGER_ZERO).getId();
         return memberPointDetailDao
                 .findByParentId(earliestZeroPointId).stream().mapToInt(MemberPointDetail::getPoint).sum();
