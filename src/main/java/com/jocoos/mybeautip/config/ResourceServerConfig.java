@@ -31,6 +31,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers(POST, "/api/1/member/signup/**").hasAnyRole("GUEST")
                 .antMatchers(GET, "/api/1/words").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/api/**/notification").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/api/admin/**").hasAnyRole("STORE", "ADMIN")
                 .antMatchers(GET, "/api/1/notices").permitAll()
                 .antMatchers(GET, "/api/1/popup").permitAll()
