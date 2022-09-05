@@ -124,67 +124,39 @@ public class MemberPointDetail extends CreatedDateAuditable {
         }
     }
 
-    public static MemberPointDetail earnStatus(MemberPoint memberPoint,
-                                               int point,
-                                               UsePointService service,
-                                               long serviceId) {
-        return MemberPointDetail.withUsePointService()
-                .memberId(memberPoint.getMember().getId())
-                .memberPointId(memberPoint.getId())
-                .parentId(memberPoint.getId())
+    public void setCommonData(MemberPoint memberPoint, UsePointService service, long serviceId) {
+        setCommonData(memberPoint);
+        if (service == UsePointService.ORDER) {
+            this.orderId = serviceId;
+        } else if (service == UsePointService.EVENT) {
+            this.eventId = serviceId;
+        }
+    }
+
+    public void setCommonData(MemberPoint memberPoint, ActivityPointType type) {
+        setCommonData(memberPoint);
+        this.activityType = type;
+    }
+
+    private void setCommonData(MemberPoint memberPoint) {
+        this.memberId = memberPoint.getMember().getId();
+        this.memberPointId = memberPoint.getId();
+        this.expiryAt = memberPoint.getExpiryAt();
+    }
+
+
+    public static MemberPointDetail slice(long parentId, int point, int state) {
+       return MemberPointDetail.builder()
+               .parentId(parentId)
+               .point(point)
+               .state(state)
+               .build();
+    }
+
+    public static MemberPointDetail slice(int point, int state) {
+        return MemberPointDetail.builder()
                 .point(point)
-                .state(STATE_EARNED_POINT)
-                .userPointService(service)
-                .usePointServiceId(serviceId)
-                .expiryAt(memberPoint.getExpiryAt())
-                .build();
-    }
-
-    public static MemberPointDetail earnUnderZeroStatus(MemberPoint memberPoint,
-                                                        long parentId,
-                                                        int point,
-                                                        UsePointService service,
-                                                        long serviceId) {
-        return MemberPointDetail.withUsePointService()
-                .memberId(memberPoint.getMember().getId())
-                .memberPointId(memberPoint.getId())
-                .parentId(parentId)
-                .point(point)
-                .state(STATE_UNDER_ZERO_POINT)
-                .userPointService(service)
-                .usePointServiceId(serviceId)
-                .expiryAt(memberPoint.getExpiryAt())
-                .build();
-    }
-
-    public static MemberPointDetail useStatus(MemberPointDetail detail,
-                                              long parentId,
-                                              int point,
-                                              UsePointService service,
-                                              long serviceId) {
-        return MemberPointDetail.withUsePointService()
-                .memberId(detail.getMemberId())
-                .memberPointId(parentId)
-                .parentId(detail.getMemberPointId())
-                .point(-point)
-                .state(STATE_USE_POINT)
-                .userPointService(service)
-                .usePointServiceId(serviceId)
-                .expiryAt(detail.getExpiryAt())
-                .build();
-    }
-
-    public static MemberPointDetail useUnderZeroStatus(MemberPoint memberPoint,
-                                                       int point,
-                                                       UsePointService service,
-                                                       long serviceId) {
-        return MemberPointDetail.withUsePointService()
-                .memberId(memberPoint.getMember().getId())
-                .memberPointId(memberPoint.getId())
-                .point(-point)
-                .state(STATE_UNDER_ZERO_POINT)
-                .userPointService(service)
-                .usePointServiceId(serviceId)
+                .state(state)
                 .build();
     }
 
@@ -211,11 +183,5 @@ public class MemberPointDetail extends CreatedDateAuditable {
 
     public void underZeroPointAllAddedUp() {
         this.parentId = this.getMemberPointId();
-    }
-
-    public void changeParentIdIfAllAddedUp(int inputPoint) {
-        if (inputPoint >= Math.abs(this.point)) {
-            underZeroPointAllAddedUp();
-        }
     }
 }

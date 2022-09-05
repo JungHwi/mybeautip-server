@@ -155,7 +155,7 @@ public class MemberPointService {
                 .build();
         memberPointRepository.save(memberPoint);
 
-        memberPointDetailService.retrievePoints(memberPoint, member.getPoint(), type.ordinal());
+        memberPointDetailService.retrievePoints(memberPoint, member.getPoint(), type);
 
         member.retrievePoint(type.getPoint());
         memberRepository.save(member);
