@@ -10,6 +10,9 @@
 | Dev
 | `https://mybeautip-dev.jocoos.com`
 
+| QA
+| `https://api-qa.mybeautip.com`
+
 | Production
 | `https://mybeautip.jocoos.com`
 |===

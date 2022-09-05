@@ -68,7 +68,7 @@ public class Community extends BaseEntity {
     @Column(columnDefinition = "DATETIME(3)")
     private ZonedDateTime sortedAt;
 
-    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER ,cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityFile> communityFileList;
 
     @ManyToOne

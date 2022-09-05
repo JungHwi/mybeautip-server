@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.advice;
 
+import com.jocoos.mybeautip.global.converter.MessageConverter;
 import com.jocoos.mybeautip.global.exception.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.env.Environment;
@@ -16,9 +17,11 @@ import java.util.Arrays;
 public class ControllerExceptionAdvice {
 
     private Environment environment;
+    private final MessageConverter messageConverter;
 
-    public ControllerExceptionAdvice(Environment environment){
+    public ControllerExceptionAdvice(Environment environment, MessageConverter messageConverter){
         this.environment = environment;
+        this.messageConverter = messageConverter;
     }
 
     @ExceptionHandler(ConflictException.class)
@@ -44,6 +47,7 @@ public class ControllerExceptionAdvice {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(e.getMessage())
                 .errorDescription(e.getDescription())
+                .message(messageConverter.converts(e.getErrorCode()))
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -74,6 +78,8 @@ public class ControllerExceptionAdvice {
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+
 
     public ResponseEntity<Object> handleNumberFormatException(NumberFormatException e) {
         log.debug("handleNumberFormatException called");
