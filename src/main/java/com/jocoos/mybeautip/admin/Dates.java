@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;
@@ -23,7 +24,7 @@ public class Dates {
             return RECOMMENDED_DATE_FORMAT.parse(date);
         } catch (ParseException e) {
             log.error("invalid recommended date format", e);
-            throw new BadRequestException("invalid date format", e.getMessage() + " - " + date);
+            throw new BadRequestException(ErrorCode.INVALID_DATE_FORMAT, e.getMessage() + " - " + date);
         }
     }
 

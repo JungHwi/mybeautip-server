@@ -23,7 +23,7 @@ public class CommunityReportDao {
     public CommunityReport report(long memberId, long communityId, ReportRequest reportRequest) {
         CommunityReport communityReport = getReport(memberId, communityId);
         if (communityReport.isReport()) {
-            throw new BadRequestException("already_report", "Already report. Id is " + communityId);
+            throw new BadRequestException("Already report. Id is " + communityId);
         }
 
         if (communityReport.isReport() == reportRequest.getIsReport()) {

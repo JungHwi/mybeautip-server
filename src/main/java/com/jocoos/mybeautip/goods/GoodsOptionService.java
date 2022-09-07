@@ -77,7 +77,7 @@ public class GoodsOptionService {
 
     public GoodsOptionInfo getGoodsOptionData(int goodsNo, String lang, TimeSaleCondition timeSaleCondition) {
         Goods goods = goodsRepository.findByGoodsNo(String.valueOf(goodsNo))
-                .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(GOODS_NOT_FOUND, lang)));
 
         List<GoodsOption> options = goodsOptionRepository.findByGoodsNo(goodsNo);
         if (options.size() == 0) {

@@ -8,14 +8,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Getter
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class BadRequestException extends MybeautipException {
-    static final String DEFAULT_MESSAGE = "bad_request";
-
     public BadRequestException(String description) {
         super(ErrorCode.BAD_REQUEST, description);
-    }
-
-    public BadRequestException(String message, String description) {
-        super(message, description);
     }
 
     public BadRequestException(ErrorCode errorCode, String description) {
@@ -27,8 +21,8 @@ public class BadRequestException extends MybeautipException {
         this.description = createErrorDescription(error);
     }
 
-    public BadRequestException(String message, Throwable e) {
-        super(message, e);
+    public BadRequestException(ErrorCode errorCode, Throwable e) {
+        super(errorCode, e);
     }
 
     private String createErrorDescription(FieldError error) {

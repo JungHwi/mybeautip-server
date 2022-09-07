@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
 import com.jocoos.mybeautip.domain.event.service.EventTypeService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.member.address.Address;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
@@ -75,19 +76,19 @@ public abstract class EventTypeAbstractService implements EventTypeService {
 
     public void validAddress(Address address) {
         if (address == null || StringUtils.isBlank(address.getZipNo())) {
-            throw new BadRequestException("no_address", "no_address");
+            throw new BadRequestException(ErrorCode.NO_ADDRESS, "no_address");
         }
     }
 
     public void validPhone(Address address) {
         if (address == null || StringUtils.isBlank(address.getPhone())) {
-            throw new BadRequestException("no_phone", "no_phone");
+            throw new BadRequestException(ErrorCode.NO_PHONE, "no_phone");
         }
     }
 
     private void validEventStatus(EventStatus status) {
         if (!status.isCanJoin()) {
-            throw new BadRequestException("can_not_join_status", "This event type is " + status);
+            throw new BadRequestException(ErrorCode.CAN_NOT_JOIN_STATUS, "This event type is " + status);
         }
     }
 
@@ -98,7 +99,7 @@ public abstract class EventTypeAbstractService implements EventTypeService {
 
     private void validEventStartDate(ZonedDateTime startAt) {
         if (!ZonedDateTime.now().isAfter(startAt)) {
-            throw new BadRequestException("not_started_event", "Event start " + startAt);
+            throw new BadRequestException(ErrorCode.NOT_STARTED_EVENT, "Event start " + startAt);
         }
     }
 
@@ -108,7 +109,7 @@ public abstract class EventTypeAbstractService implements EventTypeService {
         }
 
         if (!ZonedDateTime.now().isBefore(endAt)) {
-            throw new BadRequestException("already_ended_event", "Event ended " + endAt);
+            throw new BadRequestException(ErrorCode.ALREADY_ENDED_EVENT, "Event ended " + endAt);
         }
     }
 }

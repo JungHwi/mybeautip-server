@@ -45,7 +45,7 @@ public class EventService {
     @Transactional(readOnly = true)
     public EventResponse getEvent(long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event_not_found", "Not found event. id - " + eventId));
+                .orElseThrow(() -> new NotFoundException("Not found event. id - " + eventId));
 
         return eventConverter.convertToResponse(event);
     }

@@ -119,7 +119,7 @@ public class Community extends BaseEntity {
 
     private void validContents(String contents) {
         if (StringUtils.isBlank(contents) || contents.replace(StringUtils.SPACE, StringUtils.EMPTY).length() < 5) {
-            throw new BadRequestException("not_enough_contents", "Content length must be at least 5.");
+            throw new BadRequestException("Content length must be at least 5.");
         }
     }
 
@@ -129,13 +129,13 @@ public class Community extends BaseEntity {
 
     private void validBlind() {
         if (StringUtils.isBlank(this.title) || this.title.length() < 5) {
-            throw new BadRequestException("not_enough_title", "Community title of Blind Category must be over 5 length");
+            throw new BadRequestException("Community title of Blind Category must be over 5 length");
         }
     }
 
     private void validDrip() {
         if (this.eventId == null || this.eventId < 1) {
-            throw new BadRequestException("need_event_id", "Community of drip category needs event_id.");
+            throw new BadRequestException("Community of drip category needs event_id.");
         }
     }
 

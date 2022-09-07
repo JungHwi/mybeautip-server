@@ -56,7 +56,7 @@ public interface EventJoinConverter {
                 }
                 break;
             default:
-                throw new BadRequestException("not_supported_event", "event type is not supported. type - " + event.getType());
+                throw new BadRequestException("event type is not supported. type - " + event.getType());
         }
         eventJoinHistoryResponse.setDescription(description);
     }

@@ -19,6 +19,7 @@ import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -107,7 +108,7 @@ public class CommunityService {
             CommunityCategory category = categories.get(0);
             if (category.getType() == CommunityCategoryType.DRIP) {
                 if (request.getEventId() == null || request.getEventId() < NumberUtils.LONG_ONE) {
-                    throw new BadRequestException("need_event_info", "event_id is required to search DRIP category.");
+                    throw new BadRequestException(ErrorCode.BAD_REQUEST, "event_id is required to search DRIP category.");
                 }
                 if (request.isFirstSearch()) {
                     winList = communityDao.getCommunityForEvent(request.getEventId(), categories, true, request.getCursor(), pageable);
@@ -154,7 +155,7 @@ public class CommunityService {
         Community community = communityDao.get(communityId);
 
         if (!community.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("access_denied", "This is not yours.");
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
         }
 
         community.delete();
@@ -168,7 +169,7 @@ public class CommunityService {
         Community community = communityDao.get(request.getCommunityId());
 
         if (!community.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("access_denied", "This is not yours.");
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
         }
 
         community.setTitle(request.getTitle());
@@ -206,7 +207,7 @@ public class CommunityService {
 
         Community community = communityDao.get(communityId);
         if (community.getMemberId().equals(memberId)) {
-            throw new BadRequestException("community_i_wrote", "this is my community.");
+            throw new BadRequestException("this is my community.");
         }
 
         return ReportResponse.builder()

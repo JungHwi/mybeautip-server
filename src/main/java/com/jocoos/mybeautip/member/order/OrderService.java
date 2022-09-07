@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.global.exception.ErrorCode.COUPON_NOT_FOUND;
 import static com.jocoos.mybeautip.member.billing.MemberBillingService.MERCHANT_BILLING_PREFIX;
 
 @Slf4j
@@ -141,11 +142,11 @@ public class OrderService {
 
         if (request.getPoint() > 0) {
             if (request.getPoint() < minimumPoint) {
-                throw new BadRequestException("point_bad_request", messageService.getMessage(POINT_BAD_REQUEST, lang));
+                throw new BadRequestException(messageService.getMessage(POINT_BAD_REQUEST, lang));
             }
 
             if (member.getPoint() < request.getPoint()) {
-                throw new BadRequestException("point_not_enough", messageService.getMessage(POINT_NOT_ENOUGH, lang));
+                throw new BadRequestException(messageService.getMessage(POINT_NOT_ENOUGH, lang));
             }
         }
 
@@ -156,12 +157,11 @@ public class OrderService {
         }
 
         if (request.getCouponId() != null) {
-            MemberCoupon memberCoupon = memberCouponRepository.findById(request.getCouponId()).orElseThrow(() -> new BadRequestException("coupon_not_found", "invalid member coupon id"));
+            MemberCoupon memberCoupon = memberCouponRepository.findById(request.getCouponId()).orElseThrow(() -> new BadRequestException(COUPON_NOT_FOUND, "invalid member coupon id"));
 
             if (memberCoupon.getCoupon().getId().equals(EVENT_COUPON_ID)) {
                 if (request.getPoint() > 0) {
-                    throw new BadRequestException("point_bad_request",
-                            messageService.getMessage(CANNOT_USE_COUPON_WITH_POINT, lang));
+                    throw new BadRequestException(messageService.getMessage(CANNOT_USE_COUPON_WITH_POINT, lang));
                 }
 
                 List<String> goodsNoList =
@@ -170,8 +170,7 @@ public class OrderService {
 
                 for (String gno : goodsNoList) {
                     if (!EVENT_GOODS.contains(gno)) {
-                        throw new BadRequestException("order_bad_request",
-                                messageService.getMessage(INVALID_GOODS_FOR_COUPON, lang));
+                        throw new BadRequestException(messageService.getMessage(INVALID_GOODS_FOR_COUPON, lang));
                     }
                 }
             }
@@ -217,7 +216,7 @@ public class OrderService {
                     purchases.add(purchase);
                     return Optional.empty();
                 })
-                .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang))));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(GOODS_NOT_FOUND, lang))));
 
         log.debug("purchases: {}", purchases);
         order.setPurchases(purchases);
@@ -238,7 +237,7 @@ public class OrderService {
                     payment.setState(Payment.STATE_READY | Payment.STATE_PAID);
                     return paymentRepository.save(payment);
                 })
-                .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid order id or payment id"));
+                .orElseThrow(() -> new NotFoundException("invalid order id or payment id"));
         completeOrder(order);
         slackService.sendForOrder(order);
     }
@@ -278,7 +277,7 @@ public class OrderService {
             payment.setMessage(failReason);
             payment.setPaymentId(response.getResponse().getImpUid());
             paymentRepository.save(payment);
-            throw new BadRequestException("order_failed", response.getResponse().getFailReason());
+            throw new BadRequestException(response.getResponse().getFailReason());
         }
 
         return order;
@@ -292,7 +291,7 @@ public class OrderService {
     @Transactional
     public OrderInquiry inquiryExchangeOrReturn(Order order, Byte state, String reason, Purchase purchase, String attachments) {
         if (purchase == null) {
-            throw new BadRequestException("purchase_not_found", "invalid purchase id");
+            throw new BadRequestException("invalid purchase id");
         }
 
         String status;
@@ -328,15 +327,15 @@ public class OrderService {
     @Transactional
     public OrderInquiry cancelOrderInquire(Order order, Byte state, String reason) {
         if (order == null) {
-            throw new BadRequestException("purchase_not_found", "invalid purchase id");
+            throw new BadRequestException("invalid purchase id");
         }
 
         if (Order.State.ORDER_CANCELLING.getValue() <= order.getState()) {
-            throw new BadRequestException("order_cancel_duplicated", "Already requested order canceling");
+            throw new BadRequestException("Already requested order canceling");
         }
 
         if (Order.State.DELIVERING.getValue() <= order.getState()) {
-            throw new BadRequestException("order_cancel_failed", "Invalid order status. need to paid or preparing");
+            throw new BadRequestException("Invalid order status. need to paid or preparing");
         }
 
         order.setStatus(Order.Status.ORDER_CANCELLING);
@@ -350,10 +349,10 @@ public class OrderService {
     @Transactional
     public void cancelPayment(Order order) {
         if (order.getState() >= Order.State.ORDER_CANCELLED.getValue()) {
-            throw new BadRequestException("invalid_order_status", "invalid order status - " + order.getStatus());
+            throw new BadRequestException("invalid order status - " + order.getStatus());
         }
 
-        Payment payment = paymentRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
+        Payment payment = paymentRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("invalid payment id"));
 
         if (order.getPrice() > 0) {
             String token = iamportService.getToken();
@@ -366,7 +365,7 @@ public class OrderService {
         payment.setState(Payment.STATE_CANCELLED);
         paymentRepository.save(payment);
 
-        OrderInquiry orderInquiry = orderInquiryRepository.findByOrderAndCreatedBy(order, order.getCreatedBy()).orElseThrow(() -> new NotFoundException("inquire_not_found", "invalid inquire id"));
+        OrderInquiry orderInquiry = orderInquiryRepository.findByOrderAndCreatedBy(order, order.getCreatedBy()).orElseThrow(() -> new NotFoundException("invalid inquire id"));
         orderInquiry.setCompleted(true);
         orderInquiryRepository.save(orderInquiry);
 
@@ -452,7 +451,7 @@ public class OrderService {
                     payment.setPaymentId(paymentId);
                     return paymentRepository.save(payment);
                 })
-                .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid order id or payment id"));
+                .orElseThrow(() -> new NotFoundException("invalid order id or payment id"));
     }
 
     /**
@@ -618,7 +617,7 @@ public class OrderService {
                 .ifPresent(revenue -> {
                     RevenuePayment revenuePayment = revenue.getRevenuePayment();
                     if (revenuePayment == null) {
-                        throw new NotFoundException("revenue_payment_not_found", "Revenue payment is null");
+                        throw new NotFoundException("Revenue payment is null");
                     }
                     revenuePaymentService.appendEstimatedAmount(revenuePayment, revenue.getRevenue());
 
@@ -641,7 +640,7 @@ public class OrderService {
     @Transactional
     public OrderInquiry cancelOrderInquireByAdmin(Order order, Payment payment, Byte state, String reason) {
         if (order.getState() != Order.State.PAID.getValue()) {
-            throw new BadRequestException("invalid_order_state", "Invalid order state: " + order.getState());
+            throw new BadRequestException("Invalid order state: " + order.getState());
         }
 
         log.debug("cancel order: {}", order);
@@ -672,7 +671,7 @@ public class OrderService {
     @Transactional
     public OrderInquiry cancelPaymentByAdmin(Order order, Payment payment, Byte state, String reason) {
         if (order.getState() != Order.State.DELIVERED.getValue()) {
-            throw new BadRequestException("invalid_order_state", "Invalid order state: " + order.getState());
+            throw new BadRequestException("Invalid order state: " + order.getState());
         }
 
         log.debug("cancel order: {}", order);
@@ -690,7 +689,7 @@ public class OrderService {
         }
 
         OrderInquiry orderInquiry = orderInquiryRepository.findByOrderAndCreatedBy(order, order.getCreatedBy())
-                .orElseThrow(() -> new NotFoundException("inquire_not_found", "inquire_not_found"));
+                .orElseThrow(() -> new NotFoundException("inquire_not_found"));
         orderInquiry.setComment("canceled_by_admin");
         orderInquiryRepository.save(orderInquiry);
 

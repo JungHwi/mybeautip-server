@@ -39,7 +39,7 @@ public class RevenuePaymentService {
     @Transactional
     public RevenuePayment appendEstimatedAmount(RevenuePayment revenuePayment, int revenuePrice) {
         if (revenuePayment.getState() != NOT_PAID) {
-            throw new MybeautipException("invalid_revenue_payments_state", "Invalid Revenue payment state: " + revenuePayment.getState());
+            throw new MybeautipException("Invalid Revenue payment state: " + revenuePayment.getState());
         }
         revenuePayment.setEstimatedAmount(revenuePayment.getEstimatedAmount() + revenuePrice);
         return revenuePaymentRepository.save(revenuePayment);

@@ -68,7 +68,7 @@ public class AddressController {
     public ResponseEntity<AddressInfo> createAddress(@RequestBody CreateAddressRequest request,
                                                      @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         if (addressRepository.countByCreatedByIdAndDeletedAtIsNull(legacyMemberService.currentMemberId()) >= 10) {
-            throw new BadRequestException("too_many_addresses", messageService.getMessage(ADDRESS_TOO_MANY_ADDRESS, lang));
+            throw new BadRequestException(messageService.getMessage(ADDRESS_TOO_MANY_ADDRESS, lang));
         }
 
         return new ResponseEntity<>(new AddressInfo(addressService.create(request, legacyMemberService.currentMember())), HttpStatus.OK);

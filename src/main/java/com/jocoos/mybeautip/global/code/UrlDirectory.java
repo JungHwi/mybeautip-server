@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.global.code;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public enum UrlDirectory implements CodeValue {
 
     SHARE("친구 초대 공유", "share/"),

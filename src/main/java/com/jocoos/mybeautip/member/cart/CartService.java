@@ -276,7 +276,7 @@ public class CartService {
                     }
                     return cart;
                 })
-                .orElseThrow(() -> new NotFoundException("cart_item_not_found", messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
 
         update(item);
     }
@@ -288,8 +288,7 @@ public class CartService {
                     cartRepository.delete(cart);
                     return Optional.empty();
                 })
-                .orElseThrow(() -> new NotFoundException("cart_item_not_found",
-                        messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(CART_ITEM_NOT_FOUND, lang)));
     }
 
     /**
@@ -303,67 +302,67 @@ public class CartService {
 
     private Cart getValidCartItem(String goodsNo, int optionNo, int quantity, String lang) {
         Goods goods = goodsRepository.findByGoodsNoAndStateLessThanEqual(goodsNo, Goods.GoodsState.NO_SALE.ordinal())
-                .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(GOODS_NOT_FOUND, lang)));
 
         if ("y".equals(goods.getSoldOutFl())) { // 품절 플래그
-            throw new BadRequestException("goods_sold_out", messageService.getMessage(CART_GOODS_SOLD_OUT, lang));
+            throw new BadRequestException(messageService.getMessage(CART_GOODS_SOLD_OUT, lang));
         }
 
         if ("y".equals(goods.getStockFl()) && quantity > goods.getTotalStock()) { // 재고량에 따름, 총 재고량 추가
-            throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+            throw new BadRequestException(messageService.getMessage(CART_INVALID_QUANTITY, lang));
         }
 
         if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity < goods.getMinOrderCnt()) { // 최소구매수량 미만
-            throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+            throw new BadRequestException(messageService.getMessage(CART_INVALID_QUANTITY, lang));
         }
 
         if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity > goods.getMaxOrderCnt()) { // 최대구매수량 초과
-            throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+            throw new BadRequestException(messageService.getMessage(CART_INVALID_QUANTITY, lang));
         }
 
         GoodsOption option = null;
         if ("y".equals(goods.getOptionFl())) {
             option = goodsOptionRepository.findByGoodsNoAndOptionNoAndOptionViewFl(Integer.parseInt(goodsNo), optionNo, "y")
-                    .orElseThrow(() -> new NotFoundException("option_not_found", messageService.getMessage(OPTION_NOT_FOUND, lang)));
+                    .orElseThrow(() -> new NotFoundException(messageService.getMessage(OPTION_NOT_FOUND, lang)));
             if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
-                throw new BadRequestException("option_sold_out", messageService.getMessage(CART_OPTION_SOLD_OUT, lang));
+                throw new BadRequestException(messageService.getMessage(CART_OPTION_SOLD_OUT, lang));
             }
             if ("y".equals(goods.getStockFl()) && quantity > option.getStockCnt()) { // 재고량에 따름
-                throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+                throw new BadRequestException(messageService.getMessage(CART_INVALID_QUANTITY, lang));
             }
         } else if (optionNo != 0) {
-            throw new NotFoundException("option_not_found", messageService.getMessage(OPTION_NOT_FOUND, lang));
+            throw new NotFoundException(messageService.getMessage(OPTION_NOT_FOUND, lang));
         }
 
         Store store = storeRepository.findById(goods.getScmNo())
-                .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(STORE_NOT_FOUND, lang)));
 
         return new Cart(goods, option, store, quantity);
     }
 
     private void checkQuantityValidity(Goods goods, GoodsOption option, int quantity, String lang) {
         if ("y".equals(goods.getSoldOutFl())) { // 품절 플래그
-            throw new BadRequestException("goods_sold_out", messageService.getMessage(CART_GOODS_SOLD_OUT, lang));
+            throw new BadRequestException(messageService.getMessage(CART_GOODS_SOLD_OUT, lang));
         }
 
         if ("y".equals(goods.getStockFl()) && quantity > goods.getTotalStock()) { // 재고량에 따름, 총 재고량 추가
-            throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+            throw new BadRequestException(messageService.getMessage(CART_INVALID_QUANTITY, lang));
         }
 
         if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity < goods.getMinOrderCnt()) { // 최소구매수량 미만
-            throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+            throw new BadRequestException(messageService.getMessage(CART_INVALID_QUANTITY, lang));
         }
 
         if (goods.getMinOrderCnt() > 0 && goods.getMaxOrderCnt() > 0 && quantity > goods.getMaxOrderCnt()) { // 최대구매수량 초과
-            throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+            throw new BadRequestException(messageService.getMessage(CART_INVALID_QUANTITY, lang));
         }
 
         if ("y".equals(goods.getOptionFl())) {
             if ("n".equals(option.getOptionSellFl())) { // 옵션 판매안함
-                throw new BadRequestException("option_sold_out", messageService.getMessage(CART_OPTION_SOLD_OUT, lang));
+                throw new BadRequestException(messageService.getMessage(CART_OPTION_SOLD_OUT, lang));
             }
             if ("y".equals(goods.getStockFl()) && quantity > option.getStockCnt()) { // 재고량에 따름
-                throw new BadRequestException("invalid_quantity", messageService.getMessage(CART_INVALID_QUANTITY, lang));
+                throw new BadRequestException(messageService.getMessage(CART_INVALID_QUANTITY, lang));
             }
         }
     }

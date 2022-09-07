@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.admin;
 
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -48,7 +49,7 @@ public class AdminCouponController {
     public ResponseEntity<SendCouponResponse> sendCouponToMember(@RequestBody SendCouponRequest request) {
 
         Coupon coupon = couponRepository.findById(request.getCouponId())
-                .orElseThrow(() -> new NotFoundException("coupon_not_found", "invalid coupon id"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.COUPON_NOT_FOUND, "invalid coupon id"));
 
         log.info("{}", coupon);
 
@@ -62,7 +63,7 @@ public class AdminCouponController {
             availables.addAll(memberRepository.findByVisibleAndDeletedAtIsNull(true, pageRequest));
         } else {
             Member m = memberRepository.findByIdAndVisibleIsTrue(request.getMemberId())
-                    .orElseThrow(() -> new NotFoundException("member_not_found", "invalid member id or not visible"));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND, "invalid member id or not visible"));
             availables.add(m);
         }
 

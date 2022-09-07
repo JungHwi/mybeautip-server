@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.banner.Banner;
-import com.jocoos.mybeautip.post.Post;
 import org.springframework.data.rest.core.config.Projection;
 
 import java.util.Date;
@@ -25,7 +24,7 @@ public interface BannerExceprt {
 
     String getLink();
 
-    Post getPost();
+//    Post getPost();
 
     Date getStartedAt();
 

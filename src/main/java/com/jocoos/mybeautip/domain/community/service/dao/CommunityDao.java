@@ -46,7 +46,7 @@ public class CommunityDao {
     @Transactional(readOnly = true)
     public Community get(long communityId) {
         return repository.findById(communityId)
-                .orElseThrow(() -> new NotFoundException("no_such_community", "No such community. id - " + communityId));
+                .orElseThrow(() -> new NotFoundException("No such community. id - " + communityId));
     }
 
     @Transactional(readOnly = true)

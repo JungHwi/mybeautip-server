@@ -24,7 +24,7 @@ public class CommunityCommentReportDao {
         CommunityCommentReport report = getReport(memberId, commentId);
 
         if (report.isReport()) {
-            throw new BadRequestException("already_report", "Already report. Id is " + commentId);
+            throw new BadRequestException("Already report. Id is " + commentId);
         }
 
         if (report.isReport() == reportRequest.getIsReport()) {

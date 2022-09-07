@@ -4,7 +4,6 @@ import com.jocoos.mybeautip.domain.notification.converter.NotificationCenterConv
 import com.jocoos.mybeautip.domain.notification.dto.CenterMessageResponse;
 import com.jocoos.mybeautip.domain.notification.persistence.domain.NotificationCenterEntity;
 import com.jocoos.mybeautip.domain.notification.service.CenterServiceImpl;
-import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.restapi.CursorResponse;
@@ -45,8 +44,7 @@ public class NotificationController {
                 .withCount(size)
                 .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size() - 1).getId()) : null)
                 .toBuild();
-        throw new BadRequestException("aaaa");
-//        return cursorResponse;
+        return cursorResponse;
     }
 
     @PatchMapping("/{id}")

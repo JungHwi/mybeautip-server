@@ -193,7 +193,7 @@ public class Member {
 
     public Member usePoint(int point) {
         if (this.point < point) {
-            throw new BadRequestException("not_enough_point", "Member has " + this.point + " point. This event need " + point + " point.");
+            throw new BadRequestException("Member has " + this.point + " point. This event need " + point + " point.");
         }
 
         this.point = this.point - point;
@@ -201,9 +201,6 @@ public class Member {
     }
 
     public Member earnPoint(int point) {
-        if (point <= 0) {
-            throw new BadRequestException("not_positive_point", "Points must be positive. earn point - " + point);
-        }
         this.point = this.point + point;
         return this;
     }

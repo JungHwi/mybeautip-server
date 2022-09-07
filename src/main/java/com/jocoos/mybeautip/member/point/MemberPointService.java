@@ -317,11 +317,6 @@ public class MemberPointService {
 
     @Transactional
     public MemberPoint presentPoint(Long memberId, int point, Date expiryAt) {
-
-        if (point <= 0) {
-            throw new BadRequestException("not_positive_point", "The point must be greater than 0");
-        }
-
         Member m = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Not found Member. id - " + memberId));
         m.earnPoint(point);

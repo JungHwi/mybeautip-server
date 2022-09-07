@@ -79,6 +79,7 @@ security:
 
 mybeautip:
   service:
+    language: ko
     member:
       rejoin-available-second: 30
   addr:

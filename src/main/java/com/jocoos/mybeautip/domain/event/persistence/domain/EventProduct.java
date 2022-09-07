@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.event.persistence.domain;
 
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -47,7 +48,7 @@ public class EventProduct {
 
     public EventProduct winPrize() {
         if (quantity <= 0) {
-            throw new BadRequestException("sold_out", this.name + " product sold out.");
+            throw new BadRequestException(ErrorCode.SOLD_OUT, this.name + " product sold out.");
         }
 
         this.quantity--;
