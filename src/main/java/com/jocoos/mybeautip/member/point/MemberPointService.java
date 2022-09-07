@@ -31,8 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.jocoos.mybeautip.global.constant.PointConstant.DEFAULT_POINT_EXPIRATION_DAY;
 import static com.jocoos.mybeautip.global.constant.PointConstant.EVENT_POINT_EXPIRATION_DAY;
 import static com.jocoos.mybeautip.member.point.MemberPoint.*;
-import static com.jocoos.mybeautip.member.point.UsePointService.ACTIVITY;
-import static com.jocoos.mybeautip.member.point.UsePointService.EVENT;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -97,7 +95,7 @@ public class MemberPointService {
 
         memberPoint = memberPointRepository.save(memberPoint);
 
-        memberPointDetailService.earnPoints(memberPoint, member.getPoint(), EVENT, eventId);
+        memberPointDetailService.earnPoints(memberPoint, member.getPoint());
 
         member.earnPoint(eventProduct.getPrice());
         memberRepository.save(member);
@@ -119,7 +117,7 @@ public class MemberPointService {
                 .build();
         memberPointRepository.save(memberPoint);
 
-        memberPointDetailService.earnPoints(memberPoint, member.getPoint(), ACTIVITY, type.ordinal());
+        memberPointDetailService.earnPoints(memberPoint, member.getPoint());
 
         // 업데이트 쿼리 하나로 변경하는게 낫지 않을까 싶음
         member.earnPoint(type.getPoint());
@@ -141,7 +139,7 @@ public class MemberPointService {
                 .build();
         memberPoint = memberPointRepository.save(memberPoint);
 
-        memberPointDetailService.usePoints(memberPoint, UsePointService.EVENT, event.getId());
+        memberPointDetailService.usePoints(memberPoint);
     }
 
     @Transactional
@@ -155,7 +153,7 @@ public class MemberPointService {
                 .build();
         memberPointRepository.save(memberPoint);
 
-        memberPointDetailService.retrievePoints(memberPoint, member.getPoint(), type);
+        memberPointDetailService.retrievePoints(memberPoint, member.getPoint());
 
         member.retrievePoint(type.getPoint());
         memberRepository.save(member);
@@ -170,7 +168,7 @@ public class MemberPointService {
 
         MemberPoint memberPoint = new MemberPoint(order.getCreatedBy(), order, point, MemberPoint.STATE_USE_POINT);
         memberPoint = memberPointRepository.save(memberPoint);
-        memberPointDetailService.usePoints(memberPoint, UsePointService.ORDER, order.getId());
+        memberPointDetailService.usePoints(memberPoint);
     }
 
     private int getRemainingPoint(MemberPointDetail pointDetail) {

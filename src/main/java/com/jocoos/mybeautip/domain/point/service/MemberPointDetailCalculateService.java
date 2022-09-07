@@ -22,7 +22,7 @@ public class MemberPointDetailCalculateService {
     private final EntityManager entityManager;
 
     @Transactional
-    public List<MemberPointDetail> earnPoint(MemberPoint memberPoint, int currentMemberPoint) {
+    public List<MemberPointDetail> earnPoints(MemberPoint memberPoint, int currentMemberPoint) {
         if (currentMemberPoint < 0) {
             return getAllSliceWithUnderZero(memberPoint);
         } else {
@@ -42,7 +42,7 @@ public class MemberPointDetailCalculateService {
             if (iterator.hasNext()) {
                 MemberPointDetail availablePoint = iterator.next();
                 inputPoint = Math.min(toUsePoint, availablePoint.getPoint());
-                details.add(MemberPointDetail.slice(availablePoint.getMemberPointId(), -inputPoint, STATE_USE_POINT));
+                details.add(MemberPointDetail.slice(availablePoint.getMemberPointId(), -inputPoint, STATE_USE_POINT, availablePoint.getExpiryAt()));
             } else {
                 details.add(MemberPointDetail.slice(-toUsePoint, STATE_UNDER_ZERO_POINT));
                 break;
@@ -56,7 +56,7 @@ public class MemberPointDetailCalculateService {
         if (currentMemberPoint > 0) {
             return usePoints(memberPoint);
         } else {
-            return Collections.singletonList(MemberPointDetail.slice(memberPoint.getPoint(), STATE_UNDER_ZERO_POINT));
+            return Collections.singletonList(MemberPointDetail.slice(-memberPoint.getPoint(), STATE_UNDER_ZERO_POINT));
         }
     }
 
@@ -74,8 +74,7 @@ public class MemberPointDetailCalculateService {
             if (iterator.hasNext()) {
                 MemberPointDetail underZeroDetail = iterator.next();
 
-                inputPoint = getInputPoint(pointMap, earnPoint, underZeroDetail.getId());
-                changeParentIdIfAllAddedUp(underZeroDetail, inputPoint, earnPoint);
+                inputPoint = getInputPoint(pointMap, earnPoint, underZeroDetail);
 
                 details.add(MemberPointDetail.slice(underZeroDetail.getMemberPointId(), inputPoint, STATE_UNDER_ZERO_POINT));
             } else {
@@ -86,15 +85,14 @@ public class MemberPointDetailCalculateService {
         return details;
     }
 
-    private void changeParentIdIfAllAddedUp(MemberPointDetail underZeroDetail, int inputPoint, int earnPoint) {
-        if (inputPoint <= earnPoint) {
+    private int getInputPoint(Map<Long, Integer> pointMap, int earnPoint, MemberPointDetail underZeroDetail) {
+        int underZeroPoint = Math.abs(pointMap.get(underZeroDetail.getId()));
+        if (underZeroPoint > earnPoint) {
+            return earnPoint;
+        } else {
             underZeroDetail.underZeroPointAllAddedUp();
+            return underZeroPoint;
         }
-    }
-
-    private int getInputPoint(Map<Long, Integer> pointMap, int earnPoint, long underZeroPointDetailId) {
-        int underZeroPoint = pointMap.get(underZeroPointDetailId);
-        return Math.min(Math.abs(underZeroPoint), earnPoint);
     }
 
     private Map<Long, Integer> getPointMap(List<MemberPointDetail> underZeroPointDetails) {

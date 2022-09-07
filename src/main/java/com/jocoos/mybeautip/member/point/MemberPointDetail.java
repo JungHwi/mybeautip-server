@@ -99,49 +99,36 @@ public class MemberPointDetail extends CreatedDateAuditable {
         setPointAndState(point, STATE_USE_POINT);
     }
 
-    @Builder(builderClassName = "withUsePointService", builderMethodName = "withUsePointService")
-    private MemberPointDetail(Long memberId,
-                              Long memberPointId,
-                              Long parentId,
-                              int point,
-                              int state,
-                              UsePointService userPointService,
-                              Long usePointServiceId,
-                              Date expiryAt) {
-        this.memberId = memberId;
-        this.memberPointId = memberPointId;
-        this.parentId = parentId;
-        this.expiryAt = expiryAt;
-        this.point = point;
-        this.state = state;
-
-        if (userPointService == UsePointService.ORDER) {
-            this.orderId = usePointServiceId;
-        } else if (userPointService == UsePointService.EVENT) {
-            this.eventId = usePointServiceId;
-        } else {
-            this.activityType = ActivityPointType.getActivityPointType(Math.toIntExact(usePointServiceId));
-        }
-    }
-
-    public void setCommonData(MemberPoint memberPoint, UsePointService service, long serviceId) {
-        setCommonData(memberPoint);
-        if (service == UsePointService.ORDER) {
-            this.orderId = serviceId;
-        } else if (service == UsePointService.EVENT) {
-            this.eventId = serviceId;
-        }
-    }
-
-    public void setCommonData(MemberPoint memberPoint, ActivityPointType type) {
-        setCommonData(memberPoint);
-        this.activityType = type;
-    }
-
-    private void setCommonData(MemberPoint memberPoint) {
+    public void setCommonData(MemberPoint memberPoint) {
         this.memberId = memberPoint.getMember().getId();
         this.memberPointId = memberPoint.getId();
-        this.expiryAt = memberPoint.getExpiryAt();
+
+        setExpiryAtIfNull(memberPoint);
+        setUseService(memberPoint);
+    }
+
+    private void setExpiryAtIfNull(MemberPoint memberPoint) {
+        if (this.expiryAt == null) {
+            this.expiryAt = memberPoint.getExpiryAt();
+        }
+    }
+
+    private void setUseService(MemberPoint memberPoint) {
+        if (memberPoint.getOrder() != null) {
+            this.orderId = memberPoint.getOrder().getId();
+        } else {
+            this.eventId = memberPoint.getEventId();
+            this.activityType = memberPoint.getActivityType();
+        }
+    }
+
+    public static MemberPointDetail slice(long parentId, int point, int state, Date expiryAt) {
+        return MemberPointDetail.builder()
+                .parentId(parentId)
+                .point(point)
+                .state(state)
+                .expiryAt(expiryAt)
+                .build();
     }
 
 
