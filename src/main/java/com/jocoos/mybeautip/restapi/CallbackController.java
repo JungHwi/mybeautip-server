@@ -35,18 +35,24 @@ public class CallbackController {
     private final VideoUpdateService videoUpdateService;
 
     @PostMapping
-    public ResponseEntity startVideo(@Valid @RequestBody CallbackStartVideoRequest request,
+    public ResponseEntity startVideo(@Valid @RequestBody CallbackController.VideoStartRequest request,
                                            BindingResult bindingResult,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         if (bindingResult.hasErrors()) {
             log.info("{}", bindingResult.getTarget());
         }
-        log.info("callback startVideo: {}", request.toString());
+
+        CallbackStartVideoRequest video = request.getVideo();
+        log.info("callback startVideo: {}", video);
+
+        if (video == null) {
+            throw new BadRequestException("bad_request", "video info in callback required");
+        }
 
         try {
-            videoUpdateService.created(request);
+            videoUpdateService.created(video);
         } catch (MemberNotFoundException e) {
-            log.error("Invalid UserID: " + request.getUserId());
+            log.error("Invalid UserID: " + video.getUserId());
             throw new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang));
         }
 
@@ -54,14 +60,20 @@ public class CallbackController {
     }
 
     @PatchMapping
-    public ResponseEntity updateVideo(@Valid @RequestBody CallbackUpdateVideoRequest request) {
+    public ResponseEntity updateVideo(@Valid @RequestBody VideoUpdateRequest request) {
         log.info("callback updateVideo: {}", request.toString());
+        CallbackUpdateVideoRequest video = request.getVideo();
+
+        if (video == null) {
+            throw new BadRequestException("bad_request", "video info in callback required");
+        }
+
         try {
-            videoUpdateService.updated(request);
+            videoUpdateService.updated(video);
         } catch (BadRequestException e) {
             throw new BadRequestException("video_locked", messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
         } catch (MemberNotFoundException e) {
-            throw new MemberNotFoundException("invalid_user_id", "Invalid user_id: " + request.getUserId());
+            throw new MemberNotFoundException("invalid_user_id", "Invalid user_id: " + video.getUserId());
         }
 
         return new ResponseEntity(HttpStatus.OK);
@@ -74,9 +86,21 @@ public class CallbackController {
     }
 
     @Data
+    public static class VideoStartRequest {
+        private String callbackType;
+        private CallbackStartVideoRequest video;
+    }
+
+    @Data
+    public static class VideoUpdateRequest {
+        private String callbackType;
+        private CallbackUpdateVideoRequest video;
+    }
+
+    @Data
     public static class CallbackStartVideoRequest {
         @NotNull
-        Long userId;
+        String userId;
 
         @NotNull
         String videoKey;
@@ -108,7 +132,7 @@ public class CallbackController {
     @Data
     public static class CallbackUpdateVideoRequest {
         @NotNull
-        Long userId;
+        String userId;
 
         @NotNull
         String videoKey;

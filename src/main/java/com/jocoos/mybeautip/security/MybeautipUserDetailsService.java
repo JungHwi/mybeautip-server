@@ -19,7 +19,6 @@ public class MybeautipUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.debug("load user by username: {}", username);
         if (StringUtils.startsWith(username, "guest:")) {
             return createGuestUserDetails(username);
         }

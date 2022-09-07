@@ -11,11 +11,11 @@ phases:
       - echo end of gradle build
       - aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 776875668468.dkr.ecr.ap-northeast-2.amazonaws.com
       - REPOSITORY_URI=776875668468.dkr.ecr.ap-northeast-2.amazonaws.com/mybeautip-api
-      - IMAGE_TAG=dev
+      - IMAGE_TAG=qa
   build:
     commands:
       - echo start docker build
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker build -f Dockerfile_qa -t $REPOSITORY_URI:$IMAGE_TAG .
       - echo end of docker build
   post_build:
     commands:
@@ -23,7 +23,7 @@ phases:
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
-      - printf '[{"name":"mybeautip-api","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"mybeautip-api-qa","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
       - cat imagedefinitions.json
       
 artifacts:
