@@ -10,6 +10,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -64,12 +65,14 @@ public class Oauth2Client {
         log.debug("{}", uri);
 
 
-        ResponseEntity<AccessTokenResponse> response = restTemplate
-                .exchange(uri, HttpMethod.GET, entity, AccessTokenResponse.class);
-
-        log.debug("{}", response.getHeaders());
-        log.debug("{}", response.getBody());
-        return response.getBody().getAccessToken();
+        try {
+            ResponseEntity<AccessTokenResponse> response = restTemplate
+                    .exchange(uri, HttpMethod.GET, entity, AccessTokenResponse.class);
+            log.debug("Header : {}, Body : {}", response.getHeaders(), response.getBody());
+            return response.getBody().getAccessToken();
+        } catch(RestClientException ex) {
+            return null;
+        }
     }
 
     private String accessTokenWithPost(String code, String state) {
@@ -92,11 +95,14 @@ public class Oauth2Client {
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
         log.debug("{}", request);
 
-        ResponseEntity<AccessTokenResponse> response = restTemplate
-                .postForEntity(providerConfig.getTokenUri(), request, AccessTokenResponse.class);
-
-        log.debug("{}, {}", response.getHeaders(), response.getBody());
-        return response.getBody().getAccessToken();
+        try {
+            ResponseEntity<AccessTokenResponse> response = restTemplate
+                    .postForEntity(providerConfig.getTokenUri(), request, AccessTokenResponse.class);
+            log.debug("Header : {}, Body : {}", response.getHeaders(), response.getBody());
+            return response.getBody().getAccessToken();
+        } catch (RestClientException ex) {
+            return null;
+        }
     }
 
     public HashMap<String, Object> getUserData(String accessToken) {

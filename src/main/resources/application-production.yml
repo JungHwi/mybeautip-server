@@ -61,6 +61,5 @@ flipflop:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 redis:
-  host: 172.31.2.106
+  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
   port: 6379
-  password: akdlqbxlq#1@Jocoos
