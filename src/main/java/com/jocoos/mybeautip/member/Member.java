@@ -200,6 +200,11 @@ public class Member {
         return this;
     }
 
+    public Member retrievePoint(int point) {
+        this.point -= point;
+        return this;
+    }
+
     public Member earnPoint(int point) {
         this.point = this.point + point;
         return this;
