@@ -8,7 +8,6 @@ import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ public class CommentService {
     private final LegacyNotificationService legacyNotificationService;
     private final CommentRepository commentRepository;
     private final VideoRepository videoRepository;
-    private final PostRepository postRepository;
+//    private final PostRepository postRepository;
     private final CommentReportRepository commentReportRepository;
     private final CommentLikeRepository commentLikeRepository;
 
@@ -66,10 +65,10 @@ public class CommentService {
             comment.setVideoId(id);
             videoRepository.updateCommentCount(id, 1);
         }
-        if (type == COMMENT_TYPE_POST) {
-            comment.setPostId(id);
-            postRepository.updateCommentCount(id, 1);
-        }
+//        if (type == COMMENT_TYPE_POST) {
+//            comment.setPostId(id);
+//            postRepository.updateCommentCount(id, 1);
+//        }
 
         BeanUtils.copyProperties(request, comment);
         comment = commentRepository.save(comment);
@@ -178,15 +177,15 @@ public class CommentService {
             });
         }
 
-        if (comment.getPostId() != null) {
-            final int commentCount = -count;
-            log.info("deleted comment count for post: {}", count);
-            postRepository.findById(comment.getPostId()).ifPresent(post -> {
-                if (post.getCommentCount() > 0) {
-                    postRepository.updateCommentCount(post.getId(), commentCount);
-                }
-            });
-        }
+//        if (comment.getPostId() != null) {
+//            final int commentCount = -count;
+//            log.info("deleted comment count for post: {}", count);
+//            postRepository.findById(comment.getPostId()).ifPresent(post -> {
+//                if (post.getCommentCount() > 0) {
+//                    postRepository.updateCommentCount(post.getId(), commentCount);
+//                }
+//            });
+//        }
 
         return Comment.CommentState.DELETED.value();
     }

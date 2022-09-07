@@ -2,7 +2,9 @@ package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.feed.FeedService;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -588,7 +590,7 @@ public class VideoService {
         return videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .map(v -> {
                     if (v.getMember().getId() != memberId) {
-                        throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
+                        throw new AccessDeniedException("This video is not yours.");
                     }
                     tagService.decreaseRefCount(v.getContent());
                     tagService.removeHistory(v.getContent(), TagService.TAG_VIDEO, v.getId(), v.getMember());
@@ -606,7 +608,7 @@ public class VideoService {
                     }
                     return v;
                 })
-                .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoId: " + videoId));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "video not found, videoId: " + videoId));
     }
 
     @Transactional
@@ -614,7 +616,7 @@ public class VideoService {
         return videoRepository.findByVideoKeyAndDeletedAtIsNull(videoKey)
                 .map(v -> {
                     if (v.getMember().getId() != memberId) {
-                        throw new BadRequestException("invalid_user_id", "Invalid user_id: " + memberId);
+                        throw new AccessDeniedException("This video is not yours.");
                     }
                     tagService.decreaseRefCount(v.getContent());
                     tagService.removeHistory(v.getContent(), TagService.TAG_VIDEO, v.getId(), v.getMember());
@@ -632,7 +634,7 @@ public class VideoService {
                     }
                     return v;
                 })
-                .orElseThrow(() -> new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "video not found, videoKey: " + videoKey));
     }
 
     // Delete All user's videos when member left
@@ -744,7 +746,7 @@ public class VideoService {
     public CommentLike likeVideoComment(Long commentId, Long videoId, Member member) {
 
         Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
-                .orElseThrow(() -> new NotFoundException("comment_not_found", "invalid video or comment id"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND, "invalid video or comment id"));
         commentRepository.updateLikeCount(comment.getId(), 1);
 
         CommentLike commentLike = commentLikeRepository.findByCommentIdAndCreatedById(comment.getId(), member.getId())
@@ -871,6 +873,6 @@ public class VideoService {
 
     public Video getByVideoId(Long videoId) {
         return videoRepository.findByIdAndDeletedAtIsNull(videoId)
-                .orElseThrow(() -> new NotFoundException("video_not_found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found, videoId: " + videoId));
     }
 }

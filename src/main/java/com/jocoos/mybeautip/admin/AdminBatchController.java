@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.order.*;
 import com.jocoos.mybeautip.restapi.OrderController;
@@ -32,10 +33,10 @@ public class AdminBatchController {
     @PostMapping("/purchases/{id}/confirm")
     public ResponseEntity<OrderController.PurchaseInfo> confirmPurchase(@PathVariable("id") Long id) {
         Purchase purchase = purchaseRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("purchase_not_found", "Purchase not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PURCHASE_NOT_FOUND, "Purchase not found"));
 
         if (purchase.isConfirmed()) {
-            throw new BadRequestException("already_confirmed", "Already confirmed");
+            throw new BadRequestException(ErrorCode.ALREADY_CONFIRMED, "Already confirmed");
         }
 
         purchase = orderService.confirmPurchase(purchase);
@@ -46,10 +47,10 @@ public class AdminBatchController {
     @PostMapping("/orders/{id}/confirm")
     public ResponseEntity<OrderController.OrderInfo> confirmOrder(@PathVariable("id") Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND, "Order not found"));
 
         if (order.isConfirmed()) {
-            throw new BadRequestException("already_confirmed", "Already confirmed");
+            throw new BadRequestException(ErrorCode.ALREADY_CONFIRMED, "Already confirmed");
         }
 
         order = orderService.confirmOrder(order);

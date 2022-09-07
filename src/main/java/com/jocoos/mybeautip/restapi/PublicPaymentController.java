@@ -68,7 +68,7 @@ public class PublicPaymentController {
                     orderService.notifyPayment(order, request.getStatus(), request.getImpUid());
                     return new ResponseEntity(HttpStatus.NO_CONTENT);
                 })
-                .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
+                .orElseThrow(() -> new NotFoundException("invalid order id"));
     }
 
 

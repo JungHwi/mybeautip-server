@@ -76,10 +76,10 @@ public class GoodsDetailService {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
                 log.error("not found page - " + uri, e);
             }
-            throw new NotFoundException("goods_view_not_found", "goods view page not found - " + goodsNo);
+            throw new NotFoundException("goods view page not found - " + goodsNo);
         } catch (IOException e) {
             log.error("goods view page not found", e);
-            throw new NotFoundException("goods_view_not_found", "goods view page not found - " + goodsNo);
+            throw new NotFoundException("goods view page not found - " + goodsNo);
         }
     }
 

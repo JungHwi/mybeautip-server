@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.admin;
 
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.order.*;
 import com.jocoos.mybeautip.restapi.OrderController;
@@ -38,19 +39,19 @@ public class AdminPurchaseController {
     public ResponseEntity<OrderController.PurchaseInfo> completeDelivered(@PathVariable("id") Long id,
                                                                           @RequestBody UpdatePurchaseRequest request) {
         Purchase purchase = purchaseRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("purchase_not_found", "Purchase not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PURCHASE_NOT_FOUND, "Purchase not found"));
         Order order = orderRepository.findById(purchase.getOrderId())
-                .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND, "Order not found"));
 
         if (purchase.isDelivered()) {
-            throw new BadRequestException("already_delivered", "Already delivered");
+            throw new BadRequestException(ErrorCode.ALREADY_DELIVERED, "Already delivered");
         }
         if (!purchase.isDelivering()) {
             throw new BadRequestException("required purchase status - delivering");
         }
         if (order.isDelivering()) {
             log.warn("something wrong", "Order state cannot be 'delivered' until all state of purchases has been 'delivered'.");
-            throw new BadRequestException("invalid_order_state", "required order status - delivering");
+            throw new BadRequestException(ErrorCode.INVALID_ORDER_STATE, "required order status - delivering");
         }
 
         // Complete purchase & order delivery

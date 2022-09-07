@@ -32,7 +32,7 @@ public class AppleSocialMemberService implements SocialMemberService<AppleMember
     @Transactional
     public AppleMember save(SignupRequest request, long memberId) {
         if (StringUtils.isBlank(request.getRefreshToken())) {
-            throw new BadRequestException("token_is_null", "Refresh token must be not null.");
+            throw new BadRequestException("Refresh token must be not null.");
         }
 
         AppleMember appleMember = repository.findById(request.getSocialId())

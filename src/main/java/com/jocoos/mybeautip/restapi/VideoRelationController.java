@@ -48,7 +48,7 @@ public class VideoRelationController {
                                             @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 
         Video video = videoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<VideoGoods> videoGoods = videoGoodsRepository.findAllByVideoId(video.getId());

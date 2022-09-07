@@ -23,7 +23,7 @@ public class PopupTypeServiceFactory {
             case LOGIN:
                 return loginPopupService;
             default:
-                throw new BadRequestException("not_supported_popup_type", "Request popup is " + popupType.name());
+                throw new BadRequestException("Request popup is " + popupType.name());
         }
     }
 }

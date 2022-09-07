@@ -62,13 +62,13 @@ public class CommunityCommentDao {
     @Transactional(readOnly = true)
     public CommunityComment get(long commentId) {
         return repository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("no_such_comment", "No such comment. id - " + commentId));
+                .orElseThrow(() -> new NotFoundException("No such comment. id - " + commentId));
     }
 
     @Transactional(readOnly = true)
     public CommunityComment get(long communityId, long commentId) {
         return repository.findByCommunityIdAndId(communityId, commentId)
-                .orElseThrow(() -> new NotFoundException("no_such_comment", "No such comment. communityId - " + communityId + ", commentId - " + commentId));
+                .orElseThrow(() -> new NotFoundException("No such comment. communityId - " + communityId + ", commentId - " + commentId));
     }
 
     @Transactional

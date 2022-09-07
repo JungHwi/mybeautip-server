@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.comment.CommentService;
@@ -33,14 +34,14 @@ public class AdminCommentController {
             commentRepository.findById(id)
                     .map(comment -> {
                         if (comment.getLocked()) {
-                            throw new BadRequestException("already_locked", "Comment already locked");
+                            throw new BadRequestException(ErrorCode.ALREADY_LOCKED, "Comment already locked");
                         }
                         commentService.lockComment(comment);
                         return Optional.empty();
                     })
-                    .orElseThrow(() -> new NotFoundException("comment_not_found", "Comment not found, id: " + id));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND, "Comment not found, id: " + id));
         } else {
-            throw new BadRequestException("invalid_request_body", "Invalid request body");
+            throw new BadRequestException(ErrorCode.INVALID_REQUEST_BODY, "Invalid request body");
         }
     }
 

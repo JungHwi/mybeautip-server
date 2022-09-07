@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.banner;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
-import com.jocoos.mybeautip.post.Post;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -47,9 +46,9 @@ public class Banner extends MemberAuditable {
     @Column(nullable = false)
     private String link;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+//    @ManyToOne
+//    @JoinColumn(name = "post_id", nullable = false)
+//    private Post post;
 
     @Column
     private Date startedAt;

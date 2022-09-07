@@ -46,7 +46,7 @@ public class CallbackController {
         log.info("callback startVideo: {}", video);
 
         if (video == null) {
-            throw new BadRequestException("bad_request", "video info in callback required");
+            throw new BadRequestException("video info in callback required");
         }
 
         try {
@@ -65,15 +65,15 @@ public class CallbackController {
         CallbackUpdateVideoRequest video = request.getVideo();
 
         if (video == null) {
-            throw new BadRequestException("bad_request", "video info in callback required");
+            throw new BadRequestException("video info in callback required");
         }
 
         try {
             videoUpdateService.updated(video);
         } catch (BadRequestException e) {
-            throw new BadRequestException("video_locked", messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
+            throw new BadRequestException(messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
         } catch (MemberNotFoundException e) {
-            throw new MemberNotFoundException("invalid_user_id", "Invalid user_id: " + video.getUserId());
+            throw new MemberNotFoundException("Invalid user_id: " + video.getUserId());
         }
 
         return new ResponseEntity(HttpStatus.OK);

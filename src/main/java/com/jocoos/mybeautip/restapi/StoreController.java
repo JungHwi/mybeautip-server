@@ -79,7 +79,7 @@ public class StoreController {
             storeInfo = new StoreInfo(store, likeId);
             return new ResponseEntity<>(storeInfo, HttpStatus.OK);
         } else {
-            throw new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang));
+            throw new NotFoundException(messageService.getMessage(STORE_NOT_FOUND, lang));
         }
     }
 
@@ -91,7 +91,7 @@ public class StoreController {
                                         HttpServletRequest httpServletRequest,
                                         @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         storeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(STORE_NOT_FOUND, lang)));
 
         Date startCursor = (org.apache.logging.log4j.util.Strings.isBlank(cursor)) ?
                 new Date(System.currentTimeMillis()) : new Date(Long.parseLong(cursor));
@@ -130,12 +130,12 @@ public class StoreController {
                 .map(store -> {
                     Integer storeId = store.getId();
                     if (storeLikeRepository.findByStoreIdAndCreatedById(storeId, memberId).isPresent()) {
-                        throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
+                        throw new BadRequestException(messageService.getMessage(ALREADY_LIKED, lang));
                     }
                     StoreLike storeLike = storeService.addLike(store);
                     return new ResponseEntity<>(new StoreLikeInfo(storeLike), HttpStatus.OK);
                 })
-                .orElseThrow(() -> new NotFoundException("store_not_found", messageService.getMessage(STORE_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(STORE_NOT_FOUND, lang)));
     }
 
     @DeleteMapping("/{id:.+}/likes/{likeId:.+}")
@@ -143,14 +143,14 @@ public class StoreController {
                                              @PathVariable Long likeId) {
         Long memberId = legacyMemberService.currentMemberId();
         storeLikeRepository.findByIdAndStoreIdAndCreatedById(likeId, id, memberId)
-                .orElseThrow(() -> new NotFoundException("store_not_found", "invalid store id or like id"));
+                .orElseThrow(() -> new NotFoundException("invalid store id or like id"));
 
         storeLikeRepository.findById(likeId)
                 .map(like -> {
                     storeService.removeLike(like);
                     return Optional.empty();
                 })
-                .orElseThrow(() -> new NotFoundException("like_not_found", "invalid store like id"));
+                .orElseThrow(() -> new NotFoundException("invalid store like id"));
 
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -165,7 +165,7 @@ public class StoreController {
                     log.info("updateStoreCoverImageUrl changed: " + store.getImageUrl());
                     return storeRepository.save(store);
                 })
-                .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
+                .orElseThrow(() -> new NotFoundException("store not found:" + id));
     }
 
     @PatchMapping("/thumbnail/{id:.+}")
@@ -178,7 +178,7 @@ public class StoreController {
                     log.info("updateStoreThumbnailImageUrl changed: " + store.getThumbnailUrl());
                     return storeRepository.save(store);
                 })
-                .orElseThrow(() -> new NotFoundException("store_not_found", "store not found:" + id));
+                .orElseThrow(() -> new NotFoundException("store not found:" + id));
     }
 
     /**

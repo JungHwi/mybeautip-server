@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.order.*;
 import com.jocoos.mybeautip.restapi.OrderController;
@@ -39,9 +40,9 @@ public class AdminOrderController {
     @PostMapping("/{id}/order_cancel")
     public ResponseEntity<OrderController.OrderInquiryInfo> orderCancelByAdmin(@PathVariable("id") Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND, "Order not found: " + id));
         Payment payment = paymentRepository.findById(order.getId())
-                .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUND, "invalid payment id"));
 
         OrderInquiry inquiry = orderService.cancelOrderInquireByAdmin(order, payment, Byte.parseByte("0"), CANCEL_REASON);
         return new ResponseEntity<>(new OrderController.OrderInquiryInfo(inquiry), HttpStatus.OK);
@@ -50,9 +51,9 @@ public class AdminOrderController {
     @PostMapping("/{id}/payment_cancel")
     public ResponseEntity<OrderController.OrderInquiryInfo> cancelPaymentByAdmin(@PathVariable("id") Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("order_not_found", "Order not found: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.ORDER_NOT_FOUND, "Order not found: " + id));
         Payment payment = paymentRepository.findById(order.getId())
-                .orElseThrow(() -> new NotFoundException("payment_not_found", "invalid payment id"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.PAYMENT_NOT_FOUND, "invalid payment id"));
 
         OrderInquiry inquiry = orderService.cancelPaymentByAdmin(order, payment, Byte.parseByte("0"), CANCEL_REASON);
         return new ResponseEntity<>(new OrderController.OrderInquiryInfo(inquiry), HttpStatus.OK);

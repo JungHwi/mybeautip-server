@@ -170,7 +170,7 @@ public class TagService {
             if (matcher.find()) {
                 String tag = matcher.group();
                 if (tag.length() > MAX_TAG_LENGTH) {
-                    throw new BadRequestException("invalid_tag", "Valid tag length is between 1 to 25: " + tag);
+                    throw new BadRequestException("Valid tag length is between 1 to 25: " + tag);
                 }
 
                 if (StringUtils.removeAll(tag, "_").length() > 0) {

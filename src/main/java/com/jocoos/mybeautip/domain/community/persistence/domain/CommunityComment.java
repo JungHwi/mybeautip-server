@@ -76,7 +76,7 @@ public class CommunityComment extends BaseEntity {
 
     private void validContents(String contents) {
         if (StringUtils.isBlank(contents)) {
-            throw new BadRequestException("not_enough_contents", "Content must not be empty.");
+            throw new BadRequestException("Content must not be empty.");
         }
     }
 

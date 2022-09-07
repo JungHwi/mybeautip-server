@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
@@ -69,7 +70,7 @@ public class AdminMemberController {
             case "ROLE_STORE": {
                 memberRoleInfo = new MemberRoleInfo(myBeautipUserDetails.getMember(), 1);
                 AdminMember adminMember = adminMemberRepository.findByMemberId(memberRoleInfo.getId())
-                        .orElseThrow(() -> new MemberNotFoundException("member_not_found", "invalid member id"));
+                        .orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND, "invalid member id"));
 
                 if (adminMember.getStore() != null) {
                     memberRoleInfo.setStoreId(adminMember.getStore().getId());
@@ -93,7 +94,7 @@ public class AdminMemberController {
         }
 
         if (adminMemberRepository.existsByEmail(request.getEmail())) {
-            throw new BadRequestException("email_duplicated", "invalid email");
+            throw new BadRequestException(ErrorCode.EMAIL_DUPLICATED, "invalid email");
         }
 
         AdminMember adminMember = new AdminMember();
@@ -101,7 +102,7 @@ public class AdminMemberController {
 
         adminMember.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        Member member = memberRepository.findById(request.getMemberId()).orElseThrow(() -> new MemberNotFoundException("member_not_found", "invalid member_id"));
+        Member member = memberRepository.findById(request.getMemberId()).orElseThrow(() -> new MemberNotFoundException(ErrorCode.MEMBER_NOT_FOUND, "invalid member_id"));
         adminMember.setMember(member);
         adminMember.setCreatedAt(new Date());
 
@@ -120,7 +121,7 @@ public class AdminMemberController {
                 .orElseThrow(() -> new MemberNotFoundException(request.getYou()));
 
         if (request.getMe().equals(request.getYou())) {
-            throw new BadRequestException("bad_request", "Bad request - me and you cannot be the same.");
+            throw new BadRequestException("Bad request - me and you cannot be the same.");
         }
 
         Following following = followingRepository.findByMemberMeIdAndMemberYouId(me.getId(), you.getId()).orElse(null);
@@ -128,7 +129,7 @@ public class AdminMemberController {
         if (following == null) {
             legacyMemberService.followMember(me, you);
         } else {  // Already followed
-            throw new BadRequestException("bad_request", "Already follow");
+            throw new BadRequestException("Already follow");
         }
     }
 

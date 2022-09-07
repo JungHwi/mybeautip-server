@@ -60,7 +60,7 @@ public class MemberBillingAuthService {
         MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
                 .orElseThrow(() -> {
                     String message = messageService.getMessage("billing.auth.not_found", lang);
-                    return new BadRequestException("billing_auth_not_found", message);
+                    return new BadRequestException(message);
                 });
 
         MemberBillingService.EncryptedInfo encryptedInfo = encrypt(request.getPassword());
@@ -74,7 +74,7 @@ public class MemberBillingAuthService {
         return memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
                 .orElseThrow(() -> {
                     String message = messageService.getMessage("billing.auth.not_found", lang);
-                    return new BadRequestException("billing_auth_not_found", message);
+                    return new BadRequestException(message);
                 });
     }
 
@@ -88,7 +88,7 @@ public class MemberBillingAuthService {
         MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
                 .orElseThrow(() -> {
                     String message = messageService.getMessage("billing.auth.not_found", lang);
-                    return new BadRequestException("billing_auth_not_found", message);
+                    return new BadRequestException(message);
                 });
 
         String decrypted = decrypt(billingAuth.getPassword(), billingAuth.getSalt());
@@ -99,7 +99,7 @@ public class MemberBillingAuthService {
             // check how many times user can fail to authenticate password?
             if (billingAuth.getErrorCount() > maxErrorCount) {
                 String message = messageService.getMessage("billing.password.too_many_errors", lang);
-                throw new BadRequestException("billing_password_too_many_errors", message);
+                throw new BadRequestException(message);
             }
             billingAuth.setErrorCount(billingAuth.getErrorCount() + 1);
         }
@@ -111,14 +111,14 @@ public class MemberBillingAuthService {
         MemberBillingAuth billingAuth = memberBillingAuthRepository.findTopByMemberIdOrderByCreatedAtDesc(memberId)
                 .orElseThrow(() -> {
                     String message = messageService.getMessage("billing.auth.not_found", lang);
-                    return new BadRequestException("billing_auth_not_found", message);
+                    return new BadRequestException(message);
                 });
 
         // check reset time
         long timeWall = billingAuth.getResetAt().getTime() + timeBetweenReset;
         if (System.currentTimeMillis() < timeWall) {
             String message = messageService.getMessage("billing.password.too_many_resets", lang);
-            throw new BadRequestException("billing_password_too_many_resets", message);
+            throw new BadRequestException(message);
         }
 
         // send email async

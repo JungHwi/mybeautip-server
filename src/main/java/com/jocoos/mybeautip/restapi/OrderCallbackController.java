@@ -94,7 +94,7 @@ public class OrderCallbackController {
                                 order.getPayment().getPrice(), response.getResponse().getAmount()));
                     }
                 })
-                .orElseThrow(() -> new NotFoundException("order_not_found", "invalid order id"));
+                .orElseThrow(() -> new NotFoundException("invalid order id"));
 
         log.info("OrderCallbackComplete response: " + html);
         return new ResponseEntity<>(html, HttpStatus.OK);

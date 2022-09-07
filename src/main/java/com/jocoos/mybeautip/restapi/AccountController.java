@@ -89,7 +89,7 @@ public class AccountController {
                     log.debug("accountInfo: {}", accountInfo);
 
                     return new ResponseEntity<>(accountInfo, HttpStatus.OK);
-                }).orElseThrow(() -> new NotFoundException("account_not_found", messageService.getMessage(ACCOUNT_NOT_FOUND, lang)));
+                }).orElseThrow(() -> new NotFoundException(messageService.getMessage(ACCOUNT_NOT_FOUND, lang)));
     }
 
     @PatchMapping
@@ -127,7 +127,7 @@ public class AccountController {
         }
 
         if (!bankCodeMap.containsKey(info.getBankCode())) {  // Not supported bank code
-            throw new BadRequestException("not_supported_bank_code", messageService.getMessage(ACCOUNT_BANK_NOT_SUPPORTED, lang));
+            throw new BadRequestException(messageService.getMessage(ACCOUNT_BANK_NOT_SUPPORTED, lang));
         }
 
         info.setBankDepositor(info.getBankDepositor().trim());
@@ -143,7 +143,7 @@ public class AccountController {
             if (info.getBankDepositor().equalsIgnoreCase(response.getBody().getResponse().getBankHolder())) {
                 return true;
             } else {
-                throw new BadRequestException("invalid_account", messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
+                throw new BadRequestException(messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
             }
         }
         return false;

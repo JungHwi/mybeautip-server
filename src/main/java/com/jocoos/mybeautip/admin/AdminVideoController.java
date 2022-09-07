@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.MemberInfo;
@@ -57,7 +58,7 @@ public class AdminVideoController {
 
         if (request.getRestore() != null && request.getRestore()) {
             Video video = videoRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + id));
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found: " + id));
             videoService.restore(video);
             return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
         }
@@ -67,19 +68,19 @@ public class AdminVideoController {
                     if (request.getLocked() != null) {
                         if (request.getLocked()) {
                             if (video.getLocked()) {
-                                throw new BadRequestException("already_locked", "Video already locked");
+                                throw new BadRequestException(ErrorCode.ALREADY_LOCKED, "Video already locked");
                             }
                             video = videoService.lockVideo(video);
                         } else {
                             if (!video.getLocked()) {
-                                throw new BadRequestException("already_unlocked", "Video does not lock.");
+                                throw new BadRequestException(ErrorCode.ALREADY_UNLOCKED, "Video does not lock.");
                             }
                             video = videoService.unLockVideo(video);
                         }
                     }
                     return videoService.generateVideoInfo(video);
                 })
-                .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found: " + id));
 
         return new ResponseEntity<>(videoInfo, HttpStatus.OK);
     }
@@ -91,7 +92,7 @@ public class AdminVideoController {
                     video = videoService.remove(video);
                     return videoService.generateVideoInfo(video);
                 })
-                .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found: " + id));
 
         return new ResponseEntity<>(videoInfo, HttpStatus.OK);
     }
@@ -145,10 +146,10 @@ public class AdminVideoController {
                                                                  @RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "100") int size) {
         Video video = videoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("video_not_found", "Video not found: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found: " + id));
 
         if (!"BROADCASTED".equals(video.getType())) {
-            throw new BadRequestException("invalid_video_type", "Valid video type is BROADCASTED");
+            throw new BadRequestException(ErrorCode.INVALID_VIDEO_TYPE, "Valid video type is BROADCASTED");
         }
 
         Date endedAt = video.getEndedAt();

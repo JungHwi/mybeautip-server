@@ -1,13 +1,7 @@
 package com.jocoos.mybeautip.video;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -17,10 +11,15 @@ import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.watches.VideoWatchService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -106,7 +105,7 @@ public class VideoUpdateService {
         video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
             .orElseGet(() -> {
               log.error("Cannot find videoId: " + request.getVideoKey());
-              throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
+              throw new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "video not found, video_id:" + request.getVideoKey());
             });
       }
 
@@ -134,7 +133,7 @@ public class VideoUpdateService {
     }
 
     if (isLockedVideo(video, request.getVisibility())) {
-      throw new BadRequestException("video_locked", "");
+      throw new BadRequestException("Locked video. videoId - " + video.getId());
     }
 
     /**
@@ -201,7 +200,7 @@ public class VideoUpdateService {
     return videoRepository.findByVideoKeyAndDeletedAtIsNull(videoKey)
         .orElseGet(() -> {
           log.error("Cannot find video " + videoKey);
-          throw new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey);
+          throw new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "video not found, videoKey: " + videoKey);
         });
   }
 

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.member.persistence.domain;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.member.code.SkinType;
 import com.jocoos.mybeautip.member.code.SkinWorry;
 import com.jocoos.mybeautip.member.code.converter.SkinWorrySetConverter;
@@ -38,6 +39,8 @@ public class MemberDetail {
     public void setInviterId(Long inviterId) {
         if (this.inviterId == null || this.inviterId < 1) {
             this.inviterId = inviterId;
+        } else {
+            throw new BadRequestException(ErrorCode.ALREADY_REGISTRATION, "친구 초대 코드가 이미 등록됨.");
         }
     }
 
@@ -47,7 +50,7 @@ public class MemberDetail {
 
     public void setSkinWorry(Set<SkinWorry> skinWorrySet) {
         if (skinWorrySet.size() > 3) {
-            throw new BadRequestException("too_many_worry", "SkinWorry size id - " + skinWorrySet.size());
+            throw new BadRequestException("SkinWorry size - " + skinWorrySet.size());
         }
 
         this.skinWorry = skinWorrySet;

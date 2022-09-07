@@ -58,7 +58,7 @@ public class VideoScrapService {
     @Transactional
     public void deleteScrap(Video video, Member member) {
         VideoScrap scrap = videoScrapRepository.findByVideoIdAndCreatedById(video.getId(), member.getId())
-                .orElseThrow(() -> new NotFoundException("scrap_not_found", ""));
+                .orElseThrow(() -> new NotFoundException("Scrap not found. videoId -" + video.getId() + ", memberId - " + member.getId()));
 
         scrap.notScrap();
         video.setScrapCount(video.getScrapCount() - 1);

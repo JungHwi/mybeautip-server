@@ -20,7 +20,7 @@ public class CommunityCategoryDao {
     @Transactional(readOnly = true)
     public CommunityCategory getCommunityCategory(Long communityCategoryId) {
         return repository.findById(communityCategoryId)
-                .orElseThrow(() -> new BadRequestException("no_such_category", "No such category. id - " + communityCategoryId));
+                .orElseThrow(() -> new BadRequestException("No such category. id - " + communityCategoryId));
     }
 
     @Transactional(readOnly = true)

@@ -133,7 +133,7 @@ public class AddressService {
                     }
                     return addressRepository.save(address);
                 })
-                .orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
     }
 
     @Transactional
@@ -142,7 +142,7 @@ public class AddressService {
                 .map(address -> {
                     address.setDeletedAt(new Date());
                     return addressRepository.save(address);
-                }).orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
+                }).orElseThrow(() -> new NotFoundException(messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
 
         long baseCount = addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberId);
         if (baseCount == 0) {

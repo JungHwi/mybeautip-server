@@ -98,8 +98,7 @@ public class ScheduleService {
                                    ScheduleController.UpdateScheduleRequest request,
                                    String lang) {
         Schedule schedule = scheduleRepository.findByIdAndCreatedById(id, memberId)
-                .orElseThrow(() -> new NotFoundException("schedule_item_not_found",
-                        messageService.getMessage(SCHEDULE_ITEM_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(SCHEDULE_ITEM_NOT_FOUND, lang)));
 
         slackService.sendForUpdatingSchedule(schedule, request);
 
@@ -125,8 +124,7 @@ public class ScheduleService {
                     scheduleRepository.delete(s);
                     return Optional.empty();
                 })
-                .orElseThrow(() -> new NotFoundException("schedule_item_not_found",
-                        messageService.getMessage(SCHEDULE_ITEM_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(SCHEDULE_ITEM_NOT_FOUND, lang)));
     }
 
     public ScheduleRoughTime checkRoughTimeByNow() {

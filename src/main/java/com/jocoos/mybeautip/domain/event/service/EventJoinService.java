@@ -37,7 +37,7 @@ public class EventJoinService {
     @Transactional
     public EventJoinResponse join(long eventId, long memberId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event_not_found", "Not found event - " + eventId));
+                .orElseThrow(() -> new NotFoundException("Not found event - " + eventId));
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("No such member. id - " + memberId));

@@ -29,7 +29,7 @@ public class CommunityCategoryService {
 
     public CommunityCategoryResponse getCommunityCategory(long categoryId) {
         CommunityCategory communityCategory = repository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("not_found_community_category", "Request Id is - " + categoryId));
+                .orElseThrow(() -> new NotFoundException("Request Id is - " + categoryId));
         return converter.convert(communityCategory);
     }
 }

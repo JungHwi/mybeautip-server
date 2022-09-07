@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.*;
@@ -108,13 +109,13 @@ public class MemberSignupService {
 
         switch (member.getStatus()) {
             case ACTIVE:
-                throw new BadRequestException("already_member", "already_member");
+                throw new BadRequestException(ErrorCode.ALREADY_MEMBER, "already_member");
             case DORMANT:
-                throw new BadRequestException("dormant_member", "dormant_member");
+                throw new BadRequestException(ErrorCode.DORMANT_MEMBER, "dormant_member");
             case WITHDRAWAL:
                 LocalDateTime availableRejoin = DateUtils.toLocalDateTime(member.getDeletedAt(), ZoneId.systemDefault()).plusSeconds(REJOIN_AVAILABLE_SECOND);
                 if (availableRejoin.isAfter(LocalDateTime.now())) {
-                    throw new BadRequestException("not_yet_rejoin", "not_yet_rejoin");
+                    throw new BadRequestException(ErrorCode.NOT_YET_REJOIN, "not_yet_rejoin");
                 }
         }
     }

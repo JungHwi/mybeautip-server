@@ -14,6 +14,7 @@ import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -120,7 +121,7 @@ public class CommunityCommentService {
     public void validReply(WriteCommunityCommentRequest request) {
         CommunityComment parentComment = dao.get(request.getParentId());
         if (!request.getCommunityId().equals(parentComment.getCommunityId())) {
-            throw new BadRequestException("not_match_community", "Not matched Community Info. Parent comment's community id - " + parentComment.getCommunityId());
+            throw new BadRequestException("Not matched Community Info. Parent comment's community id - " + parentComment.getCommunityId());
         }
     }
 
@@ -130,7 +131,7 @@ public class CommunityCommentService {
         CommunityComment communityComment = dao.get(request.getCommunityId(), request.getCommentId());
 
         if (!communityComment.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("access_denied", "This is not yours.");
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
         }
 
         communityComment.setContents(request.getContents());
@@ -151,7 +152,7 @@ public class CommunityCommentService {
         CommunityComment communityComment = dao.get(communityId, commentId);
 
         if (!communityComment.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("access_denied", "This is not yours.");
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
         }
 
         communityComment.delete();

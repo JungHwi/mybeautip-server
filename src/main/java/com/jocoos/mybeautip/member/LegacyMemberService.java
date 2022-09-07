@@ -14,6 +14,7 @@ import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
@@ -54,6 +55,7 @@ import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXT
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.S3_ERROR;
 
 @Slf4j
 @Service
@@ -187,7 +189,7 @@ public class LegacyMemberService {
                 .replace(" ", "");
 
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new BadRequestException("duplicate_phone", "duplicate_phone");
+            throw new BadRequestException(ErrorCode.DUPLICATE_PHONE, "duplicate_phone");
         }
 
         return true;
@@ -237,7 +239,7 @@ public class LegacyMemberService {
         }
 
         if (!(username.matches(RegexConstants.regexForUsername))) {
-            throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
+            throw new BadRequestException("Username does not match the format");
         }
 
         List<Member> otherMembers = memberRepository.findByUsername(username).stream()
@@ -245,7 +247,7 @@ public class LegacyMemberService {
                 .collect(Collectors.toList());
 
         if (!otherMembers.isEmpty()) {
-            throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+            throw new BadRequestException(ErrorCode.ALREADY_USED, "Username already in use");
         }
 
         bannedWordService.findWordAndThrowException(BannedWord.CATEGORY_USERNAME, username, lang);
@@ -253,7 +255,7 @@ public class LegacyMemberService {
 
     public void checkEmailValidation(String email, String lang) {
         if (email.length() > 50 || !email.matches(emailRegex)) {
-            throw new BadRequestException("invalid_email", messageService.getMessage(EMAIL_INVALID_FORMAT, lang));
+            throw new BadRequestException("Email does not match the format");
         }
     }
 
@@ -408,9 +410,8 @@ public class LegacyMemberService {
             case 8:
                 appleMemberRepository.findByMemberId(member.getId()).ifPresent(appleMemberRepository::delete);
                 break;
-
             default:
-                throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
+                throw new BadRequestException("Not supported member link: " + link);
         }
 
         member.setIntro("");
@@ -487,7 +488,7 @@ public class LegacyMemberService {
                     .orElseThrow(() -> new MemberNotFoundException("No such Member. tag - " + request.getInviterTag()));
 
             if (member.getId().equals(targetMember.getId())) {
-                throw new BadRequestException("my_tag", "Target member is me.");
+                throw new BadRequestException(ErrorCode.MY_TAG, "Target member is me.");
             }
 
             if (memberDetail.getInviterId() == null) {
@@ -529,7 +530,7 @@ public class LegacyMemberService {
             }
 
         } catch (IOException ex) {
-            throw new MybeautipException("Member avatar upload Error.");
+            throw new MybeautipException(S3_ERROR, "Member avatar upload Error.");
         }
 
         return path;

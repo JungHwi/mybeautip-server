@@ -17,7 +17,7 @@ public class ControllerExceptionAdvice {
 
     private Environment environment;
 
-    public ControllerExceptionAdvice(Environment environment){
+    public ControllerExceptionAdvice(Environment environment) {
         this.environment = environment;
     }
 
@@ -74,6 +74,8 @@ public class ControllerExceptionAdvice {
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+
 
     public ResponseEntity<Object> handleNumberFormatException(NumberFormatException e) {
         log.debug("handleNumberFormatException called");

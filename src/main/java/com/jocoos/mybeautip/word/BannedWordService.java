@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.word;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.notification.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +32,7 @@ public class BannedWordService {
         String lowerCase = word.toLowerCase();
         getDictionary(category).forEach((key, value) -> {
             if (lowerCase.contains(value.getWord().toLowerCase())) {
-                throw new BadRequestException("banned_word", messageService.getMessage(USERNAME_BANNED_WORD, lang));
+                throw new BadRequestException(ErrorCode.BANNED_WORD, messageService.getMessage(USERNAME_BANNED_WORD, lang));
             }
         });
 
