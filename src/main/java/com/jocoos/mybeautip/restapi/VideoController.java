@@ -437,7 +437,7 @@ public class VideoController {
                     videoService.unLikeVideo(liked);
                     return Optional.empty();
                 })
-                .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang)));
 
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -505,14 +505,14 @@ public class VideoController {
         Member me = legacyMemberService.currentMember();
 
         Comment comment = commentRepository.findByIdAndVideoId(commentId, videoId)
-                .orElseThrow(() -> new NotFoundException("comment_not_found", messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(COMMENT_NOT_FOUND, lang)));
 
         commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
                 .map(liked -> {
                     videoService.unLikeVideoComment(liked);
                     return Optional.empty();
                 })
-                .orElseThrow(() -> new NotFoundException("comment_like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang)));
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -762,13 +762,13 @@ public class VideoController {
         Member member = legacyMemberService.currentMember();
 
         Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
-                .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
             videoScrapService.deleteScrap(video, member);
             return new ResponseEntity(HttpStatus.OK);
         } catch (NotFoundException e) {
-            throw new NotFoundException("scrap_not_found", messageService.getMessage(SCRAP_NOT_FOUND, lang));
+            throw new NotFoundException(messageService.getMessage(SCRAP_NOT_FOUND, lang));
         }
     }
 
