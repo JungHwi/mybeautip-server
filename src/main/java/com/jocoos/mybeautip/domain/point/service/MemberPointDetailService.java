@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MemberPointDetailService {
@@ -22,7 +21,6 @@ public class MemberPointDetailService {
     public List<MemberPointDetail> earnPoints(MemberPoint memberPoint, int currentMemberPoint) {
         List<MemberPointDetail> details = memberPointDetailCalculateService.earnPoints(memberPoint, currentMemberPoint);
         details.forEach(slice -> slice.setCommonData(memberPoint));
-        log.info("{}", memberPoint.getExpiryAt());
         return memberPointDetailDao.saveAll(details);
     }
 
