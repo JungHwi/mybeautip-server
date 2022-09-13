@@ -48,6 +48,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
+import static com.jocoos.mybeautip.domain.member.code.MemberStatus.ACTIVE;
+
 
 @Slf4j
 @RestController
@@ -215,9 +217,9 @@ public class AdminController {
 
         Page<Member> members = null;
         if (link > 0) {
-            members = memberRepository.findByLinkAndVisible(link, visible, pageable);
+            members = memberRepository.findByLinkAndStatus(link, ACTIVE, pageable);
         } else {
-            members = memberRepository.findByVisible(visible, pageable);
+            members = memberRepository.findByStatus(ACTIVE, pageable);
         }
 
         Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));

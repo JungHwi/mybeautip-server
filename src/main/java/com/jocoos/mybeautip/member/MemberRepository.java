@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -82,11 +83,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Page<Member> findByDeletedAtIsNotNull(Pageable pageable);
 
-    Page<Member> findByVisible(boolean visible, Pageable pageable);
+    Page<Member> findByStatus(MemberStatus status, Pageable pageable);
 
     Page<Member> findByVisibleAndReportCountNot(boolean visible, int reportCount, Pageable pageable);
 
-    Page<Member> findByLinkAndVisible(int link, boolean visible, Pageable pageable);
+    Page<Member> findByLinkAndStatus(int link, MemberStatus status, Pageable pageable);
 
     Page<Member> findByVisibleAndPushableAndUsernameContaining(boolean visible, boolean pushable, String username, Pageable pageable);
 
