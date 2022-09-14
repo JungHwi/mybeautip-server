@@ -83,17 +83,25 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Page<Member> findByDeletedAtIsNotNull(Pageable pageable);
 
+    Page<Member> findByVisible(boolean visible, Pageable pageable);
+
     Page<Member> findByStatus(MemberStatus status, Pageable pageable);
 
     Page<Member> findByVisibleAndReportCountNot(boolean visible, int reportCount, Pageable pageable);
 
-    Page<Member> findByLinkAndStatus(int link, MemberStatus status, Pageable pageable);
+    Page<Member> findByLinkAndVisible(int link, boolean visible, Pageable pageable);
 
-    Page<Member> findByVisibleAndPushableAndUsernameContaining(boolean visible, boolean pushable, String username, Pageable pageable);
+    Page<Member> findByLinkAndStatus(int link, MemberStatus status, Pageable pageable);
 
     Page<Member> findByVisibleAndUsernameContaining(boolean visible, String username, Pageable pageable);
 
     Page<Member> findByVisibleAndEmailContaining(boolean visible, String email, Pageable pageable);
+
+    Page<Member> findByVisibleAndPushableAndUsernameContaining(boolean visible, boolean pushable, String username, Pageable pageable);
+
+    Page<Member> findByStatusAndUsernameContaining(MemberStatus status, String username, Pageable pageable);
+
+    Page<Member> findByStatusAndEmailContaining(MemberStatus status, String email, Pageable pageable);
 
     Page<Member> findByVisibleAndPushable(boolean visible, boolean pushable, Pageable pageable);
 
