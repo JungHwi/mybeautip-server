@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.term.code.TermType;
+import com.jocoos.mybeautip.domain.term.code.TermTypeGroup;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -18,6 +19,7 @@ import com.jocoos.mybeautip.security.AccessTokenResponse;
 import com.jocoos.mybeautip.security.AppleLoginService;
 import com.jocoos.mybeautip.security.JwtTokenProvider;
 import com.jocoos.mybeautip.support.DateUtils;
+import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +60,10 @@ public class MemberSignupService {
 
     @Transactional
     public MemberEntireInfo signup(SignupRequest request) {
+
+        // FIXME IOS 배포 후 삭제
+        emptyTermRequestToAllTermRequest(request);
+
         validSignup(request);
 
         savaAndSetAvatarUrlIfExists(request);
@@ -131,6 +137,13 @@ public class MemberSignupService {
             String uploadAvatarUrl =
                     awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory(), DEFAULT_AVATAR_FILE_NAME);
             request.changeAvatarUrl(uploadAvatarUrl);
+        }
+    }
+
+    // FIXME IOS 배포 후 삭제
+    private void emptyTermRequestToAllTermRequest(SignupRequest request) {
+        if (Collections.isEmpty(request.getTermTypes())) {
+            request.setTermTypes(TermTypeGroup.REQUIRED.getTypes());
         }
     }
 }

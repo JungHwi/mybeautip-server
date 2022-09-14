@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.Set;
 
@@ -19,8 +18,7 @@ public class SignupRequest {
     private String email;
     private String avatarUrl;
     private String refreshToken;
-
-    @NotNull
+    
     private Set<TermType> termTypes;
 
     @Override
