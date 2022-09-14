@@ -149,7 +149,7 @@ public class AdminController {
 
         log.debug("visible: {}, username: {}", visible, username);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Member> members = memberRepository.findByVisibleAndUsernameContaining(visible, username, pageable);
+        Page<Member> members = memberRepository.findByStatusAndUsernameContaining(ACTIVE, username, pageable);
 
         Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
         return new ResponseEntity<>(details, HttpStatus.OK);
@@ -164,7 +164,7 @@ public class AdminController {
 
         log.debug("visible: {}, email: {}", visible, email);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Member> members = memberRepository.findByVisibleAndEmailContaining(visible, email, pageable);
+        Page<Member> members = memberRepository.findByStatusAndEmailContaining(ACTIVE, email, pageable);
         log.info("{}", members);
 
         Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
