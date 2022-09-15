@@ -42,6 +42,11 @@ public enum ErrorCode implements CodeValue {
     CANNOT_FOLLOWED_MYSELF("나 자신을 follow 할수 없음"),
     ALREADY_FOLLOWED("이미 follow 중"),
 
+    // COMMUNITY
+    NOT_SUPPORTED_FILE_NUM("요구되는 파일 수와 다름"),
+    DUPLICATE_VOTE("투표는 한번만 가능함"),
+    COMMUNITY_VOTE_NOT_MATCH("게시물에 등록된 파일이 아님"),
+
     // VIDEO
     VIDEO_NOT_FOUND("비디오 정보 없음"),
     INVALID_VIDEO_TYPE("잘못된 비디오 타입"),

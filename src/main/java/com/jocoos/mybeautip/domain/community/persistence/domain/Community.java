@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
+import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVote;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -13,8 +14,10 @@ import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_FILE_NUM;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
@@ -71,6 +74,9 @@ public class Community extends BaseEntity {
     @OneToMany(mappedBy = "community", fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityFile> communityFileList;
 
+    @OneToMany(mappedBy = "community", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private List<CommunityVote> communityVoteList = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "member_id", insertable = false, updatable = false)
     private Member member;
@@ -107,6 +113,10 @@ public class Community extends BaseEntity {
                 validCommunity();
                 validDrip();
                 break;
+            case VOTE:
+                validCommunity();
+                validVote();
+                break;
             default:
                 validCommunity();
         }
@@ -136,6 +146,13 @@ public class Community extends BaseEntity {
     private void validDrip() {
         if (this.eventId == null || this.eventId < 1) {
             throw new BadRequestException("Community of drip category needs event_id.");
+        }
+    }
+
+    private void validVote() {
+        int fileNum = this.getCommunityVoteList().size();
+        if (fileNum != 0 && fileNum != 2) {
+            throw new BadRequestException(NOT_SUPPORTED_FILE_NUM.getDescription());
         }
     }
 
