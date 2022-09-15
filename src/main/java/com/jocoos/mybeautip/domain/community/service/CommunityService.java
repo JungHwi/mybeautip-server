@@ -230,7 +230,7 @@ public class CommunityService {
 
     @Transactional
     public void editFiles(Community community, List<FileDto> fileDtoList) {
-        if (CollectionUtils.isEmpty(fileDtoList)) {
+        if (CollectionUtils.isEmpty(fileDtoList) || !community.getCommunityVoteList().isEmpty()) {
             return;
         }
 
