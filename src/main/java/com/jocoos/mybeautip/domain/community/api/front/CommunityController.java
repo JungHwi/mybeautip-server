@@ -37,7 +37,6 @@ public class CommunityController {
 
     @PostMapping(value = "/1/community/files", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<List<String>> uploadFile(@RequestPart List<MultipartFile> files) {
-
         List<String> urls = service.upload(files);
 
         return ResponseEntity.ok(urls);

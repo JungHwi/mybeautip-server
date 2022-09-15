@@ -49,8 +49,6 @@ public class AddressService {
 
     @Transactional
     public Address create(AddressController.CreateAddressRequest request, Member member) {
-        log.debug("CreateAddressRequest: {}", request);
-
         if (request.getBase() != null && request.getBase()) {
             addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId())
                     .ifPresent(prevBaseAddress -> {
@@ -76,7 +74,6 @@ public class AddressService {
             phone = phone.replace("-", "").replace(" ", "");
             address.setPhone(phone);
         }
-        log.debug("address: {}", address);
 
         activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
         return addressRepository.save(address);
@@ -100,8 +97,6 @@ public class AddressService {
 
     @Transactional
     public Address update(Long id, AddressController.UpdateAddressRequest request, String lang) {
-        log.info("UpdateAddressRequest: {}", request);
-
         if (request.getBase() != null && request.getBase()) {
             addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(legacyMemberService.currentMemberId())
                     .ifPresent(prevBaseAddress -> {

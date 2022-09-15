@@ -32,8 +32,8 @@ public class CommunityCategoryDao {
     public List<CommunityCategory> getCategoryForSearchCommunity(Long communityCategoryId) {
         CommunityCategory category = getCommunityCategory(communityCategoryId);
 
-        if (category.getType() == CommunityCategoryType.TOTAL) {
-            return repository.findAllByParentId(category.getId());
+        if (category.getType() == CommunityCategoryType.GROUP) {
+            return repository.findAllByParentId(category.getParentId());
         } else {
             return Collections.singletonList(category);
         }
