@@ -72,7 +72,7 @@ public class Community extends BaseEntity {
     private ZonedDateTime sortedAt;
 
     @OneToMany(mappedBy = "community", fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
-    private List<CommunityFile> communityFileList;
+    private List<CommunityFile> communityFileList = new ArrayList<>();
 
     @OneToMany(mappedBy = "community", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityVote> communityVoteList = new ArrayList<>();

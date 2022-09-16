@@ -15,6 +15,7 @@ import org.mapstruct.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
@@ -46,7 +47,7 @@ public interface CommunityConverter {
 
         if (CollectionUtils.isNotEmpty(request.getFiles())) {
             if (VOTE.equals(request.getCategory().getType())) {
-                setCommunityVote(community, request);
+                setCommunityFileAndVote(community, request);
             } else {
                 setCommunityFile(community, request);
             }
@@ -63,11 +64,11 @@ public interface CommunityConverter {
         return communityFileList;
     }
 
-    static void setCommunityVote(Community community, WriteCommunityRequest request) {
+    static void setCommunityFileAndVote(Community community, WriteCommunityRequest request) {
         List<CommunityFile> communityFiles = setCommunityFile(community, request);
         List<CommunityVote> communityVotes = communityFiles.stream()
-                                                           .map(file -> new CommunityVote(community, file))
-                                                           .collect(Collectors.toList());
+                .map(file -> new CommunityVote(community, file))
+                .collect(Collectors.toList());
         community.setCommunityVoteList(communityVotes);
     }
 
@@ -79,20 +80,12 @@ public interface CommunityConverter {
     CommunityResponse convert(Community community);
 
     @AfterMapping
-    default void convert(@MappingTarget CommunityResponse.CommunityResponseBuilder response,
-                         Community community) {
+    default void convert(@MappingTarget CommunityResponse.CommunityResponseBuilder response, Community community) {
         if (VOTE.equals(community.getCategory().getType())) {
-            response.votes(
-                    community.getCommunityVoteList().stream()
-                            .map(this::convertToUrl)
-                            .collect(Collectors.toList()));
+            response.fileUrl(getNotVotes(community));
+            response.votes(getVotes(community));
         } else {
-            if (community.getCommunityFileList() != null) {
-                response.fileUrl(
-                        community.getCommunityFileList().stream()
-                                .map(this::convertToUrl)
-                                .collect(Collectors.toList()));
-            }
+            response.fileUrl(getFiles(community));
         }
     }
 
@@ -111,6 +104,38 @@ public interface CommunityConverter {
             return null;
         }
         return convertToUrl(file.get(0));
+    }
+
+    default List<String> getFiles(Community community) {
+        return community
+                .getCommunityFileList()
+                .stream()
+                .map(this::convertToUrl)
+                .collect(Collectors.toList());
+    }
+
+    default List<VoteResponse> getVotes(Community community) {
+        return community
+                .getCommunityVoteList()
+                .stream()
+                .map(this::convertToUrl)
+                .collect(Collectors.toList());
+    }
+
+    // 커뮤니티의 파일 중 투표 파일이 아닌 것만 반환
+    default List<String> getNotVotes(Community community) {
+        Set<CommunityFile> fileSet = community
+                .getCommunityVoteList()
+                .stream()
+                .map(CommunityVote::getCommunityFile)
+                .collect(Collectors.toSet());
+
+        return community
+                .getCommunityFileList()
+                .stream()
+                .filter(file -> !fileSet.contains(file))
+                .map(this::convertToUrl)
+                .collect(Collectors.toList());
     }
 
     default String convertToUrl(CommunityFile file) {
