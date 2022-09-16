@@ -63,3 +63,6 @@ flipflop:
 redis:
   host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
   port: 6379
+
+logging:
+  config: classpath:log/log4j2-console-prod.yml
