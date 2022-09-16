@@ -1,0 +1,34 @@
+Configutation:
+  status: warn
+
+  Appenders:
+    Console:
+      name: CONSOLE
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "%clr{%d{yyyy-MM-dd HH:mm:ss.SSS}}{faint} %clr{%5p} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n%wEx"
+
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: CONSOLE
+    Logger:
+      - name: org.springframework.data.rest.webmvc.RepositoryRestHandlerMapping
+        level: warn
+      - name: org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+        level: warn
+      - name: com.jocoos.mybeautip
+        level: info
+      - name: jdbc
+        level: error
+      - name: org.springframework.web
+        level: info
+      - name: org.springframework.web.filter.CommonsRequestLoggingFilter
+        level: error
+      - name: org.springframework.security
+        level: error
+      - name: org.hibernate
+        level: error
+      - name: org.hibernate.SQL
+        level: info
