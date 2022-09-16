@@ -19,7 +19,7 @@ Configutation:
       - name: org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
         level: warn
       - name: com.jocoos.mybeautip
-        level: debug
+        level: info
       - name: jdbc
         level: error
       - name: org.springframework.web

@@ -48,7 +48,12 @@ public class AddressService {
     }
 
     @Transactional
-    public Address create(AddressController.CreateAddressRequest request, Member member) {
+    public Address create(AddressController.CreateAddressRequest request, Member member, String lang) {
+
+        if (addressRepository.existsByCreatedByAndDeletedAtIsNull(member)) {
+            throw new BadRequestException(messageService.getMessage("address.too_many_addresses", lang));
+        }
+
         log.debug("CreateAddressRequest: {}", request);
 
         if (request.getBase() != null && request.getBase()) {

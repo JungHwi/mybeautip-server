@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.address.Address;
 import com.jocoos.mybeautip.member.address.AddressRepository;
@@ -67,11 +66,8 @@ public class AddressController {
     @PostMapping
     public ResponseEntity<AddressInfo> createAddress(@RequestBody CreateAddressRequest request,
                                                      @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        if (addressRepository.countByCreatedByIdAndDeletedAtIsNull(legacyMemberService.currentMemberId()) >= 10) {
-            throw new BadRequestException("too_many_addresses", messageService.getMessage(ADDRESS_TOO_MANY_ADDRESS, lang));
-        }
-
-        return new ResponseEntity<>(new AddressInfo(addressService.create(request, legacyMemberService.currentMember())), HttpStatus.OK);
+        Address address = addressService.create(request, legacyMemberService.currentMember(), lang);
+        return new ResponseEntity<>(new AddressInfo(address), HttpStatus.OK);
     }
 
     @PatchMapping("/{id:.+}")
