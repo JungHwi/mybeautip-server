@@ -52,7 +52,7 @@ public class AddressService {
     public Address create(AddressController.CreateAddressRequest request, Member member, String lang) {
 
         if (addressRepository.existsByCreatedByAndDeletedAtIsNull(member)) {
-            throw new BadRequestException(messageService.getMessage(ADDRESS_TOO_MANY_ADDRESS.getDescription(), lang));
+            throw new BadRequestException(messageService.getMessage("address.too_many_addresses", lang));
         }
 
         log.debug("CreateAddressRequest: {}", request);
