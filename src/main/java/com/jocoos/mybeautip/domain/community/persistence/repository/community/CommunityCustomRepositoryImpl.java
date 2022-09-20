@@ -83,5 +83,4 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         }
         return community.eventId.eq(eventId);
     }
-
 }

@@ -10,9 +10,6 @@ import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,11 +29,7 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public List<EventListResponse> getEventList(EventType eventType) {
-        Pageable pageable = PageRequest.of(
-                0,
-                Integer.MAX_VALUE,
-                Sort.by(Sort.Order.asc("statusSorting"), Sort.Order.asc("sorting"), Sort.Order.desc("id")));
-        List<Event> events = dao.getEvents(eventType, pageable);
+        List<Event> events = dao.getVisibleEvents(eventType);
         return eventConverter.convertToListResponse(events);
     }
 

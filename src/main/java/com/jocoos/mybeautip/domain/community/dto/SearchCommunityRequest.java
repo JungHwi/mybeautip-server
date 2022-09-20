@@ -21,7 +21,4 @@ public class SearchCommunityRequest {
     private Long eventId;
 
     private ZonedDateTime cursor;
-
-    private boolean isFirstSearch;
-
 }

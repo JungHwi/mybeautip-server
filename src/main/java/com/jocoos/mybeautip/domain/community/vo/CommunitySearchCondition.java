@@ -13,11 +13,14 @@ import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.D
 @Getter
 public class CommunitySearchCondition {
     private final Long eventId;
-    private final boolean isFirstSearch;
     private final ZonedDateTime cursor;
     private final List<CommunityCategory> categories;
 
     public boolean isCategoryDrip() {
         return this.categories.size() == 1 && DRIP.equals(this.categories.get(0).getType());
+    }
+
+    public boolean isFirstSearch() {
+        return this.cursor == null;
     }
 }

@@ -36,7 +36,6 @@ public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCus
                         greaterOrLessThanIdByDirection(direction, condition.getCursor())
                 )
                 .orderBy(orderById(direction))
-                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch());
     }
@@ -49,7 +48,10 @@ public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCus
         return isAscending ? communityComment.id.asc() : communityComment.id.desc();
     }
 
-    private BooleanExpression greaterOrLessThanIdByDirection(boolean isAscending, long cursor) {
+    private BooleanExpression greaterOrLessThanIdByDirection(boolean isAscending, Long cursor) {
+        if (cursor == null) {
+            return null;
+        }
         return isAscending ? communityComment.id.gt(cursor) : communityComment.id.lt(cursor);
     }
 

@@ -6,7 +6,6 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
     }
 
     @Override
-    public List<Event> getEvents(EventType type, Set<EventStatus> statuses, Pageable pageable) {
+    public List<Event> getEvents(EventType type, Set<EventStatus> statuses) {
         return repository.query(query -> query
                 .select(event)
                 .from(event)
@@ -34,8 +33,6 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                         eqType(type)
                 )
                 .orderBy(event.statusSorting.asc(), event.sorting.asc(), event.id.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
                 .fetch());
     }
 

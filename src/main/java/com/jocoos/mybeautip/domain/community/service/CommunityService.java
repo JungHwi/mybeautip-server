@@ -92,12 +92,9 @@ public class CommunityService {
 
     @Transactional(readOnly = true)
     public List<CommunityResponse> getCommunities(SearchCommunityRequest request, Pageable pageable) {
-        Member member = legacyMemberService.currentMember();
-        request.setMember(member);
-
         CommunitySearchCondition condition = createSearchCondition(request);
         List<Community> communities = communityDao.getCommunities(condition, pageable);
-        return getCommunity(request.getMember(), communities);
+        return getCommunity(legacyMemberService.currentMember(), communities);
     }
 
     @Transactional(readOnly = true)
@@ -224,6 +221,6 @@ public class CommunityService {
 
     private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
         List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
-        return new CommunitySearchCondition(request.getEventId(), request.isFirstSearch(), request.getCursor(), categories);
+        return new CommunitySearchCondition(request.getEventId(), request.getCursor(), categories);
     }
 }
