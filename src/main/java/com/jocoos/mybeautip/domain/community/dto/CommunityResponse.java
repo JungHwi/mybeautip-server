@@ -8,13 +8,13 @@ import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.Member;
+import io.jsonwebtoken.lang.Collections;
 import lombok.*;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
@@ -108,7 +108,7 @@ public class CommunityResponse implements CursorInterface {
     }
 
     private void blindVoteCountIfNotVoted(CommunityRelationInfo relationInfo) {
-        if (VOTE.equals(this.getCategory().getType()) && relationInfo.getUserVoted() == null) {
+        if (!Collections.isEmpty(this.votes) && relationInfo.getUserVoted() == null) {
             this.votes.forEach(VoteResponse::setCountNull);
         }
     }

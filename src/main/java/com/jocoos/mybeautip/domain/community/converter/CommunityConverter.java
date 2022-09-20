@@ -15,7 +15,6 @@ import org.mapstruct.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
@@ -51,19 +50,22 @@ public interface CommunityConverter {
     }
 
     @Mappings({
-            @Mapping(target = "fileUrl", ignore = true),
-            @Mapping(target = "votes", ignore = true),
+            @Mapping(target = "fileUrl", source = "communityFile", qualifiedByName = "convertToUrl"),
+            @Mapping(target = "count", source = "voteCount")
+    })
+    VoteResponse convert(CommunityVote vote);
+
+    @Mappings({
             @Mapping(target = "relationInfo", ignore = true)
     })
     CommunityResponse convert(Community community);
 
     @AfterMapping
     default void convert(@MappingTarget CommunityResponse.CommunityResponseBuilder response, Community community) {
-        if (VOTE.equals(community.getCategory().getType())) {
-            response.fileUrl(fileUrlsExceptVotes(community));
-            response.votes(voteResponses(community));
+        if (community.getCommunityVoteList().isEmpty()) {
+            response.fileUrl(fileUrlsFrom(community.getCommunityFileList()));
         } else {
-            response.fileUrl(fileUrls(community));
+            response.votes(voteResponsesFrom(community.getCommunityVoteList()));
         }
     }
 
@@ -82,6 +84,11 @@ public interface CommunityConverter {
             return null;
         }
         return convertToUrl(file.get(0));
+    }
+
+    @Named(value = "convertToUrl")
+    default String convertToUrl(CommunityFile file) {
+        return toUrl(file.getFile(), COMMUNITY, file.getCommunity().getId());
     }
 
     default void setFileAndVote(Community community, WriteCommunityRequest request) {
@@ -110,47 +117,11 @@ public interface CommunityConverter {
         community.setCommunityVoteList(communityVotes);
     }
 
-    default List<String> fileUrls(Community community) {
-        return community
-                .getCommunityFileList()
-                .stream()
-                .map(this::convertToUrl)
-                .collect(Collectors.toList());
+    default List<String> fileUrlsFrom(List<CommunityFile> files) {
+        return files.stream().map(this::convertToUrl).collect(Collectors.toList());
     }
 
-    default List<VoteResponse> voteResponses(Community community) {
-        return community
-                .getCommunityVoteList()
-                .stream()
-                .map(this::convertToUrl)
-                .collect(Collectors.toList());
-    }
-
-    // 커뮤니티의 파일 중 투표 파일이 아닌 것만 반환
-    default List<String> fileUrlsExceptVotes(Community community) {
-        Set<CommunityFile> fileSet = community
-                .getCommunityVoteList()
-                .stream()
-                .map(CommunityVote::getCommunityFile)
-                .collect(Collectors.toSet());
-
-        return community
-                .getCommunityFileList()
-                .stream()
-                .filter(file -> !fileSet.contains(file))
-                .map(this::convertToUrl)
-                .collect(Collectors.toList());
-    }
-
-    default String convertToUrl(CommunityFile file) {
-        return toUrl(file.getFile(), COMMUNITY, file.getCommunity().getId());
-    }
-
-    default VoteResponse convertToUrl(CommunityVote vote) {
-        return VoteResponse.builder()
-                .id(vote.getId())
-                .fileUrl(toUrl(vote.getCommunityFile().getFile(), COMMUNITY, vote.getCommunity().getId()))
-                .count(vote.getVoteCount())
-                .build();
+    default List<VoteResponse> voteResponsesFrom(List<CommunityVote> votes) {
+        return votes.stream().map(this::convert).collect(Collectors.toList());
     }
 }
