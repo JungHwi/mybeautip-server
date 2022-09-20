@@ -46,30 +46,8 @@ public interface CommunityConverter {
         community.setSortedAt(ZonedDateTime.now());
 
         if (CollectionUtils.isNotEmpty(request.getFiles())) {
-            if (VOTE.equals(request.getCategory().getType())) {
-                setCommunityFileAndVote(community, request);
-            } else {
-                setCommunityFile(community, request);
-            }
+            setFileInfos(community, request);
         }
-    }
-
-    static List<CommunityFile> setCommunityFile(Community community, WriteCommunityRequest request) {
-        List<CommunityFile> communityFileList = new ArrayList<>();
-        for (FileDto requestFile : request.getFiles()) {
-            CommunityFile communityFile = new CommunityFile(getFilename(requestFile.getUrl()));
-            communityFileList.add(communityFile);
-        }
-        community.setCommunityFileList(communityFileList);
-        return communityFileList;
-    }
-
-    static void setCommunityFileAndVote(Community community, WriteCommunityRequest request) {
-        List<CommunityFile> communityFiles = setCommunityFile(community, request);
-        List<CommunityVote> communityVotes = communityFiles.stream()
-                .map(file -> new CommunityVote(community, file))
-                .collect(Collectors.toList());
-        community.setCommunityVoteList(communityVotes);
     }
 
     @Mappings({
@@ -104,6 +82,32 @@ public interface CommunityConverter {
             return null;
         }
         return convertToUrl(file.get(0));
+    }
+
+    default List<CommunityFile> setCommunityFile(Community community, WriteCommunityRequest request) {
+        List<CommunityFile> communityFileList = new ArrayList<>();
+        for (FileDto requestFile : request.getFiles()) {
+            CommunityFile communityFile = new CommunityFile(getFilename(requestFile.getUrl()));
+            communityFileList.add(communityFile);
+        }
+        community.setCommunityFileList(communityFileList);
+        return communityFileList;
+    }
+
+    default void setFileInfos(Community community, WriteCommunityRequest request) {
+        if (VOTE.equals(request.getCategory().getType())) {
+            setCommunityFileAndVote(community, request);
+        } else {
+            setCommunityFile(community, request);
+        }
+    }
+
+    default void setCommunityFileAndVote(Community community, WriteCommunityRequest request) {
+        List<CommunityFile> communityFiles = setCommunityFile(community, request);
+        List<CommunityVote> communityVotes = communityFiles.stream()
+                .map(file -> new CommunityVote(community, file))
+                .collect(Collectors.toList());
+        community.setCommunityVoteList(communityVotes);
     }
 
     default List<String> getFiles(Community community) {
