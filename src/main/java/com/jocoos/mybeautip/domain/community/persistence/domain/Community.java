@@ -17,7 +17,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_FILE_NUM;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
@@ -150,9 +150,9 @@ public class Community extends BaseEntity {
     }
 
     private void validVote() {
-        int fileNum = this.getCommunityVoteList().size();
-        if (fileNum != 0 && fileNum != 2) {
-            throw new BadRequestException(NOT_SUPPORTED_FILE_NUM.getDescription());
+        int voteNum = this.getCommunityVoteList().size();
+        if (voteNum != 0 && voteNum != 2) {
+            throw new BadRequestException(NOT_SUPPORTED_VOTE_NUM.getDescription());
         }
     }
 

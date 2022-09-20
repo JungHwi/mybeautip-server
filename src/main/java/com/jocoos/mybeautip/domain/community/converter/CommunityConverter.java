@@ -46,7 +46,7 @@ public interface CommunityConverter {
         community.setSortedAt(ZonedDateTime.now());
 
         if (CollectionUtils.isNotEmpty(request.getFiles())) {
-            setFileInfos(community, request);
+            setFileAndVote(community, request);
         }
     }
 
@@ -60,10 +60,10 @@ public interface CommunityConverter {
     @AfterMapping
     default void convert(@MappingTarget CommunityResponse.CommunityResponseBuilder response, Community community) {
         if (VOTE.equals(community.getCategory().getType())) {
-            response.fileUrl(getNotVotes(community));
-            response.votes(getVotes(community));
+            response.fileUrl(fileUrlsExceptVotes(community));
+            response.votes(voteResponses(community));
         } else {
-            response.fileUrl(getFiles(community));
+            response.fileUrl(fileUrls(community));
         }
     }
 
@@ -84,6 +84,14 @@ public interface CommunityConverter {
         return convertToUrl(file.get(0));
     }
 
+    default void setFileAndVote(Community community, WriteCommunityRequest request) {
+        if (VOTE.equals(request.getCategory().getType())) {
+            setCommunityFileAndVote(community, request);
+        } else {
+            setCommunityFile(community, request);
+        }
+    }
+
     default List<CommunityFile> setCommunityFile(Community community, WriteCommunityRequest request) {
         List<CommunityFile> communityFileList = new ArrayList<>();
         for (FileDto requestFile : request.getFiles()) {
@@ -94,14 +102,6 @@ public interface CommunityConverter {
         return communityFileList;
     }
 
-    default void setFileInfos(Community community, WriteCommunityRequest request) {
-        if (VOTE.equals(request.getCategory().getType())) {
-            setCommunityFileAndVote(community, request);
-        } else {
-            setCommunityFile(community, request);
-        }
-    }
-
     default void setCommunityFileAndVote(Community community, WriteCommunityRequest request) {
         List<CommunityFile> communityFiles = setCommunityFile(community, request);
         List<CommunityVote> communityVotes = communityFiles.stream()
@@ -110,7 +110,7 @@ public interface CommunityConverter {
         community.setCommunityVoteList(communityVotes);
     }
 
-    default List<String> getFiles(Community community) {
+    default List<String> fileUrls(Community community) {
         return community
                 .getCommunityFileList()
                 .stream()
@@ -118,7 +118,7 @@ public interface CommunityConverter {
                 .collect(Collectors.toList());
     }
 
-    default List<VoteResponse> getVotes(Community community) {
+    default List<VoteResponse> voteResponses(Community community) {
         return community
                 .getCommunityVoteList()
                 .stream()
@@ -127,7 +127,7 @@ public interface CommunityConverter {
     }
 
     // 커뮤니티의 파일 중 투표 파일이 아닌 것만 반환
-    default List<String> getNotVotes(Community community) {
+    default List<String> fileUrlsExceptVotes(Community community) {
         Set<CommunityFile> fileSet = community
                 .getCommunityVoteList()
                 .stream()

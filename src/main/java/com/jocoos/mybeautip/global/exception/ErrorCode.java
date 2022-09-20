@@ -43,7 +43,7 @@ public enum ErrorCode implements CodeValue {
     ALREADY_FOLLOWED("이미 follow 중"),
 
     // COMMUNITY
-    NOT_SUPPORTED_FILE_NUM("요구되는 파일 수와 다름"),
+    NOT_SUPPORTED_VOTE_NUM("요구되는 파일 수와 다름"),
     DUPLICATE_VOTE("투표는 한번만 가능함"),
     COMMUNITY_VOTE_NOT_MATCH("게시물에 등록된 파일이 아님"),
 

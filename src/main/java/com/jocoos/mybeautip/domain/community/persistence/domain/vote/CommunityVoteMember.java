@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.domain.community.persistence.domain.vote;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,14 +30,9 @@ public class CommunityVoteMember {
     @JoinColumn(name = "community_vote_id")
     private CommunityVote communityVote;
 
-    @Builder
-    public CommunityVoteMember(Community community, Member member, CommunityVote vote) {
+    public CommunityVoteMember(CommunityVote vote, Community community, Member member) {
         this.community = community;
         this.member = member;
-        this.communityVote = vote;
-    }
-
-    public void changeVote(CommunityVote vote) {
         this.communityVote = vote;
     }
 

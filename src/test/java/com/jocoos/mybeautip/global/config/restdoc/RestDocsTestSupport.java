@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.global.config.restdoc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jocoos.mybeautip.global.util.TestMemberUtil;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 
 @Disabled
-@Import(RestDocsConfig.class)
+@Import({RestDocsConfig.class, TestMemberUtil.class})
 @ExtendWith(RestDocumentationExtension.class)
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
@@ -35,6 +36,9 @@ public class RestDocsTestSupport {
 
     @Autowired
     protected RestDocumentationResultHandler restDocs;
+
+    @Autowired
+    protected TestMemberUtil testMemberUtil;
 
     @Autowired
     protected ObjectMapper objectMapper;

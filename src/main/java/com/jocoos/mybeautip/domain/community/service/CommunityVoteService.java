@@ -30,7 +30,12 @@ public class CommunityVoteService {
 
     @Transactional
     public CommunityVoteMemberResponse vote(Member member, Long communityId, Long voteId) {
-        CommunityVoteMember voteMember = createVoteMember(member, voteId, communityId);
+        CommunityVote communityVote = communityVoteDao.get(voteId);
+        Community community = communityDao.get(communityId);
+        valid(communityVote, community, member);
+
+        CommunityVoteMember voteMember = new CommunityVoteMember(communityVote, community, member);
+        communityVoteMemberDao.save(voteMember);
 
         communityVoteDao.increaseVoteCount(voteId);
 
@@ -38,28 +43,18 @@ public class CommunityVoteService {
         return CommunityVoteMemberResponse.from(updatedCommunity, voteMember.getCommunityVoteId());
     }
 
-
-    private CommunityVoteMember createVoteMember(Member member, Long voteId, Long communityId) {
-        CommunityVote vote = communityVoteDao.get(voteId);
-        Community community = communityDao.get(communityId);
-        valid(vote, community);
-        return createVoteMember(member, vote, community);
+    private void valid(CommunityVote vote, Community community, Member member) {
+        validMatchVoteAndCommunity(vote, community);
+        validDuplicateVote(community, member);
     }
 
-    private CommunityVoteMember createVoteMember(Member member, CommunityVote vote, Community community) {
+    private void validDuplicateVote(Community community, Member member) {
         if (communityVoteMemberDao.isExist(community, member)) {
             throw new BadRequestException(ErrorCode.DUPLICATE_VOTE.getDescription());
-        } else {
-            CommunityVoteMember voteMember = CommunityVoteMember.builder()
-                    .community(community)
-                    .member(member)
-                    .vote(vote)
-                    .build();
-            return communityVoteMemberDao.save(voteMember);
         }
     }
 
-    private void valid(CommunityVote vote, Community community) {
+    private void validMatchVoteAndCommunity(CommunityVote vote, Community community) {
         if (!Objects.equals(community, vote.getCommunity())) {
             throw new BadRequestException(COMMUNITY_VOTE_NOT_MATCH.getDescription());
         }
