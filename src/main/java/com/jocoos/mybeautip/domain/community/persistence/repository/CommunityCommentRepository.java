@@ -1,8 +1,9 @@
-package com.jocoos.mybeautip.domain.community.persistence.repository.comment;
+package com.jocoos.mybeautip.domain.community.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
+import com.jocoos.mybeautip.domain.community.persistence.repository.comment.CommunityCommentCustomRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;

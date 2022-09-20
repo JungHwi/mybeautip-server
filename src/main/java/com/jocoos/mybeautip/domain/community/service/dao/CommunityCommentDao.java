@@ -5,7 +5,7 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityCommentConverter
 import com.jocoos.mybeautip.domain.community.dto.SearchCommentRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
-import com.jocoos.mybeautip.domain.community.persistence.repository.comment.CommunityCommentRepository;
+import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCommentRepository;
 import com.jocoos.mybeautip.domain.community.vo.CommunityCommentSearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;

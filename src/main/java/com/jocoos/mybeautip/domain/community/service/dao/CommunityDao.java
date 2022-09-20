@@ -5,10 +5,8 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
-
-import com.jocoos.mybeautip.domain.community.persistence.repository.community.CommunityRepository;
+import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
-
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

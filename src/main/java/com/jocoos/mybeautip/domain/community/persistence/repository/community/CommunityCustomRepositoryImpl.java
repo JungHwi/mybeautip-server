@@ -74,7 +74,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     private BooleanExpression eqIsWin(boolean isFirstSearch) {
-        return isFirstSearch ? community.isWin.isTrue().or(community.isWin.isNull()) : community.isWin.isNull();
+        return isFirstSearch ? null : community.isWin.isNull();
     }
 
     private BooleanExpression eqEventId(Long eventId) {
