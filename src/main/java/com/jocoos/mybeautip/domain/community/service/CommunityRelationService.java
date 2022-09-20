@@ -5,13 +5,16 @@ import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
+import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVoteMember;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
+import com.jocoos.mybeautip.domain.community.service.dao.CommunityVoteMemberDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.block.Block;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommunityRelationService {
@@ -27,6 +33,7 @@ public class CommunityRelationService {
     private final CommunityLikeDao likeDao;
     private final CommunityReportDao reportDao;
     private final MemberBlockDao blockDao;
+    private final CommunityVoteMemberDao communityVoteMemberDao;
 
     @Transactional(readOnly = true)
     public CommunityResponse setRelationInfo(Member member, CommunityResponse communityResponse) {
@@ -38,6 +45,7 @@ public class CommunityRelationService {
                 .isLike(likeDao.isLike(member.getId(), communityResponse.getId()))
                 .isReport(reportDao.isReport(member.getId(), communityResponse.getId()))
                 .isBlock(communityResponse.getCategory().getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), communityResponse.getMember().getId()))
+                .userVoted(getUserVoted(member, communityResponse))
                 .build();
 
         return communityResponse.setRelationInfo(member, relationInfo);
@@ -72,6 +80,7 @@ public class CommunityRelationService {
                     .isLike(likeMap.containsKey(communityResponse.getId()))
                     .isReport(reportMap.containsKey(communityResponse.getId()))
                     .isBlock(communityResponse.getCategory().getType() != CommunityCategoryType.BLIND && blockMap.containsKey(communityResponse.getMember().getId()))
+                    .userVoted(getUserVoted(member, communityResponse))
                     .build();
 
             communityResponse.setRelationInfo(member, relationInfo);
@@ -96,5 +105,14 @@ public class CommunityRelationService {
         List<Block> blockList = blockDao.isBlock(memberId, writerIds);
         return blockList.stream()
                 .collect(Collectors.toMap(Block::getYouId, Function.identity()));
+    }
+
+    private Long getUserVoted(Member member, CommunityResponse response) {
+        if (VOTE.equals(response.getCategory().getType())) {
+            return communityVoteMemberDao.findByCommunityIdAndMember(response.getId(), member)
+                    .map(CommunityVoteMember::getCommunityVoteId).orElse(null);
+        } else {
+            return null;
+        }
     }
 }

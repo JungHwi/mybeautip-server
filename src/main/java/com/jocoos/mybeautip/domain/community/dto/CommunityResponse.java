@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.Member;
+import io.jsonwebtoken.lang.Collections;
 import lombok.*;
 
 import java.time.ZonedDateTime;
@@ -37,6 +38,8 @@ public class CommunityResponse implements CursorInterface {
     private String contents;
 
     private List<String> fileUrl;
+
+    private List<VoteResponse> votes;
 
     private Integer viewCount;
 
@@ -99,6 +102,14 @@ public class CommunityResponse implements CursorInterface {
             this.member.blind();
         }
 
+        blindVoteCountIfNotVoted(relationInfo);
+
         return this;
+    }
+
+    private void blindVoteCountIfNotVoted(CommunityRelationInfo relationInfo) {
+        if (!Collections.isEmpty(this.votes) && relationInfo.getUserVoted() == null) {
+            this.votes.forEach(VoteResponse::setCountNull);
+        }
     }
 }
