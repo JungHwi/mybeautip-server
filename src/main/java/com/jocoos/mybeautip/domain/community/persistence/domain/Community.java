@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVo
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
+import io.jsonwebtoken.lang.Collections;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
@@ -162,6 +164,13 @@ public class Community extends BaseEntity {
 
     public boolean isImageExist() {
         return !CollectionUtils.isEmpty(this.communityFileList);
+    }
+
+    public boolean isVoteAndIncludeFile() {
+        if (!this.category.isCategoryType(VOTE)) {
+            return false;
+        }
+        return !Collections.isEmpty(this.communityVoteList) || !Collections.isEmpty(this.communityFileList);
     }
 
     @PostPersist
