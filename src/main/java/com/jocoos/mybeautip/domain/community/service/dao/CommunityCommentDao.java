@@ -6,12 +6,12 @@ import com.jocoos.mybeautip.domain.community.dto.SearchCommentRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCommentRepository;
+import com.jocoos.mybeautip.domain.community.vo.CommunityCommentSearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,24 +27,9 @@ public class CommunityCommentDao {
 
     @Transactional(readOnly = true)
     public List<CommunityComment> getComments(SearchCommentRequest request) {
-
-        // FIXME Dynamic Query to QueryDSL
-        Sort.Direction direction = request.getPageable().getSort().stream()
-                .map(Sort.Order::getDirection)
-                .findAny()
-                .orElse(Sort.Direction.DESC);
-
-        Slice<CommunityComment> result = null;
-
-        switch (direction) {
-            case ASC:
-                result = repository.findByCommunityIdAndParentIdAndIdGreaterThan(request.getCommunityId(), request.getParentId(), request.getCursor(), request.getPageable());
-                break;
-            case DESC:
-                result = repository.findByCommunityIdAndParentIdAndIdLessThan(request.getCommunityId(), request.getParentId(), request.getCursor(), request.getPageable());
-        }
-
-        return result.getContent();
+        CommunityCommentSearchCondition condition =
+                new CommunityCommentSearchCondition(request.getCommunityId(), request.getParentId(), request.getCursor());
+        return repository.getComments(condition, request.getPageable());
     }
 
     @Transactional

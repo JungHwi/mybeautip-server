@@ -50,18 +50,10 @@ public class CommunityController {
                                                                                   @RequestParam(required = false) ZonedDateTime cursor,
                                                                                   @RequestParam(required = false, defaultValue = "20") int size) {
 
-
-        boolean isFirstSearch = false;
-        if (cursor == null) {
-            cursor = ZonedDateTime.now();
-            isFirstSearch = true;
-        }
-
         SearchCommunityRequest request = SearchCommunityRequest.builder()
                 .categoryId(categoryId)
                 .eventId(eventId)
                 .cursor(cursor)
-                .isFirstSearch(isFirstSearch)
                 .build();
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "sortedAt"));
