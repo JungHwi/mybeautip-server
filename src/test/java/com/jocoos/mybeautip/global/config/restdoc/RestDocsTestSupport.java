@@ -27,7 +27,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 
 @Disabled
-@Import({RestDocsConfig.class, TestMemberUtil.class})
+@Import({RestDocsConfig.class})
 @ExtendWith(RestDocumentationExtension.class)
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs

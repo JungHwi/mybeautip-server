@@ -32,8 +32,6 @@ class CommunityVoteControllerTest extends RestDocsTestSupport {
     @DisplayName("투표 성공 테스트")
     @Test
     void voteSuccess() throws Exception {
-        testMemberUtil.defaultTestSetting();
-
         VoteResponse voteResponse = VoteResponse.builder()
                 .id(1L)
                 .count(1)
