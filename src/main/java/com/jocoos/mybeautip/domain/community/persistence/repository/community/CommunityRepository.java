@@ -1,9 +1,9 @@
-package com.jocoos.mybeautip.domain.community.persistence.repository;
+package com.jocoos.mybeautip.domain.community.persistence.repository.community;
 
+import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
-import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Repository
-public interface CommunityRepository extends DefaultJpaRepository<Community, Long> {
+public interface CommunityRepository extends ExtendedQuerydslJpaRepository<Community, Long>, CommunityCustomRepository {
 
     Slice<Community> findByMemberIdAndStatusAndIdLessThan(long memberId, CommunityStatus status, long id, Pageable pageable);
     Slice<Community> findByCategoryInAndSortedAtLessThan(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable);

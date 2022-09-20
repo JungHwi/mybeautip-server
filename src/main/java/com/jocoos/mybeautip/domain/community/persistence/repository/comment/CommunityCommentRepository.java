@@ -1,8 +1,8 @@
-package com.jocoos.mybeautip.domain.community.persistence.repository;
+package com.jocoos.mybeautip.domain.community.persistence.repository.comment;
 
+import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
-import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CommunityCommentRepository extends DefaultJpaRepository<CommunityComment, Long> {
+public interface CommunityCommentRepository extends ExtendedQuerydslJpaRepository<CommunityComment, Long>, CommunityCommentCustomRepository {
 
     Optional<CommunityComment> findByCommunityIdAndId(long communityId, long commentId);
 
