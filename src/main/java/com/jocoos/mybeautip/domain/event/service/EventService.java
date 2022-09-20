@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
+import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -27,19 +28,16 @@ public class EventService {
     private final EventRepository eventRepository;
 
     private final EventConverter eventConverter;
+    private final EventDao dao;
 
     @Transactional(readOnly = true)
     public List<EventListResponse> getEventList(EventType eventType) {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Order.asc("statusSorting"), Sort.Order.asc("sorting"), Sort.Order.desc("id")));
-        // FIXME Dynamic Query to QueryDSL
-        List<Event> eventList;
-        if (eventType == null) {
-            eventList = eventRepository.findByStatusIn(EventStatus.visibleEventStatus, pageable);
-        } else {
-            eventList = eventRepository.findByTypeAndStatusIn(eventType, EventStatus.visibleEventStatus, pageable);
-        }
-
-        return eventConverter.convertToListResponse(eventList);
+        Pageable pageable = PageRequest.of(
+                0,
+                Integer.MAX_VALUE,
+                Sort.by(Sort.Order.asc("statusSorting"), Sort.Order.asc("sorting"), Sort.Order.desc("id")));
+        List<Event> events = dao.getEvents(eventType, pageable);
+        return eventConverter.convertToListResponse(events);
     }
 
     @Transactional(readOnly = true)

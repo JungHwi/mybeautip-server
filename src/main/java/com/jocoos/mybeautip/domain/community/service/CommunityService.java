@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
-import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
@@ -12,6 +11,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
+import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
@@ -25,17 +25,14 @@ import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
@@ -67,12 +64,12 @@ public class CommunityService {
 
         awsS3Handler.copy(request.getFiles(), UrlDirectory.COMMUNITY.getDirectory(community.getId()));
 
-        if (community.getCategory().getType() == CommunityCategoryType.DRIP) {
+        if (community.getCategory().getType() == DRIP) {
             eventJoinService.join(community.getEventId(), request.getMember().getId());
         }
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES,
-                                               validDomainAndReceiver(community, community.getId(), community.getMember()));
+                validDomainAndReceiver(community, community.getId(), community.getMember()));
 
         return getCommunity(community.getMember(), community);
     }
@@ -98,32 +95,9 @@ public class CommunityService {
         Member member = legacyMemberService.currentMember();
         request.setMember(member);
 
-        // FIXME Dynamic Query to QueryDSL
-        List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
-        List<Community> communityList = new ArrayList<>();
-        List<Community> winList = new ArrayList<>();
-        List<Community> loseList = new ArrayList<>();
-
-        if (categories.size() == 1) {
-            CommunityCategory category = categories.get(0);
-            if (category.getType() == CommunityCategoryType.DRIP) {
-                if (request.getEventId() == null || request.getEventId() < NumberUtils.LONG_ONE) {
-                    throw new BadRequestException(ErrorCode.BAD_REQUEST, "event_id is required to search DRIP category.");
-                }
-                if (request.isFirstSearch()) {
-                    winList = communityDao.getCommunityForEvent(request.getEventId(), categories, true, request.getCursor(), pageable);
-                }
-                loseList = communityDao.getCommunityForEvent(request.getEventId(), categories, null, request.getCursor(), pageable);
-                communityList = Stream.concat(winList.stream(), loseList.stream())
-                        .collect(Collectors.toList());
-            } else {
-                communityList = communityDao.get(categories, request.getCursor(), pageable);
-            }
-        } else {
-            communityList = communityDao.get(categories, request.getCursor(), pageable);
-        }
-
-        return getCommunity(request.getMember(), communityList);
+        CommunitySearchCondition condition = createSearchCondition(request);
+        List<Community> communities = communityDao.getCommunities(condition, pageable);
+        return getCommunity(request.getMember(), communities);
     }
 
     @Transactional(readOnly = true)
@@ -160,7 +134,7 @@ public class CommunityService {
 
         community.delete();
         activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES,
-                                                   validDomainAndReceiver(community, community.getId(), member));
+                validDomainAndReceiver(community, community.getId(), member));
     }
 
     @Transactional
@@ -246,5 +220,10 @@ public class CommunityService {
         }
 
         awsS3Handler.editFiles(fileDtoList, UrlDirectory.COMMUNITY.getDirectory(community.getId()));
+    }
+
+    private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
+        List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
+        return new CommunitySearchCondition(request.getEventId(), request.isFirstSearch(), request.getCursor(), categories);
     }
 }

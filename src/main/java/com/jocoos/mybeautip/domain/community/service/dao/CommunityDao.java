@@ -5,7 +5,10 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
-import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository;
+
+import com.jocoos.mybeautip.domain.community.persistence.repository.community.CommunityRepository;
+import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
+
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +25,6 @@ public class CommunityDao {
 
     private final CommunityCategoryDao categoryDao;
     private final CommunityRepository repository;
-
     private final CommunityConverter converter;
 
     private final EntityManager em;
@@ -68,9 +70,9 @@ public class CommunityDao {
         return repository.findByCategoryInAndSortedAtLessThan(categoryList, cursor, pageable).getContent();
     }
 
-    @Transactional(readOnly = true)
-    public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, Boolean isWin,  ZonedDateTime cursor, Pageable pageable) {
-        return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable).getContent();
+    @Transactional
+    public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
+        return repository.getCommunities(condition, pageable);
     }
 
     @Transactional()
