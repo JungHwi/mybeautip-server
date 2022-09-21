@@ -28,8 +28,10 @@ public class MemberPointDao {
         return repository.existsByActivityTypeAndMemberAndState(type, member, STATE_EARNED_POINT);
     }
 
-    public boolean isExistByTypeAndDomainIdAndMember(ActivityPointType type, Long domainId, Member member) {
-        return repository.existsByActivityTypeAndActivityDomainIdAndMemberAndState(type, domainId, member, STATE_EARNED_POINT);
+
+    public boolean isExistByTypeAndDomainIdAndMemberAndState(ActivityPointType type, Long domainId, Member member, int state) {
+        return repository
+                .existsByActivityTypeAndActivityDomainIdAndMemberAndState(type, domainId, member, state);
     }
 
 }
