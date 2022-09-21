@@ -60,6 +60,11 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
+    public List<Community> get(List<Long> ids) {
+        return repository.findByIdIn(ids);
+    }
+
+    @Transactional(readOnly = true)
     public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, Boolean isWin,  ZonedDateTime cursor, Pageable pageable) {
         return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable).getContent();
     }

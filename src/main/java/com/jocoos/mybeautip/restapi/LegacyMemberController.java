@@ -21,8 +21,8 @@ import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.scrap.LegacyVideoScrapService;
 import com.jocoos.mybeautip.video.scrap.VideoScrap;
-import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -75,7 +75,7 @@ public class LegacyMemberController {
     private final CommentLikeRepository commentLikeRepository;
     private final RevenueRepository revenueRepository;
     private final RevenuePaymentRepository revenuePaymentRepository;
-    private final VideoScrapService videoScrapService;
+    private final LegacyVideoScrapService legacyVideoScrapService;
     private final CommentService commentService;
 
     private final MemberTermService memberTermService;
@@ -113,7 +113,7 @@ public class LegacyMemberController {
                                   KeywordService keywordService,
                                   LegacyNotificationService legacyNotificationService,
                                   RevenuePaymentRepository revenuePaymentRepository,
-                                  VideoScrapService videoScrapService,
+                                  LegacyVideoScrapService legacyVideoScrapService,
                                   CommentService commentService,
                                   MemberTermService memberTermService) {
         this.legacyMemberService = legacyMemberService;
@@ -134,7 +134,7 @@ public class LegacyMemberController {
         this.keywordService = keywordService;
         this.legacyNotificationService = legacyNotificationService;
         this.revenuePaymentRepository = revenuePaymentRepository;
-        this.videoScrapService = videoScrapService;
+        this.legacyVideoScrapService = legacyVideoScrapService;
         this.commentService = commentService;
         this.memberTermService = memberTermService;
     }
@@ -578,7 +578,7 @@ public class LegacyMemberController {
 
         log.debug("count: {}, cursor: {}", count, cursor);
         Long memberId = legacyMemberService.currentMemberId();
-        List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
+        List<VideoScrap> list = legacyVideoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
         List<VideoController.VideoScrapInfo> scraps = new ArrayList<>();
         list.stream().forEach(scrap -> scraps.add(
                 new VideoController.VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()))));
