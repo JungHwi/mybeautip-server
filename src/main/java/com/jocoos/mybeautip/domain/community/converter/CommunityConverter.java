@@ -56,7 +56,9 @@ public interface CommunityConverter {
     VoteResponse convert(CommunityVote vote);
 
     @Mappings({
-            @Mapping(target = "relationInfo", ignore = true)
+            @Mapping(target = "relationInfo", ignore = true),
+            @Mapping(target = "fileUrl", ignore = true),
+            @Mapping(target = "votes", ignore = true)
     })
     CommunityResponse convert(Community community);
 
