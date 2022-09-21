@@ -7,7 +7,7 @@ phases:
   pre_build:
     commands:
       - echo start gradle build
-      - ./gradlew build -Pprofiles=dev
+      - ./gradlew build
       - echo end of gradle build
       - aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 776875668468.dkr.ecr.ap-northeast-2.amazonaws.com
       - REPOSITORY_URI=776875668468.dkr.ecr.ap-northeast-2.amazonaws.com/mybeautip-api
