@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.point.service;
 
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
+import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;
 import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointFactory;
 import com.jocoos.mybeautip.domain.point.service.activity.ActivityPointValidator;
 import com.jocoos.mybeautip.domain.point.service.activity.MultiTypeActivityPointValidator;
@@ -15,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.CANCEL_VIDEO_LIKE;
+import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.CANCEL_VIDEO_SCRAP;
+import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_RETRIEVE_POINT;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,8 @@ public class ActivityPointService {
 
     private final MemberPointService memberPointService;
     private final ActivityPointFactory activityPointFactory;
+
+    private final MemberPointDao memberPointDao;
 
     @Transactional
     public void gainActivityPoint(ActivityPointType type, ValidObject validObject) {
@@ -40,9 +47,18 @@ public class ActivityPointService {
 
     @Transactional
     public void retrieveActivityPoint(ActivityPointType type, Long domainId, Member member) {
-        if (member.getPoint() > 0) {
-            memberPointService.retrievePoints(type, domainId, member);
+        if (isOneTimeRetrieveType(type) && isRetrievedBefore(type, domainId, member)) {
+            return;
         }
+        memberPointService.retrievePoints(type, domainId, member);
+    }
+
+    private boolean isRetrievedBefore(ActivityPointType type, Long domainId, Member member) {
+        return memberPointDao.isExistByTypeAndDomainIdAndMemberAndState(type, domainId, member, STATE_RETRIEVE_POINT);
+    }
+
+    private boolean isOneTimeRetrieveType(ActivityPointType type) {
+        return CANCEL_VIDEO_LIKE.equals(type) || CANCEL_VIDEO_SCRAP.equals(type);
     }
 
     @Transactional
