@@ -23,14 +23,14 @@ spring:
   datasource:
     master:
       hikari:
-        username: devmybeautip
-        password: GMqaBC4WM3TxL1JRj7mM
-        jdbc-url: jdbc:mysql://127.0.0.1:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+        username: mybeautip
+        password: akdlqbxlq#1@Jocoos
+        jdbc-url: jdbc:mysql://localhost:3306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
     slave:
       hikari:
-        username: devmybeautip
-        password: GMqaBC4WM3TxL1JRj7mM
-        jdbc-url: jdbc:mysql://127.0.0.1:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+        username: mybeautip
+        password: akdlqbxlq#1@Jocoos
+        jdbc-url: jdbc:mysql://localhost:3306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
   jackson:
     serialization:
       write-dates-as-timestamps: true
