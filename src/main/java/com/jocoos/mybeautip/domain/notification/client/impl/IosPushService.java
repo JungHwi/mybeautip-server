@@ -64,6 +64,7 @@ public class IosPushService implements MobilePushService {
         notification.put(KEY_TITLE, message.getTitle());
         notification.put(KEY_BODY, message.getMessage());
         notification.put(KEY_IMAGE, message.getImageUrl());
+        notification.put(KEY_SOUND, "default");
         notification.put(KEY_NOTIFICATION_ID, message.getNotificationId().toString());
         notification.put(KEY_NOTIFICATION_LINK, NotificationConvertUtil.convertToStringAsLink(message.getNotificationLink()));
 
