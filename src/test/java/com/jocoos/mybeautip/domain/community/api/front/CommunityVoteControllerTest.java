@@ -35,19 +35,22 @@ class CommunityVoteControllerTest extends RestDocsTestSupport {
         VoteResponse voteResponse = VoteResponse.builder()
                 .id(1L)
                 .count(1)
-                .fileUrl("test.com").build();
+                .fileUrl("test.com")
+                .isVoted(true)
+                .build();
 
         VoteResponse voteResponse1 = VoteResponse.builder()
                 .id(2L)
                 .count(0)
                 .fileUrl("test2.com")
+                .isVoted(false)
                 .build();
 
         List<VoteResponse> voteResponses = new ArrayList<>();
         voteResponses.add(voteResponse);
         voteResponses.add(voteResponse1);
 
-        CommunityVoteMemberResponse response = new CommunityVoteMemberResponse(voteResponses, 1L);
+        CommunityVoteMemberResponse response = new CommunityVoteMemberResponse(voteResponses);
 
         given(communityVoteService.vote(any(), any(), any())).willReturn(response);
 
@@ -67,7 +70,7 @@ class CommunityVoteControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                                 fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
                                 fieldWithPath("votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
-                                fieldWithPath("user_voted").type(JsonFieldType.NUMBER).description("유저가 투표한 파일")
+                                fieldWithPath("votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("유저 투표 여부")
                         )
                 )
         );
