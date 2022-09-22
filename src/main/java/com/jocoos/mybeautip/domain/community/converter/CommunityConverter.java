@@ -14,6 +14,7 @@ import org.mapstruct.*;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,6 +69,7 @@ public interface CommunityConverter {
             response.fileUrl(fileUrlsFrom(community.getCommunityFileList()));
         } else {
             response.votes(voteResponsesFrom(community.getCommunityVoteList()));
+            response.fileUrl(Collections.emptyList());
         }
     }
 
