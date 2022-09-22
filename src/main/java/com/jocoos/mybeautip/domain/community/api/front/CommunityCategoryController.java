@@ -1,13 +1,11 @@
 package com.jocoos.mybeautip.domain.community.api.front;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.service.CommunityCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,9 +17,9 @@ public class CommunityCategoryController {
     private final CommunityCategoryService communityCategoryService;
 
     @GetMapping("/1/community/category")
-    public ResponseEntity<List<CommunityCategoryResponse>> getCommunityCategories() {
+    public ResponseEntity<List<CommunityCategoryResponse>> getCommunityCategories(@RequestParam(value = "type", defaultValue = "GENERAL") CommunityCategoryType type) {
 
-        return ResponseEntity.ok(communityCategoryService.getCommunityCategoryList());
+        return ResponseEntity.ok(communityCategoryService.getLowerCategoryList(type));
     }
 
     @GetMapping("/1/community/category/{categoryId}")

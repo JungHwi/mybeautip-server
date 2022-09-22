@@ -8,9 +8,11 @@ import lombok.Getter;
 @Getter
 public enum CommunityCategoryType implements CodeValue {
 
-    TOTAL("전체"),
+    GENERAL("일반 게시판"),
+    ANONYMOUS("익명 게시판"),
+    GROUP("그룹"),
     NORMAL("일반"),
-    BLIND("블라인드"),
+    BLIND("속닥속닥"),
     DRIP("드립"),
     EVENT("이벤트"),
     VOTE("결정픽");
