@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
@@ -14,7 +15,6 @@ import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 @Getter
 public class CommunityVoteMemberResponse {
     private List<VoteResponse> votes;
-    private Long userVoted;
 
     public static CommunityVoteMemberResponse from(Community updatedCommunity, Long userVoted) {
         List<VoteResponse> votes = updatedCommunity.getCommunityVoteList().stream()
@@ -22,8 +22,9 @@ public class CommunityVoteMemberResponse {
                         .id(vote.getId())
                         .fileUrl(toUrl(vote.getCommunityFile().getFile(), COMMUNITY, vote.getCommunity().getId()))
                         .count(vote.getVoteCount())
+                        .isVoted(Objects.equals(vote.getId(), userVoted))
                         .build())
                 .collect(Collectors.toList());
-        return new CommunityVoteMemberResponse(votes, userVoted);
+        return new CommunityVoteMemberResponse(votes);
     }
 }

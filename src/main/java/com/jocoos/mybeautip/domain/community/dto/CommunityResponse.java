@@ -8,12 +8,12 @@ import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.Member;
-import io.jsonwebtoken.lang.Collections;
 import lombok.*;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
@@ -102,14 +102,27 @@ public class CommunityResponse implements CursorInterface {
             this.member.blind();
         }
 
-        blindVoteCountIfNotVoted(relationInfo);
-
         return this;
     }
 
-    private void blindVoteCountIfNotVoted(CommunityRelationInfo relationInfo) {
-        if (!Collections.isEmpty(this.votes) && relationInfo.getUserVoted() == null) {
-            this.votes.forEach(VoteResponse::setCountNull);
+    public void userVote(Long userVoted) {
+        if (votes != null) {
+            setIsVotedAndCount(userVoted);
         }
+    }
+
+    private void setIsVotedAndCount(Long userVoted) {
+        if (userVoted == null) {
+            for (VoteResponse vote : votes) {
+                vote.setCountZero();
+                vote.userVoted(false);
+            }
+        } else {
+            this.votes.forEach(vote -> vote.userVoted(userVoted.equals(vote.getId())));
+        }
+    }
+
+    public boolean isCategoryType(CommunityCategoryType type) {
+        return Objects.equals(this.category.getType(), type);
     }
 }

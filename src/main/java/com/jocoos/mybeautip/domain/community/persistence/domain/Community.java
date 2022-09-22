@@ -98,10 +98,17 @@ public class Community extends BaseEntity {
     public void addFile(String fileName) {
         CommunityFile communityFile = new CommunityFile(getFilename(fileName));
         communityFile.setCommunity(this);
+        if (this.category.isCategoryType(VOTE)) {
+            CommunityVote communityVote = new CommunityVote(this, communityFile);
+            this.communityVoteList.add(communityVote);
+        }
         this.getCommunityFileList().add(communityFile);
     }
 
     public void removeFile(String fileName) {
+        if (this.category.isCategoryType(VOTE)) {
+            this.communityVoteList.removeIf(vote -> vote.getCommunityFile().getFile().equals(getFilename(fileName)));
+        }
         this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFilename(fileName)));
     }
 
@@ -117,7 +124,7 @@ public class Community extends BaseEntity {
                 break;
             case VOTE:
                 validCommunity();
-                validVote();
+                validVote(this.communityVoteList.size());
                 break;
             default:
                 validCommunity();
@@ -151,8 +158,7 @@ public class Community extends BaseEntity {
         }
     }
 
-    private void validVote() {
-        int voteNum = this.getCommunityVoteList().size();
+    private void validVote(int voteNum) {
         if (voteNum != 0 && voteNum != 2) {
             throw new BadRequestException(NOT_SUPPORTED_VOTE_NUM.getDescription());
         }
@@ -166,10 +172,11 @@ public class Community extends BaseEntity {
         return !CollectionUtils.isEmpty(this.communityFileList);
     }
 
-    public boolean isVoteAndIncludeFile() {
+    public boolean isVoteAndIncludeFile(int fileNum) {
         if (!this.category.isCategoryType(VOTE)) {
             return false;
         }
+        validVote(fileNum);
         return !Collections.isEmpty(this.communityVoteList) || !Collections.isEmpty(this.communityFileList);
     }
 

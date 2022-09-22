@@ -30,4 +30,12 @@ public class CommunityVoteMemberDao {
     public boolean isExist(Community community, Member member) {
         return repository.existsByCommunityAndMember(community, member);
     }
+
+    @Transactional(readOnly = true)
+    public Long getUserVotedId(Long communityId, Member member) {
+        return repository
+                .findByCommunityIdAndMember(communityId, member)
+                .map(CommunityVoteMember::getCommunityVoteId)
+                .orElse(null);
+    }
 }

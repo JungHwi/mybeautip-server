@@ -14,12 +14,9 @@ public class CommunityRelationInfo {
     private Boolean isReport;
     private Boolean isBlock;
 
-    private Long userVoted;
-
     public CommunityRelationInfo() {
         this.isLike = false;
         this.isReport = false;
         this.isBlock = false;
-        this.userVoted = null;
     }
 }
