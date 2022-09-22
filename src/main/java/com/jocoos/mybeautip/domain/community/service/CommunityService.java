@@ -7,10 +7,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
-import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
-import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
-import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
-import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
+import com.jocoos.mybeautip.domain.community.service.dao.*;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
@@ -33,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
@@ -53,6 +51,8 @@ public class CommunityService {
     private final CommunityDao communityDao;
     private final CommunityLikeDao likeDao;
     private final CommunityReportDao reportDao;
+
+    private final CommunityVoteMemberDao communityVoteMemberDao;
 
     private final CommunityConverter converter;
     private final AwsS3Handler awsS3Handler;
@@ -87,6 +87,7 @@ public class CommunityService {
 
     private CommunityResponse getCommunity(Member member, Community community) {
         CommunityResponse response = converter.convert(community);
+        setUserVoted(member, response);
         return relationService.setRelationInfo(member, response);
     }
 
@@ -113,6 +114,7 @@ public class CommunityService {
 
     private List<CommunityResponse> getCommunity(Member member, List<Community> communities) {
         List<CommunityResponse> responses = converter.convert(communities);
+        setUserVoted(member, responses);
         return relationService.setRelationInfo(member, responses);
     }
 
@@ -201,7 +203,7 @@ public class CommunityService {
 
     @Transactional
     public void editFiles(Community community, List<FileDto> fileDtoList) {
-        if (CollectionUtils.isEmpty(fileDtoList) || community.isVoteAndIncludeFile()) {
+        if (CollectionUtils.isEmpty(fileDtoList) || community.isVoteAndIncludeFile(fileDtoList.size())) {
             return;
         }
 
@@ -217,6 +219,21 @@ public class CommunityService {
         }
 
         awsS3Handler.editFiles(fileDtoList, UrlDirectory.COMMUNITY.getDirectory(community.getId()));
+    }
+
+
+
+    private void setUserVoted(Member member, List<CommunityResponse> responses) {
+        for (CommunityResponse response : responses) {
+            setUserVoted(member, response);
+        }
+    }
+
+    private void setUserVoted(Member member, CommunityResponse response) {
+        if (response.isCategoryType(VOTE)) {
+            Long userVotedId = communityVoteMemberDao.getUserVotedId(response.getId(), member);
+            response.userVote(userVotedId);
+        }
     }
 
     private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
