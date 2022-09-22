@@ -119,6 +119,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void writeComment() throws Exception {
         WriteCommunityCommentRequest request = WriteCommunityCommentRequest.builder()
                 .contents("Mock Comment Contents")
@@ -167,6 +168,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void editComment() throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("contents", "Test Contents");
@@ -234,6 +236,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void likeComment() throws Exception {
         BooleanDto bool = new BooleanDto(true);
 
