@@ -14,7 +14,8 @@ public enum CommunityCategoryType implements CodeValue {
     NORMAL("일반"),
     BLIND("속닥속닥"),
     DRIP("드립"),
-    EVENT("이벤트");
+    EVENT("이벤트"),
+    VOTE("결정픽");
 
     private String description;
 

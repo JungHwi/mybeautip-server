@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class CommunityController {
     private final LegacyMemberService legacyMemberService;
 
     @PostMapping(value = "/1/community")
-    public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody WriteCommunityRequest request) {
+    public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody @Valid WriteCommunityRequest request) {
         CommunityResponse response = service.write(request);
 
         return ResponseEntity.ok(response);
@@ -48,18 +49,10 @@ public class CommunityController {
                                                                                   @RequestParam(required = false) ZonedDateTime cursor,
                                                                                   @RequestParam(required = false, defaultValue = "20") int size) {
 
-
-        boolean isFirstSearch = false;
-        if (cursor == null) {
-            cursor = ZonedDateTime.now();
-            isFirstSearch = true;
-        }
-
         SearchCommunityRequest request = SearchCommunityRequest.builder()
                 .categoryId(categoryId)
                 .eventId(eventId)
                 .cursor(cursor)
-                .isFirstSearch(isFirstSearch)
                 .build();
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "sortedAt"));

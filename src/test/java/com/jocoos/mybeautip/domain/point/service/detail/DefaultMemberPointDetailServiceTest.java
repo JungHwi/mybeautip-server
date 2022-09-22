@@ -1,8 +1,6 @@
 package com.jocoos.mybeautip.domain.point.service.detail;
 
 import com.jocoos.mybeautip.domain.point.service.MemberPointDetailService;
-import com.jocoos.mybeautip.domain.point.service.detail.config.MemberPointDetailTestConfig;
-import com.jocoos.mybeautip.global.config.jpa.DataSourceConfiguration;
 import com.jocoos.mybeautip.global.util.TestMemberUtil;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointDetail;
@@ -11,10 +9,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -25,10 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@EnableJpaAuditing
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ImportAutoConfiguration(classes = {DataSourceConfiguration.class, MemberPointDetailTestConfig.class})
-@DataJpaTest
+@SpringBootTest
+@Import(TestMemberUtil.class)
+//@EnableJpaAuditing
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+//@ImportAutoConfiguration(classes = {DataSourceConfiguration.class, MemberPointDetailTestConfig.class})
+//@DataJpaTest
 public abstract class DefaultMemberPointDetailServiceTest {
 
     @Autowired

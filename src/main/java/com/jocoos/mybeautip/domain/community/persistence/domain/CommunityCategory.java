@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Getter
 @Builder
@@ -38,4 +39,8 @@ public class CommunityCategory {
 
     @Column
     private String hint;
+
+    public boolean isCategoryType(CommunityCategoryType type) {
+        return Objects.equals(type, this.type);
+    }
 }

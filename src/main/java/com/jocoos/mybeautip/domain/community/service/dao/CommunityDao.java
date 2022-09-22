@@ -6,13 +6,14 @@ import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository;
-import com.jocoos.mybeautip.domain.member.dao.MemberDao;
+import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -20,17 +21,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityDao {
 
-    private final MemberDao memberDao;
     private final CommunityCategoryDao categoryDao;
     private final CommunityRepository repository;
-
     private final CommunityConverter converter;
+
+    private final EntityManager em;
 
     @Transactional
     public Community write(WriteCommunityRequest request) {
-        Community community = converter.convert(request);
         CommunityCategory category = categoryDao.getCommunityCategory(request.getCategoryId());
-        community.setCategory(category);
+        request.setCategory(category);
+
+        Community community = converter.convert(request);
         community.setMember(request.getMember());
 
         community.valid();
@@ -50,6 +52,13 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
+    public Community getUpdated(Long communityId) {
+        em.flush();
+        em.clear();
+        return get(communityId);
+    }
+
+    @Transactional(readOnly = true)
     public List<Community> get(long memberId, long id, Pageable pageable) {
         return repository.findByMemberIdAndStatusAndIdLessThan(memberId, CommunityStatus.NORMAL, id, pageable).getContent();
     }
@@ -59,9 +68,9 @@ public class CommunityDao {
         return repository.findByCategoryInAndSortedAtLessThan(categoryList, cursor, pageable).getContent();
     }
 
-    @Transactional(readOnly = true)
-    public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, Boolean isWin,  ZonedDateTime cursor, Pageable pageable) {
-        return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable).getContent();
+    @Transactional
+    public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
+        return repository.getCommunities(condition, pageable);
     }
 
     @Transactional()

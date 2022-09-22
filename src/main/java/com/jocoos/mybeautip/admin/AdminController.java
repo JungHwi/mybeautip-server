@@ -48,6 +48,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
+import static com.jocoos.mybeautip.domain.member.code.MemberStatus.ACTIVE;
+
 
 @Slf4j
 @RestController
@@ -147,7 +149,7 @@ public class AdminController {
 
         log.debug("visible: {}, username: {}", visible, username);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Member> members = memberRepository.findByVisibleAndUsernameContaining(visible, username, pageable);
+        Page<Member> members = memberRepository.findByStatusAndUsernameContaining(ACTIVE, username, pageable);
 
         Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
         return new ResponseEntity<>(details, HttpStatus.OK);
@@ -162,7 +164,7 @@ public class AdminController {
 
         log.debug("visible: {}, email: {}", visible, email);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Member> members = memberRepository.findByVisibleAndEmailContaining(visible, email, pageable);
+        Page<Member> members = memberRepository.findByStatusAndEmailContaining(ACTIVE, email, pageable);
         log.info("{}", members);
 
         Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));
@@ -215,9 +217,9 @@ public class AdminController {
 
         Page<Member> members = null;
         if (link > 0) {
-            members = memberRepository.findByLinkAndVisible(link, visible, pageable);
+            members = memberRepository.findByLinkAndStatus(link, ACTIVE, pageable);
         } else {
-            members = memberRepository.findByVisible(visible, pageable);
+            members = memberRepository.findByStatus(ACTIVE, pageable);
         }
 
         Page<MemberDetailInfo> details = members.map(m -> memberToMemberDetails(m));

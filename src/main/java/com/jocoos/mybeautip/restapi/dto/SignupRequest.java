@@ -20,7 +20,7 @@ public class SignupRequest {
     private String avatarUrl;
     private String refreshToken;
 
-    @NotNull
+    @NotNull(message = "Term Must Not Null")
     private Set<TermType> termTypes;
 
     @Override

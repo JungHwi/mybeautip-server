@@ -6,6 +6,8 @@ import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_EARNED_POINT;
+
 @RequiredArgsConstructor
 @Component
 public class PerDomainValidator {
@@ -13,6 +15,6 @@ public class PerDomainValidator {
     private final MemberPointDao memberPointDao;
 
     public boolean valid(ActivityPointType type, Long domainId, Member member) {
-        return !memberPointDao.isExistByTypeAndDomainIdAndMember(type, domainId, member);
+        return !memberPointDao.isExistByTypeAndDomainIdAndMemberAndState(type, domainId, member, STATE_EARNED_POINT);
     }
 }
