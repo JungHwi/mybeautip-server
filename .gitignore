@@ -24,4 +24,3 @@ tools/*.zip
 .gradle/
 
 .DS_Store
-/src/main/resources/static/docs/

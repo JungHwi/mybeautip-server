@@ -21,7 +21,6 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_ADDITIONAL_INFO;
 import static com.jocoos.mybeautip.global.constant.RegexConstants.regexForPhoneNumber;
-import static com.jocoos.mybeautip.global.exception.ErrorCode.ADDRESS_TOO_MANY_ADDRESS;
 
 @Slf4j
 @Service
@@ -49,7 +48,7 @@ public class AddressService {
     }
 
     @Transactional
-    public Address create(AddressController.CreateAddressRequest request, Member member) {
+    public Address create(AddressController.CreateAddressRequest request, Member member, String lang) {
         if (addressRepository.existsByCreatedByAndDeletedAtIsNull(member)) {
             throw new BadRequestException(messageService.getMessage("address.too_many_addresses", lang));
         }
