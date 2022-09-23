@@ -126,9 +126,9 @@ dependencies {
 }
 
 test {
-//  doFirst {
-//    systemProperty 'spring.profiles.active', 'dev'
-//  }
+  doFirst {
+    systemProperty 'spring.profiles.active', 'dev'
+  }
   outputs.dir snippetsDir
   useJUnitPlatform()
 }
