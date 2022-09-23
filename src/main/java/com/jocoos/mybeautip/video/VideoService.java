@@ -81,7 +81,7 @@ public class VideoService {
     private final ViewRecodingRepository viewRecodingRepository;
     private final OrderRepository orderRepository;
     private final VideoDataService videoDataService;
-    private final VideoCategoryRepository videoCategoryRepository;
+    private final VideoCategoryMappingRepository videoCategoryMappingRepository;
     private final VideoScrapRepository videoScrapRepository;
 
     private final ActivityPointService activityPointService;
@@ -290,7 +290,7 @@ public class VideoService {
         videoInfo.setWatchCount(video.getViewCount());
         videoInfo.setRealWatchCount(video.getWatchCount());
         videoInfo.setCategory(
-                video.getCategory().stream().map(c -> c.getCategory()).collect(Collectors.toList())
+                video.getCategory().stream().map(c -> c.getCategoryId()).collect(Collectors.toList())
         );
         return videoInfo;
     }
@@ -418,11 +418,11 @@ public class VideoService {
         return new Date();
     }
 
-    private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {
-        List<VideoCategory> categories = new ArrayList<>();
+    private List<VideoCategoryMapping> createCategory(Long videoId, List<Integer> category) {
+        List<VideoCategoryMapping> categories = new ArrayList<>();
         for (int c : category) {
             if (c > 0) {
-                categories.add(new VideoCategory(videoId, c));
+                categories.add(new VideoCategoryMapping(videoId, c));
             }
         }
 
@@ -569,7 +569,7 @@ public class VideoService {
                 List<Integer> category = Arrays.stream(split).map(s -> Integer.valueOf(s)).collect(Collectors.toList());
 
                 if (target.getCategory() != null) {
-                    videoCategoryRepository.deleteByVideoId(target.getId());
+                    videoCategoryMappingRepository.deleteByVideoId(target.getId());
                 }
 
                 target.setCategory(createCategory(target.getId(), category));
