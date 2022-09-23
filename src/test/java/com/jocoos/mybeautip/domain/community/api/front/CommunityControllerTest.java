@@ -8,7 +8,6 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -29,6 +28,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void writeCommunity() throws Exception {
         WriteCommunityRequest request = WriteCommunityRequest.builder()
                 .categoryId(4L)
@@ -92,8 +92,6 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void uploadFiles() throws Exception {
-        MockMultipartFile image = new MockMultipartFile("image", "image.png", "image/png", "<<png data>>".getBytes());
-
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .multipart("/api/1/community/files")
                         .file("files", "mockup".getBytes()))
@@ -217,6 +215,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void editCommunity() throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("title", "Test Title");
