@@ -7,7 +7,6 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
-import com.jocoos.mybeautip.domain.community.service.dao.CommunityVoteMemberDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
 import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.member.Member;
@@ -30,7 +29,6 @@ public class CommunityRelationService {
     private final CommunityLikeDao likeDao;
     private final CommunityReportDao reportDao;
     private final MemberBlockDao blockDao;
-    private final CommunityVoteMemberDao communityVoteMemberDao;
 
     @Transactional(readOnly = true)
     public CommunityResponse setRelationInfo(Member member, CommunityResponse communityResponse) {

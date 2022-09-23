@@ -78,21 +78,25 @@ public class CommunityResponse implements CursorInterface {
         if (relationInfo.getIsBlock() && this.category.getType() != CommunityCategoryType.BLIND) {
             this.contents = "차단된 사용자의 글이에요.";
             this.fileUrl = new ArrayList<>();
+            this.votes = new ArrayList<>();
         } else if (this.reportCount >= 3) {
             this.contents = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             this.fileUrl = new ArrayList<>();
+            this.votes = new ArrayList<>();
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             }
         } else if (relationInfo.getIsReport()) {
             this.contents = "신고 접수 된 글이에요.";
             this.fileUrl = new ArrayList<>();
+            this.votes = new ArrayList<>();
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "신고 접수 된 글이에요.";
             }
         } else if (this.status == CommunityStatus.DELETE) {
             this.contents = "삭제된 게시물이에요.";
             this.fileUrl = new ArrayList<>();
+            this.votes = new ArrayList<>();
             if (this.category.getType() == CommunityCategoryType.BLIND) {
                 this.title = "삭제된 게시물이에요.";
             }
