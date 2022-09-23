@@ -11,8 +11,8 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "video_categories")
-public class VideoCategory implements Serializable {
+@Table(name = "video_category_mapping")
+public class VideoCategoryMapping implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,10 +22,10 @@ public class VideoCategory implements Serializable {
     private Long videoId;
 
     @Column(nullable = false)
-    private int category;
+    private int categoryId;
 
-    public VideoCategory(Long videoId, int category) {
+    public VideoCategoryMapping(Long videoId, int categoryId) {
         this.videoId = videoId;
-        this.category = category;
+        this.categoryId = categoryId;
     }
 }

@@ -45,7 +45,7 @@ public class Video {
     @Column(nullable = false)
     private String visibility;
     @OneToMany(mappedBy = "videoId", cascade = CascadeType.ALL)
-    private List<VideoCategory> category;
+    private List<VideoCategoryMapping> category;
     @Column
     private String title;
     @Column

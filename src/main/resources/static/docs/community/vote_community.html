@@ -484,19 +484,20 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 171
+Content-Length: 198
 
 {
   "votes" : [ {
     "id" : 1,
     "file_url" : "test.com",
-    "count" : 1
+    "count" : 1,
+    "is_voted" : true
   }, {
     "id" : 2,
     "file_url" : "test2.com",
-    "count" : 0
-  } ],
-  "user_voted" : 1
+    "count" : 0,
+    "is_voted" : false
+  } ]
 }</code></pre>
 </div>
 </div>
@@ -550,11 +551,11 @@ Content-Length: 171
 <td class="tableblock halign-left valign-top"><p class="tableblock">투표 수</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">user_voted</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">votes.[].is_voted</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">유저가 투표한 파일</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">유저 투표 여부</p></td>
 </tr>
 </tbody>
 </table>
@@ -564,7 +565,7 @@ Content-Length: 171
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-09-21 14:26:37 +0900
+Last updated 2022-09-22 11:39:21 +0900
 </div>
 </div>
 </body>

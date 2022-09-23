@@ -56,7 +56,7 @@ public class VideoUpdateService {
       if (StringUtils.isNotEmpty(request.getData())) {
         VideoExtraData extraData = videoDataService.getDataObject(request.getData());
         log.info("{}", extraData);
-        List<VideoCategory> categories = new ArrayList<>();
+        List<VideoCategoryMapping> categories = new ArrayList<>();
         if (!StringUtils.isBlank(extraData.getStartedAt())) {
           String startedAt = String.valueOf(extraData.getStartedAt());
 
@@ -204,7 +204,7 @@ public class VideoUpdateService {
         });
   }
 
-  private List<VideoCategory> parseCategory(Long videoId, String category) {
+  private List<VideoCategoryMapping> parseCategory(Long videoId, String category) {
     if (StringUtils.isBlank(category)) {
       return new ArrayList<>();
     }
@@ -215,11 +215,11 @@ public class VideoUpdateService {
     return createCategory(videoId, collect);
   }
 
-  private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {
-    List<VideoCategory> categories = new ArrayList<>();
+  private List<VideoCategoryMapping> createCategory(Long videoId, List<Integer> category) {
+    List<VideoCategoryMapping> categories = new ArrayList<>();
     for (int c : category) {
       if (c > 0) {
-        categories.add(new VideoCategory(videoId, c));
+        categories.add(new VideoCategoryMapping(videoId, c));
       }
     }
 

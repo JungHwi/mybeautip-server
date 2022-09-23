@@ -17,6 +17,7 @@ import com.jocoos.mybeautip.domain.popup.code.ButtonLinkType;
 import com.jocoos.mybeautip.domain.popup.code.PopupDisplayType;
 import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
 import com.jocoos.mybeautip.domain.term.code.TermType;
+import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.global.code.*;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
 import com.jocoos.mybeautip.member.code.SkinType;
@@ -57,6 +58,9 @@ public class CommonDocController {
         // Community
         Map<String, String> communityCategoryType = getDocs(CommunityCategoryType.values());
         Map<String, String> communityStatus = getDocs(CommunityStatus.values());
+
+        // Video
+        Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
 
         // Notification
         Map<String, String> notificationLinkType = getDocs(NotificationLinkType.values());
@@ -104,6 +108,8 @@ public class CommonDocController {
                 // Community
                         .communityCategoryType(communityCategoryType)
                         .communityStatus(communityStatus)
+                // Video
+                        .videoCategoryType(videoCategoryType)
                 // Notification
                         .notificationLinkType(notificationLinkType)
                         .messageType(messageType)

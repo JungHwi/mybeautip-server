@@ -510,11 +510,39 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 16765
+Content-Length: 16798
 
 {
-  "next_cursor" : "2022-08-30 09:04:52.476 +0900",
+  "next_cursor" : "2022-08-30 09:14:22.526 +0900",
   "content" : [ {
+    "id" : 261,
+    "status" : "NORMAL",
+    "title" : "Mock Title",
+    "contents" : "Mock Contents",
+    "file_url" : [ ],
+    "view_count" : 0,
+    "like_count" : 0,
+    "report_count" : 0,
+    "comment_count" : 0,
+    "created_at" : "2022-09-22 11:36:14 +0900",
+    "relation_info" : {
+      "is_like" : false,
+      "is_report" : false,
+      "is_block" : false
+    },
+    "member" : {
+      "id" : 4,
+      "status" : "ACTIVE",
+      "username" : "바람",
+      "avatar_url" : "https://static-dev.mybeautip.com/avatar/ngcskysyb5wvq3vr"
+    },
+    "category" : {
+      "id" : 4,
+      "type" : "NORMAL",
+      "title" : "결정픽",
+      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
+    }
+  }, {
     "id" : 260,
     "status" : "NORMAL",
     "title" : "Mock Title",
@@ -1045,33 +1073,6 @@ Content-Length: 16765
       "title" : "결정픽",
       "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
     }
-  }, {
-    "id" : 240,
-    "status" : "NORMAL",
-    "contents" : "contents",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 2,
-    "report_count" : 0,
-    "comment_count" : 2,
-    "created_at" : "2022-08-30 09:04:52 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "바람",
-      "avatar_url" : "https://static-dev.mybeautip.com/avatar/ngcskysyb5wvq3vr"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "NORMAL",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
   } ]
 }</code></pre>
 </div>
@@ -1159,6 +1160,41 @@ Content-Length: 16765
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">파일 URL List</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">content.[].votes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">투표 파일 List</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">content.[].votes.[].id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">투표 파일 아이디</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">content.[].votes.[].file_url</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">투표 파일 URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">content.[].votes.[].count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">투표 수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">content.[].votes.[].is_voted</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">투표 파일에 대한 유저 투표 여부</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">content.[].view_count</p></td>

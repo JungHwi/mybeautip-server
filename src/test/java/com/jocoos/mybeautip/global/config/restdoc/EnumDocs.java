@@ -33,6 +33,9 @@ public class EnumDocs {
     Map<String, String> communityStatus;
     Map<String, String> communityCategoryType;
 
+    // Video
+    Map<String, String> videoCategoryType;
+
     // Notification
     Map<String, String> notificationLinkType;
     Map<String, String> messageType;
