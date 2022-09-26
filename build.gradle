@@ -99,7 +99,7 @@ dependencies {
   implementation('com.h2database:h2')
   implementation('com.amazonaws:aws-java-sdk-sts:1.11.375')
   implementation('org.jsoup:jsoup:1.11.2')
-  implementation('redis.clients:jedis:2.9.0')
+  implementation('redis.clients:jedis:4.2.1')
   implementation('io.jsonwebtoken:jjwt:0.9.0')
   asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
   testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
