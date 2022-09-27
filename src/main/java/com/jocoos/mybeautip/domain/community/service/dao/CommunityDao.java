@@ -9,6 +9,8 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRep
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.domain.home.code.SummaryCommunityType;
+import com.jocoos.mybeautip.domain.home.vo.SummaryResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -66,13 +68,13 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Community> get(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable) {
-        return repository.findByCategoryInAndSortedAtLessThan(categoryList, cursor, pageable).getContent();
-    }
-
-    @Transactional
     public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
         return repository.getCommunities(condition, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SummaryResult> summary(SummaryCommunityType type) {
+        return repository.summary(type);
     }
 
     @Transactional()

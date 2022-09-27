@@ -7,6 +7,12 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategor
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
+import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
+import com.jocoos.mybeautip.domain.home.code.SummaryCommunityType;
+import com.jocoos.mybeautip.domain.home.vo.QSummaryResult;
+import com.jocoos.mybeautip.domain.home.vo.SummaryResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
@@ -25,6 +31,10 @@ import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.B
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
+import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
+import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.querydsl.sql.SQLExpressions.count;
@@ -41,9 +51,12 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     @Override
     public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
-        JPAQuery<Community> defaultQuery = createDefaultQuery(condition, pageable);
-        addWhereConditionOptional(condition, defaultQuery);
-        return defaultQuery.fetch();
+        JPAQuery<Community> query = baseSearchQuery(condition.getCategories(),
+                                                              condition.getCursor(),
+                                                              pageable.getPageSize());
+        query.orderBy(sortCommunities(condition.isCategoryDrip()));
+        addWhereConditionOptional(condition, query);
+        return query.fetch();
     }
 
     @Override
@@ -81,17 +94,42 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .fetchOne());
     }
 
-    private JPAQuery<Community> createDefaultQuery(CommunitySearchCondition condition, Pageable pageable) {
+    @Override
+    public List<SummaryResult> summary(SummaryCommunityType condition) {
+        JPAQuery<?> baseQuery = baseSummaryQuery(condition);
+        if (DRIP.equals(condition.getType())) {
+            return summaryWithEventTitle(baseQuery);
+        }
+        return summaryDefault(baseQuery);
+    }
+
+
+
+    private JPAQuery<Community> baseSearchQuery(List<CommunityCategory> categories,
+                                                ZonedDateTime cursor,
+                                                int limitSize) {
         return repository.query(query -> query
                 .select(community)
                 .from(community)
                 .where(
-                        inCategories(condition.getCategories()),
-                        lessThanSortedAt(condition.getCursor())
+                        inCategories(categories),
+                        lessThanSortedAt(cursor)
                 )
-                .orderBy(sortCommunities(condition.isCategoryDrip())))
-                .limit(pageable.getPageSize());
+                .limit(limitSize));
     }
+
+    private JPAQuery<?> baseSummaryQuery(SummaryCommunityType condition) {
+        return repository.query(query -> query
+                .from(community)
+                .where(
+                        community.categoryId.eq(condition.getCategoryId()),
+                        isVote(condition.getType())
+                )
+                .limit(condition.getSize())
+                .orderBy(sortCommunities(false))
+        );
+    }
+
 
     private void addWhereConditionOptional(CommunitySearchCondition condition, JPAQuery<Community> defaultQuery) {
         if (condition.isCategoryDrip()) {
@@ -99,12 +137,26 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         }
     }
 
-    private void addWhereCondition(JPAQuery<Community> defaultQuery, BooleanExpression...expressions) {
+    private void addWhereCondition(JPAQuery<Community> defaultQuery, BooleanExpression... expressions) {
         defaultQuery.where(expressions);
     }
 
-    private OrderSpecifier<?>[] sortCommunities(boolean isDrip) {
-        if (!isDrip) {
+    private List<SummaryResult> summaryDefault(JPAQuery<?> baseQuery) {
+        return baseQuery
+                .select(new QSummaryResult(community))
+                .fetch();
+    }
+
+    private List<SummaryResult> summaryWithEventTitle(JPAQuery<?> baseQuery) {
+        return baseQuery
+                .select(new QSummaryResult(community, event.title))
+                .join(event)
+                .on(community.eventId.eq(event.id))
+                .fetch();
+    }
+
+    private OrderSpecifier<?>[] sortCommunities(boolean isWinFirst) {
+        if (!isWinFirst) {
             return new OrderSpecifier[]{community.sortedAt.desc()};
         }
         return new OrderSpecifier[]{community.isWin.desc().nullsLast(), community.sortedAt.desc()};
@@ -159,5 +211,12 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         } catch (NullPointerException e) {
             return new BooleanBuilder();
         }
+    }
+
+    private BooleanExpression isVote(CommunityCategoryType type) {
+        if (VOTE.equals(type)) {
+            return community.communityVoteList.isNotEmpty();
+        }
+        return null;
     }
 }
