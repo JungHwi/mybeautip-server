@@ -26,7 +26,7 @@ public class SummaryService {
 
     private List<CommunityResponse> getTopSummary(SummaryCommunityType topType) {
         List<SummaryResult> tops = communityDao.summary(topType);
-        return summaryByType(topType, tops);
+        return convertSummaryByType(topType, tops);
     }
 
     private List<CommunityResponse> getBlindSummary() {
@@ -39,7 +39,7 @@ public class SummaryService {
         return summaryConverter.convertVoteSummary(votes);
     }
 
-    private List<CommunityResponse> summaryByType(SummaryCommunityType type, List<SummaryResult> tops) {
+    private List<CommunityResponse> convertSummaryByType(SummaryCommunityType type, List<SummaryResult> tops) {
         if (PICK_SUMMARY.equals(type)) {
             return summaryConverter.convertPickSummary(tops);
         }
