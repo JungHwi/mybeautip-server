@@ -8,10 +8,8 @@ import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
-import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
-import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
-import com.jocoos.mybeautip.domain.home.code.SummaryCommunityType;
-import com.jocoos.mybeautip.domain.home.vo.QSummaryResult;
+
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
 import com.jocoos.mybeautip.domain.home.vo.SummaryResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.querydsl.core.BooleanBuilder;
@@ -33,7 +31,6 @@ import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunit
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
-import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
 import static com.jocoos.mybeautip.member.QMember.member;
@@ -95,9 +92,9 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     @Override
-    public List<SummaryResult> summary(SummaryCommunityType condition) {
+    public List<SummaryResult> summary(SummaryCommunityCondition condition) {
         JPAQuery<?> baseQuery = baseSummaryQuery(condition);
-        if (DRIP.equals(condition.getType())) {
+        if (DRIP.equals(condition.getCategoryType())) {
             return summaryWithEventTitle(baseQuery);
         }
         return summaryDefault(baseQuery);
@@ -118,18 +115,26 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .limit(limitSize));
     }
 
-    private JPAQuery<?> baseSummaryQuery(SummaryCommunityType condition) {
+    private JPAQuery<?> baseSummaryQuery(SummaryCommunityCondition condition) {
         return repository.query(query -> query
                 .from(community)
                 .where(
-                        community.categoryId.eq(condition.getCategoryId()),
-                        isVote(condition.getType())
+                        eqCategoryId(condition.getCategoryId()),
+                        eqCategoryType(condition.getCategoryType()),
+                        isVotesNotEmpty(condition.getCategoryType())
                 )
                 .limit(condition.getSize())
                 .orderBy(sortCommunities(false))
         );
     }
 
+    private BooleanExpression eqCategoryId(Long categoryId) {
+        return categoryId == null ? null : community.categoryId.eq(categoryId);
+    }
+
+    private BooleanExpression eqCategoryType(CommunityCategoryType type) {
+        return type == null ? null : community.category.type.eq(type);
+    }
 
     private void addWhereConditionOptional(CommunitySearchCondition condition, JPAQuery<Community> defaultQuery) {
         if (condition.isCategoryDrip()) {
@@ -213,7 +218,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         }
     }
 
-    private BooleanExpression isVote(CommunityCategoryType type) {
+    private BooleanExpression isVotesNotEmpty(CommunityCategoryType type) {
         if (VOTE.equals(type)) {
             return community.communityVoteList.isNotEmpty();
         }

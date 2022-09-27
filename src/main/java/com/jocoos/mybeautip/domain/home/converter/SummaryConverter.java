@@ -9,7 +9,9 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVo
 import com.jocoos.mybeautip.domain.home.vo.SummaryResult;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import org.apache.commons.collections4.CollectionUtils;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,9 +44,9 @@ public abstract class SummaryConverter {
                 .collect(Collectors.toList());
     }
 
-    public List<CommunityResponse> convertPickSummary(List<SummaryResult> summaryResults) {
+    public List<CommunityResponse> convertDripSummary(List<SummaryResult> summaryResults) {
         return summaryResults.stream()
-                .map(pickResult -> convertPickSummary(pickResult.getCommunity(), pickResult.getEventTitle()))
+                .map(pickResult -> convertDripSummary(pickResult.getCommunity(), pickResult.getEventTitle()))
                 .collect(Collectors.toList());
     }
 
@@ -61,7 +63,7 @@ public abstract class SummaryConverter {
 
     @Mapping(target = "title", source = "eventTitle")
     @Mapping(target = "fileUrl", source = "community.communityFileList", qualifiedByName = "thumbnailToUrl")
-    abstract CommunityResponse convertPickSummary(Community community, String eventTitle);
+    abstract CommunityResponse convertDripSummary(Community community, String eventTitle);
 
 
     @Mapping(target = "fileUrl", source = "communityFile", qualifiedByName = "toUrl")

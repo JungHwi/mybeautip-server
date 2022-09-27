@@ -8,8 +8,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Getter
-public class CommunitySummaryResponse {
-        private final TopSummaryResponse top;
-        private final List<CommunityResponse> vote;
-        private final List<CommunityResponse> blind;
+public class TopSummaryContentResponse {
+    private final Long categoryId;
+    private final List<CommunityResponse> communities;
 }

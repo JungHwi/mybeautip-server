@@ -38,4 +38,9 @@ public class CommunityCategoryDao {
             return Collections.singletonList(category);
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<CommunityCategory> allSummaryCategories() {
+        return repository.findAllByIsInSummaryIsTrue();
+    }
 }
