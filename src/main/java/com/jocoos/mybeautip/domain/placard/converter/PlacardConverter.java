@@ -17,7 +17,8 @@ public interface PlacardConverter {
 
     @Mappings({
             @Mapping(target = "imageUrl", ignore = true),
-            @Mapping(target = "placardLink", ignore = true)
+            @Mapping(target = "placardLink", ignore = true),
+            @Mapping(target = "color", source = "placard.color")
     })
     PlacardResponse convertToResponse(Placard placard, @Context PlacardTabType tabType);
 

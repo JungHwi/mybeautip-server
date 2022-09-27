@@ -38,6 +38,9 @@ public class Placard extends CreatedDateAuditable {
     @Column
     private String description;
 
+    @Column
+    private String color;
+
     @Column(nullable = false, columnDefinition="TIMESTAMP")
     private ZonedDateTime startedAt;
 

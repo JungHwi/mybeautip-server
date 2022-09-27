@@ -10,4 +10,6 @@ public class PlacardResponse {
     private String imageUrl;
 
     private PlacardLink placardLink;
+
+    private String color;
 }
