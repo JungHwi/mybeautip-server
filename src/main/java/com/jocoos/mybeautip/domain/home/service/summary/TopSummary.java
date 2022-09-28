@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
+import static com.jocoos.mybeautip.domain.home.code.SummaryCount.TOP_SUMMARY;
 
 @RequiredArgsConstructor
 @Component
@@ -47,11 +48,11 @@ public class TopSummary {
     }
 
     private TopSummaryContentResponse getTopSummaryContent(Long categoryId, CommunityCategoryType type) {
-        return new TopSummaryContentResponse(categoryId, communityResponsesFrom(categoryId, type));
+        return new TopSummaryContentResponse(categoryId, communitySummaryFrom(categoryId, type));
     }
 
-    private List<CommunityResponse> communityResponsesFrom(Long categoryId, CommunityCategoryType type) {
-        List<SummaryResult> summaryResult = communityDao.summary(categoryId, type, 3);
+    private List<CommunityResponse> communitySummaryFrom(Long categoryId, CommunityCategoryType type) {
+        List<SummaryResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount());
         return convertSummaryByType(type, summaryResult);
     }
 
