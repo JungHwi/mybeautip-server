@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface VideoCategoryRepository extends DefaultJpaRepository<VideoCategory, Long> {
+public interface VideoCategoryRepository extends DefaultJpaRepository<VideoCategory, Integer> {
 
     List<VideoCategory> findAllBy(Pageable pageable);
 
-    List<VideoCategory> findAllByIdIn(List<Long> categoryIds);
+    List<VideoCategory> findAllByIdIn(List<Integer> categoryIds);
 }

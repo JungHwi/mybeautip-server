@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.video.api.front;
 
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
-import com.jocoos.mybeautip.domain.video.service.dao.VideoCategoryService;
+import com.jocoos.mybeautip.domain.video.service.VideoCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

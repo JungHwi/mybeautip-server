@@ -59,7 +59,7 @@ public class LegacyMemberController {
     private static final String MEMBER_NOT_FOUND = "member.not_found";
     private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final PostProcessService postProcessService;
     private final MessageService messageService;
     private final MentionService mentionService;
@@ -97,7 +97,7 @@ public class LegacyMemberController {
 
     public LegacyMemberController(LegacyMemberService legacyMemberService,
                                   GoodsService goodsService,
-                                  VideoService videoService,
+                                  LegacyVideoService legacyVideoService,
                                   MemberRepository memberRepository,
                                   FollowingRepository followingRepository,
 //                                  PostLikeRepository postLikeRepository,
@@ -118,7 +118,7 @@ public class LegacyMemberController {
                                   MemberTermService memberTermService) {
         this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.memberRepository = memberRepository;
         this.followingRepository = followingRepository;
 //        this.postLikeRepository = postLikeRepository;
@@ -327,9 +327,9 @@ public class LegacyMemberController {
                                       @RequestParam(required = false) String cursor,
                                       @RequestParam(required = false) String type,
                                       @RequestParam(required = false) String state) {
-        Slice<Video> list = videoService.findMyVideos(legacyMemberService.currentMember(), type, state, cursor, count);
-        List<VideoController.VideoInfo> videos = new ArrayList<>();
-        list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+        Slice<Video> list = legacyVideoService.findMyVideos(legacyMemberService.currentMember(), type, state, cursor, count);
+        List<LegacyVideoController.VideoInfo> videos = new ArrayList<>();
+        list.stream().forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
 
         String nextCursor = null;
         if (videos.size() > 0) {
@@ -353,9 +353,9 @@ public class LegacyMemberController {
         Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
-        Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
-        List<VideoController.VideoInfo> videos = new ArrayList<>();
-        list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+        Slice<Video> list = legacyVideoService.findMemberVideos(member, type, state, cursor, count);
+        List<LegacyVideoController.VideoInfo> videos = new ArrayList<>();
+        list.stream().forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
 
         String nextCursor = null;
         if (videos.size() > 0) {
@@ -579,9 +579,9 @@ public class LegacyMemberController {
         log.debug("count: {}, cursor: {}", count, cursor);
         Long memberId = legacyMemberService.currentMemberId();
         List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
-        List<VideoController.VideoScrapInfo> scraps = new ArrayList<>();
+        List<LegacyVideoController.VideoScrapInfo> scraps = new ArrayList<>();
         list.stream().forEach(scrap -> scraps.add(
-                new VideoController.VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()))));
+                new LegacyVideoController.VideoScrapInfo(scrap, legacyVideoService.generateVideoInfo(scrap.getVideo()))));
 
         String nextCursor = null;
         if (scraps.size() > 0) {
@@ -699,7 +699,7 @@ public class LegacyMemberController {
     private CursorResponse createVideoLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
         PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
         Slice<VideoLike> videoLikes;
-        List<VideoController.VideoInfo> result = new ArrayList<>();
+        List<LegacyVideoController.VideoInfo> result = new ArrayList<>();
 
         if (cursor != null) {
             videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndVideoDeletedAtIsNullAndStatus(
@@ -709,7 +709,7 @@ public class LegacyMemberController {
         }
 
         for (VideoLike like : videoLikes) {
-            result.add(videoService.generateVideoInfo(like.getVideo()));
+            result.add(legacyVideoService.generateVideoInfo(like.getVideo()));
         }
 
         String nextCursor = null;

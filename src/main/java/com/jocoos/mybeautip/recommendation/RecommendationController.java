@@ -6,11 +6,11 @@ import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.restapi.CursorResponse;
-import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.restapi.LegacyVideoController;
 import com.jocoos.mybeautip.tag.Tag;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,7 +41,7 @@ public class RecommendationController {
     private static final String DEFAULT_HASHTAG_IMG_URL = "https://static.mybeautip.com/common/app/img_hashtag_default.png";
     private final GoodsService goodsService;
     private final LegacyMemberService legacyMemberService;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final VideoRepository videoRepository;
     private final MemberRecommendationRepository memberRecommendationRepository;
     private final GoodsRecommendationRepository goodsRecommendationRepository;
@@ -53,7 +53,7 @@ public class RecommendationController {
 
     public RecommendationController(GoodsService goodsService,
                                     LegacyMemberService legacyMemberService,
-                                    VideoService videoService,
+                                    LegacyVideoService legacyVideoService,
                                     VideoRepository videoRepository,
                                     MemberRecommendationRepository memberRecommendationRepository,
                                     GoodsRecommendationRepository goodsRecommendationRepository,
@@ -62,7 +62,7 @@ public class RecommendationController {
                                     KeywordRecommendationRepository keywordRecommendationRepository) {
         this.goodsService = goodsService;
         this.legacyMemberService = legacyMemberService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.videoRepository = videoRepository;
         this.memberRecommendationRepository = memberRecommendationRepository;
         this.goodsRecommendationRepository = goodsRecommendationRepository;
@@ -82,11 +82,11 @@ public class RecommendationController {
         members.forEach(r -> {
             MemberInfo memberInfo = legacyMemberService.getMemberInfo(r.getMember());
             if (memberInfo.getVideoCount() > 0) {
-                List<VideoController.VideoInfo> videoList = new ArrayList<>();
+                List<LegacyVideoController.VideoInfo> videoList = new ArrayList<>();
                 Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
                 if (slice.hasContent()) {
                     for (Video video : slice) {
-                        videoList.add(videoService.generateVideoInfo(video));
+                        videoList.add(legacyVideoService.generateVideoInfo(video));
                     }
                     memberInfo.setVideos(videoList);
                 }
@@ -103,11 +103,11 @@ public class RecommendationController {
             members.forEach(r -> {
                 MemberInfo memberInfo = legacyMemberService.getMemberInfo(r.getMember());
                 if (memberInfo.getVideoCount() > 0) {
-                    List<VideoController.VideoInfo> videoList = new ArrayList<>();
+                    List<LegacyVideoController.VideoInfo> videoList = new ArrayList<>();
                     Slice<Video> slice = videoRepository.getUserAllVideos(r.getMember(), new Date(), PageRequest.of(0, 3));
                     if (slice.hasContent()) {
                         for (Video video : slice) {
-                            videoList.add(videoService.generateVideoInfo(video));
+                            videoList.add(legacyVideoService.generateVideoInfo(video));
                         }
                         memberInfo.setVideos(videoList);
                     }
@@ -134,18 +134,18 @@ public class RecommendationController {
     }
 
     @GetMapping("/live")
-    public ResponseEntity<List<VideoController.VideoInfo>> getRecommendedLiveVideos() {
+    public ResponseEntity<List<LegacyVideoController.VideoInfo>> getRecommendedLiveVideos() {
         // response up to 10 live videos regardless of member
-        Slice<Video> list = videoService.findVideos("BROADCASTED", "LIVE", null, 10);
-        List<VideoController.VideoInfo> result = new ArrayList<>();
-        list.stream().forEach(v -> result.add(videoService.generateVideoInfo(v)));
+        Slice<Video> list = legacyVideoService.findVideos("BROADCASTED", "LIVE", null, 10);
+        List<LegacyVideoController.VideoInfo> result = new ArrayList<>();
+        list.stream().forEach(v -> result.add(legacyVideoService.generateVideoInfo(v)));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     private List<RecommendedMotdInfo> createMotdList(Iterable<MotdRecommendation> recommendations) {
         List<RecommendedMotdInfo> info = new ArrayList<>();
         for (MotdRecommendation recommendation : recommendations) {
-            info.add(new RecommendedMotdInfo(recommendation, videoService.generateVideoInfo(recommendation.getVideo())));
+            info.add(new RecommendedMotdInfo(recommendation, legacyVideoService.generateVideoInfo(recommendation.getVideo())));
         }
         return info;
     }
@@ -354,11 +354,11 @@ public class RecommendationController {
     public static class RecommendedMotdInfo {
         private Integer seq;
         private Date createdAt;
-        private VideoController.VideoInfo content;
+        private LegacyVideoController.VideoInfo content;
         private Date startedAt;
         private Date endedAt;
 
-        public RecommendedMotdInfo(MotdRecommendation recommendation, VideoController.VideoInfo content) {
+        public RecommendedMotdInfo(MotdRecommendation recommendation, LegacyVideoController.VideoInfo content) {
             BeanUtils.copyProperties(recommendation, this);
             this.content = content;
         }

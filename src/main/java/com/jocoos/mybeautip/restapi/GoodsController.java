@@ -10,9 +10,9 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.search.KeywordService;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.VideoService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ public class GoodsController {
             = Arrays.asList("like", "order", "hit", "review", "high-price", "low-price", "latest");
     private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final GoodsOptionService goodsOptionService;
     private final MessageService messageService;
     private final GoodsRepository goodsRepository;
@@ -58,7 +58,7 @@ public class GoodsController {
 
     public GoodsController(LegacyMemberService legacyMemberService,
                            GoodsService goodsService,
-                           VideoService videoService,
+                           LegacyVideoService legacyVideoService,
                            GoodsOptionService goodsOptionService,
                            MessageService messageService,
                            GoodsRepository goodsRepository,
@@ -68,7 +68,7 @@ public class GoodsController {
                            KeywordService keywordService) {
         this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.goodsOptionService = goodsOptionService;
         this.messageService = messageService;
         this.goodsRepository = goodsRepository;
@@ -311,10 +311,10 @@ public class GoodsController {
         PageRequest pageable = of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
         Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(
                 startCursor, goodsNo, "PUBLIC", "CREATED", pageable);
-        List<VideoController.VideoInfo> result = new ArrayList<>();
+        List<LegacyVideoController.VideoInfo> result = new ArrayList<>();
 
         for (VideoGoods videoGoods : slice.getContent()) {
-            result.add(videoService.generateVideoInfo(videoGoods.getVideo()));
+            result.add(legacyVideoService.generateVideoInfo(videoGoods.getVideo()));
         }
 
         String nextCursor = null;

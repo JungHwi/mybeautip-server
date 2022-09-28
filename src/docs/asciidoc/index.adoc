@@ -16,6 +16,7 @@ include::overview.adoc[]
 
 === Video
 * link:video/get_video_categories.html[비디오 카테고리 목록 조회 API, window=_blank]
+* link:video/get_videos.html[비디오 목록 조회 API, window=_blank]
 
 === Community
 * link:community/get_community_categories.html[커뮤니티 카테고리 목록 조회 API, window=_blank]

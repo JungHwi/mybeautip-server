@@ -18,10 +18,10 @@ public class VideoCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, updatable = false)
-    public Long id;
+    public Integer id;
 
     @Column
-    public Long parentId;
+    public Integer parentId;
 
     @Enumerated(EnumType.STRING)
     private VideoCategoryType type;

@@ -3,8 +3,8 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,14 +22,14 @@ public class FeedController {
 
     private final FeedService feedService;
     private final LegacyMemberService legacyMemberService;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
 
     public FeedController(FeedService feedService,
                           LegacyMemberService legacyMemberService,
-                          VideoService videoService) {
+                          LegacyVideoService legacyVideoService) {
         this.feedService = feedService;
         this.legacyMemberService = legacyMemberService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
     }
 
     @GetMapping
@@ -46,13 +46,13 @@ public class FeedController {
 
         List<Video> videos = feedService.getVideoKeys(me.getId(), cursor, count);
 
-        List<VideoController.VideoInfo> result = new ArrayList<>();
+        List<LegacyVideoController.VideoInfo> result = new ArrayList<>();
         videos
                 .forEach(v -> {
                     if (StringUtils.isBlank(v.getVideoKey())) {
                         log.info("feed has invalid videoKey, member_id: " + me.getId());
                     } else {
-                        result.add(videoService.generateVideoInfo(v));
+                        result.add(legacyVideoService.generateVideoInfo(v));
                     }
                 });
 
