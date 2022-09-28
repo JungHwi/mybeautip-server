@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
+
 @Service
 @RequiredArgsConstructor
 public class EventService {
@@ -28,9 +30,16 @@ public class EventService {
     private final EventDao dao;
 
     @Transactional(readOnly = true)
-    public List<EventListResponse> getEventList(EventType eventType) {
-        List<Event> events = dao.getVisibleEvents(eventType);
+    public List<EventListResponse> getEventList(EventType eventType, EventStatus status) {
+        List<Event> events = getEvents(eventType, status);
         return eventConverter.convertToListResponse(events);
+    }
+
+    private List<Event> getEvents(EventType eventType, EventStatus status) {
+        if (PROGRESS.equals(status)) {
+            return dao.getProgressEvents(eventType);
+        }
+        return dao.getVisibleEvents(eventType);
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +52,7 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public List<Event> getProgressEventByType(EventType type) {
-        return eventRepository.findByTypeAndStatus(type, EventStatus.PROGRESS);
+        return eventRepository.findByTypeAndStatus(type, PROGRESS);
     }
 
     @Transactional(readOnly = true)
