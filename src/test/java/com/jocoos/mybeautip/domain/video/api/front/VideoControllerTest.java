@@ -69,6 +69,7 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].related_goods_thumbnail_url").type(JsonFieldType.STRING).description("상품 대표 URL").optional(),
                                 fieldWithPath("content.[].like_id").type(JsonFieldType.NUMBER).description("좋아요 아이디").optional(),
                                 fieldWithPath("content.[].scrap_id").type(JsonFieldType.NUMBER).description("스크랩 아이디").optional(),
+                                fieldWithPath("content.[].blocked").type(JsonFieldType.BOOLEAN).description("차단 여부").optional(),
                                 fieldWithPath("content.[].owner").type(JsonFieldType.OBJECT).description("비디오 작성자 정보"),
                                 fieldWithPath("content.[].owner.id").type(JsonFieldType.NUMBER).description("아이디"),
                                 fieldWithPath("content.[].owner.tag").type(JsonFieldType.STRING).description("태그"),
@@ -82,13 +83,12 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].owner.video_count").type(JsonFieldType.NUMBER).description("비디오 수"),
                                 fieldWithPath("content.[].owner.created_at").type(JsonFieldType.NUMBER).description("회원가입일"),
                                 fieldWithPath("content.[].owner.modified_at").type(JsonFieldType.NUMBER).description("정보수정일"),
-                                fieldWithPath("content.[].owner.permission").type(JsonFieldType.OBJECT).description("권한"),
-                                fieldWithPath("content.[].owner.permission.chat_post").type(JsonFieldType.BOOLEAN).description("post 권한"),
-                                fieldWithPath("content.[].owner.permission.comment_post").type(JsonFieldType.BOOLEAN).description("댓글 권한"),
-                                fieldWithPath("content.[].owner.permission.live_post").type(JsonFieldType.BOOLEAN).description("라이브 권한"),
-                                fieldWithPath("content.[].owner.permission.motd_post").type(JsonFieldType.BOOLEAN).description("motd 권한"),
-                                fieldWithPath("content.[].owner.permission.revenue_return").type(JsonFieldType.BOOLEAN).description("수익배분 권한"),
-                                fieldWithPath("content.[].blocked").type(JsonFieldType.BOOLEAN).description("차단 여부"),
+                                fieldWithPath("content.[].owner.permission").type(JsonFieldType.OBJECT).description("권한").optional(),
+                                fieldWithPath("content.[].owner.permission.chat_post").type(JsonFieldType.BOOLEAN).description("post 권한").optional(),
+                                fieldWithPath("content.[].owner.permission.comment_post").type(JsonFieldType.BOOLEAN).description("댓글 권한").optional(),
+                                fieldWithPath("content.[].owner.permission.live_post").type(JsonFieldType.BOOLEAN).description("라이브 권한").optional(),
+                                fieldWithPath("content.[].owner.permission.motd_post").type(JsonFieldType.BOOLEAN).description("motd 권한").optional(),
+                                fieldWithPath("content.[].owner.permission.revenue_return").type(JsonFieldType.BOOLEAN).description("수익배분 권한").optional(),
                                 fieldWithPath("content.[].created_at").type(JsonFieldType.NUMBER).description("생성일시")
                         )
                 )
@@ -143,6 +143,7 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("related_goods_thumbnail_url").type(JsonFieldType.STRING).description("상품 대표 URL").optional(),
                                 fieldWithPath("like_id").type(JsonFieldType.NUMBER).description("좋아요 아이디").optional(),
                                 fieldWithPath("scrap_id").type(JsonFieldType.NUMBER).description("스크랩 아이디").optional(),
+                                fieldWithPath("blocked").type(JsonFieldType.BOOLEAN).description("차단 여부").optional(),
                                 fieldWithPath("owner").type(JsonFieldType.OBJECT).description("비디오 작성자 정보"),
                                 fieldWithPath("owner.id").type(JsonFieldType.NUMBER).description("아이디"),
                                 fieldWithPath("owner.tag").type(JsonFieldType.STRING).description("태그"),
@@ -162,7 +163,6 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("owner.permission.live_post").type(JsonFieldType.BOOLEAN).description("라이브 권한"),
                                 fieldWithPath("owner.permission.motd_post").type(JsonFieldType.BOOLEAN).description("motd 권한"),
                                 fieldWithPath("owner.permission.revenue_return").type(JsonFieldType.BOOLEAN).description("수익배분 권한"),
-                                fieldWithPath("blocked").type(JsonFieldType.BOOLEAN).description("차단 여부"),
                                 fieldWithPath("created_at").type(JsonFieldType.NUMBER).description("생성일시")
                         )
                 )
