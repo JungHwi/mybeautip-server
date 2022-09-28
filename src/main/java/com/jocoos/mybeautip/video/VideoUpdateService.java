@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VideoUpdateService {
 
-  private final VideoService videoService;
+  private final LegacyVideoService legacyVideoService;
   private final VideoDataService videoDataService;
   private final VideoWatchService videoWatchService;
 
@@ -157,20 +157,20 @@ public class VideoUpdateService {
     log.debug("{}", video);
     String oldState = video.getState();
 
-    video = videoService.updateVideoProperties(request, video, extraData);
-    video = videoService.update(video);
+    video = legacyVideoService.updateVideoProperties(request, video, extraData);
+    video = legacyVideoService.update(video);
 
     if (extraData != null && !StringUtils.isBlank(extraData.getGoods())) {
       log.info("goods {}, request goods: {}", video.getData(), extraData.getGoods());
-      videoService.updateVideoGoods(video, extraData.getGoods());
+      legacyVideoService.updateVideoGoods(video, extraData.getGoods());
     } else {
-      videoService.clearVideoGoods(video);
+      legacyVideoService.clearVideoGoods(video);
     }
 
     if ("BROADCASTED".equals(video.getType())) {
       // Send on-live stats using slack when LIVE ended
       if ("LIVE".equals(oldState) && "VOD".equals(request.getState())) {
-        videoService.sendStats(video);
+        legacyVideoService.sendStats(video);
       }
 
       // Send collect watch counts on LIVE

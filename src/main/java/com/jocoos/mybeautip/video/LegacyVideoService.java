@@ -20,7 +20,7 @@ import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
 import com.jocoos.mybeautip.recoding.ViewRecodingRepository;
 import com.jocoos.mybeautip.restapi.CallbackController;
-import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.restapi.LegacyVideoController;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.tag.TagService;
@@ -60,7 +60,7 @@ import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class VideoService {
+public class LegacyVideoService {
 
     private static final String VIDEO_NOT_FOUND = "video.not_found";
     private final LegacyMemberService legacyMemberService;
@@ -262,7 +262,7 @@ public class VideoService {
         return comments;
     }
 
-    public VideoController.VideoInfo generateVideoInfo(Video video) {
+    public LegacyVideoController.VideoInfo generateVideoInfo(Video video) {
         Long likeId = null;
         Long scrapId = null;
         boolean blocked = false;
@@ -283,7 +283,7 @@ public class VideoService {
             video.setWatchCount(videoWatchRepository.countByVideoIdAndModifiedAtAfter(video.getId(), new Date(duration)));
         }
 
-        VideoController.VideoInfo videoInfo = new VideoController.VideoInfo(video, legacyMemberService.getMemberInfo(video.getMember()), likeId, blocked);
+        LegacyVideoController.VideoInfo videoInfo = new LegacyVideoController.VideoInfo(video, legacyMemberService.getMemberInfo(video.getMember()), likeId, blocked);
         if (scrapId != null) {
             videoInfo.setScrapId(scrapId);
         }
@@ -364,7 +364,7 @@ public class VideoService {
     }
 
     @Transactional
-    public Video create(VideoController.CreateVideoRequest request) {
+    public Video create(LegacyVideoController.CreateVideoRequest request) {
         Video video = new Video(legacyMemberService.currentMember());
         BeanUtils.copyProperties(request, video);
 

@@ -7,10 +7,10 @@ import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
 import com.jocoos.mybeautip.recoding.ViewRecodingRepository;
-import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.restapi.LegacyVideoController;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,16 +35,16 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/admin/manual/videos")
 public class AdminVideoController {
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final LegacyMemberService legacyMemberService;
     private final VideoRepository videoRepository;
     private final ViewRecodingRepository viewRecodingRepository;
 
-    public AdminVideoController(VideoService videoService,
+    public AdminVideoController(LegacyVideoService legacyVideoService,
                                 LegacyMemberService legacyMemberService,
                                 VideoRepository videoRepository,
                                 ViewRecodingRepository viewRecodingRepository) {
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.legacyMemberService = legacyMemberService;
         this.videoRepository = videoRepository;
         this.viewRecodingRepository = viewRecodingRepository;
@@ -52,33 +52,33 @@ public class AdminVideoController {
 
 
     @PatchMapping("/{id:.+}")
-    public ResponseEntity<VideoController.VideoInfo> updateVideo(@PathVariable Long id,
-                                                                 @RequestBody UpdateVideoRequest request) {
+    public ResponseEntity<LegacyVideoController.VideoInfo> updateVideo(@PathVariable Long id,
+                                                                       @RequestBody UpdateVideoRequest request) {
         log.debug("request: {}", request);
 
         if (request.getRestore() != null && request.getRestore()) {
             Video video = videoRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found: " + id));
-            videoService.restore(video);
-            return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+            legacyVideoService.restore(video);
+            return new ResponseEntity<>(legacyVideoService.generateVideoInfo(video), HttpStatus.OK);
         }
 
-        VideoController.VideoInfo videoInfo = videoRepository.findByIdAndDeletedAtIsNull(id)
+        LegacyVideoController.VideoInfo videoInfo = videoRepository.findByIdAndDeletedAtIsNull(id)
                 .map(video -> {
                     if (request.getLocked() != null) {
                         if (request.getLocked()) {
                             if (video.getLocked()) {
                                 throw new BadRequestException(ErrorCode.ALREADY_LOCKED, "Video already locked");
                             }
-                            video = videoService.lockVideo(video);
+                            video = legacyVideoService.lockVideo(video);
                         } else {
                             if (!video.getLocked()) {
                                 throw new BadRequestException(ErrorCode.ALREADY_UNLOCKED, "Video does not lock.");
                             }
-                            video = videoService.unLockVideo(video);
+                            video = legacyVideoService.unLockVideo(video);
                         }
                     }
-                    return videoService.generateVideoInfo(video);
+                    return legacyVideoService.generateVideoInfo(video);
                 })
                 .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found: " + id));
 
@@ -86,11 +86,11 @@ public class AdminVideoController {
     }
 
     @DeleteMapping("/{id:.+}")
-    public ResponseEntity<VideoController.VideoInfo> removeVideo(@PathVariable Long id) {
-        VideoController.VideoInfo videoInfo = videoRepository.findByIdAndDeletedAtIsNull(id)
+    public ResponseEntity<LegacyVideoController.VideoInfo> removeVideo(@PathVariable Long id) {
+        LegacyVideoController.VideoInfo videoInfo = videoRepository.findByIdAndDeletedAtIsNull(id)
                 .map(video -> {
-                    video = videoService.remove(video);
-                    return videoService.generateVideoInfo(video);
+                    video = legacyVideoService.remove(video);
+                    return legacyVideoService.generateVideoInfo(video);
                 })
                 .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found: " + id));
 
@@ -125,8 +125,8 @@ public class AdminVideoController {
                     pageRequest
             );
 
-            List<VideoController.VideoInfo> videos =
-                    betweens.stream().map(v -> videoService.generateVideoInfo(v)).collect(Collectors.toList());
+            List<LegacyVideoController.VideoInfo> videos =
+                    betweens.stream().map(v -> legacyVideoService.generateVideoInfo(v)).collect(Collectors.toList());
 
             recentVideos.add(new RecentVideoInfo(startDate, videos));
         }
@@ -176,9 +176,9 @@ public class AdminVideoController {
     private static class RecentVideoInfo {
         private Date date;
         private int videoCount;
-        private List<VideoController.VideoInfo> videos;
+        private List<LegacyVideoController.VideoInfo> videos;
 
-        public RecentVideoInfo(Date date, List<VideoController.VideoInfo> videos) {
+        public RecentVideoInfo(Date date, List<LegacyVideoController.VideoInfo> videos) {
             this.date = date;
             this.videos = videos;
 

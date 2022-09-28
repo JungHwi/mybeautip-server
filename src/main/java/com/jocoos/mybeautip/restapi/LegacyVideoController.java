@@ -52,7 +52,7 @@ import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/1/videos", produces = MediaType.APPLICATION_JSON_VALUE)
-public class VideoController {
+public class LegacyVideoController {
     private static final String VIDEO_NOT_FOUND = "video.not_found";
     private static final String COMMENT_NOT_FOUND = "comment.not_found";
     private static final String COMMENT_ALREADY_REPORTED = "comment.already_reported";
@@ -67,7 +67,7 @@ public class VideoController {
     private static final String HASHTAG_SIGN = "#";
     private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final MessageService messageService;
     private final VideoRepository videoRepository;
     private final VideoLikeRepository videoLikeRepository;
@@ -90,28 +90,28 @@ public class VideoController {
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
 
-    public VideoController(LegacyMemberService legacyMemberService,
-                           VideoService videoService,
-                           MessageService messageService,
-                           GoodsService goodsService,
-                           VideoGoodsRepository videoGoodsRepository,
-                           VideoRepository videoRepository,
-                           VideoLikeRepository videoLikeRepository,
-                           CommentRepository commentRepository,
-                           CommentLikeRepository commentLikeRepository,
-                           VideoReportRepository videoReportRepository,
-                           VideoViewRepository videoViewRepository,
-                           CommentService commentService,
-                           MentionService mentionService,
-                           RevenueService revenueService,
-                           KeywordService keywordService,
-                           RevenueRepository revenueRepository,
-                           VideoScrapService videoScrapService,
-                           CommentReportRepository commentReportRepository,
-                           BlockService blockService,
-                           ActivityPointService activityPointService) {
+    public LegacyVideoController(LegacyMemberService legacyMemberService,
+                                 LegacyVideoService legacyVideoService,
+                                 MessageService messageService,
+                                 GoodsService goodsService,
+                                 VideoGoodsRepository videoGoodsRepository,
+                                 VideoRepository videoRepository,
+                                 VideoLikeRepository videoLikeRepository,
+                                 CommentRepository commentRepository,
+                                 CommentLikeRepository commentLikeRepository,
+                                 VideoReportRepository videoReportRepository,
+                                 VideoViewRepository videoViewRepository,
+                                 CommentService commentService,
+                                 MentionService mentionService,
+                                 RevenueService revenueService,
+                                 KeywordService keywordService,
+                                 RevenueRepository revenueRepository,
+                                 VideoScrapService videoScrapService,
+                                 CommentReportRepository commentReportRepository,
+                                 BlockService blockService,
+                                 ActivityPointService activityPointService) {
         this.legacyMemberService = legacyMemberService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.messageService = messageService;
         this.videoGoodsRepository = videoGoodsRepository;
         this.goodsService = goodsService;
@@ -135,55 +135,57 @@ public class VideoController {
     @PostMapping
     public VideoInfo createVideo(@Valid @RequestBody CreateVideoRequest request) {
         log.info("createVideo: {}", request.toString());
-        Video createdVideo = videoService.create(request);
-        VideoInfo videoInfo = videoService.generateVideoInfo(createdVideo);
+        Video createdVideo = legacyVideoService.create(request);
+        VideoInfo videoInfo = legacyVideoService.generateVideoInfo(createdVideo);
         return videoInfo;
     }
 
-    @GetMapping("{id}")
-    public VideoInfo getVideos(@PathVariable Long id,
-                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        return videoRepository.findByIdAndDeletedAtIsNull(id)
-                .map(videoService::generateVideoInfo)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-    }
-
-    @GetMapping
-    public CursorResponse getVideos(@RequestParam(defaultValue = "50") int count,
-                                    @RequestParam(required = false) String cursor,
-                                    @RequestParam(required = false) String type,
-                                    @RequestParam(required = false) String state,
-                                    @RequestParam(required = false) String sort) {
-        Slice<Video> list = videoService.findVideos(type, state, cursor, count, sort);
-
-        List<VideoInfo> videos = new ArrayList<>();
-        list.filter(video -> "live".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(videoService.generateVideoInfo(v)));
-        list.filter(video -> "vod".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(videoService.generateVideoInfo(v)));
-
-        String nextCursor = null;
-        if (videos.size() > 0) {
-            if (sort == null) {
-                nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
-            } else {
-                switch (sort) {
-                    case "like":
-                        nextCursor = String.valueOf(videos.get(videos.size() - 1).getLikeCount());
-                        break;
-                    case "view":
-                    default:
-                        nextCursor = String.valueOf(videos.get(videos.size() - 1).getViewCount());
-                        break;
-                }
-            }
-        }
-
-        return new CursorResponse.Builder<>("/api/1/videos", videos)
-                .withType(type)
-                .withState(state)
-                .withSort(sort)
-                .withCount(count)
-                .withCursor(nextCursor).toBuild();
-    }
+//    @GetMapping("{id}")
+//    @Deprecated
+//    public VideoInfo getVideos(@PathVariable Long id,
+//                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+//        return videoRepository.findByIdAndDeletedAtIsNull(id)
+//                .map(legacyVideoService::generateVideoInfo)
+//                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+//    }
+//
+//    @GetMapping
+//    @Deprecated
+//    public CursorResponse getVideos(@RequestParam(defaultValue = "50") int count,
+//                                    @RequestParam(required = false) String cursor,
+//                                    @RequestParam(required = false) String type,
+//                                    @RequestParam(required = false) String state,
+//                                    @RequestParam(required = false) String sort) {
+//        Slice<Video> list = legacyVideoService.findVideos(type, state, cursor, count, sort);
+//
+//        List<VideoInfo> videos = new ArrayList<>();
+//        list.filter(video -> "live".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
+//        list.filter(video -> "vod".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
+//
+//        String nextCursor = null;
+//        if (videos.size() > 0) {
+//            if (sort == null) {
+//                nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
+//            } else {
+//                switch (sort) {
+//                    case "like":
+//                        nextCursor = String.valueOf(videos.get(videos.size() - 1).getLikeCount());
+//                        break;
+//                    case "view":
+//                    default:
+//                        nextCursor = String.valueOf(videos.get(videos.size() - 1).getViewCount());
+//                        break;
+//                }
+//            }
+//        }
+//
+//        return new CursorResponse.Builder<>("/api/1/videos", videos)
+//                .withType(type)
+//                .withState(state)
+//                .withSort(sort)
+//                .withCount(count)
+//                .withCursor(nextCursor).toBuild();
+//    }
 
     @GetMapping("/search")
     public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
@@ -193,12 +195,12 @@ public class VideoController {
 
         Slice<Video> list;
         if (StringUtils.isNotEmpty(keyword) && keyword.startsWith(HASHTAG_SIGN)) {
-            list = videoService.findVideosWithTag(keyword, cursor, count);
+            list = legacyVideoService.findVideosWithTag(keyword, cursor, count);
         } else {
-            list = videoService.findVideosWithKeyword(keyword, cursor, count);
+            list = legacyVideoService.findVideosWithKeyword(keyword, cursor, count);
         }
         List<VideoInfo> videos = new ArrayList<>();
-        list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+        list.stream().forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
 
         if (StringUtils.isNotBlank(keyword)) {
             keyword = keyword.trim();
@@ -253,9 +255,9 @@ public class VideoController {
         Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me) : new HashMap<>();
 
         if (parentId != null) {
-            comments = videoService.findCommentsByParentId(parentId, cursor, page, direction);
+            comments = legacyVideoService.findCommentsByParentId(parentId, cursor, page, direction);
         } else {
-            comments = videoService.findCommentsByVideoId(id, cursor, page, direction);
+            comments = legacyVideoService.findCommentsByVideoId(id, cursor, page, direction);
         }
 
         List<CommentInfo> result = new ArrayList<>();
@@ -399,9 +401,9 @@ public class VideoController {
         Member member = legacyMemberService.currentMember();
 
         try {
-            Video video = videoService.getByVideoId(videoId);
-            VideoLike videoLike = videoService.likeVideo(video, member);
-            VideoLikeInfo info = new VideoLikeInfo(videoLike, videoService.generateVideoInfo(video));
+            Video video = legacyVideoService.getByVideoId(videoId);
+            VideoLike videoLike = legacyVideoService.likeVideo(video, member);
+            VideoLikeInfo info = new VideoLikeInfo(videoLike, legacyVideoService.generateVideoInfo(video));
             return new ResponseEntity<>(info, HttpStatus.OK);
         } catch (NotFoundException e) {
             throw new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang));
@@ -418,7 +420,7 @@ public class VideoController {
 
         videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
                 .map(liked -> {
-                    videoService.unLikeVideo(liked);
+                    legacyVideoService.unLikeVideo(liked);
                     return Optional.empty();
                 })
                 .orElseThrow(() -> new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang)));
@@ -434,7 +436,7 @@ public class VideoController {
 
         videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
                 .map(liked -> {
-                    videoService.unLikeVideo(liked);
+                    legacyVideoService.unLikeVideo(liked);
                     return Optional.empty();
                 })
                 .orElseThrow(() -> new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang)));
@@ -471,7 +473,7 @@ public class VideoController {
                                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
         try {
-            CommentLike commentLike = videoService.likeVideoComment(commentId, videoId, member);
+            CommentLike commentLike = legacyVideoService.likeVideoComment(commentId, videoId, member);
             return new ResponseEntity<>(new CommentLikeInfo(commentLike), HttpStatus.OK);
         } catch (BadRequestException e) {
             throw new BadRequestException(messageService.getMessage(ALREADY_LIKED, lang));
@@ -490,7 +492,7 @@ public class VideoController {
 
         commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
                 .map(liked -> {
-                    videoService.unLikeVideoComment(liked);
+                    legacyVideoService.unLikeVideoComment(liked);
                     return Optional.empty();
                 })
                 .orElseThrow(() -> new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang)));
@@ -509,7 +511,7 @@ public class VideoController {
 
         commentLikeRepository.findByIdAndCommentIdAndCreatedById(likeId, comment.getId(), me.getId())
                 .map(liked -> {
-                    videoService.unLikeVideoComment(liked);
+                    legacyVideoService.unLikeVideoComment(liked);
                     return Optional.empty();
                 })
                 .orElseThrow(() -> new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang)));
@@ -529,16 +531,16 @@ public class VideoController {
         try {
             if ("LIVE".equalsIgnoreCase(video.getState())) {
                 if (me == null) { // Guest
-                    video = videoService.setWatcherWithGuest(video, legacyMemberService.getGuestUserName());
+                    video = legacyVideoService.setWatcherWithGuest(video, legacyMemberService.getGuestUserName());
                 } else {
-                    video = videoService.setWatcher(video, me);
+                    video = legacyVideoService.setWatcher(video, me);
                 }
             }
         } catch (ConcurrencyFailureException e) { // Ignore
             log.warn("joinWatch throws ConcurrencyFailureException");
         }
 
-        return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+        return new ResponseEntity<>(legacyVideoService.generateVideoInfo(video), HttpStatus.OK);
     }
 
     @PatchMapping(value = "/{id:.+}/watches")
@@ -552,16 +554,16 @@ public class VideoController {
         try {
             if ("LIVE".equalsIgnoreCase(video.getState())) {
                 if (me == null) {
-                    video = videoService.updateWatcherWithGuest(video, legacyMemberService.getGuestUserName());
+                    video = legacyVideoService.updateWatcherWithGuest(video, legacyMemberService.getGuestUserName());
                 } else {
-                    video = videoService.updateWatcher(video, me);
+                    video = legacyVideoService.updateWatcher(video, me);
                 }
             }
         } catch (ConcurrencyFailureException e) { // Ignore
             log.warn("keepWatch throws ConcurrencyFailureException");
         }
 
-        return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+        return new ResponseEntity<>(legacyVideoService.generateVideoInfo(video), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id:.+}/watches")
@@ -574,9 +576,9 @@ public class VideoController {
 
         try {
             if (me == null) { // Guest
-                videoService.removeGuestWatcher(video, legacyMemberService.getGuestUserName());
+                legacyVideoService.removeGuestWatcher(video, legacyMemberService.getGuestUserName());
             } else {
-                videoService.removeWatcher(video, me);
+                legacyVideoService.removeWatcher(video, me);
             }
         } catch (ConcurrencyFailureException e) { // Ignore
             log.warn("leaveWatch throws ConcurrencyFailureException");
@@ -650,7 +652,7 @@ public class VideoController {
      */
     @PostMapping(value = "/{id:.+}/report")
     public ResponseEntity<VideoInfo> reportVideo(@PathVariable Long id,
-                                                 @Valid @RequestBody VideoController.VideoReportRequest request,
+                                                 @Valid @RequestBody LegacyVideoController.VideoReportRequest request,
                                                  @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
         Member me = legacyMemberService.currentMember();
@@ -662,8 +664,8 @@ public class VideoController {
             throw new BadRequestException(messageService.getMessage(VIDEO_ALREADY_REPORTED, lang));
         }
 
-        Video result = videoService.reportVideo(video, me, reasonCode, request.getReason());
-        return new ResponseEntity<>(videoService.generateVideoInfo(result), HttpStatus.OK);
+        Video result = legacyVideoService.reportVideo(video, me, reasonCode, request.getReason());
+        return new ResponseEntity<>(legacyVideoService.generateVideoInfo(result), HttpStatus.OK);
     }
 
     /**
@@ -686,13 +688,13 @@ public class VideoController {
         Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang)));
         try {
-            videoService.increaseHeart(video, count);
+            legacyVideoService.increaseHeart(video, count);
             video.setHeartCount(video.getHeartCount() + count);
         } catch (ConcurrencyFailureException e) { // Ignore
             log.warn("heartVideo throws ConcurrencyFailureException");
         }
 
-        return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+        return new ResponseEntity<>(legacyVideoService.generateVideoInfo(video), HttpStatus.OK);
     }
 
     /**
@@ -706,11 +708,11 @@ public class VideoController {
 
         Member me = legacyMemberService.currentMember();
         if (me == null) {
-            video = videoService.addViewWithGuest(video, legacyMemberService.getGuestUserName());
+            video = legacyVideoService.addViewWithGuest(video, legacyMemberService.getGuestUserName());
         } else {
-            video = videoService.addView(video, me);
+            video = legacyVideoService.addView(video, me);
         }
-        return new ResponseEntity<>(videoService.generateVideoInfo(video), HttpStatus.OK);
+        return new ResponseEntity<>(legacyVideoService.generateVideoInfo(video), HttpStatus.OK);
     }
 
     @GetMapping("/{id:.+}/views")
@@ -733,7 +735,7 @@ public class VideoController {
 
         try {
             VideoScrap scrap = videoScrapService.scrapVideo(video, member);
-            VideoScrapInfo info = new VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()));
+            VideoScrapInfo info = new VideoScrapInfo(scrap, legacyVideoService.generateVideoInfo(scrap.getVideo()));
             return new ResponseEntity<>(info, HttpStatus.OK);
         } catch (BadRequestException e) {
             throw new BadRequestException(messageService.getMessage(ALREADY_SCRAPED, lang));
@@ -778,7 +780,7 @@ public class VideoController {
     @PostMapping(value = "/{videoId:.+}/comments/{id:.+}/report")
     public ResponseEntity<CommentReportInfo> reportVideoComment(@PathVariable Long videoId,
                                                                 @PathVariable Long id,
-                                                                @Valid @RequestBody VideoController.CommentReportRequest request,
+                                                                @Valid @RequestBody LegacyVideoController.CommentReportRequest request,
                                                                 @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
         Member me = legacyMemberService.currentMember();

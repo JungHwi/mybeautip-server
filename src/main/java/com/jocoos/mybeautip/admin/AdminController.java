@@ -22,9 +22,9 @@ import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.tag.TagRepository;
 import com.jocoos.mybeautip.tag.TagService;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import lombok.Data;
@@ -47,8 +47,8 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.*;
 
-import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
 import static com.jocoos.mybeautip.domain.member.code.MemberStatus.ACTIVE;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
 
 
 @Slf4j
@@ -72,7 +72,7 @@ public class AdminController {
     private final ScheduleRepository scheduleRepository;
     private final OrderRepository orderRepository;
     private final TagRepository tagRepository;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final TagService tagService;
     private final GoodsService goodsService;
     private final LegacyMemberService legacyMemberService;
@@ -92,7 +92,7 @@ public class AdminController {
                            VideoRepository videoRepository,
                            VideoReportRepository videoReportRepository,
                            ScheduleRepository scheduleRepository, OrderRepository orderRepository, TagRepository tagRepository,
-                           VideoService videoService,
+                           LegacyVideoService legacyVideoService,
                            TagService tagService,
                            GoodsService goodsService, LegacyMemberService legacyMemberService) {
 //        this.postRepository = postRepository;
@@ -112,7 +112,7 @@ public class AdminController {
         this.orderRepository = orderRepository;
         this.tagRepository = tagRepository;
         this.tagService = tagService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.goodsService = goodsService;
         this.legacyMemberService = legacyMemberService;
     }
@@ -491,7 +491,7 @@ public class AdminController {
     private List<RecommendationController.RecommendedMotdInfo> createMotdList(Iterable<MotdRecommendation> recommendations) {
         List<RecommendationController.RecommendedMotdInfo> info = new ArrayList<>();
         for (MotdRecommendation recommendation : recommendations) {
-            info.add(new RecommendationController.RecommendedMotdInfo(recommendation, videoService.generateVideoInfo(recommendation.getVideo())));
+            info.add(new RecommendationController.RecommendedMotdInfo(recommendation, legacyVideoService.generateVideoInfo(recommendation.getVideo())));
         }
         return info;
     }
@@ -631,14 +631,14 @@ public class AdminController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), "seq", "createdAt"));
         Page<MotdRecommendation> bases = motdRecommendationRepository.findByVideoTypeAndVideoDeletedAtIsNull(type, pageable);
 
-        Page<RecommendationController.RecommendedMotdInfo> details = bases.map(m -> new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
+        Page<RecommendationController.RecommendedMotdInfo> details = bases.map(m -> new RecommendationController.RecommendedMotdInfo(m, legacyVideoService.generateVideoInfo(m.getVideo())));
         return new ResponseEntity<>(details, HttpStatus.OK);
     }
 
     private List<RecommendationController.RecommendedMotdInfo> createRecommendedMotd(MotdRecommendationBase base) {
         List<RecommendationController.RecommendedMotdInfo> motds = new ArrayList<>();
         for (MotdRecommendation m : base.getMotds()) {
-            motds.add(new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
+            motds.add(new RecommendationController.RecommendedMotdInfo(m, legacyVideoService.generateVideoInfo(m.getVideo())));
         }
         Collections.sort(motds, (RecommendationController.RecommendedMotdInfo m1, RecommendationController.RecommendedMotdInfo m2)
                 -> m1.getSeq() < m2.getSeq() ? 1 : m1.getSeq() > m2.getSeq() ? -1 :

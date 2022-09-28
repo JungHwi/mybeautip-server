@@ -3,12 +3,12 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.video.*;
-
+import com.jocoos.mybeautip.video.LegacyVideoService;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoUpdateService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,7 @@ public class CallbackController {
     private static final String LIVE_NOT_ALLOWED = "video.live_not_allowed";
     private static final String MOTD_UPLOAD_NOT_ALLOWED = "video.motd_upload_not_allowed";
 
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final MessageService messageService;
     private final VideoUpdateService videoUpdateService;
 
@@ -82,7 +82,7 @@ public class CallbackController {
     @DeleteMapping
     public Video deleteVideo(@Valid @RequestBody CallbackDeleteVideoRequest request) {
         log.info("deleteVideo {}", request.toString());
-        return videoService.deleteVideo(request.getUserId(), request.getVideoKey());
+        return legacyVideoService.deleteVideo(request.getUserId(), request.getVideoKey());
     }
 
     @Data

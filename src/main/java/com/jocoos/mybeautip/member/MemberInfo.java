@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.member;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
-import com.jocoos.mybeautip.restapi.VideoController;
+import com.jocoos.mybeautip.restapi.LegacyVideoController;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +27,7 @@ public class MemberInfo {
     private Long reportedId;
     private Long blockedId;
     private Integer videoCount;
-    private List<VideoController.VideoInfo> videos;
+    private List<LegacyVideoController.VideoInfo> videos;
     private MemberDetailResponse memberDetail;
     private Date createdAt;
     private Date modifiedAt;

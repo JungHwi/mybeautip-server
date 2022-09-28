@@ -8,8 +8,8 @@ import com.jocoos.mybeautip.notification.NotificationRepository;
 import com.jocoos.mybeautip.recommendation.KeywordRecommendationRepository;
 import com.jocoos.mybeautip.recommendation.MemberRecommendationRepository;
 import com.jocoos.mybeautip.tag.TagService;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 public class PostProcessService {
 
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final TagService tagService;
     private final FollowingRepository followingRepository;
     private final CartRepository cartRepository;
@@ -32,7 +32,7 @@ public class PostProcessService {
     private final KeywordRecommendationRepository keywordRecommendationRepository;
     private final MemberCouponRepository memberCouponRepository;
 
-    public PostProcessService(VideoService videoService,
+    public PostProcessService(LegacyVideoService legacyVideoService,
                               TagService tagService,
                               FollowingRepository followingRepository,
                               CartRepository cartRepository,
@@ -42,7 +42,7 @@ public class PostProcessService {
                               NotificationRepository notificationRepository,
                               KeywordRecommendationRepository keywordRecommendationRepository,
                               MemberCouponRepository memberCouponRepository) {
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.tagService = tagService;
         this.followingRepository = followingRepository;
         this.cartRepository = cartRepository;
@@ -63,7 +63,7 @@ public class PostProcessService {
         // TODO: Delete garbage data depends on policy(order, addresses, account, likes, views, blocks, reports, comments)
 
         log.debug("Member {} deleted: video will be deleted", member.getId());
-        videoService.deleteVideos(member);
+        legacyVideoService.deleteVideos(member);
 
         log.debug("Member {} deleted: followings will be deleted", member.getId());
         followingRepository.findByMemberMeId(member.getId())

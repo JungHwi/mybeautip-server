@@ -1,0 +1,3 @@
+== Get Video API
+
+operation::get_video[snippets='http-request,path-parameters,http-response,response-fields']

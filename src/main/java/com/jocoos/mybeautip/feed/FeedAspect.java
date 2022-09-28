@@ -7,7 +7,6 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Aspect
@@ -20,7 +19,7 @@ public class FeedAspect {
         this.feedService = feedService;
     }
 
-    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.save(..))",
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.LegacyVideoService.save(..))",
             returning = "result")
     public void onAfterReturningCreateVideo(JoinPoint joinPoint, Object result) {
         log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -34,7 +33,7 @@ public class FeedAspect {
         }
     }
 
-    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.update(..))",
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.LegacyVideoService.update(..))",
             returning = "result")
     public void onAfterReturningUpdateVideo(JoinPoint joinPoint, Object result) {
         log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -52,7 +51,7 @@ public class FeedAspect {
         }
     }
 
-    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.deleteVideo(..))",
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.LegacyVideoService.deleteVideo(..))",
             returning = "result")
     public void onAfterReturningDeleteVideo(JoinPoint joinPoint, Object result) {
         log.debug("joinPoint: {}", joinPoint.toLongString());
