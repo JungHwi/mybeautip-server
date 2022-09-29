@@ -35,6 +35,6 @@ public class SearchController {
         Member member = legacyMemberService.currentMember();
         KeywordSearchCondition condition = new KeywordSearchCondition(keyword, cursor, size);
 
-        return ResponseEntity.ok(new CursorResultResponse<>(searchService.searchCommunity(condition, member)));
+        return ResponseEntity.ok(new CursorResultResponse<>(searchService.searchCommunity(condition, member)).withCount());
     }
 }

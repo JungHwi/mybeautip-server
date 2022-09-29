@@ -10,6 +10,8 @@ import java.util.List;
 public class CursorResultResponse<T extends CursorInterface> {
 
     private String nextCursor;
+
+    private int count;
     private List<T> content;
 
     public CursorResultResponse(List<T> content) {
@@ -19,5 +21,10 @@ public class CursorResultResponse<T extends CursorInterface> {
 
         this.nextCursor = content.get(content.size() - 1).getCursor();
         this.content = content;
+    }
+
+    public CursorResultResponse<T> withCount() {
+        this.count = content.size();
+        return this;
     }
 }
