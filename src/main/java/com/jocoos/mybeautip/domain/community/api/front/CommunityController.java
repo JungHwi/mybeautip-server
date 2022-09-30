@@ -52,7 +52,7 @@ public class CommunityController {
 
         boolean isFirstSearch = false;
         if (cursor == null) {
-            cursor = ZonedDateTime.now();
+            cursor = ZonedDateTime.now().plusYears(100);
             isFirstSearch = true;
         }
 
