@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.community.persistence.repository.community;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
@@ -19,6 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
 import static com.jocoos.mybeautip.member.QMember.member;
@@ -48,7 +50,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .join(community.member, member).fetchJoin()
                 .where(
                         searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition.getCursor())
+                        lessThanSortedAt(condition.getCursor()),
+                        notEqStatus(DELETE)
                 )
                 .orderBy(sortCommunities(false))
                 .limit(condition.getSize())
@@ -101,6 +104,10 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
             throw new BadRequestException(BAD_REQUEST, "event_id is required to search DRIP category.");
         }
         return community.eventId.eq(eventId);
+    }
+
+    private BooleanExpression notEqStatus(CommunityStatus status) {
+        return status == null ? null : community.status.ne(status);
     }
 
     private BooleanBuilder searchCondition(String keyword) {
