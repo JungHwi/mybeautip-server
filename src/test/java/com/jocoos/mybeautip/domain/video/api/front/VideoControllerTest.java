@@ -42,7 +42,7 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].locked").type(JsonFieldType.BOOLEAN).description("잠금 여부"),
                                 fieldWithPath("content.[].muted").type(JsonFieldType.BOOLEAN).description("음소거 여부"),
                                 fieldWithPath("content.[].visibility").type(JsonFieldType.STRING).description("노출 여부"),
-                                fieldWithPath("content.[].category").type(JsonFieldType.ARRAY).description("카테고리 정보"),
+                                fieldWithPath("content.[].category").type(JsonFieldType.ARRAY).description("카테고리 정보").optional(),
                                 fieldWithPath("content.[].category.[].id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("content.[].category.[].type").type(JsonFieldType.STRING).description("카테고리 구분"),
                                 fieldWithPath("content.[].category.[].title").type(JsonFieldType.STRING).description("카테고리 타이틀"),
