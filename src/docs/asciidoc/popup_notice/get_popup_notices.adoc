@@ -1,0 +1,3 @@
+== Get Popup Notices API
+
+operation::get_popup_notices[snippets='http-request,http-response,response-fields']
