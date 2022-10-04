@@ -62,7 +62,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         Long count = repository.query(query -> query
                 .select(count(community))
                 .from(community)
-                .join(community.member, member).fetchJoin()
+                .join(member).on(community.member.eq(member))
                 .where(
                         searchCondition(condition.getKeyword()),
                         lessThanSortedAt(condition.getCursor()),
