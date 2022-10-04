@@ -46,7 +46,7 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].category.[].id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("content.[].category.[].type").type(JsonFieldType.STRING).description("카테고리 구분"),
                                 fieldWithPath("content.[].category.[].title").type(JsonFieldType.STRING).description("카테고리 타이틀"),
-                                fieldWithPath("content.[].category.[].shape_url").type(JsonFieldType.STRING).description("카테고리 쉐입 URL"),
+                                fieldWithPath("content.[].category.[].shape_url").type(JsonFieldType.STRING).description("카테고리 쉐입 URL").optional(),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content.[].content").type(JsonFieldType.STRING).description("컨텐츠").optional(),
                                 fieldWithPath("content.[].url").type(JsonFieldType.STRING).description("비디오 파일 주소"),
