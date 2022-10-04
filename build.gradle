@@ -131,7 +131,7 @@ test {
   }
   outputs.dir snippetsDir
   useJUnitPlatform()
-  testLogging.showStandardStreams = true
+//  testLogging.showStandardStreams = true
 }
 
 asciidoctor {
