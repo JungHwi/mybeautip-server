@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.global.wrapper;
 
 
-import io.jsonwebtoken.lang.Collections;
 import lombok.Getter;
 import org.springframework.util.CollectionUtils;
 
@@ -12,7 +11,7 @@ public class CursorResultResponse<T extends CursorInterface> {
 
     private String nextCursor;
 
-    private int count;
+    private Long count;
     private List<T> content;
 
     public CursorResultResponse(List<T> content) {
@@ -24,8 +23,8 @@ public class CursorResultResponse<T extends CursorInterface> {
         this.content = content;
     }
 
-    public CursorResultResponse<T> withCount() {
-        this.count = Collections.size(content);
+    public CursorResultResponse<T> withCount(Long count) {
+        this.count = count;
         return this;
     }
 }

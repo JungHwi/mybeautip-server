@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
@@ -24,6 +25,7 @@ import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
 import static com.jocoos.mybeautip.member.QMember.member;
+import static com.querydsl.sql.SQLExpressions.count;
 import static io.jsonwebtoken.lang.Collections.isEmpty;
 
 @Repository
@@ -43,8 +45,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     @Override
-    public List<Community> search(KeywordSearchCondition condition) {
-        return repository.query(query -> query
+    public SearchResult search(KeywordSearchCondition condition) {
+        List<Community> communities = repository.query(query -> query
                 .select(community)
                 .from(community)
                 .join(community.member, member).fetchJoin()
@@ -56,6 +58,19 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .orderBy(sortCommunities(false))
                 .limit(condition.getSize())
                 .fetch());
+
+        Long count = repository.query(query -> query
+                .select(count(community))
+                .from(community)
+                .join(community.member, member).fetchJoin()
+                .where(
+                        searchCondition(condition.getKeyword()),
+                        lessThanSortedAt(condition.getCursor()),
+                        notEqStatus(DELETE)
+                )
+                .fetchOne());
+
+        return new SearchResult(communities, count);
     }
 
     private JPAQuery<Community> createDefaultQuery(CommunitySearchCondition condition, Pageable pageable) {

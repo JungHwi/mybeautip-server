@@ -1,10 +1,11 @@
 package com.jocoos.mybeautip.domain.search.service;
 
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
-import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.service.CommunityConvertService;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,9 @@ public class SearchService {
     private final CommunityConvertService convertService;
 
     @Transactional(readOnly = true)
-    public List<CommunityResponse> searchCommunity(KeywordSearchCondition condition, Member member) {
-        List<Community> communities = communityDao.search(condition);
-        return convertService.toResponse(member, communities);
+    public CursorResultResponse<CommunityResponse> searchCommunity(KeywordSearchCondition condition, Member member) {
+        SearchResult result = communityDao.search(condition);
+        List<CommunityResponse> responses = convertService.toResponse(member, result.getCommunities());
+        return new CursorResultResponse<>(responses).withCount(result.getCount());
     }
 }

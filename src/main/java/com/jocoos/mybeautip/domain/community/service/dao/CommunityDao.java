@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategor
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -100,7 +101,7 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Community> search(KeywordSearchCondition condition) {
+    public SearchResult search(KeywordSearchCondition condition) {
         return repository.search(condition);
     }
 }
