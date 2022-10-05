@@ -31,10 +31,10 @@ class SearchControllerTest extends RestDocsTestSupport {
 
         result.andDo(document("search_community",
                 requestParameters(
-                        parameterWithName("type").description("검색 타입"),
+                        parameterWithName("type").description("검색 타입").optional().description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.SEARCH_TYPE)),
                         parameterWithName("keyword").description("검색어"),
                         parameterWithName("cursor").description("커서").optional().attributes(getZonedDateMilliFormat(), getDefault("현재 시간")),
-                        parameterWithName("size").description("조회 개수").optional().attributes(getDefault(20))
+                        parameterWithName("size").description("조회 개").optional().attributes(getDefault(20))
                 ),
                 responseFields(
                         fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보").attributes(getZonedDateMilliFormat()),
@@ -85,7 +85,7 @@ class SearchControllerTest extends RestDocsTestSupport {
 
         result.andDo(document("search_video",
                 requestParameters(
-                        parameterWithName("type").description("검색 타입").optional(),
+                        parameterWithName("type").description("검색 타입").optional().description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.SEARCH_TYPE)),
                         parameterWithName("keyword").description("검색어"),
                         parameterWithName("cursor").description("커서").optional().attributes(getZonedDateMilliFormat(), getDefault("현재 시간")),
                         parameterWithName("size").description("조회 개수").optional().attributes(getDefault(20))
@@ -152,5 +152,25 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video.[].owner.permission.revenue_return").type(JsonFieldType.BOOLEAN).description("수익배분 권한").optional(),
                         fieldWithPath("video.[].created_at").type(JsonFieldType.NUMBER).description("생성일시"))));
 
+    }
+
+    @Test
+    void countTest() throws Exception {
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/api/1/search/count")
+                        .param("type", "VIDEO")
+                        .param("keyword", "1"))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("count",
+                requestParameters(
+                        parameterWithName("type").description("검색 타입").optional().description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.SEARCH_TYPE)),
+                        parameterWithName("keyword").description("검색어")
+                ),
+                responseFields(
+                        fieldWithPath("count").type(JsonFieldType.NUMBER).description("검색 개수")
+                )));
     }
 }
