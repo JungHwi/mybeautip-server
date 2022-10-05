@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Search Community API</title>
+<title>Search Video API</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,19 +441,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_search_community_api">Search Community API</h2>
+<h2 id="_search_video_api">Search Video API</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_search_community_api_http_request">HTTP request</h3>
+<h3 id="_search_video_api_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /api/1/search?type=COMMUNITY&amp;keyword=1&amp;size=20 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /api/1/search?type=VIDEO&amp;keyword=1&amp;size=20 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_search_community_api_request_parameters">Request parameters</h3>
+<h3 id="_search_video_api_request_parameters">Request parameters</h3>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -498,546 +498,90 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">20</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">조회 개</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회 개수</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_search_community_api_http_response">HTTP response</h3>
+<h3 id="_search_video_api_http_response">HTTP response</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 16992
+Content-Length: 1704
 
 {
-  "next_cursor" : "2022-09-22 09:27:54.991 +0900",
-  "count" : 92,
-  "community" : [ {
-    "id" : 3761,
-    "status" : "NORMAL",
-    "title" : "q13413",
-    "contents" : "30그ㄹㅏㅁㅁㄴㅁㄴㅁㅏㅡㄴㅁㅡ판ㅡ만프ㅁ프ㅇ픔ㅏㅡㅇㅏㅁㅏㅡ마ㅏ프ㄴㅁ훌ㅏㅡ나ㅡㄴㅡㅁㅏ믚ㅏㅜㅁ닟ㄴ;ㅣㅏㅁ훔",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-10-05 16:33:54 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "status" : "ACTIVE"
-    },
-    "category" : {
+  "next_cursor" : "10001",
+  "count" : 1,
+  "video" : [ {
+    "id" : 10001,
+    "video_key" : "",
+    "type" : "BROADCASTED",
+    "state" : "VOD",
+    "locked" : false,
+    "muted" : false,
+    "visibility" : "PUBLIC",
+    "category" : [ {
       "id" : 2,
-      "type" : "BLIND",
-      "title" : "\uD83D\uDD0F속닥속닥",
-      "hint" : "남 눈치 보지 않고 자유롭게 익명으로 나를 표현할 수 있는 공간이야!\n내사랑은 ing♥ 기쁜일, 슬픈일, 고민되는 너의 일상 이야기를 풀어봐! 속닥속닥\uD83E\uDD17"
-    }
-  }, {
-    "id" : 746,
-    "status" : "NORMAL",
-    "title" : "23455524ㄱㄷ",
-    "contents" : "14ㅇ횩쇼",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "status" : "ACTIVE"
-    },
-    "category" : {
-      "id" : 2,
-      "type" : "BLIND",
-      "title" : "\uD83D\uDD0F속닥속닥",
-      "hint" : "남 눈치 보지 않고 자유롭게 익명으로 나를 표현할 수 있는 공간이야!\n내사랑은 ing♥ 기쁜일, 슬픈일, 고민되는 너의 일상 이야기를 풀어봐! 속닥속닥\uD83E\uDD17"
-    }
-  }, {
-    "id" : 708,
-    "status" : "NORMAL",
-    "contents" : "19191919191919199",
-    "file_url" : [ ],
-    "view_count" : 10,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 2,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 707,
-    "status" : "NORMAL",
-    "contents" : "1818181818181818",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 706,
-    "status" : "NORMAL",
-    "contents" : "17171717171717",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 1,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 705,
-    "status" : "NORMAL",
-    "contents" : "16161616161616",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 704,
-    "status" : "NORMAL",
-    "contents" : "1515151515151515",
-    "file_url" : [ ],
-    "view_count" : 1,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 703,
-    "status" : "NORMAL",
-    "contents" : "141414141414",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 1,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 702,
-    "status" : "NORMAL",
-    "contents" : "1313131313",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 1,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 701,
-    "status" : "NORMAL",
-    "contents" : "12121ㅈ12",
-    "file_url" : [ ],
-    "view_count" : 1,
-    "like_count" : 1,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 700,
-    "status" : "NORMAL",
-    "contents" : "111111111",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 699,
-    "status" : "NORMAL",
-    "contents" : "101010101010",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 690,
-    "status" : "NORMAL",
-    "contents" : "123456",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 1,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 685,
-    "status" : "NORMAL",
-    "contents" : "edit 1 contents",
-    "file_url" : [ ],
-    "view_count" : 8,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 680,
-    "status" : "NORMAL",
-    "title" : "결정픽",
-    "contents" : "What is Lorem Ipsum?\nLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.\n\nWhy do we use it?\nIt is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).\n\n\nWhere does it come from?\nContrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bonorum et Malorum\" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", comes from a line ",
-    "file_url" : [ ],
-    "view_count" : 11,
-    "like_count" : 1,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 666,
-    "status" : "NORMAL",
-    "contents" : "ㅛㅂ4614ㅛㅂ44뵤",
-    "file_url" : [ ],
-    "view_count" : 30,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 653,
-    "status" : "NORMAL",
-    "contents" : "12446",
-    "file_url" : [ ],
-    "view_count" : 0,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 4,
-      "type" : "VOTE",
-      "title" : "결정픽",
-      "hint" : "무얼 고를지 고민된다면! 뷰띠들에게 물어봐!\n우유부단한 너를 위해 우리가 도와줄게!\n예) 원피스에 어울리는 신발을 골라줘!"
-    }
-  }, {
-    "id" : 649,
-    "status" : "NORMAL",
-    "title" : "2752852",
-    "contents" : "itsiysiyswit274714715",
-    "file_url" : [ ],
-    "view_count" : 3,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "status" : "ACTIVE"
-    },
-    "category" : {
-      "id" : 2,
-      "type" : "BLIND",
-      "title" : "\uD83D\uDD0F속닥속닥",
-      "hint" : "남 눈치 보지 않고 자유롭게 익명으로 나를 표현할 수 있는 공간이야!\n내사랑은 ing♥ 기쁜일, 슬픈일, 고민되는 너의 일상 이야기를 풀어봐! 속닥속닥\uD83E\uDD17"
-    }
-  }, {
-    "id" : 633,
-    "status" : "NORMAL",
-    "title" : "1245653",
-    "contents" : "dt7z7ts75",
-    "file_url" : [ ],
-    "view_count" : 1,
-    "like_count" : 1,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "status" : "ACTIVE"
-    },
-    "category" : {
-      "id" : 2,
-      "type" : "BLIND",
-      "title" : "\uD83D\uDD0F속닥속닥",
-      "hint" : "남 눈치 보지 않고 자유롭게 익명으로 나를 표현할 수 있는 공간이야!\n내사랑은 ing♥ 기쁜일, 슬픈일, 고민되는 너의 일상 이야기를 풀어봐! 속닥속닥\uD83E\uDD17"
-    }
-  }, {
-    "id" : 582,
-    "status" : "NORMAL",
-    "contents" : "edit 1 contents",
-    "file_url" : [ ],
-    "view_count" : 7,
-    "like_count" : 0,
-    "report_count" : 0,
-    "comment_count" : 0,
-    "created_at" : "2022-09-22 09:27:55 +0900",
-    "relation_info" : {
-      "is_like" : false,
-      "is_report" : false,
-      "is_block" : false
-    },
-    "member" : {
-      "id" : 4,
-      "status" : "ACTIVE",
-      "username" : "mybeautip.s3"
-    },
-    "category" : {
-      "id" : 5,
       "type" : "NORMAL",
-      "title" : "\uD83C\uDF6F꿀팁",
-      "hint" : "소소해도 나만의 팁을 공유해죠.\n우리도 몰랐던 팁이 많을거야"
-    }
+      "title" : "웃겨주마",
+      "shape_url" : "https://static-dev.mybeautip.com/video_category/shape_1"
+    }, {
+      "id" : 3,
+      "type" : "NORMAL",
+      "title" : "알려주마",
+      "shape_url" : "https://static-dev.mybeautip.com/video_category/shape_2"
+    } ],
+    "title" : "가우시안 필터 10",
+    "content" : "내용",
+    "url" : "",
+    "thumbnail_path" : "",
+    "thumbnail_url" : "",
+    "chat_room_id" : "sendbird_open_channel_37156_2b8f2ac0bbd0a88574d7b22310933c19fc8b38c8",
+    "duration" : 0,
+    "data" : "",
+    "watch_count" : 0,
+    "total_watch_count" : 0,
+    "view_count" : 0,
+    "heart_count" : 0,
+    "like_count" : 1,
+    "comment_count" : 0,
+    "order_count" : 0,
+    "report_count" : 0,
+    "related_goods_count" : 0,
+    "related_goods_thumbnail_url" : "",
+    "owner" : {
+      "id" : 4,
+      "tag" : "",
+      "status" : "ACTIVE",
+      "username" : "mybeautip.s3",
+      "email" : "",
+      "phone_number" : "",
+      "avatar_url" : "",
+      "permission" : {
+        "chat_post" : true,
+        "comment_post" : true,
+        "live_post" : true,
+        "motd_post" : true,
+        "revenue_return" : true
+      },
+      "follower_count" : 0,
+      "following_count" : 0,
+      "video_count" : 0,
+      "created_at" : 1661722019000,
+      "modified_at" : 1664955845137
+    },
+    "blocked" : false,
+    "created_at" : 1544739286807,
+    "real_watch_count" : 0
   } ]
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_search_community_api_response_fields">Response fields</h3>
+<h3 id="_search_video_api_response_fields">Response fields</h3>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 20%;">
@@ -1071,228 +615,410 @@ Content-Length: 16992
 <td class="tableblock halign-left valign-top"><p class="tableblock">검색 결과 수</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">커뮤니티 글 목록</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비디오 글 목록</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">글 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비디오 ID</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].is_win</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].video_key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비디오 키</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].live_key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">라이브 키</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].output_type</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].type</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">방송 타입. UPLOADED, BROADCASTED</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].state</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">방송 상태. VOD 뿐.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].locked</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">당첨 여부. 현재는 드립N드림의 당첨 여부</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">잠금 여부</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].status</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].muted</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">음소거 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].visibility</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="/docs/common/community_status.html" class="popup">커뮤니티 상태</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">노출 여부</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].event_id</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].title</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">제목</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].contents</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">내용</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].['file_url']</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].category</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 URL List</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].votes</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">투표 파일 List</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].votes.[].id</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">투표 파일 아이디</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].votes.[].file_url</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">투표 파일 URL</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].votes.[].count</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">투표 수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].votes.[].is_voted</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">투표 파일에 대한 유저 투표 여부</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].view_count</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">조회수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].like_count</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">좋아요수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].comment_count</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">댓글/대댓글수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].report_count</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">신고수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].created_at</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">yyyy-MM-dd HH:mm:ss Z</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">작성일</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].relation_info</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">유저와의 관계 정보</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].relation_info.is_like</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">글 좋아요 여부</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].relation_info.is_block</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 차단 여부</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].relation_info.is_report</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">글 신고 여부</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].member</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 정보.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].member.id</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 아이디</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].member.status</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="/docs/common/member_status.html" class="popup">회원 상태</a></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].member.username</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 이름</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].member.avatar_url</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 아바타 URL</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].category</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 정보</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].category.id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].category.[].id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 아이디</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].category.type</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].category.[].type</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="/docs/common/community_category_type.html" class="popup">커뮤니티 카테고리 구분</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 구분</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].category.title</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].category.[].title</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 제목</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 타이틀</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">community.[].category.hint</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].category.[].shape_url</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 쉐입 URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].title</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">제목</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].content</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">컨텐츠</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].url</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 힌트</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비디오 파일 주소</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].original_filename</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비디오 파일명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].thumbnail_path</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">썸네일 경로</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].thumbnail_url</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">썸네일 URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].chat_room_id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">채팅방 아이디</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].duration</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">방송 길이. mm 초 단위</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].total_watch_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">총 시청</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].real_watch_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">실시청자수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].watch_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">실시간 시청자수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].view_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].heart_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">하트수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].like_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">좋아요 수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].comment_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">댓글수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].order_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">주문수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].report_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">신고수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">상품 정보등</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].related_goods_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">관련 상품 갯수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].related_goods_thumbnail_url</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">상품 대표 URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].like_id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">좋아요 아이디</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].scrap_id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">스크랩 아이디</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].blocked</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">차단 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비디오 작성자 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">아이디</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.tag</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">태그</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.status</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">상태</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.username</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">유저명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.email</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이메일</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.phone_number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전화번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.avatar_url</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">아바타 URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.follower_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">팔로워 수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.following_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">팔로잉 수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.video_count</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">비디오 수</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.created_at</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">회원가입일</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.modified_at</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">정보수정일</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.permission</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">권한</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.permission.chat_post</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">post 권한</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.permission.comment_post</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">댓글 권한</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.permission.live_post</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">라이브 권한</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.permission.motd_post</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">motd 권한</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].owner.permission.revenue_return</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수익배분 권한</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">video.[].created_at</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">생성일시</p></td>
 </tr>
 </tbody>
 </table>
