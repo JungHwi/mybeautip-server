@@ -6,9 +6,11 @@ import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.video.Video;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
@@ -33,16 +35,23 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .from(video)
                 .where(
                         searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition.cursorDate())
+                        lessThanSortedAt(condition.cursorDate()),
+                        eqVisibilityPublic(),
+                        inState(Arrays.asList("LIVE", "VOD")),
+                        video.deletedAt.isNull()
                 )
                 .limit(condition.getSize())
+                .orderBy(video.id.desc())
                 .fetch());
 
         Long count = repository.query(query -> query
                 .select(count(video))
                 .from(video)
                 .where(
-                        searchCondition(condition.getKeyword())
+                        searchCondition(condition.getKeyword()),
+                        eqVisibilityPublic(),
+                        inState(Arrays.asList("LIVE", "VOD")),
+                        video.deletedAt.isNull()
                 )
                 .fetchOne());
 
@@ -51,6 +60,14 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
 
     private BooleanExpression lessThanSortedAt(Date cursor) {
         return cursor == null ? null : video.createdAt.lt(cursor);
+    }
+
+    private BooleanExpression eqVisibilityPublic() {
+        return video.visibility.eq("PUBLIC");
+    }
+
+    private BooleanExpression inState(List<String> states) {
+        return CollectionUtils.isEmpty(states) ? null : video.state.in(states);
     }
 
     private BooleanBuilder searchCondition(String keyword) {
