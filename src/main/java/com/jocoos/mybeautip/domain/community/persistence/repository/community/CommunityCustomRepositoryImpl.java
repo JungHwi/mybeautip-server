@@ -59,17 +59,20 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .limit(condition.getSize())
                 .fetch());
 
-        Long count = repository.query(query -> query
+        return new SearchResult<>(communities, countBy(condition.getKeyword()));
+    }
+
+    @Override
+    public Long countBy(String keyword) {
+        return repository.query(query -> query
                 .select(count(community))
                 .from(community)
                 .join(member).on(community.member.eq(member))
                 .where(
-                        searchCondition(condition.getKeyword()),
+                        searchCondition(keyword),
                         notEqStatus(DELETE)
                 )
                 .fetchOne());
-
-        return new SearchResult<>(communities, count);
     }
 
     private JPAQuery<Community> createDefaultQuery(CommunitySearchCondition condition, Pageable pageable) {

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.search.api.front;
 
 import com.jocoos.mybeautip.domain.search.code.SearchType;
+import com.jocoos.mybeautip.domain.search.dto.CountResponse;
 import com.jocoos.mybeautip.domain.search.dto.SearchResponse;
 import com.jocoos.mybeautip.domain.search.service.SearchService;
 import com.jocoos.mybeautip.domain.search.valid.KeywordConstraint;
@@ -37,5 +38,12 @@ public class SearchController {
         KeywordSearchCondition condition = new KeywordSearchCondition(keyword, cursor, size);
 
         return ResponseEntity.ok(searchService.search(type, condition, member));
+    }
+
+    @GetMapping("/search/count")
+    public ResponseEntity<CountResponse> searchCount(
+            @RequestParam(required = false, defaultValue = "COMMUNITY") SearchType type,
+            @RequestParam @KeywordConstraint String keyword) {
+        return ResponseEntity.ok(searchService.count(type, keyword));
     }
 }

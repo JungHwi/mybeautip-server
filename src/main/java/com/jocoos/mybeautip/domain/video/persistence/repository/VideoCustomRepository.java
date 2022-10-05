@@ -6,4 +6,5 @@ import com.jocoos.mybeautip.video.Video;
 
 public interface VideoCustomRepository {
     SearchResult<Video> search(KeywordSearchCondition condition);
+    Long countBy(String keyword);
 }

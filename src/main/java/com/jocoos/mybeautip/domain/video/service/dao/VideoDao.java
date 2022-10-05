@@ -45,4 +45,8 @@ public class VideoDao {
     public SearchResult<Video> search(KeywordSearchCondition condition) {
         return repository.search(condition);
     }
+
+    public Long count(String keyword) {
+        return repository.countBy(keyword);
+    }
 }

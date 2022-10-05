@@ -44,18 +44,21 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .orderBy(video.id.desc())
                 .fetch());
 
-        Long count = repository.query(query -> query
+        return new SearchResult<>(videos, countBy(condition.getKeyword()));
+    }
+
+    @Override
+    public Long countBy(String keyword) {
+        return repository.query(query -> query
                 .select(count(video))
                 .from(video)
                 .where(
-                        searchCondition(condition.getKeyword()),
+                        searchCondition(keyword),
                         eqVisibilityPublic(),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
                 )
                 .fetchOne());
-
-        return new SearchResult<>(videos, count);
     }
 
     private BooleanExpression lessThanSortedAt(Date cursor) {

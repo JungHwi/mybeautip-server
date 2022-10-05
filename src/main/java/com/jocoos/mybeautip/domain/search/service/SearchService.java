@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.service.CommunityConvertService;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
+import com.jocoos.mybeautip.domain.search.dto.CountResponse;
 import com.jocoos.mybeautip.domain.search.dto.SearchResponse;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
@@ -34,6 +35,14 @@ public class SearchService {
             return searchCommunity(condition, member);
         }
         return searchVideo(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public CountResponse count(SearchType type, String keyword) {
+        if (SearchType.COMMUNITY.equals(type)) {
+            return new CountResponse(communityDao.count(keyword));
+        }
+        return new CountResponse(videoDao.count(keyword));
     }
 
     private SearchResponse<CommunityResponse> searchCommunity(KeywordSearchCondition condition, Member member) {
