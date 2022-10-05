@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.domain.search.api.front;
 
 import com.jocoos.mybeautip.domain.search.code.SearchType;
+import com.jocoos.mybeautip.domain.search.dto.SearchResponse;
 import com.jocoos.mybeautip.domain.search.service.SearchService;
 import com.jocoos.mybeautip.domain.search.valid.KeywordConstraint;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
-import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping("/search")
-    public ResponseEntity<CursorResultResponse<?>> search(
+    public ResponseEntity<SearchResponse<?>> search(
             @RequestParam(required = false, defaultValue = "COMMUNITY") SearchType type,
             @RequestParam @KeywordConstraint String keyword,
             @RequestParam(required = false) String cursor,

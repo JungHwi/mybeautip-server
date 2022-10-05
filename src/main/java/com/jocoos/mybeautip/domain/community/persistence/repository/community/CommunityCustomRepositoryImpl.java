@@ -52,7 +52,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .join(community.member, member).fetchJoin()
                 .where(
                         searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition.cursorZonedDateTime()),
+                        lessThanSortedAt(condition. cursorZonedDateTime()),
                         notEqStatus(DELETE)
                 )
                 .orderBy(sortCommunities(false))

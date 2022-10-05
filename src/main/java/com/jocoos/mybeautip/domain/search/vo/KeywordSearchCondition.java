@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.search.vo;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.ZonedDateTime;
@@ -10,15 +10,16 @@ import java.util.Date;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
-@AllArgsConstructor
+
 @Getter
+@RequiredArgsConstructor
 public class KeywordSearchCondition {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(ZONE_DATE_TIME_MILLI_FORMAT);
-    private String keyword;
+    private final String keyword;
 
-    private String cursor;
+    private final String cursor;
 
-    private int size;
+    private final int size;
 
     public String getKeyword() {
         return keyword.trim();

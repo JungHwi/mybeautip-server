@@ -5,12 +5,12 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.service.CommunityConvertService;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
+import com.jocoos.mybeautip.domain.search.dto.SearchResponse;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.domain.video.service.VideoConvertService;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
-import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.Video;
 import lombok.RequiredArgsConstructor;
@@ -29,22 +29,22 @@ public class SearchService {
     private final VideoConvertService videoConvertService;
 
     @Transactional(readOnly = true)
-    public CursorResultResponse<?> search(SearchType type, KeywordSearchCondition condition, Member member) {
+    public SearchResponse<?> search(SearchType type, KeywordSearchCondition condition, Member member) {
         if (SearchType.COMMUNITY.equals(type)) {
             return searchCommunity(condition, member);
         }
         return searchVideo(condition);
     }
 
-    private CursorResultResponse<CommunityResponse> searchCommunity(KeywordSearchCondition condition, Member member) {
+    private SearchResponse<CommunityResponse> searchCommunity(KeywordSearchCondition condition, Member member) {
         SearchResult<Community> result = communityDao.search(condition);
         List<CommunityResponse> responses = communityConvertService.toResponse(member, result.getSearchResults());
-        return new CursorResultResponse<>(responses).withCount(result.getCount());
+        return new SearchResponse<>(responses, result.getCount()).contentJsonNameCommunity();
     }
 
-    private CursorResultResponse<VideoResponse> searchVideo(KeywordSearchCondition condition) {
+    private SearchResponse<VideoResponse> searchVideo(KeywordSearchCondition condition) {
         SearchResult<Video> result = videoDao.search(condition);
         List<VideoResponse> responses = videoConvertService.toResponses(result.getSearchResults());
-        return new CursorResultResponse<>(responses).withCount(result.getCount());
+        return new SearchResponse<>(responses, result.getCount()).contentJsonNameVideo();
     }
 }
