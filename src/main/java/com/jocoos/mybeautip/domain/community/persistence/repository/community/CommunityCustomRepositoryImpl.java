@@ -21,8 +21,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
+import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.querydsl.sql.SQLExpressions.count;
@@ -50,6 +52,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .select(community)
                 .from(community)
                 .join(community.member, member).fetchJoin()
+                .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
                         searchCondition(condition.getKeyword()),
                         lessThanSortedAt(condition. cursorZonedDateTime()),
@@ -68,6 +71,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .select(count(community))
                 .from(community)
                 .join(member).on(community.member.eq(member))
+                .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
                         searchCondition(keyword),
                         notEqStatus(DELETE)
@@ -132,7 +136,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     private BooleanBuilder containsMemberUserName(String keyword) {
-        return nullSafeBuilder(() -> member.username.contains(keyword));
+        return nullSafeBuilder(() -> communityCategory.type.ne(BLIND).and(member.username.contains(keyword)));
     }
 
     private BooleanBuilder containsContents(String keyword) {
