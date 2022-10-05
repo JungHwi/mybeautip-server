@@ -10,5 +10,5 @@ import java.util.List;
 
 public interface CommunityCustomRepository {
     List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable);
-    SearchResult search(KeywordSearchCondition condition);
+    SearchResult<Community> search(KeywordSearchCondition condition);
 }

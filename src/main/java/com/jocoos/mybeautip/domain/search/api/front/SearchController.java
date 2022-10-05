@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.search.api.front;
 
+import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.domain.search.service.SearchService;
 import com.jocoos.mybeautip.domain.search.valid.KeywordConstraint;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
@@ -28,6 +29,7 @@ public class SearchController {
 
     @GetMapping("/search")
     public ResponseEntity<CursorResultResponse<?>> search(
+            @RequestParam(required = false, defaultValue = "COMMUNITY") SearchType type,
             @RequestParam @KeywordConstraint String keyword,
             @RequestParam(required = false) ZonedDateTime cursor,
             @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
@@ -35,6 +37,6 @@ public class SearchController {
         Member member = legacyMemberService.currentMember();
         KeywordSearchCondition condition = new KeywordSearchCondition(keyword, cursor, size);
 
-        return ResponseEntity.ok(searchService.searchCommunity(condition, member));
+        return ResponseEntity.ok(searchService.search(type, condition, member));
     }
 }

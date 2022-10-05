@@ -101,7 +101,7 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public SearchResult search(KeywordSearchCondition condition) {
+    public SearchResult<Community> search(KeywordSearchCondition condition) {
         return repository.search(condition);
     }
 }

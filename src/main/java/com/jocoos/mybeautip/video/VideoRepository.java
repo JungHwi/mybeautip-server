@@ -1,10 +1,11 @@
 package com.jocoos.mybeautip.video;
 
+import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCustomRepository;
 import com.jocoos.mybeautip.member.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface VideoRepository extends JpaRepository<Video, Long> {
+public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Long>, VideoCustomRepository {
 
     // Get public videos
     @Query("select v from Video v where v.visibility = 'PUBLIC' and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < ?1 and v.deletedAt is null order by v.createdAt desc")

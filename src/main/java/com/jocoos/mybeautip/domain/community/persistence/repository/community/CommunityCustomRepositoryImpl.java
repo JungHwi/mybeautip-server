@@ -45,7 +45,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     @Override
-    public SearchResult search(KeywordSearchCondition condition) {
+    public SearchResult<Community> search(KeywordSearchCondition condition) {
         List<Community> communities = repository.query(query -> query
                 .select(community)
                 .from(community)
@@ -65,12 +65,11 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .join(member).on(community.member.eq(member))
                 .where(
                         searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition.getCursor()),
                         notEqStatus(DELETE)
                 )
                 .fetchOne());
 
-        return new SearchResult(communities, count);
+        return new SearchResult<>(communities, count);
     }
 
     private JPAQuery<Community> createDefaultQuery(CommunitySearchCondition condition, Pageable pageable) {

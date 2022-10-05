@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.domain.video.service.dao;
 
+import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
 import com.jocoos.mybeautip.domain.video.service.VideoCategoryService;
@@ -38,5 +40,9 @@ public class VideoDao {
     public Video getVideo(long videoId) {
         return repository.findById(videoId)
                 .orElseThrow(() -> new NotFoundException("No such video. id - " + videoId));
+    }
+
+    public SearchResult<Video> search(KeywordSearchCondition condition) {
+        return repository.search(condition);
     }
 }
