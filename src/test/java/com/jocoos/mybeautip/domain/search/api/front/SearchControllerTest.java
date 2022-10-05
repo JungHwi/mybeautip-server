@@ -144,6 +144,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video.[].owner.video_count").type(JsonFieldType.NUMBER).description("비디오 수"),
                         fieldWithPath("video.[].owner.created_at").type(JsonFieldType.NUMBER).description("회원가입일"),
                         fieldWithPath("video.[].owner.modified_at").type(JsonFieldType.NUMBER).description("정보수정일"),
+                        fieldWithPath("video.[].owner.deleted_at").type(JsonFieldType.NUMBER).description("탈퇴일").optional(),
                         fieldWithPath("video.[].owner.permission").type(JsonFieldType.OBJECT).description("권한").optional(),
                         fieldWithPath("video.[].owner.permission.chat_post").type(JsonFieldType.BOOLEAN).description("post 권한").optional(),
                         fieldWithPath("video.[].owner.permission.comment_post").type(JsonFieldType.BOOLEAN).description("댓글 권한").optional(),
