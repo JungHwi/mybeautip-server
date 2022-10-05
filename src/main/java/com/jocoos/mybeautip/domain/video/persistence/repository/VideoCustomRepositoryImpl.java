@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -31,7 +32,8 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .select(video)
                 .from(video)
                 .where(
-                        searchCondition(condition.getKeyword())
+                        searchCondition(condition.getKeyword()),
+                        lessThanSortedAt(condition.cursorDate())
                 )
                 .limit(condition.getSize())
                 .fetch());
@@ -47,12 +49,16 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
         return new SearchResult<>(videos, count);
     }
 
+    private BooleanExpression lessThanSortedAt(Date cursor) {
+        return cursor == null ? null : video.createdAt.lt(cursor);
+    }
+
     private BooleanBuilder searchCondition(String keyword) {
         return containsTitle(keyword).or(containsDescription(keyword));
     }
 
     private BooleanBuilder containsDescription(String keyword) {
-        return nullSafeBuilder(() ->  video.content.contains(keyword));
+        return nullSafeBuilder(() -> video.content.contains(keyword));
     }
 
     private BooleanBuilder containsTitle(String keyword) {

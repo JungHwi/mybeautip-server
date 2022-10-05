@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Min;
-import java.time.ZonedDateTime;
 
 @RequiredArgsConstructor
 @Validated
@@ -31,7 +30,7 @@ public class SearchController {
     public ResponseEntity<CursorResultResponse<?>> search(
             @RequestParam(required = false, defaultValue = "COMMUNITY") SearchType type,
             @RequestParam @KeywordConstraint String keyword,
-            @RequestParam(required = false) ZonedDateTime cursor,
+            @RequestParam(required = false) String cursor,
             @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
 
         Member member = legacyMemberService.currentMember();
