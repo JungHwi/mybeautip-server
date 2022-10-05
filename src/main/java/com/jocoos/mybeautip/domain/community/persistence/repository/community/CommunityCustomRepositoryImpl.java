@@ -56,7 +56,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .where(
                         searchCondition(condition.getKeyword()),
                         lessThanSortedAt(condition. cursorZonedDateTime()),
-                        notEqStatus(DELETE)
+                        notEqStatus(DELETE),
+                        ltReportCount(3)
                 )
                 .orderBy(sortCommunities(false))
                 .limit(condition.getSize())
@@ -74,7 +75,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
                         searchCondition(keyword),
-                        notEqStatus(DELETE)
+                        notEqStatus(DELETE),
+                        ltReportCount(3)
                 )
                 .fetchOne());
     }
@@ -129,6 +131,10 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private BooleanExpression notEqStatus(CommunityStatus status) {
         return status == null ? null : community.status.ne(status);
+    }
+
+    private BooleanExpression ltReportCount(Integer reportCount) {
+        return reportCount == null ? null : community.reportCount.lt(reportCount);
     }
 
     private BooleanBuilder searchCondition(String keyword) {
