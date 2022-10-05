@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Arrays;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Log4j2
 @RestControllerAdvice
@@ -27,7 +30,7 @@ public class ControllerExceptionAdvice {
                 .error(e.getMessage())
                 .errorDescription(e.getDescription())
                 .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
     @ExceptionHandler({NotFoundException.class})
@@ -36,7 +39,7 @@ public class ControllerExceptionAdvice {
                 .error(e.getMessage())
                 .errorDescription(e.getDescription())
                 .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
     @ExceptionHandler(BadRequestException.class)
@@ -45,7 +48,7 @@ public class ControllerExceptionAdvice {
                 .error(e.getMessage())
                 .errorDescription(e.getDescription())
                 .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -63,7 +66,7 @@ public class ControllerExceptionAdvice {
                 .error(e.getMessage())
                 .errorDescription(e.getDescription())
                 .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -72,7 +75,16 @@ public class ControllerExceptionAdvice {
                 .error(e.getMessage())
                 .errorDescription(request.getDescription(false))
                 .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public final ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(BAD_REQUEST.name().toLowerCase())
+                .errorDescription(e.getMessage())
+                .build();
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
 
@@ -83,7 +95,7 @@ public class ControllerExceptionAdvice {
                 .error("bad_request")
                 .errorDescription(e.getMessage())
                 .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
     private boolean isProduction() {

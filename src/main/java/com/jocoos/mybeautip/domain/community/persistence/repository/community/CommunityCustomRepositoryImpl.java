@@ -1,10 +1,14 @@
 package com.jocoos.mybeautip.domain.community.persistence.repository.community;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -15,9 +19,13 @@ import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.function.Supplier;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
+import static com.jocoos.mybeautip.member.QMember.member;
+import static com.querydsl.sql.SQLExpressions.count;
 import static io.jsonwebtoken.lang.Collections.isEmpty;
 
 @Repository
@@ -34,6 +42,35 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         JPAQuery<Community> defaultQuery = createDefaultQuery(condition, pageable);
         addWhereConditionOptional(condition, defaultQuery);
         return defaultQuery.fetch();
+    }
+
+    @Override
+    public SearchResult search(KeywordSearchCondition condition) {
+        List<Community> communities = repository.query(query -> query
+                .select(community)
+                .from(community)
+                .join(community.member, member).fetchJoin()
+                .where(
+                        searchCondition(condition.getKeyword()),
+                        lessThanSortedAt(condition.getCursor()),
+                        notEqStatus(DELETE)
+                )
+                .orderBy(sortCommunities(false))
+                .limit(condition.getSize())
+                .fetch());
+
+        Long count = repository.query(query -> query
+                .select(count(community))
+                .from(community)
+                .join(member).on(community.member.eq(member))
+                .where(
+                        searchCondition(condition.getKeyword()),
+                        lessThanSortedAt(condition.getCursor()),
+                        notEqStatus(DELETE)
+                )
+                .fetchOne());
+
+        return new SearchResult(communities, count);
     }
 
     private JPAQuery<Community> createDefaultQuery(CommunitySearchCondition condition, Pageable pageable) {
@@ -82,5 +119,33 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
             throw new BadRequestException(BAD_REQUEST, "event_id is required to search DRIP category.");
         }
         return community.eventId.eq(eventId);
+    }
+
+    private BooleanExpression notEqStatus(CommunityStatus status) {
+        return status == null ? null : community.status.ne(status);
+    }
+
+    private BooleanBuilder searchCondition(String keyword) {
+        return containsTitle(keyword).or(containsContents(keyword)).or(containsMemberUserName(keyword));
+    }
+
+    private BooleanBuilder containsMemberUserName(String keyword) {
+        return nullSafeBuilder(() -> member.username.contains(keyword));
+    }
+
+    private BooleanBuilder containsContents(String keyword) {
+        return nullSafeBuilder(() ->  community.contents.contains(keyword));
+    }
+
+    private BooleanBuilder containsTitle(String keyword) {
+        return nullSafeBuilder(() -> community.title.contains(keyword));
+    }
+
+    private static BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> f) {
+        try {
+            return new BooleanBuilder(f.get());
+        } catch (NullPointerException e) {
+            return new BooleanBuilder();
+        }
     }
 }
