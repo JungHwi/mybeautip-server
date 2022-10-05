@@ -101,7 +101,12 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public SearchResult search(KeywordSearchCondition condition) {
+    public SearchResult<Community> search(KeywordSearchCondition condition) {
         return repository.search(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public Long count(String keyword) {
+        return repository.countBy(keyword);
     }
 }

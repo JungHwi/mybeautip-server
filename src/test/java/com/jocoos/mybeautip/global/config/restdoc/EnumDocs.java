@@ -62,4 +62,7 @@ public class EnumDocs {
 
     // Term
     Map<String, String> termType;
+
+    // Search
+    Map<String, String> searchType;
 }

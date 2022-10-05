@@ -21,8 +21,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
+import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.querydsl.sql.SQLExpressions.count;
@@ -45,32 +47,38 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     @Override
-    public SearchResult search(KeywordSearchCondition condition) {
+    public SearchResult<Community> search(KeywordSearchCondition condition) {
         List<Community> communities = repository.query(query -> query
                 .select(community)
                 .from(community)
                 .join(community.member, member).fetchJoin()
+                .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
                         searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition.getCursor()),
-                        notEqStatus(DELETE)
+                        lessThanSortedAt(condition. cursorZonedDateTime()),
+                        notEqStatus(DELETE),
+                        ltReportCount(3)
                 )
                 .orderBy(sortCommunities(false))
                 .limit(condition.getSize())
                 .fetch());
 
-        Long count = repository.query(query -> query
+        return new SearchResult<>(communities, countBy(condition.getKeyword()));
+    }
+
+    @Override
+    public Long countBy(String keyword) {
+        return repository.query(query -> query
                 .select(count(community))
                 .from(community)
                 .join(member).on(community.member.eq(member))
+                .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
-                        searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition.getCursor()),
-                        notEqStatus(DELETE)
+                        searchCondition(keyword),
+                        notEqStatus(DELETE),
+                        ltReportCount(3)
                 )
                 .fetchOne());
-
-        return new SearchResult(communities, count);
     }
 
     private JPAQuery<Community> createDefaultQuery(CommunitySearchCondition condition, Pageable pageable) {
@@ -125,12 +133,16 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return status == null ? null : community.status.ne(status);
     }
 
+    private BooleanExpression ltReportCount(Integer reportCount) {
+        return reportCount == null ? null : community.reportCount.lt(reportCount);
+    }
+
     private BooleanBuilder searchCondition(String keyword) {
         return containsTitle(keyword).or(containsContents(keyword)).or(containsMemberUserName(keyword));
     }
 
     private BooleanBuilder containsMemberUserName(String keyword) {
-        return nullSafeBuilder(() -> member.username.contains(keyword));
+        return nullSafeBuilder(() -> communityCategory.type.ne(BLIND).and(member.username.contains(keyword)));
     }
 
     private BooleanBuilder containsContents(String keyword) {
