@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -30,6 +32,15 @@ public class KeywordSearchCondition {
     }
 
     public Date cursorDate() {
-        return StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
+        return cursorToDate(simpleDateFormat);
+    }
+
+    private Date cursorToDate(SimpleDateFormat simpleDateFormat) {
+        try {
+            return StringUtils.isBlank(cursor) ? new Date() : simpleDateFormat.parse(cursor);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Wrong Type Of Date" + cursor, e);
+        }
     }
 }
