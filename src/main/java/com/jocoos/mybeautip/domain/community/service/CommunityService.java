@@ -74,23 +74,21 @@ public class CommunityService {
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES,
                                                validDomainAndReceiver(community, community.getId(), community.getMember()));
 
-        return getCommunity(community.getMember(), community);
+        return getCommunity(community);
     }
 
     @Transactional()
     public CommunityResponse getCommunity(long communityId) {
         Community community = communityDao.get(communityId);
 
-        Member member = legacyMemberService.currentMember();
-
         communityDao.readCount(communityId);
 
-        return getCommunity(member, community);
+        return getCommunity(community);
     }
 
-    private CommunityResponse getCommunity(Member member, Community community) {
+    private CommunityResponse getCommunity(Community community) {
         CommunityResponse response = converter.convert(community);
-        return relationService.setRelationInfo(member, response);
+        return relationService.setRelationInfo(response);
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +121,7 @@ public class CommunityService {
             communityList = communityDao.get(categories, request.getCursor(), pageable);
         }
 
-        return getCommunity(request.getMember(), communityList);
+        return getCommunity(communityList);
     }
 
     @Transactional(readOnly = true)
@@ -140,9 +138,9 @@ public class CommunityService {
         return communityResponses;
     }
 
-    private List<CommunityResponse> getCommunity(Member member, List<Community> communities) {
+    private List<CommunityResponse> getCommunity(List<Community> communities) {
         List<CommunityResponse> responses = converter.convert(communities);
-        return relationService.setRelationInfo(member, responses);
+        return relationService.setRelationInfo(responses);
     }
 
     public List<String> upload(List<MultipartFile> files) {
@@ -178,7 +176,7 @@ public class CommunityService {
 
         communityDao.save(community);
 
-        return getCommunity(community.getMember(), community);
+        return getCommunity(community);
     }
 
     @Transactional

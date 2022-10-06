@@ -1,11 +1,13 @@
 package com.jocoos.mybeautip.domain.scrap.dto;
 
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ScrapRequest {
 
     private long memberId;
@@ -14,5 +16,5 @@ public class ScrapRequest {
 
     private long relationId;
 
-    private boolean isScrap;
+    private Boolean isScrap;
 }

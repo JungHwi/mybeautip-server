@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.domain.scrap.service;
 
+import com.jocoos.mybeautip.domain.community.converter.CommunityScrapConverter;
+import com.jocoos.mybeautip.domain.community.dto.CommunityScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
-import com.jocoos.mybeautip.domain.scrap.converter.ScrapConverter;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
-import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.dao.ScrapDao;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -21,19 +21,18 @@ public class ScrapService {
     private final LegacyMemberService memberService;
     private final ScrapTypeFactory scrapTypeFactory;
     private final ScrapDao dao;
-    private final ScrapConverter converter;
+    private final CommunityScrapConverter converter;
 
     @Transactional
-    public ScrapResponse scrap(ScrapRequest request) {
+    public CommunityScrapResponse scrap(ScrapRequest request) {
         long memberId = memberService.currentMemberId();
         request.setMemberId(memberId);
-
         Scrap scrap = dao.scrap(request);
         return converter.convert(scrap);
     }
 
     @Transactional(readOnly = true)
-    public List<ScrapResponse> getScrapList(ScrapType type, long cursor, Pageable pageable) {
+    public List<CommunityScrapResponse> getScrapList(ScrapType type, long cursor, Pageable pageable) {
         List<Scrap> scrapList = dao.getScrapList(type, cursor, pageable);
 
         ScrapTypeService scrapTypeService = scrapTypeFactory.getScrapTypeService(type);

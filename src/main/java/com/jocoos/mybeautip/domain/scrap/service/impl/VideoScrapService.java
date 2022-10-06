@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.scrap.service.impl;
 
-import com.jocoos.mybeautip.domain.scrap.converter.ScrapConverter;
-import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
+import com.jocoos.mybeautip.domain.community.converter.CommunityScrapConverter;
+import com.jocoos.mybeautip.domain.community.dto.CommunityScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.ScrapTypeService;
 import com.jocoos.mybeautip.video.Video;
@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
 public class VideoScrapService implements ScrapTypeService {
 
     private final VideoService videoService;
-    private final ScrapConverter converter;
+    private final CommunityScrapConverter converter;
 
     @Override
     @Transactional(readOnly = true)
-    public List<ScrapResponse> getScrapInfo(List<Scrap> scrapList) {
+    public List<CommunityScrapResponse> getScrapInfo(List<Scrap> scrapList) {
         List<Long> ids = scrapList.stream()
                 .map(Scrap::getRelationId)
                 .collect(Collectors.toList());
