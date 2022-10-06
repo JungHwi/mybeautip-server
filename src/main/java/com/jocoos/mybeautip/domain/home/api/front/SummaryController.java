@@ -23,7 +23,7 @@ public class SummaryController {
     private final SummaryService summaryService;
 
     @GetMapping("/1/summary/event")
-    public ResponseEntity<List<EventListResponse>> eventSumamry() {
+    public ResponseEntity<List<EventListResponse>> eventSummary() {
         return ResponseEntity.ok(summaryService.summaryEvent());
     }
 

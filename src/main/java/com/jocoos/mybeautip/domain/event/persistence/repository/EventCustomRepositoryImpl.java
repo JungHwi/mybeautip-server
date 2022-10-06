@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +28,16 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
 
     @Override
     public List<Event> getEvents(EventSearchCondition condition) {
+        JPAQuery<Event> baseQuery = baseSelectQuery(condition);
+        if (condition.getLimit() != null) {
+            return baseQuery
+                    .limit(condition.getLimit())
+                    .fetch();
+        }
+        return baseQuery.fetch();
+    }
+
+    private JPAQuery<Event> baseSelectQuery(EventSearchCondition condition) {
         return repository.query(query -> query
                 .select(event)
                 .from(event)
@@ -36,9 +47,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                         startedAtBefore(condition.getBetween()),
                         endedAtAfter(condition.getBetween())
                 )
-                .orderBy(event.statusSorting.asc(), event.sorting.asc(), event.id.desc())
-                .limit(condition.getLimit())
-                .fetch());
+                .orderBy(event.statusSorting.asc(), event.sorting.asc(), event.id.desc()));
     }
 
     private BooleanExpression endedAtAfter(ZonedDateTime dateTime) {
