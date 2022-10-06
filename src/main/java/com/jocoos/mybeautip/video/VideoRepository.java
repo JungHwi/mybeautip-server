@@ -20,7 +20,6 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
     // Get public videos
     @Query("select v from Video v where v.visibility = 'PUBLIC' and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < ?1 and v.deletedAt is null order by v.createdAt desc")
     Slice<Video> getAnyoneAllVideos(Date cursor, Pageable pageable);
-
     @Query("select v from Video v inner join fetch VideoCategoryMapping c on v.id = c.videoId where c.categoryId = ?1 and v.visibility = 'PUBLIC' and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < ?2 and v.deletedAt is null order by v.createdAt desc")
     Slice<Video> getCategoryVideo(Integer categoryId, Date cursor, Pageable pageable);
 
@@ -144,4 +143,6 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
     Page<Video> findByTypeAndStateInAndAndCreatedAtBetweenAndDeletedAtIsNull(String type, Collection<String> state, Date from, Date now, Pageable pageable);
 
     Optional<Video> findTopByMemberIdAndCreatedAtBetweenAndDeletedAtIsNullOrderByCreatedAtDesc(Long owner, Date from, Date to);
+
+    List<Video> findAllByVisibilityAndStateInAndCreatedAtBeforeAndDeletedAtIsNullOrderByCreatedAtDesc(String visibility, List<String> states, Date date, Pageable pageable);
 }
