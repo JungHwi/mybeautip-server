@@ -69,6 +69,6 @@ public class VideoResponse implements CursorInterface {
     @Override
     @JsonIgnore
     public String getCursor() {
-        return String.valueOf(id);
+        return String.valueOf(createdAt);
     }
 }
