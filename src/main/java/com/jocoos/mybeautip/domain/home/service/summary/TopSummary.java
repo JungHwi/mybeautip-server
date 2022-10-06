@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityCategoryConverte
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
-import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.home.converter.SummaryConverter;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryContentResponse;
@@ -25,18 +24,12 @@ import static com.jocoos.mybeautip.domain.home.code.SummaryCount.TOP_SUMMARY;
 public class TopSummary {
 
     private final CommunityDao communityDao;
-    private final CommunityCategoryDao categoryDao;
     private final SummaryConverter summaryConverter;
     private final CommunityCategoryConverter categoryConverter;
 
-    public TopSummaryResponse getResponse() {
-        List<CommunityCategoryResponse> categoryResponses = getTopCategories();
+    public TopSummaryResponse getResponse(List<CommunityCategory> topCategories) {
+        List<CommunityCategoryResponse> categoryResponses =  categoryConverter.convert(topCategories);
         return new TopSummaryResponse(categoryResponses, getTopSummaryContents(categoryResponses));
-    }
-
-    private List<CommunityCategoryResponse> getTopCategories() {
-        List<CommunityCategory> categories = categoryDao.allSummaryCategories();
-        return categoryConverter.convert(categories);
     }
 
     private List<TopSummaryContentResponse> getTopSummaryContents(List<CommunityCategoryResponse> topCategories) {

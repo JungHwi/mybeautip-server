@@ -1,14 +1,13 @@
 package com.jocoos.mybeautip.domain.community.dto;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import lombok.AllArgsConstructor;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class CommunityMemberResponse {
 
@@ -24,5 +23,13 @@ public class CommunityMemberResponse {
         this.id = null;
         this.username = null;
         this.avatarUrl = null;
+    }
+
+    @QueryProjection
+    public CommunityMemberResponse(Long id, MemberStatus status, String username, String avatarUrl) {
+        this.id = id;
+        this.status = status;
+        this.username = username;
+        this.avatarUrl = avatarUrl;
     }
 }

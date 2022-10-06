@@ -74,11 +74,6 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public List<SummaryResult> summary(CommunityCategoryType type, int size) {
-        return repository.summary(new SummaryCommunityCondition(type, size));
-    }
-
-    @Transactional(readOnly = true)
     public List<SummaryResult> summary(Long categoryId, CommunityCategoryType type, int size) {
         return repository.summary(new SummaryCommunityCondition(categoryId, type, size));
     }

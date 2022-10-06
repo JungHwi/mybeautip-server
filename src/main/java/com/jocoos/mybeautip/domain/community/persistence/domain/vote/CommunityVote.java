@@ -22,7 +22,7 @@ public class CommunityVote {
     @JoinColumn(name = "community_id")
     private Community community;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "community_file_id")
     private CommunityFile communityFile;
 
