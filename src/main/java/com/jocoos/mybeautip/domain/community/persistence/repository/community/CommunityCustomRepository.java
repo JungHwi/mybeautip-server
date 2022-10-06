@@ -4,8 +4,8 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
-import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
-import com.jocoos.mybeautip.domain.home.vo.SummaryResult;
+import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityCondition;
+import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityResult;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -14,5 +14,5 @@ public interface CommunityCustomRepository {
     List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable);
     SearchResult<Community> search(KeywordSearchCondition condition);
     Long countBy(String keyword);
-    List<SummaryResult> summary(SummaryCommunityCondition condition);
+    List<SummaryCommunityResult> summary(SummaryCommunityCondition condition);
 }

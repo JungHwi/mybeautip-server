@@ -10,8 +10,8 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRep
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
-import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
-import com.jocoos.mybeautip.domain.home.vo.SummaryResult;
+import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityCondition;
+import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -74,7 +74,7 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public List<SummaryResult> summary(Long categoryId, CommunityCategoryType type, int size) {
+    public List<SummaryCommunityResult> summary(Long categoryId, CommunityCategoryType type, int size) {
         return repository.summary(new SummaryCommunityCondition(categoryId, type, size));
     }
 

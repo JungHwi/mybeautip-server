@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.home.service.summary;
+package com.jocoos.mybeautip.domain.home.service.community;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.converter.CommunityCategoryConverter;
@@ -9,7 +9,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.home.converter.SummaryConverter;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryContentResponse;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryResponse;
-import com.jocoos.mybeautip.domain.home.vo.SummaryResult;
+import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -45,11 +45,11 @@ public class TopSummary {
     }
 
     private List<CommunityResponse> communitySummaryFrom(Long categoryId, CommunityCategoryType type) {
-        List<SummaryResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount());
+        List<SummaryCommunityResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount());
         return convertSummaryByType(type, summaryResult);
     }
 
-    private List<CommunityResponse> convertSummaryByType(CommunityCategoryType type, List<SummaryResult> tops) {
+    private List<CommunityResponse> convertSummaryByType(CommunityCategoryType type, List<SummaryCommunityResult> tops) {
         if (DRIP.equals(type)) {
             return summaryConverter.convertDripSummary(tops);
         }

@@ -5,7 +5,7 @@ import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.VoteResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
-import com.jocoos.mybeautip.domain.home.vo.SummaryResult;
+import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityResult;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,14 +16,14 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = {CommunityCategoryConverter.class, MemberConverter.class})
 public interface SummaryConverter {
 
-    default List<CommunityResponse> convertBlindSummary(List<SummaryResult> results) {
+    default List<CommunityResponse> convertBlindSummary(List<SummaryCommunityResult> results) {
         return results
                 .stream()
                 .map(result -> convertBlindSummary(result.getCommunity()))
                 .collect(Collectors.toList());
     }
 
-    default List<CommunityResponse> convertNormalSummary(List<SummaryResult> results) {
+    default List<CommunityResponse> convertNormalSummary(List<SummaryCommunityResult> results) {
         return results
                 .stream()
                 .map(result -> convertNormalSummary(
@@ -33,7 +33,7 @@ public interface SummaryConverter {
                 .collect(Collectors.toList());
     }
 
-    default List<CommunityResponse> convertVoteSummary(List<SummaryResult> results) {
+    default List<CommunityResponse> convertVoteSummary(List<SummaryCommunityResult> results) {
         return results
                 .stream()
                 .map(result -> convertVoteSummary(
@@ -43,7 +43,7 @@ public interface SummaryConverter {
                 .collect(Collectors.toList());
     }
 
-    default List<CommunityResponse> convertDripSummary(List<SummaryResult> results) {
+    default List<CommunityResponse> convertDripSummary(List<SummaryCommunityResult> results) {
         return results.stream()
                 .map(result -> convertDripSummary(
                         result.getCommunity(),

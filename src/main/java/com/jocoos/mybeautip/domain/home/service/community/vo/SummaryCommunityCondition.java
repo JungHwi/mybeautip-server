@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.home.vo;
+package com.jocoos.mybeautip.domain.home.service.community.vo;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import lombok.Getter;

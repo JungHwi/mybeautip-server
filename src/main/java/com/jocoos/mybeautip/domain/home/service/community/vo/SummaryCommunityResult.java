@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.home.vo;
+package com.jocoos.mybeautip.domain.home.service.community.vo;
 
 import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
 import com.jocoos.mybeautip.domain.community.dto.VoteResponse;
@@ -17,7 +17,7 @@ import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static java.util.Collections.emptyList;
 
 @Getter
-public class SummaryResult {
+public class SummaryCommunityResult {
 
     private final CommunityMemberResponse memberResponse;
 
@@ -27,21 +27,21 @@ public class SummaryResult {
     private List<String> thumbnailUrl;
 
     @QueryProjection
-    public SummaryResult(Community community) {
+    public SummaryCommunityResult(Community community) {
         this.community = community;
         this.eventTitle = null;
         this.memberResponse = null;
     }
 
     @QueryProjection
-    public SummaryResult(Community community, CommunityMemberResponse memberResponse) {
+    public SummaryCommunityResult(Community community, CommunityMemberResponse memberResponse) {
         this.community = community;
         this.memberResponse = memberResponse;
         this.eventTitle = null;
     }
 
     @QueryProjection
-    public SummaryResult(Community community, CommunityMemberResponse memberResponse, String eventTitle) {
+    public SummaryCommunityResult(Community community, CommunityMemberResponse memberResponse, String eventTitle) {
         this.community = community;
         this.memberResponse = memberResponse;
         this.eventTitle = eventTitle;
