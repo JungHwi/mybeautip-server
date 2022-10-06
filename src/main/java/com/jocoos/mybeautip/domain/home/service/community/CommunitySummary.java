@@ -11,7 +11,6 @@ import com.jocoos.mybeautip.domain.home.dto.CommunitySummaryResponse;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryResponse;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
 import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,6 @@ public class CommunitySummary {
     private final SummaryConverter summaryConverter;
     private final TopSummary topSummary;
     private final CommunityRelationService relationService;
-    private final LegacyMemberService memberService;
 
 
     @Transactional(readOnly = true)
@@ -56,8 +54,7 @@ public class CommunitySummary {
     private List<CommunityResponse> voteSummary(Long voteCategoryId) {
         List<SummaryCommunityResult> votes = communityDao.summary(voteCategoryId, VOTE, VOTE_SUMMARY.getCount());
         List<CommunityResponse> responses = summaryConverter.convertVoteSummary(votes);
-        Member member = memberService.currentMember();
-        return relationService.setRelationInfo(member, responses);
+        return relationService.setRelationInfo(responses);
     }
 
     private List<CommunityCategory> getTopCategories(List<CommunityCategory> categories) {

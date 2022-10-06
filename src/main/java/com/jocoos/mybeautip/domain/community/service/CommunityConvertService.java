@@ -26,14 +26,14 @@ public class CommunityConvertService {
     public List<CommunityResponse> toResponse(Member member, List<Community> communities) {
         List<CommunityResponse> responses = converter.convert(communities);
         setUserVoted(member, responses);
-        return relationService.setRelationInfo(member, responses);
+        return relationService.setRelationInfo(responses);
     }
 
     @Transactional(readOnly = true)
     public CommunityResponse toResponse(Member member, Community community) {
         CommunityResponse response = converter.convert(community);
         setUserVoted(member, response);
-        return relationService.setRelationInfo(member, response);
+        return relationService.setRelationInfo(response);
     }
 
     @Transactional(readOnly = true)
