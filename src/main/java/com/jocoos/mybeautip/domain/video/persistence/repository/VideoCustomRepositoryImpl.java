@@ -35,7 +35,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .from(video)
                 .where(
                         searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition.cursorDate()),
+                        lessThanCreatedAt(condition.cursorDate()),
                         eqVisibilityPublic(),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
@@ -61,7 +61,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .fetchOne());
     }
 
-    private BooleanExpression lessThanSortedAt(Date cursor) {
+    private BooleanExpression lessThanCreatedAt(Date cursor) {
         return cursor == null ? null : video.createdAt.lt(cursor);
     }
 
