@@ -10,5 +10,5 @@ import java.util.List;
 @Getter
 public class TopSummaryContentResponse {
     private final Long categoryId;
-    private final List<CommunityResponse> communities;
+    private final List<CommunityResponse> community;
 }

@@ -33,6 +33,7 @@ public class CommunityResponse implements CursorInterface {
 
     private Long eventId;
 
+    private String eventTitle;
     private String title;
 
     private String contents;

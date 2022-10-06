@@ -9,6 +9,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 public class TopSummaryResponse {
-    private final List<CommunityCategoryResponse> categories;
-    private final List<TopSummaryContentResponse> contents;
+    private final List<CommunityCategoryResponse> category;
+    private final List<TopSummaryContentResponse> content;
 }

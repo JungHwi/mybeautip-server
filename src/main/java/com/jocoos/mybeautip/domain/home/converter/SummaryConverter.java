@@ -79,7 +79,6 @@ public interface SummaryConverter {
 
     @Mapping(target = "id", source = "community.id")
     @Mapping(target = "status", source = "community.status")
-    @Mapping(target = "title", source = "eventTitle")
     @Mapping(target = "fileUrl", source = "thumbnailUrl")
     @Mapping(target = "member", source = "memberResponse")
     @Mapping(target = "votes", ignore = true)
