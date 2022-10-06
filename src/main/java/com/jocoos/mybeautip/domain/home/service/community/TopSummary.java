@@ -30,7 +30,6 @@ public class TopSummary {
     private final SummaryConverter summaryConverter;
     private final CommunityCategoryConverter categoryConverter;
     private final CommunityRelationService relationService;
-    private final LegacyMemberService memberService;
 
     public TopSummaryResponse getResponse(List<CommunityCategory> topCategories) {
         List<CommunityCategoryResponse> categoryResponses =  categoryConverter.convert(topCategories);
@@ -52,8 +51,7 @@ public class TopSummary {
     private List<CommunityResponse> communitySummaryFrom(Long categoryId, CommunityCategoryType type) {
         List<SummaryCommunityResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount());
         List<CommunityResponse> responses = convertSummaryByType(type, summaryResult);
-        Member member = memberService.currentMember();
-        return relationService.setRelationInfo(member, responses);
+        return relationService.setRelationInfo(responses);
     }
 
     private List<CommunityResponse> convertSummaryByType(CommunityCategoryType type, List<SummaryCommunityResult> tops) {
