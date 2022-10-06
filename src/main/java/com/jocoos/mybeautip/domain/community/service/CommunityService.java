@@ -42,6 +42,7 @@ import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.val
 @RequiredArgsConstructor
 public class CommunityService {
 
+    private final CommunityRelationService relationService;
     private final EventJoinService eventJoinService;
 
     private final ActivityPointService activityPointService;

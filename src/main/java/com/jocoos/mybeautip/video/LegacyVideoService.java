@@ -875,4 +875,10 @@ public class LegacyVideoService {
         return videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found, videoId: " + videoId));
     }
+
+    @Transactional(readOnly = true)
+    public List<Video> findByIdInAndVisibility(List<Long> ids, Visibility visibility) {
+        String visibilityName = visibility != null ? visibility.name() : Visibility.PUBLIC.name();
+        return videoRepository.findByIdInAndVisibility(ids, visibilityName);
+    }
 }

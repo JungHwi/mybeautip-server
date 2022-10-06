@@ -21,8 +21,8 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
+import com.jocoos.mybeautip.video.scrap.LegacyVideoScrapService;
 import com.jocoos.mybeautip.video.scrap.VideoScrap;
-import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import com.jocoos.mybeautip.video.view.VideoView;
 import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import lombok.AllArgsConstructor;
@@ -81,7 +81,7 @@ public class LegacyVideoController {
     private final RevenueService revenueService;
     private final KeywordService keywordService;
     private final RevenueRepository revenueRepository;
-    private final VideoScrapService videoScrapService;
+    private final LegacyVideoScrapService legacyVideoScrapService;
     private final CommentReportRepository commentReportRepository;
     private final BlockService blockService;
 
@@ -106,7 +106,7 @@ public class LegacyVideoController {
                                  RevenueService revenueService,
                                  KeywordService keywordService,
                                  RevenueRepository revenueRepository,
-                                 VideoScrapService videoScrapService,
+                                 LegacyVideoScrapService legacyVideoScrapService,
                                  CommentReportRepository commentReportRepository,
                                  BlockService blockService,
                                  ActivityPointService activityPointService) {
@@ -126,7 +126,7 @@ public class LegacyVideoController {
         this.revenueService = revenueService;
         this.keywordService = keywordService;
         this.revenueRepository = revenueRepository;
-        this.videoScrapService = videoScrapService;
+        this.legacyVideoScrapService = legacyVideoScrapService;
         this.commentReportRepository = commentReportRepository;
         this.blockService = blockService;
         this.activityPointService = activityPointService;
@@ -734,7 +734,7 @@ public class LegacyVideoController {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            VideoScrap scrap = videoScrapService.scrapVideo(video, member);
+            VideoScrap scrap = legacyVideoScrapService.scrapVideo(video, member);
             VideoScrapInfo info = new VideoScrapInfo(scrap, legacyVideoService.generateVideoInfo(scrap.getVideo()));
             return new ResponseEntity<>(info, HttpStatus.OK);
         } catch (BadRequestException e) {
@@ -751,7 +751,7 @@ public class LegacyVideoController {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            videoScrapService.deleteScrap(video, member);
+            legacyVideoScrapService.deleteScrap(video, member);
             return new ResponseEntity(HttpStatus.OK);
         } catch (NotFoundException e) {
             throw new NotFoundException(messageService.getMessage(SCRAP_NOT_FOUND, lang));
@@ -767,7 +767,7 @@ public class LegacyVideoController {
                 .orElseThrow(() -> new NotFoundException(messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            videoScrapService.deleteScrap(video, member);
+            legacyVideoScrapService.deleteScrap(video, member);
             return new ResponseEntity(HttpStatus.OK);
         } catch (NotFoundException e) {
             throw new NotFoundException(messageService.getMessage(SCRAP_NOT_FOUND, lang));
