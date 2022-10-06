@@ -5,10 +5,12 @@ import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -30,7 +32,7 @@ public class Scrap extends BaseEntity {
     private long relationId;
 
     @Column
-    private boolean isScrap;
+    private Boolean isScrap;
 
     public Scrap(long memberId, ScrapType type, long relationId) {
         this.memberId = memberId;

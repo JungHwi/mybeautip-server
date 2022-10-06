@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.scrap.service.dao;
 
+import com.jocoos.mybeautip.domain.community.converter.CommunityScrapConverter;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
-import com.jocoos.mybeautip.domain.scrap.converter.ScrapConverter;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.persistence.repository.ScrapRepository;
@@ -17,11 +17,18 @@ import java.util.List;
 public class ScrapDao {
 
     private final ScrapRepository repository;
-    private final ScrapConverter converter;
+    private final CommunityScrapConverter converter;
 
     @Transactional
     public Scrap scrap(ScrapRequest request) {
-        Scrap scrap = converter.convert(request);
+        Scrap scrap = getScrap(request.getType(), request.getMemberId(), request.getRelationId());
+
+        if (scrap.getIsScrap() == request.getIsScrap()) {
+            return scrap;
+        }
+
+        scrap.setIsScrap(request.getIsScrap());
+
         return repository.save(scrap);
     }
 
@@ -30,4 +37,9 @@ public class ScrapDao {
         return repository.findByTypeAndIdLessThan(type, cursor, pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Scrap getScrap(ScrapType type, long memberId, long communityId) {
+        return repository.findByTypeAndMemberIdAndRelationId(type, memberId, communityId)
+                .orElse(new Scrap(memberId, type, communityId));
+    }
 }
