@@ -8,7 +8,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.home.converter.SummaryConverter;
 import com.jocoos.mybeautip.domain.home.dto.CommunitySummaryResponse;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryResponse;
-import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityResult;
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

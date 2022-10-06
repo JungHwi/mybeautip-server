@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.home.service.community.vo;
+package com.jocoos.mybeautip.domain.home.vo;
 
 import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
 import com.jocoos.mybeautip.domain.community.dto.VoteResponse;

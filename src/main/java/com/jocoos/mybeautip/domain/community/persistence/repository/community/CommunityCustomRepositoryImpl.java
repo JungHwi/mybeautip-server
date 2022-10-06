@@ -10,9 +10,9 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
-import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityResult;
-import com.jocoos.mybeautip.domain.home.vo.QSummaryResult;
-import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityCondition;
+import com.jocoos.mybeautip.domain.home.vo.QSummaryCommunityResult;
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -31,7 +31,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.*;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
@@ -194,20 +195,20 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private List<SummaryCommunityResult> summaryDefault(JPAQuery<?> baseQuery) {
         return baseQuery
-                .select(new QSummaryResult(community))
+                .select(new QSummaryCommunityResult(community))
                 .fetch();
     }
 
     private List<SummaryCommunityResult> summaryWithMember(JPAQuery<?> baseQuery) {
         return baseQuery
-                .select(new QSummaryResult(community, memberResponse()))
+                .select(new QSummaryCommunityResult(community, memberResponse()))
                 .join(member).on(community.member.eq(member))
                 .fetch();
     }
 
     private List<SummaryCommunityResult> summaryWithMemberAndEventTitle(JPAQuery<?> baseQuery) {
         return baseQuery
-                .select(new QSummaryResult(community, memberResponse(), event.title))
+                .select(new QSummaryCommunityResult(community, memberResponse(), event.title))
                 .join(member).on(community.member.eq(member))
                 .join(event).on(community.eventId.eq(event.id))
                 .on(community.eventId.eq(event.id))

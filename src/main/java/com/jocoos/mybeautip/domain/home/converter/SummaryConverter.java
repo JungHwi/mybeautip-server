@@ -5,7 +5,7 @@ import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.VoteResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
-import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityResult;
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

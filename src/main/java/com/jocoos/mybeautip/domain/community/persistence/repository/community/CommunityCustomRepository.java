@@ -4,8 +4,8 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
-import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityCondition;
-import com.jocoos.mybeautip.domain.home.service.community.vo.SummaryCommunityResult;
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
