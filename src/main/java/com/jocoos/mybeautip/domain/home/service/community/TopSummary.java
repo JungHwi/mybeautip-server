@@ -5,11 +5,14 @@ import com.jocoos.mybeautip.domain.community.converter.CommunityCategoryConverte
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
+import com.jocoos.mybeautip.domain.community.service.CommunityRelationService;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.home.converter.SummaryConverter;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryContentResponse;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryResponse;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
+import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +29,8 @@ public class TopSummary {
     private final CommunityDao communityDao;
     private final SummaryConverter summaryConverter;
     private final CommunityCategoryConverter categoryConverter;
+    private final CommunityRelationService relationService;
+    private final LegacyMemberService memberService;
 
     public TopSummaryResponse getResponse(List<CommunityCategory> topCategories) {
         List<CommunityCategoryResponse> categoryResponses =  categoryConverter.convert(topCategories);
@@ -46,7 +51,9 @@ public class TopSummary {
 
     private List<CommunityResponse> communitySummaryFrom(Long categoryId, CommunityCategoryType type) {
         List<SummaryCommunityResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount());
-        return convertSummaryByType(type, summaryResult);
+        List<CommunityResponse> responses = convertSummaryByType(type, summaryResult);
+        Member member = memberService.currentMember();
+        return relationService.setRelationInfo(member, responses);
     }
 
     private List<CommunityResponse> convertSummaryByType(CommunityCategoryType type, List<SummaryCommunityResult> tops) {
