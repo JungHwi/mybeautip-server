@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.home.api.front;
 
+import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.home.dto.CommunitySummaryResponse;
 import com.jocoos.mybeautip.domain.home.service.SummaryService;
 import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
@@ -20,6 +21,11 @@ import java.util.List;
 public class SummaryController {
 
     private final SummaryService summaryService;
+
+    @GetMapping("/1/summary/event")
+    public ResponseEntity<List<EventListResponse>> eventSumamry() {
+        return ResponseEntity.ok(summaryService.summaryEvent());
+    }
 
     @GetMapping("/1/summary/community")
     public ResponseEntity<CommunitySummaryResponse> communitySummary() {

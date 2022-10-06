@@ -37,6 +37,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                         endedAtAfter(condition.getBetween())
                 )
                 .orderBy(event.statusSorting.asc(), event.sorting.asc(), event.id.desc())
+                .limit(condition.getLimit())
                 .fetch());
     }
 

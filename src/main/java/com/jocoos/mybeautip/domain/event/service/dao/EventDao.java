@@ -23,10 +23,30 @@ public class EventDao {
 
     @Transactional(readOnly = true)
     public List<Event> getVisibleEvents(EventType type) {
-        return repository.getEvents(new EventSearchCondition(type, EventStatus.visibleEventStatus));
+        EventSearchCondition condition = EventSearchCondition.builder()
+                .type(type)
+                .statuses(EventStatus.visibleEventStatus)
+                .build();
+        return repository.getEvents(condition);
     }
 
+    @Transactional(readOnly = true)
     public List<Event> getProgressEvents(EventType type) {
-        return repository.getEvents(new EventSearchCondition(type, Collections.singleton(PROGRESS), ZonedDateTime.now()));
+        EventSearchCondition condition = EventSearchCondition.builder()
+                .type(type)
+                .statuses(Collections.singleton(PROGRESS))
+                .between(ZonedDateTime.now())
+                .build();
+        return repository.getEvents(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Event> summary(int eventNum) {
+        EventSearchCondition condition = EventSearchCondition.builder()
+                .statuses(Collections.singleton(PROGRESS))
+                .between(ZonedDateTime.now())
+                .limit(eventNum)
+                .build();
+        return repository.getEvents(condition);
     }
 }

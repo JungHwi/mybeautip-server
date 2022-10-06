@@ -18,7 +18,7 @@ public class VideoSummary {
     private final VideoConvertService videoConvertService;
 
     @Transactional(readOnly = true)
-    public List<VideoResponse> summaryVideo(int summaryVideoNum) {
+    public List<VideoResponse> summary(int summaryVideoNum) {
         List<Video> videos = videoDao.getVideos(summaryVideoNum);
         return videoConvertService.toResponses(videos);
     }

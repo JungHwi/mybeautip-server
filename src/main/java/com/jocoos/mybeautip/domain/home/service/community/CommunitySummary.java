@@ -32,7 +32,7 @@ public class CommunitySummary {
 
 
     @Transactional(readOnly = true)
-    public CommunitySummaryResponse summaryCommunity() {
+    public CommunitySummaryResponse summary() {
 
         List<CommunityCategory> allSummaryCategories = categoryDao.allSummaryCategories();
 
