@@ -4,10 +4,13 @@ import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
+import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -24,16 +27,35 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
     }
 
     @Override
-    public List<Event> getEvents(EventType type, Set<EventStatus> statuses) {
+    public List<Event> getEvents(EventSearchCondition condition) {
+        JPAQuery<Event> baseQuery = baseSelectQuery(condition);
+        if (condition.getLimit() != null) {
+            return baseQuery
+                    .limit(condition.getLimit())
+                    .fetch();
+        }
+        return baseQuery.fetch();
+    }
+
+    private JPAQuery<Event> baseSelectQuery(EventSearchCondition condition) {
         return repository.query(query -> query
                 .select(event)
                 .from(event)
                 .where(
-                        inStatuses(statuses),
-                        eqType(type)
+                        inStatuses(condition.getStatuses()),
+                        eqType(condition.getType()),
+                        startedAtBefore(condition.getBetween()),
+                        endedAtAfter(condition.getBetween())
                 )
-                .orderBy(event.statusSorting.asc(), event.sorting.asc(), event.id.desc())
-                .fetch());
+                .orderBy(event.statusSorting.asc(), event.sorting.asc(), event.id.desc()));
+    }
+
+    private BooleanExpression endedAtAfter(ZonedDateTime dateTime) {
+        return dateTime == null ? null : event.endAt.after(dateTime);
+    }
+
+    private BooleanExpression startedAtBefore(ZonedDateTime dateTime) {
+        return dateTime == null ? null : event.startAt.before(dateTime);
     }
 
     private BooleanExpression inStatuses(Set<EventStatus> statuses) {

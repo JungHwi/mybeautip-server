@@ -21,6 +21,7 @@ public class EventListResponse implements CursorInterface {
     private String title;
     private String thumbnailImageUrl;
     private String bannerImageUrl;
+    private String color;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime startAt;

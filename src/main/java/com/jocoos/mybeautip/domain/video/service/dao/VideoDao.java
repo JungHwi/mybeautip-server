@@ -10,10 +10,12 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -48,5 +50,14 @@ public class VideoDao {
 
     public Long count(String keyword) {
         return repository.countBy(keyword);
+    }
+
+    public List<Video> getVideos(int videoNum) {
+        return repository
+                .findAllByVisibilityAndStateInAndCreatedAtBeforeAndDeletedAtIsNullOrderByCreatedAtDesc(
+                        "PUBLIC",
+                        Arrays.asList("VOD", "LIVE"),
+                        new Date(),
+                        PageRequest.of(0, videoNum));
     }
 }

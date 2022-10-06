@@ -170,7 +170,11 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         ),
                         customResponseFields("custom-response", beneathPath("data.term_type").withSubsectionId("term_type"),
                                 attributes(key("title").value("TermType")),
-                                enumConvertFieldDescriptor((enumDocs.getTermType())))
+                                enumConvertFieldDescriptor((enumDocs.getTermType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.search_type").withSubsectionId("search_type"),
+                                attributes(key("title").value("SearchType")),
+                                enumConvertFieldDescriptor((enumDocs.getSearchType())))
                 ));
     }
 

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.event.api.front;
 
+import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
@@ -18,8 +19,10 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping("/1/event")
-    public ResponseEntity<List<EventListResponse>> getEventList(@RequestParam(name = "event_type", required = false) EventType eventType) {
-        List<EventListResponse> response = eventService.getEventList(eventType);
+    public ResponseEntity<List<EventListResponse>> getEventList(
+            @RequestParam(name = "event_type", required = false) EventType eventType,
+            @RequestParam(name = "status", required = false) EventStatus status) {
+        List<EventListResponse> response = eventService.getEventList(eventType, status);
 
         return ResponseEntity.ok(response);
     }

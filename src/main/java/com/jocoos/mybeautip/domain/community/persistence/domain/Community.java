@@ -73,13 +73,13 @@ public class Community extends BaseEntity {
     @Column(columnDefinition = "DATETIME(3)")
     private ZonedDateTime sortedAt;
 
-    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @OneToMany(mappedBy = "community", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityFile> communityFileList = new ArrayList<>();
 
     @OneToMany(mappedBy = "community", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityVote> communityVoteList = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", insertable = false, updatable = false)
     private Member member;
 

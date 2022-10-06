@@ -21,6 +21,8 @@ public interface CommunityCategoryRepository extends DefaultJpaRepository<Commun
     List<CommunityCategory> findAllByParentId(Long parentId);
 
     List<CommunityCategory> findAllByParentId(Long parentId, Pageable pageable);
+
+    List<CommunityCategory> findAllByIsInSummaryIsTrue();
 }
 
 
