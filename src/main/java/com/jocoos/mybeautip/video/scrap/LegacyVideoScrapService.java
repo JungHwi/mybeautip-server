@@ -27,7 +27,7 @@ import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class VideoScrapService {
+public class LegacyVideoScrapService {
 
     private final VideoRepository videoRepository;
     private final VideoScrapRepository videoScrapRepository;

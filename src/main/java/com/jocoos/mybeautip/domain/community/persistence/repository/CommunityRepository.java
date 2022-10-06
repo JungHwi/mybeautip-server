@@ -17,7 +17,7 @@ import java.util.List;
 
 @Repository
 public interface CommunityRepository extends ExtendedQuerydslJpaRepository<Community, Long>, CommunityCustomRepository {
-
+    List<Community> findByIdIn(List<Long> ids);
     Slice<Community> findByMemberIdAndStatusAndIdLessThan(long memberId, CommunityStatus status, long id, Pageable pageable);
     Slice<Community> findByCategoryInAndSortedAtLessThan(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable);
     Slice<Community> findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(Long EventId, List<CommunityCategory> categoryList, Boolean isWin, ZonedDateTime cursor, Pageable pageable);

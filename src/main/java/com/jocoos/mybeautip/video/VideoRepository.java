@@ -145,4 +145,6 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
     Optional<Video> findTopByMemberIdAndCreatedAtBetweenAndDeletedAtIsNullOrderByCreatedAtDesc(Long owner, Date from, Date to);
 
     List<Video> findAllByVisibilityAndStateInAndCreatedAtBeforeAndDeletedAtIsNullOrderByCreatedAtDesc(String visibility, List<String> states, Date date, Pageable pageable);
+
+    List<Video> findByIdInAndVisibility(List<Long> ids, String visibility);
 }
