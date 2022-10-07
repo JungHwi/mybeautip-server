@@ -127,7 +127,8 @@ dependencies {
 
 test {
   doFirst {
-    systemProperty 'spring.profiles.active', 'dev'
+    systemProperty 'spring.profiles.active', System.getProperty("profile", "local")
+//    println "# test environment: " + systemProperties['spring.profiles.active']
   }
   outputs.dir snippetsDir
   useJUnitPlatform()

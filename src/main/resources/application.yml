@@ -187,10 +187,10 @@ management:
 flipflop:
   app-key: testapp3
 
-redis:
-  host: localhost
-  port: 6379
-  password: akdlqbxlq#1@Jocoos
+#redis:
+#  host: localhost
+#  port: 6379
+#  password: akdlqbxlq#1@Jocoos
 
 ---
 spring:
