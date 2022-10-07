@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -37,11 +36,11 @@ public class VideoStatsController {
 
         videoRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found. videoId - " + id));
 
-        Map<Integer, Integer[]> stats = videoWatchService.getVideoWatchStats(id);
+//        Map<Integer, Integer[]> stats = videoWatchService.getVideoWatchStats(id);
         VideoWatchStatsInfo statsInfo = new VideoWatchStatsInfo();
-        stats.forEach((k, v) -> statsInfo.add(k, v));
+//        stats.forEach((k, v) -> statsInfo.add(k, v));
 
-        log.debug("stats: {}", stats);
+//        log.debug("stats: {}", stats);
         return new ResponseEntity<>(statsInfo, HttpStatus.OK);
     }
 
