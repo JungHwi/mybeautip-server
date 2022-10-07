@@ -130,16 +130,18 @@ test {
     systemProperty 'spring.profiles.active', System.getProperty("profile", "local")
 //    println "# test environment: " + systemProperties['spring.profiles.active']
   }
-  outputs.dir snippetsDir
   useJUnitPlatform()
-//  testLogging.showStandardStreams = true
+  outputs.dir snippetsDir
+  testLogging {
+    exceptionFormat "full"
+  }
 }
 
 asciidoctor {
-  dependsOn test
   mkdir snippetsDir
   configurations 'asciidoctorExtensions'
   inputs.dir snippetsDir
+  dependsOn test
 
   sources{
     include("**/*.adoc","**/common/*.adoc")
@@ -155,11 +157,16 @@ asciidoctor.doFirst {
 
 task copyDocument(type: Copy) {
   dependsOn asciidoctor
-  from file("build/docs/asciidoc")
-  into file("src/main/resources/static/docs")
-  from ("${asciidoctor.outputDir}/html5") {
-    into 'static/docs'
-  }
+
+  from 'build/docs/asciidoc'
+  into 'src/main/resources/static/docs'
+}
+
+task copyDocumentForJar(type: Copy) {
+  dependsOn asciidoctor
+
+  from 'build/docs/asciidoc'
+  into 'build/resources/main/static/docs'
 }
 
 build {
@@ -167,6 +174,7 @@ build {
 }
 
 bootJar {
+  dependsOn copyDocumentForJar
   baseName = 'mybeautip-server'
   version = '1.1.1'
 }
