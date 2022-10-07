@@ -60,3 +60,5 @@ include::overview.adoc[]
 === Term API
 * link:term/change_choice_of_optional_term.html[선택 약관 동의 여부 변경 API, window=_blank]
 
+=== Popup Notice API
+* link:popup_notice/get_popup_notices.html[공지 팝업 목록 조회 API, window=_blank]
