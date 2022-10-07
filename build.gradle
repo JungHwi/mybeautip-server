@@ -166,7 +166,7 @@ task copyDocumentForJar(type: Copy) {
   dependsOn asciidoctor
 
   from 'build/docs/asciidoc'
-  into 'build/resources/main/static/docs'
+  into 'BOOT-INF/classes/static/docs'
 }
 
 build {

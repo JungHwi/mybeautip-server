@@ -372,6 +372,36 @@ public class CommunityControllerTest extends RestDocsTestSupport {
         );
     }
 
+    @Test
+    @Transactional
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void scrap() throws Exception {
+        BooleanDto bool = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/api/1/community/{community_id}/scrap", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bool)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("community_scrap",
+                pathParameters(
+                        parameterWithName("community_id").description("글 ID")
+                ),
+                requestFields(
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("스크랩 여부")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("스크랩 아이디"),
+                        fieldWithPath("type").type(JsonFieldType.STRING).description("스크랩 타입"),
+                        fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("스크랩 커뮤니티 아이디"),
+                        fieldWithPath("is_scrap").type(JsonFieldType.BOOLEAN).description("스크랩 여부"),
+                        fieldWithPath("created_at").type(JsonFieldType.STRING).description("스크랩 생성일시")
+                ))
+        );
+    }
+
 }
 
 
