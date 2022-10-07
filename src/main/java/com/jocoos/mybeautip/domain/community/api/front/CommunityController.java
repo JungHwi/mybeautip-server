@@ -2,6 +2,9 @@ package com.jocoos.mybeautip.domain.community.api.front;
 
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
+import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
+import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
+import com.jocoos.mybeautip.domain.scrap.service.ScrapService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -27,6 +30,7 @@ import java.util.List;
 public class CommunityController {
 
     private final CommunityService service;
+    private final ScrapService scrapService;
     private final LegacyMemberService legacyMemberService;
 
     @PostMapping(value = "/1/community")
@@ -117,5 +121,18 @@ public class CommunityController {
         ReportResponse result = service.isReport(memberId, communityId);
 
         return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("/1/community/{community_id}/scrap")
+    public ResponseEntity<CommunityScrapResponse> scrap(@PathVariable(name = "community_id") long communityId,
+                                                        @RequestBody BooleanDto isScrap) {
+        ScrapRequest request = ScrapRequest.builder()
+                .type(ScrapType.COMMUNITY)
+                .relationId(communityId)
+                .isScrap(isScrap.isBool())
+                .build();
+
+        CommunityScrapResponse response = scrapService.scrap(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
