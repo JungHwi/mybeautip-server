@@ -149,4 +149,8 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
     List<Video> findByIdInAndVisibility(List<Long> ids, String visibility);
 
     List<Video> findByIdIn(List<Long> ids);
+
+    // FIXME 팝업 임시 비디오 연결 위한 메소드 변경 후 삭제할것
+    Video findByOutputType(String eventId);
+
 }
