@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.global.exception.*;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
@@ -727,16 +728,14 @@ public class LegacyVideoController {
      * Scraps
      */
     @PostMapping("/{videoId:.+}/scraps")
-    public ResponseEntity<VideoScrapInfo> addVideoScrap(@PathVariable Long videoId,
-                                                        @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+    public ResponseEntity<VideoResponse> addVideoScrap(@PathVariable Long videoId,
+                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
         Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            VideoScrap scrap = legacyVideoScrapService.scrapVideo(video, member);
-            VideoScrapInfo info = new VideoScrapInfo(scrap, legacyVideoService.generateVideoInfo(scrap.getVideo()));
-            return new ResponseEntity<>(info, HttpStatus.OK);
+            return new ResponseEntity<>(legacyVideoScrapService.scrapVideo(video, member), HttpStatus.OK);
         } catch (BadRequestException e) {
             throw new BadRequestException(messageService.getMessage(ALREADY_SCRAPED, lang));
         }

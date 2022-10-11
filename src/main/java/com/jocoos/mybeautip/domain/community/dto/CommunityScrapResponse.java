@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
@@ -19,13 +20,10 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 @Builder
 public class CommunityScrapResponse implements CursorInterface {
 
-    private long id;
+    private Long id;
+    private Long scrapId;
 
     private ScrapType type;
-
-    private Long communityId;
-
-    private Boolean isScrap;
 
     private Boolean isWin;
 
@@ -35,7 +33,7 @@ public class CommunityScrapResponse implements CursorInterface {
 
     private String contents;
 
-    private String fileUrl;
+    private List<String> fileUrl;
 
     private Integer viewCount;
 
@@ -57,6 +55,6 @@ public class CommunityScrapResponse implements CursorInterface {
     @Override
     @JsonIgnore
     public String getCursor() {
-        return String.valueOf(id);
+        return String.valueOf(scrapId);
     }
 }

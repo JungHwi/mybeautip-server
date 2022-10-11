@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
+import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.service.ScrapService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
@@ -124,15 +125,15 @@ public class CommunityController {
     }
 
     @PatchMapping("/1/community/{community_id}/scrap")
-    public ResponseEntity<CommunityScrapResponse> scrap(@PathVariable(name = "community_id") long communityId,
-                                                        @RequestBody BooleanDto isScrap) {
+    public ResponseEntity<ScrapResponse> scrap(@PathVariable(name = "community_id") long communityId,
+                                               @RequestBody BooleanDto isScrap) {
         ScrapRequest request = ScrapRequest.builder()
                 .type(ScrapType.COMMUNITY)
                 .relationId(communityId)
                 .isScrap(isScrap.isBool())
                 .build();
 
-        CommunityScrapResponse response = scrapService.scrap(request);
+        ScrapResponse response = scrapService.scrap(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
