@@ -53,7 +53,7 @@ public class CommunityController {
                                                                                   @RequestParam(required = false, name = "event_id") Long eventId,
                                                                                   @RequestParam(required = false) ZonedDateTime cursor,
                                                                                   @RequestParam(required = false, defaultValue = "20") int size) {
-
+        
         SearchCommunityRequest request = SearchCommunityRequest.builder()
                 .categoryId(categoryId)
                 .eventId(eventId)
