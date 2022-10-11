@@ -23,7 +23,8 @@ public class DocumentLinkGenerator {
         FILE_OPERATION_TYPE("file_operation_type", "파일 작업 구분"),
         TERM_TYPE("term_type", "약관 타입"),
 
-        SEARCH_TYPE("search_type", "검색 타입")
+        SEARCH_TYPE("search_type", "검색 타입"),
+        SCRAP_TYPE("scrap_type", "스크랩 타입")
         ;
 
         private final String pageId;

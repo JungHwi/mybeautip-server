@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.home.api.front;
 
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -40,6 +41,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
     }
 
     @Test
+    @Disabled
     void summaryCommunity() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .get("/api/1/summary/community"))

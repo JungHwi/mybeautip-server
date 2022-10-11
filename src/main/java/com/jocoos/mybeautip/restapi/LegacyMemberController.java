@@ -4,9 +4,11 @@ import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
+import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
+import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.member.comment.*;
@@ -22,7 +24,6 @@ import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.scrap.LegacyVideoScrapService;
-import com.jocoos.mybeautip.video.scrap.VideoScrap;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -77,7 +78,6 @@ public class LegacyMemberController {
     private final RevenuePaymentRepository revenuePaymentRepository;
     private final LegacyVideoScrapService legacyVideoScrapService;
     private final CommentService commentService;
-
     private final MemberTermService memberTermService;
 
 
@@ -572,25 +572,14 @@ public class LegacyMemberController {
     }
 
     @GetMapping(value = "/me/scraps")
-    public CursorResponse getMyScraps(@RequestParam(defaultValue = "20") int count,
-                                      @RequestParam(required = false) String cursor) {
+    public CursorResultResponse<VideoResponse> getMyScraps(@RequestParam(defaultValue = "20") int count,
+                                            @RequestParam(required = false) String cursor) {
         PageRequest pageRequest = PageRequest.of(0, count, Sort.by("id").descending());
 
         log.debug("count: {}, cursor: {}", count, cursor);
         Long memberId = legacyMemberService.currentMemberId();
-        List<VideoScrap> list = legacyVideoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
-        List<LegacyVideoController.VideoScrapInfo> scraps = new ArrayList<>();
-        list.stream().forEach(scrap -> scraps.add(
-                new LegacyVideoController.VideoScrapInfo(scrap, legacyVideoService.generateVideoInfo(scrap.getVideo()))));
-
-        String nextCursor = null;
-        if (scraps.size() > 0) {
-            nextCursor = String.valueOf(scraps.get(scraps.size() - 1).getCreatedAt().getTime());
-        }
-
-        return new CursorResponse.Builder<>("/api/1/members/me/scraps", scraps)
-                .withCount(count)
-                .withCursor(nextCursor).toBuild();
+        List<VideoResponse> videoResponses = legacyVideoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
+        return new CursorResultResponse<>(videoResponses);
     }
 
     private CursorResponse createLikeResponse(Long memberId, String category, int count, Long cursor, String uri, Long broker) {

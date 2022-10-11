@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.scrap.code.ScrapType.COMMUNITY;
+
 @Service
 @RequiredArgsConstructor
 public class ScrapDao {
@@ -41,5 +43,13 @@ public class ScrapDao {
     public Scrap getScrap(ScrapType type, long memberId, long communityId) {
         return repository.findByTypeAndMemberIdAndRelationId(type, memberId, communityId)
                 .orElse(new Scrap(memberId, type, communityId));
+    }
+
+    public List<Scrap> scrapCommunities(long memberId, List<Long> communityIds) {
+        return repository.findByTypeAndMemberIdAndRelationIdInAndIsScrap(COMMUNITY, memberId, communityIds, true);
+    }
+
+    public Boolean isScrapCommunity(Long memberId, Long communityId) {
+        return repository.existsByTypeAndMemberIdAndRelationIdAndIsScrap(COMMUNITY, memberId, communityId, true);
     }
 }
