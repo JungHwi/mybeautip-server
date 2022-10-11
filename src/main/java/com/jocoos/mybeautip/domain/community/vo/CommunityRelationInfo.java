@@ -19,6 +19,9 @@ public class CommunityRelationInfo {
         this.isLike = false;
         this.isReport = false;
         this.isBlock = false;
-        this.isScrap = false;
+    }
+
+    public static CommunityRelationInfo withIsScrap() {
+        return new CommunityRelationInfo(false, false, false, false);
     }
 }

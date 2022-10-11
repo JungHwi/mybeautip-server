@@ -61,6 +61,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("community.[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                         fieldWithPath("community.[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                         fieldWithPath("community.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                        fieldWithPath("community.[].relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("스크랩 여부"),
                         fieldWithPath("community.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
                         fieldWithPath("community.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                         fieldWithPath("community.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),

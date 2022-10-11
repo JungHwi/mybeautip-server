@@ -16,6 +16,7 @@ import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.domain.popup.code.ButtonLinkType;
 import com.jocoos.mybeautip.domain.popup.code.PopupDisplayType;
 import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
+import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
@@ -93,6 +94,9 @@ public class CommonDocController {
         // Search
         Map<String, String> searchType = getDocs(SearchType.values());
 
+        // Scrap
+        Map<String, String> scrapType = getDocs(ScrapType.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .deviceOs(deviceOs)
@@ -138,6 +142,8 @@ public class CommonDocController {
                         .termType(termType)
                 // Search
                         .searchType(searchType)
+                // Scrap
+                        .scrapType(scrapType)
                 .build()
         );
     }

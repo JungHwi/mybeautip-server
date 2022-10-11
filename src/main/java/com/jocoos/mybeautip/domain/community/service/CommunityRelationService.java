@@ -39,7 +39,7 @@ public class CommunityRelationService {
     public CommunityResponse setRelationInfo(CommunityResponse communityResponse) {
         Member member = memberService.currentMember();
         if (member == null) {
-            return communityResponse.setRelationInfo(new CommunityRelationInfo());
+            return communityResponse.setRelationInfo(CommunityRelationInfo.withIsScrap());
         }
 
         CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
@@ -55,7 +55,7 @@ public class CommunityRelationService {
     @Transactional(readOnly = true)
     public List<CommunityResponse> setRelationInfo(List<CommunityResponse> communityResponseList) {
         Member member = memberService.currentMember();
-        CommunityRelationInfo relationInfo = new CommunityRelationInfo();
+        CommunityRelationInfo relationInfo = CommunityRelationInfo.withIsScrap();
         if (member == null) {
             for (CommunityResponse communityResponse : communityResponseList) {
                 communityResponse.setRelationInfo(relationInfo);
@@ -95,7 +95,7 @@ public class CommunityRelationService {
     @Transactional(readOnly = true)
     public List<CommunityScrapResponse> setScrapRelationInfo(List<CommunityScrapResponse> communityScrapResponseList) {
         Member member = memberService.currentMember();
-        CommunityRelationInfo relationInfo = new CommunityRelationInfo();
+        CommunityRelationInfo relationInfo = CommunityRelationInfo.withIsScrap();
         if (member == null) {
             for (CommunityScrapResponse communityScrapResponse : communityScrapResponseList) {
                 communityScrapResponse.setRelationInfo(relationInfo);

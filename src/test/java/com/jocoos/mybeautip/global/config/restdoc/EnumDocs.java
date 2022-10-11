@@ -65,4 +65,7 @@ public class EnumDocs {
 
     // Search
     Map<String, String> searchType;
+
+    // Scrap
+    Map<String, String> scrapType;
 }
