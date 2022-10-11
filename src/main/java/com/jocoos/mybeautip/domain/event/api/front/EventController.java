@@ -5,9 +5,9 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
 import com.jocoos.mybeautip.domain.event.service.EventService;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ public class EventController {
 
     // FIXME 임시로 100 파라미터로 접근 시 비디오 내려줌
     private final VideoRepository videoRepository;
-    private final VideoService videoService;
+    private final LegacyVideoService videoService;
     @GetMapping("/1/event/{eventId}")
     public ResponseEntity<?> get(@PathVariable long eventId) {
 
