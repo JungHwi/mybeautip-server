@@ -1,22 +1,22 @@
 package com.jocoos.mybeautip.domain.home.service.community;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
+import com.jocoos.mybeautip.domain.community.converter.CommunityCategoryConverter;
+import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.service.CommunityRelationService;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
+import com.jocoos.mybeautip.domain.home.code.SummaryCount;
 import com.jocoos.mybeautip.domain.home.converter.SummaryConverter;
-import com.jocoos.mybeautip.domain.home.dto.CommunitySummaryResponse;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryResponse;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
-import com.jocoos.mybeautip.member.LegacyMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
@@ -29,50 +29,33 @@ public class CommunitySummary {
 
     private final CommunityDao communityDao;
     private final CommunityCategoryDao categoryDao;
+    private final CommunityCategoryConverter categoryConverter;
     private final SummaryConverter summaryConverter;
     private final TopSummary topSummary;
     private final CommunityRelationService relationService;
 
 
     @Transactional(readOnly = true)
-    public CommunitySummaryResponse summary() {
-
-        List<CommunityCategory> allSummaryCategories = categoryDao.allSummaryCategories();
-
-        TopSummaryResponse topSummaryResponse = topSummary.getResponse(getTopCategories(allSummaryCategories));
-        List<CommunityResponse> voteSummaryResponse = voteSummary(getCategoryId(allSummaryCategories, VOTE));
-        List<CommunityResponse> blindSummaryResponse = blindSummary(getCategoryId(allSummaryCategories, BLIND));
-
-        return new CommunitySummaryResponse(topSummaryResponse, voteSummaryResponse, blindSummaryResponse);
+    public TopSummaryResponse top() {
+        List<CommunityCategory> topCategories = categoryDao.topSummaryCategories();
+        List<CommunityCategoryResponse> categoryResponses =  categoryConverter.convert(topCategories);
+        return topSummary.getResponse(categoryResponses);
     }
 
-    public List<CommunityResponse> blindSummary(Long blindCategoryId) {
-        List<SummaryCommunityResult> blinds = communityDao.summary(blindCategoryId, BLIND, BLIND_SUMMARY.getCount());
-        return summaryConverter.convertBlindSummary(blinds);
+    @Transactional(readOnly = true)
+    public List<CommunityResponse> blind() {
+        return getSummary(BLIND, BLIND_SUMMARY);
     }
 
-    private List<CommunityResponse> voteSummary(Long voteCategoryId) {
-        List<SummaryCommunityResult> votes = communityDao.summary(voteCategoryId, VOTE, VOTE_SUMMARY.getCount());
-        List<CommunityResponse> responses = summaryConverter.convertVoteSummary(votes);
+    @Transactional(readOnly = true)
+    public List<CommunityResponse> vote() {
+        return getSummary(VOTE, VOTE_SUMMARY);
+    }
+
+    private List<CommunityResponse> getSummary(CommunityCategoryType categoryType, SummaryCount summaryCount) {
+        CommunityCategory category = categoryDao.getByType(categoryType);
+        List<SummaryCommunityResult> summaryResults = communityDao.summary(category.getId(), categoryType, summaryCount.getCount());
+        List<CommunityResponse> responses = summaryConverter.convert(summaryResults);
         return relationService.setRelationInfo(responses);
-    }
-
-    private List<CommunityCategory> getTopCategories(List<CommunityCategory> categories) {
-        return categories
-                .stream()
-                .filter(this::isTopCategory)
-                .collect(Collectors.toList());
-    }
-
-    private Long getCategoryId(List<CommunityCategory> categories, CommunityCategoryType type) {
-        return categories.stream()
-                .filter(category -> category.isCategoryType(type))
-                .findFirst()
-                .map(CommunityCategory::getId)
-                .orElse(null);
-    }
-
-    private boolean isTopCategory(CommunityCategory category) {
-        return !VOTE.equals(category.getType()) && !BLIND.equals(category.getType());
     }
 }

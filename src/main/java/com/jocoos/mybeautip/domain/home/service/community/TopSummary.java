@@ -1,25 +1,20 @@
 package com.jocoos.mybeautip.domain.home.service.community;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
-import com.jocoos.mybeautip.domain.community.converter.CommunityCategoryConverter;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
-import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.service.CommunityRelationService;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.home.converter.SummaryConverter;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryContentResponse;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryResponse;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
-import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.home.code.SummaryCount.TOP_SUMMARY;
 
 @RequiredArgsConstructor
@@ -28,12 +23,10 @@ public class TopSummary {
 
     private final CommunityDao communityDao;
     private final SummaryConverter summaryConverter;
-    private final CommunityCategoryConverter categoryConverter;
     private final CommunityRelationService relationService;
 
-    public TopSummaryResponse getResponse(List<CommunityCategory> topCategories) {
-        List<CommunityCategoryResponse> categoryResponses =  categoryConverter.convert(topCategories);
-        return new TopSummaryResponse(categoryResponses, getTopSummaryContents(categoryResponses));
+    public TopSummaryResponse getResponse(List<CommunityCategoryResponse> topCategories) {
+        return new TopSummaryResponse(topCategories, getTopSummaryContents(topCategories));
     }
 
     private List<TopSummaryContentResponse> getTopSummaryContents(List<CommunityCategoryResponse> topCategories) {
@@ -50,14 +43,7 @@ public class TopSummary {
 
     private List<CommunityResponse> communitySummaryFrom(Long categoryId, CommunityCategoryType type) {
         List<SummaryCommunityResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount());
-        List<CommunityResponse> responses = convertSummaryByType(type, summaryResult);
+        List<CommunityResponse> responses = summaryConverter.convert(summaryResult);
         return relationService.setRelationInfo(responses);
-    }
-
-    private List<CommunityResponse> convertSummaryByType(CommunityCategoryType type, List<SummaryCommunityResult> tops) {
-        if (DRIP.equals(type)) {
-            return summaryConverter.convertDripSummary(tops);
-        }
-        return summaryConverter.convertNormalSummary(tops);
     }
 }

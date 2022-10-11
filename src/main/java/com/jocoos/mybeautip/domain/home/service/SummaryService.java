@@ -1,7 +1,8 @@
 package com.jocoos.mybeautip.domain.home.service;
 
+import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
-import com.jocoos.mybeautip.domain.home.dto.CommunitySummaryResponse;
+import com.jocoos.mybeautip.domain.home.dto.TopSummaryResponse;
 import com.jocoos.mybeautip.domain.home.service.community.CommunitySummary;
 import com.jocoos.mybeautip.domain.home.service.event.EventSummary;
 import com.jocoos.mybeautip.domain.home.service.video.VideoSummary;
@@ -24,8 +25,18 @@ public class SummaryService {
     private final EventSummary eventSummary;
 
     @Transactional(readOnly = true)
-    public CommunitySummaryResponse summaryCommunity() {
-        return communitySummary.summary();
+    public TopSummaryResponse communityTop() {
+        return communitySummary.top();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityResponse> communityVote() {
+        return communitySummary.vote();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityResponse> communityBlind() {
+        return communitySummary.blind();
     }
 
     @Transactional(readOnly = true)
