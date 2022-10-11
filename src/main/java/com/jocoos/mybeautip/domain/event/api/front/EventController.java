@@ -27,14 +27,14 @@ public class EventController {
         return ResponseEntity.ok(response);
     }
 
-    // FIXME 임시로 100 파라미터로 접근 시 비디오 내려줌
+    // FIXME 임시로 100 파라미터로 접근 시 비디오 내려줌 변경 후 삭제할것
     private final VideoRepository videoRepository;
     private final VideoService videoService;
     @GetMapping("/1/event/{eventId}")
     public ResponseEntity<?> get(@PathVariable long eventId) {
 
         if (eventId == 100) {
-            Video video = videoRepository.findById(12255L).orElse(null);
+            Video  video = videoRepository.findByOutputType(String.valueOf(eventId));
             return ResponseEntity.ok(videoService.generateVideoInfo(video));
         }
 
