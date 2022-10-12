@@ -8,6 +8,7 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -19,24 +20,17 @@ import static java.util.Collections.emptyList;
 @Getter
 public class SummaryCommunityResult {
 
-    private final CommunityMemberResponse memberResponse;
-
     private final Community community;
     private final String eventTitle;
-    private List<VoteResponse> voteResponses;
+    private final CommunityMemberResponse memberResponse;
     private List<String> thumbnailUrl;
-
-    @QueryProjection
-    public SummaryCommunityResult(Community community) {
-        this.community = community;
-        this.eventTitle = null;
-        this.memberResponse = null;
-    }
+    private List<VoteResponse> voteResponses;
 
     @QueryProjection
     public SummaryCommunityResult(Community community, CommunityMemberResponse memberResponse) {
         this.community = community;
         this.memberResponse = memberResponse;
+        this.thumbnailUrl = new ArrayList<>();
         this.eventTitle = null;
     }
 
@@ -45,6 +39,7 @@ public class SummaryCommunityResult {
         this.community = community;
         this.memberResponse = memberResponse;
         this.eventTitle = eventTitle;
+        this.thumbnailUrl = new ArrayList<>();
     }
 
     public void setVoteResponses(Map<Long, List<VoteResponse>> votesMap) {

@@ -40,7 +40,14 @@ public class CommunityCategoryDao {
     }
 
     @Transactional(readOnly = true)
-    public List<CommunityCategory> allSummaryCategories() {
+    public List<CommunityCategory> topSummaryCategories() {
         return repository.findAllByIsInSummaryIsTrue();
+    }
+
+    @Transactional(readOnly = true)
+    public CommunityCategory getByType(CommunityCategoryType type) {
+        return repository.findByType(type).orElseThrow(
+                () -> new BadRequestException("No such category. type - " + type)
+        );
     }
 }

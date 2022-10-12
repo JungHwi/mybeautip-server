@@ -108,7 +108,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
             case DRIP:
                 return setThumbnail(summaryWithMemberAndEventTitle(baseQuery));
             case BLIND:
-                return summaryDefault(baseQuery);
+                return summaryWithMember(baseQuery);
             case VOTE:
                 return setVoteResponses(summaryWithMember(baseQuery));
             default:
@@ -191,12 +191,6 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private void addWhereCondition(JPAQuery<Community> defaultQuery, BooleanExpression... expressions) {
         defaultQuery.where(expressions);
-    }
-
-    private List<SummaryCommunityResult> summaryDefault(JPAQuery<?> baseQuery) {
-        return baseQuery
-                .select(new QSummaryCommunityResult(community))
-                .fetch();
     }
 
     private List<SummaryCommunityResult> summaryWithMember(JPAQuery<?> baseQuery) {

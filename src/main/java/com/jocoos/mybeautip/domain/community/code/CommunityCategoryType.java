@@ -4,6 +4,10 @@ import com.jocoos.mybeautip.global.code.CodeValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 @AllArgsConstructor
 @Getter
 public enum CommunityCategoryType implements CodeValue {
@@ -18,6 +22,12 @@ public enum CommunityCategoryType implements CodeValue {
     VOTE("결정픽");
 
     private String description;
+
+    private static final Set<CommunityCategoryType> summaryTypes = new HashSet<>(Arrays.asList(BLIND, VOTE));
+
+    public static boolean supportsSummary(CommunityCategoryType type) {
+        return summaryTypes.contains(type);
+    }
 
     @Override
     public String getName() {
