@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.member.api.front;
 import com.jocoos.mybeautip.domain.community.dto.CommunityScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.scrap.service.ScrapService;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -34,5 +35,10 @@ public class ScrapController {
         CursorResultResponse<CommunityScrapResponse> result = new CursorResultResponse<>(response);
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/1/my/scrap/exist")
+    public ResponseEntity<BooleanDto> isScrapExist() {
+        return ResponseEntity.ok(new BooleanDto(service.isScrapExist()));
     }
 }

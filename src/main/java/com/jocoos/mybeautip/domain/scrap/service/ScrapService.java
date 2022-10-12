@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.dao.ScrapDao;
 import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,4 +43,9 @@ public class ScrapService {
         return scrapTypeService.getScrapInfo(scrapList);
     }
 
+    @Transactional(readOnly = true)
+    public boolean isScrapExist() {
+        Member member = memberService.currentMember();
+        return dao.isExist(member);
+    }
 }
