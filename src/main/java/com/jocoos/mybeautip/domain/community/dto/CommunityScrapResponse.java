@@ -27,7 +27,7 @@ public class CommunityScrapResponse implements CursorInterface {
 
     private Boolean isWin;
 
-    private CommunityStatus communityStatus;
+    private CommunityStatus status;
 
     private String title;
 
