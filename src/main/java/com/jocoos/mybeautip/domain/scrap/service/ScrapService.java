@@ -34,7 +34,8 @@ public class ScrapService {
 
     @Transactional(readOnly = true)
     public List<CommunityScrapResponse> getScrapList(ScrapType type, long cursor, Pageable pageable) {
-        List<Scrap> scrapList = dao.getScrapList(type, cursor, pageable);
+        long memberId = memberService.currentMemberId();
+        List<Scrap> scrapList = dao.getScrapList(type, memberId, cursor, pageable);
 
         ScrapTypeService scrapTypeService = scrapTypeFactory.getScrapTypeService(type);
 

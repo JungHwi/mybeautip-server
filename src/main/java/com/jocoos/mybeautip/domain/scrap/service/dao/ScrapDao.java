@@ -35,8 +35,8 @@ public class ScrapDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Scrap> getScrapList(ScrapType type, long cursor, Pageable pageable) {
-        return repository.findByTypeAndIdLessThan(type, cursor, pageable);
+    public List<Scrap> getScrapList(ScrapType type, long memberId, long cursor, Pageable pageable) {
+        return repository.findByTypeAndMemberIdAndIsScrapAndIdLessThan(type, memberId, true, cursor, pageable);
     }
 
     @Transactional(readOnly = true)
