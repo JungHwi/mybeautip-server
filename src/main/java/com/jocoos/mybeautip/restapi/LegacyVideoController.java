@@ -4,7 +4,9 @@ import com.jocoos.mybeautip.comment.CommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
 import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
+import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.global.exception.*;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
@@ -728,14 +730,16 @@ public class LegacyVideoController {
      * Scraps
      */
     @PostMapping("/{videoId:.+}/scraps")
-    public ResponseEntity<VideoResponse> addVideoScrap(@PathVariable Long videoId,
+    public ResponseEntity<VideoScrapInfo> addVideoScrap(@PathVariable Long videoId,
                                                        @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
         Video video = videoRepository.findByIdAndDeletedAtIsNull(videoId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         try {
-            return new ResponseEntity<>(legacyVideoScrapService.scrapVideo(video, member), HttpStatus.OK);
+            VideoScrap scrap = legacyVideoScrapService.scrapVideo(video, member);
+            VideoScrapInfo info = new VideoScrapInfo(scrap, legacyVideoService.generateVideoInfo(scrap.getVideo()));
+            return new ResponseEntity<>(info, HttpStatus.OK);
         } catch (BadRequestException e) {
             throw new BadRequestException(messageService.getMessage(ALREADY_SCRAPED, lang));
         }
@@ -829,7 +833,7 @@ public static class VideoInfo {
     private Boolean locked;
     private Boolean muted;
     private String visibility;
-    private List<Integer> category;
+    private List<VideoCategoryResponse> category;
     private String title;
     private String content;
     private String url;

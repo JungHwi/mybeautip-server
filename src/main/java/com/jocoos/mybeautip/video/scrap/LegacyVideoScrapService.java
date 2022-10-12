@@ -38,13 +38,13 @@ public class LegacyVideoScrapService {
     private final VideoConvertService convertService;
 
     @Transactional
-    public VideoResponse scrapVideo(Video video, Member member) {
+    public VideoScrap scrapVideo(Video video, Member member) {
         if (videoScrapRepository.existsByVideoIdAndCreatedByIdAndStatus(video.getId(), member.getId(), SCRAP)) {
             throw new BadRequestException("already_scrap");
         }
         VideoScrap videoScrap = saveScrapVideo(video, member);
         activityPointService.gainActivityPoint(VIDEO_SCRAP, validDomainAndReceiver(video, videoScrap.getId(), member));
-        return convertService.toResponse(video);
+        return videoScrap;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

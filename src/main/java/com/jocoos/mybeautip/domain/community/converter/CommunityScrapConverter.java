@@ -34,7 +34,7 @@ public abstract class CommunityScrapConverter {
             @Mapping(target = "type", source = "scrap.type"),
             @Mapping(target = "id", source = "community.id"),
             @Mapping(target = "isWin", source = "community.isWin"),
-            @Mapping(target = "communityStatus", source = "community.status"),
+            @Mapping(target = "status", source = "community.status"),
             @Mapping(target = "title", source = "community.title"),
             @Mapping(target = "contents", source = "community.contents"),
             @Mapping(target = "fileUrl", source = "community.communityFileList", qualifiedByName = "convert_community_main_file_wrap"),
