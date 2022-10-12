@@ -13,6 +13,8 @@ import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeG
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,7 +50,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        result.andDo(document("summary_community",
+        result.andDo(document("summary_community_top",
                 responseFields(
                         fieldWithPath("category").type(JsonFieldType.ARRAY).description("커뮤니티 메인 상단 탭 카테고리"),
                         fieldWithPath("category.[].id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
@@ -97,7 +99,10 @@ class SummaryControllerTest extends RestDocsTestSupport {
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        result.andDo(document("summary_community",
+        result.andDo(document("summary_community_vote",
+                pathParameters(
+                        parameterWithName("type").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE))
+                ),
                 responseFields(
                         fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("글 ID"),
                         fieldWithPath("[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
@@ -141,6 +146,9 @@ class SummaryControllerTest extends RestDocsTestSupport {
                 .andDo(print());
 
         result.andDo(document("summary_community_blind",
+                pathParameters(
+                        parameterWithName("type").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE))
+                ),
                 responseFields(
                         fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("글 ID"),
                         fieldWithPath("[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
