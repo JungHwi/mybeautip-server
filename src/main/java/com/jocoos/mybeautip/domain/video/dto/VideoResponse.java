@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.video.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.video.Video;
@@ -69,6 +70,6 @@ public class VideoResponse implements CursorInterface {
     @Override
     @JsonIgnore
     public String getCursor() {
-        return String.valueOf(createdAt);
+        return ZonedDateTimeUtil.dateToCursorString(createdAt);
     }
 }

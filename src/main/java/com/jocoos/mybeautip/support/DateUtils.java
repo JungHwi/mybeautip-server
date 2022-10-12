@@ -1,15 +1,13 @@
 package com.jocoos.mybeautip.support;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public final class DateUtils {
     public static ZoneId ZONE_SEOUL = ZoneId.of("Asia/Seoul");
     public static ZoneId UTC = ZoneId.of("UTC");
+    private static final String CURSOR_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
     public static Date toDate(String longValue) {
         return toDate(longValue, ZoneId.of("GMT+9"));
@@ -57,6 +55,7 @@ public final class DateUtils {
 
     private static Date fromString(String date, String format, ZoneId zoneId) {
         LocalDateTime localDateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern(format));
+        Date from = Date.from(localDateTime.toInstant(ZoneOffset.MIN));
         return Date.from(localDateTime.atZone(zoneId).toInstant());
     }
 
@@ -76,5 +75,13 @@ public final class DateUtils {
 
     private static String toFormat(Date date, String format) {
         return toLocalDateTime(date).format(DateTimeFormatter.ofPattern(format));
+    }
+
+    public static String toCursorFormat(Date date) {
+        return toFormat(date, CURSOR_FORMAT);
+    }
+
+    public static Date cursorToDate(String cursor) {
+        return fromString(cursor, CURSOR_FORMAT, UTC);
     }
 }

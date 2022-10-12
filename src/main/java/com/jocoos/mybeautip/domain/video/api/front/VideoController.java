@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 
@@ -22,7 +23,7 @@ public class VideoController {
     @GetMapping("/1/videos")
     public ResponseEntity<CursorResultResponse<VideoResponse>> getVideos(@RequestParam(name = "category_id", defaultValue = "1") Integer categoryId,
                                                                          @RequestParam(defaultValue = "50") int count,
-                                                                         @RequestParam(required = false) String cursor) {
+                                                                         @RequestParam(required = false) ZonedDateTime cursor) {
 
         Pageable pageable = PageRequest.of(0, count);
 

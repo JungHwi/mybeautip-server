@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -18,7 +19,7 @@ public class VideoService {
     private final VideoConvertService videoConvertService;
 
     @Transactional(readOnly = true)
-    public List<VideoResponse> findVideos(Integer categoryId, String cursor, Pageable pageable) {
+    public List<VideoResponse> findVideos(Integer categoryId, ZonedDateTime cursor, Pageable pageable) {
         List<Video> videoList = videoDao.getAnyoneAllVideos(categoryId, cursor, pageable);
         return videoConvertService.toResponses(videoList);
     }

@@ -74,7 +74,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
                         searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition. cursorZonedDateTime()),
+                        lessThanSortedAt(condition.getCursor()),
                         notEqStatus(DELETE),
                         ltReportCount(3)
                 )

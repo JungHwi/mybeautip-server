@@ -1,9 +1,12 @@
 package com.jocoos.mybeautip.global.util.date;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
 public class ZonedDateTimeUtil {
 
@@ -36,4 +39,11 @@ public class ZonedDateTimeUtil {
     }
 
 
+    public static String dateToCursorString(Date cursor) {
+        if (cursor == null) {
+            return null;
+        }
+        ZonedDateTime zoned = ZonedDateTime.ofInstant(cursor.toInstant(), ZoneId.of("UTC"));
+        return ZonedDateTimeUtil.toString(zoned, ZONE_DATE_TIME_MILLI_FORMAT);
+    }
 }

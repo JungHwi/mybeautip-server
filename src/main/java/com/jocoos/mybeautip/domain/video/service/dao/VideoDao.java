@@ -9,12 +9,12 @@ import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -27,8 +27,8 @@ public class VideoDao {
     private final VideoRepository repository;
 
     @Transactional(readOnly = true)
-    public List<Video> getAnyoneAllVideos(Integer categoryId, String cursor, Pageable pageable) {
-        Date startCursor = StringUtils.isBlank(cursor) ? new Date() : new Date(Long.parseLong(cursor));
+    public List<Video> getAnyoneAllVideos(Integer categoryId, ZonedDateTime cursor, Pageable pageable) {
+        Date startCursor = cursor == null ? new Date() : Date.from(cursor.toInstant());
         VideoCategoryResponse category = categoryService.getVideoCategory(categoryId);
 
         if (category.getType() == VideoCategoryType.GROUP) {
