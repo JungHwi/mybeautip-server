@@ -70,4 +70,18 @@ public class ScrapControllerTest extends RestDocsTestSupport {
         );
     }
 
+    @Test
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void scrapExist() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/api/1/my/scrap/exist")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("scrap_exist_check",
+                responseFields(
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("스크랩 존재 여부")
+                )));
+    }
 }
