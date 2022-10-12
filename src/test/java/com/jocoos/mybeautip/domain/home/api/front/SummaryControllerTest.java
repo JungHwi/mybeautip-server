@@ -2,12 +2,13 @@ package com.jocoos.mybeautip.domain.home.api.front;
 
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -41,99 +42,138 @@ class SummaryControllerTest extends RestDocsTestSupport {
     }
 
     @Test
-    @Disabled
-    void summaryCommunity() throws Exception {
+    void summaryCommunityTop() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/summary/community"))
+                        .get("/api/1/summary/community/top"))
                 .andExpect(status().isOk())
                 .andDo(print());
 
         result.andDo(document("summary_community",
                 responseFields(
-                        fieldWithPath("top").type(JsonFieldType.OBJECT).description("커뮤니티 메인 상단 탭 정보"),
-                        fieldWithPath("top.category").type(JsonFieldType.ARRAY).description("커뮤니티 메인 상단 탭 카테고리"),
-                        fieldWithPath("top.category.[].id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
-                        fieldWithPath("top.category.[].type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                        fieldWithPath("top.category.[].title").type(JsonFieldType.STRING).description("제목"),
-                        fieldWithPath("top.category.[].hint").type(JsonFieldType.STRING).description("힌트"),
-                        fieldWithPath("top.content").type(JsonFieldType.ARRAY).description("커뮤니티 메인 상단 게시글 정보"),
-                        fieldWithPath("top.content.[].category_id").type(JsonFieldType.NUMBER).description("커뮤니티 카테고리 아이디"),
-                        fieldWithPath("top.content.[].community").type(JsonFieldType.ARRAY).description("게시글 목록"),
-                        fieldWithPath("top.content.[].community.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
-                        fieldWithPath("top.content.[].community.[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
-                        fieldWithPath("top.content.[].community.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
-                        fieldWithPath("top.content.[].community.[].event_id").type(JsonFieldType.NUMBER).description("이벤트 ID").optional(),
-                        fieldWithPath("top.content.[].community.[].event_title").type(JsonFieldType.STRING).description("이벤트 제목").optional(),
-                        fieldWithPath("top.content.[].community.[].title").type(JsonFieldType.STRING).description("제목").optional(),
-                        fieldWithPath("top.content.[].community.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
-                        fieldWithPath("top.content.[].community.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
-                        fieldWithPath("top.content.[].community.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
-                        fieldWithPath("top.content.[].community.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                        fieldWithPath("top.content.[].community.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
-                        fieldWithPath("top.content.[].community.[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
-                        fieldWithPath("top.content.[].community.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
-                        fieldWithPath("top.content.[].community.[].relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
-                        fieldWithPath("top.content.[].community.[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
-                        fieldWithPath("top.content.[].community.[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
-                        fieldWithPath("top.content.[].community.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
-                        fieldWithPath("top.content.[].community.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
-                        fieldWithPath("top.content.[].community.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                        fieldWithPath("top.content.[].community.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
-                        fieldWithPath("top.content.[].community.[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
-                        fieldWithPath("top.content.[].community.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
-                        fieldWithPath("top.content.[].community.[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
-                        fieldWithPath("top.content.[].community.[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                        fieldWithPath("top.content.[].community.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                        fieldWithPath("top.content.[].community.[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
-                        fieldWithPath("top.content.[].community.[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트"),
-
-                        fieldWithPath("vote").type(JsonFieldType.ARRAY).description("커뮤니티 메인 결정픽 탭 정보"),
-                        fieldWithPath("vote.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
-                        fieldWithPath("vote.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
-                        fieldWithPath("vote.[].title").type(JsonFieldType.STRING).description("제목").optional(),
-                        fieldWithPath("vote.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
-                        fieldWithPath("vote.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
-                        fieldWithPath("vote.[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
-                        fieldWithPath("vote.[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
-                        fieldWithPath("vote.[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
-                        fieldWithPath("vote.[].votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
-                        fieldWithPath("vote.[].votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
-                        fieldWithPath("vote.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
-                        fieldWithPath("vote.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                        fieldWithPath("vote.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
-                        fieldWithPath("vote.[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
-                        fieldWithPath("vote.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
-                        fieldWithPath("vote.[].relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
-                        fieldWithPath("vote.[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
-                        fieldWithPath("vote.[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
-                        fieldWithPath("vote.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
-                        fieldWithPath("vote.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
-                        fieldWithPath("vote.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                        fieldWithPath("vote.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
-                        fieldWithPath("vote.[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
-                        fieldWithPath("vote.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
-                        fieldWithPath("vote.[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
-                        fieldWithPath("vote.[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                        fieldWithPath("vote.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                        fieldWithPath("vote.[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
-                        fieldWithPath("vote.[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트"),
-
-                        fieldWithPath("blind").type(JsonFieldType.ARRAY).description("커뮤니티 메인 속닥속닥탭 정보"),
-                        fieldWithPath("blind.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
-                        fieldWithPath("blind.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
-                        fieldWithPath("blind.[].title").type(JsonFieldType.STRING).description("제목").optional(),
-                        fieldWithPath("blind.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
-                        fieldWithPath("blind.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
-                        fieldWithPath("blind.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
-                        fieldWithPath("blind.[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
-                        fieldWithPath("blind.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
-                        fieldWithPath("blind.[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
-                        fieldWithPath("blind.[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                        fieldWithPath("blind.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
-                        fieldWithPath("blind.[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
-                        fieldWithPath("blind.[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
+                        fieldWithPath("category").type(JsonFieldType.ARRAY).description("커뮤니티 메인 상단 탭 카테고리"),
+                        fieldWithPath("category.[].id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
+                        fieldWithPath("category.[].type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                        fieldWithPath("category.[].title").type(JsonFieldType.STRING).description("제목"),
+                        fieldWithPath("category.[].hint").type(JsonFieldType.STRING).description("힌트"),
+                        fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 메인 상단 게시글 정보"),
+                        fieldWithPath("content.[].category_id").type(JsonFieldType.NUMBER).description("커뮤니티 카테고리 아이디"),
+                        fieldWithPath("content.[].community").type(JsonFieldType.ARRAY).description("게시글 목록"),
+                        fieldWithPath("content.[].community.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
+                        fieldWithPath("content.[].community.[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
+                        fieldWithPath("content.[].community.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                        fieldWithPath("content.[].community.[].event_id").type(JsonFieldType.NUMBER).description("이벤트 ID").optional(),
+                        fieldWithPath("content.[].community.[].event_title").type(JsonFieldType.STRING).description("이벤트 제목").optional(),
+                        fieldWithPath("content.[].community.[].title").type(JsonFieldType.STRING).description("제목").optional(),
+                        fieldWithPath("content.[].community.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
+                        fieldWithPath("content.[].community.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                        fieldWithPath("content.[].community.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
+                        fieldWithPath("content.[].community.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
+                        fieldWithPath("content.[].community.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
+                        fieldWithPath("content.[].community.[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
+                        fieldWithPath("content.[].community.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                        fieldWithPath("content.[].community.[].relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
+                        fieldWithPath("content.[].community.[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
+                        fieldWithPath("content.[].community.[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
+                        fieldWithPath("content.[].community.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                        fieldWithPath("content.[].community.[].relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
+                        fieldWithPath("content.[].community.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
+                        fieldWithPath("content.[].community.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
+                        fieldWithPath("content.[].community.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                        fieldWithPath("content.[].community.[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
+                        fieldWithPath("content.[].community.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
+                        fieldWithPath("content.[].community.[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                        fieldWithPath("content.[].community.[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                        fieldWithPath("content.[].community.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                        fieldWithPath("content.[].community.[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
+                        fieldWithPath("content.[].community.[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                 )));
 
+    }
+
+    @Test
+    void summaryCommunityVote() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/api/1/summary/community/{type}", VOTE))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("summary_community",
+                responseFields(
+                        fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("글 ID"),
+                        fieldWithPath("[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                        fieldWithPath("[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
+                        fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목").optional(),
+                        fieldWithPath("[].contents").type(JsonFieldType.STRING).description("내용"),
+                        fieldWithPath("[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                        fieldWithPath("[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
+                        fieldWithPath("[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
+                        fieldWithPath("[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
+                        fieldWithPath("[].votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
+                        fieldWithPath("[].votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
+                        fieldWithPath("[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
+                        fieldWithPath("[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
+                        fieldWithPath("[].comment_count").type(JsonFieldType.NUMBER).description("댓글수"),
+                        fieldWithPath("[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
+                        fieldWithPath("[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                        fieldWithPath("[].relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
+                        fieldWithPath("[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
+                        fieldWithPath("[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
+                        fieldWithPath("[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                        fieldWithPath("[].relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
+                        fieldWithPath("[].member").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                        fieldWithPath("[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
+                        fieldWithPath("[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                        fieldWithPath("[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
+                        fieldWithPath("[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
+                        fieldWithPath("[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                        fieldWithPath("[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                        fieldWithPath("[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                        fieldWithPath("[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
+                        fieldWithPath("[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
+                )));
+    }
+
+    @Test
+    void summaryCommunityBlind() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/api/1/summary/community/{type}", BLIND))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("summary_community_blind",
+                responseFields(
+                        fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("글 ID"),
+                        fieldWithPath("[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                        fieldWithPath("[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
+                        fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목").optional(),
+                        fieldWithPath("[].contents").type(JsonFieldType.STRING).description("내용"),
+                        fieldWithPath("[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                        fieldWithPath("[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
+                        fieldWithPath("[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
+                        fieldWithPath("[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
+                        fieldWithPath("[].votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
+                        fieldWithPath("[].votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
+                        fieldWithPath("[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
+                        fieldWithPath("[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
+                        fieldWithPath("[].comment_count").type(JsonFieldType.NUMBER).description("댓글수"),
+                        fieldWithPath("[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
+                        fieldWithPath("[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                        fieldWithPath("[].relation_info").type(JsonFieldType.OBJECT).description("유저와의 관계 정보"),
+                        fieldWithPath("[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
+                        fieldWithPath("[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
+                        fieldWithPath("[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                        fieldWithPath("[].relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
+                        fieldWithPath("[].member").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                        fieldWithPath("[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
+                        fieldWithPath("[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                        fieldWithPath("[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
+                        fieldWithPath("[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
+                        fieldWithPath("[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                        fieldWithPath("[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                        fieldWithPath("[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                        fieldWithPath("[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
+                        fieldWithPath("[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
+                )));
     }
 
     @Test
