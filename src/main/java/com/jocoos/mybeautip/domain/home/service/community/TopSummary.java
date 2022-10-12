@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.home.code.SummaryCount.TOP_SUMMARY;
+import static com.jocoos.mybeautip.domain.home.code.SummaryType.TOP_SUMMARY;
 
 @RequiredArgsConstructor
 @Component

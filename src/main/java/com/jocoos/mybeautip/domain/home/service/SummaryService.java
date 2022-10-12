@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.home.service;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.home.dto.TopSummaryResponse;
@@ -13,8 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.home.code.SummaryCount.EVENT_SUMMARY;
-import static com.jocoos.mybeautip.domain.home.code.SummaryCount.VIDEO_SUMMARY;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.supportsSummary;
+import static com.jocoos.mybeautip.domain.home.code.SummaryType.EVENT_SUMMARY;
+import static com.jocoos.mybeautip.domain.home.code.SummaryType.VIDEO_SUMMARY;
 
 @RequiredArgsConstructor
 @Service
@@ -30,22 +32,20 @@ public class SummaryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommunityResponse> communityVote() {
-        return communitySummary.vote();
-    }
-
-    @Transactional(readOnly = true)
-    public List<CommunityResponse> communityBlind() {
-        return communitySummary.blind();
-    }
-
-    @Transactional(readOnly = true)
-    public List<VideoResponse> summaryVideo() {
+    public List<VideoResponse> video() {
         return videoSummary.summary(VIDEO_SUMMARY.getCount());
     }
 
     @Transactional(readOnly = true)
-    public List<EventListResponse> summaryEvent() {
+    public List<EventListResponse> event() {
         return eventSummary.summary(EVENT_SUMMARY.getCount());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityResponse> community(CommunityCategoryType type) {
+        if (!supportsSummary(type)) {
+            throw new IllegalArgumentException("request type not supports in summary");
+        }
+        return communitySummary.getSummary(type);
     }
 }
