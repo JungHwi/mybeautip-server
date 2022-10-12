@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
+import com.jocoos.mybeautip.domain.video.service.VideoCategoryService;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -83,8 +85,8 @@ public class LegacyVideoService {
     private final VideoDataService videoDataService;
     private final VideoCategoryMappingRepository videoCategoryMappingRepository;
     private final VideoScrapRepository videoScrapRepository;
-
     private final ActivityPointService activityPointService;
+    private final VideoCategoryService videoCategoryService;
 
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
@@ -289,9 +291,13 @@ public class LegacyVideoService {
         }
         videoInfo.setWatchCount(video.getViewCount());
         videoInfo.setRealWatchCount(video.getWatchCount());
-        videoInfo.setCategory(
-                video.getCategory().stream().map(c -> c.getCategoryId()).collect(Collectors.toList())
-        );
+
+
+        List<Integer> categoryIds = video.getCategory().stream()
+                .map(category -> category.getCategoryId())
+                .collect(Collectors.toList());
+        List<VideoCategoryResponse> categoryResponses = videoCategoryService.getVideoCategoryList(categoryIds);
+        videoInfo.setCategory(categoryResponses);
         return videoInfo;
     }
 

@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.video.scrap;
 
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
-import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.domain.video.service.VideoConvertService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.CANCEL_VIDEO_SCRAP;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.VIDEO_SCRAP;
@@ -38,13 +36,13 @@ public class LegacyVideoScrapService {
     private final VideoConvertService convertService;
 
     @Transactional
-    public VideoResponse scrapVideo(Video video, Member member) {
+    public VideoScrap scrapVideo(Video video, Member member) {
         if (videoScrapRepository.existsByVideoIdAndCreatedByIdAndStatus(video.getId(), member.getId(), SCRAP)) {
             throw new BadRequestException("already_scrap");
         }
         VideoScrap videoScrap = saveScrapVideo(video, member);
         activityPointService.gainActivityPoint(VIDEO_SCRAP, validDomainAndReceiver(video, videoScrap.getId(), member));
-        return convertService.toResponse(video);
+        return videoScrap;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -69,21 +67,13 @@ public class LegacyVideoScrapService {
         activityPointService.retrieveActivityPoint(CANCEL_VIDEO_SCRAP, scrap.getId(), member);
     }
 
-    public List<VideoResponse> findByMemberId(Long memberId, String cursor, Visibility visibility, Pageable pageable) {
+    public List<VideoScrap> findByMemberId(Long memberId, String cursor, Visibility visibility, Pageable pageable) {
         String visibilityName = visibility != null ? visibility.name() : Visibility.PUBLIC.name();
         if (!StringUtils.isBlank(cursor)) {
             Date createdAtBefore = DateUtils.toDate(cursor);
             log.debug("cursor: {}", createdAtBefore);
-            List<VideoScrap> scraps = videoScrapRepository.findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNullAndStatus(memberId, createdAtBefore, visibilityName, pageable, SCRAP);
-            return toResponse(scraps);
+            return videoScrapRepository.findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNullAndStatus(memberId, createdAtBefore, visibilityName, pageable, SCRAP);
         }
-        List<VideoScrap> scraps = videoScrapRepository.findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNullAndStatus(memberId, visibilityName, pageable, SCRAP);
-        return toResponse(scraps);
-    }
-
-    private List<VideoResponse> toResponse(List<VideoScrap> scraps) {
-        List<Long> videoIds = scraps.stream().map(scrap -> scrap.getVideo().getId()).collect(Collectors.toList());
-        List<Video> videos = videoRepository.findByIdIn(videoIds);
-        return convertService.toResponses(videos);
+        return videoScrapRepository.findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNullAndStatus(memberId, visibilityName, pageable, SCRAP);
     }
 }

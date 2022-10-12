@@ -12,6 +12,7 @@ public interface ScrapRepository extends DefaultJpaRepository<Scrap, Long> {
 
     Optional<Scrap> findByTypeAndMemberIdAndRelationId(ScrapType type, long memberId, long relationId);
     boolean existsByTypeAndMemberIdAndRelationIdAndIsScrap(ScrapType type, long memberId, long relationId, boolean isScrap);
-    List<Scrap> findByTypeAndIdLessThan(ScrapType type, long cursor, Pageable pageable);
+    List<Scrap> findByTypeAndMemberIdAndIsScrapAndIdLessThan(ScrapType type, long memberId, boolean isScrap, long cursor, Pageable pageable);
     List<Scrap> findByTypeAndMemberIdAndRelationIdInAndIsScrap(ScrapType type, long memberId, List<Long> relationIds, boolean isScrap);
+    boolean existsByMemberIdAndIsScrap(long memberId, boolean isScrap);
 }
