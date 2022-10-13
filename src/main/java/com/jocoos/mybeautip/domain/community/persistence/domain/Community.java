@@ -70,6 +70,9 @@ public class Community extends BaseEntity {
     @Column
     private int reportCount;
 
+    @Column
+    private Boolean isTopFix;
+
     @Column(columnDefinition = "DATETIME(3)")
     private ZonedDateTime sortedAt;
 

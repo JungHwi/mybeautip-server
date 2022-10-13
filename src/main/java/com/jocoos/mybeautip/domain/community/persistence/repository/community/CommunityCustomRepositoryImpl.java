@@ -17,7 +17,6 @@ import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -38,6 +37,8 @@ import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunit
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityFile.communityFile;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.vote.QCommunityVote.communityVote;
+import static com.jocoos.mybeautip.domain.community.vo.CommunityOrder.order;
+import static com.jocoos.mybeautip.domain.community.vo.CommunityOrder.sortedAt;
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
 import static com.jocoos.mybeautip.member.QMember.member;
@@ -60,7 +61,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         JPAQuery<Community> query = baseSearchQuery(condition.getCategories(),
                                                               condition.getCursor(),
                                                               pageable.getPageSize());
-        query.orderBy(sortCommunities(condition.isCategoryDrip()));
+        query.orderBy(order(condition.isCategoryDrip()));
         addWhereConditionOptional(condition, query);
         return query.fetch();
     }
@@ -78,7 +79,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                         notEqStatus(DELETE),
                         ltReportCount(3)
                 )
-                .orderBy(sortCommunities(false))
+                .orderBy(sortedAt())
                 .limit(condition.getSize())
                 .fetch());
 
@@ -141,7 +142,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                         isVotesNotEmpty(condition.getCategoryType())
                 )
                 .limit(condition.getSize())
-                .orderBy(sortCommunities(false))
+                .orderBy(sortedAt())
         );
     }
 
@@ -212,13 +213,6 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private QCommunityMemberResponse memberResponse() {
         return new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename);
-    }
-
-    private OrderSpecifier<?>[] sortCommunities(boolean isWinFirst) {
-        if (!isWinFirst) {
-            return new OrderSpecifier[]{community.sortedAt.desc()};
-        }
-        return new OrderSpecifier[]{community.isWin.desc().nullsLast(), community.sortedAt.desc()};
     }
 
     private BooleanExpression lessThanSortedAt(ZonedDateTime cursor) {
