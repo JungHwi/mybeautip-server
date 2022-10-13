@@ -125,7 +125,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .from(community)
                 .where(
                         inCategories(categories),
-                        lessThanSortedAt(cursor)
+                        lessThanSortedAt(cursor),
+                        notEqStatus(DELETE)
                 )
                 .limit(limitSize));
     }

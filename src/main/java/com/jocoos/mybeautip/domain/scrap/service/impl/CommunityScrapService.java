@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.scrap.service.impl;
 
 import com.jocoos.mybeautip.domain.community.converter.CommunityScrapConverter;
+import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityScrapResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.service.CommunityRelationService;
@@ -29,6 +30,11 @@ public class CommunityScrapService implements ScrapTypeService {
         List<Community> communityList = communityDao.get(ids);
         List<CommunityScrapResponse> responseList = converter.convertCommunityScrap(scrapList, communityList);
 
-        return relationService.setScrapRelationInfo(responseList);
+        List<CommunityResponse> communityResponses = responseList.stream()
+                .map(CommunityScrapResponse::getCommunityResponse)
+                .collect(Collectors.toList());
+        relationService.setRelationInfo(communityResponses);
+
+        return responseList;
     }
 }

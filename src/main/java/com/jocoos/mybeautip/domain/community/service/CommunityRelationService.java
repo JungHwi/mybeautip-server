@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.domain.community.service;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
-import com.jocoos.mybeautip.domain.community.dto.CommunityScrapResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
@@ -87,49 +86,10 @@ public class CommunityRelationService {
                     .build();
 
             communityResponse.setRelationInfo(member, relationInfo);
+            communityResponse.listBlindContent();
         }
 
         return communityResponseList;
-    }
-
-    @Transactional(readOnly = true)
-    public List<CommunityScrapResponse> setScrapRelationInfo(List<CommunityScrapResponse> communityScrapResponseList) {
-        Member member = memberService.currentMember();
-        CommunityRelationInfo relationInfo = CommunityRelationInfo.withIsScrap();
-        if (member == null) {
-            for (CommunityScrapResponse communityScrapResponse : communityScrapResponseList) {
-                communityScrapResponse.setRelationInfo(relationInfo);
-            }
-            return communityScrapResponseList;
-        }
-
-        List<Long> communityIds = communityScrapResponseList.stream()
-                .map(CommunityScrapResponse::getId)
-                .collect(Collectors.toList());
-
-        List<Long> writerIds = communityScrapResponseList.stream()
-                .map(CommunityScrapResponse::getMember)
-                .collect(Collectors.toList()).stream()
-                .map(CommunityMemberResponse::getId)
-                .collect(Collectors.toList());
-
-        Map<Long, CommunityLike> likeMap = getLikeMap(member.getId(), communityIds);
-        Map<Long, CommunityReport> reportMap = getReportMap(member.getId(), communityIds);
-        Map<Long, Block> blockMap = getBlockMap(member.getId(), writerIds);
-        Map<Long, Scrap> scrapMap = getScrapMap(member.getId(), communityIds);
-
-        for (CommunityScrapResponse communityScrapResponse : communityScrapResponseList) {
-            relationInfo = CommunityRelationInfo.builder()
-                    .isLike(likeMap.containsKey(communityScrapResponse.getId()))
-                    .isReport(reportMap.containsKey(communityScrapResponse.getId()))
-                    .isBlock(communityScrapResponse.getCategory().getType() != CommunityCategoryType.BLIND && blockMap.containsKey(communityScrapResponse.getMember().getId()))
-                    .isScrap(scrapMap.containsKey(communityScrapResponse.getId()))
-                    .build();
-
-            communityScrapResponse.setRelationInfo(relationInfo);
-        }
-
-        return communityScrapResponseList;
     }
 
 
