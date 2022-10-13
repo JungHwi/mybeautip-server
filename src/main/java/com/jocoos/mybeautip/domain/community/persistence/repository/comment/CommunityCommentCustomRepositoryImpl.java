@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.community.persistence.repository.comment;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.vo.CommunityCommentSearchCondition;
 import com.querydsl.core.types.OrderSpecifier;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityComment.communityComment;
 
 @Repository
@@ -33,11 +35,16 @@ public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCus
                 .where(
                         eqCommunityId(condition.getCommunityId()),
                         eqParentId(condition.getParentId()),
-                        greaterOrLessThanIdByDirection(direction, condition.getCursor())
+                        greaterOrLessThanIdByDirection(direction, condition.getCursor()),
+                        notEqStatus(DELETE)
                 )
                 .orderBy(orderById(direction))
                 .limit(pageable.getPageSize())
                 .fetch());
+    }
+
+    private BooleanExpression notEqStatus(CommunityStatus status) {
+        return status == null ? null : communityComment.status.ne(status);
     }
 
     private BooleanExpression eqCommunityId(long communityId) {
