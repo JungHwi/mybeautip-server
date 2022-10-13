@@ -5,8 +5,10 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.converter.EventConverter;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
+import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
+import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -15,10 +17,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.domain.event.dto.EventStatusResponse.addFirstAllEventNum;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class EventService {
     private final EventRepository eventRepository;
 
     private final EventConverter eventConverter;
+    private final EventDao eventDao;
 
     @Transactional(readOnly = true)
     public List<EventListResponse> getEventList(EventType eventType) {
@@ -63,5 +66,10 @@ public class EventService {
     public Map<Long, String> getEventTitleMap(Set<Long> eventIds) {
         return getEventTitle(eventIds).stream()
                 .collect(Collectors.toMap(Event::getId, Event::getTitle));
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventStatusResponse> getEventStatesWithNum() {
+        return addFirstAllEventNum(eventDao.getEventStatesWithNum());
     }
 }

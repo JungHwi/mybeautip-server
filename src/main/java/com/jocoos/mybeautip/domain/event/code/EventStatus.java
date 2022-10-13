@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public enum EventStatus implements CodeValue {
 
-    WAIT("대기", false, false),
     PROGRESS("진행중", true, true),
+    WAIT("대기", false, false),
     HOLD("일시정지", false, false),
     END("종료", false, true);
 
