@@ -2,18 +2,10 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -32,37 +24,37 @@ public class FeedController {
         this.videoService = videoService;
     }
 
-    @GetMapping
-    public CursorResponse getFeeds(@RequestParam(defaultValue = "20") int count,
-                                   @RequestParam(required = false) String cursor) {
-        Member me = legacyMemberService.currentMember();
-
-//    if (me.getFollowingCount() == 0) {
-//      List<VideoController.VideoInfo> videos = new ArrayList<>();
-//      videoService.findVideos(null, null, null, count)
-//          .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
-//      return new CursorResponse.Builder<>(null, videos).toBuild();
+//    @GetMapping
+//    public CursorResponse getFeeds(@RequestParam(defaultValue = "20") int count,
+//                                   @RequestParam(required = false) String cursor) {
+//        Member me = legacyMemberService.currentMember();
+//
+////    if (me.getFollowingCount() == 0) {
+////      List<VideoController.VideoInfo> videos = new ArrayList<>();
+////      videoService.findVideos(null, null, null, count)
+////          .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+////      return new CursorResponse.Builder<>(null, videos).toBuild();
+////    }
+//
+//        List<Video> videos = feedService.getVideoKeys(me.getId(), cursor, count);
+//
+//        List<VideoController.VideoInfo> result = new ArrayList<>();
+//        videos
+//                .forEach(v -> {
+//                    if (StringUtils.isBlank(v.getVideoKey())) {
+//                        log.info("feed has invalid videoKey, member_id: " + me.getId());
+//                    } else {
+//                        result.add(videoService.generateVideoInfo(v));
+//                    }
+//                });
+//
+//        String nextCursor = null;
+//        if (result.size() > 0) {
+//            nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+//        }
+//
+//        return new CursorResponse.Builder<>("/api/1/members/me/feeds", result)
+//                .withCount(count)
+//                .withCursor(nextCursor).toBuild();
 //    }
-
-        List<Video> videos = feedService.getVideoKeys(me.getId(), cursor, count);
-
-        List<VideoController.VideoInfo> result = new ArrayList<>();
-        videos
-                .forEach(v -> {
-                    if (StringUtils.isBlank(v.getVideoKey())) {
-                        log.info("feed has invalid videoKey, member_id: " + me.getId());
-                    } else {
-                        result.add(videoService.generateVideoInfo(v));
-                    }
-                });
-
-        String nextCursor = null;
-        if (result.size() > 0) {
-            nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
-        }
-
-        return new CursorResponse.Builder<>("/api/1/members/me/feeds", result)
-                .withCount(count)
-                .withCursor(nextCursor).toBuild();
-    }
 }

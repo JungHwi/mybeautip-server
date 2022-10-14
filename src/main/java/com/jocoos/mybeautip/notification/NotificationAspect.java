@@ -53,7 +53,7 @@ public class NotificationAspect {
             Video video = (Video) result;
             log.debug("video: {}", video);
             if ("PUBLIC".equals(video.getVisibility())) {
-                feedService.feedVideo(video);
+//                feedService.feedVideo(video);
             }
 
             slackService.sendForVideo(video);

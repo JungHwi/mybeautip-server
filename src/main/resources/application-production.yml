@@ -60,9 +60,9 @@ flipflop:
   video:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
-redis:
-  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
-  port: 6379
+#redis:
+#  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
+#  port: 6379
 
 logging:
   config: classpath:log/log4j2-console-prod.yml
