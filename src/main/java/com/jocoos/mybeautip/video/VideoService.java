@@ -645,7 +645,7 @@ public class VideoService {
                     video.setDeletedAt(new Date());
                     saveWithDeletedAt(video);
                     videoLikeRepository.deleteByVideoId(video.getId());
-                    feedService.feedDeletedVideo(video.getId());
+//                    feedService.feedDeletedVideo(video.getId());
                 });
     }
 
@@ -694,7 +694,7 @@ public class VideoService {
         }
 
         video.setLocked(true);
-        feedService.feedDeletedVideo(video.getId());
+//        feedService.feedDeletedVideo(video.getId());
         return videoRepository.save(video);
     }
 
@@ -824,7 +824,7 @@ public class VideoService {
 
     @Transactional
     public Video remove(Video video) {
-        feedService.feedDeletedVideo(video.getId());
+//        feedService.feedDeletedVideo(video.getId());
 
         video.setDeletedAt(new Date());
         return videoRepository.save(video);
@@ -832,7 +832,7 @@ public class VideoService {
 
     @Transactional
     public Video restore(Video video) {
-        feedService.feedVideo(video);
+//        feedService.feedVideo(video);
 
         video.setDeletedAt(null);
         return videoRepository.save(video);
