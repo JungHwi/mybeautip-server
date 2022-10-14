@@ -45,6 +45,7 @@ public class ScrapControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
                                 fieldWithPath("content.[].file_url").type(JsonFieldType.ARRAY).description("파일 URL").optional(),
+                                fieldWithPath("content.[].votes").type(JsonFieldType.ARRAY).description("투표 URL").optional(),
                                 fieldWithPath("content.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("content.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),

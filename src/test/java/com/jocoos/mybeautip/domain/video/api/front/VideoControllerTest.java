@@ -89,7 +89,7 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].owner.permission.live_post").type(JsonFieldType.BOOLEAN).description("라이브 권한").optional(),
                                 fieldWithPath("content.[].owner.permission.motd_post").type(JsonFieldType.BOOLEAN).description("motd 권한").optional(),
                                 fieldWithPath("content.[].owner.permission.revenue_return").type(JsonFieldType.BOOLEAN).description("수익배분 권한").optional(),
-                                fieldWithPath("content.[].created_at").type(JsonFieldType.NUMBER).description("생성일시")
+                                fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("생성 일자").attributes(getZonedDateMilliFormat())
                         )
                 )
         );
@@ -163,7 +163,7 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("owner.permission.live_post").type(JsonFieldType.BOOLEAN).description("라이브 권한"),
                                 fieldWithPath("owner.permission.motd_post").type(JsonFieldType.BOOLEAN).description("motd 권한"),
                                 fieldWithPath("owner.permission.revenue_return").type(JsonFieldType.BOOLEAN).description("수익배분 권한"),
-                                fieldWithPath("created_at").type(JsonFieldType.NUMBER).description("생성일시")
+                                fieldWithPath("created_at").type(JsonFieldType.STRING).description("생성 일자").attributes(getZonedDateMilliFormat())
                         )
                 )
         );

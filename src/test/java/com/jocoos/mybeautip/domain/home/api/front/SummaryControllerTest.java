@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateMilliFormat;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -249,7 +250,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("[].owner.permission.live_post").type(JsonFieldType.BOOLEAN).description("라이브 권한").optional(),
                                 fieldWithPath("[].owner.permission.motd_post").type(JsonFieldType.BOOLEAN).description("motd 권한").optional(),
                                 fieldWithPath("[].owner.permission.revenue_return").type(JsonFieldType.BOOLEAN).description("수익배분 권한").optional(),
-                                fieldWithPath("[].created_at").type(JsonFieldType.NUMBER).description("생성일시")
+                                fieldWithPath("[].created_at").type(JsonFieldType.STRING).description("생성 일자").attributes(getZonedDateMilliFormat())
                         )
                 )
         );
