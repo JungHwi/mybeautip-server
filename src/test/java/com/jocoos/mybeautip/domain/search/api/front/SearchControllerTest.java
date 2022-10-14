@@ -152,7 +152,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video.[].owner.permission.live_post").type(JsonFieldType.BOOLEAN).description("라이브 권한").optional(),
                         fieldWithPath("video.[].owner.permission.motd_post").type(JsonFieldType.BOOLEAN).description("motd 권한").optional(),
                         fieldWithPath("video.[].owner.permission.revenue_return").type(JsonFieldType.BOOLEAN).description("수익배분 권한").optional(),
-                        fieldWithPath("video.[].created_at").type(JsonFieldType.NUMBER).description("생성일시"))));
+                        fieldWithPath("video.[].created_at").type(JsonFieldType.STRING).description("생성 일자").attributes(getZonedDateMilliFormat()))));
 
     }
 

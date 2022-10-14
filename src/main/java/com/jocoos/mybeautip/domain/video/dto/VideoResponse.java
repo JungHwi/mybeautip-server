@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.video.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
@@ -9,8 +10,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
+
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
 @Data
 @NoArgsConstructor
@@ -48,7 +52,10 @@ public class VideoResponse implements CursorInterface {
     private Long scrapId;
     private MemberInfo owner;
     private Boolean blocked;
-    private Date createdAt;
+
+    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
+    private ZonedDateTime createdAt;
+
     /**
      * Real watchers count that was collected for 10 seconds
      */
@@ -59,6 +66,7 @@ public class VideoResponse implements CursorInterface {
         this.owner = owner;
         this.likeId = likeId;
         this.blocked = blocked;
+        this.createdAt = ZonedDateTimeUtil.dateToZonedDateTimeUTC(video.getCreatedAt());
         if (this.relatedGoodsCount == null) {
             this.relatedGoodsCount = 0;
         }  // FIXME: check policy
@@ -70,6 +78,6 @@ public class VideoResponse implements CursorInterface {
     @Override
     @JsonIgnore
     public String getCursor() {
-        return ZonedDateTimeUtil.dateToCursorString(createdAt);
+        return ZonedDateTimeUtil.toString(createdAt, ZONE_DATE_TIME_MILLI_FORMAT);
     }
 }

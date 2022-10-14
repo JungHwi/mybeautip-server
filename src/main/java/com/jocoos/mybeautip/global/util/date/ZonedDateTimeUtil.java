@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
-import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
 public class ZonedDateTimeUtil {
 
@@ -38,12 +37,10 @@ public class ZonedDateTimeUtil {
         return ZonedDateTime.parse(dateTime, formatter);
     }
 
-
-    public static String dateToCursorString(Date cursor) {
+    public static ZonedDateTime dateToZonedDateTimeUTC(Date cursor) {
         if (cursor == null) {
             return null;
         }
-        ZonedDateTime zoned = ZonedDateTime.ofInstant(cursor.toInstant(), ZoneId.of("UTC"));
-        return ZonedDateTimeUtil.toString(zoned, ZONE_DATE_TIME_MILLI_FORMAT);
+        return ZonedDateTime.ofInstant(cursor.toInstant(), ZoneId.of("UTC"));
     }
 }
