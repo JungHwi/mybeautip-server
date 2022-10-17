@@ -1,41 +1,37 @@
 package com.jocoos.mybeautip.domain.video.service.dao;
 
-import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
-import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
-import com.jocoos.mybeautip.domain.video.service.VideoCategoryService;
+import com.jocoos.mybeautip.domain.video.vo.VideoSearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class VideoDao {
 
-    private final VideoCategoryService categoryService;
     private final VideoRepository repository;
 
     @Transactional(readOnly = true)
-    public List<Video> getAnyoneAllVideos(Integer categoryId, ZonedDateTime cursor, Pageable pageable) {
-        Date startCursor = cursor == null ? new Date() : Date.from(cursor.toInstant());
-        VideoCategoryResponse category = categoryService.getVideoCategory(categoryId);
+    public List<Video> getVideos(VideoCategoryResponse category, ZonedDateTime cursor, int size) {
+        VideoSearchCondition condition = VideoSearchCondition.builder()
+                .category(category)
+                .cursor(cursor)
+                .size(size)
+                .build();
+        return repository.getVideos(condition);
+    }
 
-        if (category.getType() == VideoCategoryType.GROUP) {
-            return repository.getAnyoneAllVideos(startCursor, pageable).getContent();
-        } else {
-            return repository.getCategoryVideo(categoryId, startCursor, pageable).getContent();
-        }
+    @Transactional(readOnly = true)
+    public List<Video> getVideos(int size) {
+        return getVideos(null, null, size);
     }
 
     @Transactional(readOnly = true)
@@ -44,20 +40,13 @@ public class VideoDao {
                 .orElseThrow(() -> new NotFoundException("No such video. id - " + videoId));
     }
 
-    public SearchResult<Video> search(KeywordSearchCondition condition) {
+    @Transactional(readOnly = true)
+    public SearchResult<Video> search(VideoSearchCondition condition) {
         return repository.search(condition);
     }
 
+    @Transactional(readOnly = true)
     public Long count(String keyword) {
         return repository.countBy(keyword);
-    }
-
-    public List<Video> getVideos(int videoNum) {
-        return repository
-                .findAllByVisibilityAndStateInAndCreatedAtBeforeAndDeletedAtIsNullOrderByCreatedAtDesc(
-                        "PUBLIC",
-                        Arrays.asList("VOD", "LIVE"),
-                        new Date(),
-                        PageRequest.of(0, videoNum));
     }
 }

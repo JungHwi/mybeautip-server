@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
 @Data
@@ -53,7 +53,7 @@ public class VideoResponse implements CursorInterface {
     private MemberInfo owner;
     private Boolean blocked;
 
-    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
+    @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT)
     private ZonedDateTime createdAt;
 
     /**
@@ -78,6 +78,6 @@ public class VideoResponse implements CursorInterface {
     @Override
     @JsonIgnore
     public String getCursor() {
-        return ZonedDateTimeUtil.toString(createdAt, ZONE_DATE_TIME_MILLI_FORMAT);
+        return ZonedDateTimeUtil.toString(createdAt.minus(1, ChronoUnit.MILLIS), ZONE_DATE_TIME_MILLI_FORMAT);
     }
 }
