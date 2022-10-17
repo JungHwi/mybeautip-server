@@ -31,10 +31,13 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
 
     @Override
     public List<Video> getVideos(VideoSearchCondition condition) {
-        return baseSearchQuery(condition)
-                .leftJoin(videoCategoryMapping).on(videoCategoryMapping.videoId.eq(video.id))
-                .where(eqCategoryId(condition.getCategoryId()))
-                .fetch();
+        if (condition.isCategorySearch()) {
+            return baseSearchQuery(condition)
+                    .innerJoin(videoCategoryMapping).on(videoCategoryMapping.videoId.eq(video.id))
+                    .where(eqCategoryId(condition.getCategoryId()))
+                    .fetch();
+        }
+        return baseSearchQuery(condition).fetch();
     }
 
 
