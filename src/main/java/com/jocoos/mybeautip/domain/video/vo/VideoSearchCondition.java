@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.util.StringUtils;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -33,7 +34,7 @@ public class VideoSearchCondition {
     }
 
     private String setKeyword(String keyword) {
-        return keyword == null ? null : keyword.trim();
+        return StringUtils.hasText(keyword) ? keyword.trim() : null;
     }
 
     private Integer setCategoryId(VideoCategoryResponse category) {
@@ -45,5 +46,9 @@ public class VideoSearchCondition {
 
     private Date setDateCursor(ZonedDateTime cursor) {
         return cursor == null ? null : Date.from(cursor.toInstant());
+    }
+
+    public boolean isCategorySearch() {
+        return categoryId != null;
     }
 }
