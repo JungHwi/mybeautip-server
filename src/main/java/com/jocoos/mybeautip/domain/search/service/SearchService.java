@@ -12,6 +12,7 @@ import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.domain.video.service.VideoConvertService;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
+import com.jocoos.mybeautip.domain.video.vo.VideoSearchCondition;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.Video;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +53,7 @@ public class SearchService {
     }
 
     private SearchResponse<VideoResponse> searchVideo(KeywordSearchCondition condition) {
-        SearchResult<Video> result = videoDao.search(condition);
+        SearchResult<Video> result = videoDao.search(VideoSearchCondition.from(condition));
         List<VideoResponse> responses = videoConvertService.toResponses(result.getSearchResults());
         return new SearchResponse<>(responses, result.getCount()).contentJsonNameVideo();
     }

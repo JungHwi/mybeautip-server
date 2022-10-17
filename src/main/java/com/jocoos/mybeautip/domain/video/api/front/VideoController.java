@@ -4,8 +4,6 @@ import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.domain.video.service.VideoService;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +23,7 @@ public class VideoController {
                                                                          @RequestParam(defaultValue = "50") int count,
                                                                          @RequestParam(required = false) ZonedDateTime cursor) {
 
-        Pageable pageable = PageRequest.of(0, count);
-
-        List<VideoResponse> response = service.findVideos(categoryId, cursor, pageable);
+        List<VideoResponse> response = service.findVideos(categoryId, cursor, count);
 
         CursorResultResponse<VideoResponse> result = new CursorResultResponse<>(response);
 

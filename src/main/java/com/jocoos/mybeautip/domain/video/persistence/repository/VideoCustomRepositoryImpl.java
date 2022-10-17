@@ -1,11 +1,12 @@
 package com.jocoos.mybeautip.domain.video.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
-import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.domain.video.vo.VideoSearchCondition;
 import com.jocoos.mybeautip.video.Video;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static com.jocoos.mybeautip.video.QVideo.video;
+import static com.jocoos.mybeautip.video.QVideoCategoryMapping.videoCategoryMapping;
 import static com.querydsl.sql.SQLExpressions.count;
 
 @Repository
@@ -27,23 +29,18 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
         this.repository = repository;
     }
 
+    @Override
+    public List<Video> getVideos(VideoSearchCondition condition) {
+        return baseSearchQuery(condition)
+                .leftJoin(videoCategoryMapping).on(videoCategoryMapping.videoId.eq(video.id))
+                .where(eqCategoryId(condition.getCategoryId()))
+                .fetch();
+    }
+
 
     @Override
-    public SearchResult<Video> search(KeywordSearchCondition condition) {
-        List<Video> videos = repository.query(query -> query
-                .select(video)
-                .from(video)
-                .where(
-                        searchCondition(condition.getKeyword()),
-                        lessThanCreatedAt(condition.cursorDate()),
-                        eqVisibilityPublic(),
-                        inState(Arrays.asList("LIVE", "VOD")),
-                        video.deletedAt.isNull()
-                )
-                .limit(condition.getSize())
-                .orderBy(video.id.desc())
-                .fetch());
-
+    public SearchResult<Video> search(VideoSearchCondition condition) {
+        List<Video> videos = baseSearchQuery(condition).fetch();
         return new SearchResult<>(videos, countBy(condition.getKeyword()));
     }
 
@@ -61,8 +58,27 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .fetchOne());
     }
 
-    private BooleanExpression lessThanCreatedAt(Date cursor) {
-        return cursor == null ? null : video.createdAt.lt(cursor);
+    private JPAQuery<Video> baseSearchQuery(VideoSearchCondition condition) {
+        return repository.query(query -> query
+                .select(video)
+                .from(video)
+                .where(
+                        searchCondition(condition.getKeyword()),
+                        lessOrEqualThanCreatedAt(condition.getCursor()),
+                        eqVisibilityPublic(),
+                        inState(Arrays.asList("LIVE", "VOD")),
+                        video.deletedAt.isNull()
+                )
+                .limit(condition.getSize())
+                .orderBy(video.createdAt.desc()));
+    }
+
+    private BooleanExpression lessOrEqualThanCreatedAt(Date cursor) {
+        return cursor == null ? null : video.createdAt.loe(cursor);
+    }
+
+    private BooleanExpression eqCategoryId(Integer categoryId) {
+        return categoryId == null ? null : videoCategoryMapping.categoryId.eq(categoryId);
     }
 
     private BooleanExpression eqVisibilityPublic() {
