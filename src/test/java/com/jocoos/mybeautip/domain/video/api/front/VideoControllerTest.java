@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.video.api.front;
 
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
@@ -47,6 +48,7 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].category.[].type").type(JsonFieldType.STRING).description("카테고리 구분"),
                                 fieldWithPath("content.[].category.[].title").type(JsonFieldType.STRING).description("카테고리 타이틀"),
                                 fieldWithPath("content.[].category.[].shape_url").type(JsonFieldType.STRING).description("카테고리 쉐입 URL").optional(),
+                                fieldWithPath("content.[].category.[].mask_type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.VIDEO_MASK_TYPE)).optional(),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content.[].content").type(JsonFieldType.STRING).description("컨텐츠").optional(),
                                 fieldWithPath("content.[].url").type(JsonFieldType.STRING).description("비디오 파일 주소"),
@@ -121,6 +123,7 @@ class VideoControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("category.[].type").type(JsonFieldType.STRING).description("카테고리 구분"),
                                 fieldWithPath("category.[].title").type(JsonFieldType.STRING).description("카테고리 타이틀"),
                                 fieldWithPath("category.[].shape_url").type(JsonFieldType.STRING).description("카테고리 쉐입 URL"),
+                                fieldWithPath("category.[].mask_type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.VIDEO_MASK_TYPE)),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content").type(JsonFieldType.STRING).description("컨텐츠").optional(),
                                 fieldWithPath("url").type(JsonFieldType.STRING).description("비디오 파일 주소").optional(),
