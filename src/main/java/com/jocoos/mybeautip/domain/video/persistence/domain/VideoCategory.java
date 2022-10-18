@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.video.persistence.domain;
 
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
+import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,4 +38,7 @@ public class VideoCategory {
 
     @Column
     private String shapeFile;
+
+    @Enumerated(EnumType.STRING)
+    private VideoMaskType maskType;
 }

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.video.dto;
 
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
+import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
 import lombok.*;
 
 @Getter
@@ -17,4 +18,6 @@ public class VideoCategoryResponse {
     private String title;
 
     private String shapeUrl;
+
+    private VideoMaskType maskType;
 }
