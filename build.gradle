@@ -29,7 +29,9 @@ plugins {
 }
 
 configurations {
-  compile.exclude module: 'spring-boot-starter-logging'
+  all {
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+  }
   asciidoctorExtensions
 }
 
@@ -55,8 +57,8 @@ springBoot {
   }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 17
+targetCompatibility = 17
 
 repositories {
   mavenCentral()
@@ -95,11 +97,11 @@ dependencies {
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonDataFormatVersion}")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonDataFormatVersion}")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonDataFormatVersion}")
-  implementation("org.mapstruct:mapstruct:1.4.2.Final")
-  annotationProcessor "org.mapstruct:mapstruct:1.4.2.Final"
-  annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
-  implementation("org.projectlombok:lombok:1.18.10")
-  annotationProcessor("org.projectlombok:lombok:1.18.10")
+  implementation("org.projectlombok:lombok:1.18.24")
+  annotationProcessor("org.projectlombok:lombok:1.18.24")
+  implementation("org.mapstruct:mapstruct:1.5.3.Final")
+  annotationProcessor "org.mapstruct:mapstruct:1.5.3.Final"
+  annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
   implementation('org.flywaydb:flyway-core:7.15.0')
   implementation('javax.xml.bind:jaxb-api')
 
@@ -120,8 +122,8 @@ dependencies {
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
   testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
-  testImplementation("org.projectlombok:lombok:1.18.10")
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.10")
+  testImplementation("org.projectlombok:lombok:1.18.24")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
 
 }
 
