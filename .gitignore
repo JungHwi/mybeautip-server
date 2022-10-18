@@ -24,4 +24,14 @@ tools/*.zip
 .gradle/
 
 .DS_Store
-/src/main/resources/static/docs/
+/src/main/resources/static/docs/common/
+/src/main/resources/static/docs/community/
+/src/main/resources/static/docs/event/
+/src/main/resources/static/docs/home/
+/src/main/resources/static/docs/member/
+/src/main/resources/static/docs/popup_notice/
+/src/main/resources/static/docs/search/
+/src/main/resources/static/docs/term/
+/src/main/resources/static/docs/video/
+/src/main/resources/static/docs/index.html
+/src/main/resources/static/docs/overview.html

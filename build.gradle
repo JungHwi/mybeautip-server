@@ -154,7 +154,6 @@ asciidoctor.doFirst {
   delete file('src/main/resources/static/docs')
 }
 
-
 task copyDocument(type: Copy) {
   dependsOn asciidoctor
 
@@ -166,7 +165,7 @@ task copyDocumentForJar(type: Copy) {
   dependsOn asciidoctor
 
   from 'build/docs/asciidoc'
-  into 'BOOT-INF/classes/static/docs'
+  into 'build/resources/main/static/docs'
 }
 
 build {
