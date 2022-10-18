@@ -109,6 +109,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video.[].category.[].type").type(JsonFieldType.STRING).description("카테고리 구분"),
                         fieldWithPath("video.[].category.[].title").type(JsonFieldType.STRING).description("카테고리 타이틀"),
                         fieldWithPath("video.[].category.[].shape_url").type(JsonFieldType.STRING).description("카테고리 쉐입 URL").optional(),
+                        fieldWithPath("video.[].category.[].mask_type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.VIDEO_MASK_TYPE)).optional(),
                         fieldWithPath("video.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                         fieldWithPath("video.[].content").type(JsonFieldType.STRING).description("컨텐츠").optional(),
                         fieldWithPath("video.[].url").type(JsonFieldType.STRING).description("비디오 파일 주소"),

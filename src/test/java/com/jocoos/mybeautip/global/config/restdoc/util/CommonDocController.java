@@ -20,6 +20,7 @@ import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
+import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
 import com.jocoos.mybeautip.global.code.*;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
 import com.jocoos.mybeautip.member.code.SkinType;
@@ -63,6 +64,7 @@ public class CommonDocController {
 
         // Video
         Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
+        Map<String, String> videoMaskType = getDocs(VideoMaskType.values());
 
         // Notification
         Map<String, String> notificationLinkType = getDocs(NotificationLinkType.values());
@@ -118,6 +120,7 @@ public class CommonDocController {
                         .communityStatus(communityStatus)
                 // Video
                         .videoCategoryType(videoCategoryType)
+                        .videoMaskType(videoMaskType)
                 // Notification
                         .notificationLinkType(notificationLinkType)
                         .messageType(messageType)

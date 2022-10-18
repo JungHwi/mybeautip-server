@@ -35,6 +35,7 @@ public class EnumDocs {
 
     // Video
     Map<String, String> videoCategoryType;
+    Map<String, String> videoMaskType;
 
     // Notification
     Map<String, String> notificationLinkType;

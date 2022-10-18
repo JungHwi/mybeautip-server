@@ -100,6 +100,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("VideoCategoryType")),
                                 enumConvertFieldDescriptor((enumDocs.getVideoCategoryType()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.video_mask_type").withSubsectionId("video_mask_type"),
+                                attributes(key("title").value("VideoMaskType")),
+                                enumConvertFieldDescriptor((enumDocs.getVideoMaskType()))
+                        ),
                         // Notification
                         customResponseFields("custom-response", beneathPath("data.notification_link_type").withSubsectionId("notification_link_type"),
                                 attributes(key("title").value("NotificationLinkType")),
