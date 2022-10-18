@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.event.persistence.domain;
 import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
+import com.jocoos.mybeautip.global.code.UrlDirectory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +13,9 @@ import org.hibernate.annotations.Formula;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 @Getter
 @Builder
@@ -82,4 +86,15 @@ public class Event extends ModifiedDateAuditable {
     @OneToMany(mappedBy = "event")
     private List<EventJoin> eventJoinList;
 
+    public String getBannerImageUrl() {
+        return toUrl(bannerImageFile, UrlDirectory.EVENT);
+    }
+
+    public ZonedDateTime getZonedCreatedAt() {
+        return null;
+    }
+
+    public static List<Long> getIds(List<Event> events) {
+        return events.stream().map(Event::getId).collect(Collectors.toList());
+    }
 }

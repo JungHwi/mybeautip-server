@@ -13,21 +13,20 @@ import java.util.List;
 public class EventStatusResponse {
     @JsonIgnore
     private static final String ALL = "전체";
-
     private final EventStatus status;
     private final String statusName;
-    private final long eventNum;
+    private final long count;
 
     @QueryProjection
-    public EventStatusResponse(EventStatus status, long eventNum) {
+    public EventStatusResponse(EventStatus status, long count) {
         this.status = status;
         this.statusName = status.getDescription();
-        this.eventNum = eventNum;
+        this.count = count;
     }
 
-    public static List<EventStatusResponse> addFirstAllEventNum(List<EventStatusResponse> responses) {
+    public static List<EventStatusResponse> addFirstAllEvent(List<EventStatusResponse> responses) {
         long allEventNum = responses.stream()
-                .mapToLong(EventStatusResponse::getEventNum)
+                .mapToLong(EventStatusResponse::getCount)
                 .sum();
         responses.add(0, new EventStatusResponse(null, ALL, allEventNum));
         return responses;

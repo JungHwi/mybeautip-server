@@ -14,5 +14,24 @@ public class EventSearchCondition {
     private final EventType type;
     private final Set<EventStatus> statuses;
     private final ZonedDateTime between;
-    private final Integer limit;
+
+    private final Long page;
+    private final Long limit;
+    private final String sort;
+    private final String search;
+    private final String keyword;
+    private final ZonedDateTime startAt;
+    private final ZonedDateTime endAt;
+    
+    public boolean isPaging() {
+        return page != null;
+    }
+    
+    public boolean isNoOffset() {
+        return page == null && limit != null;
+    }
+
+    public long getOffset() {
+        return page * limit;
+    }
 }

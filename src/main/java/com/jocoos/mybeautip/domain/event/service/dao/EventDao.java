@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
 
@@ -42,7 +43,7 @@ public class EventDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Event> summary(int eventNum) {
+    public List<Event> summary(Long eventNum) {
         EventSearchCondition condition = EventSearchCondition.builder()
                 .statuses(Collections.singleton(PROGRESS))
                 .between(ZonedDateTime.now())
@@ -55,4 +56,17 @@ public class EventDao {
     public List<EventStatusResponse> getEventStatesWithNum() {
         return repository.getEventStatesWithNum();
     }
+
+    public List<Event> getEvents(EventSearchCondition condition) {
+        return repository.getEvents(condition);
+    }
+
+    public Map<Long, Long> getJoinCountMap(List<Long> eventIds) {
+        return repository.getEventJoinCountMap(eventIds);
+    }
+
+    public Long getTotalCount(EventSearchCondition condition) {
+        return repository.getTotalCount(condition);
+    }
+
 }
