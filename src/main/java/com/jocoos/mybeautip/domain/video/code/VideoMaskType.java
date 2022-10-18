@@ -8,11 +8,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum VideoMaskType implements CodeValue {
 
-    LAUGH("웃겨주마"),
-    INFO("알려주마"),
-    SHOW("보여주마"),
-    FILL("채워주마"),
-    SLEEP("재워주마");
+    CLOVER("클로버"),
+    SQUARE("사각형"),
+    SEMI_CIRCLE("반원"),
+    HEART("하트"),
+    CLOUD("구름");
 
     private final String description;
 
