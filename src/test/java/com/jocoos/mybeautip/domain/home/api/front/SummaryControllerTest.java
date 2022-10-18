@@ -208,6 +208,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("[].category.[].type").type(JsonFieldType.STRING).description("카테고리 구분"),
                                 fieldWithPath("[].category.[].title").type(JsonFieldType.STRING).description("카테고리 타이틀"),
                                 fieldWithPath("[].category.[].shape_url").type(JsonFieldType.STRING).description("카테고리 쉐입 URL").optional(),
+                                fieldWithPath("[].category.[].mask_type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.VIDEO_MASK_TYPE)).optional(),
                                 fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("[].content").type(JsonFieldType.STRING).description("컨텐츠").optional(),
                                 fieldWithPath("[].url").type(JsonFieldType.STRING).description("비디오 파일 주소"),

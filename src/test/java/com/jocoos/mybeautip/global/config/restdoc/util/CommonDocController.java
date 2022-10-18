@@ -120,6 +120,7 @@ public class CommonDocController {
                         .communityStatus(communityStatus)
                 // Video
                         .videoCategoryType(videoCategoryType)
+                        .videoMaskType(videoMaskType)
                 // Notification
                         .notificationLinkType(notificationLinkType)
                         .messageType(messageType)
