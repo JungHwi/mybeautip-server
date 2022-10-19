@@ -10,7 +10,7 @@ spring:
       default-page-size: 10
   main:
     banner-mode: off
-    lazy-initialization: true
+#    lazy-initialization: true
   messages:
     always-use-message-format: false
     basename: i18n/messages
