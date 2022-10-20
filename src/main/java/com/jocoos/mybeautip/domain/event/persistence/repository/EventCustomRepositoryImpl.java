@@ -15,7 +15,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.impl.JPAQuery;
-import io.jsonwebtoken.lang.Collections;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -123,10 +122,6 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                 .groupBy(event.id)
                 .orderBy(joinCount.desc(), event.createdAt.desc(), event.id.desc())
                 .fetch();
-    }
-
-    private BooleanExpression inEventJoinEventId(List<Long> ids) {
-        return Collections.isEmpty(ids) ? null : eventJoin.eventId.in(ids);
     }
 
     private BooleanExpression startAtAfter(ZonedDateTime dateTime) {

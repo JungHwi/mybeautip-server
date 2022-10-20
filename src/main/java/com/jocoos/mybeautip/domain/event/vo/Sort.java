@@ -12,7 +12,7 @@ public class Sort {
     private final String direction;
 
     public Sort(String sortField, String direction) {
-        this.sortField = SortField.valueOf(sortField);
+        this.sortField = SortField.from(sortField);
         this.direction = direction;
     }
 

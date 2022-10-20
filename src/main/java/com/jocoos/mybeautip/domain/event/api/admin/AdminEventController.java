@@ -19,18 +19,18 @@ import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/")
+@RequestMapping("/admin/")
 @RestController
 public class AdminEventController {
 
     private final EventService eventService;
 
-    @GetMapping("/admin/event/status")
+    @GetMapping("/event/status")
     public ResponseEntity<List<EventStatusResponse>> getEventStates() {
         return ResponseEntity.ok(eventService.getEventStatesWithNum());
     }
 
-    @GetMapping("/admin/event")
+    @GetMapping("/event")
     public ResponseEntity<PageResponse<AdminEventListResponse>> getEvents(
             @RequestParam(required = false) EventStatus status,
             @RequestParam(required = false, defaultValue = "1") Long page,
