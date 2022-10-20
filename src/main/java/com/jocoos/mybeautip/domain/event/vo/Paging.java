@@ -9,7 +9,7 @@ public class Paging {
     private final Long page;
     private final Long size;
 
-    public Paging(Long size) {
+    public Paging(long size) {
         this.page = null;
         this.size = size;
     }
