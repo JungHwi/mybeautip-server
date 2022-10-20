@@ -1,0 +1,68 @@
+spring:
+  config:
+    activate:
+      on-profile: stage
+    import: classpath:application-oauth-prod.yml
+  datasource:
+    master:
+      hikari:
+        username: mybeautipstagsrv
+        password: mybeautipstagsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-stag.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:13305/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautipstagsrv
+        password: mybeautipstagsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-stag.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:13305/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+  jpa:
+    show-sql: false
+  flyway:
+    baselineOnMigrate: false
+    locations: classpath:db/mysql
+
+mybeautip:
+  service:
+    member:
+      rejoin-available-second: 7776000  # 90 days
+  security:
+    access-token-validity-seconds: 15552000      # 180 days
+    refresh-token-validity-seconds: 15552000     # 180 days
+  aws:
+    sns:
+      application:
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip"
+    s3:
+      domain: 'https://mybeautip-stag.s3.ap-northeast-2.amazonaws.com/'
+      bucket: 'mybeautip-stag'
+      region: 'ap-northeast-2'
+    cf:
+      domain: "https://static-stag.mybeautip.com/"
+  store:
+    image-path:
+      domain: https://static-stag.mybeautip.com/common/
+  slack:
+    key: T03FMJ9ANNR/B03FT8YFXC5/GFY50VQh98iRpEs4XbmxmrYP
+    channel: "#mybeautip-stage"
+    order-key: T03FMJ9ANNR/B03FT8YFXC5/GFY50VQh98iRpEs4XbmxmrYP
+    order-channel: "#mybeautip-stage"
+  iamport:
+    api: https://api.iamport.kr
+    key: 3621612290867148
+    secret: Z4CYi1YGDdOfk2ti4mYQtpEJiJPfxzlxEXvWZtCCGqR1skjxHinaI1U1LJgijBPXzlTyOwavW2xpmRW4
+
+cloud:
+  aws:
+    s3:
+      bucket: mybeautip-stag
+
+flipflop:
+  app-key: 9z27htVnKe
+  video:
+    thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
+
+#redis:
+#  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
+#  port: 6379
+
+logging:
+  config: classpath:log/log4j2-console-stage.yml
