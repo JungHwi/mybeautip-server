@@ -66,7 +66,7 @@ public class VideoResponse implements CursorInterface {
         this.owner = owner;
         this.likeId = likeId;
         this.blocked = blocked;
-        this.createdAt = ZonedDateTimeUtil.dateToZonedDateTimeUTC(video.getCreatedAt());
+        this.createdAt = ZonedDateTimeUtil.toUTCZoned(video.getCreatedAt());
         if (this.relatedGoodsCount == null) {
             this.relatedGoodsCount = 0;
         }  // FIXME: check policy
