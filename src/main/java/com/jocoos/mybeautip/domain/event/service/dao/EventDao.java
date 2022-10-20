@@ -5,6 +5,12 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
+import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
+import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
+import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
+import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
+import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
+import com.jocoos.mybeautip.domain.event.vo.Paging;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
 
@@ -41,12 +48,25 @@ public class EventDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Event> summary(int eventNum) {
+    public List<Event> summary(Long eventNum) {
         EventSearchCondition condition = EventSearchCondition.builder()
                 .statuses(Collections.singleton(PROGRESS))
                 .between(ZonedDateTime.now())
-                .limit(eventNum)
+                .paging(new Paging(eventNum))
                 .build();
         return repository.getEvents(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventStatusResponse> getEventStatesWithNum() {
+        return repository.getEventStatesWithNum();
+    }
+
+    public List<EventSearchResult> getEventsWithJoinCount(EventSearchCondition condition) {
+        return repository.getEventsWithJoinCount(condition);
+    }
+
+    public Long getTotalCount(EventSearchCondition condition) {
+        return repository.getTotalCount(condition);
     }
 }

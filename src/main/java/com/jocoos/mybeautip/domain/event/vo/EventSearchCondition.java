@@ -14,5 +14,18 @@ public class EventSearchCondition {
     private final EventType type;
     private final Set<EventStatus> statuses;
     private final ZonedDateTime between;
-    private final Integer limit;
+    private final Paging paging;
+    private final Sort sort;
+    private final SearchKeyword searchKeyword;
+
+    private final ZonedDateTime startAt;
+    private final ZonedDateTime endAt;
+
+    public boolean isOrderByJoinCount() {
+        return sort.isOrderByJoinCount();
+    }
+
+    public String getKeyword() {
+        return searchKeyword.getKeyword();
+    }
 }

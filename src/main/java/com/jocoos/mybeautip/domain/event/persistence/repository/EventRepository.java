@@ -4,6 +4,7 @@ import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
@@ -17,5 +18,4 @@ public interface EventRepository extends ExtendedQuerydslJpaRepository<Event, Lo
     Event findTopByTypeAndStatus(EventType type, EventStatus status);
     List<Event> findByIdIn(Set<Long> eventIds);
 
-    List<Event> findAllByStatusAndStartAtBeforeAndEndAtAfter(EventStatus status, ZonedDateTime startedAt, ZonedDateTime endedAt);
 }

@@ -37,7 +37,7 @@ public class ZonedDateTimeUtil {
         return ZonedDateTime.parse(dateTime, formatter);
     }
 
-    public static ZonedDateTime dateToZonedDateTimeUTC(Date cursor) {
+    public static ZonedDateTime toUTCZoned(Date cursor) {
         if (cursor == null) {
             return null;
         }
