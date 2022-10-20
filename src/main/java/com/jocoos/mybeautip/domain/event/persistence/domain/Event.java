@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -91,7 +92,7 @@ public class Event extends ModifiedDateAuditable {
     }
 
     public ZonedDateTime getZonedCreatedAt() {
-        return null;
+        return ZonedDateTimeUtil.toUTCZoned(createdAt);
     }
 
     public static List<Long> getIds(List<Event> events) {

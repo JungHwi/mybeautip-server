@@ -8,8 +8,14 @@ import com.jocoos.mybeautip.domain.event.dto.QEventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
+import com.jocoos.mybeautip.domain.event.vo.Paging;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.jsonwebtoken.lang.Collections;
 import org.springframework.context.annotation.Lazy;
@@ -21,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEventJoin.eventJoin;
@@ -42,22 +49,13 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
 
     @Override
     public List<Event> getEvents(EventSearchCondition condition) {
-        JPAQuery<Event> baseQuery = baseSelectQuery(condition);
+        JPAQuery<Event> baseQuery = paging(baseSelectQuery(condition), condition.getPaging());
 
-        if (condition.isNoOffset()) {
-            return baseQuery
-                    .limit(condition.getLimit())
-                    .fetch();
+        if (condition.isOrderByJoinCount()) {
+            return orderByJoinCount(baseQuery);
         }
 
-        if (condition.isPaging()) {
-            return baseQuery
-                    .offset(condition.getOffset())
-                    .limit(condition.getLimit())
-                    .fetch();
-        }
-
-        return baseQuery.fetch();
+        return orderByDefault(baseQuery).fetch();
     }
 
     @Override
@@ -75,10 +73,6 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                 .where(inEventJoinEventId(eventIds))
                 .groupBy(eventJoin.eventId)
                 .transform(groupBy(eventJoin.eventId).as(count(eventJoin))));
-    }
-
-    private static BooleanExpression inEventJoinEventId(List<Long> ids) {
-        return Collections.isEmpty(ids) ? null : eventJoin.eventId.in(ids);
     }
 
     @Override
@@ -101,8 +95,44 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                         endAtBefore(condition.getEndAt()),
                         startAtBefore(condition.getBetween()),
                         endAtAfter(condition.getBetween())
-                )
-                .orderBy(event.statusSorting.asc(), event.sorting.asc(), event.id.desc()));
+                ));
+    }
+
+    private JPAQuery<Event> paging(JPAQuery<Event> baseQuery, Paging paging) {
+        if (paging.isNoOffset()) {
+            return baseQuery
+                    .limit(paging.getSize());
+        }
+
+        return baseQuery
+                .offset(paging.getOffset())
+                .limit(paging.getSize());
+    }
+
+    private JPAQuery<Event> orderByDefault(JPAQuery<Event> query) {
+        return query
+                .orderBy(event.createdAt.desc(), event.id.desc());
+    }
+
+    private static List<Event> orderByJoinCount(JPAQuery<Event> query) {
+        NumberPath<Long> joinCount = Expressions.numberPath(Long.class, "quantity");
+        Expression<Long> joinCountSubQuery = ExpressionUtils.as(JPAExpressions
+                .select(count(eventJoin))
+                .from(eventJoin)
+                .where(eventJoin.eventId.eq(event.id))
+                .groupBy(eventJoin.eventId), joinCount);
+
+        return query
+                .select(event, joinCountSubQuery)
+                .orderBy(joinCount.desc(), event.createdAt.desc())
+                .fetch()
+                .stream()
+                .map(tuple -> tuple.get(event))
+                .collect(Collectors.toList());
+    }
+
+    private BooleanExpression inEventJoinEventId(List<Long> ids) {
+        return Collections.isEmpty(ids) ? null : eventJoin.eventId.in(ids);
     }
 
     private BooleanExpression startAtAfter(ZonedDateTime dateTime) {

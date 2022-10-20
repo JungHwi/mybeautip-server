@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
+import com.jocoos.mybeautip.domain.event.vo.Paging;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,7 @@ public class EventDao {
         EventSearchCondition condition = EventSearchCondition.builder()
                 .statuses(Collections.singleton(PROGRESS))
                 .between(ZonedDateTime.now())
-                .limit(eventNum)
+                .paging(new Paging(eventNum))
                 .build();
         return repository.getEvents(condition);
     }
@@ -68,5 +69,4 @@ public class EventDao {
     public Long getTotalCount(EventSearchCondition condition) {
         return repository.getTotalCount(condition);
     }
-
 }

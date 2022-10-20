@@ -15,23 +15,19 @@ public class EventSearchCondition {
     private final Set<EventStatus> statuses;
     private final ZonedDateTime between;
 
-    private final Long page;
-    private final Long limit;
-    private final String sort;
-    private final String search;
-    private final String keyword;
+
+    private final Paging paging;
+    private final Sort sort;
+    private final SearchKeyword searchKeyword;
+
     private final ZonedDateTime startAt;
     private final ZonedDateTime endAt;
-    
-    public boolean isPaging() {
-        return page != null;
-    }
-    
-    public boolean isNoOffset() {
-        return page == null && limit != null;
+
+    public boolean isOrderByJoinCount() {
+        return sort.isOrderByJoinCount();
     }
 
-    public long getOffset() {
-        return page * limit;
+    public String getKeyword() {
+        return searchKeyword.getKeyword();
     }
 }
