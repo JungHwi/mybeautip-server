@@ -26,6 +26,6 @@ public class EventSearchCondition {
     }
 
     public String getKeyword() {
-        return searchKeyword.getKeyword();
+        return searchKeyword == null ? null : searchKeyword.getKeyword();
     }
 }
