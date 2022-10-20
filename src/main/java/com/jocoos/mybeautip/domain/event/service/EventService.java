@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
+import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.event.dto.EventStatusResponse.addFirstAllEvent;
-import static com.jocoos.mybeautip.domain.event.persistence.domain.Event.getIds;
 
 @Service
 @RequiredArgsConstructor
@@ -78,9 +78,8 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public PageResponse<AdminEventListResponse> getEvents(EventSearchCondition condition) {
-        List<Event> events = eventDao.getEvents(condition);
-        Map<Long, Long> countMap = eventDao.getJoinCountMap(getIds(events));
+        List<EventSearchResult> events = eventDao.getEventsWithJoinCount(condition);
         Long totalCount = eventDao.getTotalCount(condition);
-        return new PageResponse<>(totalCount, AdminEventListResponse.from(events, countMap));
+        return new PageResponse<>(totalCount, AdminEventListResponse.from(events));
     }
 }

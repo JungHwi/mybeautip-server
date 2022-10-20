@@ -7,15 +7,14 @@ import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.dto.QEventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
-import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
-import com.jocoos.mybeautip.domain.event.vo.Paging;
+import com.jocoos.mybeautip.domain.event.vo.*;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.jsonwebtoken.lang.Collections;
 import org.springframework.context.annotation.Lazy;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEventJoin.eventJoin;
@@ -50,12 +48,18 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
     @Override
     public List<Event> getEvents(EventSearchCondition condition) {
         JPAQuery<Event> baseQuery = paging(baseSelectQuery(condition), condition.getPaging());
+        return orderByDefault(baseQuery).fetch();
+    }
+
+    @Override
+    public List<EventSearchResult> getEventsWithJoinCount(EventSearchCondition condition) {
+        JPAQuery<Event> baseQuery = paging(baseSelectQuery(condition), condition.getPaging());
 
         if (condition.isOrderByJoinCount()) {
             return orderByJoinCount(baseQuery);
         }
 
-        return orderByDefault(baseQuery).fetch();
+        return resultWithJoinCount(orderByDefault(baseQuery)).fetch();
     }
 
     @Override
@@ -114,21 +118,21 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                 .orderBy(event.createdAt.desc(), event.id.desc());
     }
 
-    private static List<Event> orderByJoinCount(JPAQuery<Event> query) {
-        NumberPath<Long> joinCount = Expressions.numberPath(Long.class, "quantity");
-        Expression<Long> joinCountSubQuery = ExpressionUtils.as(JPAExpressions
-                .select(count(eventJoin))
-                .from(eventJoin)
-                .where(eventJoin.eventId.eq(event.id))
-                .groupBy(eventJoin.eventId), joinCount);
+    private JPAQuery<EventSearchResult> resultWithJoinCount(JPAQuery<Event> query) {
+        return query.
+                select(new QEventSearchResult(event, count(eventJoin).nullif(0L)))
+                .leftJoin(eventJoin).on(event.id.eq(eventJoin.eventId))
+                .groupBy(event.id);
+    }
 
+    private List<EventSearchResult> orderByJoinCount(JPAQuery<Event> query) {
+        NumberPath<Long> joinCount = Expressions.numberPath(Long.class, "joinCount");
         return query
-                .select(event, joinCountSubQuery)
-                .orderBy(joinCount.desc(), event.createdAt.desc())
-                .fetch()
-                .stream()
-                .map(tuple -> tuple.get(event))
-                .collect(Collectors.toList());
+                .select(new QEventSearchResult(event, count(eventJoin).nullif(0L).as(joinCount)))
+                .leftJoin(eventJoin).on(event.id.eq(eventJoin.eventId))
+                .groupBy(event.id)
+                .orderBy(joinCount.desc(), event.createdAt.desc(), event.id.desc())
+                .fetch();
     }
 
     private BooleanExpression inEventJoinEventId(List<Long> ids) {
@@ -167,7 +171,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         return nullSafeBuilder(() -> event.title.contains(keyword));
     }
 
-    private static BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> f) {
+    private BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> f) {
         try {
             return new BooleanBuilder(f.get());
         } catch (NullPointerException e) {

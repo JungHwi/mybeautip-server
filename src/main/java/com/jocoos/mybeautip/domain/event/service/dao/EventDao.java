@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
+import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
 import com.jocoos.mybeautip.domain.event.vo.Paging;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,8 +59,8 @@ public class EventDao {
         return repository.getEventStatesWithNum();
     }
 
-    public List<Event> getEvents(EventSearchCondition condition) {
-        return repository.getEvents(condition);
+    public List<EventSearchResult> getEventsWithJoinCount(EventSearchCondition condition) {
+        return repository.getEventsWithJoinCount(condition);
     }
 
     public Map<Long, Long> getJoinCountMap(List<Long> eventIds) {
