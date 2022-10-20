@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.domain.event.api.admin;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
-import com.jocoos.mybeautip.domain.event.code.SortField;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventListResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
@@ -36,7 +35,7 @@ public class AdminEventController {
             @RequestParam(required = false) EventStatus status,
             @RequestParam(required = false, defaultValue = "1") Long page,
             @RequestParam(required = false, defaultValue = "10") Long size,
-            @RequestParam(required = false, defaultValue = "CREATED_AT") SortField sort,
+            @RequestParam(required = false, defaultValue = "createdAt") String sort,
             @RequestParam(required = false, defaultValue = "DESC") String order,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) ZonedDateTime startAt,
