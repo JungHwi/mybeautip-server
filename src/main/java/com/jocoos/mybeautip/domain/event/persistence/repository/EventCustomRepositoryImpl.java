@@ -3,32 +3,30 @@ package com.jocoos.mybeautip.domain.event.persistence.repository;
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
+import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
+import com.jocoos.mybeautip.domain.event.dto.QEventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
+import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
+import com.jocoos.mybeautip.domain.event.vo.Paging;
+import com.jocoos.mybeautip.domain.event.vo.QEventSearchResult;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.impl.JPAQuery;
+import io.jsonwebtoken.lang.Collections;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
-
-import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
-import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
-import com.jocoos.mybeautip.domain.event.dto.QEventStatusResponse;
-import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
-import com.jocoos.mybeautip.domain.event.vo.*;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
-import io.jsonwebtoken.lang.Collections;
-import org.springframework.util.StringUtils;
-
 import java.util.function.Supplier;
 
+import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEventJoin.eventJoin;
-import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.sql.SQLExpressions.count;
 import static io.jsonwebtoken.lang.Collections.isEmpty;
 
@@ -90,6 +88,11 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
     }
 
     private JPAQuery<Event> paging(JPAQuery<Event> baseQuery, Paging paging) {
+        if (paging == null) {
+            return baseQuery;
+        }
+        
+
         if (paging.isNoOffset()) {
             return baseQuery
                     .limit(paging.getSize());
