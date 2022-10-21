@@ -9,6 +9,7 @@ import lombok.Getter;
 public enum PlacardLinkType implements CodeValue {
 
     EVENT("Event 화면"),
+    VIDEO("비디오 화면"),
     EXTERNAL("외부 링크");
 
     private final String description;
