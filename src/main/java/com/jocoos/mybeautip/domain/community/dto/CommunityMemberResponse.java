@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,10 +29,10 @@ public class CommunityMemberResponse {
     }
 
     @QueryProjection
-    public CommunityMemberResponse(Long id, MemberStatus status, String username, String avatarUrl) {
+    public CommunityMemberResponse(Long id, MemberStatus status, String username, String avatarFilename) {
         this.id = id;
         this.status = status;
         this.username = username;
-        this.avatarUrl = avatarUrl;
+        this.avatarUrl = toUrl(avatarFilename, AVATAR);
     }
 }
