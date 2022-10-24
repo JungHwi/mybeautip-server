@@ -29,6 +29,7 @@ public enum ErrorCode implements CodeValue {
     EMAIL_DUPLICATED("이메일 중복"),
     MY_TAG("초대코드가 내 코드"),
     INVALID_CHAR("잘못된 문자 포함"),
+    INVALID_CHAR_ONLY_DIGIT("문자 미포함"),
     NO_PHONE("전화번호 정보 없음"),
     ADDRESS_TOO_MANY_ADDRESS("address.too_many_addresses"),
     NO_ADDRESS("주소 정보 없음"),

@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -37,5 +40,13 @@ public class CommunityVoteMemberDao {
                 .findByCommunityIdAndMember(communityId, member)
                 .map(CommunityVoteMember::getCommunityVoteId)
                 .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Long> getUserVotedIds(List<Long> communityIds, Member member) {
+        List<CommunityVoteMember> communityVoteMemberList = repository.findByCommunityIdInAndMember(communityIds, member);
+
+        return communityVoteMemberList.stream()
+                .collect(Collectors.toMap(vote -> vote.getCommunity().getId(), CommunityVoteMember::getId));
     }
 }

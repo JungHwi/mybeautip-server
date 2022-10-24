@@ -39,6 +39,7 @@ import com.jocoos.mybeautip.word.BannedWord;
 import com.jocoos.mybeautip.word.BannedWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -239,7 +240,11 @@ public class LegacyMemberService {
         }
 
         if (!(username.matches(RegexConstants.regexForUsername))) {
-            throw new BadRequestException("Username does not match the format");
+            throw new BadRequestException(ErrorCode.INVALID_CHAR, "Username does not match the format");
+        }
+
+        if (NumberUtils.isDigits(username)) {
+            throw new BadRequestException(ErrorCode.INVALID_CHAR_ONLY_DIGIT, "Username does not use only digit.");
         }
 
         List<Member> otherMembers = memberRepository.findByUsername(username).stream()

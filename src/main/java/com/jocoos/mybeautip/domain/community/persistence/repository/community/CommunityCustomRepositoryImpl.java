@@ -9,6 +9,8 @@ import com.jocoos.mybeautip.domain.community.dto.VoteResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
+import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVote;
+import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityVoteRepository;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.home.vo.QSummaryCommunityResult;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -51,9 +54,12 @@ import static io.jsonwebtoken.lang.Collections.isEmpty;
 public class CommunityCustomRepositoryImpl implements CommunityCustomRepository {
 
     private final ExtendedQuerydslJpaRepository<Community, Long> repository;
+    private final CommunityVoteRepository communityVoteRepository;
 
-    public CommunityCustomRepositoryImpl(@Lazy ExtendedQuerydslJpaRepository<Community, Long> repository) {
+    public CommunityCustomRepositoryImpl(@Lazy ExtendedQuerydslJpaRepository<Community, Long> repository,
+                                         @Lazy CommunityVoteRepository communityVoteRepository) {
         this.repository = repository;
+        this.communityVoteRepository = communityVoteRepository;
     }
 
     @Override
@@ -63,7 +69,22 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                                                               pageable.getPageSize());
         query.orderBy(order(condition.isCategoryDrip()));
         addWhereConditionOptional(condition, query);
-        return query.fetch();
+        List<Community> communityList = query.fetch();
+
+        List<Long> ids = communityList.stream()
+                .map(Community::getId)
+                .toList();
+
+        List<CommunityVote> communityVoteList = communityVoteRepository.findByCommunity_IdIn(ids);
+        Map<Long, List<CommunityVote>> communityVoteMap = communityVoteList.stream()
+                .collect(Collectors.groupingBy(communityVote -> communityVote.getCommunity().getId()));
+
+        for (Community community : communityList) {
+            List<CommunityVote> votes = communityVoteMap.getOrDefault(community.getId(), new ArrayList<>());
+                community.setCommunityVoteList(votes);
+        }
+
+        return communityList;
     }
 
     @Override
@@ -124,6 +145,9 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return repository.query(query -> query
                 .select(community)
                 .from(community)
+                .join(community.member, member)
+                .join(community.category, communityCategory)
+                .leftJoin(community.communityFileList, communityFile).fetchJoin()
                 .where(
                         inCategories(categories),
                         lessThanSortedAt(cursor),

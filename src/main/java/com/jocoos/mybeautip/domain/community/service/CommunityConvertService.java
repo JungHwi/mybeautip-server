@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 
@@ -42,8 +43,15 @@ public class CommunityConvertService {
     }
 
     private void setUserVoted(Member member, List<CommunityResponse> responses) {
-        for (CommunityResponse response : responses) {
-            setUserVoted(member, response);
+        List<Long> voteCommunityIds = responses.stream()
+                .filter(response -> response.isCategoryType(VOTE))
+                .map(CommunityResponse::getId)
+                .toList();
+
+        Map<Long, Long>  voteIdMap = communityVoteMemberDao.getUserVotedIds(voteCommunityIds, member);
+        for (CommunityResponse communityResponse : responses) {
+            Long voteId = voteIdMap.get(communityResponse.getId());
+            communityResponse.userVote(voteId);
         }
     }
 

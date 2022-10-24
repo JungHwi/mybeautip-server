@@ -75,11 +75,11 @@ public class CommunityService {
 
     @Transactional()
     public CommunityResponse getCommunity(long communityId) {
+        communityDao.readCount(communityId);
+
         Community community = communityDao.get(communityId);
 
         Member member = legacyMemberService.currentMember();
-
-        communityDao.readCount(communityId);
 
         return convertService.toResponse(member, community);
     }

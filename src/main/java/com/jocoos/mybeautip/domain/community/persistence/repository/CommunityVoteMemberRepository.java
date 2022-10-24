@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVo
 import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
 import com.jocoos.mybeautip.member.Member;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CommunityVoteMemberRepository extends DefaultJpaRepository<CommunityVoteMember, Long> {
@@ -12,6 +13,8 @@ public interface CommunityVoteMemberRepository extends DefaultJpaRepository<Comm
     Optional<CommunityVoteMember> findByCommunityAndMember(Community community, Member member);
 
     Optional<CommunityVoteMember> findByCommunityIdAndMember(Long communityId, Member member);
+
+    List<CommunityVoteMember> findByCommunityIdInAndMember(List<Long> communityIds, Member member);
 
     boolean existsByCommunityAndMember(Community community, Member member);
 }
