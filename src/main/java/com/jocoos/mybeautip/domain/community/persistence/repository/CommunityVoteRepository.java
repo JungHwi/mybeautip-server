@@ -6,7 +6,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface CommunityVoteRepository extends DefaultJpaRepository<CommunityVote, Long> {
+
+    List<CommunityVote> findByCommunity_IdIn(List<Long> ids);
 
     @Modifying
     @Query("UPDATE CommunityVote communityVote SET communityVote.voteCount = communityVote.voteCount + :count WHERE communityVote.id = :communityVoteId")
