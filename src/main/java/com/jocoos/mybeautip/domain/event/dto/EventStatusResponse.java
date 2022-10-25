@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.domain.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-@AllArgsConstructor
 public class EventStatusResponse {
     @JsonIgnore
     private static final String ALL = "전체";
@@ -19,7 +17,7 @@ public class EventStatusResponse {
     private final String statusName;
     private final long count;
 
-    public EventStatusResponse(long allEventNum) {
+    private EventStatusResponse(long allEventNum) {
         this.status = null;
         this.statusName = ALL;
         this.count = allEventNum;
