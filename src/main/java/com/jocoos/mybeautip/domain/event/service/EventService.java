@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.event.service;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
+import com.jocoos.mybeautip.domain.event.converter.AdminEventConverter;
 import com.jocoos.mybeautip.domain.event.converter.EventConverter;
 import com.jocoos.mybeautip.domain.event.dto.*;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
@@ -29,6 +30,7 @@ public class EventService {
     private final EventRepository eventRepository;
 
     private final EventConverter eventConverter;
+    private final AdminEventConverter adminEventConverter;
     private final EventDao eventDao;
 
     @Transactional(readOnly = true)
@@ -53,6 +55,14 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
+    public AdminEventResponse getEventAdmin(long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Not found event. id - " + eventId));
+        Long joinCount = eventDao.getJoinCount(event);
+        return adminEventConverter.convertWithAllImages(event, joinCount);
+    }
+
+    @Transactional(readOnly = true)
     public List<Event> getProgressEventByType(EventType type) {
         return eventRepository.findByTypeAndStatus(type, PROGRESS);
     }
@@ -74,9 +84,9 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AdminEventListResponse> getEvents(EventSearchCondition condition) {
+    public PageResponse<AdminEventResponse> getEvents(EventSearchCondition condition) {
         List<EventSearchResult> events = eventDao.getEventsWithJoinCount(condition);
         Long totalCount = eventDao.getTotalCount(condition);
-        return new PageResponse<>(totalCount, AdminEventListResponse.from(events));
+        return new PageResponse<>(totalCount, adminEventConverter.convertAllImages(events));
     }
 }

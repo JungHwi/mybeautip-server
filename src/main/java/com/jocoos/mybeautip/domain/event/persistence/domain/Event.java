@@ -91,7 +91,23 @@ public class Event extends ModifiedDateAuditable {
     private List<EventJoin> eventJoinList;
 
     public String getBannerImageUrl() {
-        return toUrl(bannerImageFile, UrlDirectory.EVENT);
+        return toEventUrl(bannerImageFile);
+    }
+
+    public String getDetailImageUrl() {
+        return toEventUrl(imageFile);
+    }
+
+    public String getThumbnailImageUrl() {
+        return toEventUrl(thumbnailImageFile);
+    }
+
+    public String getShareSquareImageUrl() {
+        return toEventUrl(shareSquareImageFile);
+    }
+
+    public String getShareRectangleImageUrl() {
+        return toEventUrl(shareRectangleImageFile);
     }
 
     public ZonedDateTime getZonedCreatedAt() {
@@ -100,5 +116,9 @@ public class Event extends ModifiedDateAuditable {
 
     public static List<Long> getIds(List<Event> events) {
         return events.stream().map(Event::getId).collect(Collectors.toList());
+    }
+
+    private String toEventUrl(String filename) {
+        return toUrl(filename, UrlDirectory.EVENT);
     }
 }

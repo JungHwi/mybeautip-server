@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
+import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
@@ -23,6 +24,7 @@ import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
 public class EventDao {
 
     private final EventRepository repository;
+    private final EventJoinRepository joinRepository;
 
     @Transactional(readOnly = true)
     public List<Event> getVisibleEvents(EventType type) {
@@ -58,11 +60,18 @@ public class EventDao {
         return repository.getEventStatesWithNum();
     }
 
+    @Transactional(readOnly = true)
     public List<EventSearchResult> getEventsWithJoinCount(EventSearchCondition condition) {
         return repository.getEventsWithJoinCount(condition);
     }
 
+    @Transactional(readOnly = true)
     public Long getTotalCount(EventSearchCondition condition) {
         return repository.getTotalCount(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public Long getJoinCount(Event event) {
+        return joinRepository.countByEvent(event);
     }
 }

@@ -1,8 +1,7 @@
 package com.jocoos.mybeautip.domain.event.api.admin;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
-import com.jocoos.mybeautip.domain.event.dto.AdminEventListResponse;
-import com.jocoos.mybeautip.domain.event.dto.EventResponse;
+import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.dto.PageResponse;
 import com.jocoos.mybeautip.domain.event.service.EventService;
@@ -31,7 +30,7 @@ public class AdminEventController {
     }
 
     @GetMapping("/event")
-    public ResponseEntity<PageResponse<AdminEventListResponse>> getEvents(
+    public ResponseEntity<PageResponse<AdminEventResponse>> getEvents(
             @RequestParam(required = false) EventStatus status,
             @RequestParam(required = false, defaultValue = "1") Long page,
             @RequestParam(required = false, defaultValue = "10") Long size,
@@ -53,8 +52,8 @@ public class AdminEventController {
         return ResponseEntity.ok(eventService.getEvents(condition));
     }
 
-    @GetMapping("/admin/event/{eventId}")
-    public ResponseEntity<EventResponse> getEvent(@PathVariable Long eventId) {
-        return ResponseEntity.ok(eventService.getEvent(eventId));
+    @GetMapping("/event/{eventId}")
+    public ResponseEntity<AdminEventResponse> getEvent(@PathVariable Long eventId) {
+        return ResponseEntity.ok(eventService.getEventAdmin(eventId));
     }
 }
