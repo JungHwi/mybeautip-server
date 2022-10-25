@@ -3,8 +3,6 @@ package com.jocoos.mybeautip.domain.event.persistence.repository;
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
-import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
-import com.jocoos.mybeautip.domain.event.dto.QEventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
@@ -21,11 +19,13 @@ import org.springframework.util.StringUtils;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEventJoin.eventJoin;
+import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.sql.SQLExpressions.count;
 import static io.jsonwebtoken.lang.Collections.isEmpty;
 
@@ -64,11 +64,12 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
     }
 
     @Override
-    public List<EventStatusResponse> getEventStatesWithNum() {
+    public Map<EventStatus, Long> getEventStatesWithNum() {
         return repository.query(query -> query
-                .select(new QEventStatusResponse(event.status, count(event)))
+                .select(event.status, count(event))
                 .from(event)
-                .groupBy(event.status)).fetch();
+                .groupBy(event.status))
+                .transform(groupBy(event.status).as(count(event)));
     }
 
     private JPAQuery<Event> baseSelectQuery(EventSearchCondition condition) {

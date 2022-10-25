@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.domain.event.service.dao;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
-import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
 
@@ -63,7 +63,7 @@ public class EventDao {
     }
 
     @Transactional(readOnly = true)
-    public List<EventStatusResponse> getEventStatesWithNum() {
+    public Map<EventStatus, Long> getJoinCountMapGroupByEventStatus() {
         return repository.getEventStatesWithNum();
     }
 

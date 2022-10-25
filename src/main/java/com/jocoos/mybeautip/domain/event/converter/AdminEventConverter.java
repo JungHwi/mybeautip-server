@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.domain.event.converter;
 
+import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
+import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
@@ -10,6 +12,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper(componentModel = "spring")
 public abstract class AdminEventConverter {
@@ -18,6 +21,10 @@ public abstract class AdminEventConverter {
         return results.stream()
                 .map(result -> convert(result.getEvent(), result.getJoinCount()))
                 .toList();
+    }
+
+    public List<EventStatusResponse> convert(Map<EventStatus, Long> joinCountMap) {
+        return EventStatusResponse.from(joinCountMap);
     }
 
     @Mapping(target = "detailImageUrl", source = "event.imageFile", qualifiedByName = "fileToUrl")

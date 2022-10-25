@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.event.service;
 
+import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.converter.AdminEventConverter;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
@@ -13,8 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static com.jocoos.mybeautip.domain.event.dto.EventStatusResponse.addFirstAllEvent;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -25,7 +25,8 @@ public class AdminEventService {
 
     @Transactional(readOnly = true)
     public List<EventStatusResponse> getEventStatesWithNum() {
-        return addFirstAllEvent(eventDao.getEventStatesWithNum());
+        Map<EventStatus, Long> joinCountMap = eventDao.getJoinCountMapGroupByEventStatus();
+        return adminEventConverter.convert(joinCountMap);
     }
 
     @Transactional(readOnly = true)
