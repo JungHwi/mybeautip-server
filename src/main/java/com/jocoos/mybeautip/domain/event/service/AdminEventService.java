@@ -24,7 +24,7 @@ public class AdminEventService {
     private final EventDao eventDao;
 
     @Transactional(readOnly = true)
-    public List<EventStatusResponse> getEventStatesWithNum() {
+    public List<EventStatusResponse> getEventStates() {
         Map<EventStatus, Long> joinCountMap = eventDao.getJoinCountMapGroupByEventStatus();
         return adminEventConverter.convert(joinCountMap);
     }
@@ -37,7 +37,7 @@ public class AdminEventService {
     }
 
     @Transactional(readOnly = true)
-    public AdminEventResponse getEventAdmin(long eventId) {
+    public AdminEventResponse getEvent(long eventId) {
         Event event = eventDao.getEvent(eventId);
         Long joinCount = eventDao.getJoinCount(event);
         return adminEventConverter.convertWithAllImages(event, joinCount);

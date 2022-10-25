@@ -28,16 +28,16 @@ public abstract class AdminEventConverter {
     }
 
     @Mapping(target = "detailImageUrl", source = "event.imageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "bannerImageUrl", source = "event.thumbnailImageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "rollingBannerImageUrl", source = "event.bannerImageFile", qualifiedByName = "fileToUrl")
+    @Mapping(target = "thumbnailImageUrl", source = "event.thumbnailImageFile", qualifiedByName = "fileToUrl")
+    @Mapping(target = "bannerImageUrl", source = "event.bannerImageFile", qualifiedByName = "fileToUrl")
     @Mapping(target = "shareSnsImageUrl", source = "event.shareSquareImageFile", qualifiedByName = "fileToUrl")
     @Mapping(target = "shareWebImageUrl", source = "event.shareRectangleImageFile", qualifiedByName = "fileToUrl")
     @Mapping(target = "point", source = "event.needPoint")
     public abstract AdminEventResponse convertWithAllImages(Event event, Long joinCount);
 
     @Mapping(target = "detailImageUrl", ignore = true)
-    @Mapping(target = "bannerImageUrl", source = "event.thumbnailImageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "rollingBannerImageUrl", ignore = true)
+    @Mapping(target = "thumbnailImageUrl", source = "event.thumbnailImageFile", qualifiedByName = "fileToUrl")
+    @Mapping(target = "bannerImageUrl", ignore = true)
     @Mapping(target = "shareSnsImageUrl", ignore = true)
     @Mapping(target = "shareWebImageUrl", ignore = true)
     @Mapping(target = "point", source = "event.needPoint")

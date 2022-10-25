@@ -18,14 +18,19 @@ public class EventSearchCondition {
     private final Sort sort;
     private final SearchKeyword searchKeyword;
 
-    private final ZonedDateTime startAt;
-    private final ZonedDateTime endAt;
-
     public boolean isOrderByJoinCount() {
         return sort.isOrderByJoinCount();
     }
 
     public String getKeyword() {
         return searchKeyword == null ? null : searchKeyword.getKeyword();
+    }
+
+    public ZonedDateTime getStartAt() {
+        return searchKeyword == null ? null : searchKeyword.getStartAt();
+    }
+
+    public ZonedDateTime getEndAt() {
+        return searchKeyword == null ? null : searchKeyword.getEndAt();
     }
 }
