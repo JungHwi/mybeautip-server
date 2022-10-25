@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
 import com.jocoos.mybeautip.domain.event.vo.Paging;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,12 @@ public class EventDao {
 
     private final EventRepository repository;
     private final EventJoinRepository joinRepository;
+
+    @Transactional(readOnly = true)
+    public Event getEvent(Long eventId) {
+        return repository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Not found event. id - " + eventId));
+    }
 
     @Transactional(readOnly = true)
     public List<Event> getVisibleEvents(EventType type) {

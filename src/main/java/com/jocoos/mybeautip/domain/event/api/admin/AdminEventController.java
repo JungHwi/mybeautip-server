@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.dto.PageResponse;
-import com.jocoos.mybeautip.domain.event.service.EventService;
+import com.jocoos.mybeautip.domain.event.service.AdminEventService;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.Paging;
 import com.jocoos.mybeautip.domain.event.vo.SearchKeyword;
@@ -22,11 +22,11 @@ import java.util.List;
 @RestController
 public class AdminEventController {
 
-    private final EventService eventService;
+    private final AdminEventService service;
 
     @GetMapping("/event/status")
     public ResponseEntity<List<EventStatusResponse>> getEventStates() {
-        return ResponseEntity.ok(eventService.getEventStatesWithNum());
+        return ResponseEntity.ok(service.getEventStatesWithNum());
     }
 
     @GetMapping("/event")
@@ -49,11 +49,11 @@ public class AdminEventController {
                 .sort(new Sort(sort, order))
                 .build();
 
-        return ResponseEntity.ok(eventService.getEvents(condition));
+        return ResponseEntity.ok(service.getEvents(condition));
     }
 
     @GetMapping("/event/{eventId}")
     public ResponseEntity<AdminEventResponse> getEvent(@PathVariable Long eventId) {
-        return ResponseEntity.ok(eventService.getEventAdmin(eventId));
+        return ResponseEntity.ok(service.getEventAdmin(eventId));
     }
 }
