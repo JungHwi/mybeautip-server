@@ -56,6 +56,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("FileOperationType")),
                                 enumConvertFieldDescriptor((enumDocs.getFileOperationType()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.sort_field").withSubsectionId("sort_field"),
+                                attributes(key("title").value("SortField")),
+                                enumConvertFieldDescriptor((enumDocs.getSortField()))
+                        ),
                         // Member
                         customResponseFields("custom-response", beneathPath("data.member_status").withSubsectionId("member_status"),
                                 attributes(key("title").value("MemberStatus")),

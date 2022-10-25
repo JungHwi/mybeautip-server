@@ -17,7 +17,7 @@ import java.util.Map;
 @Mapper(componentModel = "spring")
 public abstract class AdminEventConverter {
 
-    public List<AdminEventResponse> convertAllImages(List<EventSearchResult> results) {
+    public List<AdminEventResponse> convert(List<EventSearchResult> results) {
         return results.stream()
                 .map(result -> convert(result.getEvent(), result.getJoinCount()))
                 .toList();

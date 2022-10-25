@@ -33,7 +33,7 @@ public class AdminEventService {
     public PageResponse<AdminEventResponse> getEvents(EventSearchCondition condition) {
         List<EventSearchResult> events = eventDao.getEventsWithJoinCount(condition);
         Long totalCount = eventDao.getTotalCount(condition);
-        return new PageResponse<>(totalCount, adminEventConverter.convertAllImages(events));
+        return new PageResponse<>(totalCount, adminEventConverter.convert(events));
     }
 
     @Transactional(readOnly = true)
