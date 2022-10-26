@@ -2,12 +2,13 @@ package com.jocoos.mybeautip.domain.event.service.dao;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
-import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
+import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
 import com.jocoos.mybeautip.domain.event.vo.Paging;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
 
@@ -23,6 +25,13 @@ import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
 public class EventDao {
 
     private final EventRepository repository;
+    private final EventJoinRepository joinRepository;
+
+    @Transactional(readOnly = true)
+    public Event getEvent(Long eventId) {
+        return repository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Not found event. id - " + eventId));
+    }
 
     @Transactional(readOnly = true)
     public List<Event> getVisibleEvents(EventType type) {
@@ -54,15 +63,22 @@ public class EventDao {
     }
 
     @Transactional(readOnly = true)
-    public List<EventStatusResponse> getEventStatesWithNum() {
+    public Map<EventStatus, Long> getJoinCountMapGroupByEventStatus() {
         return repository.getEventStatesWithNum();
     }
 
+    @Transactional(readOnly = true)
     public List<EventSearchResult> getEventsWithJoinCount(EventSearchCondition condition) {
         return repository.getEventsWithJoinCount(condition);
     }
 
+    @Transactional(readOnly = true)
     public Long getTotalCount(EventSearchCondition condition) {
         return repository.getTotalCount(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public Long getJoinCount(Event event) {
+        return joinRepository.countByEvent(event);
     }
 }

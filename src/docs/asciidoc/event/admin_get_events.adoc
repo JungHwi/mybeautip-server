@@ -1,0 +1,3 @@
+== Admin Get Events API
+
+operation::admin_get_events[snippets='http-request,request-parameters,http-response,response-fields']

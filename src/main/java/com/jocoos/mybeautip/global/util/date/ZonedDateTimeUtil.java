@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.util.date;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -8,6 +9,8 @@ import java.util.Date;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 public class ZonedDateTimeUtil {
+
+    public static final ZoneId UTC = ZoneId.of("UTC");
 
     public static boolean isZonedDateTime(String dateTime) {
         return isZonedDateTime(dateTime, ZONE_DATE_TIME_FORMAT);
@@ -41,6 +44,13 @@ public class ZonedDateTimeUtil {
         if (cursor == null) {
             return null;
         }
-        return ZonedDateTime.ofInstant(cursor.toInstant(), ZoneId.of("UTC"));
+        return ZonedDateTime.ofInstant(cursor.toInstant(), UTC);
+    }
+
+    public static ZonedDateTime toUTCZoned(LocalDate localDate, ZoneId zoneId) {
+        if (localDate == null) {
+            return null;
+        }
+        return localDate.atStartOfDay(zoneId).withZoneSameInstant(UTC);
     }
 }

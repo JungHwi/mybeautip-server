@@ -12,6 +12,6 @@ public class EventSearchResult {
     @QueryProjection
     public EventSearchResult(Event event, Long joinCount) {
         this.event = event;
-        this.joinCount = joinCount;
+        this.joinCount = joinCount == null ? 0 : joinCount;
     }
 }

@@ -2,10 +2,7 @@ package com.jocoos.mybeautip.global.config.restdoc.util;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
-import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
-import com.jocoos.mybeautip.domain.event.code.EventProductType;
-import com.jocoos.mybeautip.domain.event.code.EventStatus;
-import com.jocoos.mybeautip.domain.event.code.EventType;
+import com.jocoos.mybeautip.domain.event.code.*;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.notification.code.*;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
@@ -46,6 +43,7 @@ public class CommonDocController {
         Map<String, String> telecom = getDocs(Telecom.values());
         Map<String, String> urlDirectory = getDocs(UrlDirectory.values());
         Map<String, String> fileOperationType = getDocs(FileOperationType.values());
+        Map<String, String> sortField = getDocs(SortField.values());
 
         // Member
         Map<String, String> memberStatus = getDocs(MemberStatus.values());
@@ -106,6 +104,7 @@ public class CommonDocController {
                         .telecom(telecom)
                         .urlDirectory(urlDirectory)
                         .fileOperationType(fileOperationType)
+                        .sortField(sortField)
                 // Member
                         .memberStatus(memberStatus)
                         .skinType(skinType)
