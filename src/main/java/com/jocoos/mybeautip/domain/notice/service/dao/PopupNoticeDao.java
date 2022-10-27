@@ -19,7 +19,6 @@ public class PopupNoticeDao {
 
     @Transactional(readOnly = true)
     public List<PopupNotice> getAllActive() {
-        List<PopupNotice> popupNoticeList = repository.findAllByStatusAndEndedAtAfter(ACTIVE, ZonedDateTime.now());
-        return popupNoticeList.size() == 0 ? null : popupNoticeList;
+        return repository.findAllByStatusAndEndedAtAfter(ACTIVE, ZonedDateTime.now());
     }
 }
