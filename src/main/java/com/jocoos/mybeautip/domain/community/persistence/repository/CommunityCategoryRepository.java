@@ -15,7 +15,7 @@ public interface CommunityCategoryRepository extends DefaultJpaRepository<Commun
 
     Optional<CommunityCategory> findByType(CommunityCategoryType type);
 
-    List<CommunityCategory> findAllByTypeIn(Set<CommunityCategoryType> types);
+    List<CommunityCategory> findAllByTypeNotInAndParentIdIsNotNull(Set<CommunityCategoryType> types);
 
     List<CommunityCategory> findAllBy(Pageable pageable);
 

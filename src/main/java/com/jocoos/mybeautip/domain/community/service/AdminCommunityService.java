@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.ADMIN_TYPES;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.NOT_IN_ADMIN;
 
 @RequiredArgsConstructor
 @Service
@@ -21,7 +21,7 @@ public class AdminCommunityService {
 
     @Transactional(readOnly = true)
     public List<CommunityCategoryResponse> getCategories() {
-        List<CommunityCategory> adminCategories = categoryDao.getByType(ADMIN_TYPES);
+        List<CommunityCategory> adminCategories = categoryDao.getAllByExcludeByType(NOT_IN_ADMIN);
         return converter.convert(adminCategories);
     }
 }

@@ -24,7 +24,7 @@ public enum CommunityCategoryType implements CodeValue {
     private final String description;
 
     private static final Set<CommunityCategoryType> summaryTypes = new HashSet<>(Arrays.asList(BLIND, VOTE));
-    public static final Set<CommunityCategoryType> ADMIN_TYPES = new HashSet<>(Arrays.asList(NORMAL, BLIND, DRIP, VOTE));
+    public static final Set<CommunityCategoryType> NOT_IN_ADMIN = new HashSet<>(Arrays.asList(GROUP, EVENT));
 
     public static boolean supportsSummary(CommunityCategoryType type) {
         return summaryTypes.contains(type);
