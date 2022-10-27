@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.converter.AdminEventConverter;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
-import com.jocoos.mybeautip.domain.event.dto.PageResponse;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
