@@ -36,7 +36,6 @@ class EventControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("[].type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_TYPE)),
                                 fieldWithPath("[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_STATUS)),
                                 fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목"),
-                                fieldWithPath("[].color").type(JsonFieldType.STRING).description("이벤트 색깔 정보"),
                                 fieldWithPath("[].thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
                                 fieldWithPath("[].banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL").optional(),
                                 fieldWithPath("[].start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),

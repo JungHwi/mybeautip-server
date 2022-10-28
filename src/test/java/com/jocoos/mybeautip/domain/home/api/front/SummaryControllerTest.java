@@ -21,29 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class SummaryControllerTest extends RestDocsTestSupport {
 
-
-    @Test
-    void summaryEvent() throws Exception {
-        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/summary/event"))
-                .andExpect(status().isOk())
-                .andDo(print());
-
-        result.andDo(document("summary_event",
-                responseFields(
-                        fieldWithPath("[]").type(JsonFieldType.ARRAY).description("이벤트 목록"),
-                        fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("이벤트 ID"),
-                        fieldWithPath("[].type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_TYPE)),
-                        fieldWithPath("[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.EVENT_STATUS)),
-                        fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목"),
-                        fieldWithPath("[].color").type(JsonFieldType.STRING).description("이벤트 색깔 정보"),
-                        fieldWithPath("[].thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
-                        fieldWithPath("[].banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL").optional(),
-                        fieldWithPath("[].start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
-                        fieldWithPath("[].end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat())
-                )));
-    }
-
     @Test
     void summaryCommunityTop() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders

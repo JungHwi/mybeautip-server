@@ -26,7 +26,9 @@ public class DocumentLinkGenerator {
 
         SORT_FIELD("sort_field", "정렬 필드"),
         SEARCH_TYPE("search_type", "검색 타입"),
-        SCRAP_TYPE("scrap_type", "스크랩 타입")
+        SCRAP_TYPE("scrap_type", "스크랩 타입"),
+
+        PLACARD_LINK_TYPE("placard_link_type", "플랜카드 연결 타입")
         ;
 
         private final String pageId;
