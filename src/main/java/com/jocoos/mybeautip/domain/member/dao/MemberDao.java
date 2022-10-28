@@ -20,7 +20,8 @@ public class MemberDao {
     public Member getMember(long memberId) {
         return repository.getById(memberId);
     }
-
+    
+    @Transactional(readOnly = true)
     public List<MemberStatusResponse> getStatusesWithCount() {
         return repository.getStatusesWithCount();
     }
