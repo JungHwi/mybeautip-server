@@ -1,3 +1,0 @@
-== Summary Event API
-
-operation::summary_event[snippets='http-request,http-response,response-fields']
