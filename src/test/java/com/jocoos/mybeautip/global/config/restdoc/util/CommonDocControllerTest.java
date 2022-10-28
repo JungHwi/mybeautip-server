@@ -176,13 +176,19 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("PopupStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getPopupStatus()))
                         ),
+                        // TERM
                         customResponseFields("custom-response", beneathPath("data.term_type").withSubsectionId("term_type"),
                                 attributes(key("title").value("TermType")),
                                 enumConvertFieldDescriptor((enumDocs.getTermType()))
                         ),
+                        // SEARCH
                         customResponseFields("custom-response", beneathPath("data.search_type").withSubsectionId("search_type"),
                                 attributes(key("title").value("SearchType")),
-                                enumConvertFieldDescriptor((enumDocs.getSearchType())))
+                                enumConvertFieldDescriptor((enumDocs.getSearchType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.placard_link_type").withSubsectionId("placard_link_type"),
+                                attributes(key("title").value("PlacardLinkType")),
+                                enumConvertFieldDescriptor((enumDocs.getPlacardLinkType())))
                 ));
     }
 
