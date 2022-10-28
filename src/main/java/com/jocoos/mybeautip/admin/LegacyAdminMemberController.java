@@ -31,7 +31,7 @@ import java.util.Date;
 @Slf4j
 @RestController
 @RequestMapping("/api/admin")
-public class AdminMemberController {
+public class LegacyAdminMemberController {
 
     private final LegacyMemberService legacyMemberService;
     private final PasswordEncoder passwordEncoder;
@@ -40,12 +40,12 @@ public class AdminMemberController {
     private final FollowingRepository followingRepository;
     private final MemberPointService memberPointService;
 
-    public AdminMemberController(LegacyMemberService legacyMemberService,
-                                 PasswordEncoder passwordEncoder,
-                                 AdminMemberRepository adminMemberRepository,
-                                 MemberRepository memberRepository,
-                                 FollowingRepository followingRepository,
-                                 MemberPointService memberPointService) {
+    public LegacyAdminMemberController(LegacyMemberService legacyMemberService,
+                                       PasswordEncoder passwordEncoder,
+                                       AdminMemberRepository adminMemberRepository,
+                                       MemberRepository memberRepository,
+                                       FollowingRepository followingRepository,
+                                       MemberPointService memberPointService) {
         this.legacyMemberService = legacyMemberService;
         this.passwordEncoder = passwordEncoder;
         this.adminMemberRepository = adminMemberRepository;

@@ -7,10 +7,10 @@ import lombok.Getter;
 @Getter
 public class MemberStatusResponse {
     private final MemberStatus status;
-    private final int count;
+    private final long count;
 
     @QueryProjection
-    public MemberStatusResponse(MemberStatus status, int count) {
+    public MemberStatusResponse(MemberStatus status, long count) {
         this.status = status;
         this.count = count;
     }
