@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.event.vo;
+package com.jocoos.mybeautip.global.vo;
 
 import lombok.Getter;
 import org.springframework.util.StringUtils;
