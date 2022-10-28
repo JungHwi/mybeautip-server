@@ -75,9 +75,6 @@ public class Event extends ModifiedDateAuditable {
     @Column
     private int needPoint;
 
-    @Column
-    private String color;
-
     @Column(nullable = false)
     private ZonedDateTime startAt;
 
