@@ -1,13 +1,13 @@
 package com.jocoos.mybeautip.domain.member.dao;
 
-import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -22,7 +22,7 @@ public class MemberDao {
     }
     
     @Transactional(readOnly = true)
-    public List<MemberStatusResponse> getStatusesWithCount() {
+    public Map<MemberStatus, Long> getStatusesWithCount() {
         return repository.getStatusesWithCount();
     }
 }

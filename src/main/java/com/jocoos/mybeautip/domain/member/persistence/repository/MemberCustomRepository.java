@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.domain.member.persistence.repository;
 
-import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 
-import java.util.List;
+import java.util.Map;
 
 public interface MemberCustomRepository {
-    List<MemberStatusResponse> getStatusesWithCount();
+    Map<MemberStatus, Long> getStatusesWithCount();
 }

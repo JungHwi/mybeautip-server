@@ -17,7 +17,6 @@ public class AdminMemberController {
 
     private final AdminMemberService service;
 
-
     @GetMapping("/member/status")
     public ResponseEntity<List<MemberStatusResponse>> getStatusesWithCount() {
         return ResponseEntity.ok(service.getStatusesWithCount());
