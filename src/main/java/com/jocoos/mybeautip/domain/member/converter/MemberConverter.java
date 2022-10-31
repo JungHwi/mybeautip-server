@@ -46,6 +46,7 @@ public interface MemberConverter {
             @Mapping(target = "earnPoint", ignore = true),
             @Mapping(target = "avatarFilenameFromUrl", ignore = true),
             @Mapping(target = "avatarFilename", ignore = true),
+            @Mapping(target = "retrievePoint", ignore = true),
     })
     Member convertToMember(SignupRequest signupRequest);
 

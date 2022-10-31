@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityFile.communityFile;
@@ -75,7 +76,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .map(Community::getId)
                 .toList();
 
-        List<CommunityVote> communityVoteList = communityVoteRepository.findByCommunity_IdIn(ids);
+        List<CommunityVote> communityVoteList = communityVoteRepository.findByCommunityIdIn(ids);
         Map<Long, List<CommunityVote>> communityVoteMap = communityVoteList.stream()
                 .collect(Collectors.groupingBy(communityVote -> communityVote.getCommunity().getId()));
 
@@ -145,13 +146,13 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return repository.query(query -> query
                 .select(community)
                 .from(community)
-                .join(community.member, member)
-                .join(community.category, communityCategory)
+                .join(community.member, member).fetchJoin()
+                .join(community.category, communityCategory).fetchJoin()
                 .leftJoin(community.communityFileList, communityFile).fetchJoin()
                 .where(
                         inCategories(categories),
                         lessThanSortedAt(cursor),
-                        notEqStatus(DELETE)
+                        eqStatus(NORMAL)
                 )
                 .limit(limitSize));
     }
@@ -256,6 +257,10 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
             throw new BadRequestException(BAD_REQUEST, "event_id is required to search DRIP category.");
         }
         return community.eventId.eq(eventId);
+    }
+
+    private BooleanExpression eqStatus(CommunityStatus status) {
+        return status == null ? null : community.status.eq(status);
     }
 
     private BooleanExpression notEqStatus(CommunityStatus status) {

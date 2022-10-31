@@ -37,7 +37,8 @@ public interface CommunityConverter {
             @Mapping(target = "reportCount", ignore = true),
             @Mapping(target = "sortedAt", ignore = true),
             @Mapping(target = "communityFileList", ignore = true),
-            @Mapping(target = "communityVoteList", ignore = true)
+            @Mapping(target = "communityVoteList", ignore = true),
+            @Mapping(target = "isTopFix", ignore = true)
     })
     Community convert(WriteCommunityRequest request);
 
@@ -52,14 +53,16 @@ public interface CommunityConverter {
 
     @Mappings({
             @Mapping(target = "fileUrl", source = "communityFile", qualifiedByName = "convertToUrl"),
-            @Mapping(target = "count", source = "voteCount")
+            @Mapping(target = "count", source = "voteCount"),
+            @Mapping(target = "isVoted", ignore = true),
     })
     VoteResponse convert(CommunityVote vote);
 
     @Mappings({
             @Mapping(target = "relationInfo", ignore = true),
             @Mapping(target = "fileUrl", ignore = true),
-            @Mapping(target = "votes", ignore = true)
+            @Mapping(target = "votes", ignore = true),
+            @Mapping(target = "eventTitle", ignore = true)
     })
     CommunityResponse convert(Community community);
 

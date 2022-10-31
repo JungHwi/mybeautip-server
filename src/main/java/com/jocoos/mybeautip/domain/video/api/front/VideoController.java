@@ -20,7 +20,7 @@ public class VideoController {
 
     @GetMapping("/1/videos")
     public ResponseEntity<CursorResultResponse<VideoResponse>> getVideos(@RequestParam(name = "category_id", defaultValue = "1") Integer categoryId,
-                                                                         @RequestParam(defaultValue = "50") int count,
+                                                                         @RequestParam(defaultValue = "20") int count,
                                                                          @RequestParam(required = false) ZonedDateTime cursor) {
 
         List<VideoResponse> response = service.findVideos(categoryId, cursor, count);

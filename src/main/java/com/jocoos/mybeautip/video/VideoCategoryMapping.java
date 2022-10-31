@@ -1,14 +1,15 @@
 package com.jocoos.mybeautip.video;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
+@Getter
+@Builder
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "video_category_mapping")
@@ -18,14 +19,16 @@ public class VideoCategoryMapping implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long videoId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "video_id", insertable = false, updatable = false)
+    private Video video;
 
-    @Column(nullable = false)
-    private int categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private VideoCategory videoCategory;
 
-    public VideoCategoryMapping(Long videoId, int categoryId) {
-        this.videoId = videoId;
-        this.categoryId = categoryId;
+    public VideoCategoryMapping(Video video, VideoCategory videoCategory) {
+        this.video = video;
+        this.videoCategory = videoCategory;
     }
 }

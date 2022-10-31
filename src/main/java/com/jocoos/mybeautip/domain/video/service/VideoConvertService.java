@@ -1,22 +1,22 @@
 package com.jocoos.mybeautip.domain.video.service;
 
+import com.jocoos.mybeautip.domain.video.converter.VideoConverter;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
 import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoCategoryMapping;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
+import com.jocoos.mybeautip.video.scrap.VideoScrap;
 import com.jocoos.mybeautip.video.scrap.VideoScrapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,19 +33,66 @@ public class VideoConvertService {
     private final VideoLikeRepository videoLikeRepository;
     private final VideoScrapRepository videoScrapRepository;
     private final BlockRepository blockRepository;
+    private final VideoConverter converter;
 
     @Transactional(readOnly = true)
     public List<VideoResponse> toResponses(List<Video> videoList) {
         Map<Integer, VideoCategoryResponse> videoCategoryResponseMap = getVideoCategoryMap(videoList);
-        List<VideoResponse> responseList = new ArrayList<>();
-        videoList.forEach(v -> responseList.add(generateRelationInfo(v, videoCategoryResponseMap)));
-        return responseList;
+        return generateRelationInfo(videoList, videoCategoryResponseMap);
     }
 
     @Transactional(readOnly = true)
     public VideoResponse toResponse(Video video) {
         Map<Integer, VideoCategoryResponse> videoCategoryResponseMap = getVideoCategoryMap(video);
         return generateRelationInfo(video, videoCategoryResponseMap);
+    }
+
+    private List<VideoResponse> generateRelationInfo(List<Video> videoList, Map<Integer, VideoCategoryResponse> videoCategoryMap) {
+        List<VideoResponse> responseList = new ArrayList<>();
+        Map<Long, Long> likeMap = new HashMap<>();
+        Map<Long, Long> scrapMap = new HashMap<>();
+        Map<Long, Block> blockMap = new HashMap<>();
+
+        Long me = memberService.currentMemberId();
+
+        List<Long> videoIds = videoList.stream()
+                .map(Video::getId)
+                .toList();
+
+        List<Long> ownerIds = videoList.stream()
+                .map(video -> video.getMember().getId())
+                .toList();
+
+        if (me != null) {
+            List<VideoLike> likeList = videoLikeRepository.findByVideoIdInAndCreatedByIdAndStatus(videoIds, me, LIKE);
+            likeMap = likeList.stream()
+                    .collect(Collectors.toMap(videoLike -> videoLike.getVideo().getId(), VideoLike::getId));
+            List<VideoScrap> scrapList = videoScrapRepository.findByVideoIdInAndCreatedByIdAndStatus(videoIds, me, SCRAP);
+            scrapMap = scrapList.stream()
+                    .collect(Collectors.toMap(videoScrap -> videoScrap.getVideo().getId(), VideoScrap::getId));
+            List<Block> blockList = blockRepository.findAllByMeAndMemberYouIdInAndStatus(me, ownerIds, BLOCK);
+            blockMap = blockList.stream()
+                    .collect(Collectors.toMap(Block::getYouId, Function.identity()));
+        }
+
+        for (Video video : videoList) {
+            VideoResponse response = converter.converts(video);
+            response.setWatchCount(video.getViewCount());
+            response.setRealWatchCount(video.getWatchCount());
+            response.setLikeId(likeMap.getOrDefault(video.getId(), null));
+            response.setScrapId(scrapMap.getOrDefault(video.getId(), null));
+            response.setBlocked(blockMap.containsKey(video.getId()));
+
+            List<VideoCategoryResponse> categoryResponses = new ArrayList<>();
+            for (VideoCategoryMapping category : video.getCategoryMapping()) {
+                categoryResponses.add(videoCategoryMap.get(category.getVideoCategory().getId()));
+            }
+            response.setCategory(categoryResponses);
+
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 
     private VideoResponse generateRelationInfo(Video video, Map<Integer, VideoCategoryResponse> videoCategoryMap) {
@@ -70,8 +117,8 @@ public class VideoConvertService {
         videoResponse.setWatchCount(video.getViewCount());
         videoResponse.setRealWatchCount(video.getWatchCount());
         List<VideoCategoryResponse> categoryResponses = new ArrayList<>();
-        for (VideoCategoryMapping category : video.getCategory()) {
-            categoryResponses.add(videoCategoryMap.get(category.getCategoryId()));
+        for (VideoCategoryMapping category : video.getCategoryMapping()) {
+            categoryResponses.add(videoCategoryMap.get(category.getVideoCategory().getId()));
         }
         videoResponse.setCategory(categoryResponses);
         return videoResponse;
@@ -79,11 +126,11 @@ public class VideoConvertService {
 
     private Map<Integer, VideoCategoryResponse> getVideoCategoryMap(List<Video> videoList) {
         List<Integer> categoryIds = videoList.stream()
-                .map(video -> video.getCategory())
-                .collect(Collectors.toList())
-                .stream().flatMap(List::stream)
-                .map(category -> category.getCategoryId())
-                .collect(Collectors.toList());
+                .map(video -> video.getCategoryMapping())
+                .collect(Collectors.toList()).stream()
+                .flatMap(List::stream)
+                .map(mapping -> mapping.getVideoCategory().getId())
+                .toList();
 
         List<VideoCategoryResponse> categoryResponses = videoCategoryService.getVideoCategoryList(categoryIds);
         return categoryResponses.stream()
@@ -91,8 +138,8 @@ public class VideoConvertService {
     }
 
     private Map<Integer, VideoCategoryResponse> getVideoCategoryMap(Video video) {
-        List<Integer> categoryIds = video.getCategory().stream()
-                .map(category -> category.getCategoryId())
+        List<Integer> categoryIds = video.getCategoryMapping().stream()
+                .map(category -> category.getVideoCategory().getId())
                 .collect(Collectors.toList());
 
         List<VideoCategoryResponse> categoryResponses = videoCategoryService.getVideoCategoryList(categoryIds);

@@ -29,6 +29,7 @@ public interface SummaryConverter {
     @Mapping(target = "relationInfo", ignore = true)
     @Mapping(target = "member", source = "result.memberResponse")
     @Mapping(target = "category", source = "result.community.category")
+    @Mapping(target = "sortedAt", ignore = true)
     CommunityResponse convert(SummaryCommunityResult result);
 
     List<CommunityResponse> convert(List<SummaryCommunityResult> results);

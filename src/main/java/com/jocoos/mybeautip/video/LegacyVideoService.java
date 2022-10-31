@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
+import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
+import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository;
 import com.jocoos.mybeautip.domain.video.service.VideoCategoryService;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
@@ -51,6 +53,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
@@ -87,6 +90,7 @@ public class LegacyVideoService {
     private final VideoScrapRepository videoScrapRepository;
     private final ActivityPointService activityPointService;
     private final VideoCategoryService videoCategoryService;
+    private final VideoCategoryRepository videoCategoryRepository;
 
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
@@ -293,8 +297,8 @@ public class LegacyVideoService {
         videoInfo.setRealWatchCount(video.getWatchCount());
 
 
-        List<Integer> categoryIds = video.getCategory().stream()
-                .map(category -> category.getCategoryId())
+        List<Integer> categoryIds = video.getCategoryMapping().stream()
+                .map(categoryMapping -> categoryMapping.getVideoCategory().getId())
                 .collect(Collectors.toList());
         List<VideoCategoryResponse> categoryResponses = videoCategoryService.getVideoCategoryList(categoryIds);
         videoInfo.setCategory(categoryResponses);
@@ -375,7 +379,7 @@ public class LegacyVideoService {
         BeanUtils.copyProperties(request, video);
 
         // Set categories after video is saved
-        video.setCategory(null);
+        video.setCategoryMapping(null);
         log.debug("{}", video);
 
         Video createdVideo = videoRepository.save(video); // do not notify
@@ -383,7 +387,7 @@ public class LegacyVideoService {
 
         if (request.getCategory() != null) {
             List<Integer> category = request.getCategory();
-            createdVideo.setCategory(createCategory(createdVideo.getId(), category));
+            createdVideo.setCategoryMapping(createCategory(createdVideo, category));
         }
 
         if (StringUtils.isNotEmpty(createdVideo.getContent())) {
@@ -424,11 +428,15 @@ public class LegacyVideoService {
         return new Date();
     }
 
-    private List<VideoCategoryMapping> createCategory(Long videoId, List<Integer> category) {
+    private List<VideoCategoryMapping> createCategory(Video video, List<Integer> videoCategoryIds) {
         List<VideoCategoryMapping> categories = new ArrayList<>();
-        for (int c : category) {
-            if (c > 0) {
-                categories.add(new VideoCategoryMapping(videoId, c));
+        List<VideoCategory> videoCategoryList = videoCategoryRepository.findAllByIdIn(videoCategoryIds);
+        Map<Integer, VideoCategory> videoCategoryMap = videoCategoryList.stream()
+                .collect(Collectors.toMap(VideoCategory::getId, Function.identity()));
+
+        for (int id : videoCategoryIds) {
+            if (id > 0) {
+                categories.add(new VideoCategoryMapping(video, videoCategoryMap.get(id)));
             }
         }
 
@@ -574,11 +582,11 @@ public class LegacyVideoService {
                 String[] split = extraData.getCategory().split(",");
                 List<Integer> category = Arrays.stream(split).map(s -> Integer.valueOf(s)).collect(Collectors.toList());
 
-                if (target.getCategory() != null) {
+                if (target.getCategoryMapping() != null) {
                     videoCategoryMappingRepository.deleteByVideoId(target.getId());
                 }
 
-                target.setCategory(createCategory(target.getId(), category));
+                target.setCategoryMapping(createCategory(target, category));
             }
 
             if (!StringUtils.isBlank(extraData.getStartedAt())) {

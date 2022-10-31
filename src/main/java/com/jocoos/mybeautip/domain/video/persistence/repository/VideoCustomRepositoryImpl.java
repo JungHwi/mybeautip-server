@@ -16,6 +16,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static com.jocoos.mybeautip.domain.video.persistence.domain.QVideoCategory.videoCategory;
+import static com.jocoos.mybeautip.member.QMember.member;
 import static com.jocoos.mybeautip.video.QVideo.video;
 import static com.jocoos.mybeautip.video.QVideoCategoryMapping.videoCategoryMapping;
 import static com.querydsl.sql.SQLExpressions.count;
@@ -33,7 +35,6 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     public List<Video> getVideos(VideoSearchCondition condition) {
         if (condition.isCategorySearch()) {
             return baseSearchQuery(condition)
-                    .innerJoin(videoCategoryMapping).on(videoCategoryMapping.videoId.eq(video.id))
                     .where(eqCategoryId(condition.getCategoryId()))
                     .fetch();
         }
@@ -65,6 +66,9 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
         return repository.query(query -> query
                 .select(video)
                 .from(video)
+                .join(video.member, member).fetchJoin()
+                .join(video.categoryMapping, videoCategoryMapping).fetchJoin()
+                .join(videoCategoryMapping.videoCategory, videoCategory).fetchJoin()
                 .where(
                         searchCondition(condition.getKeyword()),
                         lessOrEqualThanCreatedAt(condition.getCursor()),
@@ -81,7 +85,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     }
 
     private BooleanExpression eqCategoryId(Integer categoryId) {
-        return categoryId == null ? null : videoCategoryMapping.categoryId.eq(categoryId);
+        return categoryId == null ? null : videoCategoryMapping.videoCategory.id.eq(categoryId);
     }
 
     private BooleanExpression eqVisibilityPublic() {
