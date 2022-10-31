@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
+import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,6 +34,7 @@ public class VideoUpdateService {
   private final VideoWatchService videoWatchService;
 
   private final VideoRepository videoRepository;
+  private final VideoCategoryRepository videoCategoryRepository;
   private final MemberRepository memberRepository;
   private final TagService tagService;
   private final GoodsRepository goodsRepository;
@@ -67,9 +71,9 @@ public class VideoUpdateService {
 
         // if data had category array
         if (!StringUtils.isBlank(extraData.getCategory())) {
-          categories = parseCategory(video.getId(), extraData.getCategory());
+          categories = parseCategory(video, extraData.getCategory());
           log.info("categories: {}", categories);
-          video.setCategory(categories);
+          video.setCategoryMapping(categories);
         }
 
         List<VideoGoods> videoGoods = new ArrayList<>();
@@ -204,7 +208,7 @@ public class VideoUpdateService {
         });
   }
 
-  private List<VideoCategoryMapping> parseCategory(Long videoId, String category) {
+  private List<VideoCategoryMapping> parseCategory(Video video, String category) {
     if (StringUtils.isBlank(category)) {
       return new ArrayList<>();
     }
@@ -212,14 +216,18 @@ public class VideoUpdateService {
     List<Integer> collect = Arrays.stream(categories)
         .filter(c -> !"0".equals(c)).map(c -> Integer.valueOf(c))
         .collect(Collectors.toList());
-    return createCategory(videoId, collect);
+    return createCategory(video, collect);
   }
 
-  private List<VideoCategoryMapping> createCategory(Long videoId, List<Integer> category) {
+  private List<VideoCategoryMapping> createCategory(Video video, List<Integer> videoCategoryIds) {
     List<VideoCategoryMapping> categories = new ArrayList<>();
-    for (int c : category) {
-      if (c > 0) {
-        categories.add(new VideoCategoryMapping(videoId, c));
+    List<VideoCategory> videoCategoryList = videoCategoryRepository.findAllByIdIn(videoCategoryIds);
+    Map<Integer, VideoCategory> videoCategoryMap = videoCategoryList.stream()
+            .collect(Collectors.toMap(VideoCategory::getId, Function.identity()));
+
+    for (int id : videoCategoryIds) {
+      if (id > 0) {
+        categories.add(new VideoCategoryMapping(video, videoCategoryMap.get(id)));
       }
     }
 

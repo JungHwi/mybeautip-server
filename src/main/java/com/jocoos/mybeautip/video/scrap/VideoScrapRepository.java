@@ -16,6 +16,8 @@ public interface VideoScrapRepository extends JpaRepository<VideoScrap, Long> {
 
     Optional<VideoScrap> findByVideoIdAndCreatedByIdAndStatus(Long videoId, Long member, ScrapStatus status);
 
+    List<VideoScrap> findByVideoIdInAndCreatedByIdAndStatus(List<Long> videoId, Long member, ScrapStatus status);
+
     List<VideoScrap> findByCreatedByIdAndCreatedAtBeforeAndVideoVisibilityAndVideoDeletedAtIsNullAndStatus(Long createdId, Date createdAt, String visibility, Pageable pageable, ScrapStatus status);
 
     List<VideoScrap> findByCreatedByIdAndVideoVisibilityAndVideoDeletedAtIsNullAndStatus(Long createdId, String visibility, Pageable pageable, ScrapStatus status);

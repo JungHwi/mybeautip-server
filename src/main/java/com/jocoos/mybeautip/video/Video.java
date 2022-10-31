@@ -1,8 +1,7 @@
 package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.member.Member;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -11,8 +10,11 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "videos")
@@ -44,8 +46,8 @@ public class Video {
     private Boolean muted;
     @Column(nullable = false)
     private String visibility;
-    @OneToMany(mappedBy = "videoId", cascade = CascadeType.ALL)
-    private List<VideoCategoryMapping> category;
+    @OneToMany(mappedBy = "video", cascade = CascadeType.ALL)
+    private List<VideoCategoryMapping> categoryMapping;
     @Column
     private String title;
     @Column

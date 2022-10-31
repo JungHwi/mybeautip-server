@@ -2,18 +2,18 @@ package com.jocoos.mybeautip.domain.video.persistence.domain;
 
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.jocoos.mybeautip.video.VideoCategoryMapping;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@EqualsAndHashCode
 @Table(name = "video_category")
 public class VideoCategory {
     @Id
@@ -41,4 +41,7 @@ public class VideoCategory {
 
     @Enumerated(EnumType.STRING)
     private VideoMaskType maskType;
+
+    @OneToMany(mappedBy = "videoCategory", cascade = CascadeType.ALL)
+    private List<VideoCategoryMapping> categoryMapping;
 }
