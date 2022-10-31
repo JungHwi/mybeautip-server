@@ -2,6 +2,9 @@ package com.jocoos.mybeautip.domain.event.vo;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
+import com.jocoos.mybeautip.global.vo.Paging;
+import com.jocoos.mybeautip.global.vo.SearchKeyword;
+import com.jocoos.mybeautip.global.vo.Sort;
 import lombok.Builder;
 import lombok.Getter;
 
