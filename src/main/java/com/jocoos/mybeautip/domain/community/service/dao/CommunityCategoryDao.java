@@ -53,7 +53,7 @@ public class CommunityCategoryDao {
     }
 
     @Transactional(readOnly = true)
-    public List<CommunityCategory> getAllByExcludeByType(Set<CommunityCategoryType> types) {
+    public List<CommunityCategory> getAllExcludeByTypes(Set<CommunityCategoryType> types) {
         return repository.findAllByTypeNotInAndParentIdIsNotNull(types);
     }
 }

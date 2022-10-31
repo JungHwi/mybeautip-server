@@ -21,7 +21,10 @@ public class AdminCommunityService {
 
     @Transactional(readOnly = true)
     public List<CommunityCategoryResponse> getCategories() {
-        List<CommunityCategory> adminCategories = categoryDao.getAllByExcludeByType(NOT_IN_ADMIN);
+        List<CommunityCategory> adminCategories = categoryDao.getAllExcludeByTypes(NOT_IN_ADMIN);
         return converter.convert(adminCategories);
     }
+
+//    public List<AdminCommunityResponse> getCommunities() {
+//    }
 }
