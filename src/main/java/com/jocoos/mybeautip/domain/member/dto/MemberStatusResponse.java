@@ -20,6 +20,12 @@ public class MemberStatusResponse {
     private final String statusName;
     private final long count;
 
+    public MemberStatusResponse(MemberStatus status, long count) {
+        this.status = status;
+        this.statusName = status.getDescription();
+        this.count = count;
+    }
+
     public MemberStatusResponse(String statusName, long count) {
         this.status = null;
         this.statusName = statusName;
@@ -28,11 +34,33 @@ public class MemberStatusResponse {
 
     public static List<MemberStatusResponse> from(Map<MemberStatus, Long> statusCountMap) {
         List<MemberStatusResponse> response = new ArrayList<>();
-        long totalCount = statusCountMap.values().stream().mapToLong(Long::valueOf).sum();
-        response.add(new MemberStatusResponse(ALL, totalCount));
-        response.addAll(Arrays.stream(MemberStatus.values())
-                .map(memberStatus -> new MemberStatusResponse(memberStatus, memberStatus.getName(), statusCountMap.getOrDefault(memberStatus, 0L)))
-                .toList());
+        long totalCount = getTotalCount(statusCountMap);
+        response.add(getTotalStatus(totalCount));
+        response.addAll(getIndividualStatus(statusCountMap));
         return response;
+    }
+
+    private static long getTotalCount(Map<MemberStatus, Long> joinCountMap) {
+        return joinCountMap.values().stream()
+                .mapToLong(Long::valueOf)
+                .sum();
+    }
+
+    private static MemberStatusResponse getTotalStatus(long totalCount) {
+        return new MemberStatusResponse(ALL, totalCount);
+    }
+
+    private static List<MemberStatusResponse> getIndividualStatus(final Map<MemberStatus, Long> joinCountMap) {
+        return Arrays.stream(MemberStatus.values())
+                .map(memberStatus -> toResponse(joinCountMap, memberStatus))
+                .toList();
+    }
+
+    private static MemberStatusResponse toResponse(Map<MemberStatus, Long> joinCountMap, MemberStatus memberStatus) {
+        return new MemberStatusResponse(memberStatus, getCount(joinCountMap, memberStatus));
+    }
+
+    private static Long getCount(Map<MemberStatus, Long> joinCountMap, MemberStatus memberStatus) {
+        return joinCountMap.getOrDefault(memberStatus, 0L);
     }
 }
