@@ -16,8 +16,8 @@ import java.util.Optional;
 @Repository
 public interface CommunityCommentRepository extends ExtendedQuerydslJpaRepository<CommunityComment, Long>, CommunityCommentCustomRepository {
 
+    Long countByMemberId(Long memberId);
     Optional<CommunityComment> findByCommunityIdAndId(long communityId, long commentId);
-
     Slice<CommunityComment> findByMemberIdAndStatusAndIdLessThan(long memberId, CommunityStatus status, long cursor, Pageable pageable);
     Slice<CommunityComment> findByCommunityIdAndParentIdAndIdGreaterThan(long communityId, Long parentId, long cursor, Pageable pageable);
     Slice<CommunityComment> findByCommunityIdAndParentIdAndIdLessThan(long communityId, Long parentId, long cursor, Pageable pageable);

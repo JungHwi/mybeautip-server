@@ -22,6 +22,8 @@ public interface CommunityRepository extends ExtendedQuerydslJpaRepository<Commu
     Slice<Community> findByCategoryInAndSortedAtLessThan(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable);
     Slice<Community> findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(Long EventId, List<CommunityCategory> categoryList, Boolean isWin, ZonedDateTime cursor, Pageable pageable);
 
+    Long countByMemberId(Long memberId);
+
     @Modifying
     @Query("UPDATE Community community SET community.viewCount = community.viewCount + 1 WHERE community.id = :communityId")
     void readCount(@Param("communityId") long communityId);

@@ -83,4 +83,8 @@ public class CommunityCommentDao {
     public void commentCount(long commentId, int count) {
         repository.commentCount(commentId, count);
     }
+
+    public Long countBy(Long memberId) {
+        return repository.countByMemberId(memberId);
+    }
 }
