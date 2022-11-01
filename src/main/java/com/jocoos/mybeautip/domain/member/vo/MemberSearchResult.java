@@ -24,7 +24,7 @@ public class MemberSearchResult {
     private final String username;
     private final String email;
     private final int point;
-    private final boolean isPushable;
+    private final Boolean isPushable;
     private final GrantType grantType;
     private final Integer ageGroup;
     private final SkinType skinType;
