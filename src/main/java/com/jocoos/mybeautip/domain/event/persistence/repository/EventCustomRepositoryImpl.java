@@ -6,7 +6,7 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
-import com.jocoos.mybeautip.domain.event.vo.Paging;
+import com.jocoos.mybeautip.global.vo.Paging;
 import com.jocoos.mybeautip.domain.event.vo.QEventSearchResult;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;

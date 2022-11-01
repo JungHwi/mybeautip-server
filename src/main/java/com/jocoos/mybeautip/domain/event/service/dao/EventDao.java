@@ -7,7 +7,7 @@ import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinReposit
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
-import com.jocoos.mybeautip.domain.event.vo.Paging;
+import com.jocoos.mybeautip.global.vo.Paging;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,7 +57,7 @@ public class EventDao {
         EventSearchCondition condition = EventSearchCondition.builder()
                 .statuses(Collections.singleton(PROGRESS))
                 .between(ZonedDateTime.now())
-                .paging(new Paging(eventNum))
+                .paging(Paging.onlyLimit(eventNum))
                 .build();
         return repository.getEvents(condition);
     }

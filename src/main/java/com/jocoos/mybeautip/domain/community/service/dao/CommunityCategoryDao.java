@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -49,5 +50,10 @@ public class CommunityCategoryDao {
         return repository.findByType(type).orElseThrow(
                 () -> new BadRequestException("No such category. type - " + type)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityCategory> getAllExcludeByTypes(Set<CommunityCategoryType> types) {
+        return repository.findAllByTypeNotInAndParentIdIsNotNull(types);
     }
 }

@@ -3,12 +3,12 @@ package com.jocoos.mybeautip.domain.event.api.admin;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
-import com.jocoos.mybeautip.domain.event.dto.PageResponse;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.domain.event.service.AdminEventService;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
-import com.jocoos.mybeautip.domain.event.vo.Paging;
-import com.jocoos.mybeautip.domain.event.vo.SearchKeyword;
-import com.jocoos.mybeautip.domain.event.vo.Sort;
+import com.jocoos.mybeautip.global.vo.Paging;
+import com.jocoos.mybeautip.global.vo.SearchKeyword;
+import com.jocoos.mybeautip.global.vo.Sort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -39,13 +39,13 @@ public class AdminEventController {
             @RequestParam(required = false, defaultValue = "createdAt") String sort,
             @RequestParam(required = false, defaultValue = "DESC") String order,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
+            @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
+            @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
 
         EventSearchCondition condition = EventSearchCondition.builder()
                 .statuses(status == null ? null : Collections.singleton(status))
                 .searchKeyword(SearchKeyword.from(search, startAt, endAt, ZoneId.of("Asia/Seoul")))
-                .paging(new Paging(page - 1, size))
+                .paging(Paging.page(page - 1, size))
                 .sort(new Sort(sort, order))
                 .build();
 
