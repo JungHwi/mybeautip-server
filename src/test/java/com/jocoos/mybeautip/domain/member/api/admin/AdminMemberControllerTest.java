@@ -6,6 +6,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -85,7 +86,8 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(POINT_STATUS)),
                         fieldWithPath("content.[].reason").type(JsonFieldType.STRING).description("이유"),
                         fieldWithPath("content.[].point").type(JsonFieldType.NUMBER).description("포인트"),
-                        fieldWithPath("content.[].earned_at").type(JsonFieldType.STRING).description("생성일자"),
-                        fieldWithPath("content.[].expiry_at").type(JsonFieldType.STRING).description("만료일자"))));
+                        fieldWithPath("content.[].earned_at").type(JsonFieldType.STRING).description("생성일자").attributes(getZonedDateFormat()),
+                        fieldWithPath("content.[].expiry_at").type(JsonFieldType.STRING).description("만료일자").attributes(getZonedDateFormat()).optional()
+                )));
     }
 }

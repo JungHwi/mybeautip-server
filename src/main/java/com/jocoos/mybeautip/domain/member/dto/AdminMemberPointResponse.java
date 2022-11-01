@@ -8,15 +8,15 @@ import lombok.Builder;
 import java.time.ZonedDateTime;
 
 import static com.jocoos.mybeautip.domain.point.code.PointStatus.getPointStatus;
-import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 @Builder
 public record AdminMemberPointResponse(Long id,
                                        PointStatus status,
                                        String reason,
                                        int point,
-                                       @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT) ZonedDateTime earnedAt,
-                                       @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT) ZonedDateTime expiryAt) {
+                                       @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime earnedAt,
+                                       @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime expiryAt) {
 
     public static AdminMemberPointResponse from(MemberPoint memberPoint) {
         return AdminMemberPointResponse.builder()
