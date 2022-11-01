@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface MemberDetailRepository extends JpaRepository<MemberDetail, Long> {
 
     Optional<MemberDetail> findByMemberId(long memberId);
+    Long countByInviterId(Long memberId);
 }

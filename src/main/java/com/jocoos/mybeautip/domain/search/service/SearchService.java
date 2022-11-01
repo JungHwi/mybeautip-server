@@ -41,7 +41,7 @@ public class SearchService {
     @Transactional(readOnly = true)
     public CountResponse count(SearchType type, String keyword) {
         if (SearchType.COMMUNITY.equals(type)) {
-            return new CountResponse(communityDao.count(keyword));
+            return new CountResponse(communityDao.countBy(keyword));
         }
         return new CountResponse(videoDao.count(keyword));
     }

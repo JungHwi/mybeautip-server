@@ -114,7 +114,11 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public Long count(String keyword) {
+    public Long countBy(String keyword) {
         return repository.countBy(keyword);
+    }
+
+    public Long countBy(Long memberId) {
+        return repository.countByMemberId(memberId);
     }
 }

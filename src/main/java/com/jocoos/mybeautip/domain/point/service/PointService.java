@@ -113,7 +113,8 @@ public class PointService {
                 .sum();
     }
 
-    private int getExpiryPoint(long memberId) {
+    @Transactional(readOnly = true)
+    public int getExpiryPoint(long memberId) {
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
         List<MemberPoint> memberPointList = pointRepository.findByExpiryPoint(memberId, PointStatusGroup.EARN.getLegacyCodeGroup(), LocalDateTimeUtils.getStartDateByMonth(), LocalDateTimeUtils.getEndDateByMonth(), pageable);
         List<Long> pointIds = memberPointList.stream()
