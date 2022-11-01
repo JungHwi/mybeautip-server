@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
+import com.jocoos.mybeautip.domain.member.dto.AdminMemberReportResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;
@@ -62,7 +63,7 @@ public class AdminMemberService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AdminMemberPointResponse> getMemberHistory(Long memberId, Pageable pageable) {
+    public PageResponse<AdminMemberPointResponse> getPointHistory(Long memberId, Pageable pageable) {
         Page<MemberPoint> page = memberPointDao.getAllBy(memberId, pageable);
         return new PageResponse<>(page.getTotalElements(), getResponseContent(page.getContent()));
     }
@@ -76,5 +77,10 @@ public class AdminMemberService {
     public Long updateMemo(Long memberId, String memo) {
         memberDao.updateMemberMemo(memberId, memo);
         return memberId;
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<AdminMemberReportResponse> getReportHistory(Long memberId, Pageable pageable) {
+        return null;
     }
 }

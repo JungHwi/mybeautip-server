@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.member.api.admin;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemoRequest;
+import com.jocoos.mybeautip.domain.member.dto.AdminMemberReportResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
 import com.jocoos.mybeautip.domain.member.service.AdminMemberService;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
@@ -36,7 +37,15 @@ public class AdminMemberController {
             @PathVariable Long memberId,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size) {
-        return ResponseEntity.ok(service.getMemberHistory(memberId, PageRequest.of(page - 1, size)));
+        return ResponseEntity.ok(service.getPointHistory(memberId, PageRequest.of(page - 1, size)));
+    }
+
+    @GetMapping("/member/{memberId}/report")
+    public ResponseEntity<PageResponse<AdminMemberReportResponse>> getMemberReportHistory(
+            @PathVariable Long memberId,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok(service.getReportHistory(memberId, PageRequest.of(page - 1, size)));
     }
 
     @PatchMapping("/member/{memberId}/memo")
