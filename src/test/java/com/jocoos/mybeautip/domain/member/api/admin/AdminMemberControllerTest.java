@@ -6,7 +6,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.MEMBER_STATUS;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -62,9 +62,30 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video_comment_count").type(JsonFieldType.NUMBER).description("비디오 댓글 작성 수"),
                         fieldWithPath("invited_friend_count").type(JsonFieldType.NUMBER).description("초대한 친구들 수"),
                         fieldWithPath("age_group").type(JsonFieldType.NUMBER).description("연령대").optional(),
-                        fieldWithPath("skin_type").type(JsonFieldType.STRING).description("피부타입").optional(),
-                        fieldWithPath("skin_worry").type(JsonFieldType.STRING).description("피부고민").optional(),
+                        fieldWithPath("skin_type").type(JsonFieldType.STRING).description(generateLinkCode(SKIN_TYPE)).optional(),
+                        fieldWithPath("skin_worry").type(JsonFieldType.STRING).description(generateLinkCode(SKIN_WORRY)).optional(),
                         fieldWithPath("address").type(JsonFieldType.STRING).description("주소").optional())));
     }
 
+    @Test
+    void getMemberPointHistory() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/admin/member/{member_id}/point", 4))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_get_member_point_history",
+                pathParameters(
+                        parameterWithName("member_id").description("회원 ID")
+                ),
+                responseFields(
+                        fieldWithPath("total").type(JsonFieldType.NUMBER).description("총 포인트 내역 수"),
+                        fieldWithPath("content").type(JsonFieldType.ARRAY).description("포인트 내역 목록"),
+                        fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("포인트 ID"),
+                        fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(POINT_STATUS)),
+                        fieldWithPath("content.[].reason").type(JsonFieldType.STRING).description("이유"),
+                        fieldWithPath("content.[].point").type(JsonFieldType.NUMBER).description("포인트"),
+                        fieldWithPath("content.[].earned_at").type(JsonFieldType.STRING).description("생성일자"),
+                        fieldWithPath("content.[].expiry_at").type(JsonFieldType.STRING).description("만료일자"))));
+    }
 }
