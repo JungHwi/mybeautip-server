@@ -24,7 +24,4 @@ public class AdminCommunityService {
         List<CommunityCategory> adminCategories = categoryDao.getAllExcludeByTypes(NOT_IN_ADMIN);
         return converter.convert(adminCategories);
     }
-
-//    public List<AdminCommunityResponse> getCommunities() {
-//    }
 }

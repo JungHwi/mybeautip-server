@@ -24,19 +24,6 @@ public class AdminMemberController {
         return ResponseEntity.ok(service.getStatusesWithCount());
     }
 
-//    @GetMapping("/member")
-//    public ResponseEntity<PageResponse<AdminMemberResponse>> getMembers(
-//            @RequestParam(required = false) MemberStatus status,
-//            @RequestParam(required = false, defaultValue = "1") Long page,
-//            @RequestParam(required = false, defaultValue = "10") Long size,
-//            @RequestParam(required = false) GrantType grantType,
-//            @RequestParam(required = false) String search,
-//            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
-//            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
-//        return ResponseEntity.ok(new PageResponse<>(service.getMembers()));
-//    }
-
-
     @GetMapping("/member/{memberId}")
     public ResponseEntity<AdminMemberDetailResponse> getMember(@PathVariable Long memberId) {
         return ResponseEntity.ok(service.getMember(memberId));
