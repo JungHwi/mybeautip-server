@@ -6,12 +6,19 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
 import com.jocoos.mybeautip.domain.member.dao.MemberDao;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
+import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
+import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;
+import com.jocoos.mybeautip.domain.point.service.PointReasonService;
 import com.jocoos.mybeautip.domain.point.service.PointService;
 import com.jocoos.mybeautip.domain.term.service.dao.MemberTermDao;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +31,12 @@ public class AdminMemberService {
 
     private final MemberDao memberDao;
     private final PointService pointService;
+    private final PointReasonService pointReasonService;
     private final CommunityDao communityDao;
     private final CommunityCommentDao communityCommentDao;
     private final CommentRepository commentRepository;
     private final MemberTermDao memberTermDao;
+    private final MemberPointDao memberPointDao;
     private final AdminMemberConverter converter;
 
 
@@ -50,5 +59,16 @@ public class AdminMemberService {
         int expiryPoint = pointService.getExpiryPoint(memberId);
         boolean isAgreeOnMarketingTerm = memberTermDao.isAgreeOnMarketingTerm(memberId);
         return converter.convert(memberWithDetails, communityCount, communityCommentCount, videoCommentCount, invitedFriendCount, expiryPoint, isAgreeOnMarketingTerm);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<AdminMemberPointResponse> getMemberHistory(Long memberId, Pageable pageable) {
+        Page<MemberPoint> page = memberPointDao.getAllBy(memberId, pageable);
+        return new PageResponse<>(page.getTotalElements(), getResponseContent(page.getContent()));
+    }
+
+    private List<AdminMemberPointResponse> getResponseContent(List<MemberPoint> memberPoints) {
+        pointReasonService.setReason(memberPoints);
+        return converter.convert(memberPoints);
     }
 }

@@ -2,9 +2,13 @@ package com.jocoos.mybeautip.domain.point.dao;
 
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -34,4 +38,8 @@ public class MemberPointDao {
                 .existsByActivityTypeAndActivityDomainIdAndMemberAndState(type, domainId, member, state);
     }
 
+    @Transactional(readOnly = true)
+    public Page<MemberPoint> getAllBy(Long memberId, Pageable pageable) {
+        return repository.findAllByMemberId(memberId, pageable);
+    }
 }

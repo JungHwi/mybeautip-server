@@ -1,12 +1,9 @@
 package com.jocoos.mybeautip.domain.point.service;
 
-import com.jocoos.mybeautip.domain.event.service.EventService;
 import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.domain.point.converter.MemberPointConverter;
 import com.jocoos.mybeautip.domain.point.dto.PointHistoryResponse;
 import com.jocoos.mybeautip.domain.point.dto.PointMonthlyStatisticsResponse;
-import com.jocoos.mybeautip.member.order.Order;
-import com.jocoos.mybeautip.member.order.OrderService;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointDetail;
 import com.jocoos.mybeautip.member.point.MemberPointDetailRepository;
@@ -22,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
@@ -31,8 +27,7 @@ import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
 @RequiredArgsConstructor
 public class PointService {
 
-    private final OrderService orderService;
-    private final EventService eventService;
+    private final PointReasonService pointReasonService;
     private final MemberPointRepository pointRepository;
     private final MemberPointDetailRepository pointDetailRepository;
 
@@ -63,8 +58,8 @@ public class PointService {
 
         List<PointHistoryResponse> result = memberPointConverter.convertToResponse(memberPointList.getContent());
 
-        Map<Long, String> eventTitleMap = getEventTitleMap(memberPointList);
-        Map<Long, String> orderPurchaseMap = getOrderTitleMap(memberPointList);
+        Map<Long, String> eventTitleMap = pointReasonService.getEventTitleMap(memberPointList.getContent());
+        Map<Long, String> orderPurchaseMap = pointReasonService.getOrderTitleMap(memberPointList.getContent());
 
         for (PointHistoryResponse response : result) {
             if (response.getOrder() != null) {
@@ -81,27 +76,6 @@ public class PointService {
         }
 
         return result;
-    }
-
-    private Map<Long, String> getEventTitleMap(Slice<MemberPoint> memberPointList) {
-        Set<Long> eventIds = memberPointList.stream()
-                .map(MemberPoint::getEventId)
-                .collect(Collectors.toSet());
-
-        return eventService.getEventTitleMap(eventIds);
-    }
-
-    private Map<Long, String> getOrderTitleMap(Slice<MemberPoint> memberPointList) {
-        List<Order> orderList = memberPointList.stream()
-                .filter(point -> point.getOrder() != null)
-                .map(MemberPoint::getOrder)
-                .collect(Collectors.toList());
-
-        Set<Long> orderIds = orderList.stream()
-                .map(Order::getId)
-                .collect(Collectors.toSet());
-
-        return orderService.getPurchaseNameMap(orderIds);
     }
 
     private int getEarnedPoint(long memberId) {
