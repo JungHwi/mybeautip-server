@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member.point;
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.order.Order;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -74,4 +75,5 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
             @Param("types") Set<ActivityPointType> types,
             @Param("member") Member member);
 
+    Page<MemberPoint> findAllByMemberId(Long memberId, Pageable pageable);
 }
