@@ -37,12 +37,15 @@ public class AdminMemberService {
         return converter.convert(statusCountMap);
     }
 
+    // 리팩토링 필요
     @Transactional(readOnly = true)
     public AdminMemberDetailResponse getMember(Long memberId) {
         MemberSearchResult memberWithDetails = memberDao.getMembersWithDetails(memberId);
+
         Long communityCount = communityDao.countBy(memberId);
         Long communityCommentCount = communityCommentDao.countBy(memberId);
         Long videoCommentCount = commentRepository.countByCreatedById(memberId);
+
         Long invitedFriendCount = memberDao.countInvitedFriends(memberId);
         int expiryPoint = pointService.getExpiryPoint(memberId);
         boolean isAgreeOnMarketingTerm = memberTermDao.isAgreeOnMarketingTerm(memberId);

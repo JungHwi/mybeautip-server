@@ -97,4 +97,6 @@ include::overview.adoc[]
 * link:event/admin_get_event_status.html[이벤트 상태 목록 조회 API, window=_blank]
 * link:event/admin_get_event.html[이벤트 상세 조회 API, window=_blank]
 
-=== COMMUNITY API
+=== Member API
+* link:member/get_member_status.html[멤버 상태 및 상태별 멤버수 조회 API, window=_blank]
+* link:member/get_member_basic_detail.html[멤버 상세 조회 API, window=_blank]
