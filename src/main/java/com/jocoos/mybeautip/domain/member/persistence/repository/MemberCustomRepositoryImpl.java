@@ -63,15 +63,6 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         return getPage(fetchBasicSearchResult(offsetSearchQuery), condition.pageable(), countQuery::fetchOne);
     }
 
-    private List<MemberBasicSearchResult> fetchBasicSearchResult(JPAQuery<?> baseQuery) {
-        return baseQuery
-                .select(new QMemberBasicSearchResult(member, memberActivityCount, memberTerm.isAccept))
-                .distinct()
-                .leftJoin(memberTerm).on(member.eq(memberTerm.member))
-                .innerJoin(memberActivityCount).on(member.eq(memberActivityCount.member))
-                .fetch();
-    }
-
     private JPAQuery<?> baseSearchQuery(MemberSearchCondition condition) {
         return repository.query(query -> query
                 .from(member)
@@ -84,16 +75,6 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 ));
     }
 
-    private BooleanExpression searchByKeyword(SearchKeyword searchKeyword) {
-        if (searchKeyword.isNoSearch()) {
-            return null;
-        }
-        return Expressions.booleanOperation(
-                Ops.STRING_CONTAINS_IC,
-                Expressions.path(String.class, member, searchKeyword.getSearchField()),
-                Expressions.constant(searchKeyword.getKeyword()));
-    }
-
     private JPAQuery<?> offsetSearch(JPAQuery<?> baseQuery, Long offset, Long size) {
         return baseQuery
                 .offset(offset)
@@ -104,6 +85,25 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private JPAQuery<Long> getCountQuery(JPAQuery<?> baseQuery) {
         return baseQuery
                 .select(member.count());
+    }
+
+    private List<MemberBasicSearchResult> fetchBasicSearchResult(JPAQuery<?> baseQuery) {
+        return baseQuery
+                .select(new QMemberBasicSearchResult(member, memberActivityCount, memberTerm.isAccept))
+                .distinct()
+                .leftJoin(memberTerm).on(member.eq(memberTerm.member))
+                .innerJoin(memberActivityCount).on(member.eq(memberActivityCount.member))
+                .fetch();
+    }
+
+    private BooleanExpression searchByKeyword(SearchKeyword searchKeyword) {
+        if (searchKeyword.isNoSearch()) {
+            return null;
+        }
+        return Expressions.booleanOperation(
+                Ops.STRING_CONTAINS_IC,
+                Expressions.path(String.class, member, searchKeyword.getSearchField()),
+                Expressions.constant(searchKeyword.getKeyword()));
     }
 
     private static BooleanExpression eqId(Long memberId) {

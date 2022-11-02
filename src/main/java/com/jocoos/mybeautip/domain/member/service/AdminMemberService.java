@@ -56,7 +56,6 @@ public class AdminMemberService {
     // 리팩토링 필요
     @Transactional(readOnly = true)
     public AdminMemberDetailResponse getMember(Long memberId) {
-        PAgea
         MemberSearchResult memberWithDetails = memberDao.getMembersWithDetails(memberId);
 
         Long communityCount = communityDao.countBy(memberId);
