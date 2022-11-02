@@ -14,11 +14,11 @@ import javax.persistence.*;
 public class MemberActivityCount extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(insertable = false, updatable = false)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "id")
     private Member member;
 
     @Column
@@ -30,4 +30,10 @@ public class MemberActivityCount extends BaseEntity {
     @Column
     private int videoCommentCount;
 
+    public MemberActivityCount(Member member) {
+        this.member = member;
+        this.communityCount = 0;
+        this.communityCommentCount = 0;
+        this.videoCommentCount = 0;
+    }
 }
