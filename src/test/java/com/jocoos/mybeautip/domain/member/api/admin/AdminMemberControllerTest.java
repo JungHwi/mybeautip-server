@@ -9,6 +9,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
@@ -16,6 +17,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -71,6 +73,44 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
     }
 
     @Test
+    void getMembers() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/admin/member"))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_get_members",
+                requestParameters(
+                        parameterWithName("page").attributes(getDefault(1)).description("페이지 넘버").optional(),
+                        parameterWithName("size").attributes(getDefault(10)).description("페이지 내 컨텐츠 개수").optional(),
+                        parameterWithName("status").description("멤버 상태").optional(),
+                        parameterWithName("grant_type").description("가입").optional(),
+                        parameterWithName("search").description("검색 (검색필드,검색어) 형식").optional(),
+                        parameterWithName("start_at").description("검색 시작 일자").optional(),
+                        parameterWithName("end_at").description("검색 종료 일자").optional()
+                ),
+                responseFields(
+                        fieldWithPath("total").type(JsonFieldType.NUMBER).description("총 회원 수"),
+                        fieldWithPath("content").type(JsonFieldType.ARRAY).description("회원 목록"),
+                        fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                        fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(MEMBER_STATUS)),
+                        fieldWithPath("content.[].grant_type").type(JsonFieldType.STRING).description("가입 경로").optional(),
+                        fieldWithPath("content.[].avatar_url").type(JsonFieldType.STRING).description("아바타 이미지 URL"),
+                        fieldWithPath("content.[].username").type(JsonFieldType.STRING).description("닉네임"),
+                        fieldWithPath("content.[].email").type(JsonFieldType.STRING).description("이메일").optional(),
+                        fieldWithPath("content.[].point").type(JsonFieldType.NUMBER).description("보유 포인트"),
+                        fieldWithPath("content.[].community_count").type(JsonFieldType.NUMBER).description("게시물 작성 수"),
+                        fieldWithPath("content.[].comment_count").type(JsonFieldType.NUMBER).description("댓글 작성 수"),
+                        fieldWithPath("content.[].report_count").type(JsonFieldType.NUMBER).description("신고된 수"),
+                        fieldWithPath("content.[].order_count").type(JsonFieldType.NUMBER).description("주문 수"),
+                        fieldWithPath("content.[].is_pushable").type(JsonFieldType.BOOLEAN).description("푸시 알림 동의 여부"),
+                        fieldWithPath("content.[].is_agree_marketing_term").type(JsonFieldType.BOOLEAN).description("마케팅 동의 여부"),
+                        fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("가입일자").attributes(getZonedDateFormat()),
+                        fieldWithPath("content.[].modified_at").type(JsonFieldType.STRING).description("수정일자").attributes(getZonedDateFormat())
+                )));
+    }
+
+    @Test
     void getMemberPointHistory() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .get("/admin/member/{member_id}/point", 4))
@@ -80,6 +120,10 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
         result.andDo(document("admin_get_member_point_history",
                 pathParameters(
                         parameterWithName("member_id").description("회원 ID")
+                ),
+                requestParameters(
+                        parameterWithName("page").attributes(getDefault(1)).description("페이지 넘버").optional(),
+                        parameterWithName("size").attributes(getDefault(10)).description("페이지 내 컨텐츠 개수").optional()
                 ),
                 responseFields(
                         fieldWithPath("total").type(JsonFieldType.NUMBER).description("총 포인트 내역 수"),
