@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberBlockDao;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;

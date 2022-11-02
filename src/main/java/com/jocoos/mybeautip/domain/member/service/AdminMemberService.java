@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
-import com.jocoos.mybeautip.domain.member.dao.MemberDao;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;

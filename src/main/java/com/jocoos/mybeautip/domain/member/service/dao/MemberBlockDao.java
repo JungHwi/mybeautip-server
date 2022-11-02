@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.member.dao;
+package com.jocoos.mybeautip.domain.member.service.dao;
 
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
