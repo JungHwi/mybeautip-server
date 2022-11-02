@@ -9,6 +9,9 @@ import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberReportResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
+import com.jocoos.mybeautip.domain.member.dto.*;
+import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
+import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;
 import com.jocoos.mybeautip.domain.point.service.PointReasonService;
@@ -53,6 +56,7 @@ public class AdminMemberService {
     // 리팩토링 필요
     @Transactional(readOnly = true)
     public AdminMemberDetailResponse getMember(Long memberId) {
+        PAgea
         MemberSearchResult memberWithDetails = memberDao.getMembersWithDetails(memberId);
 
         Long communityCount = communityDao.countBy(memberId);
@@ -86,6 +90,12 @@ public class AdminMemberService {
     public PageResponse<AdminMemberReportResponse> getReportHistory(Long memberId, Pageable pageable) {
         Page<Report> page = reportDao.getAllAccusedBy(memberId, pageable);
         List<AdminMemberReportResponse> content = converter.toReportResponse(page.getContent());
+        return new PageResponse<>(page.getTotalElements(), content);
+    }
+
+    public PageResponse<AdminMemberResponse> getMembers(MemberSearchCondition condition) {
+        Page<MemberBasicSearchResult> page = memberDao.getMember(condition);
+        List<AdminMemberResponse> content = converter.toListResponse(page.getContent());
         return new PageResponse<>(page.getTotalElements(), content);
     }
 }

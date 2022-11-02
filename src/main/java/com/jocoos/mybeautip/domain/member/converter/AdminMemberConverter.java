@@ -1,10 +1,8 @@
 package com.jocoos.mybeautip.domain.member.converter;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
-import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
-import com.jocoos.mybeautip.domain.member.dto.AdminMemberReportResponse;
-import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
+import com.jocoos.mybeautip.domain.member.dto.*;
+import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.report.Report;
@@ -52,4 +50,6 @@ public interface AdminMemberConverter {
     default ZonedDateTime toUTC(Date date) {
         return toUTCZoned(date);
     }
+
+    List<AdminMemberResponse> toListResponse(List<MemberBasicSearchResult> content);
 }
