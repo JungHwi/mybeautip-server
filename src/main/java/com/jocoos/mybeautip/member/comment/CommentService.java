@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.comment;
 
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.mention.MentionService;
@@ -39,10 +40,9 @@ public class CommentService {
     private final LegacyNotificationService legacyNotificationService;
     private final CommentRepository commentRepository;
     private final VideoRepository videoRepository;
-//    private final PostRepository postRepository;
     private final CommentReportRepository commentReportRepository;
     private final CommentLikeRepository commentLikeRepository;
-
+    private final MemberActivityCountDao activityCountDao;
     private final ActivityPointService activityPointService;
 
     @Transactional
@@ -84,6 +84,7 @@ public class CommentService {
         }
 
         activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, comment.getId(), member));
+        activityCountDao.plusVideoCommentCount(member.getId());
         return comment;
     }
 
@@ -130,6 +131,7 @@ public class CommentService {
 
         activityPointService.retrieveActivityPoint(DELETE_VIDEO_COMMENT,
                                                    comment.getId(), comment.getCreatedBy());
+        activityCountDao.subVideoCommentCount(comment.getCreatedBy().getId());
 
         if (childCount == 0) {
             return deleteCommentAndChildren(comment);
