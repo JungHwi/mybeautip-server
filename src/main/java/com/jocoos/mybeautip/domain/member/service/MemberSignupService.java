@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
@@ -12,7 +13,10 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
-import com.jocoos.mybeautip.member.*;
+import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.SocialMember;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import com.jocoos.mybeautip.security.AccessTokenResponse;
 import com.jocoos.mybeautip.security.AppleLoginService;
@@ -48,8 +52,8 @@ public class MemberSignupService {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberConverter memberConverter;
-    private final KakaoMemberRepository kakaoMemberRepository;
     private final MemberTermService memberTermService;
+    private final MemberActivityCountDao activityCountDao;
 
     private final AwsS3Handler awsS3Handler;
 
@@ -63,6 +67,7 @@ public class MemberSignupService {
         savaAndSetAvatarUrlIfExists(request);
 
         Member member = legacyMemberService.register(request);
+        activityCountDao.initActivityCount(member);
 
         MemberEntireInfo memberEntireInfo = memberConverter.convert(member);
 

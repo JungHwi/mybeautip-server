@@ -13,6 +13,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
@@ -42,7 +43,6 @@ import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.val
 @RequiredArgsConstructor
 public class CommunityService {
 
-    private final CommunityRelationService relationService;
     private final EventJoinService eventJoinService;
 
     private final ActivityPointService activityPointService;
@@ -52,13 +52,15 @@ public class CommunityService {
     private final CommunityDao communityDao;
     private final CommunityLikeDao likeDao;
     private final CommunityReportDao reportDao;
+    private final MemberActivityCountDao activityCountDao;
 
     private final CommunityConvertService convertService;
     private final AwsS3Handler awsS3Handler;
 
     @Transactional
     public CommunityResponse write(WriteCommunityRequest request) {
-        request.setMember(legacyMemberService.currentMember());
+        Member member = legacyMemberService.currentMember();
+        request.setMember(member);
         Community community = communityDao.write(request);
 
         awsS3Handler.copy(request.getFiles(), UrlDirectory.COMMUNITY.getDirectory(community.getId()));
@@ -69,6 +71,7 @@ public class CommunityService {
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES,
                 validDomainAndReceiver(community, community.getId(), community.getMember()));
+        activityCountDao.plusCommunityCount(member.getId());
 
         return convertService.toResponse(community.getMember(), community);
     }
@@ -121,6 +124,7 @@ public class CommunityService {
         community.delete();
         activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES,
                 validDomainAndReceiver(community, community.getId(), member));
+        activityCountDao.subCommunityCount(member.getId());
     }
 
     @Transactional

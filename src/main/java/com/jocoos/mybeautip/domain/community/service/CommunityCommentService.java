@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
@@ -39,6 +40,7 @@ public class CommunityCommentService {
     private final CommunityCommentLikeDao likeDao;
     private final CommunityCommentReportDao reportDao;
     private final LegacyMemberService legacyMemberService;
+    private final MemberActivityCountDao activityCountDao;
 
     private final ActivityPointService activityPointService;
 
@@ -106,7 +108,7 @@ public class CommunityCommentService {
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
                                                validDomainAndReceiver(communityComment, communityComment.getId(), member));
-
+        activityCountDao.plusCommunityCommentCount(member.getId());
         return relationService.setRelationInfo(member, response);
     }
 
@@ -157,6 +159,7 @@ public class CommunityCommentService {
 
         communityComment.delete();
         activityPointService.retrieveActivityPoint(DELETE_COMMUNITY_COMMENT, communityComment.getId(), member);
+        activityCountDao.subCommunityCommentCount(member.getId());
     }
 
     @Transactional
