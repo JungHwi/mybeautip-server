@@ -28,10 +28,10 @@ public interface CommunityCommentRepository extends DefaultJpaRepository<Communi
     @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId is null and cc.id > :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id asc")
     Slice<CommunityComment> getAllByAscParentIdNull(@Param("communityId") Long communityId, @Param("cursor") Long cursor, @Param("members") List<Long> members, Pageable pageable);
 
-    @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId = :parentId and cc.id < :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id asc")
+    @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId = :parentId and cc.id < :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id desc")
     Slice<CommunityComment> getAllByDescParentIdNotNull(@Param("communityId") Long communityId, @Param("parentId") Long parentId, @Param("cursor") Long cursor, @Param("members") List<Long> members, Pageable pageable);
 
-    @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId is null and cc.id < :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id asc")
+    @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId is null and cc.id < :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id desc")
     Slice<CommunityComment> getAllByDescParentIdNull(@Param("communityId") Long communityId, @Param("cursor") Long cursor, @Param("members") List<Long> members, Pageable pageable);
 
     @Modifying
