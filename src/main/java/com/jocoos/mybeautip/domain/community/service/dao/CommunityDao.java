@@ -61,6 +61,9 @@ public class CommunityDao {
 
     @Transactional(readOnly = true)
     public List<Community> get(List<CommunityCategory> categoryList, ZonedDateTime cursor, List<Long> blocks, Pageable pageable) {
+        if (Collections.isEmpty(blocks)) {
+            blocks = Arrays.asList(-1L);
+        }
         return repository.getAllBy(blocks, BLIND, categoryList, cursor, pageable).getContent();
     }
 
