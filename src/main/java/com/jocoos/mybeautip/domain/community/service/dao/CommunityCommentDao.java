@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCommentRepository;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
+import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -26,7 +28,7 @@ public class CommunityCommentDao {
     private final CommunityCommentConverter converter;
 
     @Transactional(readOnly = true)
-    public List<CommunityComment> getComments(SearchCommentRequest request) {
+    public List<CommunityComment> getComments(SearchCommentRequest request, List<Long> ids) {
 
         // FIXME Dynamic Query to QueryDSL
         Sort.Direction direction = request.getPageable().getSort().stream()
@@ -36,12 +38,24 @@ public class CommunityCommentDao {
 
         Slice<CommunityComment> result = null;
 
+        if (Collections.isEmpty(ids)) {
+            ids = Arrays.asList(-1L);
+        }
+
         switch (direction) {
             case ASC:
-                result = repository.findByCommunityIdAndParentIdAndIdGreaterThan(request.getCommunityId(), request.getParentId(), request.getCursor(), request.getPageable());
+                if (request.getParentId() == null) {
+                    result = repository.getAllByAscParentIdNull(request.getCommunityId(), request.getCursor(), ids, request.getPageable());
+                } else {
+                    result = repository.getAllByAscParentIdNotNull(request.getCommunityId(), request.getParentId(), request.getCursor(), ids, request.getPageable());
+                }
                 break;
             case DESC:
-                result = repository.findByCommunityIdAndParentIdAndIdLessThan(request.getCommunityId(), request.getParentId(), request.getCursor(), request.getPageable());
+                if (request.getParentId() == null) {
+                    result = repository.getAllByDescParentIdNull(request.getCommunityId(), request.getCursor(), ids, request.getPageable());
+                } else {
+                    result = repository.getAllByDescParentIdNotNull(request.getCommunityId(), request.getParentId(), request.getCursor(), ids, request.getPageable());
+                }
         }
 
         return result.getContent();

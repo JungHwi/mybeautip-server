@@ -10,19 +10,23 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
+import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.block.Block;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
@@ -42,12 +46,23 @@ public class CommunityCommentService {
     private final ActivityPointService activityPointService;
 
     private final CommunityCommentConverter converter;
+    private final MemberBlockDao memberBlockDao;
 
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
         Member member = legacyMemberService.currentMember();
 
-        List<CommunityComment> communityComments = dao.getComments(request);
+        List<Long> blocks;
+        if (member != null) {
+            blocks = memberBlockDao.findAllMyBlock(member.getId())
+                    .stream()
+                    .map(Block::getYouId)
+                    .collect(Collectors.toList());
+        } else {
+            blocks = new ArrayList<>();
+        }
+
+        List<CommunityComment> communityComments = dao.getComments(request, blocks);
 
         return getComments(member, communityComments);
     }

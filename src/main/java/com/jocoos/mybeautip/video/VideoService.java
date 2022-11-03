@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -8,6 +9,7 @@ import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockRepository;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.CommentLike;
@@ -81,7 +83,7 @@ public class VideoService {
     private final VideoDataService videoDataService;
     private final VideoCategoryRepository videoCategoryRepository;
     private final VideoScrapRepository videoScrapRepository;
-
+    private final MemberBlockDao memberBlockDao;
     private final ActivityPointService activityPointService;
 
     @Value("${mybeautip.video.watch-duration}")
@@ -232,30 +234,53 @@ public class VideoService {
         return "all";
     }
 
-    public Slice<Comment> findCommentsByVideoId(Long videoId, Long cursor, Pageable pageable, String direction) {
+    public Slice<Comment> findCommentsByVideoId(Long videoId, Long cursor, Pageable pageable, String direction, Long me) {
+
+        List<Long> blockedIds;
+        if (me == null) {
+            blockedIds = new ArrayList<>();
+        } else {
+            blockedIds = memberBlockDao.findAllMyBlock(me)
+                    .stream()
+                    .map(Block::getYouId)
+                    .collect(Collectors.toList());
+        }
+
+
         Slice<Comment> comments;
         if (cursor != null) {
             if ("next".equals(direction)) {
-                comments = commentRepository.findByVideoIdAndIdGreaterThanEqualAndParentIdIsNull(videoId, cursor, pageable);
+                comments = commentRepository.findByVideoIdAndIdGreaterThanEqualAndParentIdIsNullAndCreatedByIdNotIn(videoId, cursor, blockedIds, pageable);
             } else {
-                comments = commentRepository.findByVideoIdAndIdLessThanEqualAndParentIdIsNull(videoId, cursor, pageable);
+                comments = commentRepository.findByVideoIdAndIdLessThanEqualAndParentIdIsNullAndCreatedByIdNotIn(videoId, cursor, blockedIds, pageable);
             }
         } else {
-            comments = commentRepository.findByVideoIdAndParentIdIsNull(videoId, pageable);
+            comments = commentRepository.findByVideoIdAndParentIdIsNullAndCreatedByIdNotIn(videoId, blockedIds, pageable);
         }
         return comments;
     }
 
-    public Slice<Comment> findCommentsByParentId(Long parentId, Long cursor, Pageable pageable, String direction) {
+    public Slice<Comment> findCommentsByParentId(Long parentId, Long cursor, Pageable pageable, String direction, Long me) {
+
+        List<Long> blockedIds;
+        if (me == null) {
+            blockedIds = new ArrayList<>();
+        } else {
+            blockedIds = memberBlockDao.findAllMyBlock(me)
+                    .stream()
+                    .map(Block::getYouId)
+                    .collect(Collectors.toList());
+        }
+
         Slice<Comment> comments;
         if (cursor != null) {
             if ("next".equals(direction)) {
-                comments = commentRepository.findByParentIdAndIdGreaterThanEqual(parentId, cursor, pageable);
+                comments = commentRepository.findByParentIdAndIdGreaterThanEqualAndCreatedByIdNotIn(parentId, cursor, blockedIds, pageable);
             } else {
-                comments = commentRepository.findByParentIdAndIdLessThanEqual(parentId, cursor, pageable);
+                comments = commentRepository.findByParentIdAndIdLessThanEqualAndCreatedByIdNotIn(parentId, cursor, blockedIds, pageable);
             }
         } else {
-            comments = commentRepository.findByParentId(parentId, pageable);
+            comments = commentRepository.findByParentIdAndCreatedByIdNotIn(parentId, blockedIds, pageable);
         }
         return comments;
     }
