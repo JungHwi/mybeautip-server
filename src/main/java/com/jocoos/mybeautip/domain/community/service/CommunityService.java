@@ -13,6 +13,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
+import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
@@ -21,6 +22,7 @@ import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.block.Block;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -58,6 +60,7 @@ public class CommunityService {
 
     private final CommunityConverter converter;
     private final AwsS3Handler awsS3Handler;
+    private final MemberBlockDao memberBlockDao;
 
     @Transactional
     public CommunityResponse write(WriteCommunityRequest request) {
@@ -97,6 +100,16 @@ public class CommunityService {
         Member member = legacyMemberService.currentMember();
         request.setMember(member);
 
+        List<Long> blocks;
+        if (member != null) {
+            blocks = memberBlockDao.findAllMyBlock(member.getId())
+                    .stream()
+                    .map(Block::getYouId)
+                    .collect(Collectors.toList());
+        } else {
+            blocks = new ArrayList<>();
+        }
+
         // FIXME Dynamic Query to QueryDSL
         List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
         List<Community> communityList = new ArrayList<>();
@@ -110,16 +123,16 @@ public class CommunityService {
                     throw new BadRequestException("need_event_info", "event_id is required to search DRIP category.");
                 }
                 if (request.isFirstSearch()) {
-                    winList = communityDao.getCommunityForEvent(request.getEventId(), categories, true, request.getCursor(), pageable);
+                    winList = communityDao.getCommunityForEvent(request.getEventId(), categories, true, request.getCursor(), pageable, blocks);
                 }
-                loseList = communityDao.getCommunityForEvent(request.getEventId(), categories, null, request.getCursor(), pageable);
+                loseList = communityDao.getCommunityForEvent(request.getEventId(), categories, null, request.getCursor(), pageable, blocks);
                 communityList = Stream.concat(winList.stream(), loseList.stream())
                         .collect(Collectors.toList());
             } else {
-                communityList = communityDao.get(categories, request.getCursor(), pageable);
+                communityList = communityDao.get(categories, request.getCursor(), blocks, pageable);
             }
         } else {
-            communityList = communityDao.get(categories, request.getCursor(), pageable);
+            communityList = communityDao.get(categories, request.getCursor(), blocks, pageable);
         }
 
         return getCommunity(request.getMember(), communityList);

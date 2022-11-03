@@ -8,13 +8,18 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategor
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository;
 import com.jocoos.mybeautip.domain.member.dao.MemberDao;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
+import com.jocoos.mybeautip.member.Member;
+import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
+
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 
 @Service
 @RequiredArgsConstructor
@@ -55,13 +60,23 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Community> get(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable) {
-        return repository.findByCategoryInAndSortedAtLessThan(categoryList, cursor, pageable).getContent();
+    public List<Community> get(List<CommunityCategory> categoryList, ZonedDateTime cursor, List<Long> blocks, Pageable pageable) {
+        if (Collections.isEmpty(blocks)) {
+            blocks = Arrays.asList(-1L);
+        }
+        return repository.getAllBy(blocks, BLIND, categoryList, cursor, pageable).getContent();
     }
 
     @Transactional(readOnly = true)
-    public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, Boolean isWin,  ZonedDateTime cursor, Pageable pageable) {
-        return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable).getContent();
+    public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, Boolean isWin,  ZonedDateTime cursor, Pageable pageable, List<Long> blocks) {
+        if (categoryList.get(0).getType() == BLIND) {
+            return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable).getContent();
+        } else {
+            if (Collections.isEmpty(blocks)) {
+                blocks = Arrays.asList(-1L);
+            }
+            return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThanAndMemberIdNotIn(eventId, categoryList, isWin, cursor, blocks, pageable).getContent();
+        }
     }
 
     @Transactional()
