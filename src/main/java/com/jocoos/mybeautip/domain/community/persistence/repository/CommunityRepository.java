@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.persistence.repository;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
@@ -18,8 +19,22 @@ import java.util.List;
 public interface CommunityRepository extends DefaultJpaRepository<Community, Long> {
 
     Slice<Community> findByMemberIdAndStatusAndIdLessThan(long memberId, CommunityStatus status, long id, Pageable pageable);
+
     Slice<Community> findByCategoryInAndSortedAtLessThan(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable);
-    Slice<Community> findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(Long EventId, List<CommunityCategory> categoryList, Boolean isWin, ZonedDateTime cursor, Pageable pageable);
+
+    Slice<Community> findByEventIdAndCategoryInAndIsWinAndSortedAtLessThanAndMemberIdNotIn(Long eventId, List<CommunityCategory> categoryList, Boolean isWin, ZonedDateTime cursor, List<Long> blocks, Pageable pageable);
+    Slice<Community> findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(Long eventId, List<CommunityCategory> categoryList, Boolean isWin, ZonedDateTime cursor, Pageable pageable);
+
+    @Query("select community from Community community where " +
+            "(community.memberId not in :blocks or community.category.type = :categoryType) " +
+            "and community.category in :categories " +
+            "and community.sortedAt < :cursor " +
+            "order by community.sortedAt desc")
+    Slice<Community> getAllBy(@Param("blocks") List<Long> blocks,
+                              @Param("categoryType") CommunityCategoryType excludeBlockCategory,
+                              @Param("categories") List<CommunityCategory> categories,
+                              @Param("cursor") ZonedDateTime cursor,
+                              Pageable pageable);
 
     @Modifying
     @Query("UPDATE Community community SET community.viewCount = community.viewCount + 1 WHERE community.id = :communityId")

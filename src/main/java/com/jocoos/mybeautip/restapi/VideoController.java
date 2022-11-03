@@ -272,9 +272,9 @@ public class VideoController {
         Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me) : new HashMap<>();
 
         if (parentId != null) {
-            comments = videoService.findCommentsByParentId(parentId, cursor, page, direction);
+            comments = videoService.findCommentsByParentId(parentId, cursor, page, direction, me);
         } else {
-            comments = videoService.findCommentsByVideoId(id, cursor, page, direction);
+            comments = videoService.findCommentsByVideoId(id, cursor, page, direction, me);
         }
 
         List<CommentInfo> result = new ArrayList<>();
