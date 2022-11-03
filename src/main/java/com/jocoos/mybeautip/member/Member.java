@@ -123,7 +123,7 @@ public class Member {
     private Boolean pushable;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "memo")
+    @JoinColumn(name = "memo_id")
     private MemberMemo memo;
 
     @Column
