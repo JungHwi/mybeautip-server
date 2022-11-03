@@ -8,7 +8,6 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategor
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository;
 import com.jocoos.mybeautip.domain.member.dao.MemberDao;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
-import com.jocoos.mybeautip.member.Member;
 import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
