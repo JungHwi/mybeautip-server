@@ -246,6 +246,10 @@ public class VideoService {
                     .collect(Collectors.toList());
         }
 
+        if (io.jsonwebtoken.lang.Collections.isEmpty(blockedIds)) {
+            blockedIds = Arrays.asList(-1L);
+        }
+
 
         Slice<Comment> comments;
         if (cursor != null) {
