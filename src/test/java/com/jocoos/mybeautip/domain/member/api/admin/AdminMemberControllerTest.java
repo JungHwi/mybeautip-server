@@ -1,17 +1,19 @@
 package com.jocoos.mybeautip.domain.member.api.admin;
 
+import com.jocoos.mybeautip.domain.member.dto.AdminMemoRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -88,6 +90,30 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].point").type(JsonFieldType.NUMBER).description("포인트"),
                         fieldWithPath("content.[].earned_at").type(JsonFieldType.STRING).description("생성일자").attributes(getZonedDateFormat()),
                         fieldWithPath("content.[].expiry_at").type(JsonFieldType.STRING).description("만료일자").attributes(getZonedDateFormat()).optional()
+                )));
+    }
+
+    @Transactional
+    @Test
+    void memberMemo() throws Exception {
+        AdminMemoRequest request = new AdminMemoRequest("memo");
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/admin/member/{member_id}/memo", 4)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_patch_member_memo",
+                pathParameters(
+                        parameterWithName("member_id").description("회원 ID")
+                ),
+                requestFields(
+                        fieldWithPath("memo").type(JsonFieldType.STRING).description("메모")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("멤버 ID")
                 )));
     }
 }
