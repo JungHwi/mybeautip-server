@@ -27,6 +27,18 @@ public interface CommunityCommentRepository extends ExtendedQuerydslJpaRepositor
 
     Page<CommunityComment> findAllByParentIdIsNullAndCommunityId(Long communityId, Pageable pageable);
 
+    @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId = :parentId and cc.id > :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id asc")
+    Slice<CommunityComment> getAllByAscParentIdNotNull(@Param("communityId") Long communityId, @Param("parentId") Long parentId, @Param("cursor") Long cursor, @Param("members") List<Long> members, Pageable pageable);
+
+    @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId is null and cc.id > :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id asc")
+    Slice<CommunityComment> getAllByAscParentIdNull(@Param("communityId") Long communityId, @Param("cursor") Long cursor, @Param("members") List<Long> members, Pageable pageable);
+
+    @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId = :parentId and cc.id < :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id asc")
+    Slice<CommunityComment> getAllByDescParentIdNotNull(@Param("communityId") Long communityId, @Param("parentId") Long parentId, @Param("cursor") Long cursor, @Param("members") List<Long> members, Pageable pageable);
+
+    @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId is null and cc.id < :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id asc")
+    Slice<CommunityComment> getAllByDescParentIdNull(@Param("communityId") Long communityId, @Param("cursor") Long cursor, @Param("members") List<Long> members, Pageable pageable);
+
     @Modifying
     @Query("UPDATE CommunityComment comment SET comment.likeCount = comment.likeCount + :count WHERE comment.id = :commentId")
     void likeCount(@Param("commentId") long commentId, @Param("count") int count);

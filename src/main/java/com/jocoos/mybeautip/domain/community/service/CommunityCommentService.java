@@ -45,6 +45,7 @@ public class CommunityCommentService {
     private final ActivityPointService activityPointService;
 
     private final CommunityCommentConverter converter;
+    private final MemberBlockDao memberBlockDao;
 
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
