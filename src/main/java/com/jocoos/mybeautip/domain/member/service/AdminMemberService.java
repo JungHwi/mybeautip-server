@@ -71,4 +71,10 @@ public class AdminMemberService {
         pointReasonService.setReason(memberPoints);
         return converter.convert(memberPoints);
     }
+
+    @Transactional
+    public Long updateMemo(Long memberId, String memo) {
+        memberDao.updateMemberMemo(memberId, memo);
+        return memberId;
+    }
 }

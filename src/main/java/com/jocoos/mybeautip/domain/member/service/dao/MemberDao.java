@@ -37,4 +37,9 @@ public class MemberDao {
     public Long countInvitedFriends(Long memberId) {
         return memberDetailRepository.countByInviterId(memberId);
     }
+
+    @Transactional
+    public void updateMemberMemo(Long memberId, String memo) {
+        getMember(memberId).updateMemo(memo);
+    }
 }
