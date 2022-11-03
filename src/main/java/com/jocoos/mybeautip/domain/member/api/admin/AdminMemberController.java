@@ -2,8 +2,10 @@ package com.jocoos.mybeautip.domain.member.api.admin;
 
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
+import com.jocoos.mybeautip.domain.member.dto.AdminMemoRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
 import com.jocoos.mybeautip.domain.member.service.AdminMemberService;
+import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -35,5 +37,10 @@ public class AdminMemberController {
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size) {
         return ResponseEntity.ok(service.getMemberHistory(memberId, PageRequest.of(page - 1, size)));
+    }
+
+    @PatchMapping("/member/{memberId}/memo")
+    public ResponseEntity<IdDto> updateMemo(@PathVariable Long memberId, @RequestBody AdminMemoRequest request) {
+        return ResponseEntity.ok(new IdDto(service.updateMemo(memberId, request.memo())));
     }
 }
