@@ -100,3 +100,5 @@ include::overview.adoc[]
 === Member API
 * link:member/get_member_status.html[멤버 상태 및 상태별 멤버수 조회 API, window=_blank]
 * link:member/get_member_basic_detail.html[멤버 상세 조회 API, window=_blank]
+* link:member/get_member_point_history.html[멤버 포인트 내역 조회 API, window=_blank]
+* link:member/patch_member_memo.html[멤버 메모 수정 및 작성 API, window=_blank]
