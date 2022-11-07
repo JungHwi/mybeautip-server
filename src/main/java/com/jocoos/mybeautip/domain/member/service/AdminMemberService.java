@@ -4,24 +4,19 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
-import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
-import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
-import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
-import com.jocoos.mybeautip.domain.member.dto.AdminMemberReportResponse;
-import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
 import com.jocoos.mybeautip.domain.member.dto.*;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;
 import com.jocoos.mybeautip.domain.point.service.PointReasonService;
 import com.jocoos.mybeautip.domain.point.service.PointService;
-import com.jocoos.mybeautip.domain.report.service.dao.ReportDao;
+import com.jocoos.mybeautip.domain.report.service.dao.ContentReportDao;
 import com.jocoos.mybeautip.domain.term.service.dao.MemberTermDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.report.Report;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +38,7 @@ public class AdminMemberService {
     private final CommentRepository commentRepository;
     private final MemberTermDao memberTermDao;
     private final MemberPointDao memberPointDao;
-    private final ReportDao reportDao;
+    private final ContentReportDao contentReportDao;
     private final AdminMemberConverter converter;
 
 
@@ -87,9 +82,7 @@ public class AdminMemberService {
 
     @Transactional(readOnly = true)
     public PageResponse<AdminMemberReportResponse> getReportHistory(Long memberId, Pageable pageable) {
-        Page<Report> page = reportDao.getAllAccusedBy(memberId, pageable);
-        List<AdminMemberReportResponse> content = converter.toReportResponse(page.getContent());
-        return new PageResponse<>(page.getTotalElements(), content);
+        return contentReportDao.getAllAccusedBy(memberId, pageable);
     }
 
     public PageResponse<AdminMemberResponse> getMembers(MemberSearchCondition condition) {

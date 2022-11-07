@@ -56,7 +56,7 @@ public class MemberDao {
     private void saveMemo(Member member, String memo) {
         memberMemoRepository.save(new MemberMemo(memo, member));
     }
-    
+
     @Transactional(readOnly = true)
     public Page<MemberBasicSearchResult> getMember(MemberSearchCondition condition) {
         return repository.getMember(condition);
