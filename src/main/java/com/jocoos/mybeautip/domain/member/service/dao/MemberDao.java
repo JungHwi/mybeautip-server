@@ -1,7 +1,9 @@
 package com.jocoos.mybeautip.domain.member.service.dao;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.persistence.domain.MemberMemo;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
+import com.jocoos.mybeautip.domain.member.persistence.repository.MemberMemoRepository;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -18,6 +20,7 @@ public class MemberDao {
 
     private final MemberRepository repository;
     private final MemberDetailRepository memberDetailRepository;
+    private final MemberMemoRepository memberMemoRepository;
 
     @Transactional(readOnly = true)
     public Member getMember(long memberId) {
@@ -40,6 +43,14 @@ public class MemberDao {
 
     @Transactional
     public void updateMemberMemo(Long memberId, String memo) {
-        getMember(memberId).updateMemo(memo);
+        Member member = getMember(memberId);
+        memberMemoRepository.findByMember(member)
+                .ifPresentOrElse(
+                        memberMemo -> memberMemo.update(memo),
+                        () -> saveMemo(member, memo));
+    }
+
+    private void saveMemo(Member member, String memo) {
+        memberMemoRepository.save(new MemberMemo(memo, member));
     }
 }

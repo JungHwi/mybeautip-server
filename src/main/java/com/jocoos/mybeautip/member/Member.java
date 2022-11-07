@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.member;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.domain.member.persistence.domain.MemberMemo;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.member.vo.BirthdayAttributeConverter;
@@ -121,10 +120,6 @@ public class Member {
 
     @Column
     private Boolean pushable;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "memo_id")
-    private MemberMemo memo;
 
     @Column
     @CreatedDate
@@ -267,13 +262,5 @@ public class Member {
 
     public ZonedDateTime getModifiedAtZoned() {
         return toUTCZoned(modifiedAt);
-    }
-
-    public void updateMemo(String memo) {
-        if (this.memo == null) {
-            this.memo = new MemberMemo(memo);
-            return;
-        }
-        this.memo.update(memo);
     }
 }
