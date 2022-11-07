@@ -175,7 +175,7 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                 responseFields(
                         fieldWithPath("total").type(JsonFieldType.NUMBER).description("총 신고 내역 수"),
                         fieldWithPath("content").type(JsonFieldType.ARRAY).description("신고 내역 목록"),
-                        fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("신고 ID"),
+                        fieldWithPath("content.[].id").type(JsonFieldType.STRING).description("신고 ID, type + id 형태"),
                         fieldWithPath("content.[].accuser").type(JsonFieldType.OBJECT).description("신고자"),
                         fieldWithPath("content.[].accuser.id").type(JsonFieldType.NUMBER).description("신고자 ID"),
                         fieldWithPath("content.[].accuser.username").type(JsonFieldType.STRING).description("신고자 닉네임"),
