@@ -18,6 +18,9 @@ public class CommentReport extends MemberAuditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
+    private Long reportedId;
+
     @ManyToOne
     @JoinColumn(name = "comment_id")
     private Comment comment;
@@ -30,6 +33,7 @@ public class CommentReport extends MemberAuditable {
 
     public CommentReport(Comment comment, Member member, int reasonCode, String reason) {
         this.comment = comment;
+        this.reportedId = comment.getCreatedBy().getId();
         this.createdBy = member;
         this.reasonCode = reasonCode;
         this.reason = reason;

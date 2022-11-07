@@ -20,8 +20,8 @@ public class CommunityReportDao {
     private final CommunityReportRepository repository;
 
     @Transactional
-    public CommunityReport report(long memberId, long communityId, ReportRequest reportRequest) {
-        CommunityReport communityReport = getReport(memberId, communityId);
+    public CommunityReport report(long memberId, long reportedId, long communityId, ReportRequest reportRequest) {
+        CommunityReport communityReport = getReport(memberId, reportedId, communityId);
         if (communityReport.isReport()) {
             throw new BadRequestException("Already report. Id is " + communityId);
         }
@@ -39,9 +39,9 @@ public class CommunityReportDao {
     }
 
     @Transactional(readOnly = true)
-    public CommunityReport getReport(long memberId, long communityId) {
+    public CommunityReport getReport(long memberId, long reportedId, long communityId) {
         return repository.findByMemberIdAndCommunityId(memberId, communityId)
-                .orElse(new CommunityReport(memberId, communityId));
+                .orElse(new CommunityReport(memberId, reportedId, communityId));
     }
 
     @Transactional(readOnly = true)

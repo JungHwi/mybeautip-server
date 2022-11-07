@@ -167,9 +167,10 @@ public class CommunityService {
 
     @Transactional
     public ReportResponse report(long memberId, long communityId, ReportRequest reportRequest) {
-        CommunityReport report = reportDao.report(memberId, communityId, reportRequest);
 
         Community community = communityDao.get(communityId);
+        CommunityReport report = reportDao.report(memberId, community.getMemberId(), communityId, reportRequest);
+
         if (community.getMemberId().equals(memberId)) {
             throw new BadRequestException("this is my community.");
         }
