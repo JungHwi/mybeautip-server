@@ -188,8 +188,9 @@ public class CommunityCommentService {
     public ReportResponse report(long commentId, ReportRequest report) {
         long memberId = legacyMemberService.currentMemberId();
 
-        reportDao.report(memberId, commentId, report);
         CommunityComment comment = dao.get(commentId);
+        reportDao.report(memberId, comment.getMemberId(), commentId, report);
+
         if (comment.getMemberId() == memberId) {
             throw new BadRequestException("this is my comment.");
         }

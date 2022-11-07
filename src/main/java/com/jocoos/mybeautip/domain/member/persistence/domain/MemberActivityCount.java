@@ -36,4 +36,8 @@ public class MemberActivityCount extends BaseEntity {
         this.communityCommentCount = 0;
         this.videoCommentCount = 0;
     }
+
+    public int getTotalCommentCount() {
+        return communityCommentCount + videoCommentCount;
+    }
 }

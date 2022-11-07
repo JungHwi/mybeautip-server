@@ -1,23 +1,26 @@
 package com.jocoos.mybeautip.domain.member.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.time.ZonedDateTime;
 
-@Getter
-@RequiredArgsConstructor
-public class AdminMemberResponse {
-    private final Long id;
-    private final MemberStatus status;
-    private final String avatarUrl;
-    private final String username;
-    private final String email;
-    private final int point;
-    private final int reportCount;
-    private final int orderCount;
-    private final boolean isPushable;
-    private final ZonedDateTime createdAt;
-    private final ZonedDateTime modifiedAt;
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
+
+public record AdminMemberResponse(Long id,
+                                  MemberStatus status,
+                                  String avatarUrl,
+                                  String username,
+                                  String email,
+                                  GrantType grantType,
+                                  int point,
+                                  int communityCount,
+                                  int commentCount,
+                                  int reportCount,
+                                  int orderCount,
+                                  Boolean isPushable,
+                                  Boolean isAgreeMarketingTerm,
+                                  @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime createdAt,
+                                  @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime modifiedAt) {
 }

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.global.util.date;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +34,10 @@ public class ZonedDateTimeUtil {
 
     public static ZonedDateTime toZonedDateTime(String dateTime) {
         return toZonedDateTime(dateTime, ZONE_DATE_TIME_FORMAT);
+    }
+
+    public static ZonedDateTime toUTCZoned(String dateTime) {
+        return LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")).atZone(UTC);
     }
 
     public static ZonedDateTime toZonedDateTime(String dateTime, String format) {

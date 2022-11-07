@@ -4,14 +4,15 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
+import com.jocoos.mybeautip.domain.member.dto.*;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
-import com.jocoos.mybeautip.domain.member.dto.AdminMemberDetailResponse;
-import com.jocoos.mybeautip.domain.member.dto.AdminMemberPointResponse;
-import com.jocoos.mybeautip.domain.member.dto.MemberStatusResponse;
+import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
+import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;
 import com.jocoos.mybeautip.domain.point.service.PointReasonService;
 import com.jocoos.mybeautip.domain.point.service.PointService;
+import com.jocoos.mybeautip.domain.report.service.dao.ContentReportDao;
 import com.jocoos.mybeautip.domain.term.service.dao.MemberTermDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
@@ -37,6 +38,7 @@ public class AdminMemberService {
     private final CommentRepository commentRepository;
     private final MemberTermDao memberTermDao;
     private final MemberPointDao memberPointDao;
+    private final ContentReportDao contentReportDao;
     private final AdminMemberConverter converter;
 
 
@@ -62,19 +64,30 @@ public class AdminMemberService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AdminMemberPointResponse> getMemberHistory(Long memberId, Pageable pageable) {
+    public PageResponse<AdminMemberPointResponse> getPointHistory(Long memberId, Pageable pageable) {
         Page<MemberPoint> page = memberPointDao.getAllBy(memberId, pageable);
         return new PageResponse<>(page.getTotalElements(), getResponseContent(page.getContent()));
     }
 
     private List<AdminMemberPointResponse> getResponseContent(List<MemberPoint> memberPoints) {
         pointReasonService.setReason(memberPoints);
-        return converter.convert(memberPoints);
+        return converter.toPointResponse(memberPoints);
     }
 
     @Transactional
     public Long updateMemo(Long memberId, String memo) {
         memberDao.updateMemberMemo(memberId, memo);
         return memberId;
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<AdminMemberReportResponse> getReportHistory(Long memberId, Pageable pageable) {
+        return contentReportDao.getAllAccusedBy(memberId, pageable);
+    }
+
+    public PageResponse<AdminMemberResponse> getMembers(MemberSearchCondition condition) {
+        Page<MemberBasicSearchResult> page = memberDao.getMember(condition);
+        List<AdminMemberResponse> content = converter.toListResponse(page.getContent());
+        return new PageResponse<>(page.getTotalElements(), content);
     }
 }

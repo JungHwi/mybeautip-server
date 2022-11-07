@@ -84,4 +84,11 @@ public final class DateUtils {
     public static Date cursorToDate(String cursor) {
         return fromString(cursor, CURSOR_FORMAT, UTC);
     }
+
+    public static Date toDate(ZonedDateTime zonedDateTime) {
+        if (zonedDateTime == null) {
+            return null;
+        }
+        return Date.from(zonedDateTime.toInstant());
+    }
 }

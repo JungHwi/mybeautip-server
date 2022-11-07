@@ -4,10 +4,13 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberMemo;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberMemoRepository;
+import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
+import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,5 +55,10 @@ public class MemberDao {
 
     private void saveMemo(Member member, String memo) {
         memberMemoRepository.save(new MemberMemo(memo, member));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MemberBasicSearchResult> getMember(MemberSearchCondition condition) {
+        return repository.getMember(condition);
     }
 }

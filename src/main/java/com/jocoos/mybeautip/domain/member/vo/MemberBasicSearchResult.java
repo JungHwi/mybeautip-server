@@ -1,0 +1,48 @@
+package com.jocoos.mybeautip.domain.member.vo;
+
+import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.persistence.domain.MemberActivityCount;
+import com.jocoos.mybeautip.member.Member;
+import com.querydsl.core.annotations.QueryProjection;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+import java.time.ZonedDateTime;
+
+@Getter
+@RequiredArgsConstructor
+public class MemberBasicSearchResult {
+    private final Long id;
+    private final MemberStatus status;
+    private final String avatarUrl;
+    private final String username;
+    private final String email;
+    private final GrantType grantType;
+    private final int point;
+    private final int reportCount;
+    private final int communityCount;
+    private final int commentCount;
+    private final Boolean isPushable;
+    private final Boolean isAgreeMarketingTerm;
+    private final ZonedDateTime createdAt;
+    private final ZonedDateTime modifiedAt;
+
+    @QueryProjection
+    public MemberBasicSearchResult(Member member, MemberActivityCount activityCount, boolean isAgreeMarketingTerm) {
+        this.id = member.getId();
+        this.status = member.getStatus();
+        this.avatarUrl = member.getAvatarUrl();
+        this.username = member.getUsername();
+        this.email = member.getEmail();
+        this.point = member.getPoint();
+        this.reportCount = member.getReportCount();
+        this.isPushable = member.getPushable();
+        this.grantType = member.getGrantType();
+        this.createdAt = member.getCreatedAtZoned();
+        this.modifiedAt = member.getModifiedAtZoned();
+        this.communityCount = activityCount.getCommunityCount();
+        this.commentCount = activityCount.getTotalCommentCount();
+        this.isAgreeMarketingTerm = isAgreeMarketingTerm;
+    }
+}

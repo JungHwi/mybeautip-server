@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
+import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "community_report")
-public class CommunityReport {
+public class CommunityReport extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +25,9 @@ public class CommunityReport {
     private long memberId;
 
     @Column
+    private long reportedId;
+
+    @Column
     private long communityId;
 
     @Column
@@ -32,8 +36,9 @@ public class CommunityReport {
     @Column
     private String description;
 
-    public CommunityReport(long memberId, long communityId) {
+    public CommunityReport(long memberId, long reportedId, long communityId) {
         this.memberId = memberId;
+        this.reportedId = reportedId;
         this.communityId = communityId;
         this.isReport = false;
         this.description = "";
