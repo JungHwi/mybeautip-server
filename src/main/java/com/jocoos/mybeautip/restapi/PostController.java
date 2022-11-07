@@ -337,7 +337,7 @@
 //    public CursorResponse getComments(@PathVariable Long id,
 //                                      @RequestParam(defaultValue = "20") int count,
 //                                      @RequestParam(required = false) Long cursor,
-//                                      @RequestParam(required = false) String direction,
+//                                      @RequestParam(required = false) String sort,
 //                                      @RequestParam(name = "parent_id", required = false) Long parentId,
 //                                      @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 //        Date now = new Date();
@@ -345,7 +345,7 @@
 //                .orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
 //
 //        PageRequest page;
-//        if ("next".equals(direction)) {
+//        if ("next".equals(sort)) {
 //            page = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "id"));
 //        } else {
 //            page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id")); // default
@@ -356,9 +356,9 @@
 //        Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me) : new HashMap<>();
 //
 //        if (parentId != null) {
-//            comments = postService.findCommentsByParentId(parentId, cursor, page, direction);
+//            comments = postService.findCommentsByParentId(parentId, cursor, page, sort);
 //        } else {
-//            comments = postService.findCommentsByPostId(id, cursor, page, direction);
+//            comments = postService.findCommentsByPostId(id, cursor, page, sort);
 //        }
 //
 //        List<CommentInfo> result = new ArrayList<>();
@@ -395,7 +395,7 @@
 //
 //        String nextCursor = null;
 //        if (result.size() > 0) {
-//            if ("next".equals(direction)) {
+//            if ("next".equals(sort)) {
 //                nextCursor = String.valueOf(result.get(result.size() - 1).getId() + 1);
 //            } else {
 //                nextCursor = String.valueOf(result.get(result.size() - 1).getId() - 1);

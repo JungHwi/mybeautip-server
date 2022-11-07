@@ -28,7 +28,7 @@ public class CommunityCommentDao {
     @Transactional(readOnly = true)
     public List<CommunityComment> getComments(SearchCommentRequest request) {
         CommunityCommentSearchCondition condition =
-                new CommunityCommentSearchCondition(request.getCommunityId(), request.getParentId(), request.getCursor());
+                new CommunityCommentSearchCondition(request.getCommunityId(), request.getParentId(), request.getMemberId(), request.getCursor());
         return repository.getComments(condition, request.getPageable());
     }
 

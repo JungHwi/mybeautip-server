@@ -4,8 +4,10 @@ import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.vo.CommunityCommentSearchCondition;
+import com.jocoos.mybeautip.member.block.BlockStatus;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -13,8 +15,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
+import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityComment.communityComment;
+import static com.jocoos.mybeautip.member.block.QBlock.block;
 
 @Repository
 public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCustomRepository {
@@ -28,19 +33,37 @@ public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCus
 
     @Override
     public List<CommunityComment> getComments(CommunityCommentSearchCondition condition, Pageable pageable) {
+        JPAQuery<CommunityComment> query = getBaseQuery(condition, pageable);
+        dynamicQueryForLogin(query, condition);
+        return query.fetch();
+    }
+
+    private JPAQuery<CommunityComment> getBaseQuery(CommunityCommentSearchCondition condition, Pageable pageable) {
         boolean direction = isIdAscending(pageable);
+
         return repository.query(query -> query
                 .select(communityComment)
                 .from(communityComment)
                 .where(
-                        eqCommunityId(condition.getCommunityId()),
-                        eqParentId(condition.getParentId()),
-                        greaterOrLessThanIdByDirection(direction, condition.getCursor()),
+                        eqCommunityId(condition.communityId()),
+                        eqParentId(condition.parentId()),
+                        greaterOrLessThanIdByDirection(direction, condition.cursor()),
                         notEqStatus(DELETE)
                 )
                 .orderBy(orderById(direction))
-                .limit(pageable.getPageSize())
-                .fetch());
+                .limit(pageable.getPageSize()));
+    }
+
+    private void dynamicQueryForLogin(JPAQuery<CommunityComment> query, CommunityCommentSearchCondition condition) {
+        if (condition.memberId() != null) {
+            dynamicQueryForBlock(query, condition);
+        }
+    }
+
+    private void dynamicQueryForBlock(JPAQuery<CommunityComment> query, CommunityCommentSearchCondition condition) {
+        query.innerJoin(communityCategory).on(communityComment.categoryId.eq(communityCategory.id))
+                .leftJoin(block).on(communityComment.member.id.eq(block.memberYou.id).and(block.me.eq(condition.memberId())).and(block.status.eq(BlockStatus.BLOCK)))
+                .where(communityCategory.type.eq(BLIND).or(block.memberYou.id.isNull().and(communityCategory.type.ne(BLIND))));
     }
 
     private BooleanExpression notEqStatus(CommunityStatus status) {

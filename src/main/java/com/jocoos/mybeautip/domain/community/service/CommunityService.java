@@ -210,6 +210,7 @@ public class CommunityService {
 
     private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
         List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
-        return new CommunitySearchCondition(request.getEventId(), request.getCursor(), categories);
+        Long memberId = legacyMemberService.currentMemberId();
+        return new CommunitySearchCondition(request.getEventId(), request.getCursor(), categories, memberId);
     }
 }
