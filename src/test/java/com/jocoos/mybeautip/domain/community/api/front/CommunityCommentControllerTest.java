@@ -45,7 +45,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 parameterWithName("parent_id").description("부모 댓글 아이디").optional(),
                                 parameterWithName("cursor").description("커서").optional().attributes(getDefault(MAX_LONG_STRING)),
                                 parameterWithName("size").description("페이지 사이즈").optional().attributes(getDefault(20)),
-                                parameterWithName("direction").description("정렬 방향").optional().attributes(getDefault("DESC"))
+                                parameterWithName("sort").description("정렬 방향").optional().attributes(getDefault("DESC"))
                         ),
                         responseFields(
                                 fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),

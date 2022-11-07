@@ -53,10 +53,10 @@
 //    private final AttachmentService attachmentService;
 //    private final MessageService messageService;
 //
-//    public Slice<Comment> findCommentsByPostId(Long id, Long cursor, Pageable pageable, String direction) {
+//    public Slice<Comment> findCommentsByPostId(Long id, Long cursor, Pageable pageable, String sort) {
 //        Slice<Comment> comments;
 //        if (cursor != null) {
-//            if ("next".equals(direction)) {
+//            if ("next".equals(sort)) {
 //                comments = commentRepository.findByPostIdAndIdGreaterThanEqualAndParentIdIsNull(id, cursor, pageable);
 //            } else {
 //                comments = commentRepository.findByPostIdAndIdLessThanEqualAndParentIdIsNull(id, cursor, pageable);
@@ -103,10 +103,10 @@
 //        return commentInfo;
 //    }
 //
-//    public Slice<Comment> findCommentsByParentId(Long parentId, Long cursor, Pageable pageable, String direction) {
+//    public Slice<Comment> findCommentsByParentId(Long parentId, Long cursor, Pageable pageable, String sort) {
 //        Slice<Comment> comments;
 //        if (cursor != null) {
-//            if ("next".equals(direction)) {
+//            if ("next".equals(sort)) {
 //                comments = commentRepository.findByParentIdAndIdGreaterThanEqual(parentId, cursor, pageable);
 //            } else {
 //                comments = commentRepository.findByParentIdAndIdLessThanEqual(parentId, cursor, pageable);

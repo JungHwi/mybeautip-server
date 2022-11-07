@@ -4,26 +4,32 @@ import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.restapi.CommentSearchCondition;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.DELETE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 
 @Slf4j
 @Service
@@ -34,6 +40,8 @@ public class CommentService {
     private static final String COMMENT_LOCK_MESSAGE = "comment.lock_message";
     private static final String COMMENT_BLIND_MESSAGE = "comment.blind_message";
     private static final String COMMENT_BLIND_MESSAGE_BY_ADMIN = "comment.blind_message_by_admin";
+
+    private final LegacyMemberService legacyMemberService;
     private final TagService tagService;
     private final MessageService messageService;
     private final MentionService mentionService;
@@ -44,6 +52,40 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final MemberActivityCountDao activityCountDao;
     private final ActivityPointService activityPointService;
+
+    @Transactional
+    public List<CommentInfo> getComments(CommentSearchCondition condition, Pageable pageable) {
+        List<Comment> comments = commentRepository.getComments(condition, pageable);
+
+        List<CommentInfo> result = new ArrayList<>();
+        comments.stream().forEach(comment -> {
+            CommentInfo commentInfo = null;
+            if (comment.getComment().contains("@")) {
+                MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+                if (mentionResult != null) {
+                    String content = this.getBlindContent(comment, condition.lang(), mentionResult.getComment());
+                    comment.setComment(content);
+                    commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+                } else {
+                    log.warn("mention result not found - {}", comment);
+                }
+            } else {
+                String content = getBlindContent(comment, condition.lang(), null);
+                comment.setComment(content);
+                commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()));
+            }
+
+            if (condition.memberId() != null) {
+                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), condition.memberId(), LIKE)
+                        .map(CommentLike::getId).orElse(null);
+                commentInfo.setLikeId(likeId);
+            }
+
+            result.add(commentInfo);
+        });
+
+        return result;
+    }
 
     @Transactional
     public void lockComment(Comment comment) {

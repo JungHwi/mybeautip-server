@@ -49,7 +49,7 @@ public class CommunityCommentService {
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
         Member member = legacyMemberService.currentMember();
-
+        request.setMemberId(member != null ? member.getId() : null);
         List<CommunityComment> communityComments = dao.getComments(request);
 
         return getComments(member, communityComments);

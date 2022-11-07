@@ -5,8 +5,6 @@ import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
-import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
-import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.global.exception.*;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
@@ -14,10 +12,8 @@ import com.jocoos.mybeautip.goods.TimeSaleCondition;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.block.Block;
 import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.comment.*;
-import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.*;
 import com.jocoos.mybeautip.notification.MessageService;
@@ -48,7 +44,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 
@@ -253,48 +252,16 @@ public class LegacyVideoController {
             page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id")); // default
         }
 
-        Slice<Comment> comments;
-        Long me = legacyMemberService.currentMemberId();
-        Map<Long, Block> blackList = me != null ? blockService.getBlackListByMe(me) : new HashMap<>();
+        Long memberId = legacyMemberService.currentMemberId();
+        CommentSearchCondition condition = CommentSearchCondition.builder()
+                .videoId(id)
+                .cursor(cursor)
+                .parentId(parentId)
+                .memberId(memberId)
+                .lang(lang)
+                .build();
 
-        if (parentId != null) {
-            comments = legacyVideoService.findCommentsByParentId(parentId, cursor, page, direction);
-        } else {
-            comments = legacyVideoService.findCommentsByVideoId(id, cursor, page, direction);
-        }
-
-        List<CommentInfo> result = new ArrayList<>();
-        comments.stream().forEach(comment -> {
-            CommentInfo commentInfo = null;
-            if (comment.getComment().contains("@")) {
-                MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
-                if (mentionResult != null) {
-                    String content = commentService.getBlindContent(comment, lang, mentionResult.getComment());
-                    comment.setComment(content);
-                    commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
-                } else {
-                    log.warn("mention result not found - {}", comment);
-                }
-            } else {
-                String content = commentService.getBlindContent(comment, lang, null);
-                comment.setComment(content);
-                commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()));
-            }
-
-            if (me != null) {
-                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), me, LIKE)
-                        .map(CommentLike::getId).orElse(null);
-                commentInfo.setLikeId(likeId);
-
-                Block block = blackList.get(commentInfo.getCreatedBy().getId());
-                if (block != null) {
-                    commentInfo.setBlockId(block.getId());
-                    commentInfo.setComment(messageService.getMessage(COMMENT_BLOCKED_MESSAGE, lang));
-                }
-            }
-
-            result.add(commentInfo);
-        });
+        List<CommentInfo> result = commentService.getComments(condition, page);
 
         String nextCursor = null;
         if (result.size() > 0) {

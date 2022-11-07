@@ -18,6 +18,7 @@ import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.member.block.BlockStatus;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -46,6 +47,7 @@ import static com.jocoos.mybeautip.domain.community.vo.CommunityOrder.sortedAt;
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.BAD_REQUEST;
 import static com.jocoos.mybeautip.member.QMember.member;
+import static com.jocoos.mybeautip.member.block.QBlock.block;
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.group.GroupBy.list;
 import static com.querydsl.sql.SQLExpressions.count;
@@ -65,11 +67,12 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     @Override
     public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
-        JPAQuery<Community> query = baseSearchQuery(condition.getCategories(),
-                                                              condition.getCursor(),
+        JPAQuery<Community> query = baseSearchQuery(condition.categories(),
+                                                              condition.cursor(),
                                                               pageable.getPageSize());
         query.orderBy(order(condition.isCategoryDrip()));
         addWhereConditionOptional(condition, query);
+        dynamicQueryForLogin(query, condition);
         List<Community> communityList = query.fetch();
 
         List<Long> ids = communityList.stream()
@@ -212,12 +215,23 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private void addWhereConditionOptional(CommunitySearchCondition condition, JPAQuery<Community> defaultQuery) {
         if (condition.isCategoryDrip()) {
-            addWhereCondition(defaultQuery, eqEventId(condition.getEventId()), eqIsWin(condition.isFirstSearch()));
+            addWhereCondition(defaultQuery, eqEventId(condition.eventId()), eqIsWin(condition.isFirstSearch()));
         }
     }
 
     private void addWhereCondition(JPAQuery<Community> defaultQuery, BooleanExpression... expressions) {
         defaultQuery.where(expressions);
+    }
+
+    private void dynamicQueryForLogin(JPAQuery<Community> query, CommunitySearchCondition condition) {
+        if (condition.memberId() != null) {
+            dynamicQueryForBlock(query, condition);
+        }
+    }
+
+    private void dynamicQueryForBlock(JPAQuery<Community> query, CommunitySearchCondition condition) {
+        query.leftJoin(block).on(community.member.id.eq(block.memberYou.id).and(block.me.eq(condition.memberId())).and(block.status.eq(BlockStatus.BLOCK)))
+                .where(community.category.type.eq(BLIND).or(block.memberYou.id.isNull().and(community.category.type.ne(BLIND))));
     }
 
     private List<SummaryCommunityResult> summaryWithMember(JPAQuery<?> baseQuery) {
