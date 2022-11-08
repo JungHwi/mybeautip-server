@@ -17,7 +17,7 @@ import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.block.BlockStatus;
-import com.jocoos.mybeautip.global.vo.SearchKeyword;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Order;
@@ -72,8 +72,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     @Override
     public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
-        JPAQuery<Community> query = baseSearchQuery(condition.getCategories(),
-                                                              condition.getCursor(),
+        JPAQuery<Community> query = baseSearchQuery(condition.categories(),
+                                                              condition.cursor(),
                                                               pageable.getPageSize());
         query.orderBy(order(condition.isCategoryDrip()));
         addWhereConditionOptional(condition, query);
@@ -97,7 +97,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     @Override
-    public Page<AdminCommunityResponse> getCommunitiesIncludeDelete(CommunitySearchCondition condition) {
+    public Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition) {
         List<AdminCommunityResponse> responses = repository.query(query -> query
                         .select(new QAdminCommunityResponse(community, list(communityFile), new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename)))
                         .from(community)
@@ -105,8 +105,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                         .join(communityCategory).on(community.category.eq(communityCategory))
                         .leftJoin(communityFile).on(communityFile.community.eq(community))
                         .where(
-                                inCategories(condition.getCategories()),
-                                searchByKeyword(condition.getSearchKeyword()),
+                                inCategories(condition.categories()),
+                                searchByKeyword(condition.searchOption()),
                                 createdAtAfter(condition.getStartAt()),
                                 createdAtBefore(condition.getEndAt())
                         )
@@ -127,14 +127,14 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .from(community)
                 .join(member).on(community.member.eq(member))
                 .where(
-                        inCategories(condition.getCategories()),
-                        searchByKeyword(condition.getSearchKeyword()),
+                        inCategories(condition.categories()),
+                        searchByKeyword(condition.searchOption()),
                         createdAtAfter(condition.getStartAt()),
                         createdAtBefore(condition.getEndAt())
                 ));
 
 
-        return PageableExecutionUtils.getPage(responses, condition.getPageable(), countQuery::fetchOne);
+        return PageableExecutionUtils.getPage(responses, condition.pageable(), countQuery::fetchOne);
     }
 
     private OrderSpecifier<?>[] getOrders(Sort sort) {
@@ -158,17 +158,17 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return Arrays.asList(community.isTopFix.desc(), community.isWin.desc());
     }
 
-    private BooleanExpression searchByKeyword(SearchKeyword searchKeyword) {
-        if (searchKeyword.isNoSearch()) {
+    private BooleanExpression searchByKeyword(SearchOption searchOption) {
+        if (searchOption.isNoSearch()) {
             return null;
         }
-        if (Objects.equals(searchKeyword.getSearchField(), "username")) {
-            return community.category.type.ne(BLIND).and(member.username.contains(searchKeyword.getKeyword()));
+        if (Objects.equals(searchOption.getSearchField(), "username")) {
+            return community.category.type.ne(BLIND).and(member.username.contains(searchOption.getKeyword()));
         }
         return Expressions.booleanOperation(
                 Ops.STRING_CONTAINS_IC,
-                Expressions.path(String.class, community, searchKeyword.getSearchField()),
-                Expressions.constant(searchKeyword.getKeyword()));
+                Expressions.path(String.class, community, searchOption.getSearchField()),
+                Expressions.constant(searchOption.getKeyword()));
     }
 
     @Override
@@ -299,7 +299,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private void addWhereConditionOptional(CommunitySearchCondition condition, JPAQuery<Community> defaultQuery) {
         if (condition.isCategoryDrip()) {
-            addWhereCondition(defaultQuery, eqEventId(condition.getEventId()), eqIsWin(condition.isFirstSearch()));
+            addWhereCondition(defaultQuery, eqEventId(condition.eventId()), eqIsWin(condition.isFirstSearch()));
         }
     }
 
@@ -308,13 +308,13 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     private void dynamicQueryForLogin(JPAQuery<Community> query, CommunitySearchCondition condition) {
-        if (condition.getMemberId() != null) {
+        if (condition.memberId() != null) {
             dynamicQueryForBlock(query, condition);
         }
     }
 
     private void dynamicQueryForBlock(JPAQuery<Community> query, CommunitySearchCondition condition) {
-        query.leftJoin(block).on(community.member.id.eq(block.memberYou.id).and(block.me.eq(condition.getMemberId())).and(block.status.eq(BlockStatus.BLOCK)))
+        query.leftJoin(block).on(community.member.id.eq(block.memberYou.id).and(block.me.eq(condition.memberId())).and(block.status.eq(BlockStatus.BLOCK)))
                 .where(community.category.type.eq(BLIND).or(block.memberYou.id.isNull().and(community.category.type.ne(BLIND))));
     }
 

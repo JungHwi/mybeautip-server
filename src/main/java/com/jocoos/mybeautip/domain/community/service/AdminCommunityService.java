@@ -9,9 +9,11 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategor
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,18 +37,22 @@ public class AdminCommunityService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AdminCommunityResponse> getCommunities(Long categoryId, CommunitySearchCondition condition) {
-        setCategories(categoryId, condition);
-        Page<AdminCommunityResponse> page = communityDao.getCommunitiesInAllStatus(condition);
+    public PageResponse<AdminCommunityResponse> getCommunities(Long categoryId, Pageable pageable, SearchOption searchOption) {
+        CommunitySearchCondition condition = getSearchCondition(categoryId, pageable, searchOption);
+        Page<AdminCommunityResponse> page = communityDao.getCommunitiesAllStatus(condition);
         return new PageResponse<>(page.getTotalElements(), page.getContent());
+    }
+
+    private CommunitySearchCondition getSearchCondition(Long categoryId, Pageable pageable, SearchOption searchOption) {
+        return CommunitySearchCondition.builder()
+                .pageable(pageable)
+                .searchOption(searchOption)
+                .categories(getCategories(categoryId))
+                .build();
     }
 
     private List<CommunityCategory> getAdminCategories() {
         return categoryDao.getAllExcludeByTypes(NOT_IN_ADMIN);
-    }
-
-    private void setCategories(Long categoryId, CommunitySearchCondition condition) {
-        condition.setCategories(getCategories(categoryId));
     }
 
     private List<CommunityCategory> getCategories(Long categoryId) {
