@@ -19,6 +19,7 @@ public class VideoCategoryMapping implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id", insertable = false, updatable = false)
     private Video video;
