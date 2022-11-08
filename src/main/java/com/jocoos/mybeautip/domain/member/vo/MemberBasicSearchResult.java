@@ -24,12 +24,12 @@ public class MemberBasicSearchResult {
     private final int communityCount;
     private final int commentCount;
     private final Boolean isPushable;
-    private final Boolean isAgreeMarketingTerm;
     private final ZonedDateTime createdAt;
     private final ZonedDateTime modifiedAt;
+    private Boolean isAgreeMarketingTerm;
 
     @QueryProjection
-    public MemberBasicSearchResult(Member member, MemberActivityCount activityCount, boolean isAgreeMarketingTerm) {
+    public MemberBasicSearchResult(Member member, MemberActivityCount activityCount) {
         this.id = member.getId();
         this.status = member.getStatus();
         this.avatarUrl = member.getAvatarUrl();
@@ -43,6 +43,10 @@ public class MemberBasicSearchResult {
         this.modifiedAt = member.getModifiedAtZoned();
         this.communityCount = activityCount.getCommunityCount();
         this.commentCount = activityCount.getTotalCommentCount();
+    }
+
+    public void setIsAgreeMarketingTerm(boolean isAgreeMarketingTerm) {
         this.isAgreeMarketingTerm = isAgreeMarketingTerm;
     }
+
 }

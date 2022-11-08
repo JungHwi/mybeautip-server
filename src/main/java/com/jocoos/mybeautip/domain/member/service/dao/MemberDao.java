@@ -35,6 +35,7 @@ public class MemberDao {
         return repository.getStatusesWithCount();
     }
 
+    @Transactional(readOnly = true)
     public MemberSearchResult getMembersWithDetails(Long memberId) {
         return repository.getMemberWithDetails(memberId);
     }
@@ -58,7 +59,7 @@ public class MemberDao {
     }
 
     @Transactional(readOnly = true)
-    public Page<MemberBasicSearchResult> getMember(MemberSearchCondition condition) {
+    public Page<MemberBasicSearchResult> getMembers(MemberSearchCondition condition) {
         return repository.getMember(condition);
     }
 }

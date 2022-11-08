@@ -86,7 +86,13 @@ public class AdminMemberService {
     }
 
     public PageResponse<AdminMemberResponse> getMembers(MemberSearchCondition condition) {
-        Page<MemberBasicSearchResult> page = memberDao.getMember(condition);
+        Page<MemberBasicSearchResult> page = memberDao.getMembers(condition);
+        Map<Long, Boolean> map = memberTermDao.isAgreeMarketingTerm(page.getContent().stream().map(MemberBasicSearchResult::getId).toList());
+
+        for (MemberBasicSearchResult content : page) {
+            content.setIsAgreeMarketingTerm(map.getOrDefault(content.getId(), false));
+        }
+
         List<AdminMemberResponse> content = converter.toListResponse(page.getContent());
         return new PageResponse<>(page.getTotalElements(), content);
     }

@@ -4,6 +4,7 @@ import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.vo.*;
+import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.global.vo.SearchKeyword;
 import com.jocoos.mybeautip.member.Member;
 import com.querydsl.core.types.Ops;
@@ -21,6 +22,7 @@ import java.util.Map;
 import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberActivityCount.memberActivityCount;
 import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberDetail.memberDetail;
 import static com.jocoos.mybeautip.domain.term.persistence.domain.QMemberTerm.memberTerm;
+import static com.jocoos.mybeautip.domain.term.persistence.domain.QTerm.term;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.jocoos.mybeautip.member.address.QAddress.address;
 import static com.querydsl.core.group.GroupBy.groupBy;
@@ -89,9 +91,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     private List<MemberBasicSearchResult> fetchBasicSearchResult(JPAQuery<?> baseQuery) {
         return baseQuery
-                .select(new QMemberBasicSearchResult(member, memberActivityCount, memberTerm.isAccept))
-                .distinct()
-                .leftJoin(memberTerm).on(member.eq(memberTerm.member))
+                .select(new QMemberBasicSearchResult(member, memberActivityCount))
                 .innerJoin(memberActivityCount).on(member.eq(memberActivityCount.member))
                 .fetch();
     }
