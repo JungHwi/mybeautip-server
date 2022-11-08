@@ -17,10 +17,14 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 @Getter
@@ -172,7 +176,7 @@ public class Community extends BaseEntity {
     }
 
     public boolean isImageExist() {
-        return !CollectionUtils.isEmpty(this.communityFileList);
+        return !isEmpty(this.communityFileList);
     }
 
     public boolean isVoteAndIncludeFile(int fileNum) {
@@ -188,5 +192,32 @@ public class Community extends BaseEntity {
         if (communityFileList != null) {
             communityFileList.forEach(file -> file.setCommunity(this));
         }
+    }
+
+    public List<String> getFileUrls() {
+        return communityFileList.stream()
+                .map(file -> {
+                    String url = toUrl(file.getFile(), COMMUNITY, id);
+                    return Objects.requireNonNullElse(url, "");
+                })
+                .toList();
+    }
+
+    public boolean isWin() {
+        if (isWin == null) {
+            return false;
+        }
+        return isWin;
+    }
+
+    public boolean isTopFix() {
+        if (isTopFix == null) {
+            return false;
+        }
+        return isTopFix;
+    }
+
+    public boolean isVotesEmpty() {
+        return CollectionUtils.isEmpty(communityVoteList);
     }
 }

@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.community.service.dao;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
+import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
@@ -14,6 +15,7 @@ import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +72,12 @@ public class CommunityDao {
 
     @Transactional(readOnly = true)
     public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
-        return repository.getCommunities(condition, pageable);
+        return repository.getCommunities(condition, condition.getPageable());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AdminCommunityResponse> getCommunitiesInAllStatus(CommunitySearchCondition condition) {
+        return repository.getCommunitiesIncludeDelete(condition);
     }
 
     @Transactional(readOnly = true)

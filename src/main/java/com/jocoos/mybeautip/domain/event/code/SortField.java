@@ -10,7 +10,10 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum SortField implements CodeValue {
     CREATED_AT("생성일시", "createdAt"),
-    JOIN_COUNT("참여수", "joinCount");
+    JOIN_COUNT("참여수", "joinCount"),
+    VIEW_COUNT("조회순", "viewCount"),
+    LIKE_COUNT("좋이요순", "likeCount"),
+    REPORT_COUNT("신고순", "reportCount");
 
     private final String description;
     private final String fieldName;
