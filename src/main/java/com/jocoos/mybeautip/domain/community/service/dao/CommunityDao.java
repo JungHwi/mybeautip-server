@@ -72,12 +72,12 @@ public class CommunityDao {
 
     @Transactional(readOnly = true)
     public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
-        return repository.getCommunities(condition, condition.getPageable());
+        return repository.getCommunities(condition, condition.pageable());
     }
 
     @Transactional(readOnly = true)
-    public Page<AdminCommunityResponse> getCommunitiesInAllStatus(CommunitySearchCondition condition) {
-        return repository.getCommunitiesIncludeDelete(condition);
+    public Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition) {
+        return repository.getCommunitiesAllStatus(condition);
     }
 
     @Transactional(readOnly = true)

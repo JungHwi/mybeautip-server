@@ -3,8 +3,7 @@ package com.jocoos.mybeautip.domain.community.api.admin;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
-import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
-import com.jocoos.mybeautip.global.vo.SearchKeyword;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -40,12 +39,10 @@ public class AdminCommunityController {
             @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
             @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
 
-        CommunitySearchCondition condition = CommunitySearchCondition.builder()
-                .pageable(PageRequest.of(page - 1, size, Direction.fromString(order), sort))
-                .searchKeyword(SearchKeyword.from(search, startAt, endAt, ZoneId.of("Asia/Seoul")))
-                .build();
+        PageRequest pageRequest = PageRequest.of(page - 1, size, Direction.fromString(order), sort);
+        SearchOption searchOption = SearchOption.from(search, startAt, endAt, ZoneId.of("Asia/Seoul"));
 
-        return ResponseEntity.ok(service.getCommunities(categoryId, condition));
+        return ResponseEntity.ok(service.getCommunities(categoryId, pageRequest, searchOption));
     }
 
     @GetMapping("/community/{communityId}")

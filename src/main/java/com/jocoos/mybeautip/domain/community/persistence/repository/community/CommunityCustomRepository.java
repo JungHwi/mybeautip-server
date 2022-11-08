@@ -15,7 +15,7 @@ import java.util.List;
 public interface CommunityCustomRepository {
     List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable);
 
-    Page<AdminCommunityResponse> getCommunitiesIncludeDelete(CommunitySearchCondition condition);
+    Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition);
 
     SearchResult<Community> search(KeywordSearchCondition condition);
     Long countBy(String keyword);
