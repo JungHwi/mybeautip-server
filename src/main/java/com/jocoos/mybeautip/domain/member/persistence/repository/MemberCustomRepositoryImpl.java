@@ -98,7 +98,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     }
 
     private BooleanExpression searchByKeyword(SearchKeyword searchKeyword) {
-        if (searchKeyword.isNoSearch()) {
+        if (searchKeyword == null || searchKeyword.isNoSearch()) {
             return null;
         }
         if (Objects.equals(searchKeyword.getSearchField(), "memo")) {
