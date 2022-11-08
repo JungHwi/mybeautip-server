@@ -46,7 +46,7 @@ public class Video {
     private Boolean muted;
     @Column(nullable = false)
     private String visibility;
-    @OneToMany(mappedBy = "video", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VideoCategoryMapping> categoryMapping;
     @Column
     private String title;
@@ -117,5 +117,12 @@ public class Video {
         this.orderCount = 0;
         this.reportCount = 0L;
         this.scrapCount = 0;
+    }
+
+    @PostPersist
+    public void postPersist() {
+        if(categoryMapping != null) {
+            categoryMapping.forEach(m -> m.setVideo(this));
+        }
     }
 }
