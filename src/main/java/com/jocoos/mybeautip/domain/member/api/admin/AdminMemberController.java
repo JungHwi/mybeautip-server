@@ -44,7 +44,7 @@ public class AdminMemberController {
                 .grantType(grantType)
                 .status(status)
                 .pageable(PageRequest.of(page - 1, size))
-                .searchKeyword(SearchKeyword.from(search, startAt, endAt, ZoneId.of("UTC")))
+                .searchKeyword(SearchKeyword.from(search, startAt, endAt, ZoneId.of("Asia/Seoul")))
                 .build();
 
         return ResponseEntity.ok(service.getMembers(condition));
