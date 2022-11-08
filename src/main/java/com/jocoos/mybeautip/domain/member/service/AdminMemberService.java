@@ -13,6 +13,7 @@ import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;
 import com.jocoos.mybeautip.domain.point.service.PointReasonService;
 import com.jocoos.mybeautip.domain.point.service.PointService;
 import com.jocoos.mybeautip.domain.report.service.dao.ContentReportDao;
+import com.jocoos.mybeautip.domain.term.persistence.domain.MemberTerm;
 import com.jocoos.mybeautip.domain.term.service.dao.MemberTermDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
@@ -85,15 +86,18 @@ public class AdminMemberService {
         return contentReportDao.getAllAccusedBy(memberId, pageable);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<AdminMemberResponse> getMembers(MemberSearchCondition condition) {
         Page<MemberBasicSearchResult> page = memberDao.getMembers(condition);
-        Map<Long, Boolean> map = memberTermDao.isAgreeMarketingTerm(page.getContent().stream().map(MemberBasicSearchResult::getId).toList());
-
-        for (MemberBasicSearchResult content : page) {
-            content.setIsAgreeMarketingTerm(map.getOrDefault(content.getId(), false));
-        }
-
+        setIsAgreeMarketingTerm(page.getContent());
         List<AdminMemberResponse> content = converter.toListResponse(page.getContent());
         return new PageResponse<>(page.getTotalElements(), content);
+    }
+
+    private void setIsAgreeMarketingTerm(List<MemberBasicSearchResult> content) {
+        List<Long> memberIds = MemberBasicSearchResult.memberIds(content);
+        List<MemberTerm> memberTerms = memberTermDao.isAgreeMarketingTerm(memberIds);
+        Map<Long, Boolean> agreeTermMap = MemberTerm.memberIdIsAgreeTermMap(memberTerms);
+        MemberBasicSearchResult.setIsAgreeMarketingTerm(content, agreeTermMap);
     }
 }

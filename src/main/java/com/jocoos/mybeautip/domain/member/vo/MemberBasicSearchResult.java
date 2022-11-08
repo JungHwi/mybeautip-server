@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor
@@ -43,6 +45,19 @@ public class MemberBasicSearchResult {
         this.modifiedAt = member.getModifiedAtZoned();
         this.communityCount = activityCount.getCommunityCount();
         this.commentCount = activityCount.getTotalCommentCount();
+    }
+
+    public static void setIsAgreeMarketingTerm(List<MemberBasicSearchResult> contents, Map<Long, Boolean> agreeTermMap) {
+        for (MemberBasicSearchResult content : contents) {
+            content.setIsAgreeMarketingTerm(agreeTermMap.getOrDefault(content.getId(), false));
+        }
+    }
+
+    public static List<Long> memberIds(List<MemberBasicSearchResult> contents) {
+        return contents
+                .stream()
+                .map(MemberBasicSearchResult::getId)
+                .toList();
     }
 
     public void setIsAgreeMarketingTerm(boolean isAgreeMarketingTerm) {

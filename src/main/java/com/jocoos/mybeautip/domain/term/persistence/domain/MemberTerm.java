@@ -8,8 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.term.code.TermStatus.OPTIONAL;
+import static java.util.stream.Collectors.toMap;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -42,6 +45,15 @@ public class MemberTerm extends CreatedByBaseEntity {
         this.isAccept = true;
         this.version = version;
         this.term = term;
+    }
+
+    public static Map<Long, Boolean> memberIdIsAgreeTermMap(List<MemberTerm> memberTerms) {
+        return memberTerms.stream()
+                .collect(toMap(MemberTerm::memberId, MemberTerm::getIsAccept));
+    }
+
+    private Long memberId() {
+        return this.getMember().getId();
     }
 
     public boolean isTermDiff(long termId, float termVersion) {
