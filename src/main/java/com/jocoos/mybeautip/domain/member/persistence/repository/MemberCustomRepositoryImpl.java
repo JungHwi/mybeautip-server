@@ -17,10 +17,11 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberActivityCount.memberActivityCount;
 import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberDetail.memberDetail;
-import static com.jocoos.mybeautip.domain.term.persistence.domain.QMemberTerm.memberTerm;
+import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberMemo.memberMemo;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.jocoos.mybeautip.member.address.QAddress.address;
 import static com.querydsl.core.group.GroupBy.groupBy;
@@ -48,10 +49,11 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     @Override
     public MemberSearchResult getMemberWithDetails(Long memberId) {
         return repository.query(query -> query
-                        .select(new QMemberSearchResult(member, address, memberDetail))
+                        .select(new QMemberSearchResult(member, address, memberDetail, memberMemo.memo))
                         .from(member)
                         .leftJoin(memberDetail).on(member.id.eq(memberDetail.memberId))
                         .leftJoin(address).on(member.eq(address.createdBy))
+                        .leftJoin(memberMemo).on(member.eq(memberMemo.member))
                         .where(eqId(memberId)))
                 .fetchOne();
     }
@@ -89,16 +91,18 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     private List<MemberBasicSearchResult> fetchBasicSearchResult(JPAQuery<?> baseQuery) {
         return baseQuery
-                .select(new QMemberBasicSearchResult(member, memberActivityCount, memberTerm.isAccept))
-                .distinct()
-                .leftJoin(memberTerm).on(member.eq(memberTerm.member))
+                .select(new QMemberBasicSearchResult(member, memberActivityCount))
+                .leftJoin(memberMemo).on(member.eq(memberMemo.member))
                 .innerJoin(memberActivityCount).on(member.eq(memberActivityCount.member))
                 .fetch();
     }
 
     private BooleanExpression searchByKeyword(SearchKeyword searchKeyword) {
-        if (searchKeyword.isNoSearch()) {
+        if (searchKeyword == null || searchKeyword.isNoSearch()) {
             return null;
+        }
+        if (Objects.equals(searchKeyword.getSearchField(), "memo")) {
+            return memberMemo.memo.containsIgnoreCase(searchKeyword.getKeyword());
         }
         return Expressions.booleanOperation(
                 Ops.STRING_CONTAINS_IC,

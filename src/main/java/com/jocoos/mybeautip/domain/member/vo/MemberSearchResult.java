@@ -31,6 +31,8 @@ public class MemberSearchResult {
     private final Set<SkinWorry> skinWorry;
     private final String address;
 
+    private final String memo;
+
     @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT)
     private final ZonedDateTime createdAt;
 
@@ -38,7 +40,7 @@ public class MemberSearchResult {
     private final ZonedDateTime modifiedAt;
 
     @QueryProjection
-    public MemberSearchResult(Member member, Address address, MemberDetail memberDetail) {
+    public MemberSearchResult(Member member, Address address, MemberDetail memberDetail, String memo) {
         this.id = member.getId();
         this.avatarUrl = member.getAvatarUrl();
         this.username = member.getUsername();
@@ -52,6 +54,7 @@ public class MemberSearchResult {
         this.address = address == null ? null : address.getWholeAddress();
         this.skinType = memberDetail == null ? null : memberDetail.getSkinType();
         this.skinWorry = memberDetail == null ? null : memberDetail.getSkinWorry();
+        this.memo = memo;
     }
 
 }
