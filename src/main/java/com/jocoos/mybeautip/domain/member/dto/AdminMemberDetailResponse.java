@@ -16,27 +16,30 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 @RequiredArgsConstructor
 public class AdminMemberDetailResponse {
     private final Long id;
+    private final GrantType grantType;
     private final String avatarUrl;
     private final String username;
     private final String email;
-    private final int point;
-    private final Boolean isPushable;
-    private final GrantType grantType;
+
     private final Integer ageGroup;
     private final SkinType skinType;
     private final Set<SkinWorry> skinWorry;
     private final String address;
+
+    private final Boolean isPushable;
+    private final Boolean isAgreeMarketingTerm;
+
+    private final int point;
+    private final int expiryPoint;
+    private final Long communityCount;
+    private final Long communityCommentCount;
+    private final Long videoCommentCount;
+    private final Long invitedFriendCount;
+    private final String memo;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT)
     private final ZonedDateTime createdAt;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT)
     private final ZonedDateTime modifiedAt;
-
-    private final int expiryPoint;
-    private final Boolean isAgreeMarketingTerm;
-    private final Long communityCount;
-    private final Long communityCommentCount;
-    private final Long videoCommentCount;
-    private final Long invitedFriendCount;
 }
