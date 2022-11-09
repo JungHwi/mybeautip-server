@@ -216,6 +216,11 @@ public class CommunityService {
     private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
         List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
         Long memberId = legacyMemberService.currentMemberId();
-        return new CommunitySearchCondition(request.getEventId(), request.getCursor(), categories, memberId);
+        return CommunitySearchCondition.builder()
+                .eventId(request.getEventId())
+                .cursor(request.getCursor())
+                .categories(categories)
+                .memberId(memberId)
+                .build();
     }
 }

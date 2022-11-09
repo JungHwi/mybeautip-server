@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.community.service.dao;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
+import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
@@ -14,6 +15,7 @@ import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -74,6 +77,11 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
+    public Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition) {
+        return repository.getCommunitiesAllStatus(condition);
+    }
+
+    @Transactional(readOnly = true)
     public List<Community> get(List<Long> ids) {
         return repository.findByIdIn(ids);
     }
@@ -118,7 +126,34 @@ public class CommunityDao {
         return repository.countBy(keyword);
     }
 
+    @Transactional(readOnly = true)
     public Long countBy(Long memberId) {
         return repository.countByMemberId(memberId);
+    }
+
+    @Transactional
+    public Long fix(Long communityId) {
+        findTopFix().ifPresent(topCommunity -> topCommunity.fix(false));
+        Community community = get(communityId);
+        community.fix(true);
+        return community.getId();
+    }
+
+    private Optional<Community> findTopFix() {
+        return repository.findByIsTopFixIsTrue();
+    }
+
+    @Transactional
+    public Long nonFix(Long communityId) {
+        Community community = get(communityId);
+        community.fix(false);
+        return community.getId();
+    }
+
+    @Transactional
+    public Long changeStatus(Long communityId, CommunityStatus status) {
+        Community community = get(communityId);
+        community.changeStatus(status);
+        return community.getId();
     }
 }

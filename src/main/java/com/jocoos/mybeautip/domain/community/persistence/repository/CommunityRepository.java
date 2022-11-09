@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CommunityRepository extends ExtendedQuerydslJpaRepository<Community, Long>, CommunityCustomRepository {
@@ -22,6 +23,7 @@ public interface CommunityRepository extends ExtendedQuerydslJpaRepository<Commu
     Slice<Community> findByCategoryInAndSortedAtLessThan(List<CommunityCategory> categoryList, ZonedDateTime cursor, Pageable pageable);
     Slice<Community> findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(Long EventId, List<CommunityCategory> categoryList, Boolean isWin, ZonedDateTime cursor, Pageable pageable);
 
+    Optional<Community> findByIsTopFixIsTrue();
     Long countByMemberId(Long memberId);
 
     @Modifying

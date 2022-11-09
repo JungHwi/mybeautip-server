@@ -7,7 +7,7 @@ import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.service.AdminEventService;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.global.vo.Paging;
-import com.jocoos.mybeautip.global.vo.SearchKeyword;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.vo.Sort;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class AdminEventController {
 
         EventSearchCondition condition = EventSearchCondition.builder()
                 .statuses(status == null ? null : Collections.singleton(status))
-                .searchKeyword(SearchKeyword.from(search, startAt, endAt, ZoneId.of("Asia/Seoul")))
+                .searchOption(SearchOption.from(search, startAt, endAt, ZoneId.of("Asia/Seoul")))
                 .paging(Paging.page(page - 1, size))
                 .sort(new Sort(sort, order))
                 .build();

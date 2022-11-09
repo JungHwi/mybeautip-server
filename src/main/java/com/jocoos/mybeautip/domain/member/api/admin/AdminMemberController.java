@@ -6,7 +6,7 @@ import com.jocoos.mybeautip.domain.member.dto.*;
 import com.jocoos.mybeautip.domain.member.service.AdminMemberService;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
-import com.jocoos.mybeautip.global.vo.SearchKeyword;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -44,7 +44,7 @@ public class AdminMemberController {
                 .grantType(grantType)
                 .status(status)
                 .pageable(PageRequest.of(page - 1, size))
-                .searchKeyword(SearchKeyword.from(search, startAt, endAt, ZoneId.of("Asia/Seoul")))
+                .searchOption(SearchOption.from(search, startAt, endAt, ZoneId.of("UTC")))
                 .build();
 
         return ResponseEntity.ok(service.getMembers(condition));

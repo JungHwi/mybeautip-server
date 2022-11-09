@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.community.vo.CommunityCommentSearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,16 @@ public class CommunityCommentDao {
         CommunityCommentSearchCondition condition =
                 new CommunityCommentSearchCondition(request.getCommunityId(), request.getParentId(), request.getMemberId(), request.getCursor());
         return repository.getComments(condition, request.getPageable());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CommunityComment> getCommentsPage(Long communityId, Pageable pageable) {
+        return repository.findAllByParentIdIsNullAndCommunityId(communityId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityComment> getAllByParentIdIn(List<Long> ids) {
+        return repository.findByParentIdInOrderByCreatedAtAsc(ids);
     }
 
     @Transactional

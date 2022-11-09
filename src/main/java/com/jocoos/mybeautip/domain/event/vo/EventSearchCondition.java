@@ -3,7 +3,7 @@ package com.jocoos.mybeautip.domain.event.vo;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.global.vo.Paging;
-import com.jocoos.mybeautip.global.vo.SearchKeyword;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.vo.Sort;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,21 +19,21 @@ public class EventSearchCondition {
     private final ZonedDateTime between;
     private final Paging paging;
     private final Sort sort;
-    private final SearchKeyword searchKeyword;
+    private final SearchOption searchOption;
 
     public boolean isOrderByJoinCount() {
         return sort.isOrderByJoinCount();
     }
 
     public String getKeyword() {
-        return searchKeyword == null ? null : searchKeyword.getKeyword();
+        return searchOption == null ? null : searchOption.getKeyword();
     }
 
     public ZonedDateTime getStartAt() {
-        return searchKeyword == null ? null : searchKeyword.getStartAt();
+        return searchOption == null ? null : searchOption.getStartAt();
     }
 
     public ZonedDateTime getEndAt() {
-        return searchKeyword == null ? null : searchKeyword.getEndAt();
+        return searchOption == null ? null : searchOption.getEndAt();
     }
 }

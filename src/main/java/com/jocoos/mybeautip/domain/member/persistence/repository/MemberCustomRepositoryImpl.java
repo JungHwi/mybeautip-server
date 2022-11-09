@@ -4,7 +4,7 @@ import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.vo.*;
-import com.jocoos.mybeautip.global.vo.SearchKeyword;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.member.Member;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -73,7 +73,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                         eqGrantType(condition.grantType()),
                         startAtAfter(condition.getStartAt()),
                         endAtBefore(condition.getEndAt()),
-                        searchByKeyword(condition.searchKeyword())
+                        searchByKeyword(condition.searchOption())
                 ));
     }
 
@@ -97,17 +97,17 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .fetch();
     }
 
-    private BooleanExpression searchByKeyword(SearchKeyword searchKeyword) {
-        if (searchKeyword == null || searchKeyword.isNoSearch()) {
+    private BooleanExpression searchByKeyword(SearchOption searchOption) {
+        if (searchOption == null || searchOption.isNoSearch()) {
             return null;
         }
-        if (Objects.equals(searchKeyword.getSearchField(), "memo")) {
-            return memberMemo.memo.containsIgnoreCase(searchKeyword.getKeyword());
+        if (Objects.equals(searchOption.getSearchField(), "memo")) {
+            return memberMemo.memo.containsIgnoreCase(searchOption.getKeyword());
         }
         return Expressions.booleanOperation(
                 Ops.STRING_CONTAINS_IC,
-                Expressions.path(String.class, member, searchKeyword.getSearchField()),
-                Expressions.constant(searchKeyword.getKeyword()));
+                Expressions.path(String.class, member, searchOption.getSearchField()),
+                Expressions.constant(searchOption.getKeyword()));
     }
 
     private static BooleanExpression eqId(Long memberId) {

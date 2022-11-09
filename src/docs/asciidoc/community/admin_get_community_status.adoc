@@ -1,0 +1,3 @@
+== Admin Get Community Status API
+
+operation::admin_get_community_status[snippets='http-request,http-response,response-fields']
