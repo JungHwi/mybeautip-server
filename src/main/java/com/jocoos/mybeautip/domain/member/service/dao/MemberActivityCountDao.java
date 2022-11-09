@@ -19,33 +19,18 @@ public class MemberActivityCountDao {
     }
 
     @Transactional
-    public void plusCommunityCount(Long memberId) {
-        repository.updateCommunityCount(memberId, 1);
+    public void updateCommunityCount(Long memberId, int count) {
+        repository.updateCommunityCount(memberId, count);
     }
 
     @Transactional
-    public void plusCommunityCommentCount(Long memberId) {
-        repository.updateCommunityCommentCount(memberId, 1);
+    public void updateCommunityCommentCount(Long memberId, int count) {
+        repository.updateCommunityCommentCount(memberId, count);
     }
 
     @Transactional
-    public void plusVideoCommentCount(Long memberId) {
-        repository.updateCommunityCommentCount(memberId, 1);
-    }
-
-    @Transactional
-    public void subCommunityCount(Long memberId) {
-        repository.updateCommunityCount(memberId, -1);
-    }
-
-    @Transactional
-    public void subCommunityCommentCount(Long memberId) {
-        repository.updateCommunityCommentCount(memberId, -1);
-    }
-
-    @Transactional
-    public void subVideoCommentCount(Long memberId) {
-        repository.updateCommunityCommentCount(memberId, -1);
+    public void updateVideoCommentCount(Long memberId, int count) {
+        repository.updateVideoCommentCount(memberId, count);
     }
 
 }

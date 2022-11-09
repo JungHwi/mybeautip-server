@@ -66,7 +66,7 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("community_comment_count").type(JsonFieldType.NUMBER).description("게시물 댓글 작성 수"),
                         fieldWithPath("video_comment_count").type(JsonFieldType.NUMBER).description("비디오 댓글 작성 수"),
                         fieldWithPath("invited_friend_count").type(JsonFieldType.NUMBER).description("초대한 친구들 수"),
-                        fieldWithPath("age_group").type(JsonFieldType.NUMBER).description("연령대").optional(),
+                        fieldWithPath("age_group").type(JsonFieldType.NUMBER).description("연령대, 10 단위 ex) 10, 20, 30").optional(),
                         fieldWithPath("skin_type").type(JsonFieldType.STRING).description(generateLinkCode(SKIN_TYPE)).optional(),
                         fieldWithPath("skin_worry").type(JsonFieldType.ARRAY).description(generateLinkCode(SKIN_WORRY)).optional(),
                         fieldWithPath("address").type(JsonFieldType.STRING).description("주소").optional())));

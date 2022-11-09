@@ -71,7 +71,7 @@ public class CommunityService {
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES,
                 validDomainAndReceiver(community, community.getId(), community.getMember()));
-        activityCountDao.plusCommunityCount(member.getId());
+        activityCountDao.updateCommunityCount(member.getId(), 1);
 
         return convertService.toResponse(community.getMember(), community);
     }
@@ -124,7 +124,7 @@ public class CommunityService {
         community.delete();
         activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES,
                 validDomainAndReceiver(community, community.getId(), member));
-        activityCountDao.subCommunityCount(member.getId());
+        activityCountDao.updateCommunityCount(member.getId(), -1);
     }
 
     @Transactional

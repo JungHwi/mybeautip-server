@@ -108,7 +108,7 @@ public class CommunityCommentService {
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
                                                validDomainAndReceiver(communityComment, communityComment.getId(), member));
-        activityCountDao.plusCommunityCommentCount(member.getId());
+        activityCountDao.updateCommunityCommentCount(member.getId(), 1);
         return relationService.setRelationInfo(member, response);
     }
 
@@ -159,7 +159,7 @@ public class CommunityCommentService {
 
         communityComment.delete();
         activityPointService.retrieveActivityPoint(DELETE_COMMUNITY_COMMENT, communityComment.getId(), member);
-        activityCountDao.subCommunityCommentCount(member.getId());
+        activityCountDao.updateCommunityCommentCount(member.getId(), -1);
     }
 
     @Transactional
