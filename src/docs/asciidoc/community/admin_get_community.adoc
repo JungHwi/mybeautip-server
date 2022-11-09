@@ -1,0 +1,3 @@
+== Admin Get Community API
+
+operation::admin_get_community[snippets='http-request,path-parameters,http-response,response-fields']

@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.domain.community.api.admin;
 
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
@@ -121,6 +124,81 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
                         fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                         fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(generateLinkCode(COMMUNITY_CATEGORY_TYPE)),
                         fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목")
+                )
+        ));
+    }
+
+    @Transactional
+    @Test
+    void hideCommunity() throws Exception {
+        BooleanDto request = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/admin/community/{community_id}/hiding", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_hide_community",
+                pathParameters(
+                        parameterWithName("community_id").description("글 ID")
+                ),
+                requestFields(
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("숨김 처리 여부")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 ID")
+                )
+        ));
+    }
+
+    @Transactional
+    @Test
+    void winCommunity() throws Exception {
+        BooleanDto request = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/admin/community/{community_id}/winning", 8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_win_community",
+                pathParameters(
+                        parameterWithName("community_id").description("글 ID")
+                ),
+                requestFields(
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("당첨 여부")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 ID")
+                )
+        ));
+    }
+
+    @Transactional
+    @Test
+    void fixCommunity() throws Exception {
+        BooleanDto request = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/admin/community/{community_id}/fix", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_fix_community",
+                pathParameters(
+                        parameterWithName("community_id").description("글 ID")
+                ),
+                requestFields(
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("상단 고정 여부")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 ID")
                 )
         ));
     }
