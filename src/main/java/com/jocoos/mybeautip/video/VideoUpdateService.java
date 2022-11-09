@@ -128,6 +128,7 @@ public class VideoUpdateService {
     return video;
   }
 
+  @Transactional
   public Video updated(CallbackController.CallbackUpdateVideoRequest request) {
     Video video = getVideo(request.getVideoKey());
     Member requested = findMember(Long.parseLong(request.getUserId()));
@@ -165,7 +166,7 @@ public class VideoUpdateService {
     video = legacyVideoService.update(video);
 
     if (extraData != null && !StringUtils.isBlank(extraData.getGoods())) {
-      log.info("goods {}, request goods: {}", video.getData(), extraData.getGoods());
+      log.info("goods: {}, request goods: {}", video.getData(), extraData.getGoods());
       legacyVideoService.updateVideoGoods(video, extraData.getGoods());
     } else {
       legacyVideoService.clearVideoGoods(video);
@@ -216,21 +217,6 @@ public class VideoUpdateService {
     List<Integer> collect = Arrays.stream(categories)
         .filter(c -> !"0".equals(c)).map(c -> Integer.valueOf(c))
         .collect(Collectors.toList());
-    return createCategory(video, collect);
-  }
-
-  private List<VideoCategoryMapping> createCategory(Video video, List<Integer> videoCategoryIds) {
-    List<VideoCategoryMapping> categories = new ArrayList<>();
-    List<VideoCategory> videoCategoryList = videoCategoryRepository.findAllByIdIn(videoCategoryIds);
-    Map<Integer, VideoCategory> videoCategoryMap = videoCategoryList.stream()
-            .collect(Collectors.toMap(VideoCategory::getId, Function.identity()));
-
-    for (Integer id : videoCategoryIds) {
-      if (id > 0) {
-        categories.add(new VideoCategoryMapping(video, videoCategoryMap.get(id)));
-      }
-    }
-
-    return categories;
+    return legacyVideoService.createCategory(video, collect);
   }
 }

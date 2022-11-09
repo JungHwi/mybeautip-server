@@ -4,6 +4,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -126,5 +127,21 @@ public class Video {
 
     public String getCategoryNames() {
         return categoryMapping != null && !categoryMapping.isEmpty() ? categoryMapping.stream().map(m -> m.getVideoCategory().getTitle()).collect(Collectors.joining(", ")) : "없음";
+    }
+
+    public List<Integer> getCategoryId() {
+        return categoryMapping != null && !categoryMapping.isEmpty() ? categoryMapping.stream().map(m -> m.getVideoCategory().getId()).collect(Collectors.toList()) : new ArrayList<>();
+    }
+
+    public void setCategoryMapping(List<VideoCategoryMapping> categoryMapping) {
+        if (this.categoryMapping != null) {
+            this.categoryMapping.clear();
+        }
+        if (categoryMapping != null) {
+            if (this.categoryMapping == null) {
+                this.categoryMapping = new ArrayList<>();
+            }
+            this.categoryMapping.addAll(categoryMapping);
+        }
     }
 }
