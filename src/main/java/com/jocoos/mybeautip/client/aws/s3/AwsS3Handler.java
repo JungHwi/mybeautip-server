@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.S3UrlUploadException;
 import com.jocoos.mybeautip.support.RandomUtils;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.TEST_FILE;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.getUri;
 
@@ -61,6 +63,24 @@ public class AwsS3Handler {
         }
 
         String filename = getFilename(fileDto.getUrl());
+
+        String path = service.copy(
+                UrlDirectory.TEMP.getDirectory() + filename,
+                destination + filename);
+
+        return cloudFront + path;
+    }
+
+    public String copy(String fileUrl, String destination) {
+        if (StringUtils.isBlank(fileUrl)) {
+            return null;
+        }
+
+        String filename = getFilename(fileUrl);
+
+        if (filename.equals(TEST_FILE)) {
+            return cloudFront + destination + filename;
+        }
 
         String path = service.copy(
                 UrlDirectory.TEMP.getDirectory() + filename,

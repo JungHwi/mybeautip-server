@@ -4,9 +4,10 @@ import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
@@ -14,7 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Getter
-@Builder
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -24,7 +25,7 @@ public class Event extends ModifiedDateAuditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, updatable = false)
-    private long id;
+    private Long id;
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
@@ -36,6 +37,9 @@ public class Event extends ModifiedDateAuditable {
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private EventStatus status;
+
+    @Column(nullable = false)
+    private Boolean isVisible;
 
     @Formula("case status " +
             "when 'PROGRESS' then 0 " +
@@ -70,9 +74,6 @@ public class Event extends ModifiedDateAuditable {
     @Column
     private int needPoint;
 
-    @Column
-    private String color;
-
     @Column(nullable = false)
     private ZonedDateTime startAt;
 
@@ -84,4 +85,11 @@ public class Event extends ModifiedDateAuditable {
 
     @OneToMany(mappedBy = "event")
     private List<EventJoin> eventJoinList;
+
+    @PostPersist
+    public void postPersist() {
+        if (CollectionUtils.isNotEmpty(eventProductList)) {
+            eventProductList.forEach(product -> product.setEvent(this));
+        }
+    }
 }

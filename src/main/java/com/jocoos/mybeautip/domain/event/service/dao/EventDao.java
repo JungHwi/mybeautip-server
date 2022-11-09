@@ -2,13 +2,15 @@ package com.jocoos.mybeautip.domain.event.service.dao;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
+import com.jocoos.mybeautip.domain.event.converter.AdminEventConverter;
+import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
-import com.jocoos.mybeautip.global.vo.Paging;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
+import com.jocoos.mybeautip.global.vo.Paging;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,13 @@ public class EventDao {
 
     private final EventRepository repository;
     private final EventJoinRepository joinRepository;
+    private final AdminEventConverter converter;
+
+    @Transactional
+    public Event create(EventRequest request) {
+        Event event = converter.convert(request);
+        return repository.save(event);
+    }
 
     @Transactional(readOnly = true)
     public Event getEvent(Long eventId) {

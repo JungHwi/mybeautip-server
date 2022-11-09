@@ -12,7 +12,11 @@ public class MybeautipConstant {
 
     public static final String HTTP_PREFIX = "http";
 
+    public static final String TEST_FILE_URL = "https://test.com/test_file";
+    public static final String TEST_FILE = "test_file";
+
     // String for Number
+    public static final String MAX_INTEGER_STRING = "2147483647";
     public static final String MAX_LONG_STRING = "576460752303423487";
 
     public static final int RESPONSE_CODE_OK = 0;

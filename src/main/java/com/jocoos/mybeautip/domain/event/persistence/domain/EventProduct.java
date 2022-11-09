@@ -3,10 +3,7 @@ package com.jocoos.mybeautip.domain.event.persistence.domain;
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -21,7 +18,7 @@ public class EventProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, updatable = false)
-    private long id;
+    private Long id;
 
     @Column(name = "event_id", nullable = false)
     private Long eventId;
@@ -42,6 +39,7 @@ public class EventProduct {
     @Column()
     private String imageFile;
 
+    @Setter
     @ManyToOne()
     @JoinColumn(name = "event_id", insertable = false, updatable = false)
     private Event event;

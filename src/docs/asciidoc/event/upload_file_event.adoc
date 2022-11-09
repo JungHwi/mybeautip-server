@@ -1,0 +1,3 @@
+== Upload File Event API
+
+operation::upload_file_event[snippets='http-request,request-parts,http-response,response-fields']
