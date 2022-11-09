@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.point;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
+import com.jocoos.mybeautip.domain.point.code.DefaultPointReason;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.order.Order;
 import lombok.*;
@@ -139,6 +140,9 @@ public class MemberPoint extends CreatedDateAuditable {
         if (order != null) {
             return orderTitleMap.get(order.getId());
         }
-        return activityType.getDescription();
+        if (activityType != null) {
+            return activityType.getDescription();
+        }
+        return DefaultPointReason.getDescriptionByState(state);
     }
 }

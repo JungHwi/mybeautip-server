@@ -126,7 +126,7 @@ public class CommentService {
         }
 
         activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, comment.getId(), member));
-        activityCountDao.plusVideoCommentCount(member.getId());
+        activityCountDao.updateVideoCommentCount(member.getId(), 1);
         return comment;
     }
 
@@ -173,7 +173,7 @@ public class CommentService {
 
         activityPointService.retrieveActivityPoint(DELETE_VIDEO_COMMENT,
                                                    comment.getId(), comment.getCreatedBy());
-        activityCountDao.subVideoCommentCount(comment.getCreatedBy().getId());
+        activityCountDao.updateVideoCommentCount(comment.getCreatedBy().getId(), -1);
 
         if (childCount == 0) {
             return deleteCommentAndChildren(comment);
