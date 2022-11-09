@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.domain.community.api.admin;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
+import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +50,20 @@ public class AdminCommunityController {
     @GetMapping("/community/{communityId}")
     public ResponseEntity<AdminCommunityResponse> getCommunity(@PathVariable Long communityId) {
         return ResponseEntity.ok(service.getCommunity(communityId));
+    }
+
+    @PatchMapping("/community/{communityId}/winning")
+    public ResponseEntity<IdDto> winCommunity(@PathVariable Long communityId, @RequestBody BooleanDto request) {
+        return ResponseEntity.ok(new IdDto(service.winCommunity(communityId, request.isBool())));
+    }
+
+    @PatchMapping("/community/{communityId}/fix")
+    public ResponseEntity<IdDto> fixCommunity(@PathVariable Long communityId, @RequestBody BooleanDto request) {
+        return ResponseEntity.ok(new IdDto(service.fixCommunity(communityId, request.isBool())));
+    }
+
+    @PatchMapping("/community/{communityId}/hiding")
+    public ResponseEntity<IdDto> hideCommunity(@PathVariable Long communityId, @RequestBody BooleanDto request) {
+        return ResponseEntity.ok(new IdDto(service.hideCommunity(communityId, request.isBool())));
     }
 }

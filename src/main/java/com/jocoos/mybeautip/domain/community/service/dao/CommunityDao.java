@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,7 +73,7 @@ public class CommunityDao {
 
     @Transactional(readOnly = true)
     public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
-        return repository.getCommunities(condition, condition.pageable());
+        return repository.getCommunities(condition, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -125,7 +126,34 @@ public class CommunityDao {
         return repository.countBy(keyword);
     }
 
+    @Transactional(readOnly = true)
     public Long countBy(Long memberId) {
         return repository.countByMemberId(memberId);
+    }
+
+    @Transactional
+    public Long fix(Long communityId) {
+        findTopFix().ifPresent(topCommunity -> topCommunity.fix(false));
+        Community community = get(communityId);
+        community.fix(true);
+        return community.getId();
+    }
+
+    private Optional<Community> findTopFix() {
+        return repository.findByIsTopFixIsTrue();
+    }
+
+    @Transactional
+    public Long nonFix(Long communityId) {
+        Community community = get(communityId);
+        community.fix(false);
+        return community.getId();
+    }
+
+    @Transactional
+    public Long changeStatus(Long communityId, CommunityStatus status) {
+        Community community = get(communityId);
+        community.changeStatus(status);
+        return community.getId();
     }
 }

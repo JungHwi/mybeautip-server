@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
@@ -219,5 +220,20 @@ public class Community extends BaseEntity {
 
     public boolean isVotesEmpty() {
         return CollectionUtils.isEmpty(communityVoteList);
+    }
+
+    public void win(boolean isWin) {
+        if (!DRIP.equals(category.getType())) {
+            throw new BadRequestException("Community Type Not Able TO Win");
+        }
+        this.isWin = isWin;
+    }
+
+    public void fix(boolean isFix) {
+        this.isTopFix = isFix;
+    }
+
+    public void changeStatus(CommunityStatus status) {
+        this.status = status;
     }
 }
