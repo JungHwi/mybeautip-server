@@ -2,13 +2,14 @@ package com.jocoos.mybeautip.domain.event.api.admin;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
+import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
-import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.domain.event.service.AdminEventService;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.global.vo.Paging;
 import com.jocoos.mybeautip.global.vo.SearchKeyword;
 import com.jocoos.mybeautip.global.vo.Sort;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
