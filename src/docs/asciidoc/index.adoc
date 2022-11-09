@@ -106,3 +106,16 @@ include::overview.adoc[]
 * link:member/get_member_point_history.html[멤버 포인트 내역 조회 API, window=_blank]
 * link:member/patch_member_memo.html[멤버 메모 수정 및 작성 API, window=_blank]
 * link:member/get_member_report_history.html[멤버 신고당한 내역 조회 API, window=_blank]
+
+=== Community API
+* link:community/admin_get_community.html[커뮤니티 상세 조회 API, window=_blank]
+* link:community/admin_get_communities.html[커뮤니티 목록 조회 API, window=_blank]
+* link:community/admin_fix_community.html[커뮤니티 고정 API, window=_blank]
+* link:community/admin_hide_community.html[커뮤니티 숨김 API, window=_blank]
+* link:community/admin_win_community.html[커뮤니티 마왕픽 선정 API, window=_blank]
+* link:community/admin_get_community_status.html[커뮤니티 카테고리 조회 API, window=_blank]
+
+=== Community Comment API
+* link:community/admin_get_community_comments.html[커뮤니티 댓글 조회 API, window=_blank]
+* link:community/admin_hide_community_comment.html[커뮤니티 댓글 숨김 API, window=_blank]
+
