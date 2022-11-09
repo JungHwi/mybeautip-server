@@ -21,11 +21,11 @@ public class VideoCategoryMapping implements Serializable {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "video_id", insertable = false, updatable = false)
+    @JoinColumn(name = "video_id")
     private Video video;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    @JoinColumn(name = "category_id")
     private VideoCategory videoCategory;
 
     public VideoCategoryMapping(Video video, VideoCategory videoCategory) {

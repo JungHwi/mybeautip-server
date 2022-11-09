@@ -1,5 +1,13 @@
 package com.jocoos.mybeautip.video;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -13,16 +21,10 @@ import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.watches.VideoWatchService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -48,11 +50,11 @@ public class VideoUpdateService {
     if ("UPLOADED".equals(request.getType())) {
       video = new Video(member);
       BeanUtils.copyProperties(request, video);
-      Video createdVideo = videoRepository.save(video);
+      videoRepository.save(video);
 
-      if (StringUtils.isNotEmpty(createdVideo.getContent())) {
-        tagService.increaseRefCount(createdVideo.getContent());
-        tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());
+      if (StringUtils.isNotEmpty(video.getContent())) {
+        tagService.increaseRefCount(video.getContent());
+        tagService.addHistory(video.getContent(), TagService.TAG_VIDEO, video.getId(), video.getMember());
       }
 
       // Set related goods info
@@ -60,7 +62,6 @@ public class VideoUpdateService {
       if (StringUtils.isNotEmpty(request.getData())) {
         VideoExtraData extraData = videoDataService.getDataObject(request.getData());
         log.info("{}", extraData);
-        List<VideoCategoryMapping> categories = new ArrayList<>();
         if (!StringUtils.isBlank(extraData.getStartedAt())) {
           String startedAt = String.valueOf(extraData.getStartedAt());
 
@@ -71,8 +72,8 @@ public class VideoUpdateService {
 
         // if data had category array
         if (!StringUtils.isBlank(extraData.getCategory())) {
-          categories = parseCategory(video, extraData.getCategory());
-          log.info("categories: {}", categories);
+          List<VideoCategoryMapping> categories = parseCategory(video, extraData.getCategory());
+          log.info("categories: {}", categories.stream().map(c -> c.getVideoCategory().getId()).toList());
           video.setCategoryMapping(categories);
         }
 
@@ -84,7 +85,7 @@ public class VideoUpdateService {
               continue;
             }
             goodsRepository.findByGoodsNo(goodsNo).ifPresent(g -> {
-              videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
+              videoGoods.add(new VideoGoods(video, g, video.getMember()));
             });
           }
 
@@ -93,13 +94,12 @@ public class VideoUpdateService {
 
             // Set related goods count & one thumbnail image
             String url = videoGoods.get(0).getGoods().getListImageData().toString();
-            createdVideo.setRelatedGoodsThumbnailUrl(url);
-            createdVideo.setRelatedGoodsCount(videoGoods.size());
+            video.setRelatedGoodsThumbnailUrl(url);
+            video.setRelatedGoodsCount(videoGoods.size());
           }
         }
-        if (videoGoods.size() > 0 || categories.size() > 0 || video.getStartedAt() != null) {
-          videoRepository.save(createdVideo);
-        }
+
+        log.debug("{}", video);
       }
     } else {
       Optional<Video> videoByKey = videoRepository.findByVideoKey(request.getVideoKey());
@@ -128,6 +128,7 @@ public class VideoUpdateService {
     return video;
   }
 
+  @Transactional
   public Video updated(CallbackController.CallbackUpdateVideoRequest request) {
     Video video = getVideo(request.getVideoKey());
     Member requested = findMember(Long.parseLong(request.getUserId()));
@@ -165,7 +166,7 @@ public class VideoUpdateService {
     video = legacyVideoService.update(video);
 
     if (extraData != null && !StringUtils.isBlank(extraData.getGoods())) {
-      log.info("goods {}, request goods: {}", video.getData(), extraData.getGoods());
+      log.info("goods: {}, request goods: {}", video.getData(), extraData.getGoods());
       legacyVideoService.updateVideoGoods(video, extraData.getGoods());
     } else {
       legacyVideoService.clearVideoGoods(video);
@@ -216,21 +217,6 @@ public class VideoUpdateService {
     List<Integer> collect = Arrays.stream(categories)
         .filter(c -> !"0".equals(c)).map(c -> Integer.valueOf(c))
         .collect(Collectors.toList());
-    return createCategory(video, collect);
-  }
-
-  private List<VideoCategoryMapping> createCategory(Video video, List<Integer> videoCategoryIds) {
-    List<VideoCategoryMapping> categories = new ArrayList<>();
-    List<VideoCategory> videoCategoryList = videoCategoryRepository.findAllByIdIn(videoCategoryIds);
-    Map<Integer, VideoCategory> videoCategoryMap = videoCategoryList.stream()
-            .collect(Collectors.toMap(VideoCategory::getId, Function.identity()));
-
-    for (int id : videoCategoryIds) {
-      if (id > 0) {
-        categories.add(new VideoCategoryMapping(video, videoCategoryMap.get(id)));
-      }
-    }
-
-    return categories;
+    return legacyVideoService.createCategory(video, collect);
   }
 }

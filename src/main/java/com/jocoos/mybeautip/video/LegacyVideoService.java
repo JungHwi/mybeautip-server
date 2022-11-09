@@ -422,13 +422,8 @@ public class LegacyVideoService {
 
         return createdVideo;
     }
-
-    private Date parseStartedAt(String date) {
-        LocalDateTime dateTime = LocalDateTime.parse("2018-05-05T11:50:55");
-        return new Date();
-    }
-
-    private List<VideoCategoryMapping> createCategory(Video video, List<Integer> videoCategoryIds) {
+    
+    public List<VideoCategoryMapping> createCategory(Video video, List<Integer> videoCategoryIds) {
         List<VideoCategoryMapping> categories = new ArrayList<>();
         List<VideoCategory> videoCategoryList = videoCategoryRepository.findAllByIdIn(videoCategoryIds);
         Map<Integer, VideoCategory> videoCategoryMap = videoCategoryList.stream()
@@ -582,11 +577,10 @@ public class LegacyVideoService {
                 String[] split = extraData.getCategory().split(",");
                 List<Integer> category = Arrays.stream(split).map(s -> Integer.valueOf(s)).collect(Collectors.toList());
 
-                if (target.getCategoryMapping() != null) {
-                    videoCategoryMappingRepository.deleteByVideoId(target.getId());
+                log.debug("video category: {}, request: {}", target.getCategoryId(), category);
+                if (!Objects.equals(target.getCategoryId(), category)) {
+                    target.setCategoryMapping(createCategory(target, category));
                 }
-
-                target.setCategoryMapping(createCategory(target, category));
             }
 
             if (!StringUtils.isBlank(extraData.getStartedAt())) {
