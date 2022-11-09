@@ -12,6 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -60,7 +63,7 @@ public class CommunityComment extends BaseEntity {
         if (!this.status.isDeletable()) {
             throw new BadRequestException("This status can not delete. This Community Status is " + this.status);
         }
-        this.status = CommunityStatus.DELETE;
+        this.status = DELETE;
         return this;
     }
 
@@ -82,5 +85,9 @@ public class CommunityComment extends BaseEntity {
 
     public boolean isCommentSameOrLongerThan(int length) {
         return this.contents.length() >= length;
+    }
+
+    public void hide(boolean isHide) {
+        this.status = isHide ? DELETE : NORMAL;
     }
 }
