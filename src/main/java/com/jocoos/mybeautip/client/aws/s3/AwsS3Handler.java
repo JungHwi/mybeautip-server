@@ -78,6 +78,7 @@ public class AwsS3Handler {
 
         String filename = getFilename(fileUrl);
 
+        // FIXME Test Code 에서 올라오는 File URL 은 실제 파일이 없기때문에 복사할 수가 없어서 회피용 코드 삽입. 뭔가 이 방법 말고 좋은 방법이 있다면... 고쳐주세요
         if (filename.equals(TEST_FILE)) {
             return cloudFront + destination + filename;
         }
