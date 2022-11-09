@@ -30,6 +30,8 @@ public class AdminEventService {
 
     private final CommunityCategoryDao communityCategoryDao;
     private final EventDao eventDao;
+    private final AdminEventConverter converter;
+    private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
     public List<EventStatusResponse> getEventStates() {
@@ -49,5 +51,34 @@ public class AdminEventService {
         Event event = eventDao.getEvent(eventId);
         Long joinCount = eventDao.getJoinCount(event);
         return converter.convertWithAllImages(event, joinCount);
+    }
+
+    public List<String> upload(List<MultipartFile> files) {
+        return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
+    }
+
+    @Transactional
+    public AdminEventResponse create(EventRequest request) {
+        Long relationId = getRelationIdByType(request);
+        request.setRelationId(relationId);
+        Event event = eventDao.create(request);
+        copyEventFile(request);
+        return converter.convert(event);
+    }
+
+    private void copyEventFile(EventRequest request) {
+        awsS3Handler.copy(request.getThumbnailImageUrl(), UrlDirectory.EVENT.getDirectory());
+        awsS3Handler.copy(request.getDetailImageUrl(), UrlDirectory.EVENT.getDirectory());
+        awsS3Handler.copy(request.getShareRectangleImageUrl(), UrlDirectory.EVENT.getDirectory());
+        awsS3Handler.copy(request.getShareSquareImageUrl(), UrlDirectory.EVENT.getDirectory());
+        awsS3Handler.copy(request.getBannerImageUrl(), UrlDirectory.EVENT.getDirectory());
+    }
+
+    public Long getRelationIdByType(EventRequest request) {
+        if (request.getType() == EventType.DRIP) {
+            CommunityCategory communityCategory = communityCategoryDao.getByType(CommunityCategoryType.DRIP);
+            return communityCategory.getId();
+        }
+        return null;
     }
 }
