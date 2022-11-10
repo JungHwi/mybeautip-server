@@ -226,11 +226,11 @@ public class Community extends BaseEntity {
         if (!DRIP.equals(category.getType())) {
             throw new BadRequestException("Community Type Not Able TO Win");
         }
-        this.isWin = isWin;
+        this.isWin = isWin ? true : null;
     }
 
     public void fix(boolean isFix) {
-        this.isTopFix = isFix;
+        this.isTopFix = isFix ? true : null;
     }
 
     public void changeStatus(CommunityStatus status) {
