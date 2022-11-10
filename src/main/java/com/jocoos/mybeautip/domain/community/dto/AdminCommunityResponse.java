@@ -38,7 +38,6 @@ public class AdminCommunityResponse {
 
     @QueryProjection
     public AdminCommunityResponse(Community community,
-                                  List<CommunityFile> files,
                                   CommunityCategoryResponse category,
                                   CommunityMemberResponse member) {
         this.id = community.getId();
@@ -54,6 +53,13 @@ public class AdminCommunityResponse {
         this.createdAt = community.getCreatedAt();
         this.category = category;
         this.member = category.getType() == BLIND ? null : member;
+    }
+
+    public AdminCommunityResponse(Community community,
+                                  List<CommunityFile> files,
+                                  CommunityCategoryResponse category,
+                                  CommunityMemberResponse member) {
+        this(community, category, member);
         this.fileUrl = getFileUrl(files);
     }
 
@@ -62,6 +68,9 @@ public class AdminCommunityResponse {
     }
 
     public void setVotesAndClearFileUrls(List<VoteResponse> votes) {
+        if (CollectionUtils.isEmpty(votes)) {
+            return;
+        }
         this.votes = votes;
         this.fileUrl = new ArrayList<>();
     }
@@ -73,5 +82,9 @@ public class AdminCommunityResponse {
         return files.stream()
                 .map(CommunityFile::getFileUrl)
                 .toList();
+    }
+
+    public void setFileUrls(Map<Long, List<CommunityFile>> fileMap) {
+        this.fileUrl = getFileUrl(fileMap.getOrDefault(id, new ArrayList<>()));
     }
 }

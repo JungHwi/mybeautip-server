@@ -99,11 +99,10 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     @Override
     public Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition) {
         List<AdminCommunityResponse> responses = repository.query(query -> query
-                        .select(new QAdminCommunityResponse(community, list(communityFile), new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename)))
+                        .select(new QAdminCommunityResponse(community, new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename)))
                         .from(community)
                         .join(member).on(community.member.eq(member))
                         .join(communityCategory).on(community.category.eq(communityCategory))
-                        .leftJoin(communityFile).on(communityFile.community.eq(community))
                         .where(
                                 inCategories(condition.categories()),
                                 searchByKeyword(condition.searchOption()),
@@ -113,12 +112,24 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                         .orderBy(getOrders(condition.getSort()))
                         .offset(condition.getOffset())
                         .limit(condition.getPageSize()))
-                .transform(groupBy(community.id).list(new QAdminCommunityResponse(community, list(communityFile), new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename))));
+                .fetch();
 
         List<Long> ids = responses.stream().map(AdminCommunityResponse::getId).toList();
+
+
+        Map<Long, List<CommunityFile>> fileMap = repository.query(query -> query
+                .select(communityFile)
+                .from(communityFile)
+                .join(community).on(communityFile.community.eq(community))
+                .where(
+                        communityFile.community.id.in(ids))
+        ).transform(groupBy(communityFile.community.id).as(list(communityFile)));
+
+
         Map<Long, List<VoteResponse>> votesMap = getVotesMap(ids);
 
         for (AdminCommunityResponse response : responses) {
+            response.setFileUrls(fileMap);
             response.setVotes(votesMap);
         }
 
