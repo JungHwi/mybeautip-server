@@ -23,7 +23,7 @@ import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.D
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
-import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
+import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
@@ -104,7 +104,7 @@ public class Community extends BaseEntity {
     }
 
     public void addFile(String fileName) {
-        CommunityFile communityFile = new CommunityFile(getFilename(fileName));
+        CommunityFile communityFile = new CommunityFile(getFileName(fileName));
         communityFile.setCommunity(this);
         if (this.category.isCategoryType(VOTE)) {
             CommunityVote communityVote = new CommunityVote(this, communityFile);
@@ -115,9 +115,9 @@ public class Community extends BaseEntity {
 
     public void removeFile(String fileName) {
         if (this.category.isCategoryType(VOTE)) {
-            this.communityVoteList.removeIf(vote -> vote.getCommunityFile().getFile().equals(getFilename(fileName)));
+            this.communityVoteList.removeIf(vote -> vote.getCommunityFile().getFile().equals(getFileName(fileName)));
         }
-        this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFilename(fileName)));
+        this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFileName(fileName)));
     }
 
     public void valid() {

@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.converter.AdminEventConverter;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
+import com.jocoos.mybeautip.domain.event.dto.EditEventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
@@ -23,6 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+
+import static com.jocoos.mybeautip.global.util.FileUtil.isChange;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 @RequiredArgsConstructor
 @Service
@@ -66,12 +70,58 @@ public class AdminEventService {
         return converter.convert(event);
     }
 
+    @Transactional
+    public AdminEventResponse edit(EditEventRequest request) {
+        Event event = eventDao.getEvent(request.getId());
+        copyOriginalEventFiles(event, request);
+
+        event = eventDao.edit(event, request);
+
+        editEventFile(request);
+        return converter.convert(event);
+    }
+
+    private void copyOriginalEventFiles(Event event, EditEventRequest request) {
+        request.setOriginalThumbnailImageFile(event.getThumbnailImageFile());
+        request.setOriginalDetailImageFile(event.getImageFile());
+        request.setOriginalShareRectangleImageFile(event.getShareRectangleImageFile());
+        request.setOriginalShareSquareImageFile(event.getShareSquareImageFile());
+        request.setOriginalBannerImageFile(event.getBannerImageFile());
+    }
+
     private void copyEventFile(EventRequest request) {
         awsS3Handler.copy(request.getThumbnailImageUrl(), UrlDirectory.EVENT.getDirectory());
         awsS3Handler.copy(request.getDetailImageUrl(), UrlDirectory.EVENT.getDirectory());
         awsS3Handler.copy(request.getShareRectangleImageUrl(), UrlDirectory.EVENT.getDirectory());
         awsS3Handler.copy(request.getShareSquareImageUrl(), UrlDirectory.EVENT.getDirectory());
         awsS3Handler.copy(request.getBannerImageUrl(), UrlDirectory.EVENT.getDirectory());
+    }
+
+    private void editEventFile(EditEventRequest request) {
+        if (isChange(request.getOriginalThumbnailImageFile(), request.getThumbnailImageUrl())) {
+            awsS3Handler.copy(request.getThumbnailImageUrl(), UrlDirectory.EVENT.getDirectory());
+            awsS3Handler.delete(toUrl(request.getOriginalThumbnailImageFile(), UrlDirectory.EVENT));
+        }
+
+        if (isChange(request.getOriginalDetailImageFile(), request.getDetailImageUrl())) {
+            awsS3Handler.copy(request.getDetailImageUrl(), UrlDirectory.EVENT.getDirectory());
+            awsS3Handler.delete(toUrl(request.getOriginalDetailImageFile(), UrlDirectory.EVENT));
+        }
+
+        if (isChange(request.getOriginalShareSquareImageFile(), request.getShareSquareImageUrl())) {
+            awsS3Handler.copy(request.getShareSquareImageUrl(), UrlDirectory.EVENT.getDirectory());
+            awsS3Handler.delete(toUrl(request.getOriginalShareSquareImageFile(), UrlDirectory.EVENT));
+        }
+
+        if (isChange(request.getOriginalShareRectangleImageFile(), request.getShareRectangleImageUrl())) {
+            awsS3Handler.copy(request.getShareRectangleImageUrl(), UrlDirectory.EVENT.getDirectory());
+            awsS3Handler.delete(toUrl(request.getOriginalShareRectangleImageFile(), UrlDirectory.EVENT));
+        }
+
+        if (isChange(request.getOriginalBannerImageFile(), request.getBannerImageUrl())) {
+            awsS3Handler.copy(request.getBannerImageUrl(), UrlDirectory.EVENT.getDirectory());
+            awsS3Handler.delete(toUrl(request.getOriginalBannerImageFile(), UrlDirectory.EVENT));
+        }
     }
 
     public Long getRelationIdByType(EventRequest request) {

@@ -20,7 +20,6 @@ public abstract class AdminEventProductConverter {
             @Mapping(target = "name", constant = "name"),
             @Mapping(target = "quantity", constant = MAX_INTEGER_STRING),
             @Mapping(target = "imageFile", ignore = true),
-            @Mapping(target = "event", ignore = true),
     })
     abstract EventProduct converts(EventProductRequest request);
 

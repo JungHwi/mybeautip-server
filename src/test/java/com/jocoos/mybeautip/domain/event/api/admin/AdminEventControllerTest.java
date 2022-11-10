@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.event.api.admin;
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
+import com.jocoos.mybeautip.domain.event.dto.EditEventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventProductRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
@@ -130,7 +131,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        result.andDo(document("upload_file_event",
+        result.andDo(document("admin_upload_event_file",
                         requestParts(
                                 partWithName("files").description("업로드할 파일 목록")
                         ),
@@ -213,6 +214,82 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                         fieldWithPath("product.price").type(JsonFieldType.NUMBER).description("상품 가격")
                 )
             )
+        );
+    }
+
+    @Test
+    @Transactional
+    @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void editEvent() throws Exception {
+        EventProductRequest productRequest = EventProductRequest.builder()
+                .type(EventProductType.POINT)
+                .price(3000)
+                .build();
+
+        EditEventRequest request = EditEventRequest.builder()
+                .status(EventStatus.WAIT)
+                .isVisible(true)
+                .title("Mock Title")
+                .description("Mock Contents")
+                .needPoint(0)
+                .startAt(ZonedDateTime.now())
+                .thumbnailImageUrl(TEST_FILE_URL)
+                .detailImageUrl(TEST_FILE_URL)
+                .shareRectangleImageUrl(TEST_FILE_URL)
+                .shareSquareImageUrl(TEST_FILE_URL)
+                .product(productRequest)
+                .build();
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .put("/admin/event/{event_id}", 4)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_edit_event",
+                        pathParameters(
+                                parameterWithName("event_id").description("이벤트 ID")
+                        ),
+                        requestFields(
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_STATUS)),
+                                fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부"),
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                fieldWithPath("description").type(JsonFieldType.STRING).description("설명"),
+                                fieldWithPath("need_point").type(JsonFieldType.NUMBER).description("이벤트 참가시 필요한 포인트"),
+                                fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
+                                fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat()).optional(),
+                                fieldWithPath("thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
+                                fieldWithPath("detail_image_url").type(JsonFieldType.STRING).description("상세 이미지 URL"),
+                                fieldWithPath("share_rectangle_image_url").type(JsonFieldType.STRING).description("공유용 사각형 이미지 URL"),
+                                fieldWithPath("share_square_image_url").type(JsonFieldType.STRING).description("공유용 정사각형 이미지 URL"),
+                                fieldWithPath("banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL(Drip 전용)").optional(),
+                                fieldWithPath("product").type(JsonFieldType.OBJECT).description("이벤트 상품 정보").optional(),
+                                fieldWithPath("product.type").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_PRODUCT_TYPE)),
+                                fieldWithPath("product.price").type(JsonFieldType.NUMBER).description("상품 가격")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("이벤트 ID"),
+                                fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_TYPE)),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_STATUS)),
+                                fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출여부"),
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                fieldWithPath("description").type(JsonFieldType.STRING).description("설명"),
+                                fieldWithPath("thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
+                                fieldWithPath("detail_image_url").type(JsonFieldType.STRING).description("상세 이미지 URL"),
+                                fieldWithPath("share_rectangle_image_url").type(JsonFieldType.STRING).description("공유용 사각형 이미지 URL"),
+                                fieldWithPath("share_square_image_url").type(JsonFieldType.STRING).description("공유용 정사각형 이미지 URL"),
+                                fieldWithPath("banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL(Drip 전용)").optional(),
+                                fieldWithPath("join_count").type(JsonFieldType.NUMBER).description("이벤트 참여수"),
+                                fieldWithPath("need_point").type(JsonFieldType.NUMBER).description("이벤트 참여시 필요 포인트"),
+                                fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시"),
+                                fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").optional(),
+                                fieldWithPath("created_at").type(JsonFieldType.STRING).description("이벤트 등록일시"),
+                                fieldWithPath("product").type(JsonFieldType.OBJECT).description("이벤트 상품 정보").optional(),
+                                fieldWithPath("product.type").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_PRODUCT_TYPE)),
+                                fieldWithPath("product.price").type(JsonFieldType.NUMBER).description("상품 가격")
+                        )
+                )
         );
     }
 }

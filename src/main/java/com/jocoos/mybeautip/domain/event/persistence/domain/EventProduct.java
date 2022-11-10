@@ -8,6 +8,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,9 +20,6 @@ public class EventProduct {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable = false, updatable = false)
     private Long id;
-
-    @Column(name = "event_id", nullable = false)
-    private Long eventId;
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -39,9 +37,8 @@ public class EventProduct {
     @Column()
     private String imageFile;
 
-    @Setter
-    @ManyToOne()
-    @JoinColumn(name = "event_id", insertable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "event_id")
     private Event event;
 
     public EventProduct winPrize() {

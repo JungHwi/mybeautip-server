@@ -80,7 +80,7 @@ public class Event extends ModifiedDateAuditable {
     @Column
     private ZonedDateTime endAt;
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<EventProduct> eventProductList;
 
     @OneToMany(mappedBy = "event")
