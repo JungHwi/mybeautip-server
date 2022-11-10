@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.event.service.dao;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.converter.AdminEventConverter;
+import com.jocoos.mybeautip.domain.event.dto.EditEventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
@@ -33,6 +34,13 @@ public class EventDao {
     @Transactional
     public Event create(EventRequest request) {
         Event event = converter.convert(request);
+        return repository.save(event);
+    }
+
+    @Transactional
+    public Event edit(Event originalEvent, EditEventRequest request) {
+        Event event = converter.convertForEdit(originalEvent, request);
+        event.setEventProductList(originalEvent.getEventProductList());
         return repository.save(event);
     }
 

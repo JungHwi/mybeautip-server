@@ -10,10 +10,6 @@ import lombok.Setter;
 @Builder
 public class EventProductRequest {
 
-    private Long id;
-
-    private Long eventId;
-
     private EventProductType type;
 
     private int price;

@@ -2,18 +2,22 @@ package com.jocoos.mybeautip.domain.event.converter;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
+import com.jocoos.mybeautip.domain.event.dto.EditEventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
+import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
+import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 
 @Mapper(componentModel = "spring", uses = {AdminEventProductConverter.class})
 public abstract class AdminEventConverter {
@@ -29,6 +33,47 @@ public abstract class AdminEventConverter {
     }
 
     @Mappings({
+            @Mapping(target = "id", source = "event.id"),
+            @Mapping(target = "type", source = "event.type"),
+            @Mapping(target = "relationId", source = "event.relationId"),
+            @Mapping(target = "status", source = "request.status"),
+            @Mapping(target = "isVisible", source = "request.isVisible"),
+            @Mapping(target = "sorting", source = "request.sorting"),
+            @Mapping(target = "title", source = "request.title"),
+            @Mapping(target = "description", source = "request.description"),
+            @Mapping(target = "needPoint", source = "request.needPoint"),
+            @Mapping(target = "startAt", source = "request.startAt"),
+            @Mapping(target = "endAt", source = "request.endAt"),
+            @Mapping(target = "createdAt", source = "event.createdAt"),
+            @Mapping(target = "thumbnailImageFile", ignore = true),
+            @Mapping(target = "imageFile", ignore = true),
+            @Mapping(target = "shareSquareImageFile", ignore = true),
+            @Mapping(target = "shareRectangleImageFile", ignore = true),
+            @Mapping(target = "bannerImageFile", ignore = true),
+            @Mapping(target = "eventProductList", ignore = true),
+            @Mapping(target = "eventJoinList", ignore = true),
+    })
+    public abstract Event convertForEdit(Event event, EditEventRequest request);
+
+    @AfterMapping
+    public void convert(@MappingTarget Event event, Event originalEvent, EditEventRequest request) {
+        event.setThumbnailImageFile(getFileName(request.getThumbnailImageUrl()));
+        event.setImageFile(getFileName(request.getDetailImageUrl()));
+        event.setShareRectangleImageFile(getFileName(request.getShareRectangleImageUrl()));
+        event.setShareSquareImageFile(getFileName(request.getShareSquareImageUrl()));
+        event.setBannerImageFile(getFileName(request.getBannerImageUrl()));
+
+        List<EventProduct> eventProductList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(originalEvent.getEventProductList())) {
+            EventProduct product = originalEvent.getEventProductList().get(0);
+            product.setType(request.getProduct().getType());
+            product.setPrice(request.getProduct().getPrice());
+            eventProductList.add(product);
+        }
+        event.setEventProductList(eventProductList);
+    }
+
+    @Mappings({
             @Mapping(target = "eventProductList", source = "product"),
             @Mapping(target = "eventJoinList", ignore = true),
     })
@@ -36,11 +81,11 @@ public abstract class AdminEventConverter {
 
     @AfterMapping
     public void convert(@MappingTarget Event event, EventRequest request) {
-        event.setThumbnailImageFile(getFilename(request.getThumbnailImageUrl()));
-        event.setImageFile(getFilename(request.getDetailImageUrl()));
-        event.setShareRectangleImageFile(getFilename(request.getShareRectangleImageUrl()));
-        event.setShareSquareImageFile(getFilename(request.getShareSquareImageUrl()));
-        event.setBannerImageFile(getFilename(request.getBannerImageUrl()));
+        event.setThumbnailImageFile(getFileName(request.getThumbnailImageUrl()));
+        event.setImageFile(getFileName(request.getDetailImageUrl()));
+        event.setShareRectangleImageFile(getFileName(request.getShareRectangleImageUrl()));
+        event.setShareSquareImageFile(getFileName(request.getShareSquareImageUrl()));
+        event.setBannerImageFile(getFileName(request.getBannerImageUrl()));
     }
 
     @Mapping(target = "detailImageUrl", source = "event.imageFile", qualifiedByName = "fileToUrl")

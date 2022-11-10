@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
-import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
+import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 @Mapper(componentModel = "spring", uses = {CommunityCategoryConverter.class, MemberConverter.class})
@@ -109,7 +109,7 @@ public interface CommunityConverter {
     default List<CommunityFile> setCommunityFile(Community community, WriteCommunityRequest request) {
         List<CommunityFile> communityFileList = new ArrayList<>();
         for (FileDto requestFile : request.getFiles()) {
-            CommunityFile communityFile = new CommunityFile(getFilename(requestFile.getUrl()));
+            CommunityFile communityFile = new CommunityFile(getFileName(requestFile.getUrl()));
             communityFileList.add(communityFile);
         }
         community.setCommunityFileList(communityFileList);

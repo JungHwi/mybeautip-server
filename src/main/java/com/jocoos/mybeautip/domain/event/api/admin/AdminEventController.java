@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.event.api.admin;
 
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
+import com.jocoos.mybeautip.domain.event.dto.EditEventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.service.AdminEventService;
@@ -73,5 +74,14 @@ public class AdminEventController {
     public ResponseEntity<AdminEventResponse> createEvent(@RequestBody @Valid EventRequest request) {
         AdminEventResponse response = service.create(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/event/{event_id}")
+    public ResponseEntity<AdminEventResponse> editEvent(@PathVariable(name = "event_id") long eventId,
+                                                        @RequestBody @Valid EditEventRequest request) {
+        request.setId(eventId);
+
+        AdminEventResponse response = service.edit(request);
+        return ResponseEntity.ok(response);
     }
 }
