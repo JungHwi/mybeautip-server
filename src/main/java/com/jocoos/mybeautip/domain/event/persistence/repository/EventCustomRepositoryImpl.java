@@ -6,8 +6,8 @@ import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
-import com.jocoos.mybeautip.global.vo.Paging;
 import com.jocoos.mybeautip.domain.event.vo.QEventSearchResult;
+import com.jocoos.mybeautip.global.vo.Paging;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,8 +81,8 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                         searchCondition(condition.getKeyword()),
                         inStatuses(condition.getStatuses()),
                         eqType(condition.getType()),
-                        startAtAfter(condition.getStartAt()),
-                        endAtBefore(condition.getEndAt()),
+                        goeCreatedAt(condition.getStartAt()),
+                        loeCreatedAt(condition.getEndAt()),
                         startAtBefore(condition.getBetween()),
                         endAtAfter(condition.getBetween())
                 ));
@@ -125,12 +126,12 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                 .fetch();
     }
 
-    private BooleanExpression startAtAfter(ZonedDateTime dateTime) {
-        return dateTime == null ? null : event.startAt.goe(dateTime);
+    private BooleanExpression goeCreatedAt(Date dateTime) {
+        return dateTime == null ? null : event.createdAt.goe(dateTime);
     }
 
-    private BooleanExpression endAtBefore(ZonedDateTime dateTime) {
-        return dateTime == null ? null : event.endAt.loe(dateTime);
+    private BooleanExpression loeCreatedAt(Date dateTime) {
+        return dateTime == null ? null : event.createdAt.loe(dateTime);
     }
 
     private BooleanExpression endAtAfter(ZonedDateTime dateTime) {

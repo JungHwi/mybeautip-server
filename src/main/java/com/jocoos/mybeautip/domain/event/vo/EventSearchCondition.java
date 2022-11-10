@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.Set;
 
 @Getter
@@ -29,11 +30,11 @@ public class EventSearchCondition {
         return searchOption == null ? null : searchOption.getKeyword();
     }
 
-    public ZonedDateTime getStartAt() {
-        return searchOption == null ? null : searchOption.getStartAt();
+    public Date getStartAt() {
+        return searchOption == null ? null : searchOption.getStartAtDate();
     }
 
-    public ZonedDateTime getEndAt() {
-        return searchOption == null ? null : searchOption.getEndAt();
+    public Date getEndAt() {
+        return searchOption == null ? null : searchOption.getEndAtDate();
     }
 }
