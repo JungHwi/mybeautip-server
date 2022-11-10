@@ -211,13 +211,6 @@ public class Community extends BaseEntity {
         return isWin;
     }
 
-    public boolean isTopFix() {
-        if (isTopFix == null) {
-            return false;
-        }
-        return isTopFix;
-    }
-
     public boolean isVotesEmpty() {
         return CollectionUtils.isEmpty(communityVoteList);
     }
