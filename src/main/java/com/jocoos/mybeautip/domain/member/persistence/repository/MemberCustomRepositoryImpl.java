@@ -24,6 +24,8 @@ import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberDetai
 import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberMemo.memberMemo;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.jocoos.mybeautip.member.address.QAddress.address;
+import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
+import static com.jocoos.mybeautip.member.block.QBlock.block;
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.sql.SQLExpressions.count;
 import static org.springframework.data.support.PageableExecutionUtils.getPage;
@@ -62,6 +64,11 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     public Page<MemberBasicSearchResult> getMember(MemberSearchCondition condition) {
         JPAQuery<?> offsetSearchQuery = offsetSearch(baseSearchQuery(condition), condition.getOffset(), condition.getSize());
         JPAQuery<Long> countQuery = getCountQuery(baseSearchQuery(condition));
+
+        if (condition.isBlocked()) {
+            onlyBlockedMember(offsetSearchQuery);
+        }
+
         return getPage(fetchBasicSearchResult(offsetSearchQuery), condition.pageable(), countQuery::fetchOne);
     }
 
@@ -95,6 +102,12 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .leftJoin(memberMemo).on(member.eq(memberMemo.member))
                 .innerJoin(memberActivityCount).on(member.eq(memberActivityCount.member))
                 .fetch();
+    }
+
+    private JPAQuery<?> onlyBlockedMember(JPAQuery<?> baseQuery) {
+        return baseQuery
+                .join(block).on(block.memberYou.eq(member))
+                .where(block.status.eq(BLOCK));
     }
 
     private BooleanExpression searchByKeyword(SearchOption searchOption) {

@@ -32,4 +32,11 @@ public record MemberSearchCondition(MemberStatus status,
     public Date getEndAt() {
         return searchOption == null ? null : searchOption.getEndAtDate();
     }
+
+    public boolean isBlocked() {
+        if (searchOption == null) {
+            return false;
+        }
+        return searchOption.getIsReported() != null && searchOption.getIsReported();
+    }
 }
