@@ -47,4 +47,8 @@ public record CommunitySearchCondition(Long eventId,
         return searchOption == null ? null : searchOption.getEndAt();
     }
 
+    public Boolean isReported() {
+        return searchOption == null ? null : searchOption.getIsReported();
+    }
+
 }

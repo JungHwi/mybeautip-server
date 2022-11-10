@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.global.vo;
 
 import com.jocoos.mybeautip.support.DateUtils;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
@@ -17,22 +18,23 @@ public class SearchOption {
     private final String keyword;
     private final ZonedDateTime startAt;
     private final ZonedDateTime endAt;
+    private final Boolean isReported;
 
-    private SearchOption(String searchField, String keyword, LocalDate startAt, LocalDate endAt, ZoneId zoneId) {
-        this.searchField = searchField;
-        this.keyword = keyword;
+    @Builder
+    private SearchOption(String searchQueryString, LocalDate startAt, LocalDate endAt, ZoneId zoneId, Boolean isReported) {
+        this.searchField = setSearchField(searchQueryString);
+        this.keyword = setKeyword(searchQueryString);
         this.startAt = startAt == null ? null : toUTCZoned(startAt, zoneId);
         this.endAt = endAt == null ? null : toUTCZoned(endAt, zoneId);
+        this.isReported = isReported;
     }
 
-    public static SearchOption from(String queryString, LocalDate startAt, LocalDate endAt, ZoneId zoneId) {
+    private String setSearchField(String queryString) {
+        return StringUtils.hasText(queryString) ? queryString.split(",")[0] : null;
+    }
 
-        if (!StringUtils.hasText(queryString)) {
-            return new SearchOption(null, null, startAt, endAt, zoneId);
-        }
-
-        String[] splitQueryString = queryString.split(",");
-        return new SearchOption(splitQueryString[0], splitQueryString[1], startAt, endAt, zoneId);
+    private String setKeyword(String queryString) {
+        return StringUtils.hasText(queryString) ? queryString.split(",")[1] : null;
     }
 
     public Date getStartAtDate() {

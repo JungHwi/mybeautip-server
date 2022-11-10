@@ -38,13 +38,22 @@ public class AdminMemberController {
             @RequestParam(name = "grant_type", required = false) GrantType grantType,
             @RequestParam(required = false) String search,
             @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
-            @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
+            @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
+            @RequestParam(required = false, name = "is_reported") Boolean isReported) {
+
+        SearchOption searchOption = SearchOption.builder()
+                .searchQueryString(search)
+                .startAt(startAt)
+                .endAt(endAt)
+                .zoneId(ZoneId.of("Asia/Seoul"))
+                .isReported(isReported)
+                .build();
 
         MemberSearchCondition condition = MemberSearchCondition.builder()
                 .grantType(grantType)
                 .status(status)
                 .pageable(PageRequest.of(page - 1, size))
-                .searchOption(SearchOption.from(search, startAt, endAt, ZoneId.of("UTC")))
+                .searchOption(searchOption)
                 .build();
 
         return ResponseEntity.ok(service.getMembers(condition));

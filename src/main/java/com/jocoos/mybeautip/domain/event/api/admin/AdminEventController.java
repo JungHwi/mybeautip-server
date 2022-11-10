@@ -48,9 +48,17 @@ public class AdminEventController {
             @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
             @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
 
+
+        SearchOption searchOption = SearchOption.builder()
+                .searchQueryString(search)
+                .startAt(startAt)
+                .endAt(endAt)
+                .zoneId(ZoneId.of("Asia/Seoul"))
+                .build();
+
         EventSearchCondition condition = EventSearchCondition.builder()
                 .statuses(status == null ? null : Collections.singleton(status))
-                .searchOption(SearchOption.from(search, startAt, endAt, ZoneId.of("Asia/Seoul")))
+                .searchOption(searchOption)
                 .paging(Paging.page(page - 1, size))
                 .sort(new Sort(sort, order))
                 .build();

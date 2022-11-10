@@ -39,10 +39,17 @@ public class AdminCommunityController {
             @RequestParam(required = false, defaultValue = "DESC") String order,
             @RequestParam(required = false) String search,
             @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
-            @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
+            @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
+            @RequestParam(required = false, name = "is_reported") Boolean isReported) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, size, Direction.fromString(order), sort);
-        SearchOption searchOption = SearchOption.from(search, startAt, endAt, ZoneId.of("Asia/Seoul"));
+        SearchOption searchOption = SearchOption.builder()
+                .searchQueryString(search)
+                .startAt(startAt)
+                .endAt(endAt)
+                .zoneId(ZoneId.of("Asia/Seoul"))
+                .isReported(isReported)
+                .build();
 
         return ResponseEntity.ok(service.getCommunities(categoryId, pageRequest, searchOption));
     }

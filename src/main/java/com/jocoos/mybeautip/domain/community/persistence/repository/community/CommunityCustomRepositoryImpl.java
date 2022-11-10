@@ -107,7 +107,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                                 inCategories(condition.categories()),
                                 searchByKeyword(condition.searchOption()),
                                 createdAtAfter(condition.getStartAt()),
-                                createdAtBefore(condition.getEndAt())
+                                createdAtBefore(condition.getEndAt()),
+                                isReported(condition.isReported())
                         )
                         .orderBy(getOrders(condition.getSort()))
                         .offset(condition.getOffset())
@@ -146,6 +147,13 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
 
         return PageableExecutionUtils.getPage(responses, condition.pageable(), countQuery::fetchOne);
+    }
+
+    private BooleanExpression isReported(Boolean isReported) {
+        if (isReported == null) {
+            return null;
+        }
+        return isReported ? community.reportCount.goe(3) : community.reportCount.eq(0);
     }
 
     private OrderSpecifier<?>[] getOrders(Sort sort) {
