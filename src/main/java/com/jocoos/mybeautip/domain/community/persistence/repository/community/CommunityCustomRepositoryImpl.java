@@ -16,8 +16,8 @@ import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.member.block.BlockStatus;
 import com.jocoos.mybeautip.global.vo.SearchOption;
+import com.jocoos.mybeautip.member.block.BlockStatus;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Order;
@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
-import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
@@ -200,7 +199,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .where(
                         searchCondition(condition.getKeyword()),
                         lessThanSortedAt(condition.getCursor()),
-                        notEqStatus(DELETE),
+                        eqStatus(NORMAL),
                         ltReportCount(3)
                 )
                 .orderBy(sortedAt())
@@ -219,7 +218,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
                         searchCondition(keyword),
-                        notEqStatus(DELETE),
+                        eqStatus(NORMAL),
                         ltReportCount(3)
                 )
                 .fetchOne());
@@ -264,7 +263,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .from(community)
                 .where(
                         eqCategoryId(condition.getCategoryId()),
-                        notEqStatus(DELETE),
+                        eqStatus(NORMAL),
                         ltReportCount(3),
                         isVotesNotEmpty(condition.getCategoryType())
                 )
