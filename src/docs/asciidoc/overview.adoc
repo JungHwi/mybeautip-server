@@ -10,8 +10,8 @@
 | Dev
 | `https://mybeautip-dev.jocoos.com`
 
-| QA
-| `https://api-qa.mybeautip.com`
+| Stage
+| `https://api-stage.mybeautip.com`
 
 | Production
 | `https://mybeautip.jocoos.com`
