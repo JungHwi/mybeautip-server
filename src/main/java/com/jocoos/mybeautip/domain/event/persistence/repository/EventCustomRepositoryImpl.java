@@ -80,6 +80,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                 .where(
                         searchCondition(condition.getKeyword()),
                         inStatuses(condition.getStatuses()),
+                        eqVisible(condition.isVisible()),
                         eqType(condition.getType()),
                         goeCreatedAt(condition.getStartAt()),
                         loeCreatedAt(condition.getEndAt()),
@@ -144,6 +145,10 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
 
     private BooleanExpression inStatuses(Set<EventStatus> statuses) {
         return isEmpty(statuses) ? null : event.status.in(statuses);
+    }
+
+    private BooleanExpression eqVisible(Boolean visible) {
+        return visible == null ? null : event.isVisible.eq(visible);
     }
 
     private BooleanExpression eqType(EventType type) {

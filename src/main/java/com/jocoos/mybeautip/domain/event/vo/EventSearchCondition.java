@@ -17,6 +17,7 @@ import java.util.Set;
 public class EventSearchCondition {
     private final EventType type;
     private final Set<EventStatus> statuses;
+    private final boolean isVisible;
     private final ZonedDateTime between;
     private final Paging paging;
     private final Sort sort;
