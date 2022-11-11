@@ -12,7 +12,6 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportD
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
-import com.jocoos.mybeautip.domain.member.service.dao.MemberBlockDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -46,7 +45,6 @@ public class CommunityCommentService {
     private final ActivityPointService activityPointService;
 
     private final CommunityCommentConverter converter;
-    private final MemberBlockDao memberBlockDao;
 
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
