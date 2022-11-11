@@ -80,7 +80,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                 .where(
                         searchCondition(condition.getKeyword()),
                         inStatuses(condition.getStatuses()),
-                        eqVisible(condition.isVisible()),
+                        eqVisible(condition.getIsVisible()),
                         eqType(condition.getType()),
                         goeCreatedAt(condition.getStartAt()),
                         loeCreatedAt(condition.getEndAt()),

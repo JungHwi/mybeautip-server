@@ -82,6 +82,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
                         parameterWithName("type").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE))
                 ),
                 responseFields(
+                        fieldWithPath("[]").type(JsonFieldType.ARRAY).description("Vote 커뮤니티 목록").optional(),
                         fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("글 ID"),
                         fieldWithPath("[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                         fieldWithPath("[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
