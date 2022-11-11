@@ -5,7 +5,9 @@ import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
+import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.global.exception.*;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.goods.TimeSaleCondition;
@@ -845,6 +847,12 @@ public static class VideoInfo {
             this.relatedGoodsThumbnailUrl = "";
         } // FIXME: check policy
     }
+
+    public static VideoResponse toVideoResponse(VideoInfo videoInfo) {
+        VideoResponse videoResponse = new VideoResponse();
+        BeanUtils.copyProperties(videoInfo, videoResponse);
+        return videoResponse;
+    }
 }
 
 @Data
@@ -909,11 +917,12 @@ public static class VideoScrapInfo {
     @Deprecated
     private Long createdBy;
     private Date createdAt;
-    private VideoInfo video;
+    private VideoResponse video;
 
     VideoScrapInfo(VideoScrap VideoScrap, VideoInfo video) {
         BeanUtils.copyProperties(VideoScrap, this);
-        this.video = video;
+        this.video = VideoInfo.toVideoResponse(video);
+        this.video.setCreatedAt(ZonedDateTimeUtil.toUTCZoned(video.getCreatedAt()));
     }
 }
 
