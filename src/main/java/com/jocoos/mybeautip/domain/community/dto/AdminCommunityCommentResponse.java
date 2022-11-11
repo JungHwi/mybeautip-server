@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.util.CollectionUtils;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -33,6 +34,8 @@ public class AdminCommunityCommentResponse {
 
     public void blindMember() {
         this.member = null;
-        children.forEach(AdminCommunityCommentResponse::blindMember);
+        if (!CollectionUtils.isEmpty(children)) {
+            children.forEach(AdminCommunityCommentResponse::blindMember);
+        }
     }
 }
