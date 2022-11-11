@@ -55,6 +55,7 @@ public class EventDao {
         EventSearchCondition condition = EventSearchCondition.builder()
                 .type(type)
                 .statuses(EventStatus.visibleEventStatus)
+                .isVisible(true)
                 .build();
         return repository.getEvents(condition);
     }

@@ -71,6 +71,7 @@ public abstract class EventTypeAbstractService implements EventTypeService {
             throw new BadRequestException("Event is not available");
         }
         validEventStatus(event.getStatus());
+        validEventVisible(event.getIsVisible());
         validEventPeriod(event.getStartAt(), event.getEndAt());
     }
 
@@ -89,6 +90,12 @@ public abstract class EventTypeAbstractService implements EventTypeService {
     private void validEventStatus(EventStatus status) {
         if (!status.isCanJoin()) {
             throw new BadRequestException(ErrorCode.CAN_NOT_JOIN_STATUS, "This event type is " + status);
+        }
+    }
+
+    private void validEventVisible(boolean visible) {
+        if (!visible) {
+            throw new BadRequestException(ErrorCode.CAN_NOT_JOIN_STATUS, "This event visible is false.");
         }
     }
 

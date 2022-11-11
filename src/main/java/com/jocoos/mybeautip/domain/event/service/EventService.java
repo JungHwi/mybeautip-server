@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.event.service;
 
-import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.converter.EventConverter;
 import com.jocoos.mybeautip.domain.event.dto.EventListResponse;
@@ -30,15 +29,12 @@ public class EventService {
     private final EventDao eventDao;
 
     @Transactional(readOnly = true)
-    public List<EventListResponse> getEventList(EventType eventType, EventStatus status) {
-        List<Event> events = getEvents(eventType, status);
+    public List<EventListResponse> getEventList(EventType eventType) {
+        List<Event> events = getEvents(eventType);
         return eventConverter.convertToListResponse(events);
     }
 
-    private List<Event> getEvents(EventType eventType, EventStatus status) {
-        if (PROGRESS.equals(status)) {
-            return eventDao.getProgressEvents(eventType);
-        }
+    private List<Event> getEvents(EventType eventType) {
         return eventDao.getVisibleEvents(eventType);
     }
 
