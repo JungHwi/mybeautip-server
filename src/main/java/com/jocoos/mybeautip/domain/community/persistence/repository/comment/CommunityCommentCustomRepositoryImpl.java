@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
-import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityCategory.communityCategory;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunityComment.communityComment;
 import static com.jocoos.mybeautip.member.block.QBlock.block;
@@ -48,7 +48,7 @@ public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCus
                         eqCommunityId(condition.communityId()),
                         eqParentId(condition.parentId()),
                         greaterOrLessThanIdByDirection(direction, condition.cursor()),
-                        notEqStatus(DELETE)
+                        eqStatus(NORMAL)
                 )
                 .orderBy(orderById(direction))
                 .limit(pageable.getPageSize()));
@@ -66,8 +66,8 @@ public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCus
                 .where(communityCategory.type.eq(BLIND).or(block.memberYou.id.isNull().and(communityCategory.type.ne(BLIND))));
     }
 
-    private BooleanExpression notEqStatus(CommunityStatus status) {
-        return status == null ? null : communityComment.status.ne(status);
+    private BooleanExpression eqStatus(CommunityStatus status) {
+        return status == null ? null : communityComment.status.eq(status);
     }
 
     private BooleanExpression eqCommunityId(long communityId) {

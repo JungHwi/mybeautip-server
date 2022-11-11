@@ -20,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.NOT_IN_ADMIN;
-import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
-import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
 
 @RequiredArgsConstructor
 @Service
@@ -87,9 +85,8 @@ public class AdminCommunityService {
 
     @Transactional
     public Long hideCommunity(Long communityId, boolean isHide) {
-       if (isHide) {
-           return communityDao.changeStatus(communityId, DELETE);
-       }
-       return communityDao.changeStatus(communityId, NORMAL);
+        Community community = communityDao.get(communityId);
+        community.hide(isHide);
+        return community.getId();
     }
 }

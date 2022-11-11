@@ -149,11 +149,4 @@ public class CommunityDao {
         community.fix(false);
         return community.getId();
     }
-
-    @Transactional
-    public Long changeStatus(Long communityId, CommunityStatus status) {
-        Community community = get(communityId);
-        community.changeStatus(status);
-        return community.getId();
-    }
 }
