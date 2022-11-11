@@ -41,6 +41,9 @@ public class EditEventRequest {
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime endAt;
 
+    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
+    private ZonedDateTime reservationAt;
+
     @NotNull(message = "thumbnailImageUrl must not be null")
     private String thumbnailImageUrl;
     private String originalThumbnailImageFile;

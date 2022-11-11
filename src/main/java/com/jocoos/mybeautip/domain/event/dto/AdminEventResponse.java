@@ -25,5 +25,6 @@ public record AdminEventResponse(long id,
                                  AdminEventProductResponse product,
                                  @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startAt,
                                  @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime endAt,
+                                 @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime reservationAt,
                                  @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT) ZonedDateTime createdAt) {
 }

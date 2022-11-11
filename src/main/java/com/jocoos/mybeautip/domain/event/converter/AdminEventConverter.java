@@ -44,6 +44,7 @@ public abstract class AdminEventConverter {
             @Mapping(target = "needPoint", source = "request.needPoint"),
             @Mapping(target = "startAt", source = "request.startAt"),
             @Mapping(target = "endAt", source = "request.endAt"),
+            @Mapping(target = "reservationAt", source = "request.reservationAt"),
             @Mapping(target = "createdAt", source = "event.createdAt"),
             @Mapping(target = "thumbnailImageFile", ignore = true),
             @Mapping(target = "imageFile", ignore = true),

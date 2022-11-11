@@ -79,6 +79,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].need_point").type(JsonFieldType.NUMBER).description("이벤트 참여 포인트"),
                                 fieldWithPath("content.[].start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
                                 fieldWithPath("content.[].end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat()).optional(),
+                                fieldWithPath("content.[].reservation_at").type(JsonFieldType.STRING).description("이벤트 예약일시").attributes(getZonedDateFormat()).optional(),
                                 fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("이벤트 생성일시").attributes(getZonedDateMilliFormat())
                         )
                 )
@@ -105,13 +106,14 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("description").type(JsonFieldType.STRING).description("설명"),
                                 fieldWithPath("thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
                                 fieldWithPath("detail_image_url").type(JsonFieldType.STRING).description("이벤트 상세 이미지 URL"),
-                                fieldWithPath("banner_image_url").type(JsonFieldType.STRING).description("롤링배너 이미지 URL").optional(),
+                                fieldWithPath("banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL").optional(),
                                 fieldWithPath("share_rectangle_image_url").type(JsonFieldType.STRING).description("웹 공유 이미지 URL"),
                                 fieldWithPath("share_square_image_url").type(JsonFieldType.STRING).description("SNS 공유 이미지 URL"),
                                 fieldWithPath("join_count").type(JsonFieldType.NUMBER).description("참여수"),
                                 fieldWithPath("need_point").type(JsonFieldType.NUMBER).description("이벤트 참여 포인트"),
                                 fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
-                                fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat()),
+                                fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat()).optional(),
+                                fieldWithPath("reservation_at").type(JsonFieldType.STRING).description("이벤트 예약일시").attributes(getZonedDateFormat()).optional(),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("이벤트 생성일시").attributes(getZonedDateMilliFormat()),
                                 fieldWithPath("product").type(JsonFieldType.OBJECT).description("이벤트 상품 정보").optional(),
                                 fieldWithPath("product.type").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_PRODUCT_TYPE)),
@@ -183,6 +185,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                         fieldWithPath("need_point").type(JsonFieldType.NUMBER).description("이벤트 참가시 필요한 포인트"),
                         fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
                         fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat()).optional(),
+                        fieldWithPath("reservation_at").type(JsonFieldType.STRING).description("이벤트 예약일시").attributes(getZonedDateFormat()).optional(),
                         fieldWithPath("thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
                         fieldWithPath("detail_image_url").type(JsonFieldType.STRING).description("상세 이미지 URL"),
                         fieldWithPath("share_rectangle_image_url").type(JsonFieldType.STRING).description("공유용 사각형 이미지 URL"),
@@ -206,9 +209,10 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                         fieldWithPath("banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL(Drip 전용)").optional(),
                         fieldWithPath("join_count").type(JsonFieldType.NUMBER).description("이벤트 참여수"),
                         fieldWithPath("need_point").type(JsonFieldType.NUMBER).description("이벤트 참여시 필요 포인트"),
-                        fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시"),
-                        fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").optional(),
-                        fieldWithPath("created_at").type(JsonFieldType.STRING).description("이벤트 등록일시"),
+                        fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
+                        fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat()).optional(),
+                        fieldWithPath("reservation_at").type(JsonFieldType.STRING).description("이벤트 예약일시").attributes(getZonedDateFormat()).optional(),
+                        fieldWithPath("created_at").type(JsonFieldType.STRING).description("이벤트 등록일시").attributes(getZonedDateFormat()),
                         fieldWithPath("product").type(JsonFieldType.OBJECT).description("이벤트 상품 정보").optional(),
                         fieldWithPath("product.type").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_PRODUCT_TYPE)),
                         fieldWithPath("product.price").type(JsonFieldType.NUMBER).description("상품 가격")
@@ -233,6 +237,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                 .description("Mock Contents")
                 .needPoint(0)
                 .startAt(ZonedDateTime.now())
+                .reservationAt(ZonedDateTime.now())
                 .thumbnailImageUrl(TEST_FILE_URL)
                 .detailImageUrl(TEST_FILE_URL)
                 .shareRectangleImageUrl(TEST_FILE_URL)
@@ -259,6 +264,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("need_point").type(JsonFieldType.NUMBER).description("이벤트 참가시 필요한 포인트"),
                                 fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
                                 fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat()).optional(),
+                                fieldWithPath("reservation_at").type(JsonFieldType.STRING).description("이벤트 예약일시").attributes(getZonedDateFormat()).optional(),
                                 fieldWithPath("thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
                                 fieldWithPath("detail_image_url").type(JsonFieldType.STRING).description("상세 이미지 URL"),
                                 fieldWithPath("share_rectangle_image_url").type(JsonFieldType.STRING).description("공유용 사각형 이미지 URL"),
@@ -282,9 +288,10 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("banner_image_url").type(JsonFieldType.STRING).description("배너 이미지 URL(Drip 전용)").optional(),
                                 fieldWithPath("join_count").type(JsonFieldType.NUMBER).description("이벤트 참여수"),
                                 fieldWithPath("need_point").type(JsonFieldType.NUMBER).description("이벤트 참여시 필요 포인트"),
-                                fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시"),
-                                fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").optional(),
-                                fieldWithPath("created_at").type(JsonFieldType.STRING).description("이벤트 등록일시"),
+                                fieldWithPath("start_at").type(JsonFieldType.STRING).description("이벤트 시작일시").attributes(getZonedDateFormat()),
+                                fieldWithPath("end_at").type(JsonFieldType.STRING).description("이벤트 종료일시").attributes(getZonedDateFormat()).optional(),
+                                fieldWithPath("reservation_at").type(JsonFieldType.STRING).description("이벤트 예약일시").attributes(getZonedDateFormat()).optional(),
+                                fieldWithPath("created_at").type(JsonFieldType.STRING).description("이벤트 등록일시").attributes(getZonedDateFormat()),
                                 fieldWithPath("product").type(JsonFieldType.OBJECT).description("이벤트 상품 정보").optional(),
                                 fieldWithPath("product.type").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_PRODUCT_TYPE)),
                                 fieldWithPath("product.price").type(JsonFieldType.NUMBER).description("상품 가격")
