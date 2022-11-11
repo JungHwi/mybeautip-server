@@ -29,7 +29,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CommunityDao {
 
-    private final MemberDao memberDao;
     private final CommunityCategoryDao categoryDao;
     private final CommunityRepository repository;
 
