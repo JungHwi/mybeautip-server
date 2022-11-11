@@ -32,18 +32,6 @@ create table member_memo
     modified_at datetime not null comment '수정일'
 )comment '멤버 어드민 메모' charset = utf8mb4;
 
-create table popup_notice
-(
-    id bigint auto_increment comment '공지 팝업 아이디 'primary key,
-    status varchar(20) not null comment '공지 팝업 상태',
-    filename varchar(100) comment '공지 팝업 파일이름',
-    link_type varchar(20) comment '공지 팝업 링크 타입',
-    link_argument varchar(300) comment '공지 팝업 링크 파라미터',
-    started_at datetime comment '공지 팝업 시작일',
-    ended_at datetime comment '공지 팝업 종료일',
-    created_at datetime not null comment '공지 팝업 생성일'
-);
-
 create table video_category (
     id int auto_increment comment '비디오 카테고리 아이디' primary key,
     parent_id int null comment '부모 카테고리 아이디',
@@ -158,7 +146,6 @@ where id = 13
 -- drop table community_vote_member;
 -- drop table member_activity_count;
 -- drop table member_memo;
--- drop table popup_notice;
 -- drop table video_category;
 
 -- alter table community_category drop column is_in_summary;
@@ -196,5 +183,3 @@ where id = 13
 -- update community_category set parent_id = 8 where id = 2;
 
 -- select * from community_category;
-
--- INSERT INTO mybeautip.popup_notice (status, filename, link_type, link_argument, started_at, ended_at, created_at) VALUES ('ACTIVE', '1_winner_pop', 'EVENT', '4', '2022-10-04 14:18:55', '2023-10-04 14:18:58', '2022-10-04 14:19:02');
