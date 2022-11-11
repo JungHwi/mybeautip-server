@@ -25,14 +25,14 @@ public enum CommunityStatus implements CodeValue {
         return isHide ? hide() : disableHide();
     }
 
-    public CommunityStatus hide() {
+    private CommunityStatus hide() {
         if (this.equals(DELETE)) {
             throw new BadRequestException("삭제 상태는 숨김 상태가 불가능합니다.");
         }
         return HIDE;
     }
 
-    public CommunityStatus disableHide() {
+    private CommunityStatus disableHide() {
         if (!this.equals(HIDE)) {
             throw new BadRequestException("숨김 상태 해제는 숨김 상태만 가능합니다");
         }

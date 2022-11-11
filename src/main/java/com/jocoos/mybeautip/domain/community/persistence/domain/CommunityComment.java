@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import javax.persistence.*;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
-import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
 
 @Getter
 @Setter
@@ -88,6 +87,6 @@ public class CommunityComment extends BaseEntity {
     }
 
     public void hide(boolean isHide) {
-        this.status = isHide ? DELETE : NORMAL;
+        this.status = status.hide(isHide);
     }
 }
