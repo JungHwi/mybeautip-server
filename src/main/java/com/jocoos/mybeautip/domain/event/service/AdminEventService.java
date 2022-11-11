@@ -17,6 +17,7 @@ import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
+import com.jocoos.mybeautip.support.slack.SlackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,7 @@ public class AdminEventService {
     private final EventDao eventDao;
     private final AdminEventConverter converter;
     private final AwsS3Handler awsS3Handler;
+    private final SlackService slackService;
 
     @Transactional(readOnly = true)
     public List<EventStatusResponse> getEventStates() {
@@ -79,6 +81,34 @@ public class AdminEventService {
 
         editEventFile(request);
         return converter.convert(event);
+    }
+
+    @Transactional
+    public void batchStatus() {
+        int startEvent = startStatus();
+        int endEvent = endStatus();
+
+        if (startEvent > 0 || endEvent > 0) {
+            String resultMessage = String.format("이벤트 자동 상태 변경 배치\n" +
+                    "시작된 이벤트 : %d, 종료된 이벤트 : %d", startEvent, endEvent);
+            slackService.send(resultMessage);
+        }
+    }
+
+    private int startStatus() {
+        List<Event> eventList = eventDao.findStartEvent();
+        List<Long> ids = eventList.stream()
+                .map(Event::getId)
+                .toList();
+        return eventDao.updateStatus(ids, EventStatus.PROGRESS);
+    }
+
+    private int endStatus() {
+        List<Event> eventList = eventDao.findEndEvent();
+        List<Long> ids = eventList.stream()
+                .map(Event::getId)
+                .toList();
+        return eventDao.updateStatus(ids, EventStatus.END);
     }
 
     private void copyOriginalEventFiles(Event event, EditEventRequest request) {

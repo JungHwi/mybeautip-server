@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
+import static com.jocoos.mybeautip.domain.event.code.EventStatus.WAIT;
 
 @RequiredArgsConstructor
 @Service
@@ -98,5 +99,20 @@ public class EventDao {
     @Transactional(readOnly = true)
     public Long getJoinCount(Event event) {
         return joinRepository.countByEvent(event);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Event> findStartEvent() {
+        return repository.findByReservationAtLessThanEqualAndStatus(ZonedDateTime.now(), WAIT);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Event> findEndEvent() {
+        return repository.findByEndAtLessThanEqualAndStatus(ZonedDateTime.now(), PROGRESS);
+    }
+
+    @Transactional
+    public int updateStatus(List<Long> ids, EventStatus status) {
+        return repository.updateStatus(ids, status);
     }
 }

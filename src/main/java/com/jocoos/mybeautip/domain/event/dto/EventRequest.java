@@ -44,6 +44,7 @@ public class EventRequest {
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime startAt;
 
+    @NotNull(message = "endAt must not be null")
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private ZonedDateTime endAt;
 
