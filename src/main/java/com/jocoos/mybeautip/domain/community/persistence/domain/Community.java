@@ -21,6 +21,7 @@ import java.util.Objects;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.*;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
@@ -99,7 +100,7 @@ public class Community extends BaseEntity {
         if (!this.status.isDeletable()) {
             throw new BadRequestException("This status can not delete. This Community Status is " + this.status);
         }
-        this.status = CommunityStatus.DELETE;
+        this.status = DELETE;
         return this;
     }
 
@@ -224,6 +225,10 @@ public class Community extends BaseEntity {
 
     public void fix(boolean isFix) {
         this.isTopFix = isFix ? true : null;
+    }
+
+    public void hide(boolean isHide) {
+      this.status = status.hide(isHide);
     }
 
     public void changeStatus(CommunityStatus status) {
