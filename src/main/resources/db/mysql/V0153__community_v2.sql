@@ -184,6 +184,9 @@ where id = 13
 -- create index idx_category_status on community(category_id , status );
 -- create index idx_is_top_sorted_at on community(is_top_fix desc, sorted_at desc);
 
+-- index scrap
+-- create index idx_scrap on scrap (member_id, relation_id);
+
 -- Blind 분리
 -- insert into community_category (type, sort, title, description, hint)
 -- values ('GENERAL', 1, '일반 게시판', '일반 게시판 카테고리', '일반 게시판 카테고리 힌트'),
