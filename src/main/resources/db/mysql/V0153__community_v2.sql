@@ -175,6 +175,7 @@ where id = 13
 -- alter table community_comment_report drop column reported_id;
 
 -- alter table comment_reports drop column reported_id;
+-- alter table video_category_mapping rename video_categories;
 
 -- delete from flyway_schema_history where version = '0153';
 
