@@ -85,7 +85,6 @@ public class AwsS3Service {
 
     public String copy(String sourceKey, String destinationKey) {
         CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
-        copyObjectRequest.withCannedAccessControlList(CannedAccessControlList.PublicRead);
 
         return copy(copyObjectRequest);
     }
