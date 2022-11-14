@@ -35,7 +35,7 @@ public class ScrapControllerTest extends RestDocsTestSupport {
                                 parameterWithName("size").description("조회 갯수").optional().attributes(getDefault(20))
                         ),
                         responseFields(
-                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보").attributes(getZonedDateMilliFormat()),
+                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보").attributes(getZonedDateMilliFormat()).optional(),
                                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 스크랩 목록").optional(),
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("커뮤니티 ID"),
                                 fieldWithPath("content.[].type").type(JsonFieldType.STRING).description("스크랩 타"),
