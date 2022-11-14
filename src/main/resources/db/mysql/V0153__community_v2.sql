@@ -32,6 +32,18 @@ create table member_memo
     modified_at datetime not null comment '수정일'
 )comment '멤버 어드민 메모' charset = utf8mb4;
 
+create table scrap
+(
+    id          bigint auto_increment comment '스크랩 아이디' primary key,
+    type        varchar(10) not null comment '스크랩 대상 서비스',
+    relation_id bigint      not null comment '스크랩 대상 아이디',
+    member_id   bigint      not null comment '회원 아이디',
+    is_scrap    tinyint(1)  not null comment '스크랩 여부',
+    modified_at datetime    not null comment '수정일시',
+    created_at  datetime    not null comment '등록일시'
+)comment '스크랩 정보' charset = utf8mb4;
+
+
 create table video_category (
     id int auto_increment comment '비디오 카테고리 아이디' primary key,
     parent_id int null comment '부모 카테고리 아이디',
@@ -147,6 +159,7 @@ where id = 13
 -- drop table member_activity_count;
 -- drop table member_memo;
 -- drop table video_category;
+-- drop table scrap;
 
 -- alter table community_category drop column is_in_summary;
 -- alter table community drop column is_top_fix;
