@@ -35,6 +35,6 @@ public class CommunityFile {
     }
 
     public String getFileUrl() {
-        return toUrl(file, COMMUNITY, id);
+        return toUrl(file, COMMUNITY, community.getId());
     }
 }
