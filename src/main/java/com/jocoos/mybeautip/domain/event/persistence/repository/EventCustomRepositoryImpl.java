@@ -107,7 +107,10 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
 
     private JPAQuery<Event> orderByDefault(JPAQuery<Event> query) {
         return query
-                .orderBy(event.createdAt.desc(), event.id.desc());
+                .orderBy(event.statusSorting.asc().nullsLast(),
+                        event.sorting.asc().nullsLast(),
+                        event.createdAt.desc(),
+                        event.id.desc());
     }
 
     private JPAQuery<EventSearchResult> resultWithJoinCount(JPAQuery<Event> query) {

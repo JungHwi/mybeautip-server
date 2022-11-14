@@ -25,24 +25,24 @@ public class TopSummary {
     private final SummaryConverter summaryConverter;
     private final CommunityRelationService relationService;
 
-    public TopSummaryResponse getResponse(List<CommunityCategoryResponse> topCategories) {
-        return new TopSummaryResponse(topCategories, getTopSummaryContents(topCategories));
+    public TopSummaryResponse getResponse(List<CommunityCategoryResponse> topCategories, Long memberId) {
+        return new TopSummaryResponse(topCategories, getTopSummaryContents(topCategories, memberId));
     }
 
-    private List<TopSummaryContentResponse> getTopSummaryContents(List<CommunityCategoryResponse> topCategories) {
+    private List<TopSummaryContentResponse> getTopSummaryContents(List<CommunityCategoryResponse> topCategories, Long memberId) {
         List<TopSummaryContentResponse> topSummaryContents = new ArrayList<>();
         for (CommunityCategoryResponse category : topCategories) {
-            topSummaryContents.add(getTopSummaryContent(category.getId(), category.getType()));
+            topSummaryContents.add(getTopSummaryContent(category.getId(), category.getType(), memberId));
         }
         return topSummaryContents;
     }
 
-    private TopSummaryContentResponse getTopSummaryContent(Long categoryId, CommunityCategoryType type) {
-        return new TopSummaryContentResponse(categoryId, communitySummaryFrom(categoryId, type));
+    private TopSummaryContentResponse getTopSummaryContent(Long categoryId, CommunityCategoryType type, Long memberId) {
+        return new TopSummaryContentResponse(categoryId, communitySummaryFrom(categoryId, type, memberId));
     }
 
-    private List<CommunityResponse> communitySummaryFrom(Long categoryId, CommunityCategoryType type) {
-        List<SummaryCommunityResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount());
+    private List<CommunityResponse> communitySummaryFrom(Long categoryId, CommunityCategoryType type, Long memberId) {
+        List<SummaryCommunityResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount(), memberId);
         List<CommunityResponse> responses = summaryConverter.convert(summaryResult);
         return relationService.setRelationInfo(responses);
     }
