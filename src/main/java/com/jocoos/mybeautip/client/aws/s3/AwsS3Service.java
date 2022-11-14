@@ -44,8 +44,6 @@ public class AwsS3Service {
             metadata.setContentType(file.getContentType());
 
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
-            putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
-
             result = s3Client.putObject(putObjectRequest);
         } catch (IOException ex) {
             throw new RuntimeException("File Upload ERROR");
@@ -130,9 +128,7 @@ public class AwsS3Service {
     }
 
     private PutObjectRequest getPutObjectRequest(String key, InputStream inputStream, ObjectMetadata metadata) {
-        PutObjectRequest request = new PutObjectRequest(bucketName, key, inputStream, metadata);
-        request.setCannedAcl(CannedAccessControlList.PublicRead);
-        return request;
+        return new PutObjectRequest(bucketName, key, inputStream, metadata);
     }
 
     private void closeConnection(HttpURLConnection conn, InputStream inputStream) throws IOException {
