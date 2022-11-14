@@ -36,7 +36,7 @@ public class SearchController {
             @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
 
         Member member = legacyMemberService.currentMember();
-        KeywordSearchCondition condition = new KeywordSearchCondition(keyword, cursor, size);
+        KeywordSearchCondition condition = new KeywordSearchCondition(keyword, member, cursor, size);
 
         return ResponseEntity.ok(searchService.search(type, condition, member));
     }

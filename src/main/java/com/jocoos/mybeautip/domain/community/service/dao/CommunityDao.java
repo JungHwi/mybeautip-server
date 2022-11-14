@@ -88,8 +88,8 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public List<SummaryCommunityResult> summary(Long categoryId, CommunityCategoryType type, int size) {
-        return repository.summary(new SummaryCommunityCondition(categoryId, type, size));
+    public List<SummaryCommunityResult> summary(Long categoryId, CommunityCategoryType type, int size, Long memberId) {
+        return repository.summary(new SummaryCommunityCondition(categoryId, type, size, memberId));
     }
 
     @Transactional()
@@ -123,8 +123,8 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public Long countBy(String keyword) {
-        return repository.countBy(keyword);
+    public Long countBy(String keyword, Long memberId) {
+        return repository.countBy(keyword, memberId);
     }
 
     @Transactional(readOnly = true)

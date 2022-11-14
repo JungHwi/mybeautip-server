@@ -11,13 +11,11 @@ import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
-import com.jocoos.mybeautip.global.vo.Paging;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -57,26 +55,6 @@ public class EventDao {
                 .type(type)
                 .statuses(EventStatus.visibleEventStatus)
                 .isVisible(true)
-                .build();
-        return repository.getEvents(condition);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Event> getProgressEvents(EventType type) {
-        EventSearchCondition condition = EventSearchCondition.builder()
-                .type(type)
-                .statuses(Collections.singleton(PROGRESS))
-                .between(ZonedDateTime.now())
-                .build();
-        return repository.getEvents(condition);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Event> summary(int eventNum) {
-        EventSearchCondition condition = EventSearchCondition.builder()
-                .statuses(Collections.singleton(PROGRESS))
-                .between(ZonedDateTime.now())
-                .paging(Paging.onlyLimit(eventNum))
                 .build();
         return repository.getEvents(condition);
     }

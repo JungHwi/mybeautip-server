@@ -76,7 +76,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                                                               pageable.getPageSize());
         query.orderBy(order(condition.isCategoryDrip()));
         addWhereConditionOptional(condition, query);
-        dynamicQueryForLogin(query, condition);
+        dynamicQueryForLogin(query, condition.memberId());
         List<Community> communityList = query.fetch();
 
         List<Long> ids = communityList.stream()
@@ -191,7 +191,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     @Override
     public SearchResult<Community> search(KeywordSearchCondition condition) {
-        List<Community> communities = repository.query(query -> query
+        JPAQuery<Community> baseQuery = repository.query(query -> query
                 .select(community)
                 .from(community)
                 .join(community.member, member).fetchJoin()
@@ -203,16 +203,16 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                         ltReportCount(3)
                 )
                 .orderBy(sortedAt())
-                .limit(condition.getSize())
-                .fetch());
+                .limit(condition.getSize()));
+        dynamicQueryForLogin(baseQuery, condition.getMemberId());
+        List<Community> communities = baseQuery.fetch();
 
-        return new SearchResult<>(communities, countBy(condition.getKeyword()));
+        return new SearchResult<>(communities, countBy(condition.getKeyword(), condition.getMemberId()));
     }
 
     @Override
-    public Long countBy(String keyword) {
-        return repository.query(query -> query
-                .select(count(community))
+    public Long countBy(String keyword, Long memberId) {
+        JPAQuery<?> baseQuery = repository.query(query -> query
                 .from(community)
                 .join(member).on(community.member.eq(member))
                 .join(communityCategory).on(community.category.eq(communityCategory))
@@ -220,24 +220,23 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                         searchCondition(keyword),
                         eqStatus(NORMAL),
                         ltReportCount(3)
-                )
-                .fetchOne());
+                ));
+
+        dynamicQueryForLogin(baseQuery, memberId);
+        return baseQuery.select(community.count()).fetchOne();
     }
 
     @Override
     public List<SummaryCommunityResult> summary(SummaryCommunityCondition condition) {
         JPAQuery<?> baseQuery = baseSummaryQuery(condition);
+        dynamicQueryForLogin(baseQuery, condition.memberId());
 
-        switch (condition.getCategoryType()) {
-            case DRIP:
-                return setThumbnail(summaryWithMemberAndEventTitle(baseQuery));
-            case BLIND:
-                return summaryWithMember(baseQuery);
-            case VOTE:
-                return setVoteResponses(summaryWithMember(baseQuery));
-            default:
-                return setThumbnail(summaryWithMember(baseQuery));
-        }
+        return switch (condition.categoryType()) {
+            case DRIP -> setThumbnail(summaryWithMemberAndEventTitle(baseQuery));
+            case BLIND -> summaryWithMember(baseQuery);
+            case VOTE -> setVoteResponses(summaryWithMember(baseQuery));
+            default -> setThumbnail(summaryWithMember(baseQuery));
+        };
     }
 
 
@@ -262,12 +261,12 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return repository.query(query -> query
                 .from(community)
                 .where(
-                        eqCategoryId(condition.getCategoryId()),
+                        eqCategoryId(condition.categoryId()),
                         eqStatus(NORMAL),
                         ltReportCount(3),
-                        isVotesNotEmpty(condition.getCategoryType())
+                        isVotesNotEmpty(condition.categoryType())
                 )
-                .limit(condition.getSize())
+                .limit(condition.size())
                 .orderBy(sortedAt())
         );
     }
@@ -325,14 +324,15 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         defaultQuery.where(expressions);
     }
 
-    private void dynamicQueryForLogin(JPAQuery<Community> query, CommunitySearchCondition condition) {
-        if (condition.memberId() != null) {
-            dynamicQueryForBlock(query, condition);
+    private void dynamicQueryForLogin(JPAQuery<?> query, Long memberId) {
+        if (memberId != null) {
+            dynamicQueryForBlock(query, memberId);
         }
     }
 
-    private void dynamicQueryForBlock(JPAQuery<Community> query, CommunitySearchCondition condition) {
-        query.leftJoin(block).on(community.member.id.eq(block.memberYou.id).and(block.me.eq(condition.memberId())).and(block.status.eq(BlockStatus.BLOCK)))
+    private void dynamicQueryForBlock(JPAQuery<?> query, Long memberId) {
+        query
+                .leftJoin(block).on(community.member.id.eq(block.memberYou.id).and(block.me.eq(memberId)).and(block.status.eq(BlockStatus.BLOCK)))
                 .where(community.category.type.eq(BLIND).or(block.memberYou.id.isNull().and(community.category.type.ne(BLIND))));
     }
 
@@ -396,7 +396,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     private static BooleanExpression containsMemberUsernameExpression(String keyword) {
-        return communityCategory.type.ne(BLIND).and(member.username.contains(keyword));
+        return communityCategory.type.ne(BLIND).and(community.member.username.contains(keyword));
     }
 
     private BooleanBuilder containsContents(String keyword) {
