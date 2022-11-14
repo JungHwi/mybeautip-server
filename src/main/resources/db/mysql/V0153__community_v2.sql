@@ -165,6 +165,8 @@ where id = 13
 -- alter table community drop column is_top_fix;
 -- alter table placard drop column title;
 -- alter table placard drop column color;
+-- alter table event drop column reservation_at;
+-- alter table event drop column is_visible;
 
 -- alter table community_report drop column created_at;
 -- alter table community_report drop column modified_at;
