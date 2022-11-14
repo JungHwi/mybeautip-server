@@ -13,6 +13,7 @@ import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.domain.video.service.VideoConvertService;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
 import com.jocoos.mybeautip.domain.video.vo.VideoSearchCondition;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.Video;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class SearchService {
     private final VideoDao videoDao;
     private final CommunityConvertService communityConvertService;
     private final VideoConvertService videoConvertService;
+    private final LegacyMemberService legacyMemberService;
 
     @Transactional(readOnly = true)
     public SearchResponse<?> search(SearchType type, KeywordSearchCondition condition, Member member) {
@@ -40,8 +42,9 @@ public class SearchService {
 
     @Transactional(readOnly = true)
     public CountResponse count(SearchType type, String keyword) {
+        Long memberId = legacyMemberService.currentMemberId();
         if (SearchType.COMMUNITY.equals(type)) {
-            return new CountResponse(communityDao.countBy(keyword));
+            return new CountResponse(communityDao.countBy(keyword, memberId));
         }
         return new CountResponse(videoDao.count(keyword));
     }
