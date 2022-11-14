@@ -31,11 +31,15 @@ public class VoteResponse {
     public VoteResponse(Long id, Long communityId, String filename) {
         this.id = id;
         this.fileUrl = toUrl(filename, COMMUNITY, communityId);
-        this.count = 0;
-        this.isVoted = false;
+    }
+
+    @QueryProjection
+    public VoteResponse(Long id, Long communityId, String filename, int count) {
+        this(id, communityId, filename);
+        this.count = count;
     }
 
     public static VoteResponse from(CommunityVote vote) {
-        return new VoteResponse(vote.getId(), vote.getCommunity().getId(), vote.getCommunityFile().getFile());
+        return new VoteResponse(vote.getId(), vote.getCommunity().getId(), vote.getCommunityFile().getFile(), vote.getVoteCount());
     }
 }
