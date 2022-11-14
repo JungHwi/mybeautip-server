@@ -165,6 +165,8 @@ where id = 13
 -- alter table community drop column is_top_fix;
 -- alter table placard drop column title;
 -- alter table placard drop column color;
+-- alter table event drop column reservation_at;
+-- alter table event drop column is_visible;
 
 -- alter table community_report drop column created_at;
 -- alter table community_report drop column modified_at;
@@ -175,6 +177,8 @@ where id = 13
 -- alter table community_comment_report drop column reported_id;
 
 -- alter table comment_reports drop column reported_id;
+-- alter table video_category_mapping change column category_id category int not null;
+-- alter table video_category_mapping rename video_categories;
 
 -- delete from flyway_schema_history where version = '0153';
 
