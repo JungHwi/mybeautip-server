@@ -88,9 +88,6 @@ public class S3StorageService implements StorageService {
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 bucketName, key, file.getInputStream(), metadata);
 
-        if (publicRead) {
-            putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
-        }
         s3Client.putObject(putObjectRequest);
         return s3Client.getUrl(bucketName, key).toString();
     }
@@ -99,10 +96,6 @@ public class S3StorageService implements StorageService {
         AmazonS3 s3Client = getS3Client();
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 bucketName, key, file);
-
-        if (publicRead) {
-            putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
-        }
 
         s3Client.putObject(putObjectRequest);
         return s3Client.getUrl(bucketName, key).toString();
@@ -114,10 +107,6 @@ public class S3StorageService implements StorageService {
         objectMetadata.setContentLength(contentLength);
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 bucketName, key, inputStream, objectMetadata);
-
-        if (publicRead) {
-            putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
-        }
 
         s3Client.putObject(putObjectRequest);
         return s3Client.getUrl(bucketName, key).toString();
