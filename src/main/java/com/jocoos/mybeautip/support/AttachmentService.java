@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.support;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +17,9 @@ import java.util.List;
 public class AttachmentService {
 
     private final StorageService storageService;
+
+    @Value("${mybeautip.aws.cf.domain}")
+    private String cloudFront;
 
     public List<String> upload(List<MultipartFile> files, String keyPrefix) throws IOException {
         List<String> attachments = new ArrayList<>();
@@ -31,7 +35,7 @@ public class AttachmentService {
     public String upload(MultipartFile file, String keyPrefix) throws IOException {
         String filename = DigestUtils.getFilename(file);
         String key = String.format("%s/%s", keyPrefix, filename);
-        String path = storageService.upload(file, key);
+        String path = cloudFront + storageService.upload(file, key);
         log.info("Uploaded {}", path);
         return path;
     }
