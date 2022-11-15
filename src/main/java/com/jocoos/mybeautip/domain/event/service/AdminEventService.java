@@ -7,10 +7,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.converter.AdminEventConverter;
-import com.jocoos.mybeautip.domain.event.dto.AdminEventResponse;
-import com.jocoos.mybeautip.domain.event.dto.EditEventRequest;
-import com.jocoos.mybeautip.domain.event.dto.EventRequest;
-import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
+import com.jocoos.mybeautip.domain.event.dto.*;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
 import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
@@ -84,7 +81,7 @@ public class AdminEventService {
     }
 
     @Transactional
-    public void batchStatus() {
+    public EventBatchResult batchStatus() {
         int startEvent = startStatus();
         int endEvent = endStatus();
 
@@ -93,6 +90,11 @@ public class AdminEventService {
                     "시작된 이벤트 : %d, 종료된 이벤트 : %d", startEvent, endEvent);
             slackService.send(resultMessage);
         }
+
+        return EventBatchResult.builder()
+                .startCount(startEvent)
+                .endCount(endEvent)
+                .build();
     }
 
     private int startStatus() {
