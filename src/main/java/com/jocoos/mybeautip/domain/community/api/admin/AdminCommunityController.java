@@ -33,6 +33,7 @@ public class AdminCommunityController {
     @GetMapping("/community")
     public ResponseEntity<PageResponse<AdminCommunityResponse>> getCommunities(
             @RequestParam(required = false, name = "category_id") Long categoryId,
+            @RequestParam(required = false, name= "event_id") Long eventId,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "sortedAt") String sort,
@@ -51,7 +52,7 @@ public class AdminCommunityController {
                 .isReported(isReported)
                 .build();
 
-        return ResponseEntity.ok(service.getCommunities(categoryId, pageRequest, searchOption));
+        return ResponseEntity.ok(service.getCommunities(categoryId, eventId, pageRequest, searchOption));
     }
 
     @GetMapping("/community/{communityId}")

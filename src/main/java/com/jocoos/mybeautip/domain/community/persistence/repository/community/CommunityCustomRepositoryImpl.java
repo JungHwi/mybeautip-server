@@ -97,23 +97,25 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     @Override
     public Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition) {
-        List<AdminCommunityResponse> responses = repository.query(query -> query
-                        .select(new QAdminCommunityResponse(community, new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename), event.title))
-                        .from(community)
-                        .join(member).on(community.member.eq(member))
-                        .join(communityCategory).on(community.category.eq(communityCategory))
-                        .leftJoin(event).on(community.eventId.eq(event.id))
-                        .where(
-                                inCategories(condition.categories()),
-                                searchByKeyword(condition.searchOption()),
-                                createdAtAfter(condition.getStartAt()),
-                                createdAtBefore(condition.getEndAt()),
-                                isReported(condition.isReported())
-                        )
-                        .orderBy(getOrders(condition.getSort()))
-                        .offset(condition.getOffset())
-                        .limit(condition.getPageSize()))
-                .fetch();
+        JPAQuery<AdminCommunityResponse> baseQuery = repository.query(query -> query
+                .select(new QAdminCommunityResponse(community, new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename)))
+                .from(community)
+                .join(member).on(community.member.eq(member))
+                .join(communityCategory).on(community.category.eq(communityCategory))
+                .where(
+                        inCategories(condition.categories()),
+                        searchByKeyword(condition.searchOption()),
+                        createdAtAfter(condition.getStartAt()),
+                        createdAtBefore(condition.getEndAt()),
+                        isReported(condition.isReported())
+                )
+                .orderBy(getOrders(condition.getSort()))
+                .offset(condition.getOffset())
+                .limit(condition.getPageSize()));
+
+
+        dynamicQueryForEvent(condition.eventId(), baseQuery);
+        List<AdminCommunityResponse> responses = baseQuery.fetch();
 
         List<Long> ids = responses.stream().map(AdminCommunityResponse::getId).toList();
 
@@ -142,11 +144,21 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                         inCategories(condition.categories()),
                         searchByKeyword(condition.searchOption()),
                         createdAtAfter(condition.getStartAt()),
-                        createdAtBefore(condition.getEndAt())
+                        createdAtBefore(condition.getEndAt()),
+                        isReported(condition.isReported())
                 ));
+        dynamicQueryForEvent(condition.eventId(), countQuery);
 
 
         return PageableExecutionUtils.getPage(responses, condition.pageable(), countQuery::fetchOne);
+    }
+
+    private void dynamicQueryForEvent(Long eventId, JPAQuery<?> baseQuery) {
+        if (eventId != null) {
+            baseQuery
+                    .leftJoin(event).on(community.eventId.eq(event.id))
+                    .where(community.eventId.eq(eventId));
+        }
     }
 
     private BooleanExpression isReported(Boolean isReported) {

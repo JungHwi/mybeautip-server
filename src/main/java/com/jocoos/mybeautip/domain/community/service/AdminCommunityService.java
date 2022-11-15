@@ -31,6 +31,7 @@ public class AdminCommunityService {
     private final AdminCommunityConverter converter;
     private final CommunityCommentDeleteService deleteService;
 
+
     @Transactional(readOnly = true)
     public List<CommunityCategoryResponse> getCategories() {
         List<CommunityCategory> adminCategories = getAdminCategories();
@@ -38,8 +39,11 @@ public class AdminCommunityService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AdminCommunityResponse> getCommunities(Long categoryId, Pageable pageable, SearchOption searchOption) {
-        CommunitySearchCondition condition = getSearchCondition(categoryId, pageable, searchOption);
+    public PageResponse<AdminCommunityResponse> getCommunities(Long categoryId,
+                                                               Long eventId,
+                                                               Pageable pageable,
+                                                               SearchOption searchOption) {
+        CommunitySearchCondition condition = getSearchCondition(categoryId, eventId, pageable, searchOption);
         Page<AdminCommunityResponse> page = communityDao.getCommunitiesAllStatus(condition);
         return new PageResponse<>(page.getTotalElements(), page.getContent());
     }
@@ -74,10 +78,14 @@ public class AdminCommunityService {
         return community.getId();
     }
 
-    private CommunitySearchCondition getSearchCondition(Long categoryId, Pageable pageable, SearchOption searchOption) {
+    private CommunitySearchCondition getSearchCondition(Long categoryId,
+                                                        Long eventId,
+                                                        Pageable pageable,
+                                                        SearchOption searchOption) {
         return CommunitySearchCondition.builder()
                 .pageable(pageable)
                 .searchOption(searchOption)
+                .eventId(eventId)
                 .categories(getCategories(categoryId))
                 .build();
     }
