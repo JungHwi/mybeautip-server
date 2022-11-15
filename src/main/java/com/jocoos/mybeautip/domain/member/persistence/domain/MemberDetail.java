@@ -36,9 +36,11 @@ public class MemberDetail {
     @Convert(converter = SkinWorrySetConverter.class)
     private Set<SkinWorry> skinWorry;
 
-    public void setInviterId(Long inviterId) {
-        if (this.inviterId == null || this.inviterId < 1) {
+    public void registerInviterId(Long inviterId) {
+        if (this.inviterId == null || this.inviterId < 1 ) {
             this.inviterId = inviterId;
+        } else if (this.inviterId.equals(inviterId)) {
+            return;
         } else {
             throw new BadRequestException(ErrorCode.ALREADY_REGISTRATION, "친구 초대 코드가 이미 등록됨.");
         }

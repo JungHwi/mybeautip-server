@@ -510,7 +510,7 @@ public class LegacyMemberService {
         memberDetail.setSkinType(request.getSkinType());
         memberDetail.setSkinWorry(request.getSkinWorry());
         if (targetMember != null) {
-            memberDetail.setInviterId(targetMember.getId());
+            memberDetail.registerInviterId(targetMember.getId());
         }
 
         memberDetail = memberDetailRepository.save(memberDetail);
