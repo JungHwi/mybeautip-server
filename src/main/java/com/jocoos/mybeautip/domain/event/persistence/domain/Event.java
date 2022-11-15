@@ -92,7 +92,11 @@ public class Event extends ModifiedDateAuditable {
     @PostPersist
     public void postPersist() {
         if (CollectionUtils.isNotEmpty(eventProductList)) {
-            eventProductList.forEach(product -> product.setEvent(this));
+            eventProductList.forEach(product -> {
+                if (product != null) {
+                    product.setEvent(this);
+                }
+            });
         }
     }
 }

@@ -31,17 +31,17 @@ public class CommunitySummary {
 
 
     @Transactional(readOnly = true)
-    public TopSummaryResponse top() {
+    public TopSummaryResponse top(Long memberId) {
         List<CommunityCategory> topCategories = categoryDao.topSummaryCategories();
         List<CommunityCategoryResponse> categoryResponses =  categoryConverter.convert(topCategories);
-        return topSummary.getResponse(categoryResponses);
+        return topSummary.getResponse(categoryResponses, memberId);
     }
 
     @Transactional(readOnly = true)
-    public List<CommunityResponse> getSummary(CommunityCategoryType categoryType) {
+    public List<CommunityResponse> getSummary(CommunityCategoryType categoryType, Long memberId) {
         SummaryType summaryType = SummaryType.getByCategory(categoryType);
         CommunityCategory category = categoryDao.getByType(categoryType);
-        List<SummaryCommunityResult> summaryResults = communityDao.summary(category.getId(), categoryType, summaryType.getCount());
+        List<SummaryCommunityResult> summaryResults = communityDao.summary(category.getId(), categoryType, summaryType.getCount(), memberId);
         List<CommunityResponse> responses = summaryConverter.convert(summaryResults);
         return relationService.setRelationInfo(responses);
     }

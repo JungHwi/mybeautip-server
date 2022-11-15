@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.domain.scrap.service.dao;
 
-import com.jocoos.mybeautip.domain.community.converter.CommunityScrapConverter;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.persistence.repository.ScrapRepository;
+import com.jocoos.mybeautip.domain.scrap.vo.ScrapSearchCondition;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.scrap.VideoScrapRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,6 @@ public class ScrapDao {
 
     private final ScrapRepository repository;
     private final VideoScrapRepository videoScrapRepository;
-    private final CommunityScrapConverter converter;
 
     @Transactional
     public Scrap scrap(ScrapRequest request) {
@@ -40,7 +39,8 @@ public class ScrapDao {
 
     @Transactional(readOnly = true)
     public List<Scrap> getScrapList(ScrapType type, long memberId, long cursor, Pageable pageable) {
-        return repository.findByTypeAndMemberIdAndIsScrapAndIdLessThan(type, memberId, true, cursor, pageable);
+        ScrapSearchCondition condition = new ScrapSearchCondition(type, memberId, true, cursor, pageable);
+        return repository.getScrapsExcludeBlockMember(condition);
     }
 
     @Transactional(readOnly = true)
