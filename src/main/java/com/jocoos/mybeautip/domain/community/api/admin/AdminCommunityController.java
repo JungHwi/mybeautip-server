@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.api.admin;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
@@ -34,6 +35,7 @@ public class AdminCommunityController {
     public ResponseEntity<PageResponse<AdminCommunityResponse>> getCommunities(
             @RequestParam(required = false, name = "category_id") Long categoryId,
             @RequestParam(required = false, name= "event_id") Long eventId,
+            @RequestParam(required = false) CommunityStatus status,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "sortedAt") String sort,
@@ -52,7 +54,7 @@ public class AdminCommunityController {
                 .isReported(isReported)
                 .build();
 
-        return ResponseEntity.ok(service.getCommunities(categoryId, eventId, pageRequest, searchOption));
+        return ResponseEntity.ok(service.getCommunities(status, categoryId, eventId, pageRequest, searchOption));
     }
 
     @GetMapping("/community/{communityId}")

@@ -103,6 +103,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .join(member).on(community.member.eq(member))
                 .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
+                        eqStatus(condition.status()),
                         inCategories(condition.categories()),
                         searchByKeyword(condition.searchOption()),
                         createdAtAfter(condition.getStartAt()),
@@ -141,6 +142,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .from(community)
                 .join(member).on(community.member.eq(member))
                 .where(
+                        eqStatus(condition.status()),
                         inCategories(condition.categories()),
                         searchByKeyword(condition.searchOption()),
                         createdAtAfter(condition.getStartAt()),

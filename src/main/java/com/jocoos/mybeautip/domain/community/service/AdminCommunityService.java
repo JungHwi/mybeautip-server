@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.AdminCommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
@@ -39,11 +40,12 @@ public class AdminCommunityService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AdminCommunityResponse> getCommunities(Long categoryId,
+    public PageResponse<AdminCommunityResponse> getCommunities(CommunityStatus status,
+                                                               Long categoryId,
                                                                Long eventId,
                                                                Pageable pageable,
                                                                SearchOption searchOption) {
-        CommunitySearchCondition condition = getSearchCondition(categoryId, eventId, pageable, searchOption);
+        CommunitySearchCondition condition = getSearchCondition(status, categoryId, eventId, pageable, searchOption);
         Page<AdminCommunityResponse> page = communityDao.getCommunitiesAllStatus(condition);
         return new PageResponse<>(page.getTotalElements(), page.getContent());
     }
@@ -78,11 +80,13 @@ public class AdminCommunityService {
         return community.getId();
     }
 
-    private CommunitySearchCondition getSearchCondition(Long categoryId,
+    private CommunitySearchCondition getSearchCondition(CommunityStatus status,
+                                                        Long categoryId,
                                                         Long eventId,
                                                         Pageable pageable,
                                                         SearchOption searchOption) {
         return CommunitySearchCondition.builder()
+                .status(status)
                 .pageable(pageable)
                 .searchOption(searchOption)
                 .eventId(eventId)
