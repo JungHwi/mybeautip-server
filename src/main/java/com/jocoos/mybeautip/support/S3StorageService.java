@@ -77,7 +77,8 @@ public class S3StorageService implements StorageService {
     }
 
     public String upload(MultipartFile file, String key) throws IOException {
-        return upload(file, key, true);
+        upload(file, key, true);
+        return key;
     }
 
     public String upload(MultipartFile file, String key, boolean publicRead) throws IOException {
