@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -50,7 +51,12 @@ public class Placard extends CreatedDateAuditable {
     @Column(nullable = false, columnDefinition="TIMESTAMP")
     private ZonedDateTime endedAt;
 
-    @OneToMany(mappedBy = "placard")
+    @OneToMany(mappedBy = "placard", cascade = CascadeType.ALL)
     private List<PlacardDetail> detailList;
+
+    public void addDetail(PlacardDetail detail) {
+        this.detailList = Collections.singletonList(detail);
+        detail.setPlacard(this);
+    }
 
 }

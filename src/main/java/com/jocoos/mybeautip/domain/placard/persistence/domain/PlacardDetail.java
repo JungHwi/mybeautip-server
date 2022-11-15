@@ -25,9 +25,13 @@ public class PlacardDetail {
     private PlacardTabType tabType;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "placard_id", insertable = false, updatable = false)
+    @JoinColumn(name = "placard_id", updatable = false)
     Placard placard;
 
     @Column
     String imageFile;
+
+    public void setPlacard(Placard placard) {
+        this.placard = placard;
+    }
 }
