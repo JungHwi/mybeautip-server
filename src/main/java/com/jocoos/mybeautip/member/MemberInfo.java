@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.restapi.LegacyVideoController;
@@ -16,6 +17,7 @@ public class MemberInfo {
     private Long id;
     private String tag;
     private MemberStatus status;
+    private GrantType grantType;
     private String username;
     private String email;
     private String phoneNumber;
@@ -37,6 +39,7 @@ public class MemberInfo {
         this.id = member.getId();
         this.tag = member.getTag();
         this.status = member.getStatus();
+        this.grantType = member.getGrantType();
         this.username = StringUtils.isBlank(member.getUsername()) ? "" : member.getUsername();
         this.email = StringUtils.isBlank(member.getEmail()) ? "" : member.getEmail();
         this.phoneNumber = StringUtils.isBlank(member.getPhoneNumber()) ? "" : member.getPhoneNumber();

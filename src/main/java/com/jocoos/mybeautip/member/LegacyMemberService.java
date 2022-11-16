@@ -11,6 +11,8 @@ import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
+import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -68,10 +70,12 @@ public class LegacyMemberService {
     private static final String USERNAME_ALREADY_USED = "username.already_used";
     private static final String EMAIL_INVALID_FORMAT = "email.invalid_format";
     private static final String MEMBER_NOT_FOUND = "member.not_found";
+
     private final BlockService blockService;
     private final BannedWordService bannedWordService;
     private final MessageService messageService;
     private final TagService tagService;
+    private final MemberTermService memberTermService;
     private final MemberRepository memberRepository;
     private final MemberDetailRepository memberDetailRepository;
     private final FollowingRepository followingRepository;
@@ -86,6 +90,7 @@ public class LegacyMemberService {
     private final SlackService slackService;
     private final SocialMemberFactory socialMemberFactory;
 
+
     private final ActivityPointService activityPointService;
 
     private final AwsS3Handler awsS3Handler;
@@ -99,6 +104,7 @@ public class LegacyMemberService {
     public LegacyMemberService(BannedWordService bannedWordService,
                                MessageService messageService,
                                TagService tagService,
+                               MemberTermService memberTermService,
                                MemberRepository memberRepository,
                                MemberDetailRepository memberDetailRepository,
                                FollowingRepository followingRepository,
@@ -118,6 +124,7 @@ public class LegacyMemberService {
         this.bannedWordService = bannedWordService;
         this.messageService = messageService;
         this.tagService = tagService;
+        this.memberTermService = memberTermService;
         this.memberRepository = memberRepository;
         this.memberDetailRepository = memberDetailRepository;
         this.followingRepository = followingRepository;
@@ -163,6 +170,17 @@ public class LegacyMemberService {
     public Member getAdmin() {
         return memberRepository.findByUsernameAndDeletedAtIsNullAndVisibleIsTrue("마이뷰팁")
                 .orElseThrow(() -> new MemberNotFoundException("Can't find admin"));
+    }
+
+    @Transactional(readOnly = true)
+    public MemberMeInfo getMyInfo(String lang) {
+        List<TermTypeResponse> termTypeResponses =
+                memberTermService.getOptionalTermAcceptStatus(currentMemberId());
+
+        return memberRepository.findByIdAndDeletedAtIsNull(currentMemberId())
+                .map(m -> new MemberMeInfo(m, termTypeResponses))
+                .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+
     }
 
     private Object currentPrincipal() {

@@ -142,12 +142,16 @@ public class LegacyMemberController {
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         log.debug("member id: {}", principal.getName());
 
+        MemberMeInfo memberMeInfo = legacyMemberService.getMyInfo(lang);
+
         List<TermTypeResponse> termTypeResponses =
                 memberTermService.getOptionalTermAcceptStatus(Long.parseLong(principal.getName()));
 
-        return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-                .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio, termTypeResponses)))
+        memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
+                .map(m -> EntityModel.of(new MemberMeInfo(m, termTypeResponses)))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+
+        return EntityModel.of(memberMeInfo);
     }
 
     @PatchMapping()
