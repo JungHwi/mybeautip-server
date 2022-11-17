@@ -43,10 +43,18 @@ public class SearchService {
     @Transactional(readOnly = true)
     public CountResponse count(SearchType type, String keyword) {
         Long memberId = legacyMemberService.currentMemberId();
-        if (SearchType.COMMUNITY.equals(type)) {
-            return new CountResponse(communityDao.countBy(keyword, memberId));
-        }
-        return new CountResponse(videoDao.count(keyword));
+
+        return switch (type) {
+            case COMMUNITY -> new CountResponse(communityDao.countBy(keyword, memberId));
+            case VIDEO -> new CountResponse(videoDao.count(keyword));
+            case ALL -> countAll(keyword);
+        };
+    }
+
+    private CountResponse countAll(String keyword) {
+        Long memberId = legacyMemberService.currentMemberId();
+        Long count = communityDao.countBy(keyword, memberId) + videoDao.count(keyword);
+        return new CountResponse(count);
     }
 
     private SearchResponse<CommunityResponse> searchCommunity(KeywordSearchCondition condition, Member member) {
