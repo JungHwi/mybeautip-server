@@ -140,8 +140,6 @@ public class CommunityService {
         community.setContents(request.getContents());
         editFiles(community, request.getFiles());
 
-        communityDao.save(community);
-
         return convertService.toResponse(community.getMember(), community);
     }
 
