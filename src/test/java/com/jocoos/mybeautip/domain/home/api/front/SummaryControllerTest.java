@@ -214,6 +214,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("[].owner.id").type(JsonFieldType.NUMBER).description("아이디"),
                                 fieldWithPath("[].owner.tag").type(JsonFieldType.STRING).description("태그"),
                                 fieldWithPath("[].owner.status").type(JsonFieldType.STRING).description("상태"),
+                                fieldWithPath("[].owner.grant_type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.GRANT_TYPE)),
                                 fieldWithPath("[].owner.username").type(JsonFieldType.STRING).description("유저명"),
                                 fieldWithPath("[].owner.email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("[].owner.phone_number").type(JsonFieldType.STRING).description("전화번호"),

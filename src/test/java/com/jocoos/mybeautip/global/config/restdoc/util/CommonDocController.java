@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.global.config.restdoc.util;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
+import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.notification.code.*;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
@@ -49,6 +50,7 @@ public class CommonDocController {
         Map<String, String> memberStatus = getDocs(MemberStatus.values());
         Map<String, String> skinType = getDocs(SkinType.values());
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
+        Map<String, String> grantType = getDocs(GrantType.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -109,6 +111,7 @@ public class CommonDocController {
                         .memberStatus(memberStatus)
                         .skinType(skinType)
                         .skinWorry(skinWorry)
+                        .grantType(grantType)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)

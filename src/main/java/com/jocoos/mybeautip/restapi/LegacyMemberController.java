@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
-import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -43,7 +42,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.security.Principal;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -138,18 +136,8 @@ public class LegacyMemberController {
     }
 
     @GetMapping("/me")
-    public EntityModel<MemberMeInfo> getMe(Principal principal,
-                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        log.debug("member id: {}", principal.getName());
-
+    public EntityModel<MemberMeInfo> getMe(@RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         MemberMeInfo memberMeInfo = legacyMemberService.getMyInfo(lang);
-
-        List<TermTypeResponse> termTypeResponses =
-                memberTermService.getOptionalTermAcceptStatus(Long.parseLong(principal.getName()));
-
-        memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-                .map(m -> EntityModel.of(new MemberMeInfo(m, termTypeResponses)))
-                .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
         return EntityModel.of(memberMeInfo);
     }

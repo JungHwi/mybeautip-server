@@ -23,6 +23,7 @@ public class EnumDocs {
     Map<String, String> memberStatus;
     Map<String, String> skinType;
     Map<String, String> skinWorry;
+    Map<String, String> grantType;
 
     // Event
     Map<String, String> eventStatus;
