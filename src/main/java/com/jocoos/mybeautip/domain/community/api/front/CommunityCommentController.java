@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_LONG_STRING;
-
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -25,9 +23,16 @@ public class CommunityCommentController {
     @GetMapping("/1/community/{community_id}/comment")
     public ResponseEntity<CursorResultResponse<CommunityCommentResponse>> getComments(@PathVariable("community_id") long communityId,
                                                                                       @RequestParam(value = "parent_id", required = false) Long parentId,
-                                                                                      @RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
+                                                                                      @RequestParam(required = false) Long cursor,
                                                                                       @RequestParam(required = false, defaultValue = "20") int size,
                                                                                       @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction) {
+        if (cursor == null) {
+            if (direction.isAscending()) {
+                cursor = Long.MIN_VALUE;
+            } else {
+                cursor = Long.MAX_VALUE;
+            }
+        }
 
         SearchCommentRequest request = SearchCommentRequest.builder()
                 .communityId(communityId)
