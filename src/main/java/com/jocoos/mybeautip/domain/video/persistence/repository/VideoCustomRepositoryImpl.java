@@ -53,6 +53,9 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
         return repository.query(query -> query
                 .select(count(video))
                 .from(video)
+                .join(member).on(video.member.eq(member))
+                .join(videoCategoryMapping).on(video.categoryMapping.contains(videoCategoryMapping))
+                .join(videoCategory).on(videoCategoryMapping.videoCategory.eq(videoCategory))
                 .where(
                         searchCondition(keyword),
                         eqVisibilityPublic(),
