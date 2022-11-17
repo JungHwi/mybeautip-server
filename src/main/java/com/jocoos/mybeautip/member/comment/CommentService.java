@@ -21,6 +21,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.DELETE_VI
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DELETED;
 
 @Slf4j
 @Service
@@ -164,73 +166,63 @@ public class CommentService {
 
     @Transactional
     public int deleteComment(Comment comment) {
-        if (comment.getParentId() != null) {
-            return deleteCommentAndChildren(comment);
-        }
 
         int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
         log.debug("child count: {}", childCount);
 
         activityPointService.retrieveActivityPoint(DELETE_VIDEO_COMMENT,
-                                                   comment.getId(), comment.getCreatedBy());
+                comment.getId(), comment.getCreatedBy());
         activityCountDao.updateVideoCommentCount(comment.getCreatedBy().getId(), -1);
 
-        if (childCount == 0) {
-            return deleteCommentAndChildren(comment);
-        } else {
-            return blindComment(comment);
-        }
-    }
-
-    @Transactional
-    public int blindComment(Comment comment) {
-        Comment.CommentState state = Comment.CommentState.BLINDED;
-        comment.setState(state);
-        commentRepository.save(comment);
-        return state.value();
+        return deleteCommentAndChildren(comment);
     }
 
     @Transactional
     public int deleteCommentAndChildren(Comment comment) {
-        tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
 
-        int count = 1;
+        tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+        comment.setState(DELETED);
+
+        deleteChildComments(comment);
+        updateParentCommentChildCount(comment);
+        deleteCommentLikes(comment);
+
+        commentRepository.save(comment);
+        return DELETED.value();
+    }
+
+    private void deleteCommentLikes(Comment comment) {
+        List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
+        commentLikeRepository.deleteAll(commentLikes);
+    }
+
+    private void updateParentCommentChildCount(Comment comment) {
         if (comment.getParentId() != null) {
             commentRepository.findById(comment.getParentId()).ifPresent(parentComment -> {
                 if (parentComment.getCommentCount() > 0) {
                     commentRepository.updateCommentCount(parentComment.getId(), -1);
                 }
             });
-        } else {
-            if (comment.getCommentCount() > 0) {
-                count += commentRepository.deleteByParentIdAndCreatedById(comment.getId(), comment.getCreatedBy().getId());
-            }
+        }
+    }
+
+    private void deleteChildComments(Comment comment) {
+        List<Long> ids = commentRepository.findByParentId(comment.getId())
+                .stream()
+                .map(Comment::getId)
+                .toList();
+        if (!CollectionUtils.isEmpty(ids)) {
+            commentRepository.updateState(ids, DELETED.value());
         }
 
-        List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
-        commentLikeRepository.deleteAll(commentLikes);
-        commentRepository.delete(comment);
-
+        final int count = 1 + ids.size();
         if (comment.getVideoId() != null) {
-            final int commentCount = -count;
             log.info("deleted comment count for video: {}", count);
             videoRepository.findById(comment.getVideoId()).ifPresent(video -> {
                 if (video.getCommentCount() > 0) {
-                    videoRepository.updateCommentCount(video.getId(), commentCount);
+                    videoRepository.updateCommentCount(video.getId(), count);
                 }
             });
         }
-
-//        if (comment.getPostId() != null) {
-//            final int commentCount = -count;
-//            log.info("deleted comment count for post: {}", count);
-//            postRepository.findById(comment.getPostId()).ifPresent(post -> {
-//                if (post.getCommentCount() > 0) {
-//                    postRepository.updateCommentCount(post.getId(), commentCount);
-//                }
-//            });
-//        }
-
-        return Comment.CommentState.DELETED.value();
     }
 }
