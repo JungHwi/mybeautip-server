@@ -174,10 +174,11 @@ public class LegacyMemberService {
 
     @Transactional(readOnly = true)
     public MemberMeInfo getMyInfo(String lang) {
+        Long memberId = currentMemberId();
         List<TermTypeResponse> termTypeResponses =
-                memberTermService.getOptionalTermAcceptStatus(currentMemberId());
+                memberTermService.getOptionalTermAcceptStatus(memberId);
 
-        return memberRepository.findByIdAndDeletedAtIsNull(currentMemberId())
+        return memberRepository.findByIdAndDeletedAtIsNull(memberId)
                 .map(m -> new MemberMeInfo(m, termTypeResponses))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 

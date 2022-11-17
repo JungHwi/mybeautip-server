@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.jocoos.mybeautip.domain.member.code.GrantType.NAVER;
 import static com.jocoos.mybeautip.domain.member.code.MemberStatus.ACTIVE;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -98,6 +99,7 @@ class SignupControllerTest extends RestDocsTestSupport {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.member.tag").value(member.getTag()))
                 .andExpect(jsonPath("$.member.status").value(ACTIVE.name()))
+                .andExpect(jsonPath("$.member.grant_type").value(NAVER.name()))
                 .andExpect(jsonPath("$.member.username").value(member.getUsername()))
                 .andExpect(jsonPath("$.member.email").value(member.getEmail()))
                 .andExpect(jsonPath("$.member.phone_number").value(memberInfo.getPhoneNumber()))
@@ -140,6 +142,8 @@ class SignupControllerTest extends RestDocsTestSupport {
                         fieldWithPath("member.tag").type(JsonFieldType.STRING).description("멤버 태그"),
                         fieldWithPath("member.status").type(JsonFieldType.STRING).description("멤버 상태")
                                 .description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                        fieldWithPath("member.grant_type").type(JsonFieldType.STRING)
+                                .description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.GRANT_TYPE)),
                         fieldWithPath("member.username").type(JsonFieldType.STRING).description("멤버 이름"),
                         fieldWithPath("member.email").type(JsonFieldType.STRING).description("멤버 이메일"),
                         fieldWithPath("member.phone_number").type(JsonFieldType.STRING).description("멤버 전화번호"),
