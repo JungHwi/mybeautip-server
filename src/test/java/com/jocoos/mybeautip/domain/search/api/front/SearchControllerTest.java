@@ -137,6 +137,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video.[].owner.id").type(JsonFieldType.NUMBER).description("아이디"),
                         fieldWithPath("video.[].owner.tag").type(JsonFieldType.STRING).description("태그"),
                         fieldWithPath("video.[].owner.status").type(JsonFieldType.STRING).description("상태"),
+                        fieldWithPath("video.[].owner.grant_type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.GRANT_TYPE)).optional(),
                         fieldWithPath("video.[].owner.username").type(JsonFieldType.STRING).description("유저명"),
                         fieldWithPath("video.[].owner.email").type(JsonFieldType.STRING).description("이메일"),
                         fieldWithPath("video.[].owner.phone_number").type(JsonFieldType.STRING).description("전화번호"),
