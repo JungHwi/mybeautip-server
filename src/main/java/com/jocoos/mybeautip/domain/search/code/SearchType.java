@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SearchType implements CodeValue {
     COMMUNITY("커뮤니티 검색"),
-    VIDEO("비디오 검색");
+    VIDEO("비디오 검색"),
+    ALL("전체");
 
     private final String description;
 
