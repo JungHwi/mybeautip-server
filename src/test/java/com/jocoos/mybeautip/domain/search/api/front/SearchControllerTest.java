@@ -7,7 +7,11 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static com.jocoos.mybeautip.domain.search.code.SearchType.COMMUNITY;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.SEARCH_TYPE;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -31,8 +35,8 @@ class SearchControllerTest extends RestDocsTestSupport {
 
         result.andDo(document("search_community",
                 requestParameters(
-                        parameterWithName("type").description("검색 타입").optional().description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.SEARCH_TYPE)),
-                        parameterWithName("keyword").description("검색어"),
+                        parameterWithName("type").description("검색 타입").attributes(getDefault(COMMUNITY)).optional().description(generateLinkCode(SEARCH_TYPE)),
+                        parameterWithName("keyword").description("검색어 (1자 이상 20자 이하)"),
                         parameterWithName("cursor").description("커서").optional().attributes(getZonedDateMilliFormat(), getDefault("현재 시간")),
                         parameterWithName("size").description("조회 개").optional().attributes(getDefault(20))
                 ),
@@ -42,7 +46,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("community").type(JsonFieldType.ARRAY).description("커뮤니티 글 목록"),
                         fieldWithPath("community.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
                         fieldWithPath("community.[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
-                        fieldWithPath("community.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                        fieldWithPath("community.[].status").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_STATUS)),
                         fieldWithPath("community.[].event_id").type(JsonFieldType.NUMBER).description("이벤트 ID").optional(),
                         fieldWithPath("community.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                         fieldWithPath("community.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
@@ -64,12 +68,12 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("community.[].relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("스크랩 여부"),
                         fieldWithPath("community.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
                         fieldWithPath("community.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                        fieldWithPath("community.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                        fieldWithPath("community.[].member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                         fieldWithPath("community.[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                         fieldWithPath("community.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
                         fieldWithPath("community.[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
                         fieldWithPath("community.[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                        fieldWithPath("community.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                        fieldWithPath("community.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
                         fieldWithPath("community.[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
                         fieldWithPath("community.[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트"))));
     }
@@ -86,7 +90,7 @@ class SearchControllerTest extends RestDocsTestSupport {
 
         result.andDo(document("search_video",
                 requestParameters(
-                        parameterWithName("type").description("검색 타입").optional().description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.SEARCH_TYPE)),
+                        parameterWithName("type").description("검색 타입").optional().description(generateLinkCode(SEARCH_TYPE)),
                         parameterWithName("keyword").description("검색어"),
                         parameterWithName("cursor").description("커서").optional().attributes(getZonedDateMilliFormat(), getDefault("현재 시간")),
                         parameterWithName("size").description("조회 개수").optional().attributes(getDefault(20))
@@ -109,7 +113,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video.[].category.[].type").type(JsonFieldType.STRING).description("카테고리 구분"),
                         fieldWithPath("video.[].category.[].title").type(JsonFieldType.STRING).description("카테고리 타이틀"),
                         fieldWithPath("video.[].category.[].shape_url").type(JsonFieldType.STRING).description("카테고리 쉐입 URL").optional(),
-                        fieldWithPath("video.[].category.[].mask_type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.VIDEO_MASK_TYPE)).optional(),
+                        fieldWithPath("video.[].category.[].mask_type").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.VIDEO_MASK_TYPE)).optional(),
                         fieldWithPath("video.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                         fieldWithPath("video.[].content").type(JsonFieldType.STRING).description("컨텐츠").optional(),
                         fieldWithPath("video.[].url").type(JsonFieldType.STRING).description("비디오 파일 주소"),
@@ -137,7 +141,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video.[].owner.id").type(JsonFieldType.NUMBER).description("아이디"),
                         fieldWithPath("video.[].owner.tag").type(JsonFieldType.STRING).description("태그"),
                         fieldWithPath("video.[].owner.status").type(JsonFieldType.STRING).description("상태"),
-                        fieldWithPath("video.[].owner.grant_type").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.GRANT_TYPE)).optional(),
+                        fieldWithPath("video.[].owner.grant_type").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.GRANT_TYPE)).optional(),
                         fieldWithPath("video.[].owner.username").type(JsonFieldType.STRING).description("유저명"),
                         fieldWithPath("video.[].owner.email").type(JsonFieldType.STRING).description("이메일"),
                         fieldWithPath("video.[].owner.phone_number").type(JsonFieldType.STRING).description("전화번호"),
@@ -163,14 +167,13 @@ class SearchControllerTest extends RestDocsTestSupport {
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .get("/api/1/search/count")
-                        .param("type", "VIDEO")
                         .param("keyword", "1"))
                 .andExpect(status().isOk())
                 .andDo(print());
 
         result.andDo(document("count",
                 requestParameters(
-                        parameterWithName("type").description("검색 타입").optional().description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.SEARCH_TYPE)),
+                        parameterWithName("type").description("검색 타입").attributes(getDefault(COMMUNITY)).optional().description(generateLinkCode(SEARCH_TYPE)),
                         parameterWithName("keyword").description("검색어")
                 ),
                 responseFields(
