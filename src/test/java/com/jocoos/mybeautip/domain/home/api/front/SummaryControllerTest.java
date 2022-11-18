@@ -92,8 +92,6 @@ class SummaryControllerTest extends RestDocsTestSupport {
                         fieldWithPath("[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                         fieldWithPath("[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                         fieldWithPath("[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
-                        fieldWithPath("[].votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
-                        fieldWithPath("[].votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
                         fieldWithPath("[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
                         fieldWithPath("[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                         fieldWithPath("[].comment_count").type(JsonFieldType.NUMBER).description("댓글수"),
