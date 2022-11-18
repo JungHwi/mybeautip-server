@@ -19,7 +19,6 @@ import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +31,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
+import static java.util.Collections.singletonList;
 
 
 @Slf4j
@@ -83,6 +85,7 @@ public class CommunityService {
         Community community = communityDao.get(communityId);
 
         Member member = legacyMemberService.currentMember();
+        validLogin(community.getCategory(), member);
 
         return convertService.toResponse(member, community);
     }
@@ -90,6 +93,7 @@ public class CommunityService {
     @Transactional(readOnly = true)
     public List<CommunityResponse> getCommunities(SearchCommunityRequest request, Pageable pageable) {
         CommunitySearchCondition condition = createSearchCondition(request);
+
         List<Community> communities = communityDao.getCommunities(condition, pageable);
         return convertService.toResponse(legacyMemberService.currentMember(), communities);
     }
@@ -118,7 +122,7 @@ public class CommunityService {
         Community community = communityDao.get(communityId);
 
         if (!community.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
         }
 
         community.delete();
@@ -133,7 +137,7 @@ public class CommunityService {
         Community community = communityDao.get(request.getCommunityId());
 
         if (!community.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
         }
 
         community.setTitle(request.getTitle());
@@ -214,11 +218,24 @@ public class CommunityService {
     private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
         List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
         Long memberId = legacyMemberService.currentMemberId();
+        validLogin(categories, memberId);
         return CommunitySearchCondition.builder()
                 .eventId(request.getEventId())
                 .cursor(request.getCursor())
                 .categories(categories)
                 .memberId(memberId)
                 .build();
+    }
+
+    private void validLogin(List<CommunityCategory> categories, Long memberId) {
+        if (memberId == null && categories.size() == 1 && BLIND.equals(categories.get(0).getType())) {
+            throw new AccessDeniedException("need login");
+        }
+    }
+
+    private void validLogin(CommunityCategory category, Member member) {
+        if (member == null) {
+            validLogin(singletonList(category), null);
+        }
     }
 }
