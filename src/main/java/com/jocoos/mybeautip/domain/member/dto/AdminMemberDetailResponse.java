@@ -20,6 +20,7 @@ public class AdminMemberDetailResponse {
     private final String avatarUrl;
     private final String username;
     private final String email;
+    private final String phoneNumber;
 
     private final Integer ageGroup;
     private final SkinType skinType;
