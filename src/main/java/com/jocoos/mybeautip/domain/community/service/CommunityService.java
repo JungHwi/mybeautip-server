@@ -84,7 +84,7 @@ public class CommunityService {
         Community community = communityDao.get(communityId);
         Member member = legacyMemberService.currentMember();
 
-        validCategoryDripLogin(community.getCategory(), member);
+        validCategoryBlindLogin(community.getCategory(), member);
 
         return convertService.toResponse(member, community);
     }
@@ -224,7 +224,7 @@ public class CommunityService {
                 .build();
     }
 
-    private void validCategoryDripLogin(CommunityCategory category, Member member) {
+    private void validCategoryBlindLogin(CommunityCategory category, Member member) {
         if (member == null && BLIND.equals(category.getType())) {
             throw new AccessDeniedException("need login");
         }
