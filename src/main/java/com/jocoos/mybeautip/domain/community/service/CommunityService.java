@@ -83,8 +83,8 @@ public class CommunityService {
         communityDao.readCount(communityId);
 
         Community community = communityDao.get(communityId);
-
         Member member = legacyMemberService.currentMember();
+
         validLogin(community.getCategory(), member);
 
         return convertService.toResponse(member, community);
@@ -93,7 +93,6 @@ public class CommunityService {
     @Transactional(readOnly = true)
     public List<CommunityResponse> getCommunities(SearchCommunityRequest request, Pageable pageable) {
         CommunitySearchCondition condition = createSearchCondition(request);
-
         List<Community> communities = communityDao.getCommunities(condition, pageable);
         return convertService.toResponse(legacyMemberService.currentMember(), communities);
     }
@@ -227,15 +226,15 @@ public class CommunityService {
                 .build();
     }
 
-    private void validLogin(List<CommunityCategory> categories, Long memberId) {
-        if (memberId == null && categories.size() == 1 && BLIND.equals(categories.get(0).getType())) {
-            throw new AccessDeniedException("need login");
-        }
-    }
-
     private void validLogin(CommunityCategory category, Member member) {
         if (member == null) {
             validLogin(singletonList(category), null);
+        }
+    }
+
+    private void validLogin(List<CommunityCategory> categories, Long memberId) {
+        if (memberId == null && categories.size() == 1 && BLIND.equals(categories.get(0).getType())) {
+            throw new AccessDeniedException("need login");
         }
     }
 }
