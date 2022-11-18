@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DEFAULT;
 
 @Slf4j
 @RestController
@@ -257,6 +258,7 @@ public class LegacyVideoController {
         Long memberId = legacyMemberService.currentMemberId();
         CommentSearchCondition condition = CommentSearchCondition.builder()
                 .videoId(id)
+                .state(DEFAULT)
                 .cursor(cursor)
                 .parentId(parentId)
                 .memberId(memberId)
