@@ -37,7 +37,6 @@ import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
-import static java.util.Collections.singletonList;
 
 
 @Slf4j
@@ -85,7 +84,7 @@ public class CommunityService {
         Community community = communityDao.get(communityId);
         Member member = legacyMemberService.currentMember();
 
-        validLogin(community.getCategory(), member);
+        validCategoryDripLogin(community.getCategory(), member);
 
         return convertService.toResponse(member, community);
     }
@@ -217,7 +216,6 @@ public class CommunityService {
     private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
         List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
         Long memberId = legacyMemberService.currentMemberId();
-        validLogin(categories, memberId);
         return CommunitySearchCondition.builder()
                 .eventId(request.getEventId())
                 .cursor(request.getCursor())
@@ -226,14 +224,8 @@ public class CommunityService {
                 .build();
     }
 
-    private void validLogin(CommunityCategory category, Member member) {
-        if (member == null) {
-            validLogin(singletonList(category), null);
-        }
-    }
-
-    private void validLogin(List<CommunityCategory> categories, Long memberId) {
-        if (memberId == null && categories.size() == 1 && BLIND.equals(categories.get(0).getType())) {
+    private void validCategoryDripLogin(CommunityCategory category, Member member) {
+        if (member == null && BLIND.equals(category.getType())) {
             throw new AccessDeniedException("need login");
         }
     }
