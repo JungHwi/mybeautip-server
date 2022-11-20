@@ -53,6 +53,7 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("avatar_url").type(JsonFieldType.STRING).description("아바타 이미지 URL"),
                         fieldWithPath("username").type(JsonFieldType.STRING).description("닉네임"),
                         fieldWithPath("email").type(JsonFieldType.STRING).description("이메일").optional(),
+                        fieldWithPath("phone_number").type(JsonFieldType.STRING).description("전화번호").optional(),
                         fieldWithPath("point").type(JsonFieldType.NUMBER).description("보유 포인트"),
                         fieldWithPath("expiry_point").type(JsonFieldType.NUMBER).description("이번달 만료예정 포인트"),
                         fieldWithPath("is_pushable").type(JsonFieldType.BOOLEAN).description("푸시 알림 동의 여부"),

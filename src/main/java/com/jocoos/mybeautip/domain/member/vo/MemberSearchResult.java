@@ -23,6 +23,7 @@ public class MemberSearchResult {
     private final String avatarUrl;
     private final String username;
     private final String email;
+    private final String phoneNumber;
     private final int point;
     private final Boolean isPushable;
     private final GrantType grantType;
@@ -45,6 +46,7 @@ public class MemberSearchResult {
         this.avatarUrl = member.getAvatarUrl();
         this.username = member.getUsername();
         this.email = member.getEmail();
+        this.phoneNumber = member.getPhoneNumber();
         this.point = member.getPoint();
         this.isPushable = member.getPushable();
         this.grantType = member.getGrantType();
