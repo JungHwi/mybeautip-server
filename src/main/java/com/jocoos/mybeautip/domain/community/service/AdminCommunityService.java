@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategor
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
+import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class AdminCommunityService {
 
     private final CommunityCategoryDao categoryDao;
     private final CommunityDao communityDao;
+    private final EventDao eventDao;
     private final AdminCommunityConverter converter;
     private final CommunityCommentDeleteService deleteService;
 
@@ -42,29 +44,11 @@ public class AdminCommunityService {
         return new PageResponse<>(page.getTotalElements(), page.getContent());
     }
 
-    private CommunitySearchCondition getSearchCondition(Long categoryId, Pageable pageable, SearchOption searchOption) {
-        return CommunitySearchCondition.builder()
-                .pageable(pageable)
-                .searchOption(searchOption)
-                .categories(getCategories(categoryId))
-                .build();
-    }
-
-    private List<CommunityCategory> getAdminCategories() {
-        return categoryDao.getAllExcludeByTypes(NOT_IN_ADMIN);
-    }
-
-    private List<CommunityCategory> getCategories(Long categoryId) {
-        if (categoryId == null) {
-            return getAdminCategories();
-        }
-        return categoryDao.getCategoryForSearchCommunity(categoryId);
-    }
-
     @Transactional(readOnly = true)
     public AdminCommunityResponse getCommunity(Long communityId) {
         Community community = communityDao.get(communityId);
-        return converter.convert(community);
+        String eventTitle = getEventTitle(community.getEventId());
+        return converter.convert(community, eventTitle);
     }
 
     @Transactional
@@ -88,5 +72,31 @@ public class AdminCommunityService {
         community.hide(isHide);
         deleteService.hide(communityId, isHide);
         return community.getId();
+    }
+
+    private CommunitySearchCondition getSearchCondition(Long categoryId, Pageable pageable, SearchOption searchOption) {
+        return CommunitySearchCondition.builder()
+                .pageable(pageable)
+                .searchOption(searchOption)
+                .categories(getCategories(categoryId))
+                .build();
+    }
+
+    private List<CommunityCategory> getAdminCategories() {
+        return categoryDao.getAllExcludeByTypes(NOT_IN_ADMIN);
+    }
+
+    private List<CommunityCategory> getCategories(Long categoryId) {
+        if (categoryId == null) {
+            return getAdminCategories();
+        }
+        return categoryDao.getCategoryForSearchCommunity(categoryId);
+    }
+
+    private String getEventTitle(Long eventId) {
+        if (eventId != null) {
+            return eventDao.getEvent(eventId).getTitle();
+        }
+        return null;
     }
 }
