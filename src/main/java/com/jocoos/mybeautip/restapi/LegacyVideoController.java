@@ -832,6 +832,8 @@ public static class VideoInfo {
     private Boolean blocked;
     private Date createdAt;
     private Date deletedAt;
+    private String categoryNames;
+
     /**
      * Real watchers count that was collected for 10 seconds
      */

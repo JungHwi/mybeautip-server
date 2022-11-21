@@ -20,6 +20,8 @@ public class MotdDetailInfo extends LegacyVideoController.VideoInfo {
 
     public MotdDetailInfo(Video video) {
         BeanUtils.copyProperties(video, this);
+        this.setCategoryNames(video.getCategoryNames());
+
         this.member = new MemberInfo(video.getMember());
     }
 
