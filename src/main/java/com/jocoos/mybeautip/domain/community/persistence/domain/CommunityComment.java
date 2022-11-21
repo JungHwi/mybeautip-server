@@ -91,7 +91,7 @@ public class CommunityComment extends BaseEntity {
     }
 
     public boolean isChild() {
-        return parentId == null;
+        return parentId != null;
     }
 
     public boolean eqStatus(CommunityStatus status) {
