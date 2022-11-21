@@ -49,4 +49,14 @@ public class VideoDao {
     public Long count(String keyword) {
         return repository.countBy(keyword);
     }
+
+    @Transactional
+    public void commentCount(Long videoId, int count) {
+        repository.updateCommentCount(videoId, count);
+    }
+
+    @Transactional
+    public void setCommentCount(Long videoId, int count) {
+        repository.setCommentCount(videoId, count);
+    }
 }

@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.video.service.VideoCommentDeleteService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.mention.MentionResult;
@@ -21,7 +22,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,6 @@ import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.DELETE_VI
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
-import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DELETED;
 
 @Slf4j
 @Service
@@ -54,6 +53,7 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final MemberActivityCountDao activityCountDao;
     private final ActivityPointService activityPointService;
+    private final VideoCommentDeleteService deleteService;
 
     @Transactional
     public List<CommentInfo> getComments(CommentSearchCondition condition, Pageable pageable) {
@@ -109,10 +109,6 @@ public class CommentService {
             comment.setVideoId(id);
             videoRepository.updateCommentCount(id, 1);
         }
-//        if (type == COMMENT_TYPE_POST) {
-//            comment.setPostId(id);
-//            postRepository.updateCommentCount(id, 1);
-//        }
 
         BeanUtils.copyProperties(request, comment);
         comment = commentRepository.save(comment);
@@ -128,7 +124,7 @@ public class CommentService {
         }
 
         activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, comment.getId(), member));
-        activityCountDao.updateVideoCommentCount(member.getId(), 1);
+        activityCountDao.updateAllVideoCommentCount(member, 1);
         return comment;
     }
 
@@ -170,59 +166,15 @@ public class CommentService {
         int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
         log.debug("child count: {}", childCount);
 
-        activityPointService.retrieveActivityPoint(DELETE_VIDEO_COMMENT,
-                comment.getId(), comment.getCreatedBy());
-        activityCountDao.updateVideoCommentCount(comment.getCreatedBy().getId(), -1);
-
-        return deleteCommentAndChildren(comment);
-    }
-
-    @Transactional
-    public int deleteCommentAndChildren(Comment comment) {
-
         tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
-        comment.setState(DELETED);
-
-        deleteChildComments(comment);
-        updateParentCommentChildCount(comment);
         deleteCommentLikes(comment);
 
-        commentRepository.save(comment);
-        return DELETED.value();
+        activityPointService.retrieveActivityPoint(DELETE_VIDEO_COMMENT, comment.getId(), comment.getCreatedBy());
+        return deleteService.delete(comment);
     }
 
     private void deleteCommentLikes(Comment comment) {
         List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
         commentLikeRepository.deleteAll(commentLikes);
-    }
-
-    private void updateParentCommentChildCount(Comment comment) {
-        if (comment.getParentId() != null) {
-            commentRepository.findById(comment.getParentId()).ifPresent(parentComment -> {
-                if (parentComment.getCommentCount() > 0) {
-                    commentRepository.updateCommentCount(parentComment.getId(), -1);
-                }
-            });
-        }
-    }
-
-    private void deleteChildComments(Comment comment) {
-        List<Long> ids = commentRepository.findByParentId(comment.getId())
-                .stream()
-                .map(Comment::getId)
-                .toList();
-        if (!CollectionUtils.isEmpty(ids)) {
-            commentRepository.updateState(ids, DELETED.value());
-        }
-
-        final int count = 1 + ids.size();
-        if (comment.getVideoId() != null) {
-            log.info("deleted comment count for video: {}", count);
-            videoRepository.findById(comment.getVideoId()).ifPresent(video -> {
-                if (video.getCommentCount() > 0) {
-                    videoRepository.updateCommentCount(video.getId(), count);
-                }
-            });
-        }
     }
 }
