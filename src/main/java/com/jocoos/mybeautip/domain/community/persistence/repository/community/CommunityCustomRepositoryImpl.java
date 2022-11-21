@@ -98,10 +98,11 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     @Override
     public Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition) {
         List<AdminCommunityResponse> responses = repository.query(query -> query
-                        .select(new QAdminCommunityResponse(community, new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename)))
+                        .select(new QAdminCommunityResponse(community, new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename), event.title))
                         .from(community)
                         .join(member).on(community.member.eq(member))
                         .join(communityCategory).on(community.category.eq(communityCategory))
+                        .leftJoin(event).on(community.eventId.eq(event.id))
                         .where(
                                 inCategories(condition.categories()),
                                 searchByKeyword(condition.searchOption()),
