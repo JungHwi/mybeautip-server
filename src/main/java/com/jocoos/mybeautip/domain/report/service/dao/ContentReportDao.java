@@ -58,7 +58,7 @@ public class ContentReportDao {
     }
 
     private ZonedDateTime getReportedAt(Map<String, Object> map) {
-        return ZonedDateTimeUtil.toUTCZoned(getStringValue(map, "createdAt"));
+        return ZonedDateTimeUtil.toUTCZonedDateTimeFormat(getStringValue(map, "createdAt").split("\\.")[0]);
     }
 
     private String getStringValue(Map<String, Object> map, String key) {
