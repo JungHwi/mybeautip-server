@@ -78,7 +78,7 @@ public class Comment extends MemberAuditable {
     }
 
     public boolean isParent() {
-        return parentId != null;
+        return parentId == null;
     }
 
     public boolean isNormal() {
