@@ -60,6 +60,6 @@ public class MemberDao {
 
     @Transactional(readOnly = true)
     public Page<MemberBasicSearchResult> getMembers(MemberSearchCondition condition) {
-        return repository.getMember(condition);
+        return repository.getMembers(condition);
     }
 }

@@ -51,9 +51,10 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     @Override
     public MemberSearchResult getMemberWithDetails(Long memberId) {
         return repository.query(query -> query
-                        .select(new QMemberSearchResult(member, address, memberDetail, memberMemo.memo))
+                        .select(new QMemberSearchResult(member, address, memberDetail, memberMemo.memo, memberActivityCount))
                         .from(member)
                         .leftJoin(memberDetail).on(member.id.eq(memberDetail.memberId))
+                        .leftJoin(memberActivityCount).on(memberActivityCount.member.id.eq(memberId))
                         .leftJoin(address).on(member.eq(address.createdBy))
                         .leftJoin(memberMemo).on(member.eq(memberMemo.member))
                         .where(eqId(memberId)))
@@ -61,7 +62,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     }
 
     @Override
-    public Page<MemberBasicSearchResult> getMember(MemberSearchCondition condition) {
+    public Page<MemberBasicSearchResult> getMembers(MemberSearchCondition condition) {
         JPAQuery<?> offsetSearchQuery = offsetSearch(baseSearchQuery(condition), condition.getOffset(), condition.getSize());
         JPAQuery<Long> countQuery = getCountQuery(baseSearchQuery(condition));
 

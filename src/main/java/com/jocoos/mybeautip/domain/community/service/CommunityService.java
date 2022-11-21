@@ -45,18 +45,16 @@ import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 public class CommunityService {
 
     private final EventJoinService eventJoinService;
-
     private final ActivityPointService activityPointService;
     private final LegacyMemberService legacyMemberService;
-
     private final CommunityCategoryDao categoryDao;
     private final CommunityDao communityDao;
     private final CommunityLikeDao likeDao;
     private final CommunityReportDao reportDao;
     private final MemberActivityCountDao activityCountDao;
-
     private final CommunityConvertService convertService;
     private final AwsS3Handler awsS3Handler;
+    private final CommunityCommentDeleteService commentDeleteService;
 
     @Transactional
     public CommunityResponse write(WriteCommunityRequest request) {
@@ -72,7 +70,7 @@ public class CommunityService {
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES,
                 validDomainAndReceiver(community, community.getId(), community.getMember()));
-        activityCountDao.updateCommunityCount(member.getId(), 1);
+        activityCountDao.updateAllCommunityCount(member, 1);
 
         return convertService.toResponse(community.getMember(), community);
     }
@@ -124,9 +122,11 @@ public class CommunityService {
         }
 
         community.delete();
+        commentDeleteService.delete(community.getId());
+
         activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES,
                 validDomainAndReceiver(community, community.getId(), member));
-        activityCountDao.updateCommunityCount(member.getId(), -1);
+        activityCountDao.updateNormalCommunityCount(member, -1);
     }
 
     @Transactional

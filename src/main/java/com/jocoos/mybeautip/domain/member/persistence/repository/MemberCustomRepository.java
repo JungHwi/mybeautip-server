@@ -13,5 +13,5 @@ public interface MemberCustomRepository {
 
     MemberSearchResult getMemberWithDetails(Long memberId);
 
-    Page<MemberBasicSearchResult> getMember(MemberSearchCondition condition);
+    Page<MemberBasicSearchResult> getMembers(MemberSearchCondition condition);
 }

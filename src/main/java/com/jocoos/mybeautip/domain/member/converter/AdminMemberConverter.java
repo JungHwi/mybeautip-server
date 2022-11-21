@@ -22,9 +22,6 @@ public interface AdminMemberConverter {
 
     @Mapping(target = ".", source = "result")
     AdminMemberDetailResponse convert(MemberSearchResult result,
-                                      Long communityCount,
-                                      Long communityCommentCount,
-                                      Long videoCommentCount,
                                       Long invitedFriendCount,
                                       int expiryPoint,
                                       boolean isAgreeMarketingTerm);

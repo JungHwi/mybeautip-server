@@ -30,14 +30,26 @@ public class MemberActivityCount extends BaseEntity {
     @Column
     private int videoCommentCount;
 
+    @Column
+    private int allCommunityCount;
+
+    @Column
+    private int allCommunityCommentCount;
+
+    @Column
+    private int allVideoCommentCount;
+
     public MemberActivityCount(Member member) {
         this.member = member;
         this.communityCount = 0;
         this.communityCommentCount = 0;
         this.videoCommentCount = 0;
+        this.allCommunityCount = 0;
+        this.allCommunityCommentCount = 0;
+        this.allVideoCommentCount = 0;
     }
 
-    public int getTotalCommentCount() {
+    public int getTotalNormalCommentCount() {
         return communityCommentCount + videoCommentCount;
     }
 }

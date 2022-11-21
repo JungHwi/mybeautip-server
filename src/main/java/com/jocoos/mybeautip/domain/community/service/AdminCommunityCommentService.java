@@ -23,6 +23,7 @@ public class AdminCommunityCommentService {
 
     private final CommunityCommentDao communityCommentDao;
     private final CommunityCategoryDao categoryDao;
+    private final CommunityCommentDeleteService deleteService;
     private final AdminCommunityCommentConverter converter;
 
     @Transactional(readOnly = true)
@@ -57,7 +58,7 @@ public class AdminCommunityCommentService {
     @Transactional
     public Long hide(Long commentId, boolean isHide) {
         CommunityComment comment = communityCommentDao.get(commentId);
-        comment.hide(isHide);
+        deleteService.hide(comment, isHide);
         return comment.getId();
     }
 }

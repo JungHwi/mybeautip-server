@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.domain.community.converter.AdminCommunityConverter;
-import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
@@ -28,7 +27,7 @@ public class AdminCommunityService {
     private final CommunityCategoryDao categoryDao;
     private final CommunityDao communityDao;
     private final AdminCommunityConverter converter;
-    private final CommunityConverter communityConverter;
+    private final CommunityCommentDeleteService deleteService;
 
     @Transactional(readOnly = true)
     public List<CommunityCategoryResponse> getCategories() {
@@ -87,6 +86,7 @@ public class AdminCommunityService {
     public Long hideCommunity(Long communityId, boolean isHide) {
         Community community = communityDao.get(communityId);
         community.hide(isHide);
+        deleteService.hide(communityId, isHide);
         return community.getId();
     }
 }

@@ -150,4 +150,8 @@ public class CommunityDao {
         community.fix(false);
         return community.getId();
     }
+
+    public void setCommentCount(Long communityId, int count) {
+        repository.setCommentCount(communityId, count);
+    }
 }
