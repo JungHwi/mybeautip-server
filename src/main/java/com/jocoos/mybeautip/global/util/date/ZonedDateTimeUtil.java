@@ -40,6 +40,10 @@ public class ZonedDateTimeUtil {
         return LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S")).atZone(UTC);
     }
 
+    public static ZonedDateTime toUTCZonedDateTimeFormat(String dateTime) {
+        return LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).atZone(UTC);
+    }
+
     public static ZonedDateTime toZonedDateTime(String dateTime, String format) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         return ZonedDateTime.parse(dateTime, formatter);
