@@ -86,7 +86,16 @@ public class CommunityComment extends BaseEntity {
         return this.contents.length() >= length;
     }
 
-    public void hide(boolean isHide) {
-        this.status = status.hide(isHide);
+    public boolean isParent() {
+        return parentId == null;
     }
+
+    public boolean isChild() {
+        return parentId == null;
+    }
+
+    public boolean eqStatus(CommunityStatus status) {
+        return this.status == status;
+    }
+
 }
