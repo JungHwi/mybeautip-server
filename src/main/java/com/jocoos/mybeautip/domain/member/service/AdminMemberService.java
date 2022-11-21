@@ -54,14 +54,10 @@ public class AdminMemberService {
     public AdminMemberDetailResponse getMember(Long memberId) {
         MemberSearchResult memberWithDetails = memberDao.getMembersWithDetails(memberId);
 
-        Long communityCount = communityDao.countBy(memberId);
-        Long communityCommentCount = communityCommentDao.countBy(memberId);
-        Long videoCommentCount = commentRepository.countByCreatedById(memberId);
-
         Long invitedFriendCount = memberDao.countInvitedFriends(memberId);
         int expiryPoint = pointService.getExpiryPoint(memberId);
         boolean isAgreeOnMarketingTerm = memberTermDao.isAgreeOnMarketingTerm(memberId);
-        return converter.convert(memberWithDetails, communityCount, communityCommentCount, videoCommentCount, invitedFriendCount, expiryPoint, isAgreeOnMarketingTerm);
+        return converter.convert(memberWithDetails, invitedFriendCount, expiryPoint, isAgreeOnMarketingTerm);
     }
 
     @Transactional(readOnly = true)

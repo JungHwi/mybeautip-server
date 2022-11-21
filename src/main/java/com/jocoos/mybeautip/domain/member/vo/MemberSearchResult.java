@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.member.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.persistence.domain.MemberActivityCount;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.address.Address;
@@ -30,8 +31,13 @@ public class MemberSearchResult {
     private final SkinType skinType;
     private final Set<SkinWorry> skinWorry;
     private final String address;
-
     private final String memo;
+    private final int normalCommunityCount;
+    private final int normalCommunityCommentCount;
+    private final int normalVideoCommentCount;
+    private final int totalCommunityCount;
+    private final int totalCommunityCommentCount;
+    private final int totalVideoCommentCount;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT)
     private final ZonedDateTime createdAt;
@@ -40,7 +46,7 @@ public class MemberSearchResult {
     private final ZonedDateTime modifiedAt;
 
     @QueryProjection
-    public MemberSearchResult(Member member, Address address, MemberDetail memberDetail, String memo) {
+    public MemberSearchResult(Member member, Address address, MemberDetail memberDetail, String memo, MemberActivityCount activityCount) {
         this.id = member.getId();
         this.avatarUrl = member.getAvatarUrl();
         this.username = member.getUsername();
@@ -55,6 +61,12 @@ public class MemberSearchResult {
         this.skinType = memberDetail == null ? null : memberDetail.getSkinType();
         this.skinWorry = memberDetail == null ? null : memberDetail.getSkinWorry();
         this.memo = memo;
+        this.normalCommunityCount = activityCount.getCommunityCount();
+        this.normalCommunityCommentCount = activityCount.getCommunityCommentCount();
+        this.normalVideoCommentCount = activityCount.getVideoCommentCount();
+        this.totalCommunityCount = activityCount.getAllCommunityCount();
+        this.totalCommunityCommentCount = activityCount.getAllCommunityCommentCount();
+        this.totalVideoCommentCount = activityCount.getAllVideoCommentCount();
     }
 
 }

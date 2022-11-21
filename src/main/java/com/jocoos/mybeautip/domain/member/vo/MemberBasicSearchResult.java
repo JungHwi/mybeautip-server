@@ -44,7 +44,7 @@ public class MemberBasicSearchResult {
         this.createdAt = member.getCreatedAtZoned();
         this.modifiedAt = member.getModifiedAtZoned();
         this.communityCount = activityCount.getCommunityCount();
-        this.commentCount = activityCount.getTotalCommentCount();
+        this.commentCount = activityCount.getTotalNormalCommentCount();
     }
 
     public static void setIsAgreeMarketingTerm(List<MemberBasicSearchResult> contents, Map<Long, Boolean> agreeTermMap) {

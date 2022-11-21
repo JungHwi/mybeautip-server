@@ -31,9 +31,12 @@ public class AdminMemberDetailResponse {
 
     private final int point;
     private final int expiryPoint;
-    private final Long communityCount;
-    private final Long communityCommentCount;
-    private final Long videoCommentCount;
+    private final int normalCommunityCount;
+    private final int normalCommunityCommentCount;
+    private final int normalVideoCommentCount;
+    private final int totalCommunityCount;
+    private final int totalCommunityCommentCount;
+    private final int totalVideoCommentCount;
     private final Long invitedFriendCount;
     private final String memo;
 
