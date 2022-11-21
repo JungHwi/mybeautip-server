@@ -38,6 +38,14 @@ public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCus
         return query.fetch();
     }
 
+    @Override
+    public void updateStatusIdIn(List<Long> ids, CommunityStatus status) {
+         repository.update(query -> query
+                .set(communityComment.status, status)
+                .where(inId(ids))
+                .execute());
+    }
+
     private JPAQuery<CommunityComment> getBaseQuery(CommunityCommentSearchCondition condition, Pageable pageable) {
         boolean direction = isIdAscending(pageable);
 
@@ -72,6 +80,10 @@ public class CommunityCommentCustomRepositoryImpl implements CommunityCommentCus
 
     private BooleanExpression eqCommunityId(long communityId) {
         return communityComment.communityId.eq(communityId);
+    }
+
+    private BooleanExpression inId(List<Long> ids) {
+        return communityComment.id.in(ids);
     }
 
     private OrderSpecifier<?> orderById(boolean isAscending) {

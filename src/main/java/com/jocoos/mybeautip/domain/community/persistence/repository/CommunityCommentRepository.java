@@ -50,4 +50,12 @@ public interface CommunityCommentRepository extends ExtendedQuerydslJpaRepositor
     @Modifying
     @Query("UPDATE CommunityComment comment SET comment.commentCount = comment.commentCount + :count WHERE comment.id = :commentId")
     void commentCount(@Param("commentId") long commentId, @Param("count") int count);
+
+    @Modifying
+    @Query("UPDATE CommunityComment comment SET comment.commentCount = :count WHERE comment.id in :commentIds")
+    void setCommentCount(@Param("commentIds") List<Long> commentIds, @Param("count") int count);
+
+    List<CommunityComment> findByParentId(Long parentId);
+
+    List<CommunityComment> findByCommunityId(Long communityId);
 }
