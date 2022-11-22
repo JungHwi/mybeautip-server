@@ -15,7 +15,6 @@ import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-@ToString
 @Getter
 @Setter
 @Builder
