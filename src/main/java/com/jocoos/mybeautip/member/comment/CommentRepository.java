@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Date;
 import java.util.List;
@@ -18,8 +20,17 @@ public interface CommentRepository extends ExtendedQuerydslJpaRepository<Comment
     void updateCommentCount(Long id, int count);
 
     @Modifying
+    @Query("update Comment c set c.commentCount = :count, c.modifiedAt = now() where c.id in :ids")
+    void setCommentCount(@Param("ids") List<Long> ids, @Param("count") int count);
+
+
+    @Modifying
     @Query("update Comment c set c.likeCount = c.likeCount + ?2, c.modifiedAt = now() where c.id = ?1")
     void updateLikeCount(Long id, int count);
+
+    @Modifying
+    @Query("update Comment c set c.state = :state where c.id in :ids")
+    void updateState(@Param("ids") List<Long> ids, @Param("state") int state);
 
     Optional<Comment> findByIdAndPostId(Long id, Long postId);
 
@@ -48,6 +59,7 @@ public interface CommentRepository extends ExtendedQuerydslJpaRepository<Comment
     Slice<Comment> findByVideoIdAndParentIdIsNullAndCreatedByIdNotIn(Long id, List<Long> blackList, Pageable pageable);
 
     Slice<Comment> findByParentId(Long parentId, Pageable pageable);
+    List<Comment> findByParentId(Long parentId);
 
     Slice<Comment> findByParentIdAndIdLessThanEqual(Long parentId, Long cursor, Pageable pageable);
 
@@ -73,5 +85,6 @@ public interface CommentRepository extends ExtendedQuerydslJpaRepository<Comment
 
     Long countByCreatedById(Long memberId);
 
+    List<Comment> findByVideoId(Long videoId);
 }
 

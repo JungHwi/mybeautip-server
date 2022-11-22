@@ -10,6 +10,9 @@ import org.springframework.util.StringUtils;
 import javax.persistence.*;
 import java.util.Date;
 
+import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DEFAULT;
+import static com.jocoos.mybeautip.member.comment.Comment.CommentState.getType;
+
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -67,11 +70,23 @@ public class Comment extends MemberAuditable {
     }
 
     public CommentState getCommentState() {
-        return CommentState.BLINDED.getType(this.state);
+        return getType(this.state);
     }
 
     public boolean isCommentSameOrLongerThan(int length) {
         return StringUtils.trimAllWhitespace(this.comment).length() >= length;
+    }
+
+    public boolean isParent() {
+        return parentId == null;
+    }
+
+    public boolean isNormal() {
+        return DEFAULT.equals(getType(state));
+    }
+
+    public Long getMemberId() {
+        return createdBy.getId();
     }
 
     public enum CommentState {

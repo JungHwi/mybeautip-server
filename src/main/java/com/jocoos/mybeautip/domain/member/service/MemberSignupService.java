@@ -67,7 +67,7 @@ public class MemberSignupService {
         savaAndSetAvatarUrlIfExists(request);
 
         Member member = legacyMemberService.register(request);
-        activityCountDao.initActivityCount(member);
+        activityCountDao.init(member);
 
         MemberEntireInfo memberEntireInfo = memberConverter.convert(member);
 

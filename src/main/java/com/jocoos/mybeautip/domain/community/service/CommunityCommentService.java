@@ -34,16 +34,14 @@ import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.val
 public class CommunityCommentService {
 
     private final CommunityCommentRelationService relationService;
-
     private final CommunityDao communityDao;
     private final CommunityCommentDao dao;
     private final CommunityCommentLikeDao likeDao;
     private final CommunityCommentReportDao reportDao;
     private final LegacyMemberService legacyMemberService;
     private final MemberActivityCountDao activityCountDao;
-
     private final ActivityPointService activityPointService;
-
+    private final CommunityCommentDeleteService deleteService;
     private final CommunityCommentConverter converter;
 
     @Transactional(readOnly = true)
@@ -108,7 +106,7 @@ public class CommunityCommentService {
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
                                                validDomainAndReceiver(communityComment, communityComment.getId(), member));
-        activityCountDao.updateCommunityCommentCount(member.getId(), 1);
+        activityCountDao.updateAllCommunityCommentCount(member, 1);
         return relationService.setRelationInfo(member, response);
     }
 
@@ -157,9 +155,8 @@ public class CommunityCommentService {
             throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
         }
 
-        communityComment.delete();
+        deleteService.delete(communityComment);
         activityPointService.retrieveActivityPoint(DELETE_COMMUNITY_COMMENT, communityComment.getId(), member);
-        activityCountDao.updateCommunityCommentCount(member.getId(), -1);
     }
 
     @Transactional

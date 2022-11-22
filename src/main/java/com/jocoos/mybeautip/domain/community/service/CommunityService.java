@@ -19,7 +19,6 @@ import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 
 
 @Slf4j
@@ -44,18 +45,16 @@ import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.val
 public class CommunityService {
 
     private final EventJoinService eventJoinService;
-
     private final ActivityPointService activityPointService;
     private final LegacyMemberService legacyMemberService;
-
     private final CommunityCategoryDao categoryDao;
     private final CommunityDao communityDao;
     private final CommunityLikeDao likeDao;
     private final CommunityReportDao reportDao;
     private final MemberActivityCountDao activityCountDao;
-
     private final CommunityConvertService convertService;
     private final AwsS3Handler awsS3Handler;
+    private final CommunityCommentDeleteService commentDeleteService;
 
     @Transactional
     public CommunityResponse write(WriteCommunityRequest request) {
@@ -71,7 +70,7 @@ public class CommunityService {
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES,
                 validDomainAndReceiver(community, community.getId(), community.getMember()));
-        activityCountDao.updateCommunityCount(member.getId(), 1);
+        activityCountDao.updateAllCommunityCount(member, 1);
 
         return convertService.toResponse(community.getMember(), community);
     }
@@ -81,8 +80,9 @@ public class CommunityService {
         communityDao.readCount(communityId);
 
         Community community = communityDao.get(communityId);
-
         Member member = legacyMemberService.currentMember();
+
+        validCategoryBlindLogin(community.getCategory(), member);
 
         return convertService.toResponse(member, community);
     }
@@ -118,13 +118,15 @@ public class CommunityService {
         Community community = communityDao.get(communityId);
 
         if (!community.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
         }
 
         community.delete();
+        commentDeleteService.delete(community.getId());
+
         activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES,
                 validDomainAndReceiver(community, community.getId(), member));
-        activityCountDao.updateCommunityCount(member.getId(), -1);
+        activityCountDao.updateNormalCommunityCount(member, -1);
     }
 
     @Transactional
@@ -133,7 +135,7 @@ public class CommunityService {
         Community community = communityDao.get(request.getCommunityId());
 
         if (!community.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
         }
 
         community.setTitle(request.getTitle());
@@ -220,5 +222,11 @@ public class CommunityService {
                 .categories(categories)
                 .memberId(memberId)
                 .build();
+    }
+
+    private void validCategoryBlindLogin(CommunityCategory category, Member member) {
+        if (member == null && BLIND.equals(category.getType())) {
+            throw new AccessDeniedException("need login");
+        }
     }
 }

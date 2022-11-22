@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static java.util.Collections.singletonList;
+
 @Service
 @RequiredArgsConstructor
 public class CommunityCommentDao {
@@ -95,7 +97,34 @@ public class CommunityCommentDao {
         repository.commentCount(commentId, count);
     }
 
-    public Long countBy(Long memberId) {
+    @Transactional(readOnly = true)
+    public Long countByMemberId(Long memberId) {
         return repository.countByMemberId(memberId);
     }
+
+    @Transactional(readOnly = true)
+    public List<CommunityComment> getAllByParentId(Long parentId) {
+        return repository.findByParentId(parentId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityComment> getAllByCommunityId(Long communityId) {
+        return repository.findByCommunityId(communityId);
+    }
+
+    @Transactional
+    public void updateStatus(List<Long> ids, CommunityStatus status) {
+        repository.updateStatusIdIn(ids, status);
+    }
+
+    @Transactional
+    public void setCommentCount(List<Long> ids, int count) {
+        repository.setCommentCount(ids, count);
+    }
+
+    @Transactional
+    public void setCommentCount(Long commentId, int count) {
+        repository.setCommentCount(singletonList(commentId), count);
+    }
+
 }

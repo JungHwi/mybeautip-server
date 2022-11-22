@@ -17,15 +17,12 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
-import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.*;
-import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
-import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
@@ -196,15 +193,6 @@ public class Community extends BaseEntity {
         }
     }
 
-    public List<String> getFileUrls() {
-        return communityFileList.stream()
-                .map(file -> {
-                    String url = toUrl(file.getFile(), COMMUNITY, id);
-                    return Objects.requireNonNullElse(url, "");
-                })
-                .toList();
-    }
-
     public boolean isWin() {
         if (isWin == null) {
             return false;
@@ -231,7 +219,4 @@ public class Community extends BaseEntity {
       this.status = status.hide(isHide);
     }
 
-    public void changeStatus(CommunityStatus status) {
-        this.status = status;
-    }
 }

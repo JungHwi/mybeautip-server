@@ -21,8 +21,8 @@ public abstract class AdminCommunityConverter {
     protected abstract CommunityCategoryResponse convert(CommunityCategory adminCategory);
 
 
-    public AdminCommunityResponse convert(Community community) {
-        AdminCommunityResponse response = getResponse(community);
+    public AdminCommunityResponse convert(Community community, String eventTitle) {
+        AdminCommunityResponse response = getResponse(community, eventTitle);
 
         if (!community.isVotesEmpty()) {
             response.setVotesAndClearFileUrls(getVoteResponses(community));
@@ -38,19 +38,21 @@ public abstract class AdminCommunityConverter {
                 .toList();
     }
 
-    private AdminCommunityResponse getResponse(Community community) {
+    private AdminCommunityResponse getResponse(Community community, String eventTitle) {
         CommunityCategoryResponse categoryResponse = CommunityCategoryResponse.from(community.getCategory());
         CommunityMemberResponse memberResponse = CommunityMemberResponse.from(community.getMember());
-        return toResponse(community, categoryResponse, memberResponse);
+        return toResponse(community, categoryResponse, memberResponse, eventTitle);
     }
 
     private AdminCommunityResponse toResponse(Community community,
-                                                     CommunityCategoryResponse categoryResponse,
-                                                     CommunityMemberResponse memberResponse) {
+                                              CommunityCategoryResponse categoryResponse,
+                                              CommunityMemberResponse memberResponse,
+                                              String eventTitle) {
         return new AdminCommunityResponse(
                 community,
                 community.getCommunityFileList(),
                 categoryResponse,
-                memberResponse);
+                memberResponse,
+                eventTitle);
     }
 }

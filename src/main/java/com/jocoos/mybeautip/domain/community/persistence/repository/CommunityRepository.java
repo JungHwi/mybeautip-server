@@ -43,7 +43,10 @@ public interface CommunityRepository extends ExtendedQuerydslJpaRepository<Commu
     void commentCount(@Param("communityId") long communityId, @Param("count") int count);
 
     @Modifying
+    @Query("UPDATE Community community SET community.commentCount = :count WHERE community.id = :communityId")
+    void setCommentCount(@Param("communityId") long communityId, @Param("count") int count);
+
+    @Modifying
     @Query("UPDATE Community community SET community.sortedAt = :now WHERE community.id = :communityId")
     void updateSortedAt(@Param("communityId") long communityId, @Param("now") ZonedDateTime now);
-
 }

@@ -22,6 +22,7 @@ public class AdminCommunityResponse {
 
     private final Long id;
     private final String title;
+    private final String eventTitle;
     private final CommunityStatus status;
     private final String contents;
     private final int viewCount;
@@ -39,10 +40,12 @@ public class AdminCommunityResponse {
     @QueryProjection
     public AdminCommunityResponse(Community community,
                                   CommunityCategoryResponse category,
-                                  CommunityMemberResponse member) {
+                                  CommunityMemberResponse member,
+                                  String eventTitle) {
         this.id = community.getId();
         this.status = community.getStatus();
-        this.title = community.getTitle();
+        this.title = eventTitle == null ? community.getTitle() : null;
+        this.eventTitle = eventTitle;
         this.contents = community.getContents();
         this.viewCount = community.getViewCount();
         this.likeCount = community.getLikeCount();
@@ -58,8 +61,9 @@ public class AdminCommunityResponse {
     public AdminCommunityResponse(Community community,
                                   List<CommunityFile> files,
                                   CommunityCategoryResponse category,
-                                  CommunityMemberResponse member) {
-        this(community, category, member);
+                                  CommunityMemberResponse member,
+                                  String eventTitle) {
+        this(community, category, member, eventTitle);
         this.fileUrl = getFileUrl(files);
     }
 

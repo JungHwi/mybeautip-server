@@ -9,6 +9,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Collection;
 import java.util.Date;
@@ -105,6 +106,10 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
     @Modifying
     @Query("update Video v set v.commentCount = v.commentCount + ?2, v.modifiedAt = now() where v.id = ?1")
     void updateCommentCount(Long id, int count);
+
+    @Modifying
+    @Query("update Video v set v.commentCount = :count, v.modifiedAt = now() where v.id = :videoId")
+    void setCommentCount(@Param("videoId") Long videoId, @Param("count") int count);
 
     @Modifying
     @Query("update Video v set v.likeCount = v.likeCount + ?2, v.modifiedAt = now() where v.id = ?1")

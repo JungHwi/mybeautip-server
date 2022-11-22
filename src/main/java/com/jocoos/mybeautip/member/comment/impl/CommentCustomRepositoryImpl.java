@@ -42,12 +42,17 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
                 .join(member).on(comment1.createdBy.id.eq(member.id))
                 .where(
                         eqVideo(condition.videoId()),
+                        eqState(condition.state()),
                         getParent(condition),
                         getCursor(condition, pageable)
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(sortComment(pageable)));
+    }
+
+    private BooleanExpression eqState(Comment.CommentState state) {
+        return state == null ? null : comment1.state.eq(state.value());
     }
 
     private OrderSpecifier<?> sortComment(Pageable pageable) {
