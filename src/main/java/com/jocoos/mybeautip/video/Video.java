@@ -1,21 +1,17 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.member.Member;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.*;
 
-import com.jocoos.mybeautip.member.Member;
-
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
-
-@ToString
 @Getter
 @Setter
 @Builder
