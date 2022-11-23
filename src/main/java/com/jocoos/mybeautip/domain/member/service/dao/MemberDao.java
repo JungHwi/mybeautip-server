@@ -62,4 +62,9 @@ public class MemberDao {
     public Page<MemberBasicSearchResult> getMembers(MemberSearchCondition condition) {
         return repository.getMembers(condition);
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsByUsername(String username) {
+        return repository.existsByUsername(username);
+    }
 }
