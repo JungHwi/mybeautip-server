@@ -87,6 +87,14 @@ public class AdminCommunityService {
         return community.getId();
     }
 
+    @Transactional
+    public Long delete(Long communityId) {
+        Community community = communityDao.get(communityId);
+        community.validAdminWrite();
+        communityDao.hardDelete(community);
+        return community.getId();
+    }
+
     private CommunitySearchCondition getSearchCondition(CommunityStatus status,
                                                         Long categoryId,
                                                         Long eventId,

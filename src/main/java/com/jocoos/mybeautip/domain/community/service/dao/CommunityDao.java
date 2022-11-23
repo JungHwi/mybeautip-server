@@ -156,4 +156,8 @@ public class CommunityDao {
     public void setCommentCount(Long communityId, int count) {
         repository.setCommentCount(communityId, count);
     }
+
+    public void hardDelete(Community community) {
+        repository.delete(community);
+    }
 }

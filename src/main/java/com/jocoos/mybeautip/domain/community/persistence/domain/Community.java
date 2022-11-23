@@ -21,8 +21,7 @@ import java.util.List;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
-import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
-import static com.jocoos.mybeautip.global.exception.ErrorCode.TOO_MANY_FILE;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
@@ -229,7 +228,13 @@ public class Community extends BaseEntity {
       this.status = status.hide(isHide);
     }
 
-    public void validReadAuth(Role member) {
-        category.validReadAuth(member);
+    public void validReadAuth(Role role) {
+        category.validReadAuth(role);
+    }
+
+    public void validAdminWrite() {
+        if(!member.isAdmin()) {
+            throw new BadRequestException(ACCESS_DENIED, "not a admin write community, community id - " + id);
+        }
     }
 }

@@ -39,6 +39,11 @@ public class AdminCommunityController {
         return ResponseEntity.created(location).body(response);
     }
 
+    @DeleteMapping("/community/{communityId}")
+    public ResponseEntity<IdDto> deleteAdminWrite(@PathVariable Long communityId) {
+        return ResponseEntity.ok(new IdDto(service.delete(communityId)));
+    }
+
     @GetMapping("/community/category")
     public ResponseEntity<List<CommunityCategoryResponse>> getCommunityCategories() {
         return ResponseEntity.ok(service.getCategories());

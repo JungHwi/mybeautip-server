@@ -327,4 +327,8 @@ public class Member {
         }
         return USER;
     }
+
+    public boolean isAdmin() {
+        return link == 0;
+    }
 }
