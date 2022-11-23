@@ -39,7 +39,6 @@ public class RouletteEventService extends EventTypeAbstractService {
                 .memberId(member.getId())
                 .eventId(event.getId())
                 .status(EventJoinStatus.WIN)
-                .eventProductId(eventProduct.getId())
                 .eventProduct(eventProduct)
                 .recipientInfo(super.getRecipientInfo(eventProduct, address))
                 .build();

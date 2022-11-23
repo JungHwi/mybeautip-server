@@ -12,6 +12,7 @@ import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -23,6 +24,10 @@ import java.util.stream.Collectors;
 public abstract class EventTypeAbstractService implements EventTypeService {
 
     public EventProduct winPrize(List<EventProduct> productList) {
+        if (CollectionUtils.isEmpty(productList)) {
+            return null;
+        }
+
         if (productList.size() == 1) {
             return productList.get(0);
         }

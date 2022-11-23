@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EventJoinConverter {
 
-    @Mapping(target = "result", source = "eventProductId")
+    @Mapping(target = "result", source = "eventProduct.id")
     EventJoinResponse convertsToJoin(EventJoin eventJoin);
 
     @Mappings({
