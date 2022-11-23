@@ -55,4 +55,8 @@ public abstract class AdminCommunityConverter {
                 memberResponse,
                 eventTitle);
     }
+
+    public AdminCommunityResponse convert(Community community) {
+        return convert(community, null);
+    }
 }

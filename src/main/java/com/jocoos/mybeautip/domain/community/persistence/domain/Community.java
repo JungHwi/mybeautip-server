@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
@@ -23,6 +22,7 @@ import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.D
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.TOO_MANY_FILE;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
@@ -121,20 +121,28 @@ public class Community extends BaseEntity {
 
     public void valid() {
         switch (this.category.getType()) {
-            case BLIND:
+            case BLIND -> {
                 validCommunity();
                 validBlind();
-                break;
-            case DRIP:
+            }
+            case DRIP -> {
                 validCommunity();
                 validDrip();
-                break;
-            case VOTE:
+            }
+            case VOTE -> {
                 validCommunity();
                 validVote(this.communityVoteList.size());
-                break;
-            default:
-                validCommunity();
+            }
+            case KING_TIP -> {
+                validFileSize(10);
+            }
+            default -> validCommunity();
+        }
+    }
+
+    private void validFileSize(int limit) {
+        if (!isEmpty(communityFileList) && communityFileList.size() > limit) {
+            throw new BadRequestException(TOO_MANY_FILE, "file size limit " + limit + " request file size " + communityFileList.size());
         }
     }
 
@@ -151,6 +159,7 @@ public class Community extends BaseEntity {
 
     private void validCommunity() {
         validContents(this.contents);
+        validFileSize(5);
     }
 
     private void validBlind() {
@@ -202,7 +211,7 @@ public class Community extends BaseEntity {
     }
 
     public boolean isVotesEmpty() {
-        return CollectionUtils.isEmpty(communityVoteList);
+        return isEmpty(communityVoteList);
     }
 
     public void win(boolean isWin) {

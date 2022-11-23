@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.AdminCommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
@@ -31,6 +32,12 @@ public class AdminCommunityService {
     private final EventDao eventDao;
     private final AdminCommunityConverter converter;
     private final CommunityCommentDeleteService deleteService;
+    private final CommunityCRUDService crudService;
+
+    @Transactional
+    public AdminCommunityResponse write(WriteCommunityRequest request) {
+        return converter.convert(crudService.write(request));
+    }
 
 
     @Transactional(readOnly = true)

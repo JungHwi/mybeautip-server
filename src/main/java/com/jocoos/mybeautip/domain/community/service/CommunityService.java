@@ -55,14 +55,12 @@ public class CommunityService {
     private final CommunityConvertService convertService;
     private final AwsS3Handler awsS3Handler;
     private final CommunityCommentDeleteService commentDeleteService;
+    private final CommunityCRUDService crudService;
 
     @Transactional
     public CommunityResponse write(WriteCommunityRequest request) {
         Member member = legacyMemberService.currentMember();
-        request.setMember(member);
-        Community community = communityDao.write(request);
-
-        awsS3Handler.copy(request.getFiles(), UrlDirectory.COMMUNITY.getDirectory(community.getId()));
+        Community community = crudService.write(request);
 
         if (community.getCategory().getType() == DRIP) {
             eventJoinService.join(community.getEventId(), request.getMember().getId());

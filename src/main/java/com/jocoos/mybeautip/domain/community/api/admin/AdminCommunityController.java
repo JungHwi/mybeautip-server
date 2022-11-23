@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.community.api.admin;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
@@ -14,7 +15,9 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -25,6 +28,16 @@ import java.util.List;
 public class AdminCommunityController {
 
     private final AdminCommunityService service;
+
+    @PostMapping("/community")
+    public ResponseEntity<AdminCommunityResponse> write(@RequestBody WriteCommunityRequest request) {
+        AdminCommunityResponse response = service.write(request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .path("/{id}")
+                .buildAndExpand(response.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(response);
+    }
 
     @GetMapping("/community/category")
     public ResponseEntity<List<CommunityCategoryResponse>> getCommunityCategories() {
