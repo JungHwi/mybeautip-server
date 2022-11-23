@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.domain.community.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
-import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.persistence.repository.comment.CommunityCommentCustomRepository;
 import org.springframework.data.domain.Page;
@@ -20,9 +19,7 @@ public interface CommunityCommentRepository extends ExtendedQuerydslJpaRepositor
 
     Long countByMemberId(Long memberId);
     Optional<CommunityComment> findByCommunityIdAndId(long communityId, long commentId);
-    Slice<CommunityComment> findByMemberIdAndStatusAndIdLessThan(long memberId, CommunityStatus status, long cursor, Pageable pageable);
-    Slice<CommunityComment> findByCommunityIdAndParentIdAndIdGreaterThan(long communityId, Long parentId, long cursor, Pageable pageable);
-    Slice<CommunityComment> findByCommunityIdAndParentIdAndIdLessThan(long communityId, Long parentId, long cursor, Pageable pageable);
+    Slice<CommunityComment> findByMemberIdAndIdLessThan(long memberId, long cursor, Pageable pageable);
     List<CommunityComment> findByParentIdInOrderByCreatedAtAsc(List<Long> parentIds);
 
     Page<CommunityComment> findAllByParentIdIsNullAndCommunityId(Long communityId, Pageable pageable);
