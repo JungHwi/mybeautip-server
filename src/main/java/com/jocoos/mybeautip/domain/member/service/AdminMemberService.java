@@ -86,6 +86,7 @@ public class AdminMemberService {
     public PageResponse<AdminMemberResponse> getMembers(MemberSearchCondition condition) {
         Page<MemberBasicSearchResult> page = memberDao.getMembers(condition);
         setIsAgreeMarketingTerm(page.getContent());
+        setReportCount(page.getContent());
         List<AdminMemberResponse> content = converter.toListResponse(page.getContent());
         return new PageResponse<>(page.getTotalElements(), content);
     }
@@ -95,5 +96,11 @@ public class AdminMemberService {
         List<MemberTerm> memberTerms = memberTermDao.isAgreeMarketingTerm(memberIds);
         Map<Long, Boolean> agreeTermMap = MemberTerm.memberIdIsAgreeTermMap(memberTerms);
         MemberBasicSearchResult.setIsAgreeMarketingTerm(content, agreeTermMap);
+    }
+
+    private void setReportCount(List<MemberBasicSearchResult> content) {
+        List<Long> ids = MemberBasicSearchResult.memberIds(content);
+        Map<Long, Integer> idCountMap = contentReportDao.getAllReportCountMap(ids);
+        content.forEach(c -> c.setReportCount(idCountMap.getOrDefault(c.getId(), 0)));
     }
 }
