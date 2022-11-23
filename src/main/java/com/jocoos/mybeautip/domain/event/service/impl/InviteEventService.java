@@ -37,7 +37,6 @@ public class InviteEventService extends EventTypeAbstractService {
                 .eventId(event.getId())
                 .status(EventJoinStatus.JOIN)
                 .eventProduct(eventProduct)
-                .eventProductId(eventProduct.getId())
                 .build();
 
         eventJoin = eventJoinRepository.save(eventJoin);
