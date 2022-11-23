@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVote;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -219,4 +220,7 @@ public class Community extends BaseEntity {
       this.status = status.hide(isHide);
     }
 
+    public void validReadAuth(Role member) {
+        category.validReadAuth(member);
+    }
 }

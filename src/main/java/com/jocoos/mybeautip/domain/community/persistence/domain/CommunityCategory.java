@@ -51,4 +51,8 @@ public class CommunityCategory {
     public void validWriteAuth(Role role) {
         type.validWriteAuth(role);
     }
+
+    public void validReadAuth(Role role) {
+        type.validReadAuth(role);
+    }
 }

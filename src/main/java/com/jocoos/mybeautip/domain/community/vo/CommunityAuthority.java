@@ -32,4 +32,8 @@ public class CommunityAuthority {
     public boolean canWrite(Role role) {
         return writeAuth.contains(role);
     }
+
+    public boolean canRead(Role role) {
+        return readAuth.contains(role);
+    }
 }

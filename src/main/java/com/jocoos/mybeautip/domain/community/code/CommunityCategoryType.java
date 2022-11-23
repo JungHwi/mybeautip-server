@@ -46,11 +46,17 @@ public enum CommunityCategoryType implements CodeValue {
 
     public void validWriteAuth(Role role) {
         if (!authority.canWrite(role)) {
-            throw new BadRequestException(ACCESS_DENIED, writeAuthErrorMessage(role));
+            throw new BadRequestException(ACCESS_DENIED, "write " + authErrorMessage(role, authority.getWriteAuth()));
         }
     }
 
-    private String writeAuthErrorMessage(Role role) {
-        return "category " + name() + " need role " + authority.getWriteAuth() + ", request role is " + role;
+    public void validReadAuth(Role role) {
+        if (!authority.canRead(role)) {
+            throw new BadRequestException(ACCESS_DENIED, "read " + authErrorMessage(role, authority.getReadAuth()));
+        }
+    }
+
+    private String authErrorMessage(Role role, Set<Role> requiredRoles) {
+        return "category " + name() + " need role " + requiredRoles + ", request role is " + role;
     }
 }

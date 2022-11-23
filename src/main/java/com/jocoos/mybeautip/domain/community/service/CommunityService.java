@@ -12,6 +12,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
@@ -31,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
@@ -81,8 +81,7 @@ public class CommunityService {
 
         Community community = communityDao.get(communityId);
         Member member = legacyMemberService.currentMember();
-
-        validCategoryBlindLogin(community.getCategory(), member);
+        community.validReadAuth(Role.from(member));
 
         return convertService.toResponse(member, community);
     }
@@ -222,11 +221,5 @@ public class CommunityService {
                 .categories(categories)
                 .memberId(memberId)
                 .build();
-    }
-
-    private void validCategoryBlindLogin(CommunityCategory category, Member member) {
-        if (member == null && BLIND.equals(category.getType())) {
-            throw new AccessDeniedException("need login");
-        }
     }
 }
