@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.member.vo.BirthdayAttributeConverter;
@@ -23,6 +24,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static com.jocoos.mybeautip.domain.member.code.GrantType.*;
+import static com.jocoos.mybeautip.domain.member.code.Role.ADMIN;
+import static com.jocoos.mybeautip.domain.member.code.Role.USER;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.*;
 import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
@@ -317,5 +320,11 @@ public class Member {
         this.publicVideoCount = 0;
         this.totalVideoCount = 0;
         this.deletedAt = new Date();
+    }
+    public Role getRole() {
+        if (link == 0) {
+            return ADMIN;
+        }
+        return USER;
     }
 }

@@ -11,6 +11,7 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRep
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
@@ -39,6 +40,7 @@ public class CommunityDao {
     @Transactional
     public Community write(WriteCommunityRequest request) {
         CommunityCategory category = categoryDao.getCommunityCategory(request.getCategoryId());
+        category.validWriteAuth(Role.from(request.getMember()));
         request.setCategory(category);
 
         Community community = converter.convert(request);
