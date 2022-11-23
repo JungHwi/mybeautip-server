@@ -11,7 +11,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.jocoos.mybeautip.domain.community.vo.CommunityAuthority.defaultAuth;
+import static com.jocoos.mybeautip.domain.community.vo.CommunityAuthority.readAllRoleNoWriteRole;
+import static com.jocoos.mybeautip.domain.community.vo.CommunityAuthority.readAllRoleWriteUserAdmin;
 import static com.jocoos.mybeautip.domain.member.code.Role.*;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 
@@ -19,15 +20,15 @@ import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 @Getter
 public enum CommunityCategoryType implements CodeValue {
 
-    GENERAL("일반 게시판", defaultAuth()),
-    ANONYMOUS("익명 게시판", defaultAuth()),
-    GROUP("그룹", defaultAuth()),
-    NORMAL("일반", defaultAuth()),
+    GENERAL("일반 게시판", readAllRoleNoWriteRole()),
+    ANONYMOUS("익명 게시판", readAllRoleNoWriteRole()),
+    GROUP("그룹", readAllRoleNoWriteRole()),
+    NORMAL("일반", readAllRoleWriteUserAdmin()),
     BLIND("속닥속닥", new CommunityAuthority(Set.of(USER, ADMIN))),
-    DRIP("드립", defaultAuth()),
-    EVENT("이벤트", defaultAuth()),
-    VOTE("결정픽", defaultAuth()),
-    KING_TIP("마왕팁", new CommunityAuthority(ADMIN, ALL));
+    DRIP("드립", readAllRoleWriteUserAdmin()),
+    EVENT("이벤트", readAllRoleNoWriteRole()),
+    VOTE("결정픽", readAllRoleWriteUserAdmin()),
+    KING_TIP("마왕팁", new CommunityAuthority(ALL_ROLES, Set.of(ADMIN)));
 
     private final String description;
     private final CommunityAuthority authority;

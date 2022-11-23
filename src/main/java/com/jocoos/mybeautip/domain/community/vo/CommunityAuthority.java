@@ -12,21 +12,20 @@ import static com.jocoos.mybeautip.domain.member.code.Role.*;
 @RequiredArgsConstructor
 public class CommunityAuthority {
 
-    private final Set<Role> writeAuth;
     private final Set<Role> readAuth;
+    private final Set<Role> writeAuth;
 
-    public CommunityAuthority(Set<Role> auth) {
-        this.writeAuth = auth;
-        this.readAuth = auth;
+    public CommunityAuthority(Set<Role> requiredReadWriteRoles) {
+        this.writeAuth = requiredReadWriteRoles;
+        this.readAuth = requiredReadWriteRoles;
     }
 
-    public CommunityAuthority(Role role, Set<Role> roles) {
-        this.writeAuth = Set.of(role);
-        this.readAuth = roles;
+    public static CommunityAuthority readAllRoleWriteUserAdmin() {
+        return new CommunityAuthority(Set.of(USER, ADMIN), ALL_ROLES);
     }
 
-    public static CommunityAuthority defaultAuth() {
-        return new CommunityAuthority(Set.of(USER, ADMIN), ALL);
+    public static CommunityAuthority readAllRoleNoWriteRole() {
+        return new CommunityAuthority(ALL_ROLES, Set.of());
     }
 
     public boolean canWrite(Role role) {

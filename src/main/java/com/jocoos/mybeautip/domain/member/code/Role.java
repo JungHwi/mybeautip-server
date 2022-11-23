@@ -13,7 +13,7 @@ public enum Role {
 
     private final String authority;
 
-    public static final Set<Role> ALL = Set.of(values());
+    public static final Set<Role> ALL_ROLES = Set.of(values());
 
     public static Role from(Member member) {
         if (member == null) {
