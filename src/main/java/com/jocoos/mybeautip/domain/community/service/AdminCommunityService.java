@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.AdminCommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
+import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
@@ -31,7 +32,7 @@ public class AdminCommunityService {
     private final CommunityDao communityDao;
     private final EventDao eventDao;
     private final AdminCommunityConverter converter;
-    private final CommunityCommentDeleteService deleteService;
+    private final CommunityCommentDeleteService commentDeleteService;
     private final CommunityCRUDService crudService;
 
     @Transactional
@@ -65,6 +66,14 @@ public class AdminCommunityService {
     }
 
     @Transactional
+    public Long edit(Long communityId, PatchCommunityRequest request) {
+        Community community = communityDao.get(communityId);
+        community.edit(request.getTitle(), request.getContents());
+        communityDao.save(community);
+        return community.getId();
+    }
+
+    @Transactional
     public Long winCommunity(Long communityId, boolean isWin) {
         Community community = communityDao.get(communityId);
         community.win(isWin);
@@ -83,15 +92,15 @@ public class AdminCommunityService {
     public Long hideCommunity(Long communityId, boolean isHide) {
         Community community = communityDao.get(communityId);
         community.hide(isHide);
-        deleteService.hide(communityId, isHide);
+        commentDeleteService.hide(communityId, isHide);
         return community.getId();
     }
 
     @Transactional
     public Long delete(Long communityId) {
         Community community = communityDao.get(communityId);
-        community.validAdminWrite();
-        communityDao.hardDelete(community);
+        community.deleteAdminWrite();
+        commentDeleteService.delete(community.getId());
         return community.getId();
     }
 

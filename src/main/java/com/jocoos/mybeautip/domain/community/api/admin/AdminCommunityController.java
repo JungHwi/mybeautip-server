@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
+import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
@@ -37,6 +38,11 @@ public class AdminCommunityController {
                 .buildAndExpand(response.getId())
                 .toUri();
         return ResponseEntity.created(location).body(response);
+    }
+
+    @PatchMapping("/community/{communityId}")
+    public ResponseEntity<IdDto> edit(@PathVariable Long communityId, @RequestBody PatchCommunityRequest request) {
+        return ResponseEntity.ok(new IdDto(service.edit(communityId, request)));
     }
 
     @DeleteMapping("/community/{communityId}")

@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
@@ -23,6 +24,7 @@ import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.V
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
+import static com.jocoos.mybeautip.global.util.JsonNullableUtils.changeIfPresent;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
@@ -236,5 +238,23 @@ public class Community extends BaseEntity {
         if(!member.isAdmin()) {
             throw new BadRequestException(ACCESS_DENIED, "not a admin write community, community id - " + id);
         }
+    }
+
+    public void edit(JsonNullable<String> title, JsonNullable<String> contents) {
+        changeIfPresent(title, this::updateTitle);
+        changeIfPresent(contents, this::updateContents);
+    }
+
+    public void deleteAdminWrite() {
+        validAdminWrite();
+        delete();
+    }
+
+    private void updateTitle(String title) {
+        this.title = title;
+    }
+
+    private void updateContents(String contents) {
+        this.contents = contents;
     }
 }
