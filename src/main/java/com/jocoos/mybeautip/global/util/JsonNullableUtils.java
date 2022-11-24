@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JsonNullableUtils {
+
     public static <T> void changeIfPresent(JsonNullable<T> nullable, Consumer<T> consumer) {
         if (nullable.isPresent()) {
             consumer.accept(nullable.get());
