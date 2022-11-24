@@ -5,7 +5,9 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.*;
+import com.jocoos.mybeautip.domain.member.persistence.domain.UsernameCombinationWord;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
+import com.jocoos.mybeautip.domain.member.service.dao.UsernameCombinationWordDao;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
@@ -32,6 +34,7 @@ import java.util.Map;
 public class AdminMemberService {
 
     private final MemberDao memberDao;
+    private final UsernameCombinationWordDao usernameDao;
     private final PointService pointService;
     private final PointReasonService pointReasonService;
     private final CommunityDao communityDao;
@@ -88,6 +91,10 @@ public class AdminMemberService {
         setIsAgreeMarketingTerm(page.getContent());
         List<AdminMemberResponse> content = converter.toListResponse(page.getContent());
         return new PageResponse<>(page.getTotalElements(), content);
+    }
+
+    public List<UsernameCombinationWord> refreshUsername() {
+        return usernameDao.refresh();
     }
 
     private void setIsAgreeMarketingTerm(List<MemberBasicSearchResult> content) {
