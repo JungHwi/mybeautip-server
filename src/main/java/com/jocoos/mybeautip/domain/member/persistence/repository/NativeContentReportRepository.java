@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -39,5 +40,17 @@ public interface NativeContentReportRepository extends JpaRepository<CommunityRe
                     "from comment_reports " +
                     "where comment_reports.reported_id = :reportedId"
     )
-    public Page<Map<String, Object>> unionAllContentReport(@Param("reportedId") Long reportedId, Pageable pageable);
+    Page<Map<String, Object>> unionAllContentReport(@Param("reportedId") Long reportedId, Pageable pageable);
+
+
+    @Query(nativeQuery = true,
+    value = "select id, sum(cnt) as count " +
+            "from (" +
+            "(select reported_id as id, count(*) as cnt from comment_reports where reported_id in :reportedIds group by reported_id) " +
+            "union all " +
+            "(select reported_id as id, count(*) as cnt from community_report where reported_id in :reportedIds group by reported_id)\n" +
+            "union all" +
+            "(select reported_id as id, count(*) as cnt from community_comment_report where reported_id in :reportedIds group by reported_id)) " +
+            "as cnt group by id;")
+    List<Map<String, Object>> unionAllCountContentReport(@Param("reportedIds") List<Long> reportedIds);
 }

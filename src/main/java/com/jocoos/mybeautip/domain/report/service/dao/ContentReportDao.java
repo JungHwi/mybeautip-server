@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,14 @@ public class ContentReportDao {
                 .toList();
 
         return new PageResponse<>(page.getTotalElements(), response);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Integer> getAllReportCountMap(List<Long> accusedIds) {
+        List<Map<String, Object>> maps = repository.unionAllCountContentReport(accusedIds);
+        Map<Long, Integer> idCountMap = new HashMap<>();
+        maps.forEach(map -> idCountMap.put(getLongValue(map, "id"), getIntegerValue(map, "count")));
+        return idCountMap;
     }
 
     private AdminMemberReportResponse toResponse(Map<String, Object> map) {
@@ -59,6 +68,14 @@ public class ContentReportDao {
 
     private ZonedDateTime getReportedAt(Map<String, Object> map) {
         return ZonedDateTimeUtil.toUTCZonedDateTimeFormat(getStringValue(map, "createdAt").split("\\.")[0]);
+    }
+
+    private Long getLongValue(Map<String, Object> map, String id) {
+        return Long.valueOf(getStringValue(map, id));
+    }
+
+    private Integer getIntegerValue(Map<String, Object> map, String id) {
+        return Integer.valueOf(getStringValue(map, id));
     }
 
     private String getStringValue(Map<String, Object> map, String key) {

@@ -22,12 +22,12 @@ public class MemberBasicSearchResult {
     private final String email;
     private final GrantType grantType;
     private final int point;
-    private final int reportCount;
     private final int communityCount;
     private final int commentCount;
     private final Boolean isPushable;
     private final ZonedDateTime createdAt;
     private final ZonedDateTime modifiedAt;
+    private int reportCount;
     private Boolean isAgreeMarketingTerm;
 
     @QueryProjection
@@ -38,7 +38,6 @@ public class MemberBasicSearchResult {
         this.username = member.getUsername();
         this.email = member.getEmail();
         this.point = member.getPoint();
-        this.reportCount = member.getReportCount();
         this.isPushable = member.getPushable();
         this.grantType = member.getGrantType();
         this.createdAt = member.getCreatedAtZoned();
@@ -64,4 +63,7 @@ public class MemberBasicSearchResult {
         this.isAgreeMarketingTerm = isAgreeMarketingTerm;
     }
 
+    public void setReportCount(Integer reportCount) {
+        this.reportCount = reportCount;
+    }
 }
