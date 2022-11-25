@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -7,10 +8,15 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
+import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
+import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
 
 @Getter
 @Setter
@@ -139,5 +145,23 @@ public class Video {
             }
             this.categoryMapping.addAll(categoryMapping);
         }
+    }
+
+    public ZonedDateTime getCreatedAtZoned() {
+        return toUTCZoned(createdAt);
+    }
+
+    public List<VideoCategory> getCategories() {
+        return categoryMapping.stream()
+                .map(VideoCategoryMapping::getVideoCategory)
+                .toList();
+    }
+
+    public void hide(boolean isHide) {
+        this.visibility = isHide ? PRIVATE.name() : PUBLIC.name();
+    }
+
+    public void delete() {
+        this.deletedAt = new Date();
     }
 }

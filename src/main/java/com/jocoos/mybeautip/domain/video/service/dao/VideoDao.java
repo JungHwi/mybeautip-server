@@ -1,12 +1,15 @@
 package com.jocoos.mybeautip.domain.video.service.dao;
 
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.domain.video.dto.AdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
+import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
 import com.jocoos.mybeautip.domain.video.vo.VideoSearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,11 @@ public class VideoDao {
                 .cursor(cursor)
                 .size(size)
                 .build();
+        return repository.getVideos(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AdminVideoResponse> getVideos(AdminVideoSearchCondition condition) {
         return repository.getVideos(condition);
     }
 
