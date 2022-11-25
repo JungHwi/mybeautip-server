@@ -13,7 +13,7 @@ import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CommunityMemberResponse {
+public class MemberResponse {
 
     private Long id;
 
@@ -24,20 +24,16 @@ public class CommunityMemberResponse {
     private String avatarUrl;
 
     @QueryProjection
-    public CommunityMemberResponse(Long id, MemberStatus status, String username, String avatarFilename) {
+    public MemberResponse(Long id, MemberStatus status, String username, String avatarFilename) {
         this.id = id;
         this.status = status;
         this.username = username;
         this.avatarUrl = toUrl(avatarFilename, AVATAR);
     }
 
-    @QueryProjection
-    public CommunityMemberResponse(Long id, String username) {
-        this(id, null, username, null);
-    }
 
-    public static CommunityMemberResponse from(Member member) {
-        return new CommunityMemberResponse(
+    public static MemberResponse from(Member member) {
+        return new MemberResponse(
                 member.getId(),
                 member.getStatus(),
                 member.getUsername(),

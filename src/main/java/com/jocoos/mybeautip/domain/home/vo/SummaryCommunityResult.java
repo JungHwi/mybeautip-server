@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.home.vo;
 
-import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
+import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.community.dto.VoteResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
@@ -22,12 +22,12 @@ public class SummaryCommunityResult {
 
     private final Community community;
     private final String eventTitle;
-    private final CommunityMemberResponse memberResponse;
+    private final MemberResponse memberResponse;
     private List<String> thumbnailUrl;
     private List<VoteResponse> voteResponses;
 
     @QueryProjection
-    public SummaryCommunityResult(Community community, CommunityMemberResponse memberResponse) {
+    public SummaryCommunityResult(Community community, MemberResponse memberResponse) {
         this.community = community;
         this.memberResponse = memberResponse;
         this.thumbnailUrl = new ArrayList<>();
@@ -35,7 +35,7 @@ public class SummaryCommunityResult {
     }
 
     @QueryProjection
-    public SummaryCommunityResult(Community community, CommunityMemberResponse memberResponse, String eventTitle) {
+    public SummaryCommunityResult(Community community, MemberResponse memberResponse, String eventTitle) {
         this.community = community;
         this.memberResponse = memberResponse;
         this.eventTitle = eventTitle;

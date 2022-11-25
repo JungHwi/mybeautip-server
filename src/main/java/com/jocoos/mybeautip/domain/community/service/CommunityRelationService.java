@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
-import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
+import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityLike;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
@@ -69,7 +69,7 @@ public class CommunityRelationService {
         List<Long> writerIds = communityResponseList.stream()
                 .map(CommunityResponse::getMember)
                 .collect(Collectors.toList()).stream()
-                .map(CommunityMemberResponse::getId)
+                .map(MemberResponse::getId)
                 .collect(Collectors.toList());
 
         Map<Long, CommunityLike> likeMap = getLikeMap(member.getId(), communityIds);

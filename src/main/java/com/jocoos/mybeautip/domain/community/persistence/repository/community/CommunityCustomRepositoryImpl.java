@@ -355,8 +355,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .fetch();
     }
 
-    private QCommunityMemberResponse memberResponse() {
-        return new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename);
+    private QMemberResponse memberResponse() {
+        return new QMemberResponse(member.id, member.status, member.username, member.avatarFilename);
     }
 
     private BooleanExpression lessThanSortedAt(ZonedDateTime cursor) {
