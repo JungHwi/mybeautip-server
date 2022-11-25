@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.video.service.AdminVideoService;
 import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
+import com.jocoos.mybeautip.global.dto.single.SortOrderResponse;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 
 import static com.jocoos.mybeautip.global.code.SearchDomain.VIDEO;
 
@@ -36,7 +38,8 @@ public class AdminVideoController {
             @RequestParam(required = false) String search,
             @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
             @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
-            @RequestParam(required = false, name = "is_reported") Boolean isReported) {
+            @RequestParam(required = false, name = "is_reported") Boolean isReported,
+            @RequestParam(required = false, name = "is_top_fix") Boolean isTopFix) {
 
         SearchOption searchOption = SearchOption.builder()
                 .domain(VIDEO)
@@ -45,6 +48,7 @@ public class AdminVideoController {
                 .endAt(endAt)
                 .zoneId(ZoneId.of("Asia/Seoul"))
                 .isReported(isReported)
+                .isTopFix(isTopFix)
                 .build();
 
         AdminVideoSearchCondition condition = AdminVideoSearchCondition.builder()
@@ -72,7 +76,12 @@ public class AdminVideoController {
     }
 
     @PatchMapping("/video/{videoId}/fix")
-    public ResponseEntity<IdDto> topFixVideo(@PathVariable Long videoId, BooleanDto isTopFix) {
+    public ResponseEntity<IdDto> topFixVideo(@PathVariable Long videoId, @RequestBody BooleanDto isTopFix) {
         return ResponseEntity.ok(new IdDto(service.topFix(videoId, isTopFix.isBool())));
+    }
+
+    @PatchMapping("/video/order/change")
+    public ResponseEntity<SortOrderResponse> changeOrderOfVideo(List<Long> ids) {
+        return ResponseEntity.ok(new SortOrderResponse(service.arrange(ids)));
     }
 }

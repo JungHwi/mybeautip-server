@@ -10,9 +10,15 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface VideoCustomRepository {
+    void unFixAndSortingToNull(Long videoId);
+
     Page<AdminVideoResponse> getVideos(AdminVideoSearchCondition condition);
 
     SearchResult<Video> search(VideoSearchCondition condition);
     Long countBy(String keyword);
     List<Video> getVideos(VideoSearchCondition condition);
+
+    List<Long> arrangeByIndex(List<Long> sortedIds);
+
+    void fixAndAddToLastOrder(Long videoId);
 }

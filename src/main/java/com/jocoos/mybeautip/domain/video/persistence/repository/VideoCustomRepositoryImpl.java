@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import static com.jocoos.mybeautip.domain.video.persistence.domain.QVideoCategory.videoCategory;
 import static com.jocoos.mybeautip.global.code.SearchField.COMMENT;
@@ -36,6 +37,7 @@ import static com.jocoos.mybeautip.member.comment.QComment.comment1;
 import static com.jocoos.mybeautip.video.QVideo.video;
 import static com.jocoos.mybeautip.video.QVideoCategoryMapping.videoCategoryMapping;
 import static com.querydsl.core.group.GroupBy.groupBy;
+import static com.querydsl.core.types.dsl.Expressions.nullExpression;
 import static com.querydsl.sql.SQLExpressions.count;
 
 @Repository
@@ -55,6 +57,37 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                     .fetch();
         }
         return baseSearchQuery(condition).fetch();
+    }
+
+    @Override
+    public List<Long> arrangeByIndex(List<Long> sortedIds) {
+        updateAllSortingNullAndIsTopFixFalse();
+        IntStream.range(0, sortedIds.size()).forEach(index -> updateSortingByIndexAndIsTopFixTrue(sortedIds, index));
+        return getSortingOrderIds();
+    }
+
+    @Override
+    public void fixAndAddToLastOrder(Long videoId) {
+        Integer orderCount = repository.query(query -> query
+                .select(video.count().intValue().add(1))
+                .from(video)
+                .where(video.sorting.isNotNull())
+                .fetchOne());
+
+        repository.update(query -> query
+                .set(video.sorting, orderCount)
+                .set(video.isTopFix, true)
+                .where(eqId(videoId))
+                .execute());
+    }
+
+    @Override
+    public void unFixAndSortingToNull(Long videoId) {
+        repository.update(query -> query
+                .set(video.sorting, nullExpression())
+                .set(video.isTopFix, false)
+                .where(eqId(videoId))
+                .execute());
     }
 
     @Override
@@ -96,7 +129,8 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         eqCategoryId(condition.categoryId()),
                         goeCreatedAt(condition.startAtDate()),
                         loeCreatedAt(condition.endAtDate()),
-                        isReported(condition.isReported())
+                        isReported(condition.isReported()),
+                        isTopFix(condition.isTopFix())
                 ));
 
         dynamicQueryForCommentSearch(condition, baseQuery);
@@ -140,6 +174,13 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
         return isReported ? video.reportCount.gt(0) : video.reportCount.eq(0L);
     }
 
+    private BooleanExpression isTopFix(Boolean isTopFix) {
+        if (isTopFix == null) {
+            return null;
+        }
+        return isTopFix ? video.isTopFix.isTrue() : video.isTopFix.isFalse();
+    }
+
 
     @Override
     public SearchResult<Video> search(VideoSearchCondition condition) {
@@ -180,6 +221,34 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 )
                 .limit(condition.getSize())
                 .orderBy(video.createdAt.desc()));
+    }
+
+    private void updateAllSortingNullAndIsTopFixFalse() {
+        repository.update(query -> query
+                .set(video.isTopFix, false)
+                .set(video.sorting, nullExpression())
+                .execute());
+    }
+
+    private void updateSortingByIndexAndIsTopFixTrue(List<Long> sortedIds, int index) {
+        repository.update(query -> query
+                .set(video.isTopFix, true)
+                .set(video.sorting, index + 1)
+                .where(eqId(sortedIds.get(index)))
+                .execute());
+    }
+
+    private List<Long> getSortingOrderIds() {
+        return repository.query(query -> query
+                .select(video.id)
+                .from(video)
+                .where(video.sorting.isNotNull())
+                .orderBy(video.sorting.asc())
+                .fetch());
+    }
+
+    private BooleanExpression eqId(Long id) {
+        return id == null ? null : video.id.eq(id);
     }
 
     private BooleanExpression loeCreatedAt(Date endAt) {

@@ -104,6 +104,10 @@ public class Video {
     @JoinColumn(name = "owner")
     private Member member;
 
+    // is_top_fix true 인것만 정렬 가능
+    @Column
+    private Integer sorting;
+
     @Column
     private Boolean isTopFix;
 
@@ -166,9 +170,5 @@ public class Video {
 
     public void delete() {
         this.deletedAt = new Date();
-    }
-
-    public void topFix(boolean isTopFix) {
-        this.isTopFix = isTopFix;
     }
 }

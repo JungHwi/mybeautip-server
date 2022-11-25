@@ -46,4 +46,8 @@ public record AdminVideoSearchCondition(Integer categoryId,
     public String keyword() {
         return searchOption.getKeyword();
     }
+
+    public Boolean isTopFix() {
+        return searchOption == null ? null : searchOption.getIsTopFix();
+    }
 }

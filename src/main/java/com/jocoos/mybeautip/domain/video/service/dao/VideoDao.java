@@ -67,4 +67,19 @@ public class VideoDao {
     public void setCommentCount(Long videoId, int count) {
         repository.setCommentCount(videoId, count);
     }
+
+    @Transactional
+    public List<Long> arrangeByIndex(List<Long> sortedIds) {
+        return repository.arrangeByIndex(sortedIds);
+    }
+
+    @Transactional
+    public void fixAndAddToLastOrder(Long videoId) {
+        repository.fixAndAddToLastOrder(videoId);
+    }
+
+    @Transactional
+    public void unFixAndSortingToNull(Long videoId) {
+        repository.unFixAndSortingToNull(videoId);
+    }
 }

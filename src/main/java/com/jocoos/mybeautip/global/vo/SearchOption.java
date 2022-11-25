@@ -32,7 +32,7 @@ public class SearchOption {
                          LocalDate endAt,
                          ZoneId zoneId,
                          Boolean isReported,
-                Boolean isTopFix) {
+                         Boolean isTopFix) {
         this.domain = domain;
         this.searchField = setSearchField(searchQueryString);
         this.keyword = setKeyword(searchQueryString);
