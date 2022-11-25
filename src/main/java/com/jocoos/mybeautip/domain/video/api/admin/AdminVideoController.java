@@ -24,7 +24,6 @@ import static com.jocoos.mybeautip.global.code.SearchDomain.VIDEO;
 @RestController
 public class AdminVideoController {
 
-
     private final AdminVideoService service;
 
     @GetMapping("/video")
@@ -72,4 +71,8 @@ public class AdminVideoController {
         return ResponseEntity.ok(new IdDto(service.delete(videoId)));
     }
 
+    @PatchMapping("/video/{videoId}/fix")
+    public ResponseEntity<IdDto> topFixVideo(@PathVariable Long videoId, BooleanDto isTopFix) {
+        return ResponseEntity.ok(new IdDto(service.topFix(videoId, isTopFix.isBool())));
+    }
 }

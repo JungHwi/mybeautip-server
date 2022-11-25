@@ -104,6 +104,9 @@ public class Video {
     @JoinColumn(name = "owner")
     private Member member;
 
+    @Column
+    private Boolean isTopFix;
+
     @Transient
     private boolean isFirstOpen;
 
@@ -163,5 +166,9 @@ public class Video {
 
     public void delete() {
         this.deletedAt = new Date();
+    }
+
+    public void topFix(boolean isTopFix) {
+        this.isTopFix = isTopFix;
     }
 }

@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.video.service;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
 import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.video.Video;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,13 @@ public class AdminVideoService {
         Video video = videoDao.getVideo(videoId);
         video.delete();
         commentDeleteService.delete(videoId);
+        return video.getId();
+    }
+
+    @Transactional
+    public Long topFix(Long videoId, boolean isTopFix) {
+        Video video = videoDao.getVideo(videoId);
+        video.topFix(isTopFix);
         return video.getId();
     }
 }
