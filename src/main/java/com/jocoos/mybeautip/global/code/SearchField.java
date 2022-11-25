@@ -3,13 +3,20 @@ package com.jocoos.mybeautip.global.code;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 @Getter
 @RequiredArgsConstructor
 public enum SearchField {
+    TITLE("title"),
+    COMMENT("comment");
 
-    USERNAME("username"),
-    PHONE_NUMBER("phoneNumber"),
-    EMAIL("email");
+    private final String filedName;
 
-    private final String fieldName;
+    public static SearchField get(String searchField) {
+        return Arrays.stream(values())
+                .filter(value -> value.filedName.equals(searchField))
+                .findFirst()
+                .orElse(null);
+    }
 }

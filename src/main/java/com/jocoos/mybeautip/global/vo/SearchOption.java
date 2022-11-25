@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.global.vo;
 
+import com.jocoos.mybeautip.global.code.SearchDomain;
+import com.jocoos.mybeautip.global.code.SearchField;
 import com.jocoos.mybeautip.support.DateUtils;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +16,8 @@ import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned
 
 @Getter
 public class SearchOption {
+
+    private final SearchDomain domain;
     private final String searchField;
     private final String keyword;
     private final ZonedDateTime startAt;
@@ -22,12 +26,14 @@ public class SearchOption {
     private final Boolean isTopFix;
 
     @Builder
-    private SearchOption(String searchQueryString,
+    private SearchOption(SearchDomain domain,
+                         String searchQueryString,
                          LocalDate startAt,
                          LocalDate endAt,
                          ZoneId zoneId,
                          Boolean isReported,
-                         Boolean isTopFix) {
+                Boolean isTopFix) {
+        this.domain = domain;
         this.searchField = setSearchField(searchQueryString);
         this.keyword = setKeyword(searchQueryString);
         this.startAt = startAt == null ? null : toUTCZoned(startAt, zoneId);
@@ -54,5 +60,13 @@ public class SearchOption {
 
     public boolean isNoSearch() {
         return searchField == null || keyword == null;
+    }
+
+    public boolean isOuterField() {
+        return domain.isOuterField(searchField);
+    }
+
+    public boolean isSearchFieldEqual(SearchField searchField) {
+        return searchField == SearchField.get(this.searchField);
     }
 }
