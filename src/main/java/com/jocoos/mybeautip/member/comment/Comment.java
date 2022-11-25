@@ -8,10 +8,13 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DEFAULT;
 import static com.jocoos.mybeautip.member.comment.Comment.CommentState.getType;
+import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
+import static com.jocoos.mybeautip.member.comment.Comment.CommentState.*;
 
 @NoArgsConstructor
 @Data
@@ -65,10 +68,6 @@ public class Comment extends MemberAuditable {
         this.state = commentState.value();
     }
 
-    public boolean isBlinded() {
-        return CommentState.BLINDED.value() == this.state || CommentState.BLINDED_BY_ADMIN.value() == this.state;
-    }
-
     public CommentState getCommentState() {
         return getType(this.state);
     }
@@ -87,6 +86,26 @@ public class Comment extends MemberAuditable {
 
     public Long getMemberId() {
         return createdBy.getId();
+    }
+
+    public CommentState getStateString() {
+        return getType(state);
+    }
+
+    public ZonedDateTime getCreatedAtUTCZoned() {
+        return toUTCZoned(createdAt);
+    }
+
+    public void hide(boolean isHide) {
+        this.state = isHide ? BLINDED_BY_ADMIN.value : DEFAULT.value;
+    }
+
+    public boolean eqState(CommentState state) {
+        return this.state == state.value;
+    }
+
+    public boolean isChild() {
+        return parentId != null;
     }
 
     public enum CommentState {
@@ -118,3 +137,4 @@ public class Comment extends MemberAuditable {
         }
     }
 }
+

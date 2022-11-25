@@ -61,6 +61,8 @@ public interface CommentRepository extends ExtendedQuerydslJpaRepository<Comment
     Slice<Comment> findByParentId(Long parentId, Pageable pageable);
     List<Comment> findByParentId(Long parentId);
 
+    Page<Comment> findByVideoId(Long videoId, Pageable pageable);
+
     Slice<Comment> findByParentIdAndIdLessThanEqual(Long parentId, Long cursor, Pageable pageable);
 
     Slice<Comment> findByParentIdAndIdGreaterThanEqual(Long parentId, Long cursor, Pageable pageable);
@@ -86,5 +88,6 @@ public interface CommentRepository extends ExtendedQuerydslJpaRepository<Comment
     Long countByCreatedById(Long memberId);
 
     List<Comment> findByVideoId(Long videoId);
+    Slice<Comment> findByParentIdInOrderByCreatedAtAsc(List<Long> parentId);
 }
 
