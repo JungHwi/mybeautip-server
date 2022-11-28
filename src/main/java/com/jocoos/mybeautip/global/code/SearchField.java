@@ -11,11 +11,11 @@ public enum SearchField {
     TITLE("title"),
     COMMENT("comment");
 
-    private final String filedName;
+    private final String fieldName;
 
     public static SearchField get(String searchField) {
         return Arrays.stream(values())
-                .filter(value -> value.filedName.equals(searchField))
+                .filter(value -> value.fieldName.equals(searchField))
                 .findFirst()
                 .orElse(null);
     }

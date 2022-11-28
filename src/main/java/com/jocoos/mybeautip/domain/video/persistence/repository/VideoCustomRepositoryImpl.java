@@ -112,7 +112,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     private List<AdminVideoResponse> getContents(AdminVideoSearchCondition condition, JPAQuery<?> query) {
         return query
                 .select(new QAdminVideoResponse(video, member, GroupBy.list(videoCategory)))
-                .orderBy(getOrders(condition.sort()))
+                .orderBy(video.sorting.asc().nullsLast(), getOrders(condition.sort()))
                 .offset(condition.offset())
                 .limit(condition.limit())
                 .transform(groupBy(video).list(new QAdminVideoResponse(video, member, GroupBy.list(videoCategory))));

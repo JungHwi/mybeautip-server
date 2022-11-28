@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
 import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
+import static java.lang.Boolean.TRUE;
 
 @Getter
 @Setter
@@ -170,5 +172,21 @@ public class Video {
 
     public void delete() {
         this.deletedAt = new Date();
+        unFix();
+    }
+
+    public void validCanFix() {
+        if (deletedAt != null) {
+            throw new BadRequestException("삭제된 영상은 고정할 수 없습니다.");
+        }
+    }
+
+    public void unFix() {
+        this.isTopFix = false;
+        this.sorting = null;
+    }
+
+    public Boolean isTopFixTrueOrNull() {
+        return TRUE.equals(isTopFix) ? isTopFix : null;
     }
 }

@@ -18,6 +18,10 @@ public enum SearchDomain {
     private final Set<SearchField> outerFields;
 
     public boolean isOuterField(String searchField) {
-        return outerFields.contains(SearchField.get(searchField));
+        SearchField field = SearchField.get(searchField);
+        if (field == null) {
+            return false;
+        }
+        return outerFields.contains(field);
     }
 }

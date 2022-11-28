@@ -50,7 +50,7 @@ public class AdminVideoService {
     @Transactional
     public Long topFix(Long videoId, boolean isTopFix) {
         Video video = videoDao.getVideo(videoId);
-        fixAndChangeSortOrder(video.getId(), isTopFix);
+        fixAndChangeSortOrder(video, isTopFix);
         return video.getId();
     }
 
@@ -59,11 +59,12 @@ public class AdminVideoService {
         return videoDao.arrangeByIndex(sortedIds);
     }
 
-    private void fixAndChangeSortOrder(Long videoId, boolean isTopFix) {
+    private void fixAndChangeSortOrder(Video video, boolean isTopFix) {
         if (isTopFix) {
-            videoDao.fixAndAddToLastOrder(videoId);
+            video.validCanFix();
+            videoDao.fixAndAddToLastOrder(video.getId());
         } else {
-            videoDao.unFixAndSortingToNull(videoId);
+            videoDao.unFixAndSortingToNull(video.getId());
         }
     }
 }

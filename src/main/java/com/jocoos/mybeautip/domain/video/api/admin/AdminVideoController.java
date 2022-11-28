@@ -5,7 +5,7 @@ import com.jocoos.mybeautip.domain.video.service.AdminVideoService;
 import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
-import com.jocoos.mybeautip.global.dto.single.SortOrderResponse;
+import com.jocoos.mybeautip.global.dto.single.SortOrderDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 
 import static com.jocoos.mybeautip.global.code.SearchDomain.VIDEO;
 
@@ -80,8 +79,8 @@ public class AdminVideoController {
         return ResponseEntity.ok(new IdDto(service.topFix(videoId, isTopFix.isBool())));
     }
 
-    @PatchMapping("/video/order/change")
-    public ResponseEntity<SortOrderResponse> changeOrderOfVideo(List<Long> ids) {
-        return ResponseEntity.ok(new SortOrderResponse(service.arrange(ids)));
+    @PatchMapping("/video/order")
+    public ResponseEntity<SortOrderDto> changeOrderOfVideo(@RequestBody SortOrderDto request) {
+        return ResponseEntity.ok(new SortOrderDto(service.arrange(request.ids())));
     }
 }

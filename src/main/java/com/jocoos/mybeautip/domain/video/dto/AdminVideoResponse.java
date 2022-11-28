@@ -25,6 +25,7 @@ public class AdminVideoResponse {
     private final String thumbnailUrl;
     private final String title;
     private final String content;
+    private final Boolean isTopFix;
     private final int viewCount;
     private final int likeCount;
     private final int commentCount;
@@ -45,6 +46,7 @@ public class AdminVideoResponse {
         this.thumbnailUrl = video.getThumbnailUrl();
         this.title = video.getTitle();
         this.content = video.getContent();
+        this.isTopFix = video.isTopFixTrueOrNull();
         this.viewCount = video.getViewCount();
         this.likeCount = video.getLikeCount();
         this.commentCount = video.getCommentCount();
