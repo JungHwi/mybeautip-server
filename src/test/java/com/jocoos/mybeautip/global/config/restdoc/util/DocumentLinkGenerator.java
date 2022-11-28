@@ -38,6 +38,7 @@ public class DocumentLinkGenerator {
         OPERATION_TARGET_TYPE("operation_target_type", "운영 대상 구분"),
         OPERATION_TYPE("operation_type", "운영 행위 구분"),
         PLACARD_STATUS("placard_status", "플랜카드 상태"),
+        VIDEO_COMMENT_STATUS("video_comment_status", "비디오 댓글 상태")
         ;
 
         private final String pageId;

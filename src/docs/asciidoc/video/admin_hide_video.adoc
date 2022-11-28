@@ -1,0 +1,3 @@
+== Admin Hide Video API
+
+operation::admin_hide_video[snippets='http-request,path-parameters,request-fields,http-response,response-fields']

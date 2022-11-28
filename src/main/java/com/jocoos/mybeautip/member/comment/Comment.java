@@ -1,9 +1,8 @@
 package com.jocoos.mybeautip.member.comment;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import com.jocoos.mybeautip.global.code.CodeValue;
+import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.util.StringUtils;
 
@@ -108,17 +107,16 @@ public class Comment extends MemberAuditable {
         return parentId != null;
     }
 
-    public enum CommentState {
-        DEFAULT(0),
-        DELETED(1),
-        BLINDED(2),
-        BLINDED_BY_ADMIN(4);
+    @Getter
+    @RequiredArgsConstructor
+    public enum CommentState implements CodeValue {
+        DEFAULT(0, "정상"),
+        DELETED(1, "삭제"),
+        BLINDED(2, ""),
+        BLINDED_BY_ADMIN(4, "어드민 숨김");
 
-        private int value;
-
-        CommentState(int value) {
-            this.value = value;
-        }
+        private final int value;
+        private final String description;
 
         public static CommentState getType(int value) {
             CommentState state = DEFAULT;
@@ -134,6 +132,11 @@ public class Comment extends MemberAuditable {
 
         public int value() {
             return this.value;
+        }
+
+        @Override
+        public String getName() {
+            return this.name();
         }
     }
 }

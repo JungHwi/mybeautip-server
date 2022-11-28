@@ -25,6 +25,7 @@ import com.jocoos.mybeautip.global.code.*;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
 import com.jocoos.mybeautip.member.code.SkinType;
 import com.jocoos.mybeautip.member.code.SkinWorry;
+import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.point.UsePointService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,6 +68,7 @@ public class CommonDocController {
         // Video
         Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
         Map<String, String> videoMaskType = getDocs(VideoMaskType.values());
+        Map<String, String> videoCommentStatus = getDocs(Comment.CommentState.values());
 
         // Notification
         Map<String, String> notificationLinkType = getDocs(NotificationLinkType.values());
@@ -129,6 +131,7 @@ public class CommonDocController {
                 // Video
                         .videoCategoryType(videoCategoryType)
                         .videoMaskType(videoMaskType)
+                        .videoCommentStatus(videoCommentStatus)
                 // Notification
                         .notificationLinkType(notificationLinkType)
                         .messageType(messageType)

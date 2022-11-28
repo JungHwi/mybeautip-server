@@ -1,0 +1,3 @@
+== Admin Delete Video API
+
+operation::admin_delete_video[snippets='http-request,path-parameters,http-response,response-fields']

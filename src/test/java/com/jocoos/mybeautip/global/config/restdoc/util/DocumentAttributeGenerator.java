@@ -21,4 +21,8 @@ public class DocumentAttributeGenerator {
     public static Attributes.Attribute getZonedDateMilliFormat() {
         return key(KEY_FORMAT).value(ZONE_DATE_TIME_MILLI_FORMAT);
     }
+
+    public static Attributes.Attribute getLocalDateFormat() {
+        return key(KEY_FORMAT).value("yyyy-MM-dd");
+    }
 }
