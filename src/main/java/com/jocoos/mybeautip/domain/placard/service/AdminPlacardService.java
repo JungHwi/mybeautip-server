@@ -53,8 +53,7 @@ public class AdminPlacardService {
     @Transactional
     public Long topFix(Long placardId, boolean isTopFix) {
         Placard placard = placardDao.getById(placardId);
-        placard.topFix(isTopFix);
-        changeSorting(placardId, isTopFix);
+        changeIsTopFixAndSorting(placard, isTopFix);
         return placard.getId();
 
     }
@@ -76,11 +75,12 @@ public class AdminPlacardService {
         placard.initDetail(placardDetail);
     }
 
-    private void changeSorting(Long placardId, boolean isTopFix) {
+    private void changeIsTopFixAndSorting(Placard placard, boolean isTopFix) {
         if (isTopFix) {
-            placardDao.addToFrontOrder(placardId);
+            placard.validActive();
+            placardDao.fixAndAddToLastOrder(placard.getId());
         } else {
-            placardDao.sortingToNull(placardId);
+            placardDao.unFixAndSortingToNull(placard.getId());
         }
     }
 }

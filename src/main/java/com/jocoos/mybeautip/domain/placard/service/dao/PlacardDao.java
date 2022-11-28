@@ -40,8 +40,8 @@ public class PlacardDao {
     }
 
     @Transactional
-    public void addToFrontOrder(Long id) {
-        repository.toFirstOrder(id);
+    public void fixAndAddToLastOrder(Long id) {
+        repository.fixAndAddToLastOrder(id);
     }
 
     @Transactional
@@ -50,7 +50,7 @@ public class PlacardDao {
     }
 
     @Transactional
-    public void sortingToNull(Long placardId) {
-        repository.sortingToNull(placardId);
+    public void unFixAndSortingToNull(Long placardId) {
+        repository.unFixAndSortingToNull(placardId);
     }
 }

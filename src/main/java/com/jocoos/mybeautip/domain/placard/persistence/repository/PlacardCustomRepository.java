@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface PlacardCustomRepository {
     Page<AdminPlacardResponse> getPlacards(PlacardSearchCondition condition);
-    void toFirstOrder(Long id);
+    void fixAndAddToLastOrder(Long id);
     void arrangeByIndex(List<Long> ids);
 
-    void sortingToNull(Long placardId);
+    void unFixAndSortingToNull(Long placardId);
 }

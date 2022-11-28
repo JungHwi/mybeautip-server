@@ -130,14 +130,7 @@ public class Placard extends CreatedDateAuditable {
         return isActive ? ACTIVE : INACTIVE;
     }
 
-    public void topFix(boolean isTopFix) {
-        if (isTopFix) {
-            validActive();
-        }
-        this.isTopFix = isTopFix;
-    }
-
-    private void validActive() {
+    public void validActive() {
         if (status.equals(INACTIVE)) {
             throw new BadRequestException(ONLY_ACTIVE_CAN_FIX);
         }

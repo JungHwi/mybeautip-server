@@ -8,7 +8,6 @@ import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
 import com.jocoos.mybeautip.domain.placard.vo.PlacardSearchCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAUpdateClause;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -40,53 +39,47 @@ public class PlacardCustomRepositoryImpl implements  PlacardCustomRepository {
     }
 
     @Override
-    public void toFirstOrder(Long id) {
-        pushAllSortingValue(1);
+    public void fixAndAddToLastOrder(Long id) {
+        Integer orderCount = repository.query(query -> query
+                .select(placard.count().intValue().add(1))
+                .from(placard)
+                .where(placard.sorting.isNotNull())
+                .fetchOne());
+
         repository.update(query -> query
-                .set(placard.sorting, 1)
+                .set(placard.sorting, orderCount)
+                .set(placard.isTopFix, true)
                 .where(eqId(id))
                 .execute());
     }
 
     @Override
     public void arrangeByIndex(List<Long> ids) {
-        allSortingToNull();
-        IntStream.range(0, ids.size()).forEach(index -> setSortingByIndex(ids, index));
-        changeIsTopFixFalseWhereSortingIsNull(); // ㅅㅜㅈㅓㅇ
+        updateAllSortingNullAndIsTopFixFalse();
+        IntStream.range(0, ids.size()).forEach(index -> updateSortingByIndexAndIsTopFixTrue(ids, index));
     }
 
     @Override
-    public void sortingToNull(Long placardId) {
-        repository.update(query -> sortingToNull(query)
-                .where(eqId(placardId))
-                .execute());
-    }
-
-    private void allSortingToNull() {
-        repository.update(query -> sortingToNull(query).execute());
-    }
-
-    private JPAUpdateClause sortingToNull(JPAUpdateClause query) {
-        return query.set(placard.sorting, nullExpression());
-    }
-
-    private void changeIsTopFixFalseWhereSortingIsNull() {
+    public void unFixAndSortingToNull(Long id) {
         repository.update(query -> query
                 .set(placard.isTopFix, false)
-                .where(placard.sorting.isNull())
+                .set(placard.sorting, nullExpression())
+                .where(eqId(id))
                 .execute());
     }
 
-    private void setSortingByIndex(List<Long> ids, int index) {
+    private void updateAllSortingNullAndIsTopFixFalse() {
         repository.update(query -> query
+                .set(placard.isTopFix, false)
+                .set(placard.sorting, nullExpression())
+                .execute());
+    }
+
+    private void updateSortingByIndexAndIsTopFixTrue(List<Long> ids, int index) {
+        repository.update(query -> query
+                .set(placard.isTopFix, true)
                 .set(placard.sorting, index + 1)
                 .where(placard.id.eq(ids.get(index)))
-                .execute());
-    }
-
-    private void pushAllSortingValue(int pushValue) {
-        repository.update(query -> query
-                .set(placard.sorting, placard.sorting.add(pushValue))
                 .execute());
     }
 
