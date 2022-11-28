@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.ZonedDateTime;
 import java.util.Set;
 
-import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 @Getter
 @RequiredArgsConstructor
@@ -41,9 +41,9 @@ public class AdminMemberDetailResponse {
     private final Long invitedFriendCount;
     private final String memo;
 
-    @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT)
+    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime createdAt;
 
-    @JsonFormat(pattern = ZONE_DATE_TIME_MILLI_FORMAT)
+    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime modifiedAt;
 }
