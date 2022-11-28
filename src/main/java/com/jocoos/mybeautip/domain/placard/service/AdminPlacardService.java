@@ -59,8 +59,8 @@ public class AdminPlacardService {
     }
 
     @Transactional
-    public void arrange(List<Long> ids) {
-        placardDao.arrangeByIndex(ids);
+    public List<Long> arrange(List<Long> ids) {
+        return placardDao.arrangeByIndex(ids);
     }
 
     @Transactional

@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.placard.service.AdminPlacardService;
 import com.jocoos.mybeautip.domain.placard.vo.PlacardSearchCondition;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
+import com.jocoos.mybeautip.global.dto.single.SortOrderDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,6 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/admin")
@@ -87,7 +87,7 @@ public class AdminPlacardController {
     }
 
     @PatchMapping("/placard/order/change")
-    public void changeOrder(@RequestBody List<Long> ids) {
-        service.arrange(ids);
+    public SortOrderDto changeOrder(@RequestBody SortOrderDto request) {
+        return ResponseEntity.ok(new SortOrderDto(service.arrange(request.sortedIds()));
     }
 }

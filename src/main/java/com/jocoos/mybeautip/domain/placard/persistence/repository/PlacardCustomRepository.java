@@ -9,7 +9,7 @@ import java.util.List;
 public interface PlacardCustomRepository {
     Page<AdminPlacardResponse> getPlacards(PlacardSearchCondition condition);
     void fixAndAddToLastOrder(Long id);
-    void arrangeByIndex(List<Long> ids);
+    List<Long> arrangeByIndex(List<Long> ids);
 
     void unFixAndSortingToNull(Long placardId);
 }

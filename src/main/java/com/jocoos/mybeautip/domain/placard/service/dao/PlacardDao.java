@@ -45,8 +45,8 @@ public class PlacardDao {
     }
 
     @Transactional
-    public void arrangeByIndex(List<Long> ids) {
-        repository.arrangeByIndex(ids);
+    public List<Long> arrangeByIndex(List<Long> ids) {
+        return repository.arrangeByIndex(ids);
     }
 
     @Transactional

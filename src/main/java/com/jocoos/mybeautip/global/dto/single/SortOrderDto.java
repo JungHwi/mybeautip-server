@@ -2,5 +2,5 @@ package com.jocoos.mybeautip.global.dto.single;
 
 import java.util.List;
 
-public record SortOrderResponse(List<Long> ids) {
+public record SortOrderDto(List<Long> sortedIds) {
 }

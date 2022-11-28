@@ -54,9 +54,10 @@ public class PlacardCustomRepositoryImpl implements  PlacardCustomRepository {
     }
 
     @Override
-    public void arrangeByIndex(List<Long> ids) {
+    public List<Long> arrangeByIndex(List<Long> ids) {
         updateAllSortingNullAndIsTopFixFalse();
         IntStream.range(0, ids.size()).forEach(index -> updateSortingByIndexAndIsTopFixTrue(ids, index));
+        return getSortingOrderIds();
     }
 
     @Override
@@ -81,6 +82,15 @@ public class PlacardCustomRepositoryImpl implements  PlacardCustomRepository {
                 .set(placard.sorting, index + 1)
                 .where(placard.id.eq(ids.get(index)))
                 .execute());
+    }
+
+    private List<Long> getSortingOrderIds() {
+        return repository.query(query -> query
+                .select(placard.id)
+                .from(placard)
+                .where(placard.sorting.isNotNull())
+                .orderBy(placard.sorting.asc())
+                .fetch());
     }
 
     private List<AdminPlacardResponse> getContents(PlacardSearchCondition condition) {
