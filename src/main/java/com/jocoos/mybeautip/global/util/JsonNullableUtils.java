@@ -13,4 +13,11 @@ public class JsonNullableUtils {
             consumer.accept(nullable.get());
         }
     }
+
+    public static <T> T getIfPresent(JsonNullable<T> nullable, T originalValue) {
+        if (nullable.isPresent()) {
+            return nullable.get();
+        }
+        return originalValue;
+    }
 }

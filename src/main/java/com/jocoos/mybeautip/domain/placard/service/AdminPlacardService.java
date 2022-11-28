@@ -46,8 +46,9 @@ public class AdminPlacardService {
     @Transactional
     public Long edit(Long placardId, PatchPlacardRequest request) {
         Placard placard = placardDao.getById(placardId);
-        request.edit(placard);
-        return placard.getId();
+        Placard editedPlacard = request.edit(placard);
+        Placard savedPlacard = placardDao.save(editedPlacard);
+        return savedPlacard.getId();
     }
 
     @Transactional

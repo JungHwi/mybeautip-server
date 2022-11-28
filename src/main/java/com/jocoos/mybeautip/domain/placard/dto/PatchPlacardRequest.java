@@ -11,7 +11,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
 import java.time.ZonedDateTime;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
-import static com.jocoos.mybeautip.global.util.JsonNullableUtils.changeIfPresent;
+import static com.jocoos.mybeautip.global.util.JsonNullableUtils.getIfPresent;
 
 @Getter
 @Builder
@@ -33,15 +33,18 @@ public class PatchPlacardRequest {
     private JsonNullable<ZonedDateTime> endedAt = JsonNullable.undefined();
 
 
-    public void edit(Placard placard) {
-        changeIfPresent(status, placard::editStatus);
-        changeIfPresent(title, placard::editTitle);
-        changeIfPresent(linkType, placard::editLinkType);
-        changeIfPresent(linkArgument, placard::editLinkArgument);
-        changeIfPresent(description, placard::editDescription);
-        changeIfPresent(color, placard::editColor);
-        changeIfPresent(startedAt, placard::editStartedAt);
-        changeIfPresent(endedAt, placard::editEndedAt);
-        changeIfPresent(imageUrl, placard::editImageUrl);
+    public Placard edit(Placard placard) {
+        return Placard.editBuilder()
+                .fromOriginal(placard)
+                .status(getIfPresent(status, placard.getStatus()))
+                .title(getIfPresent(title, placard.getTitle()))
+                .linkType(getIfPresent(linkType, placard.getLinkType()))
+                .linkArgument(getIfPresent(linkArgument, placard.getLinkArgument()))
+                .description(getIfPresent(description, placard.getDescription()))
+                .color(getIfPresent(color, placard.getColor()))
+                .startedAt(getIfPresent(startedAt, placard.getStartedAt()))
+                .endedAt(getIfPresent(endedAt, placard.getEndedAt()))
+                .imageUrl(getIfPresent(imageUrl, placard.getImageUrl()))
+                .build();
     }
 }

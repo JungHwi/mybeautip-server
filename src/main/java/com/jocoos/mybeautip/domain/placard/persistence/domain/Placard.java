@@ -84,44 +84,6 @@ public class Placard extends CreatedDateAuditable {
         return toUTCZoned(createdAt);
     }
 
-    public void editTitle(String title) {
-        this.title = title;
-    }
-
-    public void editStatus(PlacardStatus status) {
-        this.status = status;
-    }
-
-    public void editLinkType(PlacardLinkType linkType) {
-        this.linkType = linkType;
-    }
-
-    public void editLinkArgument(String linkArgument) {
-        this.linkArgument = linkArgument;
-    }
-
-    public void editDescription(String description) {
-        this.description = description;
-    }
-
-    public void editColor(String color) {
-        this.color = color;
-    }
-
-    public void editStartedAt(ZonedDateTime startedAt) {
-        this.startedAt = startedAt;
-    }
-
-    public void editEndedAt(ZonedDateTime endedAt) {
-        this.endedAt = endedAt;
-    }
-
-    public void editImageUrl(String imageUrl) {
-        detailList.stream()
-                .findFirst()
-                .ifPresent(detail -> detail.replaceFile(imageUrl));
-    }
-
     public void changeStatus(boolean isActive) {
         this.status = getStatus(isActive);
     }
@@ -134,5 +96,37 @@ public class Placard extends CreatedDateAuditable {
         if (status.equals(INACTIVE)) {
             throw new BadRequestException(ONLY_ACTIVE_CAN_FIX);
         }
+    }
+
+    @Builder(builderClassName = "PlacardEditBuilder", builderMethodName = "editBuilder")
+    public Placard(Placard fromOriginal,
+                   String title,
+                   PlacardStatus status,
+                   PlacardLinkType linkType,
+                   String linkArgument,
+                   String description,
+                   String color,
+                   ZonedDateTime startedAt,
+                   ZonedDateTime endedAt,
+                   String imageUrl) {
+        this.id = fromOriginal.id;
+        this.createdAt = fromOriginal.createdAt;
+        this.sorting = fromOriginal.sorting;
+        this.isTopFix = fromOriginal.isTopFix;
+        this.title = title;
+        this.status = status;
+        this.linkType = linkType;
+        this.linkArgument = linkArgument;
+        this.description = description;
+        this.color = color;
+        this.startedAt = startedAt;
+        this.endedAt = endedAt;
+        fromOriginal.editImageUrl(imageUrl);
+    }
+
+    private void editImageUrl(String imageUrl) {
+        detailList.stream()
+                .findFirst()
+                .ifPresent(detail -> detail.replaceFile(imageUrl));
     }
 }

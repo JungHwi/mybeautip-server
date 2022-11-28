@@ -19,8 +19,8 @@ public class PlacardDao {
     private final PlacardRepository repository;
 
     @Transactional
-    public void save(Placard placard) {
-        repository.save(placard);
+    public Placard save(Placard placard) {
+        return repository.save(placard);
     }
 
     @Transactional(readOnly = true)
