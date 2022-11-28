@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+import static com.jocoos.mybeautip.global.code.UrlDirectory.PLACARD;
+import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+
 @Entity
 @Getter
 @Builder
@@ -33,5 +37,13 @@ public class PlacardDetail {
 
     public void setPlacard(Placard placard) {
         this.placard = placard;
+    }
+
+    public String getImageUrl() {
+        return toUrl(imageFile, PLACARD);
+    }
+
+    public void replaceFile(String imageUrl) {
+        this.imageFile = toFileName(imageUrl);
     }
 }

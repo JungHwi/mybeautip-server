@@ -19,14 +19,21 @@ public class SearchOption {
     private final ZonedDateTime startAt;
     private final ZonedDateTime endAt;
     private final Boolean isReported;
+    private final Boolean isTopFix;
 
     @Builder
-    private SearchOption(String searchQueryString, LocalDate startAt, LocalDate endAt, ZoneId zoneId, Boolean isReported) {
+    private SearchOption(String searchQueryString,
+                         LocalDate startAt,
+                         LocalDate endAt,
+                         ZoneId zoneId,
+                         Boolean isReported,
+                         Boolean isTopFix) {
         this.searchField = setSearchField(searchQueryString);
         this.keyword = setKeyword(searchQueryString);
         this.startAt = startAt == null ? null : toUTCZoned(startAt, zoneId);
         this.endAt = endAt == null ? null : toUTCZoned(endAt, zoneId);
         this.isReported = isReported;
+        this.isTopFix = isTopFix;
     }
 
     private String setSearchField(String queryString) {

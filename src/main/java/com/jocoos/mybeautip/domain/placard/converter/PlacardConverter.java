@@ -49,7 +49,16 @@ public interface PlacardConverter {
     List<PlacardResponse> convertToResponse(List<Placard> placardList, @Context PlacardTabType tabType);
 
     @Mapping(target = "detailList", ignore = true)
+    @Mapping(target = "startedAt", ignore = true)
+    @Mapping(target = "endedAt", ignore = true)
     Placard convert(PlacardRequest request);
+
+    @AfterMapping
+    default void convert(@MappingTarget Placard.PlacardBuilder placardBuilder, PlacardRequest request) {
+        placardBuilder
+                .startedAt(request.getStartedAtUTCZoned())
+                .endedAt(request.getEndedAtUTCZoned());
+    }
 
     default PlacardDetail convertToDetail(String imageUrl) {
         return PlacardDetail

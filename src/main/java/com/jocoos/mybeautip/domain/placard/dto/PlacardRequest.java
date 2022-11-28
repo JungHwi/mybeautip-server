@@ -3,26 +3,57 @@ package com.jocoos.mybeautip.domain.placard.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
+import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.LOCAL_DATE_TIME_FORMAT;
 
 @Getter
 @RequiredArgsConstructor
 public class PlacardRequest {
 
+    @NotNull
     private final PlacardStatus status;
-    private final String imageUrl;
-    private final String title;
-    private final PlacardLinkType linkType;
-    private final String linkArgument;
-    private final String description;
-    private final String color;
-    private final @NotNull(message = "startAt must not be null") @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt;
-    private final @NotNull(message = "endAt must not be null") @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime endedAt;
 
+    @NotNull
+    private final String imageUrl;
+
+    @NotNull
+    private final String title;
+
+    @NotNull
+    private final PlacardLinkType linkType;
+
+    private final String linkArgument;
+
+    private final String description;
+
+    @NotNull
+    private final String color;
+
+    @NotNull
+    @JsonFormat(pattern = LOCAL_DATE_TIME_FORMAT)
+    private final LocalDateTime startedAt;
+
+    @NotNull
+    @JsonFormat(pattern = LOCAL_DATE_TIME_FORMAT)
+    private final LocalDateTime endedAt;
+
+    public ZonedDateTime getStartedAtUTCZoned() {
+        return toUTCZoned();
+    }
+
+    public ZonedDateTime getEndedAtUTCZoned() {
+        return toUTCZoned();
+    }
+
+    private ZonedDateTime toUTCZoned() {
+        return ZonedDateTimeUtil.toUTCZoned(startedAt, ZoneId.of("Asia/Seoul"));
+    }
 }

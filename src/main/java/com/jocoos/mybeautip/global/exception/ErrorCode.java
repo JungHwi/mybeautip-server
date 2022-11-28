@@ -92,7 +92,12 @@ public enum ErrorCode implements CodeValue {
     INVALID_REQUEST_BODY("잘못된 요청"),
 
     // THIRD PARTY
-    S3_ERROR("S3 에러");
+    S3_ERROR("S3 에러"),
+
+
+    // Placard
+    ONLY_ACTIVE_CAN_FIX("활성화된 플랜카드만 고정됨")
+    ;
 
     private final String description;
 
