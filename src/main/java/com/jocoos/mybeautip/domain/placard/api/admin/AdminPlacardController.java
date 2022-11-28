@@ -86,8 +86,8 @@ public class AdminPlacardController {
         return ResponseEntity.ok(new IdDto(service.changeStatus(placardId, isActive.isBool())));
     }
 
-    @PatchMapping("/placard/order/change")
-    public SortOrderDto changeOrder(@RequestBody SortOrderDto request) {
-        return ResponseEntity.ok(new SortOrderDto(service.arrange(request.sortedIds()));
+    @PatchMapping("/placard/order")
+    public ResponseEntity<SortOrderDto> changeOrder(@RequestBody SortOrderDto request) {
+        return ResponseEntity.ok(new SortOrderDto(service.arrange(request.getSortedIds())));
     }
 }

@@ -56,8 +56,8 @@ public interface PlacardConverter {
     @AfterMapping
     default void convert(@MappingTarget Placard.PlacardBuilder placardBuilder, PlacardRequest request) {
         placardBuilder
-                .startedAt(request.getStartedAtUTCZoned())
-                .endedAt(request.getEndedAtUTCZoned());
+                .startedAt(request.startedAtToUTCZoned())
+                .endedAt(request.endedAtToUTCZoned());
     }
 
     default PlacardDetail convertToDetail(String imageUrl) {

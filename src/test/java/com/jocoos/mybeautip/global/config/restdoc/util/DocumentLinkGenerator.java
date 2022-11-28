@@ -36,7 +36,8 @@ public class DocumentLinkGenerator {
         POPUP_DISPLAY_TYPE("popup_display_type", "팝업 노출 구분"),
         BUTTON_LINK_TYPE("button_link_type", "버튼 링크 구분"),
         OPERATION_TARGET_TYPE("operation_target_type", "운영 대상 구분"),
-        OPERATION_TYPE("operation_type", "운영 행위 구분")
+        OPERATION_TYPE("operation_type", "운영 행위 구분"),
+        PLACARD_STATUS("placard_status", "플랜카드 상태"),
         ;
 
         private final String pageId;

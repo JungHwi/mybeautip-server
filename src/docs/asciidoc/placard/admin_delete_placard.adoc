@@ -1,0 +1,3 @@
+== Admin Delete Placard API
+
+operation::admin_delete_placard[snippets='http-request,path-parameters,http-response,response-fields']

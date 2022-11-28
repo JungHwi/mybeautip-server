@@ -1,6 +1,14 @@
 package com.jocoos.mybeautip.global.dto.single;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-public record SortOrderDto(List<Long> sortedIds) {
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+public class SortOrderDto {
+    private List<Long> sortedIds;
 }

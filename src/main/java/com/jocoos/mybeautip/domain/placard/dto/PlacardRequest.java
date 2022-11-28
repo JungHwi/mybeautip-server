@@ -45,11 +45,11 @@ public class PlacardRequest {
     @JsonFormat(pattern = LOCAL_DATE_TIME_FORMAT)
     private final LocalDateTime endedAt;
 
-    public ZonedDateTime getStartedAtUTCZoned() {
+    public ZonedDateTime startedAtToUTCZoned() {
         return toUTCZoned();
     }
 
-    public ZonedDateTime getEndedAtUTCZoned() {
+    public ZonedDateTime endedAtToUTCZoned() {
         return toUTCZoned();
     }
 
