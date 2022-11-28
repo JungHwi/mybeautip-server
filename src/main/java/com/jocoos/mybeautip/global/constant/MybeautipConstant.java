@@ -4,6 +4,8 @@ import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 public class MybeautipConstant {
+    // Service
+    public static final String DISABLE_USERNAME = "집나간파우치";
 
     // Image
     public static final String DEFAULT_AVATAR_FILE_NAME = "img_profile_default.png";

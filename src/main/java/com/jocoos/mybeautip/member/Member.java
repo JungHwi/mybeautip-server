@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -23,8 +24,7 @@ import java.util.Date;
 
 import static com.jocoos.mybeautip.domain.member.code.GrantType.*;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.HTTP_PREFIX;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.*;
 import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
@@ -262,5 +262,27 @@ public class Member {
 
     public ZonedDateTime getModifiedAtZoned() {
         return toUTCZoned(modifiedAt);
+    }
+
+    public void changeDormant() {
+        this.status = MemberStatus.DORMANT;
+        this.username = DISABLE_USERNAME;
+        this.avatarFilename = DEFAULT_AVATAR_FILE_NAME;
+        this.tag = StringUtils.EMPTY;
+        this.visible = false;
+        this.email = StringUtils.EMPTY;
+        this.phoneNumber = StringUtils.EMPTY;
+        this.birthday = null;
+        this.permission = NumberUtils.INTEGER_ZERO;
+        this.intro = StringUtils.EMPTY;
+        this.point = NumberUtils.INTEGER_ZERO;
+        this.followerCount = NumberUtils.INTEGER_ZERO;
+        this.followingCount = NumberUtils.INTEGER_ZERO;
+        this.reportCount = NumberUtils.INTEGER_ZERO;
+        this.publicVideoCount = NumberUtils.INTEGER_ZERO;
+        this.totalVideoCount = NumberUtils.INTEGER_ZERO;
+        this.revenue = NumberUtils.INTEGER_ZERO;
+        this.revenueModifiedAt = null;
+        this.pushable = false;
     }
 }

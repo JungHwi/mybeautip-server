@@ -1,7 +1,5 @@
 package com.jocoos.mybeautip.domain.member.service;
 
-import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
-import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.*;
@@ -18,7 +16,7 @@ import com.jocoos.mybeautip.domain.report.service.dao.ContentReportDao;
 import com.jocoos.mybeautip.domain.term.persistence.domain.MemberTerm;
 import com.jocoos.mybeautip.domain.term.service.dao.MemberTermDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
-import com.jocoos.mybeautip.member.comment.CommentRepository;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,9 +35,6 @@ public class AdminMemberService {
     private final UsernameCombinationWordDao usernameDao;
     private final PointService pointService;
     private final PointReasonService pointReasonService;
-    private final CommunityDao communityDao;
-    private final CommunityCommentDao communityCommentDao;
-    private final CommentRepository commentRepository;
     private final MemberTermDao memberTermDao;
     private final MemberPointDao memberPointDao;
     private final ContentReportDao contentReportDao;
@@ -102,5 +97,18 @@ public class AdminMemberService {
         List<MemberTerm> memberTerms = memberTermDao.isAgreeMarketingTerm(memberIds);
         Map<Long, Boolean> agreeTermMap = MemberTerm.memberIdIsAgreeTermMap(memberTerms);
         MemberBasicSearchResult.setIsAgreeMarketingTerm(content, agreeTermMap);
+    }
+
+    @Transactional
+    public int changeDormantMember() {
+        int result = 0;
+        List<Member> members = memberDao.getDormantTarget();
+        for (Member member : members) {
+            memberDao.changeToDormantMember(member);
+            member.changeDormant();
+            result++;
+        }
+
+        return result;
     }
 }

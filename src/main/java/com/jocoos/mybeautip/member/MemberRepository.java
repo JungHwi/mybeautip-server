@@ -6,11 +6,11 @@ import com.jocoos.mybeautip.domain.member.persistence.repository.MemberCustomRep
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, Long>, MemberCustomRepository {
@@ -24,6 +24,8 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
     boolean existsByUsername(String username);
 
     List<Member> findByUsername(String username);
+
+    List<Member> findByStatusAndLastLoggedAtLessThan(MemberStatus status, ZonedDateTime date);
 
     Optional<Member> findByTag(String tag);
 
