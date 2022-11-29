@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.dto;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.member.Member;
@@ -15,6 +16,8 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 @Builder
 public class WriteCommunityRequest {
 
+    private CommunityStatus status;
+
     private Long categoryId;
 
     private Long eventId;
@@ -24,7 +27,9 @@ public class WriteCommunityRequest {
     private String contents;
     private List<FileDto> files;
     private List<String> imageUrls;
+
     private Member member;
+
     private CommunityCategory category;
 
     public void fileUrlsToFileDto() {

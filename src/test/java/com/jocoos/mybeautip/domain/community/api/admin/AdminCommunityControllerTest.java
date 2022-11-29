@@ -46,8 +46,8 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
         result.andDo(document("admin_write_community",
                         requestFields(
                                 fieldWithPath("category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_STATUS)),
                                 fieldWithPath("event_id").type(JsonFieldType.NUMBER).description("이벤트 아이디. 써봐줄게 일때 관련된 이벤트 아이디.").optional(),
-                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목. 속닥속닥에서만 필수").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("image_urls").type(JsonFieldType.ARRAY).description("이미지 URL").optional()
                         ),
