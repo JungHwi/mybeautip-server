@@ -12,8 +12,11 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
+import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,11 +36,16 @@ public class AdminCommunityService {
     private final EventDao eventDao;
     private final AdminCommunityConverter converter;
     private final CommunityCommentDeleteService commentDeleteService;
-    private final CommunityCRUDService crudService;
+    private final CommunityFileService fileService;
+    private final LegacyMemberService legacyMemberService;
 
     @Transactional
     public AdminCommunityResponse write(WriteCommunityRequest request) {
-        return converter.convert(crudService.write(request));
+        setMember(request);
+        setFileDto(request);
+        Community community = communityDao.write(request);
+        fileService.write(request.getFiles(), community.getId());
+        return converter.convert(community);
     }
 
 
@@ -69,6 +77,7 @@ public class AdminCommunityService {
     public Long edit(Long communityId, PatchCommunityRequest request) {
         Community community = communityDao.get(communityId);
         community.edit(request.getTitle(), request.getContents());
+        editFiles(request, community);
         communityDao.save(community);
         return community.getId();
     }
@@ -102,6 +111,20 @@ public class AdminCommunityService {
         community.deleteAdminWrite();
         commentDeleteService.delete(community.getId());
         return community.getId();
+    }
+
+    private void setMember(WriteCommunityRequest request) {
+        Member member = legacyMemberService.currentMember();
+        request.setMember(member);
+    }
+
+    private void setFileDto(WriteCommunityRequest request) {
+        request.fileUrlsToFileDto();
+    }
+
+    private void editFiles(PatchCommunityRequest request, Community community) {
+        List<FileDto> editFiles = request.getFileDto(community.getCommunityFileList());
+        fileService.editFiles(community, editFiles);
     }
 
     private CommunitySearchCondition getSearchCondition(CommunityStatus status,

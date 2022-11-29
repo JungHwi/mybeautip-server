@@ -17,14 +17,12 @@ import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
-import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,12 +53,14 @@ public class CommunityService {
     private final CommunityConvertService convertService;
     private final AwsS3Handler awsS3Handler;
     private final CommunityCommentDeleteService commentDeleteService;
-    private final CommunityCRUDService crudService;
+    private final CommunityFileService fileService;
 
     @Transactional
     public CommunityResponse write(WriteCommunityRequest request) {
         Member member = legacyMemberService.currentMember();
-        Community community = crudService.write(request);
+        request.setMember(member);
+        Community community = communityDao.write(request);
+        fileService.write(request.getFiles(), community.getId());
 
         if (community.getCategory().getType() == DRIP) {
             eventJoinService.join(community.getEventId(), request.getMember().getId());
@@ -137,7 +137,7 @@ public class CommunityService {
 
         community.setTitle(request.getTitle());
         community.setContents(request.getContents());
-        editFiles(community, request.getFiles());
+        fileService.editFiles(community, request.getFiles());
 
         return convertService.toResponse(community.getMember(), community);
     }
@@ -188,26 +188,6 @@ public class CommunityService {
                 .isReport(isReport)
                 .reportCount(community.getReportCount())
                 .build();
-    }
-
-    @Transactional
-    public void editFiles(Community community, List<FileDto> fileDtoList) {
-        if (CollectionUtils.isEmpty(fileDtoList) || community.isVoteAndIncludeFile(fileDtoList.size())) {
-            return;
-        }
-
-        for (FileDto fileDto : fileDtoList) {
-            switch (fileDto.getOperation()) {
-                case UPLOAD:
-                    community.addFile(fileDto.getUrl());
-                    break;
-                case DELETE:
-                    community.removeFile(fileDto.getUrl());
-                    break;
-            }
-        }
-
-        awsS3Handler.editFiles(fileDtoList, UrlDirectory.COMMUNITY.getDirectory(community.getId()));
     }
 
     private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {

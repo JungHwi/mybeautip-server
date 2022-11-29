@@ -120,65 +120,9 @@ public class Community extends BaseEntity {
         this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFileName(fileName)));
     }
 
-    public void valid() {
-        switch (this.category.getType()) {
-            case BLIND -> {
-                validCommunity();
-                validBlind();
-            }
-            case DRIP -> {
-                validCommunity();
-                validDrip();
-            }
-            case VOTE -> {
-                validCommunity();
-                validVote(this.communityVoteList.size());
-            }
-            case KING_TIP -> {
-                validFileSize(10);
-            }
-            default -> validCommunity();
-        }
-    }
-
-    private void validFileSize(int limit) {
-        if (!isEmpty(communityFileList) && communityFileList.size() > limit) {
-            throw new BadRequestException(TOO_MANY_FILE, "file size limit " + limit + " request file size " + communityFileList.size());
-        }
-    }
-
     public void setContents(String contents) {
         validContents(contents);
         this.contents = contents;
-    }
-
-    private void validContents(String contents) {
-        if (StringUtils.isBlank(contents) || contents.replace(StringUtils.SPACE, StringUtils.EMPTY).length() < 5) {
-            throw new BadRequestException("Content length must be at least 5.");
-        }
-    }
-
-    private void validCommunity() {
-        validContents(this.contents);
-        validFileSize(5);
-    }
-
-    private void validBlind() {
-        if (StringUtils.isBlank(this.title) || this.title.length() < 5) {
-            throw new BadRequestException("Community title of Blind Category must be over 5 length");
-        }
-    }
-
-    private void validDrip() {
-        if (this.eventId == null || this.eventId < 1) {
-            throw new BadRequestException("Community of drip category needs event_id.");
-        }
-    }
-
-    private void validVote(int voteNum) {
-        if (voteNum != 0 && voteNum != 2) {
-            throw new BadRequestException(NOT_SUPPORTED_VOTE_NUM.getDescription());
-        }
     }
 
     public boolean isContentLongerThanOrSame(int length) {
@@ -230,6 +174,81 @@ public class Community extends BaseEntity {
       this.status = status.hide(isHide);
     }
 
+    public void edit(JsonNullable<String> title,
+                     JsonNullable<String> contents) {
+        changeIfPresent(title, this::editTitle);
+        changeIfPresent(contents, this::editContents);
+    }
+
+    public void deleteAdminWrite() {
+        validAdminWrite();
+        delete();
+    }
+
+    private void editTitle(String title) {
+        this.title = title;
+    }
+
+    private void editContents(String contents) {
+        this.contents = contents;
+    }
+
+    public void valid() {
+        switch (this.category.getType()) {
+            case BLIND -> {
+                validCommunity();
+                validBlind();
+            }
+            case DRIP -> {
+                validCommunity();
+                validDrip();
+            }
+            case VOTE -> {
+                validCommunity();
+                validVote(this.communityVoteList.size());
+            }
+            case KING_TIP -> {
+                validFileSize(10);
+            }
+            default -> validCommunity();
+        }
+    }
+
+    private void validFileSize(int limit) {
+        if (!isEmpty(communityFileList) && communityFileList.size() > limit) {
+            throw new BadRequestException(TOO_MANY_FILE, "file size limit " + limit + " request file size " + communityFileList.size());
+        }
+    }
+
+    private void validContents(String contents) {
+        if (StringUtils.isBlank(contents) || contents.replace(StringUtils.SPACE, StringUtils.EMPTY).length() < 5) {
+            throw new BadRequestException("Content length must be at least 5.");
+        }
+    }
+
+    private void validCommunity() {
+        validContents(this.contents);
+        validFileSize(5);
+    }
+
+    private void validBlind() {
+        if (StringUtils.isBlank(this.title) || this.title.length() < 5) {
+            throw new BadRequestException("Community title of Blind Category must be over 5 length");
+        }
+    }
+
+    private void validDrip() {
+        if (this.eventId == null || this.eventId < 1) {
+            throw new BadRequestException("Community of drip category needs event_id.");
+        }
+    }
+
+    private void validVote(int voteNum) {
+        if (voteNum != 0 && voteNum != 2) {
+            throw new BadRequestException(NOT_SUPPORTED_VOTE_NUM.getDescription());
+        }
+    }
+
     public void validReadAuth(Role role) {
         category.validReadAuth(role);
     }
@@ -240,21 +259,5 @@ public class Community extends BaseEntity {
         }
     }
 
-    public void edit(JsonNullable<String> title, JsonNullable<String> contents) {
-        changeIfPresent(title, this::updateTitle);
-        changeIfPresent(contents, this::updateContents);
-    }
 
-    public void deleteAdminWrite() {
-        validAdminWrite();
-        delete();
-    }
-
-    private void updateTitle(String title) {
-        this.title = title;
-    }
-
-    private void updateContents(String contents) {
-        this.contents = contents;
-    }
 }

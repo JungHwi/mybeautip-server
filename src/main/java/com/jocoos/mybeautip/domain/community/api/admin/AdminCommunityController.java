@@ -5,6 +5,9 @@ import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.dto.*;
+import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
+import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
@@ -21,7 +24,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/admin")
@@ -48,11 +50,6 @@ public class AdminCommunityController {
     @DeleteMapping("/community/{communityId}")
     public ResponseEntity<IdDto> deleteAdminWrite(@PathVariable Long communityId) {
         return ResponseEntity.ok(new IdDto(service.delete(communityId)));
-    }
-
-    @GetMapping("/community/category")
-    public ResponseEntity<List<CommunityCategoryResponse>> getCommunityCategories() {
-        return ResponseEntity.ok(service.getCategories());
     }
 
     @GetMapping("/community")

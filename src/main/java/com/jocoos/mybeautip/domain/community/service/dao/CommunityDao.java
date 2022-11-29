@@ -32,9 +32,7 @@ public class CommunityDao {
 
     private final CommunityCategoryDao categoryDao;
     private final CommunityRepository repository;
-
     private final CommunityConverter converter;
-
     private final EntityManager em;
 
     @Transactional

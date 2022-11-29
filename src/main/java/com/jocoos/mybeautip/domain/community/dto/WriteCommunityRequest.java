@@ -8,6 +8,9 @@ import lombok.Data;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 @Data
 @Builder
 public class WriteCommunityRequest {
@@ -19,10 +22,20 @@ public class WriteCommunityRequest {
     private String title;
 
     private String contents;
-
     private List<FileDto> files;
-
+    private List<String> imageUrls;
     private Member member;
-
     private CommunityCategory category;
+
+    public void fileUrlsToFileDto() {
+        if (!isEmpty(imageUrls)) {
+            this.files = imageUrls.stream()
+                    .map(this::toFileDto)
+                    .toList();
+        }
+    }
+
+    private FileDto toFileDto(String url) {
+        return new FileDto(UPLOAD, url);
+    }
 }

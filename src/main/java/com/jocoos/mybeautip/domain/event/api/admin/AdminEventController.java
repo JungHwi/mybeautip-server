@@ -46,7 +46,8 @@ public class AdminEventController {
             @RequestParam(required = false, defaultValue = "DESC") String order,
             @RequestParam(required = false) String search,
             @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
-            @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
+            @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
+            @RequestParam(name = "community_category_id", required = false) Long communityCategoryId) {
 
 
         SearchOption searchOption = SearchOption.builder()
