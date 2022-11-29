@@ -134,6 +134,7 @@ public class AdminCommunityService {
                                                         SearchOption searchOption) {
         return CommunitySearchCondition.builder()
                 .status(status)
+                .eventId(eventId)
                 .pageable(pageable)
                 .searchOption(searchOption)
                 .eventId(eventId)
