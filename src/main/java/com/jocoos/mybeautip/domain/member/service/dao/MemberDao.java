@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.domain.member.service.dao;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
-import com.jocoos.mybeautip.domain.member.persistence.domain.DormantMember;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberMemo;
-import com.jocoos.mybeautip.domain.member.persistence.repository.DormantMemberRepository;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberMemoRepository;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
@@ -13,6 +10,7 @@ import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +19,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
-
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class MemberDao {
@@ -29,8 +27,6 @@ public class MemberDao {
     private final MemberRepository repository;
     private final MemberDetailRepository memberDetailRepository;
     private final MemberMemoRepository memberMemoRepository;
-    private final DormantMemberRepository dormantMemberRepository;
-    private final MemberConverter memberConverter;
 
     @Transactional(readOnly = true)
     public Member getMember(long memberId) {
@@ -75,15 +71,14 @@ public class MemberDao {
         return repository.existsByUsername(username);
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsByTag(String tag) {
+        return repository.existsByTag(tag);
+    }
+
     @Transactional
     public List<Member> getDormantTarget() {
         ZonedDateTime targetDate = ZonedDateTime.now().minusYears(1);
         return repository.findByStatusAndLastLoggedAtLessThan(MemberStatus.ACTIVE, targetDate);
-    }
-
-    @Transactional()
-    public DormantMember changeToDormantMember(Member member) {
-        DormantMember dormantMember = memberConverter.convertForDormant(member);
-        return dormantMemberRepository.save(dormantMember);
     }
 }

@@ -1,10 +1,8 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
-import com.jocoos.mybeautip.global.exception.ErrorCode;
-import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.global.exception.MybeautipException;
-import com.jocoos.mybeautip.global.exception.NotFoundException;
+import com.jocoos.mybeautip.domain.member.dto.ExceptionMemberResponse;
+import com.jocoos.mybeautip.global.exception.*;
 import com.jocoos.mybeautip.member.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +51,6 @@ public class SocialLoginService {
 
     private Member saveOrUpdate(SocialMemberRequest socialMemberRequest) {
         Member member = findMember(socialMemberRequest);
-
         return memberRepository.save(member);
     }
 
@@ -68,11 +65,24 @@ public class SocialLoginService {
 
         switch (member.getStatus()) {
             case ACTIVE -> {
+                memberRepository.updateLastLoggedAt(member.getId());
                 return member;
             }
             case WITHDRAWAL -> throw new MemberNotFoundException("탈퇴한 회원");
-            case DORMANT -> throw new NotFoundException(ErrorCode.DORMANT_MEMBER, "휴면 회원");
-            case SUSPENDED -> throw new NotFoundException(ErrorCode.SUSPENDED_MEMBER, member.getModifiedAtZoned().plusDays(14), "정지 회원");
+            case DORMANT -> {
+                ExceptionMemberResponse response = ExceptionMemberResponse.builder()
+                        .memberId(member.getId())
+                        .date(member.getLastLoggedAt().plusYears(1))
+                        .build();
+                throw new BadRequestException(ErrorCode.DORMANT_MEMBER, "휴면 회원", response);
+            }
+            case SUSPENDED -> {
+                ExceptionMemberResponse response = ExceptionMemberResponse.builder()
+                        .memberId(member.getId())
+                        .date(member.getModifiedAtZoned().plusDays(14))
+                        .build();
+                throw new BadRequestException(ErrorCode.SUSPENDED_MEMBER, "정지 회원", response);
+            }
             case EXILE -> throw new NotFoundException(ErrorCode.EXILED_MEMBER, "추방된 회원");
             default -> throw new MybeautipException("Unsupported member status");
         }

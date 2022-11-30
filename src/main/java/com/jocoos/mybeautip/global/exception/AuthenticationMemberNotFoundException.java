@@ -29,4 +29,6 @@ public class AuthenticationMemberNotFoundException extends ClientAuthenticationE
     public String getOAuth2ErrorCode() {
         return this.errorCode.name();
     }
+
+
 }

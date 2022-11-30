@@ -31,7 +31,10 @@ public class DocumentLinkGenerator {
         SEARCH_TYPE("search_type", "검색 타입"),
         SCRAP_TYPE("scrap_type", "스크랩 타입"),
         PLACARD_LINK_TYPE("placard_link_type", "플랜카드 연결 타입"),
-        POINT_STATUS("point_status", "포인트 상태")
+        POINT_STATUS("point_status", "포인트 상태"),
+        POPUP_STATUS("popup_status", "팝업 상태 구분"),
+        POPUP_DISPLAY_TYPE("popup_display_type", "팝업 노출 구분"),
+        BUTTON_LINK_TYPE("button_link_type", "버튼 링크 구분"),
         ;
 
         private final String pageId;

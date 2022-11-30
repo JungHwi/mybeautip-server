@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.*;
 import com.jocoos.mybeautip.domain.member.persistence.domain.UsernameCombinationWord;
+import com.jocoos.mybeautip.domain.member.service.dao.DormantMemberDao;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.domain.member.service.dao.UsernameCombinationWordDao;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
@@ -32,6 +33,7 @@ import java.util.Map;
 public class AdminMemberService {
 
     private final MemberDao memberDao;
+    private final DormantMemberDao dormantMemberDao;
     private final UsernameCombinationWordDao usernameDao;
     private final PointService pointService;
     private final PointReasonService pointReasonService;
@@ -104,7 +106,7 @@ public class AdminMemberService {
         int result = 0;
         List<Member> members = memberDao.getDormantTarget();
         for (Member member : members) {
-            memberDao.changeToDormantMember(member);
+            dormantMemberDao.changeToDormantMember(member);
             member.changeDormant();
             result++;
         }

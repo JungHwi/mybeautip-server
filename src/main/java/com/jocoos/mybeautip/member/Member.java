@@ -144,7 +144,6 @@ public class Member {
     public Member(SignupRequest request) {
         this.status = MemberStatus.ACTIVE;
         this.link = parseLink(request.getGrantType());
-        this.username = StringUtils.isBlank(request.getUsername()) ? RandomUtils.generateUsername() : request.getUsername();
         this.email = StringUtils.isBlank(request.getEmail()) ? "" : request.getEmail();
         this.point = 0;
         this.visible = false;
@@ -199,9 +198,13 @@ public class Member {
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber.trim()
-                .replace("-", "")
-                .replace(" ", "");
+        if (StringUtils.isEmpty(phoneNumber)) {
+            this.phoneNumber = null;
+        } else {
+            this.phoneNumber = phoneNumber.trim()
+                    .replace("-", "")
+                    .replace(" ", "");
+        }
     }
 
     public Member usePoint(int point) {

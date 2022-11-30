@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.domain.popup.persistence.repository;
 
+import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
+import com.jocoos.mybeautip.domain.popup.code.PopupType;
 import com.jocoos.mybeautip.domain.popup.persistence.domain.Popup;
 import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +12,6 @@ import java.util.List;
 @Repository
 public interface PopupRepository extends DefaultJpaRepository<Popup, Long> {
 
-
     @Query("SELECT popup " +
             "FROM Popup AS popup " +
             "WHERE popup.status = 'ACTIVE' " +
@@ -18,4 +19,7 @@ public interface PopupRepository extends DefaultJpaRepository<Popup, Long> {
             "   AND popup.endedAt > CURRENT_TIMESTAMP " +
             "ORDER BY popup.id DESC")
     List<Popup> findByActivePopup();
+
+    Popup findTopByTypeAndStatus(PopupType type, PopupStatus status);
+
 }
