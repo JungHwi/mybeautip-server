@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.dto.single.SortOrderDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
+import com.jocoos.mybeautip.video.Visibility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -38,7 +39,8 @@ public class AdminVideoController {
             @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
             @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
             @RequestParam(required = false, name = "is_reported") Boolean isReported,
-            @RequestParam(required = false, name = "is_top_fix") Boolean isTopFix) {
+            @RequestParam(required = false, name = "is_top_fix") Boolean isTopFix,
+            @RequestParam(required = false) Visibility visibility) {
 
         SearchOption searchOption = SearchOption.builder()
                 .domain(VIDEO)
@@ -52,6 +54,7 @@ public class AdminVideoController {
 
         AdminVideoSearchCondition condition = AdminVideoSearchCondition.builder()
                 .categoryId(categoryId)
+                .visibility(visibility)
                 .pageable(PageRequest.of(page - 1, size, Direction.fromString(order), sort))
                 .searchOption(searchOption)
                 .build();

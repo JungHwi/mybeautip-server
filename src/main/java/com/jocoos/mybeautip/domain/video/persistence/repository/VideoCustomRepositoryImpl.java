@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
 import com.jocoos.mybeautip.domain.video.vo.VideoSearchCondition;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.Visibility;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Ops;
@@ -36,6 +37,8 @@ import static com.jocoos.mybeautip.member.QMember.member;
 import static com.jocoos.mybeautip.member.comment.QComment.comment1;
 import static com.jocoos.mybeautip.video.QVideo.video;
 import static com.jocoos.mybeautip.video.QVideoCategoryMapping.videoCategoryMapping;
+import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
+import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
 import static com.querydsl.sql.SQLExpressions.count;
@@ -130,7 +133,8 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         goeCreatedAt(condition.startAtDate()),
                         loeCreatedAt(condition.endAtDate()),
                         isReported(condition.isReported()),
-                        isTopFix(condition.isTopFix())
+                        isTopFix(condition.isTopFix()),
+                        eqVisibility(condition.visibility())
                 ));
 
         dynamicQueryForCommentSearch(condition, baseQuery);
@@ -198,7 +202,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .join(videoCategory).on(videoCategoryMapping.videoCategory.eq(videoCategory))
                 .where(
                         searchCondition(keyword),
-                        eqVisibilityPublic(),
+                        eqVisibility(PUBLIC),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
                 )
@@ -215,7 +219,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .where(
                         searchCondition(condition.getKeyword()),
                         lessOrEqualThanCreatedAt(condition.getCursor()),
-                        eqVisibilityPublic(),
+                        eqVisibility(PUBLIC),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
                 )
@@ -267,8 +271,11 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
         return categoryId == null ? null : videoCategoryMapping.videoCategory.id.eq(categoryId);
     }
 
-    private BooleanExpression eqVisibilityPublic() {
-        return video.visibility.eq("PUBLIC");
+    private BooleanExpression eqVisibility(Visibility visibility) {
+        if (visibility == null) {
+            return null;
+        }
+        return visibility.equals(PUBLIC) ? video.visibility.eq(PUBLIC.name()) : video.visibility.eq(PRIVATE.name());
     }
 
     private BooleanExpression inState(List<String> states) {

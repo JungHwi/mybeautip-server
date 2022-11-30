@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.video.vo;
 
 import com.jocoos.mybeautip.global.code.SearchField;
 import com.jocoos.mybeautip.global.vo.SearchOption;
+import com.jocoos.mybeautip.video.Visibility;
 import lombok.Builder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -10,6 +11,7 @@ import java.util.Date;
 
 @Builder
 public record AdminVideoSearchCondition(Integer categoryId,
+                                        Visibility visibility,
                                         Pageable pageable,
                                         SearchOption searchOption) {
     public Sort sort() {
