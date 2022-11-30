@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.domain.community.converter.AdminCommunityCommentConverter;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityCommentResponse;
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
@@ -25,6 +26,7 @@ public class AdminCommunityCommentService {
     private final CommunityCategoryDao categoryDao;
     private final CommunityCommentDeleteService deleteService;
     private final AdminCommunityCommentConverter converter;
+    private final CommunityCommentCRUDService crudService;
 
     @Transactional(readOnly = true)
     public PageResponse<AdminCommunityCommentResponse> getComments(Long communityId, Pageable pageable) {
@@ -60,5 +62,9 @@ public class AdminCommunityCommentService {
         CommunityComment comment = communityCommentDao.get(commentId);
         deleteService.hide(comment, isHide);
         return comment.getId();
+    }
+
+    public AdminCommunityCommentResponse write(WriteCommunityCommentRequest request) {
+        return converter.convert(crudService.write(request));
     }
 }
