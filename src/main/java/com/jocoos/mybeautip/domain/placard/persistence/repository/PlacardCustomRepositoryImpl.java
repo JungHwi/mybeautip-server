@@ -69,6 +69,18 @@ public class PlacardCustomRepositoryImpl implements  PlacardCustomRepository {
                 .execute());
     }
 
+    @Override
+    public long updateStatus(List<Long> ids, PlacardStatus status) {
+        return repository.update(query -> query
+                .set(placard.status, status)
+                .where(inId(ids))
+                .execute());
+    }
+
+    private BooleanExpression inId(List<Long> ids) {
+        return ids == null ? null : placard.id.in(ids);
+    }
+
     private void updateAllSortingNullAndIsTopFixFalse() {
         repository.update(query -> query
                 .set(placard.isTopFix, false)

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.placard.service.dao;
 
+import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
 import com.jocoos.mybeautip.domain.placard.dto.AdminPlacardResponse;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
 import com.jocoos.mybeautip.domain.placard.persistence.repository.PlacardRepository;
@@ -10,7 +11,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
 import java.util.List;
+
+import static com.jocoos.mybeautip.domain.placard.code.PlacardStatus.ACTIVE;
+import static com.jocoos.mybeautip.domain.placard.code.PlacardStatus.INACTIVE;
 
 @RequiredArgsConstructor
 @Service
@@ -52,5 +57,20 @@ public class PlacardDao {
     @Transactional
     public void unFixAndSortingToNull(Long placardId) {
         repository.unFixAndSortingToNull(placardId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Placard> findStartPlacards() {
+        return repository.findAllByStartedAtLessThanEqualAndEndedAtGreaterThanAndStatus(ZonedDateTime.now(), ZonedDateTime.now(), INACTIVE);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Placard> findEndPlacards() {
+        return repository.findAllByEndedAtLessThanEqualAndStatus(ZonedDateTime.now(), ACTIVE);
+    }
+
+    @Transactional
+    public long updateStatus(List<Long> ids, PlacardStatus status) {
+       return repository.updateStatus(ids, status);
     }
 }
