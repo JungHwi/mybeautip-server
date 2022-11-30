@@ -25,7 +25,7 @@ public class CommunityFileService {
 
     @Transactional
     public void editFiles(Community community, List<FileDto> fileDtoList) {
-        if (CollectionUtils.isEmpty(fileDtoList) || community.isVoteAndIncludeFile(fileDtoList.size())) {
+        if (CollectionUtils.isEmpty(fileDtoList) || community.isVoteAndIncludeFile()) {
             return;
         }
 
@@ -40,6 +40,7 @@ public class CommunityFileService {
             }
         }
 
+        community.validWrite();
         awsS3Handler.editFiles(fileDtoList, COMMUNITY.getDirectory(community.getId()));
     }
 }

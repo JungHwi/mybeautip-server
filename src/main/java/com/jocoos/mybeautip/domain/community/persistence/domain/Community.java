@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import javax.persistence.*;
@@ -22,7 +21,7 @@ import java.util.List;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
-import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.JsonNullableUtils.changeIfPresent;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -120,11 +119,6 @@ public class Community extends BaseEntity {
         this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFileName(fileName)));
     }
 
-    public void setContents(String contents) {
-        validContents(contents);
-        this.contents = contents;
-    }
-
     public boolean isContentLongerThanOrSame(int length) {
         return trimAllWhitespace(this.contents).length() >= length;
     }
@@ -133,11 +127,10 @@ public class Community extends BaseEntity {
         return !isEmpty(this.communityFileList);
     }
 
-    public boolean isVoteAndIncludeFile(int fileNum) {
+    public boolean isVoteAndIncludeFile() {
         if (!this.category.isCategoryType(VOTE)) {
             return false;
         }
-        validVote(fileNum);
         return !Collections.isEmpty(this.communityVoteList) || !Collections.isEmpty(this.communityFileList);
     }
 
@@ -190,67 +183,20 @@ public class Community extends BaseEntity {
     }
 
     private void editContents(String contents) {
+        validContent(contents);
         this.contents = contents;
     }
 
-    public void valid() {
-        switch (this.category.getType()) {
-            case BLIND -> {
-                validCommunity();
-                validBlind();
-            }
-            case DRIP -> {
-                validCommunity();
-                validDrip();
-            }
-            case VOTE -> {
-                validCommunity();
-                validVote(this.communityVoteList.size());
-            }
-            case KING_TIP -> {
-                validFileSize(10);
-            }
-            default -> validCommunity();
-        }
-    }
-
-    private void validFileSize(int limit) {
-        if (!isEmpty(communityFileList) && communityFileList.size() > limit) {
-            throw new BadRequestException(TOO_MANY_FILE, "file size limit " + limit + " request file size " + communityFileList.size());
-        }
-    }
-
-    private void validContents(String contents) {
-        if (StringUtils.isBlank(contents) || contents.replace(StringUtils.SPACE, StringUtils.EMPTY).length() < 5) {
-            throw new BadRequestException("Content length must be at least 5.");
-        }
-    }
-
-    private void validCommunity() {
-        validContents(this.contents);
-        validFileSize(5);
-    }
-
-    private void validBlind() {
-        if (StringUtils.isBlank(this.title) || this.title.length() < 5) {
-            throw new BadRequestException("Community title of Blind Category must be over 5 length");
-        }
-    }
-
-    private void validDrip() {
-        if (this.eventId == null || this.eventId < 1) {
-            throw new BadRequestException("Community of drip category needs event_id.");
-        }
-    }
-
-    private void validVote(int voteNum) {
-        if (voteNum != 0 && voteNum != 2) {
-            throw new BadRequestException(NOT_SUPPORTED_VOTE_NUM.getDescription());
-        }
+    private void validContent(String contents) {
+        category.validContent(getMemberRole(), contents);
     }
 
     public void validReadAuth(Role role) {
         category.validReadAuth(role);
+    }
+
+    public void validWrite() {
+        category.validWrite(this);
     }
 
     public void validAdminWrite() {
@@ -259,5 +205,16 @@ public class Community extends BaseEntity {
         }
     }
 
+    public Role getMemberRole() {
+        return Role.from(member);
+    }
+
+    public int getFileSize() {
+        return communityFileList.size();
+    }
+
+    public int getVoteSize() {
+        return communityVoteList.size();
+    }
 
 }

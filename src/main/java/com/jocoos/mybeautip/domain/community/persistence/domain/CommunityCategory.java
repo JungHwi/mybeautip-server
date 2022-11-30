@@ -48,11 +48,16 @@ public class CommunityCategory {
         return Objects.equals(type, this.type);
     }
 
-    public void validWriteAuth(Role role) {
-        type.validWriteAuth(role);
-    }
 
     public void validReadAuth(Role role) {
         type.validReadAuth(role);
+    }
+
+    public void validWrite(Community community) {
+        type.validWrite(community);
+    }
+
+    public void validContent(Role role, String contents) {
+        type.validContent(role, contents);
     }
 }
