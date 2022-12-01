@@ -15,8 +15,8 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 @RequiredArgsConstructor
 public class MemoResponse {
     private final Long id;
-    private final String memo;
-    private final CommunityMemberResponse memberResponse;
+    private final String content;
+    private final CommunityMemberResponse member;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime createdAt;
@@ -24,15 +24,15 @@ public class MemoResponse {
     @QueryProjection
     public MemoResponse(MemberMemo memberMemo, CommunityMemberResponse memberResponse) {
         this.id = memberMemo.getId();
-        this.memo = memberMemo.getMemo();
-        this.memberResponse = memberResponse;
+        this.content = memberMemo.getMemo();
+        this.member = memberResponse;
         this.createdAt = memberMemo.getCreatedAt();
     }
 
     public MemoResponse(MemberMemo memberMemo) {
         this.id = memberMemo.getId();
-        this.memo = memberMemo.getMemo();
-        this.memberResponse = new CommunityMemberResponse(memberMemo.getCreatedBy().getId(), memberMemo.getCreatedBy().getUsername());
+        this.content = memberMemo.getMemo();
+        this.member = new CommunityMemberResponse(memberMemo.getCreatedBy().getId(), memberMemo.getCreatedBy().getUsername());
         this.createdAt = memberMemo.getCreatedAt();
     }
 }

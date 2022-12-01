@@ -32,10 +32,6 @@ public class MemberMemo extends BaseEntity {
     @JoinColumn(name = "created_by")
     private Member createdBy;
 
-    public void update(String memo) {
-        this.memo = memo;
-    }
-
     public MemberMemo(String memo, Member target, Member createdBy) {
         this.memo = memo;
         this.target = target;

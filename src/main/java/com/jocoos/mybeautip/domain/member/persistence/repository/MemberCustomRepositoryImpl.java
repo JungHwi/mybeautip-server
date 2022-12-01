@@ -4,11 +4,13 @@ import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.community.dto.QCommunityMemberResponse;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
 import com.jocoos.mybeautip.domain.member.dto.QMemoResponse;
 import com.jocoos.mybeautip.domain.member.vo.*;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.QMember;
+import com.querydsl.core.group.AbstractGroupExpression;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -56,16 +58,16 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     public MemberSearchResult getMemberWithDetails(Long memberId) {
         QMember memoCreatedBy = new QMember("memoCreatedBy");
         return repository.query(query -> query
-                        .select(new QMemberSearchResult(member, address, memberDetail, memberActivityCount, list(new QMemoResponse(memberMemo, new QCommunityMemberResponse(memoCreatedBy.id, memoCreatedBy.username)).skipNulls())))
+                        .select(memberSearchResult(memoCreatedBy))
                         .from(member)
                         .leftJoin(memberDetail).on(memberDetail.memberId.eq(memberId))
                         .leftJoin(memberActivityCount).on(memberActivityCount.member.id.eq(memberId))
                         .leftJoin(address).on(address.createdBy.id.eq(memberId))
-                        .leftJoin(memberMemo).on(memberMemo.member.id.eq(memberId))
+                        .leftJoin(memberMemo).on(memberMemo.target.id.eq(memberId))
                         .leftJoin(memoCreatedBy).on(memberMemo.createdBy.eq(memoCreatedBy))
                         .where(eqId(memberId)))
                 .orderBy(memberMemo.id.asc())
-                .transform(groupBy(member.id).as(new QMemberSearchResult(member, address, memberDetail, memberActivityCount, list(new QMemoResponse(memberMemo, new QCommunityMemberResponse(memoCreatedBy.id, memoCreatedBy.username)).skipNulls()))))
+                .transform(groupBy(member.id).as(memberSearchResult(memoCreatedBy)))
                 .get(memberId);
     }
 
@@ -108,7 +110,6 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private List<MemberBasicSearchResult> fetchBasicSearchResult(JPAQuery<?> baseQuery) {
         return baseQuery
                 .select(new QMemberBasicSearchResult(member, memberActivityCount))
-                .leftJoin(memberMemo).on(member.eq(memberMemo.member))
                 .innerJoin(memberActivityCount).on(member.eq(memberActivityCount.member))
                 .fetch();
     }
@@ -130,6 +131,22 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 Ops.STRING_CONTAINS_IC,
                 Expressions.path(String.class, member, searchOption.getSearchField()),
                 Expressions.constant(searchOption.getKeyword()));
+    }
+
+    private QMemberSearchResult memberSearchResult(QMember memoCreatedBy) {
+        return new QMemberSearchResult(member, address, memberDetail, memberActivityCount, memoResponses(memoCreatedBy));
+    }
+
+    private AbstractGroupExpression<MemoResponse, List<MemoResponse>> memoResponses(QMember memoCreatedBy) {
+        return list(memoResponse(memoCreatedBy).skipNulls());
+    }
+
+    private QMemoResponse memoResponse(QMember memoCreatedBy) {
+        return new QMemoResponse(memberMemo, memberResponse(memoCreatedBy).skipNulls());
+    }
+
+    private QCommunityMemberResponse memberResponse(QMember member) {
+        return new QCommunityMemberResponse(member.id, member.username);
     }
 
     private static BooleanExpression eqId(Long memberId) {

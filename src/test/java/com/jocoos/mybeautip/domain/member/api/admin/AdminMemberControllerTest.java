@@ -6,19 +6,18 @@ import com.jocoos.mybeautip.domain.member.dto.MemberStatusRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemoRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,7 +75,13 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("skin_type").type(JsonFieldType.STRING).description(generateLinkCode(SKIN_TYPE)).optional(),
                         fieldWithPath("skin_worry").type(JsonFieldType.ARRAY).description(generateLinkCode(SKIN_WORRY)).optional(),
                         fieldWithPath("address").type(JsonFieldType.STRING).description("주소").optional(),
-                        fieldWithPath("memo").type(JsonFieldType.STRING).description("어드민 메모").optional()
+                        fieldWithPath("memo").type(JsonFieldType.ARRAY).description("괸리자 작성 메모 목록").optional(),
+                        fieldWithPath("memo.[].id").type(JsonFieldType.NUMBER).description("괸리자 작성 메모 ID"),
+                        fieldWithPath("memo.[].content").type(JsonFieldType.STRING).description("괸리자 작성 메모 내용"),
+                        fieldWithPath("memo.[].member").type(JsonFieldType.OBJECT).description("괸리자 작성 메모 작성자"),
+                        fieldWithPath("memo.[].member.id").type(JsonFieldType.OBJECT).description("괸리자 작성 메모 작성자 ID"),
+                        fieldWithPath("memo.[].member.username").type(JsonFieldType.OBJECT).description("괸리자 작성 메모 작성자 닉네임"),
+                        fieldWithPath("memo.[].created_at").type(JsonFieldType.STRING).description("생성일자").attributes(getZonedDateFormat())
                 )));
     }
 
@@ -142,30 +147,6 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].point").type(JsonFieldType.NUMBER).description("포인트"),
                         fieldWithPath("content.[].earned_at").type(JsonFieldType.STRING).description("생성일자").attributes(getZonedDateFormat()),
                         fieldWithPath("content.[].expiry_at").type(JsonFieldType.STRING).description("만료일자").attributes(getZonedDateFormat()).optional()
-                )));
-    }
-
-    @Transactional
-    @Test
-    void memberMemo() throws Exception {
-        MemoRequest request = new MemoRequest("memo");
-
-        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/admin/member/{member_id}/memo", 4)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print());
-
-        result.andDo(document("admin_patch_member_memo",
-                pathParameters(
-                        parameterWithName("member_id").description("회원 ID")
-                ),
-                requestFields(
-                        fieldWithPath("memo").type(JsonFieldType.STRING).description("메모")
-                ),
-                responseFields(
-                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("멤버 ID")
                 )));
     }
 

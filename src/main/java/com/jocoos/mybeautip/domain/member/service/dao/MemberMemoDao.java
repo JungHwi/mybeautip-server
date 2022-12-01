@@ -22,7 +22,7 @@ public class MemberMemoDao {
 
     @Transactional(readOnly = true)
     public MemberMemo get(Long memoId, Long memberId) {
-        return repository.findByIdAndMemberId(memoId, memberId)
+        return repository.findByIdAndTargetId(memoId, memberId)
                 .orElseThrow(() -> new NotFoundException(MEMBER_MEMO_NOT_FOUND, "memo id - " + memoId + ", member id" + memberId));
     }
 
