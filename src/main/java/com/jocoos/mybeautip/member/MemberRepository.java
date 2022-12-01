@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -49,6 +50,7 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
     @Query("UPDATE Member m set m.point = m.point + ?2 WHERE m.id = ?1")
     void updateMemberPoint(long memberId, int point);
 
+    @Transactional
     @Modifying
     @Query("update Member m set m.lastLoggedAt = current_timestamp where m.id = ?1")
     void updateLastLoggedAt(Long memberId);

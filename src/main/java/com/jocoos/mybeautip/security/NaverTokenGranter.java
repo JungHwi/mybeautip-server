@@ -13,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -42,7 +41,6 @@ public class NaverTokenGranter extends AbstractTokenGranter {
     }
 
     @Override
-    @Transactional
     public OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
         Map<String, String> requestParameters = tokenRequest.getRequestParameters();
         String naverId = requestParameters.get("social_id");
