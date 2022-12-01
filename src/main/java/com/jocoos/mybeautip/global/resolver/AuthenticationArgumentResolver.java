@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.global.resolver;
 
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
+import lombok.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,11 +17,13 @@ public class AuthenticationArgumentResolver implements HandlerMethodArgumentReso
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType().equals(MyBeautipUserDetails.class);
+        boolean hasAnnotation = parameter.hasParameterAnnotation(CurrentMember.class);
+        boolean hasParameterType = parameter.getParameterType().equals(MyBeautipUserDetails.class);
+        return hasAnnotation && hasParameterType;
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(@NonNull MethodParameter parameter, ModelAndViewContainer mavContainer, @NonNull NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         return currentUserDetails();
     }
 

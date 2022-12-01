@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.member.api.admin;
 import com.jocoos.mybeautip.domain.member.dto.MemoRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
 import com.jocoos.mybeautip.domain.member.service.AdminMemberMemoService;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class AdminMemberMemoController {
     private final AdminMemberMemoService service;
 
     @PostMapping("/member/{memberId}/memo")
-    public ResponseEntity<MemoResponse> writeMemo(MyBeautipUserDetails currentMember,
+    public ResponseEntity<MemoResponse> writeMemo(@CurrentMember MyBeautipUserDetails currentMember,
                                                   @PathVariable Long memberId,
                                                   @RequestBody @Valid MemoRequest request) {
         MemoResponse response = service.write(request.memo(), memberId, currentMember.getMember());
@@ -27,7 +28,7 @@ public class AdminMemberMemoController {
     }
 
     @PatchMapping("/member/{memberId}/memo/{memoId}")
-    public ResponseEntity<IdDto> editMemo(MyBeautipUserDetails currentMember,
+    public ResponseEntity<IdDto> editMemo(@CurrentMember MyBeautipUserDetails currentMember,
                                           @PathVariable Long memberId,
                                           @PathVariable Long memoId,
                                           @RequestBody @Valid MemoRequest request) {
@@ -35,7 +36,7 @@ public class AdminMemberMemoController {
     }
 
     @DeleteMapping("/member/{memberId}/memo/{memoId}")
-    public ResponseEntity<IdDto> deleteMemo(MyBeautipUserDetails currentMember,
+    public ResponseEntity<IdDto> deleteMemo(@CurrentMember MyBeautipUserDetails currentMember,
                                             @PathVariable Long memberId,
                                             @PathVariable Long memoId) {
         return ResponseEntity.ok(new IdDto(service.delete(memoId, memberId, currentMember.getMember())));
