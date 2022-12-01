@@ -17,16 +17,16 @@ public class AdminMemberMemoService {
     private final MemberMemoDao memberMemoDao;
 
     @Transactional
-    public MemoResponse write(String memo, Long memberId, Member createdBy) {
+    public MemoResponse write(String content, Long memberId, Member createdBy) {
         Member member = memberDao.getMember(memberId);
-        MemberMemo memberMemo = new MemberMemo(memo, member, createdBy);
+        MemberMemo memberMemo = new MemberMemo(content, member, createdBy);
         return new MemoResponse(memberMemoDao.save(memberMemo));
     }
 
     @Transactional
-    public Long edit(Long memoId, Long memberId, String editMemo, Member editedBy) {
+    public Long edit(Long memoId, Long memberId, String editContent, Member editedBy) {
         MemberMemo memberMemo = memberMemoDao.get(memoId, memberId);
-        memberMemo.edit(editMemo, editedBy);
+        memberMemo.edit(editContent, editedBy);
         return memberMemo.getId();
     }
 

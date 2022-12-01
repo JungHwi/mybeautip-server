@@ -38,7 +38,7 @@ class AdminMemberMemoControllerTest extends RestDocsTestSupport {
                         parameterWithName("member_id").description("회원 ID")
                 ),
                 requestFields(
-                        fieldWithPath("memo").type(JsonFieldType.STRING).description("메모")
+                        fieldWithPath("content").type(JsonFieldType.STRING).description("메모 내용")
                 ),
                 responseFields(
                         fieldWithPath("id").type(JsonFieldType.NUMBER).description("괸리자 작성 메모 ID"),
@@ -69,7 +69,7 @@ class AdminMemberMemoControllerTest extends RestDocsTestSupport {
                         parameterWithName("memo_id").description("메모 ID")
                 ),
                 requestFields(
-                        fieldWithPath("memo").type(JsonFieldType.STRING).description("메모")
+                        fieldWithPath("content").type(JsonFieldType.STRING).description("메모 내용")
                 ),
                 responseFields(
                         fieldWithPath("id").type(JsonFieldType.NUMBER).description("괸리자 작성 메모 ID")

@@ -22,7 +22,7 @@ public class MemberMemo extends BaseEntity {
     private Long id;
 
     @Column
-    private String memo;
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id")
@@ -32,15 +32,15 @@ public class MemberMemo extends BaseEntity {
     @JoinColumn(name = "created_by")
     private Member createdBy;
 
-    public MemberMemo(String memo, Member target, Member createdBy) {
-        this.memo = memo;
+    public MemberMemo(String content, Member target, Member createdBy) {
+        this.content = content;
         this.target = target;
         this.createdBy = createdBy;
     }
 
-    public void edit(String editMemo, Member editedBy) {
+    public void edit(String editContent, Member editedBy) {
         validSameWriter(editedBy);
-        this.memo = editMemo;
+        this.content = editContent;
     }
 
     public void validSameWriter(Member editedBy) {

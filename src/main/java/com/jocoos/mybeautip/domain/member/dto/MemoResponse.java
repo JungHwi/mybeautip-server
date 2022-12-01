@@ -24,14 +24,14 @@ public class MemoResponse {
     @QueryProjection
     public MemoResponse(MemberMemo memberMemo, CommunityMemberResponse memberResponse) {
         this.id = memberMemo.getId();
-        this.content = memberMemo.getMemo();
+        this.content = memberMemo.getContent();
         this.member = memberResponse;
         this.createdAt = memberMemo.getCreatedAt();
     }
 
     public MemoResponse(MemberMemo memberMemo) {
         this.id = memberMemo.getId();
-        this.content = memberMemo.getMemo();
+        this.content = memberMemo.getContent();
         this.member = new CommunityMemberResponse(memberMemo.getCreatedBy().getId(), memberMemo.getCreatedBy().getUsername());
         this.createdAt = memberMemo.getCreatedAt();
     }

@@ -23,8 +23,7 @@ public class AdminMemberMemoController {
     public ResponseEntity<MemoResponse> writeMemo(@CurrentMember MyBeautipUserDetails currentMember,
                                                   @PathVariable Long memberId,
                                                   @RequestBody @Valid MemoRequest request) {
-        MemoResponse response = service.write(request.memo(), memberId, currentMember.getMember());
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok(service.write(request.content(), memberId, currentMember.getMember()));
     }
 
     @PatchMapping("/member/{memberId}/memo/{memoId}")
@@ -32,7 +31,7 @@ public class AdminMemberMemoController {
                                           @PathVariable Long memberId,
                                           @PathVariable Long memoId,
                                           @RequestBody @Valid MemoRequest request) {
-        return ResponseEntity.ok(new IdDto(service.edit(memoId, memberId, request.memo(), currentMember.getMember())));
+        return ResponseEntity.ok(new IdDto(service.edit(memoId, memberId, request.content(), currentMember.getMember())));
     }
 
     @DeleteMapping("/member/{memberId}/memo/{memoId}")

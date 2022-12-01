@@ -125,7 +125,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
             return null;
         }
         if (Objects.equals(searchOption.getSearchField(), "memo")) {
-            return memberMemo.memo.containsIgnoreCase(searchOption.getKeyword());
+            return memberMemo.content.containsIgnoreCase(searchOption.getKeyword());
         }
         return Expressions.booleanOperation(
                 Ops.STRING_CONTAINS_IC,
