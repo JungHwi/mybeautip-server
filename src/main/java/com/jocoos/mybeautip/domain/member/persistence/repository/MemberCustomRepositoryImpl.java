@@ -1,11 +1,14 @@
 package com.jocoos.mybeautip.domain.member.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.community.dto.QCommunityMemberResponse;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.dto.QMemoResponse;
 import com.jocoos.mybeautip.domain.member.vo.*;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.QMember;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -27,6 +30,7 @@ import static com.jocoos.mybeautip.member.address.QAddress.address;
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 import static com.jocoos.mybeautip.member.block.QBlock.block;
 import static com.querydsl.core.group.GroupBy.groupBy;
+import static com.querydsl.core.group.GroupBy.list;
 import static com.querydsl.sql.SQLExpressions.count;
 import static org.springframework.data.support.PageableExecutionUtils.getPage;
 
@@ -50,15 +54,19 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     @Override
     public MemberSearchResult getMemberWithDetails(Long memberId) {
+        QMember memoCreatedBy = new QMember("memoCreatedBy");
         return repository.query(query -> query
-                        .select(new QMemberSearchResult(member, address, memberDetail, memberMemo.memo, memberActivityCount))
+                        .select(new QMemberSearchResult(member, address, memberDetail, memberActivityCount, list(new QMemoResponse(memberMemo, new QCommunityMemberResponse(memoCreatedBy.id, memoCreatedBy.username)).skipNulls())))
                         .from(member)
-                        .leftJoin(memberDetail).on(member.id.eq(memberDetail.memberId))
+                        .leftJoin(memberDetail).on(memberDetail.memberId.eq(memberId))
                         .leftJoin(memberActivityCount).on(memberActivityCount.member.id.eq(memberId))
-                        .leftJoin(address).on(member.eq(address.createdBy))
-                        .leftJoin(memberMemo).on(member.eq(memberMemo.member))
+                        .leftJoin(address).on(address.createdBy.id.eq(memberId))
+                        .leftJoin(memberMemo).on(memberMemo.member.id.eq(memberId))
+                        .leftJoin(memoCreatedBy).on(memberMemo.createdBy.eq(memoCreatedBy))
                         .where(eqId(memberId)))
-                .fetchOne();
+                .orderBy(memberMemo.id.asc())
+                .transform(groupBy(member.id).as(new QMemberSearchResult(member, address, memberDetail, memberActivityCount, list(new QMemoResponse(memberMemo, new QCommunityMemberResponse(memoCreatedBy.id, memoCreatedBy.username)).skipNulls()))))
+                .get(memberId);
     }
 
     @Override

@@ -14,22 +14,28 @@ import javax.persistence.*;
 public class MemberMemo extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private Long id;
 
     @Column
     private String memo;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
     private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private Member createdBy;
 
     public void update(String memo) {
         this.memo = memo;
     }
 
-    public MemberMemo(String memo, Member member) {
+    public MemberMemo(String memo, Member member, Member createdBy) {
         this.memo = memo;
         this.member = member;
+        this.createdBy = createdBy;
     }
 }

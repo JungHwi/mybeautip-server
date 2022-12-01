@@ -31,6 +31,11 @@ public class CommunityMemberResponse {
         this.avatarUrl = toUrl(avatarFilename, AVATAR);
     }
 
+    @QueryProjection
+    public CommunityMemberResponse(Long id, String username) {
+        this(id, null, username, null);
+    }
+
     public static CommunityMemberResponse from(Member member) {
         return new CommunityMemberResponse(
                 member.getId(),

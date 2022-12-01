@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Set;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
@@ -39,7 +40,7 @@ public class AdminMemberDetailResponse {
     private final int totalCommunityCommentCount;
     private final int totalVideoCommentCount;
     private final Long invitedFriendCount;
-    private final String memo;
+    private final List<MemoResponse> memo;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime createdAt;

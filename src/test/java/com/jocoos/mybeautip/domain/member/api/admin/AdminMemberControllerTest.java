@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.member.api.admin;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemoRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusRequest;
+import com.jocoos.mybeautip.domain.member.dto.MemoRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -147,7 +148,7 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
     @Transactional
     @Test
     void memberMemo() throws Exception {
-        AdminMemoRequest request = new AdminMemoRequest("memo");
+        MemoRequest request = new MemoRequest("memo");
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .patch("/admin/member/{member_id}/memo", 4)

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.member.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberActivityCount;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.member.Member;
@@ -13,6 +14,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Set;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
@@ -32,7 +34,7 @@ public class MemberSearchResult {
     private final SkinType skinType;
     private final Set<SkinWorry> skinWorry;
     private final String address;
-    private final String memo;
+    private final List<MemoResponse> memo;
     private final int normalCommunityCount;
     private final int normalCommunityCommentCount;
     private final int normalVideoCommentCount;
@@ -47,7 +49,7 @@ public class MemberSearchResult {
     private final ZonedDateTime modifiedAt;
 
     @QueryProjection
-    public MemberSearchResult(Member member, Address address, MemberDetail memberDetail, String memo, MemberActivityCount activityCount) {
+    public MemberSearchResult(Member member, Address address, MemberDetail memberDetail, MemberActivityCount activityCount, List<MemoResponse> memoResponses) {
         this.id = member.getId();
         this.avatarUrl = member.getAvatarUrl();
         this.username = member.getUsername();
@@ -62,7 +64,7 @@ public class MemberSearchResult {
         this.address = address == null ? null : address.getWholeAddress();
         this.skinType = memberDetail == null ? null : memberDetail.getSkinType();
         this.skinWorry = memberDetail == null ? null : memberDetail.getSkinWorry();
-        this.memo = memo;
+        this.memo = memoResponses;
         this.normalCommunityCount = activityCount.getCommunityCount();
         this.normalCommunityCommentCount = activityCount.getCommunityCommentCount();
         this.normalVideoCommentCount = activityCount.getVideoCommentCount();
