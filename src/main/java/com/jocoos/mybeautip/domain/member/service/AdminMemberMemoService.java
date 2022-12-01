@@ -17,9 +17,16 @@ public class AdminMemberMemoService {
     private final MemberMemoDao memberMemoDao;
 
     @Transactional
-    public MemoResponse writeMemo(String memo, Long memberId, Member createdBy) {
+    public MemoResponse write(String memo, Long memberId, Member createdBy) {
         Member member = memberDao.getMember(memberId);
         MemberMemo memberMemo = new MemberMemo(memo, member, createdBy);
         return new MemoResponse(memberMemoDao.save(memberMemo));
+    }
+
+    @Transactional
+    public Long edit(Long memoId, Long memberId, String editMemo, Member editedBy) {
+        MemberMemo memberMemo = memberMemoDao.get(memoId, memberId);
+        memberMemo.edit(editMemo, editedBy);
+        return memberMemo.getId();
     }
 }

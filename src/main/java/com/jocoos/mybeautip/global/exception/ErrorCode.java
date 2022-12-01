@@ -16,6 +16,7 @@ public enum ErrorCode implements CodeValue {
     INVALID_DATE_FORMAT("날짜 포맷 오류"),
     ALREADY_USED("이미 사용중"),
     BANNED_WORD("금칙어 포함"),
+    NOT_A_WRITER("작성자가 아님"),
 
     // MEMBER
     MEMBER_NOT_FOUND("회원 정보 없음"),
@@ -36,6 +37,9 @@ public enum ErrorCode implements CodeValue {
     ADDRESS_TOO_MANY_ADDRESS("address.too_many_addresses"),
     NO_ADDRESS("주소 정보 없음"),
     RANDOM_USERNAME_NOT_FOUND("랜덤 닉네임 찾지 못함"),
+
+    // MEMBER MEMO
+    MEMBER_MEMO_NOT_FOUND("메모 정보 없음"),
 
     // EVENT
     NOT_STARTED_EVENT("아직 시작 안 한 이벤트"),

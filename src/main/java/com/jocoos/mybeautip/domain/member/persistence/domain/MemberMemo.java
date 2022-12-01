@@ -1,12 +1,15 @@
 package com.jocoos.mybeautip.domain.member.persistence.domain;
 
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+
+import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_A_WRITER;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -37,5 +40,16 @@ public class MemberMemo extends BaseEntity {
         this.memo = memo;
         this.member = member;
         this.createdBy = createdBy;
+    }
+
+    public void edit(String editMemo, Member editedBy) {
+        validSameWriterEditor(editedBy);
+        this.memo = editMemo;
+    }
+
+    private void validSameWriterEditor(Member editedBy) {
+        if (!createdBy.equals(editedBy)) {
+            throw new BadRequestException(NOT_A_WRITER);
+        }
     }
 }
