@@ -319,7 +319,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private void addWhereConditionOptional(CommunitySearchCondition condition, JPAQuery<Community> defaultQuery) {
         if (condition.isCategoryDrip()) {
-            addWhereCondition(defaultQuery, eqEventId(condition.eventId()), eqIsWin(condition.isFirstSearch()));
+            addWhereCondition(defaultQuery, eqEventIdWithValid(condition.eventId()), eqIsWin(condition.isFirstSearch()));
         }
     }
 
@@ -371,11 +371,15 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return isFirstSearch ? null : community.isWin.isNull();
     }
 
-    private BooleanExpression eqEventId(Long eventId) {
+    private BooleanExpression eqEventIdWithValid(Long eventId) {
         if (eventId == null || eventId < NumberUtils.LONG_ONE) {
             throw new BadRequestException(BAD_REQUEST, "event_id is required to search DRIP category.");
         }
         return community.eventId.eq(eventId);
+    }
+
+    private BooleanExpression eqEventId(Long eventId) {
+        return eventId == null ? null : community.eventId.eq(eventId);
     }
 
     private BooleanExpression eqStatus(CommunityStatus status) {

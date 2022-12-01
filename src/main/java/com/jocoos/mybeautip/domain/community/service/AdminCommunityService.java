@@ -125,6 +125,7 @@ public class AdminCommunityService {
     private void editFiles(PatchCommunityRequest request, Community community) {
         List<FileDto> editFiles = request.getFileDto(community.getCommunityFileList());
         fileService.editFiles(community, editFiles);
+        request.getImageUrls().ifPresent(community::sortFilesByRequestIndex);
     }
 
     private CommunitySearchCondition getSearchCondition(CommunityStatus status,

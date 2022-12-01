@@ -17,12 +17,14 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
+import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
 import static com.jocoos.mybeautip.global.util.JsonNullableUtils.changeIfPresent;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
@@ -80,6 +82,7 @@ public class Community extends BaseEntity {
     @Column(columnDefinition = "DATETIME(3)")
     private ZonedDateTime sortedAt;
 
+    @OrderBy("id")
     @OneToMany(mappedBy = "community", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityFile> communityFileList = new ArrayList<>();
 
@@ -187,6 +190,19 @@ public class Community extends BaseEntity {
         this.contents = contents;
     }
 
+    public void sortFilesByRequestIndex(List<String> sortedUrls) {
+        if (communityFileList.size() == sortedUrls.size()) {
+            IntStream.range(0, communityFileList.size())
+                    .forEach(index -> replaceFileIfDiff(sortedUrls.get(index), communityFileList.get(index)));
+        }
+    }
+
+    private void replaceFileIfDiff(String url, CommunityFile file) {
+        if (!file.isUrlEqual(url)) {
+            file.setFile(toFileName(url));
+        }
+    }
+
     private void validContent(String contents) {
         category.validContent(getMemberRole(), contents);
     }
@@ -216,5 +232,4 @@ public class Community extends BaseEntity {
     public int getVoteSize() {
         return communityVoteList.size();
     }
-
 }
