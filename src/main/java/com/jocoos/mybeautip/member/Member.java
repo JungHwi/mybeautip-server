@@ -259,6 +259,17 @@ public class Member {
         return birthday.getAgeGroupByTen();
     }
 
+    public Member changeStatus(MemberStatus status) {
+        switch (status) {
+            case WITHDRAWAL -> withdrawal();
+            case DORMANT -> dormant();
+            case SUSPENDED -> suspend();
+            case EXILE -> exile();
+        }
+
+        return this;
+    }
+
     public ZonedDateTime getCreatedAtZoned() {
         return toUTCZoned(createdAt);
     }
@@ -267,7 +278,7 @@ public class Member {
         return toUTCZoned(modifiedAt);
     }
 
-    public void changeDormant() {
+    private void dormant() {
         this.status = MemberStatus.DORMANT;
         this.username = DISABLE_USERNAME;
         this.avatarFilename = DEFAULT_AVATAR_FILE_NAME;
@@ -287,5 +298,24 @@ public class Member {
         this.revenue = NumberUtils.INTEGER_ZERO;
         this.revenueModifiedAt = null;
         this.pushable = false;
+    }
+
+    private void suspend() {
+        this.status = MemberStatus.SUSPENDED;
+    }
+
+    private void exile() {
+        this.status = MemberStatus.EXILE;
+    }
+
+    private void withdrawal() {
+        this.status = MemberStatus.WITHDRAWAL;
+        this.visible = false;
+        this.avatarFilename = DEFAULT_AVATAR_FILE_NAME;
+        this.followingCount = 0;
+        this.followerCount = 0;
+        this.publicVideoCount = 0;
+        this.totalVideoCount = 0;
+        this.deletedAt = new Date();
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -89,6 +90,18 @@ public class AdminMemberController {
     @PatchMapping("/member/username/refresh")
     public ResponseEntity refreshUsername() {
         service.refreshUsername();
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PatchMapping("/member/{memberId}/status")
+    public ResponseEntity changeStatus(@PathVariable Long memberId,
+                                       @RequestBody MemberStatusRequest request) {
+        long adminId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
+        request.setAdminId(adminId);
+        request.setMemberId(memberId);
+
+        service.updateStatus(request);
+
         return new ResponseEntity(HttpStatus.OK);
     }
 }

@@ -1,11 +1,14 @@
 package com.jocoos.mybeautip.domain.member.api.admin;
 
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.AdminMemoRequest;
+import com.jocoos.mybeautip.domain.member.dto.MemberStatusRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -185,6 +188,34 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].accuser.username").type(JsonFieldType.STRING).description("신고자 닉네임"),
                         fieldWithPath("content.[].reason").type(JsonFieldType.STRING).description("신고 사유"),
                         fieldWithPath("content.[].reported_at").type(JsonFieldType.STRING).description("신고일자").attributes(getZonedDateFormat())
+                )));
+    }
+
+    @Test
+    @Transactional
+    @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void patchMemberStatus() throws Exception {
+        MemberStatusRequest request = new MemberStatusRequest(MemberStatus.SUSPENDED);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/admin/member/{member_id}/status", 4)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_patch_member_status",
+                pathParameters(
+                        parameterWithName("member_id").description("회원 ID")
+                ),
+                requestFields(
+                        fieldWithPath("after_status").type(JsonFieldType.STRING).description(generateLinkCode(MEMBER_STATUS)),
+                        fieldWithPath("admin_id").ignored(),
+                        fieldWithPath("member_id").ignored(),
+                        fieldWithPath("description").ignored(),
+                        fieldWithPath("created_by").ignored(),
+                        fieldWithPath("target_id").ignored(),
+                        fieldWithPath("operation_type").ignored()
                 )));
     }
 }

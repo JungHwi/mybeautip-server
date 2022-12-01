@@ -10,6 +10,9 @@ import com.jocoos.mybeautip.domain.member.service.dao.UsernameCombinationWordDao
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
+import com.jocoos.mybeautip.domain.operation.converter.OperationLogConverter;
+import com.jocoos.mybeautip.domain.operation.dto.OperationLogRequest;
+import com.jocoos.mybeautip.domain.operation.service.dao.OperationLogDao;
 import com.jocoos.mybeautip.domain.point.dao.MemberPointDao;
 import com.jocoos.mybeautip.domain.point.service.PointReasonService;
 import com.jocoos.mybeautip.domain.point.service.PointService;
@@ -34,6 +37,7 @@ public class AdminMemberService {
 
     private final MemberDao memberDao;
     private final DormantMemberDao dormantMemberDao;
+    private final OperationLogDao operationLogDao;
     private final UsernameCombinationWordDao usernameDao;
     private final PointService pointService;
     private final PointReasonService pointReasonService;
@@ -41,6 +45,7 @@ public class AdminMemberService {
     private final MemberPointDao memberPointDao;
     private final ContentReportDao contentReportDao;
     private final AdminMemberConverter converter;
+    private final OperationLogConverter operationLogConverter;
 
 
     @Transactional(readOnly = true)
@@ -107,10 +112,19 @@ public class AdminMemberService {
         List<Member> members = memberDao.getDormantTarget();
         for (Member member : members) {
             dormantMemberDao.changeToDormantMember(member);
-            member.changeDormant();
+            member.changeStatus(MemberStatus.DORMANT);
             result++;
         }
 
         return result;
+    }
+
+    @Transactional
+    public Member updateStatus(MemberStatusRequest request) {
+        Member member = memberDao.getMember(request.getMemberId());
+        request.setBeforeStatus(member.getStatus());
+        OperationLogRequest logRequest = operationLogConverter.converts(request);
+        operationLogDao.logging(logRequest);
+        return memberDao.updateStatus(member, request.getAfterStatus());
     }
 }
