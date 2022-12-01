@@ -25,4 +25,9 @@ public class MemberMemoDao {
         return repository.findByIdAndMemberId(memoId, memberId)
                 .orElseThrow(() -> new NotFoundException(MEMBER_MEMO_NOT_FOUND, "memo id - " + memoId + ", member id" + memberId));
     }
+
+    @Transactional
+    public void delete(MemberMemo memberMemo) {
+        repository.delete(memberMemo);
+    }
 }

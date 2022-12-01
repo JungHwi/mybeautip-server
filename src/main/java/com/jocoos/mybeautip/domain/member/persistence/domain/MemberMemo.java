@@ -25,8 +25,8 @@ public class MemberMemo extends BaseEntity {
     private String memo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "target_id")
+    private Member target;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
@@ -36,18 +36,18 @@ public class MemberMemo extends BaseEntity {
         this.memo = memo;
     }
 
-    public MemberMemo(String memo, Member member, Member createdBy) {
+    public MemberMemo(String memo, Member target, Member createdBy) {
         this.memo = memo;
-        this.member = member;
+        this.target = target;
         this.createdBy = createdBy;
     }
 
     public void edit(String editMemo, Member editedBy) {
-        validSameWriterEditor(editedBy);
+        validSameWriter(editedBy);
         this.memo = editMemo;
     }
 
-    private void validSameWriterEditor(Member editedBy) {
+    public void validSameWriter(Member editedBy) {
         if (!createdBy.equals(editedBy)) {
             throw new BadRequestException(NOT_A_WRITER);
         }

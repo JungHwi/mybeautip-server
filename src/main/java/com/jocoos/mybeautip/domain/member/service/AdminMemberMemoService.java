@@ -29,4 +29,12 @@ public class AdminMemberMemoService {
         memberMemo.edit(editMemo, editedBy);
         return memberMemo.getId();
     }
+
+    @Transactional
+    public Long delete(Long memoId, Long memberId, Member deletedBy) {
+        MemberMemo memberMemo = memberMemoDao.get(memoId, memberId);
+        memberMemo.validSameWriter(deletedBy);
+        memberMemoDao.delete(memberMemo);
+        return memberMemo.getId();
+    }
 }

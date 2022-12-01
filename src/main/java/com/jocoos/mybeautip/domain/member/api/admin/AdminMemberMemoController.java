@@ -31,4 +31,11 @@ public class AdminMemberMemoController {
                                           @RequestBody MemoRequest request) {
         return ResponseEntity.ok(new IdDto(service.edit(memoId, memberId, request.memo(), currentMember.getMember())));
     }
+
+    @DeleteMapping("/member/{memberId}/memo/{memoId}")
+    public ResponseEntity<IdDto> deleteMemo(MyBeautipUserDetails currentMember,
+                                            @PathVariable Long memberId,
+                                            @PathVariable Long memoId) {
+        return ResponseEntity.ok(new IdDto(service.delete(memoId, memberId, currentMember.getMember())));
+    }
 }
