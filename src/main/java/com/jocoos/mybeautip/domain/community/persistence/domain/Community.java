@@ -1,9 +1,11 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
+import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVote;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
+import io.jsonwebtoken.lang.Collections;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +15,15 @@ import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.jocoos.mybeautip.global.util.FileUtil.getFilename;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
+import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 @Getter
@@ -65,13 +73,19 @@ public class Community extends BaseEntity {
     @Column
     private int reportCount;
 
+    @Column
+    private Boolean isTopFix;
+
     @Column(columnDefinition = "DATETIME(3)")
     private ZonedDateTime sortedAt;
 
-    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER ,cascade = {CascadeType.ALL}, orphanRemoval = true)
-    private List<CommunityFile> communityFileList;
+    @OneToMany(mappedBy = "community", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private List<CommunityFile> communityFileList = new ArrayList<>();
 
-    @ManyToOne
+    @OneToMany(mappedBy = "community", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private List<CommunityVote> communityVoteList = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", insertable = false, updatable = false)
     private Member member;
 
@@ -83,18 +97,25 @@ public class Community extends BaseEntity {
         if (!this.status.isDeletable()) {
             throw new BadRequestException("This status can not delete. This Community Status is " + this.status);
         }
-        this.status = CommunityStatus.DELETE;
+        this.status = DELETE;
         return this;
     }
 
     public void addFile(String fileName) {
-        CommunityFile communityFile = new CommunityFile(getFilename(fileName));
+        CommunityFile communityFile = new CommunityFile(getFileName(fileName));
         communityFile.setCommunity(this);
+        if (this.category.isCategoryType(VOTE)) {
+            CommunityVote communityVote = new CommunityVote(this, communityFile);
+            this.communityVoteList.add(communityVote);
+        }
         this.getCommunityFileList().add(communityFile);
     }
 
     public void removeFile(String fileName) {
-        this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFilename(fileName)));
+        if (this.category.isCategoryType(VOTE)) {
+            this.communityVoteList.removeIf(vote -> vote.getCommunityFile().getFile().equals(getFileName(fileName)));
+        }
+        this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFileName(fileName)));
     }
 
     public void valid() {
@@ -106,6 +127,10 @@ public class Community extends BaseEntity {
             case DRIP:
                 validCommunity();
                 validDrip();
+                break;
+            case VOTE:
+                validCommunity();
+                validVote(this.communityVoteList.size());
                 break;
             default:
                 validCommunity();
@@ -119,7 +144,7 @@ public class Community extends BaseEntity {
 
     private void validContents(String contents) {
         if (StringUtils.isBlank(contents) || contents.replace(StringUtils.SPACE, StringUtils.EMPTY).length() < 5) {
-            throw new BadRequestException("not_enough_contents", "Content length must be at least 5.");
+            throw new BadRequestException("Content length must be at least 5.");
         }
     }
 
@@ -129,13 +154,19 @@ public class Community extends BaseEntity {
 
     private void validBlind() {
         if (StringUtils.isBlank(this.title) || this.title.length() < 5) {
-            throw new BadRequestException("not_enough_title", "Community title of Blind Category must be over 5 length");
+            throw new BadRequestException("Community title of Blind Category must be over 5 length");
         }
     }
 
     private void validDrip() {
         if (this.eventId == null || this.eventId < 1) {
-            throw new BadRequestException("need_event_id", "Community of drip category needs event_id.");
+            throw new BadRequestException("Community of drip category needs event_id.");
+        }
+    }
+
+    private void validVote(int voteNum) {
+        if (voteNum != 0 && voteNum != 2) {
+            throw new BadRequestException(NOT_SUPPORTED_VOTE_NUM.getDescription());
         }
     }
 
@@ -144,7 +175,15 @@ public class Community extends BaseEntity {
     }
 
     public boolean isImageExist() {
-        return !CollectionUtils.isEmpty(this.communityFileList);
+        return !isEmpty(this.communityFileList);
+    }
+
+    public boolean isVoteAndIncludeFile(int fileNum) {
+        if (!this.category.isCategoryType(VOTE)) {
+            return false;
+        }
+        validVote(fileNum);
+        return !Collections.isEmpty(this.communityVoteList) || !Collections.isEmpty(this.communityFileList);
     }
 
     @PostPersist
@@ -153,4 +192,31 @@ public class Community extends BaseEntity {
             communityFileList.forEach(file -> file.setCommunity(this));
         }
     }
+
+    public boolean isWin() {
+        if (isWin == null) {
+            return false;
+        }
+        return isWin;
+    }
+
+    public boolean isVotesEmpty() {
+        return CollectionUtils.isEmpty(communityVoteList);
+    }
+
+    public void win(boolean isWin) {
+        if (!DRIP.equals(category.getType())) {
+            throw new BadRequestException("Community Type Not Able TO Win");
+        }
+        this.isWin = isWin ? true : null;
+    }
+
+    public void fix(boolean isFix) {
+        this.isTopFix = isFix ? true : null;
+    }
+
+    public void hide(boolean isHide) {
+      this.status = status.hide(isHide);
+    }
+
 }

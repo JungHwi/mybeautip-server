@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.api.front;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import org.junit.jupiter.api.Test;
@@ -8,11 +9,11 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class CommunityCategoryControllerTest extends RestDocsTestSupport {
@@ -25,6 +26,12 @@ class CommunityCategoryControllerTest extends RestDocsTestSupport {
                 .andExpect(status().isOk());
 
         result.andDo(document("get_community_categories",
+                        requestParameters(
+                                parameterWithName("type").optional().attributes(getDefault(CommunityCategoryType.GENERAL))
+                                        .description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE) + "+ \n" +
+                                        "일반 게시판의 경우에는 [GENERAL] + \n" +
+                                        "익명 게시판의 경우에는 [ANONYMOUS]")
+                        ),
                         responseFields(
                                 fieldWithPath("[]").type(JsonFieldType.ARRAY).description("커뮤니티 카테고리 목록"),
                                 fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),

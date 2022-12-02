@@ -117,7 +117,7 @@ public class IamportService implements IamportApi {
         if (response == null || response.getCode() != 0) {
             log.warn("invalid_iamport_response, Check payment status, merchantId: " + merchantId);
             slackService.sendForImportCancelPaymentException(merchantId, (response == null) ? "" : response.toString());
-            throw new BadRequestException("order_failed", (response == null) ? "" : response.getMessage());
+            throw new BadRequestException((response == null) ? "" : response.getMessage());
         }
 
         log.debug("{}, {}", response.getCode(), response.getResponse());
@@ -146,7 +146,7 @@ public class IamportService implements IamportApi {
         if (response == null || response.getCode() != 0) {
             log.warn("invalid_iamport_response, Check request card info status, billingId: " + billingId);
             slackService.sendForImportGetCardInfoException(billingId, (response == null) ? "" : response.toString());
-            throw new BadRequestException("delete_billing_info_failed", (response == null) ? "" : response.getMessage());
+            throw new BadRequestException((response == null) ? "" : response.getMessage());
         }
 
         log.debug("{}, {}", response.getCode(), response.getResponse());
@@ -176,7 +176,7 @@ public class IamportService implements IamportApi {
         if (response == null || response.getCode() != 0) {
             log.warn("invalid_iamport_response, Check deleting billing info status, billingId: " + billingId);
             slackService.sendForImportDeleteBillingInfoException(billingId, (response == null) ? "" : response.toString());
-            throw new BadRequestException("delete_billing_info_failed", (response == null) ? "" : response.getMessage());
+            throw new BadRequestException((response == null) ? "" : response.getMessage());
         }
 
         log.debug("{}, {}", response.getCode(), response.getResponse());
@@ -232,7 +232,7 @@ public class IamportService implements IamportApi {
             return restTemplate.exchange(requestUri, HttpMethod.GET, request, VbankResponse.class);
         } catch (HttpClientErrorException httpClientErrorException) {
             if (httpClientErrorException.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new BadRequestException("invalid_account", messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
+                throw new BadRequestException(messageService.getMessage(ACCOUNT_INVALID_INFO, lang));
             }
             log.warn("account_info_validation_iamport_fail", httpClientErrorException.getMessage());
             return null;  // Do not throw exception

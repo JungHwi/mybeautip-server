@@ -8,10 +8,14 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityReport;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
-import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberBlockDao;
+import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
+import com.jocoos.mybeautip.domain.scrap.service.dao.ScrapDao;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.block.Block;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,32 +24,37 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommunityRelationService {
-
+    private final LegacyMemberService memberService;
     private final CommunityLikeDao likeDao;
     private final CommunityReportDao reportDao;
     private final MemberBlockDao blockDao;
+    private final ScrapDao scrapDao;
 
     @Transactional(readOnly = true)
-    public CommunityResponse setRelationInfo(Member member, CommunityResponse communityResponse) {
+    public CommunityResponse setRelationInfo(CommunityResponse communityResponse) {
+        Member member = memberService.currentMember();
         if (member == null) {
-            return communityResponse.setRelationInfo(new CommunityRelationInfo());
+            return communityResponse.setRelationInfo(CommunityRelationInfo.withIsScrap());
         }
 
         CommunityRelationInfo relationInfo = CommunityRelationInfo.builder()
                 .isLike(likeDao.isLike(member.getId(), communityResponse.getId()))
                 .isReport(reportDao.isReport(member.getId(), communityResponse.getId()))
                 .isBlock(communityResponse.getCategory().getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), communityResponse.getMember().getId()))
+                .isScrap(scrapDao.isScrapCommunity(member.getId(), communityResponse.getId()))
                 .build();
 
         return communityResponse.setRelationInfo(member, relationInfo);
     }
 
     @Transactional(readOnly = true)
-    public List<CommunityResponse> setRelationInfo(Member member, List<CommunityResponse> communityResponseList) {
-        CommunityRelationInfo relationInfo = new CommunityRelationInfo();
+    public List<CommunityResponse> setRelationInfo(List<CommunityResponse> communityResponseList) {
+        Member member = memberService.currentMember();
+        CommunityRelationInfo relationInfo = CommunityRelationInfo.withIsScrap();
         if (member == null) {
             for (CommunityResponse communityResponse : communityResponseList) {
                 communityResponse.setRelationInfo(relationInfo);
@@ -66,19 +75,26 @@ public class CommunityRelationService {
         Map<Long, CommunityLike> likeMap = getLikeMap(member.getId(), communityIds);
         Map<Long, CommunityReport> reportMap = getReportMap(member.getId(), communityIds);
         Map<Long, Block> blockMap = getBlockMap(member.getId(), writerIds);
+        Map<Long, Scrap> scrapMap = getScrapMap(member.getId(), communityIds);
 
         for (CommunityResponse communityResponse : communityResponseList) {
             relationInfo = CommunityRelationInfo.builder()
                     .isLike(likeMap.containsKey(communityResponse.getId()))
                     .isReport(reportMap.containsKey(communityResponse.getId()))
                     .isBlock(communityResponse.getCategory().getType() != CommunityCategoryType.BLIND && blockMap.containsKey(communityResponse.getMember().getId()))
+                    .isScrap(scrapMap.containsKey(communityResponse.getId()))
                     .build();
 
             communityResponse.setRelationInfo(member, relationInfo);
+            communityResponse.listBlindContent();
         }
 
         return communityResponseList;
     }
+
+
+
+
 
     private Map<Long, CommunityLike> getLikeMap(long memberId, List<Long> communityIds) {
         List<CommunityLike> likeCommunities = likeDao.likeCommunities(memberId, communityIds);
@@ -96,5 +112,11 @@ public class CommunityRelationService {
         List<Block> blockList = blockDao.isBlock(memberId, writerIds);
         return blockList.stream()
                 .collect(Collectors.toMap(Block::getYouId, Function.identity()));
+    }
+
+    private Map<Long, Scrap> getScrapMap(long memberId, List<Long> communityIds) {
+        List<Scrap> scraps = scrapDao.scrapCommunities(memberId, communityIds);
+        return scraps.stream()
+                .collect(Collectors.toMap(Scrap::getRelationId, Function.identity()));
     }
 }

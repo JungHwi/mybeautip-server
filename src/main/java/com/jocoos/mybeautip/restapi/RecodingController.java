@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.goods.*;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.post.*;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
 import com.jocoos.mybeautip.recoding.ViewRecodingService;
 import com.jocoos.mybeautip.video.Video;
@@ -37,36 +36,36 @@ public class RecodingController {
 
     private final ViewRecodingService viewRecodingService;
     private final LegacyMemberService legacyMemberService;
-    private final PostService postService;
+//    private final PostService postService;
     private final GoodsService goodsService;
     private final MessageService messageService;
-    private final PostRepository postRepository;
+//    private final PostRepository postRepository;
     private final GoodsRepository goodsRepository;
     private final VideoRepository videoRepository;
-    private final PostLikeRepository postLikeRepository;
+//    private final PostLikeRepository postLikeRepository;
     private final GoodsLikeRepository goodsLikeRepository;
     private final VideoLikeRepository videoLikeRepository;
 
     public RecodingController(ViewRecodingService viewRecodingService,
                               LegacyMemberService legacyMemberService,
-                              PostService postService,
+//                              PostService postService,
                               GoodsService goodsService,
                               MessageService messageService,
-                              PostRepository postRepository,
+//                              PostRepository postRepository,
                               GoodsRepository goodsRepository,
                               VideoRepository videoRepository,
-                              PostLikeRepository postLikeRepository,
+//                              PostLikeRepository postLikeRepository,
                               GoodsLikeRepository goodsLikeRepository,
                               VideoLikeRepository videoLikeRepository) {
         this.viewRecodingService = viewRecodingService;
         this.legacyMemberService = legacyMemberService;
-        this.postService = postService;
+//        this.postService = postService;
         this.goodsService = goodsService;
         this.messageService = messageService;
-        this.postRepository = postRepository;
+//        this.postRepository = postRepository;
         this.goodsRepository = goodsRepository;
         this.videoRepository = videoRepository;
-        this.postLikeRepository = postLikeRepository;
+//        this.postLikeRepository = postLikeRepository;
         this.goodsLikeRepository = goodsLikeRepository;
         this.videoLikeRepository = videoLikeRepository;
     }
@@ -157,14 +156,14 @@ public class RecodingController {
     private RecodingInfo getBasicInfo(ViewRecoding recoding) {
         Long me = legacyMemberService.currentMemberId();
         switch (recoding.getCategory()) {
-            case 1:
-                return postRepository.findById(Long.parseLong(recoding.getItemId()))
-                        .map(post -> {
-                            Long likeId = postLikeRepository.findByPostIdAndCreatedById(post.getId(), me)
-                                    .map(PostLike::getId).orElse(null);
-                            return new RecodingInfo(recoding, post, likeId);
-                        })
-                        .orElseGet(() -> new RecodingInfo(recoding));
+//            case 1:
+//                return postRepository.findById(Long.parseLong(recoding.getItemId()))
+//                        .map(post -> {
+//                            Long likeId = postLikeRepository.findByPostIdAndCreatedById(post.getId(), me)
+//                                    .map(PostLike::getId).orElse(null);
+//                            return new RecodingInfo(recoding, post, likeId);
+//                        })
+//                        .orElseGet(() -> new RecodingInfo(recoding));
             case 2:
                 return goodsRepository.findByGoodsNo(recoding.getItemId())
                         .map(goods -> {
@@ -191,15 +190,15 @@ public class RecodingController {
     private ViewsLogInfo getViewsLogInfo(ViewRecoding recoding, String lang) {
         Long me = legacyMemberService.currentMemberId();
         switch (recoding.getCategory()) {
-            case 1:
-                return postRepository.findById(Long.parseLong(recoding.getItemId()))
-                        .map(post -> {
-                            Long likeId = postLikeRepository.findByPostIdAndCreatedById(post.getId(), me)
-                                    .map(PostLike::getId).orElse(null);
-                            String content = messageService.getMessage(postService.getPostCategoryName(post.getCategory()), lang);
-                            return new ViewsLogInfo(recoding, post, content, likeId);
-                        })
-                        .orElseGet(() -> new ViewsLogInfo(recoding, RESOURCE_TYPE_POST));
+//            case 1:
+//                return postRepository.findById(Long.parseLong(recoding.getItemId()))
+//                        .map(post -> {
+//                            Long likeId = postLikeRepository.findByPostIdAndCreatedById(post.getId(), me)
+//                                    .map(PostLike::getId).orElse(null);
+//                            String content = messageService.getMessage(postService.getPostCategoryName(post.getCategory()), lang);
+//                            return new ViewsLogInfo(recoding, post, content, likeId);
+//                        })
+//                        .orElseGet(() -> new ViewsLogInfo(recoding, RESOURCE_TYPE_POST));
             case 2:
                 return goodsRepository.findByGoodsNo(recoding.getItemId())
                         .map(goods -> {
@@ -238,12 +237,12 @@ public class RecodingController {
             BeanUtils.copyProperties(viewRecoding, this);
         }
 
-        public RecodingInfo(ViewRecoding viewRecoding, Post src, Long likeId) {
-            BeanUtils.copyProperties(viewRecoding, this);
-            if (src != null) {
-                detail = new BasicInfo(src, likeId);
-            }
-        }
+//        public RecodingInfo(ViewRecoding viewRecoding, Post src, Long likeId) {
+//            BeanUtils.copyProperties(viewRecoding, this);
+//            if (src != null) {
+//                detail = new BasicInfo(src, likeId);
+//            }
+//        }
 
         public RecodingInfo(ViewRecoding viewRecoding, Goods src, Long likeId) {
             BeanUtils.copyProperties(viewRecoding, this);
@@ -280,10 +279,10 @@ public class RecodingController {
         private String username;
         private Date createdAt;
 
-        public BasicInfo(Post post, Long likeId) {
-            BeanUtils.copyProperties(post, this);
-            this.likeId = likeId;
-        }
+//        public BasicInfo(Post post, Long likeId) {
+//            BeanUtils.copyProperties(post, this);
+//            this.likeId = likeId;
+//        }
 
         public BasicInfo(Goods goods, Long likeId) {
             BeanUtils.copyProperties(goods, this);
@@ -328,16 +327,16 @@ public class RecodingController {
             this.content = "";
         }
 
-        public ViewsLogInfo(ViewRecoding log, Post post, String content, Long likeId) {
-            this.id = log.getId();
-            this.modifiedAt = log.getModifiedAt();
-            this.resourceType = RESOURCE_TYPE_POST;
-            this.resourceId = post.getId();
-            this.imageUrl = post.getThumbnailUrl();
-            this.title = post.getTitle();
-            this.content = content;
-            this.likeId = likeId;
-        }
+//        public ViewsLogInfo(ViewRecoding log, Post post, String content, Long likeId) {
+//            this.id = log.getId();
+//            this.modifiedAt = log.getModifiedAt();
+//            this.resourceType = RESOURCE_TYPE_POST;
+//            this.resourceId = post.getId();
+//            this.imageUrl = post.getThumbnailUrl();
+//            this.title = post.getTitle();
+//            this.content = content;
+//            this.likeId = likeId;
+//        }
 
         public ViewsLogInfo(ViewRecoding log, Goods goods, String formattedGoodsPrice, Long likeId) {
             this.id = log.getId();

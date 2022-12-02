@@ -26,4 +26,6 @@ public interface MemberTermRepository extends JpaRepository<MemberTerm, Long> {
                                         @Param("isAccept") boolean isAccept);
 
     List<MemberTerm> findAllByMemberIdAndTermIn(long memberId, List<Term> terms);
+
+    List<MemberTerm> findByTermIdAndMemberIdIn(long marketingTermId, List<Long> memberIds);
 }

@@ -42,6 +42,11 @@ public interface MemberConverter {
             @Mapping(target = "modifiedAt", ignore = true),
             @Mapping(target = "lastLoggedAt", ignore = true),
             @Mapping(target = "deletedAt", ignore = true),
+            @Mapping(target = "usePoint", ignore = true),
+            @Mapping(target = "earnPoint", ignore = true),
+            @Mapping(target = "avatarFilenameFromUrl", ignore = true),
+            @Mapping(target = "avatarFilename", ignore = true),
+            @Mapping(target = "retrievePoint", ignore = true),
     })
     Member convertToMember(SignupRequest signupRequest);
 

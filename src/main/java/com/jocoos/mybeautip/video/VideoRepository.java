@@ -1,24 +1,28 @@
 package com.jocoos.mybeautip.video;
 
+import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCustomRepository;
 import com.jocoos.mybeautip.member.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface VideoRepository extends JpaRepository<Video, Long> {
+public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Long>, VideoCustomRepository {
 
     // Get public videos
     @Query("select v from Video v where v.visibility = 'PUBLIC' and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < ?1 and v.deletedAt is null order by v.createdAt desc")
     Slice<Video> getAnyoneAllVideos(Date cursor, Pageable pageable);
+    @Query("select v from Video v inner join fetch VideoCategoryMapping c on v.id = c.video.id where c.videoCategory.id = ?1 and v.visibility = 'PUBLIC' and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < ?2 and v.deletedAt is null order by v.createdAt desc")
+    Slice<Video> getCategoryVideo(Integer categoryId, Date cursor, Pageable pageable);
 
     @Query("select v from Video v where v.visibility = 'PUBLIC' and v.type = 'BROADCASTED' and (v.state = 'LIVE' or v.state = 'VOD') and v.createdAt < ?1 and v.deletedAt is null order by v.createdAt desc")
     Slice<Video> getAnyoneLiveAndVodVideos(Date cursor, Pageable pageable);
@@ -104,6 +108,10 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     void updateCommentCount(Long id, int count);
 
     @Modifying
+    @Query("update Video v set v.commentCount = :count, v.modifiedAt = now() where v.id = :videoId")
+    void setCommentCount(@Param("videoId") Long videoId, @Param("count") int count);
+
+    @Modifying
     @Query("update Video v set v.likeCount = v.likeCount + ?2, v.modifiedAt = now() where v.id = ?1")
     void updateLikeCount(Long id, int i);
 
@@ -141,6 +149,13 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
     Optional<Video> findTopByMemberIdAndCreatedAtBetweenAndDeletedAtIsNullOrderByCreatedAtDesc(Long owner, Date from, Date to);
 
+    List<Video> findAllByVisibilityAndStateInAndCreatedAtBeforeAndDeletedAtIsNullOrderByCreatedAtDesc(String visibility, List<String> states, Date date, Pageable pageable);
+
+    List<Video> findByIdInAndVisibility(List<Long> ids, String visibility);
+
+    List<Video> findByIdIn(List<Long> ids);
+
     // FIXME 팝업 임시 비디오 연결 위한 메소드 변경 후 삭제할것
     Video findByOutputType(String eventId);
+
 }

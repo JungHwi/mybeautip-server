@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EventJoinConverter {
 
-    @Mapping(target = "result", source = "eventProductId")
+    @Mapping(target = "result", source = "eventProduct.id")
     EventJoinResponse convertsToJoin(EventJoin eventJoin);
 
     @Mappings({
@@ -56,7 +56,7 @@ public interface EventJoinConverter {
                 }
                 break;
             default:
-                throw new BadRequestException("not_supported_event", "event type is not supported. type - " + event.getType());
+                throw new BadRequestException("event type is not supported. type - " + event.getType());
         }
         eventJoinHistoryResponse.setDescription(description);
     }

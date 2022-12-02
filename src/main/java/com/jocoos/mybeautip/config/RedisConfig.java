@@ -9,12 +9,15 @@ public class RedisConfig {
 //    private int port;
 //    private String password;
 //
+//    private int maxIdle = 128;
+//    private int minIdle = 16;
+//
 //    @Bean
 //    public JedisPool jedisPool() {
 //        JedisPoolConfig poolConfig = new JedisPoolConfig();
-//        poolConfig.setMaxTotal(128);
-//        poolConfig.setMaxIdle(128);
-//        poolConfig.setMinIdle(16);
+//        poolConfig.setMaxTotal(maxIdle);
+//        poolConfig.setMaxIdle(maxIdle);
+//        poolConfig.setMinIdle(minIdle);
 //        poolConfig.setTestOnBorrow(true);
 //        poolConfig.setTestOnReturn(true);
 //        poolConfig.setTestWhileIdle(true);
@@ -24,5 +27,18 @@ public class RedisConfig {
 //        poolConfig.setBlockWhenExhausted(true);
 //
 //        return new JedisPool(poolConfig, host, port, 3600, password);
+//    }
+//
+//    @Bean
+//    public JedisCluster jedisCluster() {
+//        Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
+//        jedisClusterNodes.add(new HostAndPort(host, port));
+//
+//        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+//        jedisPoolConfig.setMaxIdle(maxIdle);
+//        jedisPoolConfig.setMinIdle(minIdle);
+//
+//        JedisCluster jedisCluster = new JedisCluster(jedisClusterNodes);
+//        return jedisCluster;
 //    }
 }

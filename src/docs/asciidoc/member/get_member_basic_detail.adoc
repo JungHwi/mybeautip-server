@@ -1,0 +1,3 @@
+== Get Member Basic Detail API
+
+operation::admin_get_member_basic_detail[snippets='http-request,path-parameters,http-response,response-fields']

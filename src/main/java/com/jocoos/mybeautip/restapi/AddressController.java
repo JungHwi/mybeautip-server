@@ -4,7 +4,6 @@ import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.address.Address;
 import com.jocoos.mybeautip.member.address.AddressRepository;
 import com.jocoos.mybeautip.member.address.AddressService;
-import com.jocoos.mybeautip.notification.MessageService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,20 +22,15 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/1/members/me/addresses")
 public class AddressController {
-
-    private static final String ADDRESS_TOO_MANY_ADDRESS = "address.too_many_addresses";
     private final AddressService addressService;
     private final LegacyMemberService legacyMemberService;
-    private final MessageService messageService;
     private final AddressRepository addressRepository;
 
     public AddressController(AddressService addressService,
                              LegacyMemberService legacyMemberService,
-                             MessageService messageService,
                              AddressRepository addressRepository) {
         this.addressService = addressService;
         this.legacyMemberService = legacyMemberService;
-        this.messageService = messageService;
         this.addressRepository = addressRepository;
     }
 

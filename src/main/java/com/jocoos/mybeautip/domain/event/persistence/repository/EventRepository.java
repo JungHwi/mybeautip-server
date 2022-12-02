@@ -1,21 +1,28 @@
 package com.jocoos.mybeautip.domain.event.persistence.repository;
 
+import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
-import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
 @Repository
-public interface EventRepository extends DefaultJpaRepository<Event, Long> {
+public interface EventRepository extends ExtendedQuerydslJpaRepository<Event, Long>, EventCustomRepository {
 
-    List<Event> findByStatusIn(Set<EventStatus> statusSet, Pageable pageable);
-    List<Event> findByTypeAndStatusIn(EventType eventType,Set<EventStatus> statusSet, Pageable pageable);
     List<Event> findByTypeAndStatus(EventType type, EventStatus status);
     Event findTopByTypeAndStatus(EventType type, EventStatus status);
     List<Event> findByIdIn(Set<Long> eventIds);
+
+    List<Event> findByReservationAtLessThanEqualAndStatus(ZonedDateTime now, EventStatus status);
+    List<Event> findByEndAtLessThanEqualAndStatus(ZonedDateTime now, EventStatus status);
+
+    @Modifying
+    @Query("UPDATE Event e SET e.status = :status WHERE e.id in :ids")
+    int updateStatus(List<Long> ids, EventStatus status);
 }

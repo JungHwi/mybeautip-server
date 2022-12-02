@@ -1,0 +1,3 @@
+== Upload Event File API
+
+operation::admin_upload_event_file[snippets='http-request,request-parts,http-response,response-fields']

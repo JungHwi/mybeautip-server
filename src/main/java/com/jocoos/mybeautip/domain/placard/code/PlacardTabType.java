@@ -9,7 +9,8 @@ import lombok.Getter;
 public enum PlacardTabType implements CodeValue {
 
     M_VIDEO("비디오 화면"),
-    COMMUNITY("커뮤니티 화면");
+    COMMUNITY("커뮤니티 화면"),
+    HOME("홈 화면");
 
     private final String description;
 

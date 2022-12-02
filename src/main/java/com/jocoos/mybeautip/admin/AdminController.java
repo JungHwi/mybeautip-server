@@ -1,26 +1,20 @@
 package com.jocoos.mybeautip.admin;
 
-import com.jocoos.mybeautip.banner.Banner;
 import com.jocoos.mybeautip.banner.BannerRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.Goods;
-import com.jocoos.mybeautip.goods.GoodsInfo;
 import com.jocoos.mybeautip.goods.GoodsRepository;
 import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.member.report.ReportRepository;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.PostContent;
-import com.jocoos.mybeautip.post.PostRepository;
 import com.jocoos.mybeautip.recommendation.*;
-import com.jocoos.mybeautip.restapi.PostController;
 import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.schedules.ScheduleRepository;
 import com.jocoos.mybeautip.store.StoreRepository;
@@ -28,9 +22,9 @@ import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.Tag;
 import com.jocoos.mybeautip.tag.TagRepository;
 import com.jocoos.mybeautip.tag.TagService;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
-import com.jocoos.mybeautip.video.VideoService;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import lombok.Data;
@@ -54,13 +48,15 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static com.jocoos.mybeautip.domain.member.code.MemberStatus.ACTIVE;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
+
 
 @Slf4j
 @RestController
 @RequestMapping("/api/admin/manual")
 public class AdminController {
 
-    private final PostRepository postRepository;
+//    private final PostRepository postRepository;
     private final BannerRepository bannerRepository;
     private final MemberRepository memberRepository;
     private final GoodsRepository goodsRepository;
@@ -76,12 +72,13 @@ public class AdminController {
     private final ScheduleRepository scheduleRepository;
     private final OrderRepository orderRepository;
     private final TagRepository tagRepository;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final TagService tagService;
     private final GoodsService goodsService;
     private final LegacyMemberService legacyMemberService;
 
-    public AdminController(PostRepository postRepository,
+    public AdminController(
+//            PostRepository postRepository,
                            BannerRepository bannerRepository,
                            MemberRepository memberRepository,
                            GoodsRepository goodsRepository,
@@ -95,10 +92,10 @@ public class AdminController {
                            VideoRepository videoRepository,
                            VideoReportRepository videoReportRepository,
                            ScheduleRepository scheduleRepository, OrderRepository orderRepository, TagRepository tagRepository,
-                           VideoService videoService,
+                           LegacyVideoService legacyVideoService,
                            TagService tagService,
                            GoodsService goodsService, LegacyMemberService legacyMemberService) {
-        this.postRepository = postRepository;
+//        this.postRepository = postRepository;
         this.bannerRepository = bannerRepository;
         this.memberRepository = memberRepository;
         this.goodsRepository = goodsRepository;
@@ -115,95 +112,9 @@ public class AdminController {
         this.orderRepository = orderRepository;
         this.tagRepository = tagRepository;
         this.tagService = tagService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.goodsService = goodsService;
         this.legacyMemberService = legacyMemberService;
-    }
-
-    @DeleteMapping("/posts/{id:.+}")
-    public ResponseEntity<?> deletePost(@PathVariable Long id) {
-        postRepository.findByIdAndDeletedAtIsNull(id).map(post -> {
-            post.setDeletedAt(new Date());
-            postRepository.save(post);
-            tagService.decreaseRefCount(post.getDescription());
-            tagService.removeHistory(post.getDescription(), TagService.TAG_POST, post.getId(), post.getCreatedBy());
-            return Optional.empty();
-        }).orElseThrow(() -> new NotFoundException("post_not_found", "post not found"));
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PostMapping("/posts")
-    public ResponseEntity<PostController.PostInfo> createPost(@RequestBody CreatePostRequest request) {
-        log.debug("request: {}", request);
-
-        Post post = new Post();
-        BeanUtils.copyProperties(request, post);
-        post.setStartedAt(getRecommendedDate(request.getStartedAt()));
-        post.setEndedAt(getRecommendedDate(request.getEndedAt()));
-        postRepository.save(post);
-        log.debug("saved post: {}", post);
-
-        if (StringUtils.isNotEmpty(request.getDescription())) {
-            tagService.increaseRefCount(request.getDescription());
-            tagService.addHistory(request.getDescription(), TagService.TAG_POST, post.getId(), post.getCreatedBy());
-        }
-
-        Member me = legacyMemberService.currentMember();
-        List<GoodsInfo> goodsInfoList = new ArrayList<>();
-        List<String> goodsList = post.getGoods();
-        for (String info : goodsList) {
-            goodsService.generateGoodsInfo(info)
-                    .map(goodsInfoList::add)
-                    .orElseThrow(() -> new NotFoundException("goodsNo not found", "invalid good no"));
-        }
-
-        PostController.PostInfo info = new PostController.PostInfo(post, new MemberInfo(me), goodsInfoList);
-        return new ResponseEntity<>(info, HttpStatus.OK);
-    }
-
-    @SuppressWarnings("deprecation")
-    @PostMapping("/banners")
-    public ResponseEntity<BannerInfo> createTrend(@RequestBody CreateBannerRequest request) {
-        log.debug("request: {}", request);
-
-        Post post = postRepository.findByIdAndDeletedAtIsNull(request.getPostId())
-                .orElseThrow(() -> new NotFoundException("post_not_found", "invalid post id"));
-
-        Banner banner = new Banner();
-        BeanUtils.copyProperties(request, banner);
-        banner.setLink(String.format("/api/1/posts/%d", request.getPostId()));
-        banner.setPost(post);
-        banner.setCategory(1);
-        banner.setStartedAt(getRecommendedDate(request.getStartedAt()));
-        banner.setEndedAt(getRecommendedDate(request.getEndedAt()));
-
-        banner = bannerRepository.save(banner);
-        log.debug("banner: {}", banner);
-
-        if (StringUtils.isNotEmpty(request.getDescription())) {
-            tagService.touchRefCount(request.getDescription());
-            tagService.addHistory(request.getDescription(), TagService.TAG_BANNER, banner.getId(), banner.getCreatedBy());
-        }
-
-        BannerInfo info = new BannerInfo();
-        BeanUtils.copyProperties(banner, info);
-        return new ResponseEntity<>(info, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/banners/{id:.+}")
-    public ResponseEntity<?> deleteBanner(@PathVariable Long id) {
-        bannerRepository.findById(id)
-                .map(banner -> {
-                    banner.setDeletedAt(new Date());
-                    bannerRepository.save(banner);
-
-                    tagService.removeHistory(banner.getDescription(), TagService.TAG_BANNER, banner.getId(), banner.getCreatedBy());
-                    return Optional.empty();
-                })
-                .orElseThrow(() -> new NotFoundException("banner_not_found", "invalid banner id"));
-
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(value = "/memberDetails", params = {"isDeleted=true"})
@@ -385,7 +296,7 @@ public class AdminController {
 
         memberRecommendationRepository.findByMemberId(request.getMemberId())
                 .ifPresent(r -> {
-                    throw new BadRequestException("member_duplicated", "Already member is recommended");
+                    throw new BadRequestException(ErrorCode.MEMBER_DUPLICATED, "Already member is recommended");
                 });
 
         MemberRecommendation recommendation = new MemberRecommendation();
@@ -471,7 +382,7 @@ public class AdminController {
 
         goodsRecommendationRepository.findByGoodsNo(request.getGoodsNo())
                 .ifPresent(r -> {
-                    throw new BadRequestException("duplicated_goods", "Already goods is recommended");
+                    throw new BadRequestException(ErrorCode.DUPLICATED_GOODS, "Already goods is recommended");
                 });
 
         GoodsRecommendation recommendation = new GoodsRecommendation();
@@ -490,7 +401,7 @@ public class AdminController {
             RecommendedGoodsInfo info = new RecommendedGoodsInfo();
             BeanUtils.copyProperties(recommendation, info);
             return new ResponseEntity<>(info, HttpStatus.OK);
-        }).orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
+        }).orElseThrow(() -> new NotFoundException(GOODS_NOT_FOUND, "invalid goods no"));
     }
 
     @DeleteMapping("/recommendedGoods/{goodsNo:.+}")
@@ -502,7 +413,7 @@ public class AdminController {
                     goodsRecommendationRepository.delete(r);
                     return new ResponseEntity(HttpStatus.NO_CONTENT);
 
-                }).orElseThrow(() -> new NotFoundException("goods_not_found", "invalid goods no"));
+                }).orElseThrow(() -> new NotFoundException(GOODS_NOT_FOUND, "invalid goods no"));
     }
 
     @Transactional
@@ -513,7 +424,7 @@ public class AdminController {
 
         motdRecommendationRepository.findByVideoId(request.getVideoId())
                 .ifPresent(r -> {
-                    throw new BadRequestException("duplicated_motds", "Already motds is recommended");
+                    throw new BadRequestException(DUPLICATED_MOTDS, "Already motds is recommended");
                 });
         MotdRecommendation recommendation = new MotdRecommendation();
         recommendation.setSeq(request.getSeq());
@@ -550,7 +461,7 @@ public class AdminController {
                             new RecommendationController.RecommendedMotdBaseInfo(newBase);
                     BeanUtils.copyProperties(recommendation, info);
                     return new ResponseEntity<>(info, HttpStatus.OK);
-                }).orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id"));
+                }).orElseThrow(() -> new NotFoundException(VIDEO_NOT_FOUND, "invalid video id"));
     }
 
 
@@ -574,13 +485,13 @@ public class AdminController {
                             });
                     return new ResponseEntity(HttpStatus.NO_CONTENT);
                 })
-                .orElseThrow(() -> new NotFoundException("video_not_found", "invalid video id"));
+                .orElseThrow(() -> new NotFoundException(VIDEO_NOT_FOUND, "invalid video id"));
     }
 
     private List<RecommendationController.RecommendedMotdInfo> createMotdList(Iterable<MotdRecommendation> recommendations) {
         List<RecommendationController.RecommendedMotdInfo> info = new ArrayList<>();
         for (MotdRecommendation recommendation : recommendations) {
-            info.add(new RecommendationController.RecommendedMotdInfo(recommendation, videoService.generateVideoInfo(recommendation.getVideo())));
+            info.add(new RecommendationController.RecommendedMotdInfo(recommendation, legacyVideoService.generateVideoInfo(recommendation.getVideo())));
         }
         return info;
     }
@@ -720,14 +631,14 @@ public class AdminController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), "seq", "createdAt"));
         Page<MotdRecommendation> bases = motdRecommendationRepository.findByVideoTypeAndVideoDeletedAtIsNull(type, pageable);
 
-        Page<RecommendationController.RecommendedMotdInfo> details = bases.map(m -> new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
+        Page<RecommendationController.RecommendedMotdInfo> details = bases.map(m -> new RecommendationController.RecommendedMotdInfo(m, legacyVideoService.generateVideoInfo(m.getVideo())));
         return new ResponseEntity<>(details, HttpStatus.OK);
     }
 
     private List<RecommendationController.RecommendedMotdInfo> createRecommendedMotd(MotdRecommendationBase base) {
         List<RecommendationController.RecommendedMotdInfo> motds = new ArrayList<>();
         for (MotdRecommendation m : base.getMotds()) {
-            motds.add(new RecommendationController.RecommendedMotdInfo(m, videoService.generateVideoInfo(m.getVideo())));
+            motds.add(new RecommendationController.RecommendedMotdInfo(m, legacyVideoService.generateVideoInfo(m.getVideo())));
         }
         Collections.sort(motds, (RecommendationController.RecommendedMotdInfo m1, RecommendationController.RecommendedMotdInfo m2)
                 -> m1.getSeq() < m2.getSeq() ? 1 : m1.getSeq() > m2.getSeq() ? -1 :
@@ -794,7 +705,7 @@ public class AdminController {
         private String thumbnailUrl;
         private int progress;
         private boolean opened;
-        private Set<PostContent> contents;
+//        private Set<PostContent> contents;
         @NotNull
         private List<String> goods;
         @NotNull

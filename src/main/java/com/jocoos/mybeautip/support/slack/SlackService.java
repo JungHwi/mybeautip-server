@@ -14,6 +14,7 @@ import com.jocoos.mybeautip.restapi.ScheduleController;
 import com.jocoos.mybeautip.schedules.Schedule;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoCategoryMapping;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
 import com.jocoos.mybeautip.video.report.VideoReport;
@@ -34,6 +35,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -65,12 +67,17 @@ public class SlackService {
         StringBuilder sb = new StringBuilder(String.format("*%s*", header));
         sb.append(String.format("```사용자: %s / %d\n", video.getMember().getUsername(), video.getMember().getId()));
         if (isPrivateVideo) {
-            sb.append(String.format("영상제목: %s, 비디오 키: %s, 공개일: %s\n", video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())));
+            sb.append(String.format("영상제목: [%s] %s, 비디오 키: %s, 공개일: %s\n", video.getCategoryNames(), video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())));
         } else {
             sb.append(String.format("영상제목: %s\n", video.getTitle()));
         }
         sb.append(String.format("%s```", generateRelatedGoodsInfo(video)));
         send(sb.toString());
+    }
+
+    private String getCategorxy(Video v) {
+        List<VideoCategoryMapping> mapping = v.getCategoryMapping();
+        return mapping != null ? mapping.stream().map(m -> m.getVideoCategory().getTitle()).collect(Collectors.joining(", ")) : "없음";
     }
 
     private String generateRelatedGoodsInfo(Video video) {

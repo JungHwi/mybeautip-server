@@ -7,7 +7,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PlacardResponse {
+
+    private String title;
+
     private String imageUrl;
 
+    private String color;
+
     private PlacardLink placardLink;
+
 }

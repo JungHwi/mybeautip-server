@@ -1,0 +1,3 @@
+== Get Member Status And Count API
+
+operation::admin_get_member_status[snippets='http-request,http-response,response-fields']

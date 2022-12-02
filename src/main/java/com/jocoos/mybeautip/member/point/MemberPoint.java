@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.member.point;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
+import com.jocoos.mybeautip.domain.point.code.DefaultPointReason;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.order.Order;
 import lombok.*;
@@ -9,8 +10,12 @@ import lombok.*;
 import javax.persistence.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+
+import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 
 @NoArgsConstructor
 @Data
@@ -27,6 +32,7 @@ public class MemberPoint extends CreatedDateAuditable {
     public static final int STATE_REFUNDED_POINT = 8;
     public static final int STATE_PRESENT_POINT = 9;
     public static final int STATE_RETRIEVE_POINT = 10;
+    public static final int STATE_UNDER_ZERO_POINT = 11;
     private static DecimalFormat POINT_FORMAT = new DecimalFormat("#,###", new DecimalFormatSymbols(Locale.KOREA));
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -77,6 +83,9 @@ public class MemberPoint extends CreatedDateAuditable {
     @Column
     private boolean remind;
 
+    @Transient
+    private String reason;
+
     public MemberPoint(Member member, Order order, int point) {
         this(member, order, point, STATE_WILL_BE_EARNED);
     }
@@ -107,5 +116,33 @@ public class MemberPoint extends CreatedDateAuditable {
 
     public String getFormattedPoint() {
         return POINT_FORMAT.format(this.point);
+    }
+
+    public ZonedDateTime getCreatedAtZoned() {
+        if (earnedAt != null) {
+            return toUTCZoned(earnedAt);
+        }
+        return toUTCZoned(createdAt);
+    }
+
+    public ZonedDateTime getExpiryAtZoned() {
+        return toUTCZoned(expiryAt);
+    }
+
+    public void setReason(Map<Long, String> eventTitleMap, Map<Long, String> orderTitleMap) {
+        reason = getReason(eventTitleMap, orderTitleMap);
+    }
+
+    public String getReason(Map<Long, String> eventTitleMap, Map<Long, String> orderTitleMap) {
+        if (eventId != null) {
+            return eventTitleMap.get(eventId);
+        }
+        if (order != null) {
+            return orderTitleMap.get(order.getId());
+        }
+        if (activityType != null) {
+            return activityType.getDescription();
+        }
+        return DefaultPointReason.getDescriptionByState(state);
     }
 }

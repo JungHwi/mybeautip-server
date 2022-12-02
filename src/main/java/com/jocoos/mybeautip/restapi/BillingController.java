@@ -121,7 +121,7 @@ public class BillingController {
                                                         @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         String pw = params.get("password");
         if (pw == null) {
-            throw new BadRequestException("billing_auth_invalid", "password field does not exist");
+            throw new BadRequestException("password field does not exist");
         }
         Member member = legacyMemberService.currentMember();
         BillingAuthRequest request = new BillingAuthRequest();

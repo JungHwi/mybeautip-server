@@ -5,9 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
+import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.goods.GoodsRepository;
@@ -27,11 +31,12 @@ import org.apache.commons.lang3.StringUtils;
 @RequiredArgsConstructor
 public class VideoUpdateService {
 
-  private final VideoService videoService;
+  private final LegacyVideoService legacyVideoService;
   private final VideoDataService videoDataService;
   private final VideoWatchService videoWatchService;
 
   private final VideoRepository videoRepository;
+  private final VideoCategoryRepository videoCategoryRepository;
   private final MemberRepository memberRepository;
   private final TagService tagService;
   private final GoodsRepository goodsRepository;
@@ -45,11 +50,11 @@ public class VideoUpdateService {
     if ("UPLOADED".equals(request.getType())) {
       video = new Video(member);
       BeanUtils.copyProperties(request, video);
-      Video createdVideo = videoRepository.save(video);
+      videoRepository.save(video);
 
-      if (StringUtils.isNotEmpty(createdVideo.getContent())) {
-        tagService.increaseRefCount(createdVideo.getContent());
-        tagService.addHistory(createdVideo.getContent(), TagService.TAG_VIDEO, createdVideo.getId(), createdVideo.getMember());
+      if (StringUtils.isNotEmpty(video.getContent())) {
+        tagService.increaseRefCount(video.getContent());
+        tagService.addHistory(video.getContent(), TagService.TAG_VIDEO, video.getId(), video.getMember());
       }
 
       // Set related goods info
@@ -57,7 +62,6 @@ public class VideoUpdateService {
       if (StringUtils.isNotEmpty(request.getData())) {
         VideoExtraData extraData = videoDataService.getDataObject(request.getData());
         log.info("{}", extraData);
-        List<VideoCategory> categories = new ArrayList<>();
         if (!StringUtils.isBlank(extraData.getStartedAt())) {
           String startedAt = String.valueOf(extraData.getStartedAt());
 
@@ -68,9 +72,9 @@ public class VideoUpdateService {
 
         // if data had category array
         if (!StringUtils.isBlank(extraData.getCategory())) {
-          categories = parseCategory(video.getId(), extraData.getCategory());
-          log.info("categories: {}", categories);
-          video.setCategory(categories);
+          List<VideoCategoryMapping> categories = parseCategory(video, extraData.getCategory());
+          log.info("categories: {}", categories.stream().map(c -> c.getVideoCategory().getId()).toList());
+          video.setCategoryMapping(categories);
         }
 
         List<VideoGoods> videoGoods = new ArrayList<>();
@@ -81,7 +85,7 @@ public class VideoUpdateService {
               continue;
             }
             goodsRepository.findByGoodsNo(goodsNo).ifPresent(g -> {
-              videoGoods.add(new VideoGoods(createdVideo, g, createdVideo.getMember()));
+              videoGoods.add(new VideoGoods(video, g, video.getMember()));
             });
           }
 
@@ -90,13 +94,12 @@ public class VideoUpdateService {
 
             // Set related goods count & one thumbnail image
             String url = videoGoods.get(0).getGoods().getListImageData().toString();
-            createdVideo.setRelatedGoodsThumbnailUrl(url);
-            createdVideo.setRelatedGoodsCount(videoGoods.size());
+            video.setRelatedGoodsThumbnailUrl(url);
+            video.setRelatedGoodsCount(videoGoods.size());
           }
         }
-        if (videoGoods.size() > 0 || categories.size() > 0 || video.getStartedAt() != null) {
-          videoRepository.save(createdVideo);
-        }
+
+        log.debug("{}", video);
       }
     } else {
       Optional<Video> videoByKey = videoRepository.findByVideoKey(request.getVideoKey());
@@ -106,7 +109,7 @@ public class VideoUpdateService {
         video = videoRepository.findById(Long.parseLong(request.getVideoKey()))
             .orElseGet(() -> {
               log.error("Cannot find videoId: " + request.getVideoKey());
-              throw new NotFoundException("video_not_found", "video not found, video_id:" + request.getVideoKey());
+              throw new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "video not found, video_id:" + request.getVideoKey());
             });
       }
 
@@ -125,6 +128,7 @@ public class VideoUpdateService {
     return video;
   }
 
+  @Transactional
   public Video updated(CallbackController.CallbackUpdateVideoRequest request) {
     Video video = getVideo(request.getVideoKey());
     Member requested = findMember(Long.parseLong(request.getUserId()));
@@ -134,7 +138,7 @@ public class VideoUpdateService {
     }
 
     if (isLockedVideo(video, request.getVisibility())) {
-      throw new BadRequestException("video_locked", "");
+      throw new BadRequestException("Locked video. videoId - " + video.getId());
     }
 
     /**
@@ -158,20 +162,20 @@ public class VideoUpdateService {
     log.debug("{}", video);
     String oldState = video.getState();
 
-    video = videoService.updateVideoProperties(request, video, extraData);
-    video = videoService.update(video);
+    video = legacyVideoService.updateVideoProperties(request, video, extraData);
+    video = legacyVideoService.update(video);
 
     if (extraData != null && !StringUtils.isBlank(extraData.getGoods())) {
-      log.info("goods {}, request goods: {}", video.getData(), extraData.getGoods());
-      videoService.updateVideoGoods(video, extraData.getGoods());
+      log.info("goods: {}, request goods: {}", video.getData(), extraData.getGoods());
+      legacyVideoService.updateVideoGoods(video, extraData.getGoods());
     } else {
-      videoService.clearVideoGoods(video);
+      legacyVideoService.clearVideoGoods(video);
     }
 
     if ("BROADCASTED".equals(video.getType())) {
       // Send on-live stats using slack when LIVE ended
       if ("LIVE".equals(oldState) && "VOD".equals(request.getState())) {
-        videoService.sendStats(video);
+        legacyVideoService.sendStats(video);
       }
 
       // Send collect watch counts on LIVE
@@ -201,11 +205,11 @@ public class VideoUpdateService {
     return videoRepository.findByVideoKeyAndDeletedAtIsNull(videoKey)
         .orElseGet(() -> {
           log.error("Cannot find video " + videoKey);
-          throw new NotFoundException("video_not_found", "video not found, videoKey: " + videoKey);
+          throw new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "video not found, videoKey: " + videoKey);
         });
   }
 
-  private List<VideoCategory> parseCategory(Long videoId, String category) {
+  private List<VideoCategoryMapping> parseCategory(Video video, String category) {
     if (StringUtils.isBlank(category)) {
       return new ArrayList<>();
     }
@@ -213,17 +217,6 @@ public class VideoUpdateService {
     List<Integer> collect = Arrays.stream(categories)
         .filter(c -> !"0".equals(c)).map(c -> Integer.valueOf(c))
         .collect(Collectors.toList());
-    return createCategory(videoId, collect);
-  }
-
-  private List<VideoCategory> createCategory(Long videoId, List<Integer> category) {
-    List<VideoCategory> categories = new ArrayList<>();
-    for (int c : category) {
-      if (c > 0) {
-        categories.add(new VideoCategory(videoId, c));
-      }
-    }
-
-    return categories;
+    return legacyVideoService.createCategory(video, collect);
   }
 }

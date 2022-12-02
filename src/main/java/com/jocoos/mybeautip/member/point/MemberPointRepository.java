@@ -17,13 +17,9 @@ import java.util.Set;
 
 public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> {
 
-    List<MemberPoint> findByIdIn(List<Long> ids);
-
     Slice<MemberPoint> findByMemberAndCreatedAtBefore(Member member, Date createdAt, Pageable page);
 
     List<MemberPoint> findByMemberAndState(Member member, int state);
-
-    List<MemberPoint> findByStateAndCreatedAtBeforeAndEarnedAtIsNull(int state, Date createdAt);
 
     List<MemberPoint> findByStateInAndExpiryAtBeforeAndExpiredAtIsNull(List<Integer> states, Date earnedAt);
 
@@ -42,24 +38,7 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
             "   AND memberPoint.state in :state")
     Slice<MemberPoint> findByMemberIdAndStateIn(long memberId, Set<Integer> state, Long cursor, Pageable pageable);
 
-    Page<MemberPoint> findByMemberIdAndState(Long memberId, int state, Pageable pageable);
-
     Optional<MemberPoint> findByMemberAndOrderAndPointAndState(Member member, Order order, int point, int state);
-
-    @Query("SELECT memberPoint " +
-            "FROM MemberPoint AS memberPoint " +
-            "WHERE memberPoint.member.id = :memberId " +
-            "   AND memberPoint.id >= :cursor " +
-            "   AND memberPoint.state in :state " +
-            "ORDER BY memberPoint.id ")
-    List<MemberPoint> getAvailablePoint(
-            @Param("memberId") long memberId,
-            @Param("state") Set<Integer> state,
-            @Param("cursor") Long cursor);
-
-
-    // admin api
-    Page<MemberPoint> findByStateAndOrderIsNull(int state, Pageable pageable);
 
     @Query("SELECT memberPoint " +
             "FROM MemberPoint as memberPoint " +
@@ -95,4 +74,6 @@ public interface MemberPointRepository extends JpaRepository<MemberPoint, Long> 
     Long countActivityPointDailyByTypes(
             @Param("types") Set<ActivityPointType> types,
             @Param("member") Member member);
+
+    Page<MemberPoint> findAllByMemberId(Long memberId, Pageable pageable);
 }

@@ -2,9 +2,13 @@ package com.jocoos.mybeautip.domain.point.dao;
 
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.point.MemberPointRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -14,22 +18,28 @@ import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_EARNED_POINT;
 @Service
 public class MemberPointDao {
 
-    private final MemberPointRepository memberPointRepository;
+    private final MemberPointRepository repository;
 
     public Long countActivityPointDaily(ActivityPointType type, Member member) {
-        return memberPointRepository.countActivityPointDailyByType(type, member);
+        return repository.countActivityPointDailyByType(type, member);
     }
 
     public Long countActivityPointDaily(Set<ActivityPointType> types, Member member) {
-        return memberPointRepository.countActivityPointDailyByTypes(types, member);
+        return repository.countActivityPointDailyByTypes(types, member);
     }
 
     public boolean isExistByTypeAndMember(ActivityPointType type, Member member) {
-        return memberPointRepository.existsByActivityTypeAndMemberAndState(type, member, STATE_EARNED_POINT);
+        return repository.existsByActivityTypeAndMemberAndState(type, member, STATE_EARNED_POINT);
     }
 
+
     public boolean isExistByTypeAndDomainIdAndMemberAndState(ActivityPointType type, Long domainId, Member member, int state) {
-        return memberPointRepository
+        return repository
                 .existsByActivityTypeAndActivityDomainIdAndMemberAndState(type, domainId, member, state);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MemberPoint> getAllBy(Long memberId, Pageable pageable) {
+        return repository.findAllByMemberId(memberId, pageable);
     }
 }

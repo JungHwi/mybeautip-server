@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.admin;
 
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.watches.VideoWatchService;
@@ -33,7 +34,7 @@ public class VideoStatsController {
     @GetMapping("/{id:.+}/watches")
     public ResponseEntity<VideoWatchStatsInfo> getWatchStats(@PathVariable Long id) {
 
-        videoRepository.findById(id).orElseThrow(() -> new NotFoundException("video_not_found", ""));
+        videoRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "Video not found. videoId - " + id));
 
 //        Map<Integer, Integer[]> stats = videoWatchService.getVideoWatchStats(id);
         VideoWatchStatsInfo statsInfo = new VideoWatchStatsInfo();

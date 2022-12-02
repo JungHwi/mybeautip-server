@@ -2,6 +2,10 @@ package com.jocoos.mybeautip.domain.community.api.front;
 
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
+import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
+import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
+import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
+import com.jocoos.mybeautip.domain.scrap.service.ScrapService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -16,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -26,10 +31,11 @@ import java.util.List;
 public class CommunityController {
 
     private final CommunityService service;
+    private final ScrapService scrapService;
     private final LegacyMemberService legacyMemberService;
 
     @PostMapping(value = "/1/community")
-    public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody WriteCommunityRequest request) {
+    public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody @Valid WriteCommunityRequest request) {
         CommunityResponse response = service.write(request);
 
         return ResponseEntity.ok(response);
@@ -37,7 +43,6 @@ public class CommunityController {
 
     @PostMapping(value = "/1/community/files", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<List<String>> uploadFile(@RequestPart List<MultipartFile> files) {
-
         List<String> urls = service.upload(files);
 
         return ResponseEntity.ok(urls);
@@ -48,19 +53,11 @@ public class CommunityController {
                                                                                   @RequestParam(required = false, name = "event_id") Long eventId,
                                                                                   @RequestParam(required = false) ZonedDateTime cursor,
                                                                                   @RequestParam(required = false, defaultValue = "20") int size) {
-
-
-        boolean isFirstSearch = false;
-        if (cursor == null) {
-            cursor = ZonedDateTime.now().plusYears(100);
-            isFirstSearch = true;
-        }
-
+        
         SearchCommunityRequest request = SearchCommunityRequest.builder()
                 .categoryId(categoryId)
                 .eventId(eventId)
                 .cursor(cursor)
-                .isFirstSearch(isFirstSearch)
                 .build();
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "sortedAt"));
@@ -125,5 +122,18 @@ public class CommunityController {
         ReportResponse result = service.isReport(memberId, communityId);
 
         return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("/1/community/{community_id}/scrap")
+    public ResponseEntity<ScrapResponse> scrap(@PathVariable(name = "community_id") long communityId,
+                                               @RequestBody BooleanDto isScrap) {
+        ScrapRequest request = ScrapRequest.builder()
+                .type(ScrapType.COMMUNITY)
+                .relationId(communityId)
+                .isScrap(isScrap.isBool())
+                .build();
+
+        ScrapResponse response = scrapService.scrap(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

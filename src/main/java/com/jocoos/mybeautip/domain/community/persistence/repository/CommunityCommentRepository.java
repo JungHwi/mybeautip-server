@@ -1,8 +1,9 @@
 package com.jocoos.mybeautip.domain.community.persistence.repository;
 
-import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
+import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
-import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
+import com.jocoos.mybeautip.domain.community.persistence.repository.comment.CommunityCommentCustomRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,13 +15,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CommunityCommentRepository extends DefaultJpaRepository<CommunityComment, Long> {
+public interface CommunityCommentRepository extends ExtendedQuerydslJpaRepository<CommunityComment, Long>, CommunityCommentCustomRepository {
 
+    Long countByMemberId(Long memberId);
     Optional<CommunityComment> findByCommunityIdAndId(long communityId, long commentId);
+    Slice<CommunityComment> findByMemberIdAndIdLessThan(long memberId, long cursor, Pageable pageable);
+    List<CommunityComment> findByParentIdInOrderByCreatedAtAsc(List<Long> parentIds);
 
-    Slice<CommunityComment> findByMemberIdAndStatusAndIdLessThan(long memberId, CommunityStatus status, long cursor, Pageable pageable);
-    Slice<CommunityComment> findByCommunityIdAndParentIdAndIdGreaterThan(long communityId, Long parentId, long cursor, Pageable pageable);
-    Slice<CommunityComment> findByCommunityIdAndParentIdAndIdLessThan(long communityId, Long parentId, long cursor, Pageable pageable);
+    Page<CommunityComment> findAllByParentIdIsNullAndCommunityId(Long communityId, Pageable pageable);
 
     @Query("select cc from CommunityComment cc where cc.communityId = :communityId and cc.parentId = :parentId and cc.id > :cursor and (cc.memberId not in :members or cc.categoryId = 2) order by cc.id asc")
     Slice<CommunityComment> getAllByAscParentIdNotNull(@Param("communityId") Long communityId, @Param("parentId") Long parentId, @Param("cursor") Long cursor, @Param("members") List<Long> members, Pageable pageable);
@@ -45,4 +47,12 @@ public interface CommunityCommentRepository extends DefaultJpaRepository<Communi
     @Modifying
     @Query("UPDATE CommunityComment comment SET comment.commentCount = comment.commentCount + :count WHERE comment.id = :commentId")
     void commentCount(@Param("commentId") long commentId, @Param("count") int count);
+
+    @Modifying
+    @Query("UPDATE CommunityComment comment SET comment.commentCount = :count WHERE comment.id in :commentIds")
+    void setCommentCount(@Param("commentIds") List<Long> commentIds, @Param("count") int count);
+
+    List<CommunityComment> findByParentId(Long parentId);
+
+    List<CommunityComment> findByCommunityId(Long communityId);
 }

@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[video_mask_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-video_mask_type.adoc[]

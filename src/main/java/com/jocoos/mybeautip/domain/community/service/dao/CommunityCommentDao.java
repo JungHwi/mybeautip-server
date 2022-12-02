@@ -6,18 +6,19 @@ import com.jocoos.mybeautip.domain.community.dto.SearchCommentRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCommentRepository;
+import com.jocoos.mybeautip.domain.community.vo.CommunityCommentSearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
-import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 @Service
 @RequiredArgsConstructor
@@ -28,37 +29,20 @@ public class CommunityCommentDao {
     private final CommunityCommentConverter converter;
 
     @Transactional(readOnly = true)
-    public List<CommunityComment> getComments(SearchCommentRequest request, List<Long> ids) {
+    public List<CommunityComment> getComments(SearchCommentRequest request) {
+        CommunityCommentSearchCondition condition =
+                new CommunityCommentSearchCondition(request.getCommunityId(), request.getParentId(), request.getMemberId(), request.getCursor());
+        return repository.getComments(condition, request.getPageable());
+    }
 
-        // FIXME Dynamic Query to QueryDSL
-        Sort.Direction direction = request.getPageable().getSort().stream()
-                .map(Sort.Order::getDirection)
-                .findAny()
-                .orElse(Sort.Direction.DESC);
+    @Transactional(readOnly = true)
+    public Page<CommunityComment> getCommentsPage(Long communityId, Pageable pageable) {
+        return repository.findAllByParentIdIsNullAndCommunityId(communityId, pageable);
+    }
 
-        Slice<CommunityComment> result = null;
-
-        if (Collections.isEmpty(ids)) {
-            ids = Arrays.asList(-1L);
-        }
-
-        switch (direction) {
-            case ASC:
-                if (request.getParentId() == null) {
-                    result = repository.getAllByAscParentIdNull(request.getCommunityId(), request.getCursor(), ids, request.getPageable());
-                } else {
-                    result = repository.getAllByAscParentIdNotNull(request.getCommunityId(), request.getParentId(), request.getCursor(), ids, request.getPageable());
-                }
-                break;
-            case DESC:
-                if (request.getParentId() == null) {
-                    result = repository.getAllByDescParentIdNull(request.getCommunityId(), request.getCursor(), ids, request.getPageable());
-                } else {
-                    result = repository.getAllByDescParentIdNotNull(request.getCommunityId(), request.getParentId(), request.getCursor(), ids, request.getPageable());
-                }
-        }
-
-        return result.getContent();
+    @Transactional(readOnly = true)
+    public List<CommunityComment> getAllByParentIdIn(List<Long> ids) {
+        return repository.findByParentIdInOrderByCreatedAtAsc(ids);
     }
 
     @Transactional
@@ -69,20 +53,20 @@ public class CommunityCommentDao {
 
     @Transactional(readOnly = true)
     public List<CommunityComment> getMyComments(long memberId, long cursor, Pageable pageable) {
-        Slice<CommunityComment> commentSlice = repository.findByMemberIdAndStatusAndIdLessThan(memberId, CommunityStatus.NORMAL, cursor, pageable);
+        Slice<CommunityComment> commentSlice = repository.findByMemberIdAndIdLessThan(memberId, cursor, pageable);
         return commentSlice.getContent();
     }
 
     @Transactional(readOnly = true)
     public CommunityComment get(long commentId) {
         return repository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("no_such_comment", "No such comment. id - " + commentId));
+                .orElseThrow(() -> new NotFoundException("No such comment. id - " + commentId));
     }
 
     @Transactional(readOnly = true)
     public CommunityComment get(long communityId, long commentId) {
         return repository.findByCommunityIdAndId(communityId, commentId)
-                .orElseThrow(() -> new NotFoundException("no_such_comment", "No such comment. communityId - " + communityId + ", commentId - " + commentId));
+                .orElseThrow(() -> new NotFoundException("No such comment. communityId - " + communityId + ", commentId - " + commentId));
     }
 
     @Transactional
@@ -112,4 +96,35 @@ public class CommunityCommentDao {
     public void commentCount(long commentId, int count) {
         repository.commentCount(commentId, count);
     }
+
+    @Transactional(readOnly = true)
+    public Long countByMemberId(Long memberId) {
+        return repository.countByMemberId(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityComment> getAllByParentId(Long parentId) {
+        return repository.findByParentId(parentId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityComment> getAllByCommunityId(Long communityId) {
+        return repository.findByCommunityId(communityId);
+    }
+
+    @Transactional
+    public void updateStatus(List<Long> ids, CommunityStatus status) {
+        repository.updateStatusIdIn(ids, status);
+    }
+
+    @Transactional
+    public void setCommentCount(List<Long> ids, int count) {
+        repository.setCommentCount(ids, count);
+    }
+
+    @Transactional
+    public void setCommentCount(Long commentId, int count) {
+        repository.setCommentCount(singletonList(commentId), count);
+    }
+
 }

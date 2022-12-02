@@ -7,8 +7,8 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.Date;
 
-import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_RETRIEVE_POINT;
-import static com.jocoos.mybeautip.member.point.MemberPoint.STATE_USE_POINT;
+import static com.jocoos.mybeautip.member.point.MemberPoint.*;
+
 
 @NoArgsConstructor
 @Data
@@ -91,7 +91,7 @@ public class MemberPointDetail extends CreatedDateAuditable {
         this.expiryAt = memberPoint.getExpiryAt();
         if (userPointService == UsePointService.ORDER) {
             this.orderId = usePointServiceId;
-        } else if (userPointService == UsePointService.EVENT){
+        } else if (userPointService == UsePointService.EVENT) {
             this.eventId = usePointServiceId;
         } else {
             this.activityType = ActivityPointType.getActivityPointType(Math.toIntExact(usePointServiceId));
@@ -99,8 +99,52 @@ public class MemberPointDetail extends CreatedDateAuditable {
         setPointAndState(point, STATE_USE_POINT);
     }
 
-    public static int getEarnedState() {
-        return MemberPoint.STATE_EARNED_POINT;
+    public void setCommonData(MemberPoint memberPoint) {
+        this.memberId = memberPoint.getMember().getId();
+        this.memberPointId = memberPoint.getId();
+
+        setExpiryAtIfNull(memberPoint);
+        setUseService(memberPoint);
+    }
+
+    private void setExpiryAtIfNull(MemberPoint memberPoint) {
+        if (this.expiryAt == null) {
+            this.expiryAt = memberPoint.getExpiryAt();
+        }
+    }
+
+    private void setUseService(MemberPoint memberPoint) {
+        if (memberPoint.getOrder() != null) {
+            this.orderId = memberPoint.getOrder().getId();
+        } else {
+            this.eventId = memberPoint.getEventId();
+            this.activityType = memberPoint.getActivityType();
+        }
+    }
+
+    public static MemberPointDetail slice(long parentId, int point, int state, Date expiryAt) {
+        return MemberPointDetail.builder()
+                .parentId(parentId)
+                .point(point)
+                .state(state)
+                .expiryAt(expiryAt)
+                .build();
+    }
+
+
+    public static MemberPointDetail slice(long parentId, int point, int state) {
+       return MemberPointDetail.builder()
+               .parentId(parentId)
+               .point(point)
+               .state(state)
+               .build();
+    }
+
+    public static MemberPointDetail slice(int point, int state) {
+        return MemberPointDetail.builder()
+                .point(point)
+                .state(state)
+                .build();
     }
 
     public void setPointAndState(int point, int state) {
@@ -122,5 +166,9 @@ public class MemberPointDetail extends CreatedDateAuditable {
 
     public void setCreatedAt(Date date) {
         super.createdAt = date;
+    }
+
+    public void underZeroPointAllAddedUp() {
+        this.parentId = this.getMemberPointId();
     }
 }

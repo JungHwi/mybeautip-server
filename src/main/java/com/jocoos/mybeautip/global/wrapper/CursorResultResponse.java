@@ -20,4 +20,8 @@ public class CursorResultResponse<T extends CursorInterface> {
         this.nextCursor = content.get(content.size() - 1).getCursor();
         this.content = content;
     }
+
+    protected void contentToNull() {
+        this.content = null;
+    }
 }

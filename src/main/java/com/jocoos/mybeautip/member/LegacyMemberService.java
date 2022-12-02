@@ -11,9 +11,12 @@ import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
+import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
@@ -38,6 +41,7 @@ import com.jocoos.mybeautip.word.BannedWord;
 import com.jocoos.mybeautip.word.BannedWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,6 +58,7 @@ import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXT
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.S3_ERROR;
 
 @Slf4j
 @Service
@@ -65,10 +70,12 @@ public class LegacyMemberService {
     private static final String USERNAME_ALREADY_USED = "username.already_used";
     private static final String EMAIL_INVALID_FORMAT = "email.invalid_format";
     private static final String MEMBER_NOT_FOUND = "member.not_found";
+
     private final BlockService blockService;
     private final BannedWordService bannedWordService;
     private final MessageService messageService;
     private final TagService tagService;
+    private final MemberTermService memberTermService;
     private final MemberRepository memberRepository;
     private final MemberDetailRepository memberDetailRepository;
     private final FollowingRepository followingRepository;
@@ -83,6 +90,7 @@ public class LegacyMemberService {
     private final SlackService slackService;
     private final SocialMemberFactory socialMemberFactory;
 
+
     private final ActivityPointService activityPointService;
 
     private final AwsS3Handler awsS3Handler;
@@ -96,6 +104,7 @@ public class LegacyMemberService {
     public LegacyMemberService(BannedWordService bannedWordService,
                                MessageService messageService,
                                TagService tagService,
+                               MemberTermService memberTermService,
                                MemberRepository memberRepository,
                                MemberDetailRepository memberDetailRepository,
                                FollowingRepository followingRepository,
@@ -115,6 +124,7 @@ public class LegacyMemberService {
         this.bannedWordService = bannedWordService;
         this.messageService = messageService;
         this.tagService = tagService;
+        this.memberTermService = memberTermService;
         this.memberRepository = memberRepository;
         this.memberDetailRepository = memberDetailRepository;
         this.followingRepository = followingRepository;
@@ -162,6 +172,18 @@ public class LegacyMemberService {
                 .orElseThrow(() -> new MemberNotFoundException("Can't find admin"));
     }
 
+    @Transactional(readOnly = true)
+    public MemberMeInfo getMyInfo(String lang) {
+        Long memberId = currentMemberId();
+        List<TermTypeResponse> termTypeResponses =
+                memberTermService.getOptionalTermAcceptStatus(memberId);
+
+        return memberRepository.findByIdAndDeletedAtIsNull(memberId)
+                .map(m -> new MemberMeInfo(m, termTypeResponses))
+                .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+
+    }
+
     private Object currentPrincipal() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -187,7 +209,7 @@ public class LegacyMemberService {
                 .replace(" ", "");
 
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new BadRequestException("duplicate_phone", "duplicate_phone");
+            throw new BadRequestException(ErrorCode.DUPLICATE_PHONE, "duplicate_phone");
         }
 
         return true;
@@ -237,7 +259,11 @@ public class LegacyMemberService {
         }
 
         if (!(username.matches(RegexConstants.regexForUsername))) {
-            throw new BadRequestException("invalid_char", messageService.getMessage(USERNAME_INVALID_CHAR, lang));
+            throw new BadRequestException(ErrorCode.INVALID_CHAR, "Username does not match the format");
+        }
+
+        if (NumberUtils.isDigits(username)) {
+            throw new BadRequestException(ErrorCode.INVALID_CHAR_ONLY_DIGIT, "Username does not use only digit.");
         }
 
         List<Member> otherMembers = memberRepository.findByUsername(username).stream()
@@ -245,7 +271,7 @@ public class LegacyMemberService {
                 .collect(Collectors.toList());
 
         if (!otherMembers.isEmpty()) {
-            throw new BadRequestException("already_used", messageService.getMessage(USERNAME_ALREADY_USED, lang));
+            throw new BadRequestException(ErrorCode.ALREADY_USED, "Username already in use");
         }
 
         bannedWordService.findWordAndThrowException(BannedWord.CATEGORY_USERNAME, username, lang);
@@ -253,7 +279,7 @@ public class LegacyMemberService {
 
     public void checkEmailValidation(String email, String lang) {
         if (email.length() > 50 || !email.matches(emailRegex)) {
-            throw new BadRequestException("invalid_email", messageService.getMessage(EMAIL_INVALID_FORMAT, lang));
+            throw new BadRequestException("Email does not match the format");
         }
     }
 
@@ -408,9 +434,8 @@ public class LegacyMemberService {
             case 8:
                 appleMemberRepository.findByMemberId(member.getId()).ifPresent(appleMemberRepository::delete);
                 break;
-
             default:
-                throw new BadRequestException("invalid_member_link", "invalid member link: " + link);
+                throw new BadRequestException("Not supported member link: " + link);
         }
 
         member.setIntro("");
@@ -487,7 +512,7 @@ public class LegacyMemberService {
                     .orElseThrow(() -> new MemberNotFoundException("No such Member. tag - " + request.getInviterTag()));
 
             if (member.getId().equals(targetMember.getId())) {
-                throw new BadRequestException("my_tag", "Target member is me.");
+                throw new BadRequestException(ErrorCode.MY_TAG, "Target member is me.");
             }
 
             if (memberDetail.getInviterId() == null) {
@@ -504,7 +529,7 @@ public class LegacyMemberService {
         memberDetail.setSkinType(request.getSkinType());
         memberDetail.setSkinWorry(request.getSkinWorry());
         if (targetMember != null) {
-            memberDetail.setInviterId(targetMember.getId());
+            memberDetail.registerInviterId(targetMember.getId());
         }
 
         memberDetail = memberDetailRepository.save(memberDetail);
@@ -529,7 +554,7 @@ public class LegacyMemberService {
             }
 
         } catch (IOException ex) {
-            throw new MybeautipException("Member avatar upload Error.");
+            throw new MybeautipException(S3_ERROR, "Member avatar upload Error.");
         }
 
         return path;

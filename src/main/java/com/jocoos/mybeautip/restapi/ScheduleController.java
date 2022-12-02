@@ -193,7 +193,7 @@ public class ScheduleController {
                                          @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         if (request == null ||
                 StringUtils.isBlank(request.title) || request.startedAt == null) {
-            throw new BadRequestException("invalid_values", "All values are null.");
+            throw new BadRequestException("All values are null.");
         }
 
         Schedule schedule = scheduleService.updateSchedule(id, legacyMemberService.currentMemberId(), request, lang);

@@ -177,15 +177,15 @@ public class TagController {
         String[] validMethods = {"start", "contain"};
 
         if (!StringUtils.containsAny(scope, validScopes)) {
-            throw new BadRequestException("invalid_scope", "Valid scope is 'me', 'all', or 'recommended'");
+            throw new BadRequestException("Valid scope is 'me', 'all', or 'recommended'");
         }
 
         if (!StringUtils.containsAny(method, validMethods)) {
-            throw new BadRequestException("invalid_method", "Valid method is 'start_with' or 'contain'");
+            throw new BadRequestException("Valid method is 'start_with' or 'contain'");
         }
 
         if (keyword != null && keyword.length() > 255) {
-            throw new BadRequestException("invalid_keyword", "Valid keyword size is between 1 to 255");
+            throw new BadRequestException("Valid keyword size is between 1 to 255");
         }
 
         if (count < 0) {

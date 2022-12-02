@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class AccessDeniedException extends MybeautipException {
 
     public AccessDeniedException(String description) {
-        super("access denied", description);
+        super(ErrorCode.ACCESS_DENIED, description);
     }
 
-    public AccessDeniedException(String message, String description) {
-        super(message, description);
+    public AccessDeniedException(ErrorCode errorCode, String description) {
+        super(errorCode, description);
     }
 }

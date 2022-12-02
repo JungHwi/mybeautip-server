@@ -30,10 +30,8 @@ public class MemberMeInfo extends MemberInfo {
         this.setPermission(new PermissionInfo(member.getPermission()));
     }
 
-    public MemberMeInfo(Member member, int pointRatio, int revenueRatio, List<TermTypeResponse> responses) {
+    public MemberMeInfo(Member member, List<TermTypeResponse> responses) {
         this(member);
-        this.pointRatio = pointRatio;
-        this.revenueRatio = revenueRatio;
         this.optionTermAccepts = responses;
     }
 }

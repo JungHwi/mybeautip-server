@@ -2,28 +2,35 @@ package com.jocoos.mybeautip.member.comment;
 
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.video.service.VideoCommentDeleteService;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.member.mention.MentionResult;
 import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.mention.MentionTag;
 import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.post.PostRepository;
+import com.jocoos.mybeautip.restapi.CommentSearchCondition;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.DELETE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 
 @Slf4j
 @Service
@@ -34,17 +41,53 @@ public class CommentService {
     private static final String COMMENT_LOCK_MESSAGE = "comment.lock_message";
     private static final String COMMENT_BLIND_MESSAGE = "comment.blind_message";
     private static final String COMMENT_BLIND_MESSAGE_BY_ADMIN = "comment.blind_message_by_admin";
+
+    private final LegacyMemberService legacyMemberService;
     private final TagService tagService;
     private final MessageService messageService;
     private final MentionService mentionService;
     private final LegacyNotificationService legacyNotificationService;
     private final CommentRepository commentRepository;
     private final VideoRepository videoRepository;
-    private final PostRepository postRepository;
     private final CommentReportRepository commentReportRepository;
     private final CommentLikeRepository commentLikeRepository;
-
+    private final MemberActivityCountDao activityCountDao;
     private final ActivityPointService activityPointService;
+    private final VideoCommentDeleteService deleteService;
+
+    @Transactional
+    public List<CommentInfo> getComments(CommentSearchCondition condition, Pageable pageable) {
+        List<Comment> comments = commentRepository.getComments(condition, pageable);
+
+        List<CommentInfo> result = new ArrayList<>();
+        comments.stream().forEach(comment -> {
+            CommentInfo commentInfo = null;
+            if (comment.getComment().contains("@")) {
+                MentionResult mentionResult = mentionService.createMentionComment(comment.getComment());
+                if (mentionResult != null) {
+                    String content = this.getBlindContent(comment, condition.lang(), mentionResult.getComment());
+                    comment.setComment(content);
+                    commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()), mentionResult.getMentionInfo());
+                } else {
+                    log.warn("mention result not found - {}", comment);
+                }
+            } else {
+                String content = getBlindContent(comment, condition.lang(), null);
+                comment.setComment(content);
+                commentInfo = new CommentInfo(comment, legacyMemberService.getMemberInfo(comment.getCreatedBy()));
+            }
+
+            if (condition.memberId() != null) {
+                Long likeId = commentLikeRepository.findByCommentIdAndCreatedByIdAndStatus(comment.getId(), condition.memberId(), LIKE)
+                        .map(CommentLike::getId).orElse(null);
+                commentInfo.setLikeId(likeId);
+            }
+
+            result.add(commentInfo);
+        });
+
+        return result;
+    }
 
     @Transactional
     public void lockComment(Comment comment) {
@@ -66,10 +109,6 @@ public class CommentService {
             comment.setVideoId(id);
             videoRepository.updateCommentCount(id, 1);
         }
-        if (type == COMMENT_TYPE_POST) {
-            comment.setPostId(id);
-            postRepository.updateCommentCount(id, 1);
-        }
 
         BeanUtils.copyProperties(request, comment);
         comment = commentRepository.save(comment);
@@ -85,6 +124,7 @@ public class CommentService {
         }
 
         activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, comment.getId(), member));
+        activityCountDao.updateAllVideoCommentCount(member, 1);
         return comment;
     }
 
@@ -122,72 +162,19 @@ public class CommentService {
 
     @Transactional
     public int deleteComment(Comment comment) {
-        if (comment.getParentId() != null) {
-            return deleteCommentAndChildren(comment);
-        }
 
         int childCount = commentRepository.countByParentIdAndCreatedByIdNot(comment.getId(), comment.getCreatedBy().getId());
         log.debug("child count: {}", childCount);
 
-        activityPointService.retrieveActivityPoint(DELETE_VIDEO_COMMENT,
-                                                   comment.getId(), comment.getCreatedBy());
-
-        if (childCount == 0) {
-            return deleteCommentAndChildren(comment);
-        } else {
-            return blindComment(comment);
-        }
-    }
-
-    @Transactional
-    public int blindComment(Comment comment) {
-        Comment.CommentState state = Comment.CommentState.BLINDED;
-        comment.setState(state);
-        commentRepository.save(comment);
-        return state.value();
-    }
-
-    @Transactional
-    public int deleteCommentAndChildren(Comment comment) {
         tagService.removeHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+        deleteCommentLikes(comment);
 
-        int count = 1;
-        if (comment.getParentId() != null) {
-            commentRepository.findById(comment.getParentId()).ifPresent(parentComment -> {
-                if (parentComment.getCommentCount() > 0) {
-                    commentRepository.updateCommentCount(parentComment.getId(), -1);
-                }
-            });
-        } else {
-            if (comment.getCommentCount() > 0) {
-                count += commentRepository.deleteByParentIdAndCreatedById(comment.getId(), comment.getCreatedBy().getId());
-            }
-        }
+        activityPointService.retrieveActivityPoint(DELETE_VIDEO_COMMENT, comment.getId(), comment.getCreatedBy());
+        return deleteService.delete(comment);
+    }
 
+    private void deleteCommentLikes(Comment comment) {
         List<CommentLike> commentLikes = commentLikeRepository.findAllByCommentId(comment.getId());
         commentLikeRepository.deleteAll(commentLikes);
-        commentRepository.delete(comment);
-
-        if (comment.getVideoId() != null) {
-            final int commentCount = -count;
-            log.info("deleted comment count for video: {}", count);
-            videoRepository.findById(comment.getVideoId()).ifPresent(video -> {
-                if (video.getCommentCount() > 0) {
-                    videoRepository.updateCommentCount(video.getId(), commentCount);
-                }
-            });
-        }
-
-        if (comment.getPostId() != null) {
-            final int commentCount = -count;
-            log.info("deleted comment count for post: {}", count);
-            postRepository.findById(comment.getPostId()).ifPresent(post -> {
-                if (post.getCommentCount() > 0) {
-                    postRepository.updateCommentCount(post.getId(), commentCount);
-                }
-            });
-        }
-
-        return Comment.CommentState.DELETED.value();
     }
 }

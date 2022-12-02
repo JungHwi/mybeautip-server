@@ -14,7 +14,7 @@ public class FeedAspect {
         this.feedService = feedService;
     }
 
-//    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.save(..))",
+//    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.LegacyVideoService.save(..))",
 //            returning = "result")
 //    public void onAfterReturningCreateVideo(JoinPoint joinPoint, Object result) {
 //        log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -27,8 +27,8 @@ public class FeedAspect {
 //            }
 //        }
 //    }
-//
-//    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.update(..))",
+
+//    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.LegacyVideoService.update(..))",
 //            returning = "result")
 //    public void onAfterReturningUpdateVideo(JoinPoint joinPoint, Object result) {
 //        log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -45,8 +45,8 @@ public class FeedAspect {
 //            }
 //        }
 //    }
-//
-//    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.VideoService.deleteVideo(..))",
+
+//    @AfterReturning(value = "execution(* com.jocoos.mybeautip.video.LegacyVideoService.deleteVideo(..))",
 //            returning = "result")
 //    public void onAfterReturningDeleteVideo(JoinPoint joinPoint, Object result) {
 //        log.debug("joinPoint: {}", joinPoint.toLongString());
@@ -57,7 +57,7 @@ public class FeedAspect {
 //            feedService.feedDeletedVideo(video.getId());
 //        }
 //    }
-//
+
 //    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.following.FollowingRepository.save(..))",
 //            returning = "result")
 //    public void onAfterReturningFollowingYou(JoinPoint joinPoint, Object result) {
@@ -70,7 +70,7 @@ public class FeedAspect {
 //            feedService.followMember(following.getMemberMe().getId(), following.getMemberYou().getId());
 //        }
 //    }
-//
+
 //    @Before(value = "execution(* com.jocoos.mybeautip.member.following.FollowingRepository.delete(..))")
 //    public void onBeforeUnfollowingYou(JoinPoint joinPoint) {
 //        log.debug("joinPoint: {}", joinPoint.toLongString());

@@ -40,7 +40,7 @@ public class MemberBillingService {
             if (validInfos.isEmpty()) {
                 // no valid billing infos
                 String message = messageService.getMessage("billing.not_found", lang);
-                throw new BadRequestException("billing_not_found", message);
+                throw new BadRequestException(message);
             } else {
                 // there are valid billing infos which is not base
                 MemberBilling validInfo = validInfos.get(0);
@@ -78,7 +78,7 @@ public class MemberBillingService {
         MemberBilling memberBilling = memberBillingRepository.findByIdAndMemberIdAndValid(billingId, memberId, false)
                 .orElseThrow(() -> {
                     String message = messageService.getMessage("billing.not_found", lang);
-                    return new BadRequestException("billing_not_found", message);
+                    return new BadRequestException(message);
                 });
 
         // fetch card info from iamport
@@ -107,7 +107,7 @@ public class MemberBillingService {
         MemberBilling memberBilling = memberBillingRepository.findByIdAndMemberIdAndValid(billingId, memberId, true)
                 .orElseThrow(() -> {
                     String message = messageService.getMessage("billing.not_found", lang);
-                    return new BadRequestException("billing_not_found", message);
+                    return new BadRequestException(message);
                 });
         memberBilling.setBase(true);
         return memberBillingRepository.save(memberBilling);
@@ -127,7 +127,7 @@ public class MemberBillingService {
         MemberBilling memberBilling = memberBillingRepository.findByIdAndMemberIdAndValid(billingId, memberId, true)
                 .orElseThrow(() -> {
                     String message = messageService.getMessage("billing.not_found", lang);
-                    return new BadRequestException("billing_not_found", message);
+                    return new BadRequestException(message);
                 });
 
         String customerId = decrypt(memberBilling.getCustomerId(), memberBilling.getSalt());

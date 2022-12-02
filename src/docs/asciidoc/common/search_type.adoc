@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[search_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-search_type.adoc[]

@@ -1,0 +1,3 @@
+== Get Placards API
+
+operation::get_placards[snippets='http-request,http-response,response-fields']

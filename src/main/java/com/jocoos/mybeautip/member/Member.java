@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.vo.Birthday;
@@ -20,11 +21,13 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import static com.jocoos.mybeautip.domain.member.code.GrantType.*;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.HTTP_PREFIX;
 import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 
 
 @Data
@@ -181,6 +184,16 @@ public class Member {
         }
     }
 
+    public GrantType getGrantType() {
+        return switch (link) {
+            case LINK_FACEBOOK -> FACEBOOK;
+            case LINK_NAVER -> NAVER;
+            case LINK_KAKAO -> KAKAO;
+            case LINK_APPLE -> APPLE;
+            default -> null;
+        };
+    }
+
     public void setTag() {
         this.tag = RandomUtils.generateTag();
     }
@@ -193,17 +206,19 @@ public class Member {
 
     public Member usePoint(int point) {
         if (this.point < point) {
-            throw new BadRequestException("not_enough_point", "Member has " + this.point + " point. This event need " + point + " point.");
+            throw new BadRequestException("Member has " + this.point + " point. This event need " + point + " point.");
         }
 
         this.point = this.point - point;
         return this;
     }
 
+    public Member retrievePoint(int point) {
+        this.point -= point;
+        return this;
+    }
+
     public Member earnPoint(int point) {
-        if (point <= 0) {
-            throw new BadRequestException("not_positive_point", "Points must be positive. earn point - " + point);
-        }
         this.point = this.point + point;
         return this;
     }
@@ -232,5 +247,20 @@ public class Member {
 
     public boolean isAvatarUrlSame(String originalAvatar) {
         return getAvatarUrl().equals(originalAvatar);
+    }
+
+    public Integer getAgeGroup() {
+        if (birthday == null) {
+            return null;
+        }
+        return birthday.getAgeGroupByTen();
+    }
+
+    public ZonedDateTime getCreatedAtZoned() {
+        return toUTCZoned(createdAt);
+    }
+
+    public ZonedDateTime getModifiedAtZoned() {
+        return toUTCZoned(modifiedAt);
     }
 }
