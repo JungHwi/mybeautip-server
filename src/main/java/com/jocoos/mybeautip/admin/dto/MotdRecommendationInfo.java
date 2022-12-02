@@ -1,13 +1,13 @@
 package com.jocoos.mybeautip.admin.dto;
 
+import com.jocoos.mybeautip.recommendation.MotdRecommendation;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
 import java.util.Date;
 
-import com.jocoos.mybeautip.recommendation.MotdRecommendation;
-
-import lombok.NoArgsConstructor;
-
+@Getter
 @NoArgsConstructor
 public class MotdRecommendationInfo {
   private Long videoId;
