@@ -121,6 +121,8 @@ public class AdminMemberService {
 
     @Transactional
     public Member updateStatus(MemberStatusRequest request) {
+        Member adminMember = memberDao.getMember(request.getAdminId());
+        request.setAdminMember(adminMember);
         Member member = memberDao.getMember(request.getMemberId());
         request.setBeforeStatus(member.getStatus());
         OperationLogRequest logRequest = operationLogConverter.converts(request);

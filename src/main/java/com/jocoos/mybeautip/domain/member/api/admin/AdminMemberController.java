@@ -99,7 +99,6 @@ public class AdminMemberController {
         long adminId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
         request.setAdminId(adminId);
         request.setMemberId(memberId);
-
         service.updateStatus(request);
 
         return new ResponseEntity(HttpStatus.OK);

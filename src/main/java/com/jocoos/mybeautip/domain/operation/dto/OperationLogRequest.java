@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.operation.dto;
 
 import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
 import com.jocoos.mybeautip.domain.operation.code.OperationType;
+import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,5 +22,5 @@ public class OperationLogRequest {
 
     private String description;
 
-    private long createdBy;
+    private Member createdBy;
 }

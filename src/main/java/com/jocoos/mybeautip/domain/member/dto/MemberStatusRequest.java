@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.operation.code.OperationType;
 import com.jocoos.mybeautip.domain.operation.service.dao.OperationLogInterface;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.member.Member;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,11 +15,12 @@ import org.apache.commons.lang3.StringUtils;
 @NoArgsConstructor
 public class MemberStatusRequest implements OperationLogInterface {
 
-    private long adminId;
     private long memberId;
     private MemberStatus beforeStatus;
     private MemberStatus afterStatus;
     private String description;
+    private long adminId;
+    private Member adminMember;
 
     public MemberStatusRequest(MemberStatus status) {
         this.afterStatus = status;
@@ -48,7 +50,7 @@ public class MemberStatusRequest implements OperationLogInterface {
     }
 
     @Override
-    public long getCreatedBy() {
-        return this.adminId;
+    public Member getCreatedBy() {
+        return adminMember;
     }
 }
