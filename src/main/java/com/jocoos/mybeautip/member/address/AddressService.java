@@ -49,19 +49,8 @@ public class AddressService {
 
     @Transactional
     public Address create(AddressController.CreateAddressRequest request, Member member, String lang) {
-
         if (addressRepository.existsByCreatedByAndDeletedAtIsNull(member)) {
             throw new BadRequestException(messageService.getMessage("address.too_many_addresses", lang));
-        }
-
-        log.debug("CreateAddressRequest: {}", request);
-
-        if (request.getBase() != null && request.getBase()) {
-            addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(member.getId())
-                    .ifPresent(prevBaseAddress -> {
-                        prevBaseAddress.setBase(false);
-                        addressRepository.save(prevBaseAddress);
-                    });
         }
 
         Address address = new Address();
@@ -81,7 +70,6 @@ public class AddressService {
             phone = phone.replace("-", "").replace(" ", "");
             address.setPhone(phone);
         }
-        log.debug("address: {}", address);
 
         activityPointService.gainActivityPoint(INPUT_ADDITIONAL_INFO, ValidObject.validReceiver(member));
         return addressRepository.save(address);
@@ -105,8 +93,6 @@ public class AddressService {
 
     @Transactional
     public Address update(Long id, AddressController.UpdateAddressRequest request, String lang) {
-        log.info("UpdateAddressRequest: {}", request);
-
         if (request.getBase() != null && request.getBase()) {
             addressRepository.findByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(legacyMemberService.currentMemberId())
                     .ifPresent(prevBaseAddress -> {
@@ -138,7 +124,7 @@ public class AddressService {
                     }
                     return addressRepository.save(address);
                 })
-                .orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
     }
 
     @Transactional
@@ -147,7 +133,7 @@ public class AddressService {
                 .map(address -> {
                     address.setDeletedAt(new Date());
                     return addressRepository.save(address);
-                }).orElseThrow(() -> new NotFoundException("address_not_found", messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
+                }).orElseThrow(() -> new NotFoundException(messageService.getMessage(ADDRESS_NOT_FOUND, lang)));
 
         long baseCount = addressRepository.countByCreatedByIdAndDeletedAtIsNullAndBaseIsTrue(memberId);
         if (baseCount == 0) {

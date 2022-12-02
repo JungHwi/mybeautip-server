@@ -6,7 +6,6 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -25,6 +24,7 @@ class PopupNoticeControllerTest extends RestDocsTestSupport {
 
         result.andDo(document("get_popup_notices",
             responseFields(
+                    fieldWithPath("[]").type(JsonFieldType.ARRAY).description("공지 팝업 목록").optional(),
                     fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("공지 팝업 아이디"),
                     fieldWithPath("[].image_url").type(JsonFieldType.STRING).description("공지 팝업 이미지 주소"),
                     fieldWithPath("[].link_type").type(JsonFieldType.STRING).description("공지 팝업 이미지 링크 타입").optional(),

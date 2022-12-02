@@ -18,7 +18,6 @@ import java.util.Map;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_LONG_STRING;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -43,13 +42,13 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         ),
                         requestParameters(
                                 parameterWithName("parent_id").description("부모 댓글 아이디").optional(),
-                                parameterWithName("cursor").description("커서").optional().attributes(getDefault(MAX_LONG_STRING)),
+                                parameterWithName("cursor").description("커서").optional(),
                                 parameterWithName("size").description("페이지 사이즈").optional().attributes(getDefault(20)),
                                 parameterWithName("direction").description("정렬 방향").optional().attributes(getDefault("DESC"))
                         ),
                         responseFields(
-                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),
-                                fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 댓글 목록"),
+                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보").optional(),
+                                fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 댓글 목록").optional(),
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
                                 fieldWithPath("content.[].category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("content.[].community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
@@ -119,6 +118,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void writeComment() throws Exception {
         WriteCommunityCommentRequest request = WriteCommunityCommentRequest.builder()
                 .contents("Mock Comment Contents")
@@ -167,6 +167,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void editComment() throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("contents", "Test Contents");
@@ -234,6 +235,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void likeComment() throws Exception {
         BooleanDto bool = new BooleanDto(true);
 

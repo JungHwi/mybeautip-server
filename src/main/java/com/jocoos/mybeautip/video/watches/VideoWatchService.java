@@ -17,6 +17,8 @@ import java.util.List;
 public class VideoWatchService {
 
     private static final String VIDEO_STATS_KEY = "video:%s";
+
+//    private final JedisCluster jedis;
     private final ObjectMapper objectMapper;
     private final VideoWatchRepository videoWatchRepository;
 
@@ -48,23 +50,18 @@ public class VideoWatchService {
     }
 
 //    private void saveVideoWatchCount(String key, int elapsedTime, String counts) {
-//        Jedis jedis = null;
 //        try {
-//            jedis = jedisPool.getResource();
 //            jedis.zadd(key, elapsedTime, String.format("%s:%s", counts, elapsedTime));
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
+//                jedis.close();
 //            }
 //        }
 //    }
-//
+
 //    public Map<Integer, Integer[]> getVideoWatchStats(Long videoId) {
-//        Jedis jedis = null;
 //        try {
-//            jedis = jedisPool.getResource();
-//            Set<Tuple> tuples = jedis.zrangeByScoreWithScores(String.format(VIDEO_STATS_KEY, videoId), "-inf", "+inf");
+//            List<Tuple> tuples = jedis.zrangeByScoreWithScores(String.format(VIDEO_STATS_KEY, videoId), "-inf", "+inf");
 //
 //            Map<Integer, Integer[]> stats = new TreeMap<>();
 //            for (Tuple t : tuples) {
@@ -81,18 +78,7 @@ public class VideoWatchService {
 //            return stats;
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
-//            }
-//        }
-//    }
-
-//    private void close(Closeable... closeables) {
-//        for (Closeable c : closeables) {
-//            try {
-//                c.close();
-//            } catch (IOException e) {
-//                log.error("Cann't close exception", e);
+//                jedis.close();
 //            }
 //        }
 //    }

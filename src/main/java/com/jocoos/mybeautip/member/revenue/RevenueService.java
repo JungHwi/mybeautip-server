@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member.revenue;
 
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
@@ -41,7 +42,7 @@ public class RevenueService {
 
     public RevenueOverview getOverview(Long videoId, Member member) {
         Video video = videoRepository.findByIdAndMemberId(videoId, member.getId())
-                .orElseThrow(() -> new NotFoundException("video_not_fount", "invalid video id or member id"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, "invalid video id or member id"));
 
         List<Revenue> revenues = revenueRepository.findByVideoId(video.getId());
         RevenueOverview overview = new RevenueOverview(platformRatio, revenues, member.getRevenue());
@@ -82,7 +83,7 @@ public class RevenueService {
 
         RevenuePayment revenuePayment = revenue.getRevenuePayment();
         if (revenuePayment == null) {
-            throw new NotFoundException("revenue_payment_not_found", "Revenue payment is null");
+            throw new NotFoundException(ErrorCode.REVENUE_PAYMENT_NOT_FOUND, "Revenue payment is null");
         }
         revenuePaymentService.appendEstimatedAmount(revenuePayment, revenue.getRevenue());
 

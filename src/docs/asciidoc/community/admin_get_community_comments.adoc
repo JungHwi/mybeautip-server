@@ -1,0 +1,3 @@
+== Admin Get Community Comments API
+
+operation::admin_get_community_comments[snippets='http-request,path-parameters,request-parameters,http-response,response-fields']

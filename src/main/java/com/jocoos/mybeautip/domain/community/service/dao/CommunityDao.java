@@ -1,40 +1,47 @@
 package com.jocoos.mybeautip.domain.community.service.dao;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
+import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository;
-import com.jocoos.mybeautip.domain.member.dao.MemberDao;
+import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
+import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
+import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
-import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CommunityDao {
 
-    private final MemberDao memberDao;
     private final CommunityCategoryDao categoryDao;
     private final CommunityRepository repository;
 
     private final CommunityConverter converter;
 
+    private final EntityManager em;
+
     @Transactional
     public Community write(WriteCommunityRequest request) {
-        Community community = converter.convert(request);
         CommunityCategory category = categoryDao.getCommunityCategory(request.getCategoryId());
-        community.setCategory(category);
+        request.setCategory(category);
+
+        Community community = converter.convert(request);
         community.setMember(request.getMember());
 
         community.valid();
@@ -50,7 +57,14 @@ public class CommunityDao {
     @Transactional(readOnly = true)
     public Community get(long communityId) {
         return repository.findById(communityId)
-                .orElseThrow(() -> new NotFoundException("no_such_community", "No such community. id - " + communityId));
+                .orElseThrow(() -> new NotFoundException("No such community. id - " + communityId));
+    }
+
+    @Transactional(readOnly = true)
+    public Community getUpdated(Long communityId) {
+        em.flush();
+        em.clear();
+        return get(communityId);
     }
 
     @Transactional(readOnly = true)
@@ -59,23 +73,23 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Community> get(List<CommunityCategory> categoryList, ZonedDateTime cursor, List<Long> blocks, Pageable pageable) {
-        if (Collections.isEmpty(blocks)) {
-            blocks = Arrays.asList(-1L);
-        }
-        return repository.getAllBy(blocks, BLIND, categoryList, cursor, pageable).getContent();
+    public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
+        return repository.getCommunities(condition, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<Community> getCommunityForEvent(long eventId, List<CommunityCategory> categoryList, Boolean isWin,  ZonedDateTime cursor, Pageable pageable, List<Long> blocks) {
-        if (categoryList.get(0).getType() == BLIND) {
-            return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThan(eventId, categoryList, isWin, cursor, pageable).getContent();
-        } else {
-            if (Collections.isEmpty(blocks)) {
-                blocks = Arrays.asList(-1L);
-            }
-            return repository.findByEventIdAndCategoryInAndIsWinAndSortedAtLessThanAndMemberIdNotIn(eventId, categoryList, isWin, cursor, blocks, pageable).getContent();
-        }
+    public Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition) {
+        return repository.getCommunitiesAllStatus(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Community> get(List<Long> ids) {
+        return repository.findByIdIn(ids);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SummaryCommunityResult> summary(Long categoryId, CommunityCategoryType type, int size, Long memberId) {
+        return repository.summary(new SummaryCommunityCondition(categoryId, type, size, memberId));
     }
 
     @Transactional()
@@ -101,5 +115,43 @@ public class CommunityDao {
     @Transactional
     public void updateSortedAt(long communityId) {
         repository.updateSortedAt(communityId, ZonedDateTime.now());
+    }
+
+    @Transactional(readOnly = true)
+    public SearchResult<Community> search(KeywordSearchCondition condition) {
+        return repository.search(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countBy(String keyword, Long memberId) {
+        return repository.countBy(keyword, memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countBy(Long memberId) {
+        return repository.countByMemberId(memberId);
+    }
+
+    @Transactional
+    public Long fix(Long communityId) {
+        findTopFix().ifPresent(topCommunity -> topCommunity.fix(false));
+        Community community = get(communityId);
+        community.fix(true);
+        return community.getId();
+    }
+
+    private Optional<Community> findTopFix() {
+        return repository.findByIsTopFixIsTrue();
+    }
+
+    @Transactional
+    public Long nonFix(Long communityId) {
+        Community community = get(communityId);
+        community.fix(false);
+        return community.getId();
+    }
+
+    public void setCommentCount(Long communityId, int count) {
+        repository.setCommentCount(communityId, count);
     }
 }

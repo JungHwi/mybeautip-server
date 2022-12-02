@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -60,7 +62,7 @@ public class CommunityComment extends BaseEntity {
         if (!this.status.isDeletable()) {
             throw new BadRequestException("This status can not delete. This Community Status is " + this.status);
         }
-        this.status = CommunityStatus.DELETE;
+        this.status = DELETE;
         return this;
     }
 
@@ -76,11 +78,24 @@ public class CommunityComment extends BaseEntity {
 
     private void validContents(String contents) {
         if (StringUtils.isBlank(contents)) {
-            throw new BadRequestException("not_enough_contents", "Content must not be empty.");
+            throw new BadRequestException("Content must not be empty.");
         }
     }
 
     public boolean isCommentSameOrLongerThan(int length) {
         return this.contents.length() >= length;
     }
+
+    public boolean isParent() {
+        return parentId == null;
+    }
+
+    public boolean isChild() {
+        return parentId != null;
+    }
+
+    public boolean eqStatus(CommunityStatus status) {
+        return this.status == status;
+    }
+
 }

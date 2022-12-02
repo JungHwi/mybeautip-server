@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
+import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -29,5 +32,9 @@ public class CommunityFile {
 
     public CommunityFile(String file) {
         this.file = file;
+    }
+
+    public String getFileUrl() {
+        return toUrl(file, COMMUNITY, community.getId());
     }
 }

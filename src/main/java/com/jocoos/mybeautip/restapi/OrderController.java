@@ -144,7 +144,7 @@ public class OrderController {
 
                     return new ResponseEntity<>(new OrderInfo(order, delivery, payment, purchaseInfos), HttpStatus.OK);
                 })
-                .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(ORDER_NOT_FOUND, lang)));
     }
 
     @PatchMapping("/orders/{id:.+}")
@@ -152,12 +152,12 @@ public class OrderController {
                                                   @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Long memberId = legacyMemberService.currentMemberId();
         Order order = orderRepository.findByIdAndCreatedById(id, memberId)
-                .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(ORDER_NOT_FOUND, lang)));
 
         List<PurchaseInfo> purchaseInfos = new ArrayList<>();
         order.getPurchases().stream().forEach(p -> {
             if (!p.isDelivered()) {
-                throw new BadRequestException("invalid_purchase_state", messageService.getMessage(INVALID_PURCHASE_STATE, lang));
+                throw new BadRequestException(messageService.getMessage(INVALID_PURCHASE_STATE, lang));
             }
 
             PurchaseInfo purchaseInfo = orderInquiryRepository.findByPurchaseId(p.getId())
@@ -168,7 +168,7 @@ public class OrderController {
         });
 
         if (order.getState() != Order.State.DELIVERED.getValue()) {
-            throw new BadRequestException("invalid_order_state", messageService.getMessage(INVALID_ORDER_STATE, lang));
+            throw new BadRequestException(messageService.getMessage(INVALID_ORDER_STATE, lang));
         }
 
         orderService.confirmOrderAndPurchase(order);
@@ -253,7 +253,7 @@ public class OrderController {
 
         Long me = legacyMemberService.currentMemberId();
         Order order = orderRepository.findByIdAndCreatedById(id, me)
-                .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(ORDER_NOT_FOUND, lang)));
         OrderInquiry inquiry;
 
         Byte state = Byte.parseByte(request.getState());
@@ -264,9 +264,9 @@ public class OrderController {
             case 1:
             case 2: {
                 if (request.getPurchaseId() == null) {
-                    throw new NotFoundException("purchase_not_found", "purchase id required");
+                    throw new NotFoundException("purchase id required");
                 }
-                Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
+                Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("invalid purchase id"));
                 inquiry = orderService.inquiryExchangeOrReturn(order, Byte.parseByte(request.getState()), request.getReason(), purchase);
                 break;
             }
@@ -284,28 +284,28 @@ public class OrderController {
         log.debug("inquiry request: {}", request);
 
         if (StringUtils.isBlank(request.getState())) {
-            throw new BadRequestException("inquire_state_required", "Inquiry state is required");
+            throw new BadRequestException("Inquiry state is required");
         }
 
         if (StringUtils.isBlank(request.getReason())) {
-            throw new BadRequestException("inquire_reason_required", "Inquiry reason is required");
+            throw new BadRequestException("Inquiry reason is required");
         }
 
         Byte state = Byte.parseByte(request.getState());
         if (state > 0 && request.getPurchaseId() == null) {
-            throw new NotFoundException("purchase_not_found", "purchase id required");
+            throw new NotFoundException("purchase id required");
         }
 
         List<String> attachments;
         try {
             attachments = attachmentService.upload(request.getFiles(), String.format("orders/%s", id));
         } catch (IOException e) {
-            throw new BadRequestException("inquire_image_upload_fail", "state_required");
+            throw new BadRequestException("state_required");
         }
 
         Long me = legacyMemberService.currentMemberId();
         Order order = orderRepository.findByIdAndCreatedById(id, me)
-                .orElseThrow(() -> new NotFoundException("order_not_found", messageService.getMessage(ORDER_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(ORDER_NOT_FOUND, lang)));
         OrderInquiry inquiry;
         switch (state) {
             case 0:
@@ -313,7 +313,7 @@ public class OrderController {
                 break;
             case 1:
             case 2: {
-                Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("purchase_not_found", "invalid purchase id"));
+                Purchase purchase = order.getPurchases().stream().filter(p -> p.getId().equals(request.getPurchaseId())).findAny().orElseThrow(() -> new NotFoundException("invalid purchase id"));
                 String attachment = attachments != null && attachments.size() > 0 ? String.join(ATTACHMENT_DELIMITER, attachments) : "";
                 inquiry = orderService.inquiryExchangeOrReturn(order, Byte.parseByte(request.getState()), request.getReason(), purchase, attachment);
                 break;
@@ -351,7 +351,7 @@ public class OrderController {
                 break;
             }
             default: {
-                throw new NotFoundException("category_not_found", "invalid category name");
+                throw new NotFoundException("invalid category name");
             }
         }
 
@@ -377,7 +377,7 @@ public class OrderController {
                                                        @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         return orderInquiryRepository.findByIdAndCreatedById(id, legacyMemberService.currentMemberId())
                 .map(orderInquiry -> new ResponseEntity<>(new OrderInquiryInfo(orderInquiry), HttpStatus.OK))
-                .orElseThrow(() -> new NotFoundException("inquiry_not_found", messageService.getMessage(ORDER_INQUIRY_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(ORDER_INQUIRY_NOT_FOUND, lang)));
     }
 
     @Data

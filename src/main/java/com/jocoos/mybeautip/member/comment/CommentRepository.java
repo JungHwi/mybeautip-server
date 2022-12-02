@@ -1,25 +1,36 @@
 package com.jocoos.mybeautip.member.comment;
 
+import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+public interface CommentRepository extends ExtendedQuerydslJpaRepository<Comment, Long>, CommentCustomRepository {
 
     @Modifying
     @Query("update Comment c set c.commentCount = c.commentCount + ?2, c.modifiedAt = now() where c.id = ?1")
     void updateCommentCount(Long id, int count);
 
     @Modifying
+    @Query("update Comment c set c.commentCount = :count, c.modifiedAt = now() where c.id in :ids")
+    void setCommentCount(@Param("ids") List<Long> ids, @Param("count") int count);
+
+
+    @Modifying
     @Query("update Comment c set c.likeCount = c.likeCount + ?2, c.modifiedAt = now() where c.id = ?1")
     void updateLikeCount(Long id, int count);
+
+    @Modifying
+    @Query("update Comment c set c.state = :state where c.id in :ids")
+    void updateState(@Param("ids") List<Long> ids, @Param("state") int state);
 
     Optional<Comment> findByIdAndPostId(Long id, Long postId);
 
@@ -48,6 +59,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Slice<Comment> findByVideoIdAndParentIdIsNullAndCreatedByIdNotIn(Long id, List<Long> blackList, Pageable pageable);
 
     Slice<Comment> findByParentId(Long parentId, Pageable pageable);
+    List<Comment> findByParentId(Long parentId);
 
     Slice<Comment> findByParentIdAndIdLessThanEqual(Long parentId, Long cursor, Pageable pageable);
 
@@ -70,5 +82,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     int deleteByParentIdAndCreatedById(Long parentId, Long createdBy);
 
     int countByVideoIdAndCreatedByIdNotIn(Long videoId, List<Long> blackList);
+
+    Long countByCreatedById(Long memberId);
+
+    List<Comment> findByVideoId(Long videoId);
 }
 

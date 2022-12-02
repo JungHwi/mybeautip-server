@@ -38,14 +38,14 @@ public class SignupEventService extends EventTypeAbstractService {
                 .eventId(event.getId())
                 .status(EventJoinStatus.JOIN)
                 .eventProduct(eventProduct)
-                .eventProductId(eventProduct.getId())
                 .build();
 
         eventJoin = eventJoinRepository.save(eventJoin);
 
-        PresentService presentService = presentFactory.getPresentService(eventProduct.getType());
-        presentService.present(member, eventJoin);
-
+        if (eventProduct != null) {
+            PresentService presentService = presentFactory.getPresentService(eventProduct.getType());
+            presentService.present(member, eventJoin);
+        }
         return eventJoin;
     }
 

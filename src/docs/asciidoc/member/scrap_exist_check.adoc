@@ -1,0 +1,3 @@
+== Check Scrap Exist API
+
+operation::scrap_exist_check[snippets='http-request,http-response,response-fields']

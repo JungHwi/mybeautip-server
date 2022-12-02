@@ -55,7 +55,7 @@ public class ReportController {
         }
 
         if (reportRepository.findByMeIdAndYouId(legacyMemberService.currentMemberId(), request.getMemberId()).isPresent()) {
-            throw new BadRequestException("already_reported", messageService.getMessage(MEMBER_ALREADY_REPORTED, lang));
+            throw new BadRequestException(messageService.getMessage(MEMBER_ALREADY_REPORTED, lang));
         }
         Member member = legacyMemberService.currentMember();
 

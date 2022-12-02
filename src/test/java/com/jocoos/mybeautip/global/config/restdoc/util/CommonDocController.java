@@ -2,10 +2,8 @@ package com.jocoos.mybeautip.global.config.restdoc.util;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
-import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
-import com.jocoos.mybeautip.domain.event.code.EventProductType;
-import com.jocoos.mybeautip.domain.event.code.EventStatus;
-import com.jocoos.mybeautip.domain.event.code.EventType;
+import com.jocoos.mybeautip.domain.event.code.*;
+import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.notification.code.*;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
@@ -16,7 +14,11 @@ import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.domain.popup.code.ButtonLinkType;
 import com.jocoos.mybeautip.domain.popup.code.PopupDisplayType;
 import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
+import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
+import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
+import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
+import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
 import com.jocoos.mybeautip.global.code.*;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
 import com.jocoos.mybeautip.member.code.SkinType;
@@ -42,11 +44,13 @@ public class CommonDocController {
         Map<String, String> telecom = getDocs(Telecom.values());
         Map<String, String> urlDirectory = getDocs(UrlDirectory.values());
         Map<String, String> fileOperationType = getDocs(FileOperationType.values());
+        Map<String, String> sortField = getDocs(SortField.values());
 
         // Member
         Map<String, String> memberStatus = getDocs(MemberStatus.values());
         Map<String, String> skinType = getDocs(SkinType.values());
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
+        Map<String, String> grantType = getDocs(GrantType.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -57,6 +61,10 @@ public class CommonDocController {
         // Community
         Map<String, String> communityCategoryType = getDocs(CommunityCategoryType.values());
         Map<String, String> communityStatus = getDocs(CommunityStatus.values());
+
+        // Video
+        Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
+        Map<String, String> videoMaskType = getDocs(VideoMaskType.values());
 
         // Notification
         Map<String, String> notificationLinkType = getDocs(NotificationLinkType.values());
@@ -85,6 +93,12 @@ public class CommonDocController {
         // Term
         Map<String, String> termType = getDocs(TermType.values());
 
+        // Search
+        Map<String, String> searchType = getDocs(SearchType.values());
+
+        // Scrap
+        Map<String, String> scrapType = getDocs(ScrapType.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .deviceOs(deviceOs)
@@ -92,10 +106,12 @@ public class CommonDocController {
                         .telecom(telecom)
                         .urlDirectory(urlDirectory)
                         .fileOperationType(fileOperationType)
+                        .sortField(sortField)
                 // Member
                         .memberStatus(memberStatus)
                         .skinType(skinType)
                         .skinWorry(skinWorry)
+                        .grantType(grantType)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)
@@ -104,6 +120,9 @@ public class CommonDocController {
                 // Community
                         .communityCategoryType(communityCategoryType)
                         .communityStatus(communityStatus)
+                // Video
+                        .videoCategoryType(videoCategoryType)
+                        .videoMaskType(videoMaskType)
                 // Notification
                         .notificationLinkType(notificationLinkType)
                         .messageType(messageType)
@@ -126,6 +145,10 @@ public class CommonDocController {
                         .popupStatus(popupStatus)
                 // Term
                         .termType(termType)
+                // Search
+                        .searchType(searchType)
+                // Scrap
+                        .scrapType(scrapType)
                 .build()
         );
     }

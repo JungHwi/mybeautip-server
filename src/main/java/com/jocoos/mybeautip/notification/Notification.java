@@ -8,7 +8,6 @@ import com.jocoos.mybeautip.member.following.Following;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.point.MemberPoint;
 import com.jocoos.mybeautip.member.revenue.RevenuePayment;
-import com.jocoos.mybeautip.post.Post;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoLike;
 import lombok.Data;
@@ -177,17 +176,17 @@ public class Notification {
         this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
     }
 
-    public Notification(Post post, Comment comment, Member target, String thumbnail) {
-        this.type = COMMENT;
-        this.targetMember = target;
-        this.read = false;
-        this.resourceType = RESOURCE_TYPE_POST_COMMENT;
-        this.resourceId = comment.getId();
-        this.resourceIds = StringUtils.joinWith(",", post.getId(), comment.getId());
-        this.resourceOwner = comment.getCreatedBy();
-        this.imageUrl = thumbnail;
-        this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
-    }
+//    public Notification(Post post, Comment comment, Member target, String thumbnail) {
+//        this.type = COMMENT;
+//        this.targetMember = target;
+//        this.read = false;
+//        this.resourceType = RESOURCE_TYPE_POST_COMMENT;
+//        this.resourceId = comment.getId();
+//        this.resourceIds = StringUtils.joinWith(",", post.getId(), comment.getId());
+//        this.resourceOwner = comment.getCreatedBy();
+//        this.imageUrl = thumbnail;
+//        this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
+//    }
 
     public Notification(Video video, Comment comment, Long parentId, Member target, String thumbnail) {
         this.type = COMMENT_REPLY;
@@ -201,17 +200,17 @@ public class Notification {
         this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
     }
 
-    public Notification(Post post, Comment comment, Long parentId, Member target, String thumbnail) {
-        this.type = COMMENT_REPLY;
-        this.targetMember = target;
-        this.read = false;
-        this.resourceType = RESOURCE_TYPE_POST_COMMENT_REPLY;
-        this.resourceId = comment.getId();
-        this.resourceIds = StringUtils.joinWith(",", post.getId(), comment.getParentId(), comment.getId());
-        this.resourceOwner = comment.getCreatedBy();
-        this.imageUrl = thumbnail;
-        this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
-    }
+//    public Notification(Post post, Comment comment, Long parentId, Member target, String thumbnail) {
+//        this.type = COMMENT_REPLY;
+//        this.targetMember = target;
+//        this.read = false;
+//        this.resourceType = RESOURCE_TYPE_POST_COMMENT_REPLY;
+//        this.resourceId = comment.getId();
+//        this.resourceIds = StringUtils.joinWith(",", post.getId(), comment.getParentId(), comment.getId());
+//        this.resourceOwner = comment.getCreatedBy();
+//        this.imageUrl = thumbnail;
+//        this.args = Arrays.asList(comment.getCreatedBy().getUsername(), comment.getComment());
+//    }
 
     public Notification(Video video, CommentLike commentLike, String commentStr) {
         this.type = COMMENT_LIKE;
@@ -225,29 +224,29 @@ public class Notification {
         this.args = Arrays.asList(commentLike.getCreatedBy().getUsername(), commentStr);
     }
 
-    public Notification(Post post, CommentLike commentLike, String commentStr) {
-        this.type = COMMENT_LIKE;
-        this.targetMember = commentLike.getComment().getCreatedBy();
-        this.read = false;
-        this.resourceType = RESOURCE_TYPE_POST_COMMENT;
-        this.resourceId = commentLike.getComment().getId();
-        this.resourceIds = StringUtils.joinWith(",", post.getId(), commentLike.getComment().getId());
-        this.resourceOwner = commentLike.getCreatedBy();
-        this.imageUrl = post.getThumbnailUrl();
-        this.args = Arrays.asList(commentLike.getCreatedBy().getUsername(), commentStr);
-    }
+//    public Notification(Post post, CommentLike commentLike, String commentStr) {
+//        this.type = COMMENT_LIKE;
+//        this.targetMember = commentLike.getComment().getCreatedBy();
+//        this.read = false;
+//        this.resourceType = RESOURCE_TYPE_POST_COMMENT;
+//        this.resourceId = commentLike.getComment().getId();
+//        this.resourceIds = StringUtils.joinWith(",", post.getId(), commentLike.getComment().getId());
+//        this.resourceOwner = commentLike.getCreatedBy();
+//        this.imageUrl = post.getThumbnailUrl();
+//        this.args = Arrays.asList(commentLike.getCreatedBy().getUsername(), commentStr);
+//    }
 
-    public Notification(Post post, Comment postComment, Member mentioned) {
-        this.type = MENTION;
-        this.targetMember = mentioned;
-        this.read = false;
-        this.resourceType = RESOURCE_TYPE_POST_COMMENT;
-        this.resourceId = postComment.getId();
-        this.resourceIds = StringUtils.joinWith(",", post.getId(), postComment.getId());
-        this.resourceOwner = postComment.getCreatedBy();
-        this.imageUrl = post.getThumbnailUrl();
-        this.args = Arrays.asList(postComment.getCreatedBy().getUsername(), postComment.getComment());
-    }
+//    public Notification(Post post, Comment postComment, Member mentioned) {
+//        this.type = MENTION;
+//        this.targetMember = mentioned;
+//        this.read = false;
+//        this.resourceType = RESOURCE_TYPE_POST_COMMENT;
+//        this.resourceId = postComment.getId();
+//        this.resourceIds = StringUtils.joinWith(",", post.getId(), postComment.getId());
+//        this.resourceOwner = postComment.getCreatedBy();
+//        this.imageUrl = post.getThumbnailUrl();
+//        this.args = Arrays.asList(postComment.getCreatedBy().getUsername(), postComment.getComment());
+//    }
 
     public Notification(Video video, Comment videoComment, Member mentioned) {
         this.type = MENTION;

@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.video.VideoService;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,14 +14,14 @@ public class FeedController {
 
     private final FeedService feedService;
     private final LegacyMemberService legacyMemberService;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
 
     public FeedController(FeedService feedService,
                           LegacyMemberService legacyMemberService,
-                          VideoService videoService) {
+                          LegacyVideoService legacyVideoService) {
         this.feedService = feedService;
         this.legacyMemberService = legacyMemberService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
     }
 
 //    @GetMapping
@@ -29,22 +29,22 @@ public class FeedController {
 //                                   @RequestParam(required = false) String cursor) {
 //        Member me = legacyMemberService.currentMember();
 //
-////    if (me.getFollowingCount() == 0) {
-////      List<VideoController.VideoInfo> videos = new ArrayList<>();
-////      videoService.findVideos(null, null, null, count)
-////          .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
-////      return new CursorResponse.Builder<>(null, videos).toBuild();
-////    }
+//    if (me.getFollowingCount() == 0) {
+//      List<VideoController.VideoInfo> videos = new ArrayList<>();
+//      videoService.findVideos(null, null, null, count)
+//          .stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+//      return new CursorResponse.Builder<>(null, videos).toBuild();
+//    }
 //
 //        List<Video> videos = feedService.getVideoKeys(me.getId(), cursor, count);
 //
-//        List<VideoController.VideoInfo> result = new ArrayList<>();
+//        List<LegacyVideoController.VideoInfo> result = new ArrayList<>();
 //        videos
 //                .forEach(v -> {
 //                    if (StringUtils.isBlank(v.getVideoKey())) {
 //                        log.info("feed has invalid videoKey, member_id: " + me.getId());
 //                    } else {
-//                        result.add(videoService.generateVideoInfo(v));
+//                        result.add(legacyVideoService.generateVideoInfo(v));
 //                    }
 //                });
 //

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.admin;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.revenue.*;
 import lombok.Data;
@@ -38,10 +39,10 @@ public class AdminRevenuePaymentController {
         log.debug("request: {}, {}", id, request);
 
         RevenuePayment revenuePayment = revenuePaymentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("revenue_payment_not_found", "Revenue payment not found: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.REVENUE_PAYMENT_NOT_FOUND, "Revenue payment not found: " + id));
 
         if (revenuePayment.getState() != NOT_PAID) {
-            throw new BadRequestException("invalid_state", "Invalid Revenue Payment state: " + revenuePayment.getState());
+            throw new BadRequestException(ErrorCode.INVALID_STATE, "Invalid Revenue Payment state: " + revenuePayment.getState());
         }
 
         Date paymentDate = Dates.parse(request.getPaymentDate());

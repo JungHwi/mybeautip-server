@@ -1,0 +1,3 @@
+== Admin Hide Community Comment API
+
+operation::admin_hide_community_comment[snippets='http-request,path-parameters,http-response,response-fields']

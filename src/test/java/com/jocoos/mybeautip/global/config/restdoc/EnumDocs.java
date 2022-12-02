@@ -17,11 +17,13 @@ public class EnumDocs {
     Map<String, String> telecom;
     Map<String, String> urlDirectory;
     Map<String, String> fileOperationType;
+    Map<String, String> sortField;
 
     // Member
     Map<String, String> memberStatus;
     Map<String, String> skinType;
     Map<String, String> skinWorry;
+    Map<String, String> grantType;
 
     // Event
     Map<String, String> eventStatus;
@@ -32,6 +34,10 @@ public class EnumDocs {
     // Community
     Map<String, String> communityStatus;
     Map<String, String> communityCategoryType;
+
+    // Video
+    Map<String, String> videoCategoryType;
+    Map<String, String> videoMaskType;
 
     // Notification
     Map<String, String> notificationLinkType;
@@ -59,4 +65,10 @@ public class EnumDocs {
 
     // Term
     Map<String, String> termType;
+
+    // Search
+    Map<String, String> searchType;
+
+    // Scrap
+    Map<String, String> scrapType;
 }

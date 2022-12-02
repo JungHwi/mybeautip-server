@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.recoding;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.post.Post;
-import com.jocoos.mybeautip.post.PostRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
@@ -24,12 +21,13 @@ public class ViewRecodingService {
     private static final int MAX_COUNT = 200;
 
     private final ViewRecodingRepository viewRecodingRepository;
-    private final PostRepository postRepository;
+//    private final PostRepository postRepository;
 
-    public ViewRecodingService(ViewRecodingRepository viewRecodingRepository,
-                               PostRepository postRepository) {
+    public ViewRecodingService(ViewRecodingRepository viewRecodingRepository
+//                               ,PostRepository postRepository
+    ) {
         this.viewRecodingRepository = viewRecodingRepository;
-        this.postRepository = postRepository;
+//        this.postRepository = postRepository;
     }
 
     public Slice<ViewRecoding> findByWeekAgo(Long memberId, int count, String cursor, Integer category) {
@@ -56,13 +54,13 @@ public class ViewRecodingService {
 
     @Transactional
     public void insertOrUpdate(String itemId, int category, Member me) {
-        if (category == ViewRecoding.CATEGORY_POST) {
-            Post post = postRepository.findByIdAndDeletedAtIsNull(Long.parseLong(itemId))
-                    .orElseThrow(() -> new NotFoundException("post_not_found", "Post not found: " + itemId));
-            if (post.getCategory() == Post.CATEGORY_NOTICE) {
-                return; // Do not insert view log when post type is 'notice'
-            }
-        }
+//        if (category == ViewRecoding.CATEGORY_POST) {
+//            Post post = postRepository.findByIdAndDeletedAtIsNull(Long.parseLong(itemId))
+//                    .orElseThrow(() -> new NotFoundException("Post not found: " + itemId));
+//            if (post.getCategory() == Post.CATEGORY_NOTICE) {
+//                return; // Do not insert view log when post type is 'notice'
+//            }
+//        }
 
         viewRecodingRepository.findByItemIdAndCategoryAndCreatedBy(itemId, category, me)
                 .map(recoding -> {

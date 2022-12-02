@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.member.vo;
 
 import com.jocoos.mybeautip.support.LocalDateTimeUtils;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -14,6 +11,7 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.LOCAL_D
 @Getter
 @Builder
 @NoArgsConstructor
+@EqualsAndHashCode
 @AllArgsConstructor
 public class Birthday {
     private LocalDate birthday;

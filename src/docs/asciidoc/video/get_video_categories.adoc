@@ -1,0 +1,3 @@
+== Get Video Categories API
+
+operation::get_video_categories[snippets='http-request,http-response,response-fields']

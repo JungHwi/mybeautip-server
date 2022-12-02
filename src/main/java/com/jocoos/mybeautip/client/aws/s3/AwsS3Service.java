@@ -1,11 +1,12 @@
 package com.jocoos.mybeautip.client.aws.s3;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.jocoos.mybeautip.global.config.aws.AwsCredentialService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.exception.S3UrlUploadException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 @Slf4j
@@ -42,8 +44,6 @@ public class AwsS3Service {
             metadata.setContentType(file.getContentType());
 
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
-            putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
-
             result = s3Client.putObject(putObjectRequest);
         } catch (IOException ex) {
             throw new RuntimeException("File Upload ERROR");
@@ -71,15 +71,20 @@ public class AwsS3Service {
 
             closeConnection(conn, inputStream);
             return key;
-        } catch (IOException | SdkClientException e) {
-            log.info("{} Cause At Avatar Url Upload, Request URL : {}", e.getClass().getName(), urlString);
-            throw new S3UrlUploadException(e);
+        } catch (MalformedURLException e) {
+            throw new BadRequestException(ErrorCode.BAD_REQUEST, "wrong url : " + urlString);
+        } catch (IOException e) {
+            //TODO Exception 정의
+            throw new RuntimeException("File Upload ERROR", e);
+        } catch (AmazonServiceException e) {
+            throw new RuntimeException("AWS S3 ERROR!! - UPLOAD" , e);
+        } catch (SdkClientException e) {
+            throw new RuntimeException("sdk client exception - upload" , e);
         }
     }
 
     public String copy(String sourceKey, String destinationKey) {
         CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
-        copyObjectRequest.withCannedAccessControlList(CannedAccessControlList.PublicRead);
 
         return copy(copyObjectRequest);
     }
@@ -100,7 +105,7 @@ public class AwsS3Service {
 
             delete(copyObjectRequest.getSourceKey());
         } catch (AmazonS3Exception ex) {
-            throw new BadRequestException("s3_error", ex.getErrorMessage());
+            throw new BadRequestException(ErrorCode.S3_ERROR, ex.getErrorMessage());
         }
 
         return copyObjectRequest.getDestinationKey();
@@ -122,9 +127,7 @@ public class AwsS3Service {
     }
 
     private PutObjectRequest getPutObjectRequest(String key, InputStream inputStream, ObjectMetadata metadata) {
-        PutObjectRequest request = new PutObjectRequest(bucketName, key, inputStream, metadata);
-        request.setCannedAcl(CannedAccessControlList.PublicRead);
-        return request;
+        return new PutObjectRequest(bucketName, key, inputStream, metadata);
     }
 
     private void closeConnection(HttpURLConnection conn, InputStream inputStream) throws IOException {

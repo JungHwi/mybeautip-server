@@ -20,11 +20,11 @@ public class CommunityCommentReportDao {
     private final CommunityCommentReportRepository repository;
 
     @Transactional
-    public CommunityCommentReport report(long memberId, long commentId, ReportRequest reportRequest) {
-        CommunityCommentReport report = getReport(memberId, commentId);
+    public CommunityCommentReport report(long memberId, long reportedId, long commentId, ReportRequest reportRequest) {
+        CommunityCommentReport report = getReport(memberId, reportedId, commentId);
 
         if (report.isReport()) {
-            throw new BadRequestException("already_report", "Already report. Id is " + commentId);
+            throw new BadRequestException("Already report. Id is " + commentId);
         }
 
         if (report.isReport() == reportRequest.getIsReport()) {
@@ -40,9 +40,9 @@ public class CommunityCommentReportDao {
     }
 
     @Transactional(readOnly = true)
-    public CommunityCommentReport getReport(long memberId, long commentId) {
+    public CommunityCommentReport getReport(long memberId, long reportedId, long commentId) {
         return repository.findByMemberIdAndCommentId(memberId, commentId)
-                .orElse(new CommunityCommentReport(memberId, commentId));
+                .orElse(new CommunityCommentReport(memberId, reportedId, commentId));
     }
 
     @Transactional(readOnly = true)

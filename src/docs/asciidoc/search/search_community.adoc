@@ -1,0 +1,3 @@
+== Search Community API
+
+operation::search_community[snippets='http-request,request-parameters,http-response,response-fields']

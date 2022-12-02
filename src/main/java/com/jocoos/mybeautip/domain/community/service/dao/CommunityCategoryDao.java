@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class CommunityCategoryDao {
     @Transactional(readOnly = true)
     public CommunityCategory getCommunityCategory(Long communityCategoryId) {
         return repository.findById(communityCategoryId)
-                .orElseThrow(() -> new BadRequestException("no_such_category", "No such category. id - " + communityCategoryId));
+                .orElseThrow(() -> new BadRequestException("No such category. id - " + communityCategoryId));
     }
 
     @Transactional(readOnly = true)
@@ -32,10 +33,27 @@ public class CommunityCategoryDao {
     public List<CommunityCategory> getCategoryForSearchCommunity(Long communityCategoryId) {
         CommunityCategory category = getCommunityCategory(communityCategoryId);
 
-        if (category.getType() == CommunityCategoryType.TOTAL) {
-            return repository.findAllByParentId(category.getId());
+        if (category.getType() == CommunityCategoryType.GROUP) {
+            return repository.findAllByParentId(category.getParentId());
         } else {
             return Collections.singletonList(category);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityCategory> topSummaryCategories() {
+        return repository.findAllByIsInSummaryIsTrue();
+    }
+
+    @Transactional(readOnly = true)
+    public CommunityCategory getByType(CommunityCategoryType type) {
+        return repository.findByType(type).orElseThrow(
+                () -> new BadRequestException("No such category. type - " + type)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommunityCategory> getAllExcludeByTypes(Set<CommunityCategoryType> types) {
+        return repository.findAllByTypeNotInAndParentIdIsNotNull(types);
     }
 }

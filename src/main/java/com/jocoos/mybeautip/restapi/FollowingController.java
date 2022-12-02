@@ -54,7 +54,7 @@ public class FollowingController {
                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member me = legacyMemberService.currentMember();
         if (me.getId().equals(followingMemberRequest.getMemberId())) {
-            throw new BadRequestException("following_bad_request", messageService.getMessage(MEMBER_FOLLOWING_BAD_REQUEST, lang));
+            throw new BadRequestException(messageService.getMessage(MEMBER_FOLLOWING_BAD_REQUEST, lang));
         }
 
         Member you = memberRepository.findByIdAndDeletedAtIsNull(followingMemberRequest.getMemberId())
@@ -73,10 +73,10 @@ public class FollowingController {
                                @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member me = legacyMemberService.currentMember();
         Following following = followingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("following_not_found", messageService.getMessage(FOLLOWING_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(FOLLOWING_NOT_FOUND, lang)));
 
         if (!me.equals(following.getMemberMe())) {
-            throw new BadRequestException("following_not_found", messageService.getMessage(FOLLOWING_NOT_FOUND, lang));
+            throw new BadRequestException(messageService.getMessage(FOLLOWING_NOT_FOUND, lang));
         }
 
         legacyMemberService.unFollowMember(following);

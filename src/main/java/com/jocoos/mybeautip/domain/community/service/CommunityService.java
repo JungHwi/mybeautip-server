@@ -1,8 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
-import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
-import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
@@ -12,9 +10,10 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityReportDao;
+import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.event.service.EventJoinService;
-import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
@@ -22,24 +21,22 @@ import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.block.Block;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.GET_LIKE_COMMUNITY;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_COMMUNITY_TYPES;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 
 
 @Slf4j
@@ -47,95 +44,54 @@ import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.val
 @RequiredArgsConstructor
 public class CommunityService {
 
-    private final CommunityRelationService relationService;
     private final EventJoinService eventJoinService;
-
     private final ActivityPointService activityPointService;
     private final LegacyMemberService legacyMemberService;
-
     private final CommunityCategoryDao categoryDao;
     private final CommunityDao communityDao;
     private final CommunityLikeDao likeDao;
     private final CommunityReportDao reportDao;
-
-    private final CommunityConverter converter;
+    private final MemberActivityCountDao activityCountDao;
+    private final CommunityConvertService convertService;
     private final AwsS3Handler awsS3Handler;
-    private final MemberBlockDao memberBlockDao;
+    private final CommunityCommentDeleteService commentDeleteService;
 
     @Transactional
     public CommunityResponse write(WriteCommunityRequest request) {
-        request.setMember(legacyMemberService.currentMember());
+        Member member = legacyMemberService.currentMember();
+        request.setMember(member);
         Community community = communityDao.write(request);
 
         awsS3Handler.copy(request.getFiles(), UrlDirectory.COMMUNITY.getDirectory(community.getId()));
 
-        if (community.getCategory().getType() == CommunityCategoryType.DRIP) {
+        if (community.getCategory().getType() == DRIP) {
             eventJoinService.join(community.getEventId(), request.getMember().getId());
         }
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_TYPES,
-                                               validDomainAndReceiver(community, community.getId(), community.getMember()));
+                validDomainAndReceiver(community, community.getId(), community.getMember()));
+        activityCountDao.updateAllCommunityCount(member, 1);
 
-        return getCommunity(community.getMember(), community);
+        return convertService.toResponse(community.getMember(), community);
     }
 
     @Transactional()
     public CommunityResponse getCommunity(long communityId) {
-        Community community = communityDao.get(communityId);
-
-        Member member = legacyMemberService.currentMember();
-
         communityDao.readCount(communityId);
 
-        return getCommunity(member, community);
-    }
+        Community community = communityDao.get(communityId);
+        Member member = legacyMemberService.currentMember();
 
-    private CommunityResponse getCommunity(Member member, Community community) {
-        CommunityResponse response = converter.convert(community);
-        return relationService.setRelationInfo(member, response);
+        validCategoryBlindLogin(community.getCategory(), member);
+
+        return convertService.toResponse(member, community);
     }
 
     @Transactional(readOnly = true)
     public List<CommunityResponse> getCommunities(SearchCommunityRequest request, Pageable pageable) {
-        Member member = legacyMemberService.currentMember();
-        request.setMember(member);
-
-        List<Long> blocks;
-        if (member != null) {
-            blocks = memberBlockDao.findAllMyBlock(member.getId())
-                    .stream()
-                    .map(Block::getYouId)
-                    .collect(Collectors.toList());
-        } else {
-            blocks = new ArrayList<>();
-        }
-
-        // FIXME Dynamic Query to QueryDSL
-        List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
-        List<Community> communityList = new ArrayList<>();
-        List<Community> winList = new ArrayList<>();
-        List<Community> loseList = new ArrayList<>();
-
-        if (categories.size() == 1) {
-            CommunityCategory category = categories.get(0);
-            if (category.getType() == CommunityCategoryType.DRIP) {
-                if (request.getEventId() == null || request.getEventId() < NumberUtils.LONG_ONE) {
-                    throw new BadRequestException("need_event_info", "event_id is required to search DRIP category.");
-                }
-                if (request.isFirstSearch()) {
-                    winList = communityDao.getCommunityForEvent(request.getEventId(), categories, true, request.getCursor(), pageable, blocks);
-                }
-                loseList = communityDao.getCommunityForEvent(request.getEventId(), categories, null, request.getCursor(), pageable, blocks);
-                communityList = Stream.concat(winList.stream(), loseList.stream())
-                        .collect(Collectors.toList());
-            } else {
-                communityList = communityDao.get(categories, request.getCursor(), blocks, pageable);
-            }
-        } else {
-            communityList = communityDao.get(categories, request.getCursor(), blocks, pageable);
-        }
-
-        return getCommunity(request.getMember(), communityList);
+        CommunitySearchCondition condition = createSearchCondition(request);
+        List<Community> communities = communityDao.getCommunities(condition, pageable);
+        return convertService.toResponse(legacyMemberService.currentMember(), communities);
     }
 
     @Transactional(readOnly = true)
@@ -143,18 +99,13 @@ public class CommunityService {
         Member member = legacyMemberService.currentMember();
 
         List<Community> communityList = communityDao.get(member.getId(), cursor, pageable);
-        List<MyCommunityResponse> communityResponses = converter.convertToMyCommunity(communityList);
+        List<MyCommunityResponse> communityResponses = convertService.toMyCommunityResponse(communityList);
 
         for (MyCommunityResponse response : communityResponses) {
             response.changeContents();
         }
 
         return communityResponses;
-    }
-
-    private List<CommunityResponse> getCommunity(Member member, List<Community> communities) {
-        List<CommunityResponse> responses = converter.convert(communities);
-        return relationService.setRelationInfo(member, responses);
     }
 
     public List<String> upload(List<MultipartFile> files) {
@@ -167,12 +118,15 @@ public class CommunityService {
         Community community = communityDao.get(communityId);
 
         if (!community.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("access_denied", "This is not yours.");
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
         }
 
         community.delete();
+        commentDeleteService.delete(community.getId());
+
         activityPointService.retrieveActivityPoint(WRITE_COMMUNITY_TYPES,
-                                                   validDomainAndReceiver(community, community.getId(), member));
+                validDomainAndReceiver(community, community.getId(), member));
+        activityCountDao.updateNormalCommunityCount(member, -1);
     }
 
     @Transactional
@@ -181,16 +135,14 @@ public class CommunityService {
         Community community = communityDao.get(request.getCommunityId());
 
         if (!community.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("access_denied", "This is not yours.");
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
         }
 
         community.setTitle(request.getTitle());
         community.setContents(request.getContents());
         editFiles(community, request.getFiles());
 
-        communityDao.save(community);
-
-        return getCommunity(community.getMember(), community);
+        return convertService.toResponse(community.getMember(), community);
     }
 
     @Transactional
@@ -215,11 +167,12 @@ public class CommunityService {
 
     @Transactional
     public ReportResponse report(long memberId, long communityId, ReportRequest reportRequest) {
-        CommunityReport report = reportDao.report(memberId, communityId, reportRequest);
 
         Community community = communityDao.get(communityId);
+        CommunityReport report = reportDao.report(memberId, community.getMemberId(), communityId, reportRequest);
+
         if (community.getMemberId().equals(memberId)) {
-            throw new BadRequestException("community_i_wrote", "this is my community.");
+            throw new BadRequestException("this is my community.");
         }
 
         return ReportResponse.builder()
@@ -242,7 +195,7 @@ public class CommunityService {
 
     @Transactional
     public void editFiles(Community community, List<FileDto> fileDtoList) {
-        if (CollectionUtils.isEmpty(fileDtoList)) {
+        if (CollectionUtils.isEmpty(fileDtoList) || community.isVoteAndIncludeFile(fileDtoList.size())) {
             return;
         }
 
@@ -258,5 +211,22 @@ public class CommunityService {
         }
 
         awsS3Handler.editFiles(fileDtoList, UrlDirectory.COMMUNITY.getDirectory(community.getId()));
+    }
+
+    private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
+        List<CommunityCategory> categories = categoryDao.getCategoryForSearchCommunity(request.getCategoryId());
+        Long memberId = legacyMemberService.currentMemberId();
+        return CommunitySearchCondition.builder()
+                .eventId(request.getEventId())
+                .cursor(request.getCursor())
+                .categories(categories)
+                .memberId(memberId)
+                .build();
+    }
+
+    private void validCategoryBlindLogin(CommunityCategory category, Member member) {
+        if (member == null && BLIND.equals(category.getType())) {
+            throw new AccessDeniedException("need login");
+        }
     }
 }

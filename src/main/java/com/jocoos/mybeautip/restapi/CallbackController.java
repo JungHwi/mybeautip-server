@@ -3,12 +3,12 @@ package com.jocoos.mybeautip.restapi;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.video.*;
-
+import com.jocoos.mybeautip.video.LegacyVideoService;
+import com.jocoos.mybeautip.video.Video;
+import com.jocoos.mybeautip.video.VideoUpdateService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,7 @@ public class CallbackController {
     private static final String LIVE_NOT_ALLOWED = "video.live_not_allowed";
     private static final String MOTD_UPLOAD_NOT_ALLOWED = "video.motd_upload_not_allowed";
 
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final MessageService messageService;
     private final VideoUpdateService videoUpdateService;
 
@@ -46,7 +46,7 @@ public class CallbackController {
         log.info("callback startVideo: {}", video);
 
         if (video == null) {
-            throw new BadRequestException("bad_request", "video info in callback required");
+            throw new BadRequestException("video info in callback required");
         }
 
         try {
@@ -65,15 +65,15 @@ public class CallbackController {
         CallbackUpdateVideoRequest video = request.getVideo();
 
         if (video == null) {
-            throw new BadRequestException("bad_request", "video info in callback required");
+            throw new BadRequestException("video info in callback required");
         }
 
         try {
             videoUpdateService.updated(video);
         } catch (BadRequestException e) {
-            throw new BadRequestException("video_locked", messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
+            throw new BadRequestException(messageService.getMessage(VIDEO_LOCKED, Locale.KOREAN));
         } catch (MemberNotFoundException e) {
-            throw new MemberNotFoundException("invalid_user_id", "Invalid user_id: " + video.getUserId());
+            throw new MemberNotFoundException("Invalid user_id: " + video.getUserId());
         }
 
         return new ResponseEntity(HttpStatus.OK);
@@ -82,7 +82,7 @@ public class CallbackController {
     @DeleteMapping
     public Video deleteVideo(@Valid @RequestBody CallbackDeleteVideoRequest request) {
         log.info("deleteVideo {}", request.toString());
-        return videoService.deleteVideo(request.getUserId(), request.getVideoKey());
+        return legacyVideoService.deleteVideo(request.getUserId(), request.getVideoKey());
     }
 
     @Data

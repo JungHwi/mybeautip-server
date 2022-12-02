@@ -13,10 +13,15 @@ public class CommunityRelationInfo {
     private Boolean isLike;
     private Boolean isReport;
     private Boolean isBlock;
+    private Boolean isScrap;
 
     public CommunityRelationInfo() {
         this.isLike = false;
         this.isReport = false;
         this.isBlock = false;
+    }
+
+    public static CommunityRelationInfo withIsScrap() {
+        return new CommunityRelationInfo(false, false, false, false);
     }
 }

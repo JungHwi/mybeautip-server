@@ -10,7 +10,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunityRelationInfo;
-import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberBlockDao;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.block.Block;
 import lombok.RequiredArgsConstructor;
@@ -50,16 +50,19 @@ public class CommunityCommentRelationService {
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> setRelationInfo(Member member, List<CommunityCommentResponse> communityCommentResponses) {
         CommunityRelationInfo relationInfo = new CommunityRelationInfo();
-        if (member == null) {
-            for (CommunityCommentResponse communityCommentResponse : communityCommentResponses) {
-                communityCommentResponse.setRelationInfo(relationInfo);
-            }
-            return communityCommentResponses;
-        }
 
         List<Long> categoryIds = communityCommentResponses.stream()
                 .map(CommunityCommentResponse::getCategoryId)
                 .collect(Collectors.toList());
+
+        Map<Long, CommunityCategoryType> categoryTypeMap = getCategoryMap(communityCommentResponses, categoryIds);
+
+        if (member == null) {
+            for (CommunityCommentResponse communityCommentResponse : communityCommentResponses) {
+                communityCommentResponse.setRelationInfo(relationInfo, categoryTypeMap.get(communityCommentResponse.getId()));
+            }
+            return communityCommentResponses;
+        }
 
         List<Long> commentIds = communityCommentResponses.stream()
                 .map(CommunityCommentResponse::getId)
@@ -71,7 +74,6 @@ public class CommunityCommentRelationService {
                 .map(CommunityMemberResponse::getId)
                 .collect(Collectors.toList());
 
-        Map<Long, CommunityCategoryType> categoryTypeMap = getCategoryMap(communityCommentResponses, categoryIds);
         Map<Long, CommunityCommentLike> likeMap = getLikeMap(member.getId(), commentIds);
         Map<Long, CommunityCommentReport> reportMap = getReportMap(member.getId(), commentIds);
         Map<Long, Block> blockMap = getBlockMap(member.getId(), writerIds);

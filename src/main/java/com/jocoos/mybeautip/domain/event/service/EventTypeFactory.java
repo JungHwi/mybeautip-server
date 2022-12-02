@@ -29,7 +29,7 @@ public class EventTypeFactory {
             case DRIP:
                 return dripEventService;
             default:
-                throw new BadRequestException("not_support_event", "Not support event. type is " + eventType);
+                throw new BadRequestException("Not support event. type is " + eventType);
         }
     }
 }

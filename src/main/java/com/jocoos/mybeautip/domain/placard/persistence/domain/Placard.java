@@ -25,6 +25,9 @@ public class Placard extends CreatedDateAuditable {
     private Long id;
 
     @Column
+    private String title;
+
+    @Column
     @Enumerated(EnumType.STRING)
     private PlacardStatus status;
 
@@ -37,6 +40,9 @@ public class Placard extends CreatedDateAuditable {
 
     @Column
     private String description;
+
+    @Column
+    private String color;
 
     @Column(nullable = false, columnDefinition="TIMESTAMP")
     private ZonedDateTime startedAt;

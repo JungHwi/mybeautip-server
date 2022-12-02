@@ -6,14 +6,14 @@ spring:
   datasource:
     master:
       hikari:
-        username: mybeautip_service
-        password: akdlqbxlq#1@Jocoos
-        jdbc-url: jdbc:mysql://mybeautip-dev.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+        username: mybeautipdevsrv
+        password: mybeautipdevsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-dev.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
     slave:
       hikari:
-        username: mybeautip_service
-        password: akdlqbxlq#1@Jocoos
-        jdbc-url: jdbc:mysql://mybeautip-dev.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+        username: mybeautipdevsrv
+        password: mybeautipdevsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-dev.cluster-ro-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:23306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
 mybeautip:
   store:
     image-path:
@@ -27,7 +27,11 @@ mybeautip:
     order-key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
     order-channel: "#mybeautip-dev"
 
+#redis:
+#  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
+#  port: 6379
+
 logging:
-  config: classpath:log/log4j2-file.yml
+  config: classpath:log/log4j2-console.yml
 
 

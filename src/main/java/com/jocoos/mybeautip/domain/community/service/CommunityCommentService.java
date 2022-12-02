@@ -10,23 +10,21 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentLikeDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
-import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.block.Block;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
@@ -36,33 +34,21 @@ import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.val
 public class CommunityCommentService {
 
     private final CommunityCommentRelationService relationService;
-
     private final CommunityDao communityDao;
     private final CommunityCommentDao dao;
     private final CommunityCommentLikeDao likeDao;
     private final CommunityCommentReportDao reportDao;
     private final LegacyMemberService legacyMemberService;
-
+    private final MemberActivityCountDao activityCountDao;
     private final ActivityPointService activityPointService;
-
+    private final CommunityCommentDeleteService deleteService;
     private final CommunityCommentConverter converter;
-    private final MemberBlockDao memberBlockDao;
 
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
         Member member = legacyMemberService.currentMember();
-
-        List<Long> blocks;
-        if (member != null) {
-            blocks = memberBlockDao.findAllMyBlock(member.getId())
-                    .stream()
-                    .map(Block::getYouId)
-                    .collect(Collectors.toList());
-        } else {
-            blocks = new ArrayList<>();
-        }
-
-        List<CommunityComment> communityComments = dao.getComments(request, blocks);
+        request.setMemberId(member != null ? member.getId() : null);
+        List<CommunityComment> communityComments = dao.getComments(request);
 
         return getComments(member, communityComments);
     }
@@ -120,7 +106,7 @@ public class CommunityCommentService {
 
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
                                                validDomainAndReceiver(communityComment, communityComment.getId(), member));
-
+        activityCountDao.updateAllCommunityCommentCount(member, 1);
         return relationService.setRelationInfo(member, response);
     }
 
@@ -135,7 +121,7 @@ public class CommunityCommentService {
     public void validReply(WriteCommunityCommentRequest request) {
         CommunityComment parentComment = dao.get(request.getParentId());
         if (!request.getCommunityId().equals(parentComment.getCommunityId())) {
-            throw new BadRequestException("not_match_community", "Not matched Community Info. Parent comment's community id - " + parentComment.getCommunityId());
+            throw new BadRequestException("Not matched Community Info. Parent comment's community id - " + parentComment.getCommunityId());
         }
     }
 
@@ -145,7 +131,7 @@ public class CommunityCommentService {
         CommunityComment communityComment = dao.get(request.getCommunityId(), request.getCommentId());
 
         if (!communityComment.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("access_denied", "This is not yours.");
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
         }
 
         communityComment.setContents(request.getContents());
@@ -166,10 +152,10 @@ public class CommunityCommentService {
         CommunityComment communityComment = dao.get(communityId, commentId);
 
         if (!communityComment.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException("access_denied", "This is not yours.");
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
         }
 
-        communityComment.delete();
+        deleteService.delete(communityComment);
         activityPointService.retrieveActivityPoint(DELETE_COMMUNITY_COMMENT, communityComment.getId(), member);
     }
 
@@ -199,8 +185,9 @@ public class CommunityCommentService {
     public ReportResponse report(long commentId, ReportRequest report) {
         long memberId = legacyMemberService.currentMemberId();
 
-        reportDao.report(memberId, commentId, report);
         CommunityComment comment = dao.get(commentId);
+        reportDao.report(memberId, comment.getMemberId(), commentId, report);
+
         if (comment.getMemberId() == memberId) {
             throw new BadRequestException("this is my comment.");
         }

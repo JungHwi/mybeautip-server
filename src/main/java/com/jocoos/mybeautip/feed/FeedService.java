@@ -14,20 +14,17 @@ public class FeedService {
     private static final String MEMBER_KEY = "member:%s";
     private static final String FEED_KEY = "feed:%s";
 
-//    private final JedisPool jedisPool;
+//    private final JedisCluster jedis;
     private final FollowingRepository followingRepository;
     private final VideoRepository videoRepository;
-    
 
 //    public List<Video> getVideoKeys(Long memberId, String cursor, int count) {
 //        String key = String.format(FEED_KEY, memberId);
-//        Jedis jedis = null;
 //        log.debug("memberId: {}, cursor: {}, count: {}", memberId, cursor, count);
 //        List<Video> videos = new ArrayList<>();
 //
 //        try {
-//            jedis = jedisPool.getResource();
-//            Set<Tuple> tuples;
+//            List<Tuple> tuples;
 //            if (StringUtils.isBlank(cursor)) {
 //                tuples = jedis.zrevrangeByScoreWithScores(key, "+inf", "-inf", 0, count);
 //            } else {
@@ -43,13 +40,12 @@ public class FeedService {
 //            }
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
+//                jedis.close();
 //            }
 //        }
 //        return videos;
 //    }
-//
+
 //    @Async
 //    public void feedVideo(Video video) {
 //        Long creator = video.getMember().getId();
@@ -65,30 +61,27 @@ public class FeedService {
 //
 //        addVideoLinkFeed(receives, video);
 //    }
-//
+
 //    public void followMember(Long me, Long follower) {
 //        String followerKey = String.format(MEMBER_KEY, follower);
 //        String myFeedKey = String.format(FEED_KEY, me);
 //        copyVideos(followerKey, myFeedKey);
 //    }
-//
+
 //    private void copyVideos(String followerKey, String myFeedKey) {
-//        Jedis jedis = null;
 //        try {
-//            jedis = jedisPool.getResource();
-//            Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
+//            List<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
 //            for (Tuple t : tuples) {
 //                log.debug("copy videos key: {}, element: {}", t.getScore(), t.getElement());
 //                jedis.zadd(myFeedKey, t.getScore(), t.getElement());
 //            }
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
+//                jedis.close();
 //            }
 //        }
 //    }
-//
+
 //    public void unfollowMember(Long me, Long follower) {
 //        String followerKey = String.format(MEMBER_KEY, follower);
 //        String myFeedKey = String.format(FEED_KEY, me);
@@ -96,23 +89,20 @@ public class FeedService {
 //
 //        removeVideos(followerKey, myFeedKey);
 //    }
-//
+
 //    private void removeVideos(String followerKey, String myFeedKey) {
-//        Jedis jedis = null;
 //        try {
-//            jedis = jedisPool.getResource();
-//            Set<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
+//            List<Tuple> tuples = jedis.zrevrangeByScoreWithScores(followerKey, "+inf", "-inf");
 //            for (Tuple t : tuples) {
 //                jedis.zrem(myFeedKey, t.getElement());
 //            }
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
+//                jedis.close();
 //            }
 //        }
 //    }
-//
+
 //    public void feedDeletedVideo(Long videoId) {
 //        videoRepository.findById(videoId).ifPresent(
 //                v -> {
@@ -133,13 +123,11 @@ public class FeedService {
 //                }
 //        );
 //    }
-//
+
 //    private String removeMyVideoAndGetVideoKey(Long creatorId, String createdAt) {
-//        Jedis jedis = null;
 //        try {
-//            jedis = jedisPool.getResource();
 //            String myVideo = String.format(MEMBER_KEY, creatorId);
-//            Set<Tuple> videos = jedis.zrevrangeByScoreWithScores(myVideo, createdAt, createdAt);
+//            List<Tuple> videos = jedis.zrevrangeByScoreWithScores(myVideo, createdAt, createdAt);
 //            if (videos.size() == 1) {
 //                for (Tuple t : videos) {
 //                    String element = t.getElement();
@@ -150,62 +138,42 @@ public class FeedService {
 //            return null;
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
+//                jedis.close();
 //            }
 //        }
 //    }
-//
+
 //    private void removeFeedVideos(List<String> receives, String videoKey) {
-//        Jedis jedis = null;
 //        try {
-//            jedis = jedisPool.getResource();
 //            for (String key : receives) {
 //                log.debug("key: {}, videoKey: {}", key, videoKey);
 //                jedis.zrem(key, videoKey);
 //            }
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
+//                jedis.close();
 //            }
 //        }
 //    }
-//
+
 //    private void addMyVideo(String key, Video video) {
-//        Jedis jedis = null;
 //        try {
-//            jedis = jedisPool.getResource();
 //            jedis.zadd(key, video.getCreatedAt().getTime(), video.getVideoKey());
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
+//                jedis.close();
 //            }
 //        }
 //    }
-//
+
 //    private void addVideoLinkFeed(List<String> keys, Video video) {
-//        Jedis jedis = null;
 //        try {
-//            jedis = jedisPool.getResource();
 //            for (String key : keys) {
 //                jedis.zadd(key, video.getCreatedAt().getTime(), video.getVideoKey());
 //            }
 //        } finally {
 //            if (jedis != null) {
-//                jedis.disconnect();
-//                close(jedis);
-//            }
-//        }
-//    }
-//
-//    private void close(Closeable... closeables) {
-//        for (Closeable c : closeables) {
-//            try {
-//                c.close();
-//            } catch (IOException e) {
-//                log.error("Cann't close exception", e);
+//                jedis.close();
 //            }
 //        }
 //    }

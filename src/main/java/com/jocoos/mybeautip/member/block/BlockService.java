@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.member.block;
 
-import com.jocoos.mybeautip.domain.member.dao.MemberBlockDao;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberBlockDao;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;

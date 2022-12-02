@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.member;
 
+import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.persistence.repository.MemberCustomRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -11,7 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, Long>, MemberCustomRepository {
 
     List<Member> findByIdIn(Set<Long> ids);
 

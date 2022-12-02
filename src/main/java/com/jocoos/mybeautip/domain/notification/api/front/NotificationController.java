@@ -44,7 +44,6 @@ public class NotificationController {
                 .withCount(size)
                 .withCursor(result.size() > 0 ? String.valueOf(result.get(result.size() - 1).getId()) : null)
                 .toBuild();
-
         return cursorResponse;
     }
 

@@ -46,7 +46,7 @@ public class MailService {
             mailSender.send(mimeMessage);
         } catch (Exception e) {
             log.info("Failed: {}", e.getMessage());
-            throw new BadRequestException("billing_failed_password_reset", "could not send email for password reset");
+            throw new BadRequestException("could not send email for password reset");
         }
     }
 

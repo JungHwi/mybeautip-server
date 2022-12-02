@@ -69,7 +69,7 @@ public class BlockController {
         long you = blockMemberRequest.getMemberId();
 
         if (me == you) {
-            throw new BadRequestException("report_bad_request", messageService.getMessage(MEMBER_REPORT_BAD_REQUEST, lang));
+            throw new BadRequestException(messageService.getMessage(MEMBER_REPORT_BAD_REQUEST, lang));
         }
         log.debug("Block " + me + " : " + you);
 
@@ -86,7 +86,7 @@ public class BlockController {
                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Long me = legacyMemberService.currentMemberId();
         Block block = blockRepository.findByIdAndMe(id, me)
-                .orElseThrow(() -> new NotFoundException("block_not_found", messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(MEMBER_BLOCK_NOT_FOUND, lang)));
         blockService.unblock(block);
     }
 

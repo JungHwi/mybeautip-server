@@ -1,0 +1,3 @@
+== Get Member Reported History API
+
+operation::admin_get_member_report_history[snippets='http-request,path-parameters,response-fields']

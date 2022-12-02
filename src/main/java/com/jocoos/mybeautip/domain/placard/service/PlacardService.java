@@ -1,7 +1,5 @@
 package com.jocoos.mybeautip.domain.placard.service;
 
-import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
-import com.jocoos.mybeautip.domain.placard.code.PlacardTabType;
 import com.jocoos.mybeautip.domain.placard.converter.PlacardConverter;
 import com.jocoos.mybeautip.domain.placard.dto.PlacardResponse;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
@@ -11,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.placard.code.PlacardStatus.ACTIVE;
+import static com.jocoos.mybeautip.domain.placard.code.PlacardTabType.HOME;
+
 @Service
 @RequiredArgsConstructor
 public class PlacardService {
@@ -19,9 +20,8 @@ public class PlacardService {
 
     private final PlacardConverter placardConverter;
 
-    public List<PlacardResponse> getPlacardList(PlacardTabType tabType) {
-        List<Placard> placardList = placardRepository.findByActivePlacard(PlacardStatus.ACTIVE, tabType);
-
-        return placardConverter.convertToResponse(placardList, tabType);
+    public List<PlacardResponse> getPlacardList() {
+        List<Placard> placardList = placardRepository.findByActivePlacard(ACTIVE, HOME);
+        return placardConverter.convertToResponse(placardList, HOME);
     }
 }

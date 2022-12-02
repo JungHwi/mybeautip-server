@@ -22,18 +22,18 @@ import java.util.stream.Collectors;
 public class VideoRelationController {
 
     private static final String VIDEO_NOT_FOUND = "video.not_found";
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final MessageService messageService;
     private final VideoRepository videoRepository;
     private final VideoGoodsRepository videoGoodsRepository;
     private final MotdRecommendationRepository motdRecommendationRepository;
 
-    public VideoRelationController(VideoService videoService,
+    public VideoRelationController(LegacyVideoService legacyVideoService,
                                    MessageService messageService,
                                    VideoRepository videoRepository,
                                    VideoGoodsRepository videoGoodsRepository,
                                    MotdRecommendationRepository motdRecommendationRepository) {
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.messageService = messageService;
         this.videoRepository = videoRepository;
         this.videoGoodsRepository = videoGoodsRepository;
@@ -48,7 +48,7 @@ public class VideoRelationController {
                                             @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 
         Video video = videoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("video_not_found", messageService.getMessage(VIDEO_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(VIDEO_NOT_FOUND, lang)));
 
         PageRequest page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<VideoGoods> videoGoods = videoGoodsRepository.findAllByVideoId(video.getId());
@@ -106,10 +106,10 @@ public class VideoRelationController {
     }
 
     private CursorResponse createResponse(List<Video> list, Long id, int count, String cursor) {
-        List<VideoController.VideoInfo> videos = new ArrayList<>();
+        List<LegacyVideoController.VideoInfo> videos = new ArrayList<>();
         Collections.sort(list, (Video o1, Video o2) -> o2.getId().compareTo(o1.getId()));
 
-        list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+        list.stream().forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
 
         String nextCursor = null;
         if (videos.size() > 0) {

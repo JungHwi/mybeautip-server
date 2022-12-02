@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.godo.GoodsDetailService;
 import com.jocoos.mybeautip.goods.*;
@@ -9,9 +10,9 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.search.KeywordService;
+import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.VideoGoods;
 import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.VideoService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class GoodsController {
             = Arrays.asList("like", "order", "hit", "review", "high-price", "low-price", "latest");
     private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final GoodsOptionService goodsOptionService;
     private final MessageService messageService;
     private final GoodsRepository goodsRepository;
@@ -57,7 +58,7 @@ public class GoodsController {
 
     public GoodsController(LegacyMemberService legacyMemberService,
                            GoodsService goodsService,
-                           VideoService videoService,
+                           LegacyVideoService legacyVideoService,
                            GoodsOptionService goodsOptionService,
                            MessageService messageService,
                            GoodsRepository goodsRepository,
@@ -67,7 +68,7 @@ public class GoodsController {
                            KeywordService keywordService) {
         this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.goodsOptionService = goodsOptionService;
         this.messageService = messageService;
         this.goodsRepository = goodsRepository;
@@ -88,17 +89,17 @@ public class GoodsController {
             count = 100;
         }
         if (keyword != null && keyword.length() > 255) {
-            throw new BadRequestException("invalid_keyword", "Valid keyword size is between 1 to 255.");
+            throw new BadRequestException("Valid keyword size is between 1 to 255.");
         }
         if (category != null && category.length() > 6) {
-            throw new BadRequestException("invalid_category", "Valid category size is between 1 to 6.");
+            throw new BadRequestException("Valid category size is between 1 to 6.");
         }
         if (sort != null && !validSort.contains(sort)) {
-            throw new BadRequestException("invalid_sort", "Valid sort value is one of 'like', 'order', 'hit', 'review', 'high-price', 'low-price' or 'latest'.");
+            throw new BadRequestException("Valid sort value is one of 'like', 'order', 'hit', 'review', 'high-price', 'low-price' or 'latest'.");
         }
         if (cursor != null && sort != null && !"latest".equals(sort)) {
             if (cursor > Integer.MAX_VALUE) {
-                throw new BadRequestException("invalid_cursor", "Invalid cursor");
+                throw new BadRequestException("Invalid cursor");
             }
         }
 
@@ -194,7 +195,7 @@ public class GoodsController {
         if (optional.isPresent()) {
             return goodsService.generateGoodsInfo(optional.get(), TimeSaleCondition.createWithBroker(broker));
         } else {
-            throw new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang));
+            throw new NotFoundException(messageService.getMessage(GOODS_NOT_FOUND, lang));
         }
     }
 
@@ -233,7 +234,7 @@ public class GoodsController {
                     response.setTotalMemberCount(memberSet.size());
                     return response;
                 })
-                .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(GOODS_NOT_FOUND, lang)));
     }
 
     @GetMapping("/{goodsNo}/details")
@@ -284,13 +285,13 @@ public class GoodsController {
         return goodsRepository.findByGoodsNo(goodsNo)
                 .map(goods -> {
                     if (goodsLikeRepository.findByGoodsGoodsNoAndCreatedById(goodsNo, memberId).isPresent()) {
-                        throw new BadRequestException("already_liked", messageService.getMessage(ALREADY_LIKED, lang));
+                        throw new BadRequestException(messageService.getMessage(ALREADY_LIKED, lang));
                     }
                     GoodsLike goodsLike = goodsService.addLike(goods);
                     GoodsLikeInfo info = new GoodsLikeInfo(goodsLike, goodsService.generateGoodsInfo(goods, TimeSaleCondition.createWithBroker(broker)));
                     return new ResponseEntity<>(info, HttpStatus.OK);
                 })
-                .orElseThrow(() -> new NotFoundException("goods_not_found", messageService.getMessage(GOODS_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.GOODS_NOT_FOUND, messageService.getMessage(GOODS_NOT_FOUND, lang)));
     }
 
     @DeleteMapping("/{goodsNo:.+}/likes/{likeId:.+}")
@@ -298,7 +299,7 @@ public class GoodsController {
                                              @PathVariable Long likeId,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         GoodsLike like = goodsLikeRepository.findByIdAndGoodsGoodsNoAndCreatedById(likeId, goodsNo, legacyMemberService.currentMemberId())
-                .orElseThrow(() -> new NotFoundException("like_not_found", messageService.getMessage(LIKE_NOT_FOUND, lang)));
+                .orElseThrow(() -> new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang)));
         goodsService.removeLike(like);
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -310,10 +311,10 @@ public class GoodsController {
         PageRequest pageable = of(0, count, Sort.by(Sort.Direction.DESC, "createdAt"));
         Slice<VideoGoods> slice = videoGoodsRepository.findByCreatedAtBeforeAndGoodsGoodsNoAndVideoVisibilityAndVideoDeletedAtIsNullAndVideoStateNot(
                 startCursor, goodsNo, "PUBLIC", "CREATED", pageable);
-        List<VideoController.VideoInfo> result = new ArrayList<>();
+        List<LegacyVideoController.VideoInfo> result = new ArrayList<>();
 
         for (VideoGoods videoGoods : slice.getContent()) {
-            result.add(videoService.generateVideoInfo(videoGoods.getVideo()));
+            result.add(legacyVideoService.generateVideoInfo(videoGoods.getVideo()));
         }
 
         String nextCursor = null;

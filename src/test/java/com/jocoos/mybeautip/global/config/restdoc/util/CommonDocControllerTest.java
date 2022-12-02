@@ -56,6 +56,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("FileOperationType")),
                                 enumConvertFieldDescriptor((enumDocs.getFileOperationType()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.sort_field").withSubsectionId("sort_field"),
+                                attributes(key("title").value("SortField")),
+                                enumConvertFieldDescriptor((enumDocs.getSortField()))
+                        ),
                         // Member
                         customResponseFields("custom-response", beneathPath("data.member_status").withSubsectionId("member_status"),
                                 attributes(key("title").value("MemberStatus")),
@@ -68,6 +72,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         customResponseFields("custom-response", beneathPath("data.skin_worry").withSubsectionId("skin_worry"),
                                 attributes(key("title").value("SkinWorry")),
                                 enumConvertFieldDescriptor((enumDocs.getSkinWorry()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.grant_type").withSubsectionId("grant_type"),
+                                attributes(key("title").value("GrantType")),
+                                enumConvertFieldDescriptor((enumDocs.getGrantType()))
                         ),
                         // Event
                         customResponseFields("custom-response", beneathPath("data.event_status").withSubsectionId("event_status"),
@@ -94,6 +102,15 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         customResponseFields("custom-response", beneathPath("data.community_status").withSubsectionId("community_status"),
                                 attributes(key("title").value("CommunityStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getCommunityStatus()))
+                        ),
+                        // Video
+                        customResponseFields("custom-response", beneathPath("data.video_category_type").withSubsectionId("video_category_type"),
+                                attributes(key("title").value("VideoCategoryType")),
+                                enumConvertFieldDescriptor((enumDocs.getVideoCategoryType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.video_mask_type").withSubsectionId("video_mask_type"),
+                                attributes(key("title").value("VideoMaskType")),
+                                enumConvertFieldDescriptor((enumDocs.getVideoMaskType()))
                         ),
                         // Notification
                         customResponseFields("custom-response", beneathPath("data.notification_link_type").withSubsectionId("notification_link_type"),
@@ -163,9 +180,19 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("PopupStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getPopupStatus()))
                         ),
+                        // TERM
                         customResponseFields("custom-response", beneathPath("data.term_type").withSubsectionId("term_type"),
                                 attributes(key("title").value("TermType")),
-                                enumConvertFieldDescriptor((enumDocs.getTermType())))
+                                enumConvertFieldDescriptor((enumDocs.getTermType()))
+                        ),
+                        // SEARCH
+                        customResponseFields("custom-response", beneathPath("data.search_type").withSubsectionId("search_type"),
+                                attributes(key("title").value("SearchType")),
+                                enumConvertFieldDescriptor((enumDocs.getSearchType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.placard_link_type").withSubsectionId("placard_link_type"),
+                                attributes(key("title").value("PlacardLinkType")),
+                                enumConvertFieldDescriptor((enumDocs.getPlacardLinkType())))
                 ));
     }
 

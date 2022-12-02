@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
-import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -17,14 +16,12 @@ import com.jocoos.mybeautip.member.mention.MentionService;
 import com.jocoos.mybeautip.member.revenue.*;
 import com.jocoos.mybeautip.notification.LegacyNotificationService;
 import com.jocoos.mybeautip.notification.MessageService;
-import com.jocoos.mybeautip.post.PostLike;
-import com.jocoos.mybeautip.post.PostLikeRepository;
 import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.store.StoreLike;
 import com.jocoos.mybeautip.store.StoreLikeRepository;
 import com.jocoos.mybeautip.video.*;
+import com.jocoos.mybeautip.video.scrap.LegacyVideoScrapService;
 import com.jocoos.mybeautip.video.scrap.VideoScrap;
-import com.jocoos.mybeautip.video.scrap.VideoScrapService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,7 +42,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.security.Principal;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -61,7 +57,7 @@ public class LegacyMemberController {
     private static final String MEMBER_NOT_FOUND = "member.not_found";
     private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
-    private final VideoService videoService;
+    private final LegacyVideoService legacyVideoService;
     private final PostProcessService postProcessService;
     private final MessageService messageService;
     private final MentionService mentionService;
@@ -69,7 +65,7 @@ public class LegacyMemberController {
     private final LegacyNotificationService legacyNotificationService;
     private final MemberRepository memberRepository;
     private final FollowingRepository followingRepository;
-    private final PostLikeRepository postLikeRepository;
+    //    private final PostLikeRepository postLikeRepository;
     private final GoodsLikeRepository goodsLikeRepository;
     private final StoreLikeRepository storeLikeRepository;
     private final VideoLikeRepository videoLikeRepository;
@@ -77,11 +73,9 @@ public class LegacyMemberController {
     private final CommentLikeRepository commentLikeRepository;
     private final RevenueRepository revenueRepository;
     private final RevenuePaymentRepository revenuePaymentRepository;
-    private final VideoScrapService videoScrapService;
+    private final LegacyVideoScrapService legacyVideoScrapService;
     private final CommentService commentService;
-
     private final MemberTermService memberTermService;
-
 
 
     @Value("${mybeautip.store.image-path.domain}")
@@ -99,10 +93,10 @@ public class LegacyMemberController {
 
     public LegacyMemberController(LegacyMemberService legacyMemberService,
                                   GoodsService goodsService,
-                                  VideoService videoService,
+                                  LegacyVideoService legacyVideoService,
                                   MemberRepository memberRepository,
                                   FollowingRepository followingRepository,
-                                  PostLikeRepository postLikeRepository,
+//                                  PostLikeRepository postLikeRepository,
                                   GoodsLikeRepository goodsLikeRepository,
                                   StoreLikeRepository storeLikeRepository,
                                   VideoLikeRepository videoLikeRepository,
@@ -115,15 +109,15 @@ public class LegacyMemberController {
                                   KeywordService keywordService,
                                   LegacyNotificationService legacyNotificationService,
                                   RevenuePaymentRepository revenuePaymentRepository,
-                                  VideoScrapService videoScrapService,
+                                  LegacyVideoScrapService legacyVideoScrapService,
                                   CommentService commentService,
                                   MemberTermService memberTermService) {
         this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
-        this.videoService = videoService;
+        this.legacyVideoService = legacyVideoService;
         this.memberRepository = memberRepository;
         this.followingRepository = followingRepository;
-        this.postLikeRepository = postLikeRepository;
+//        this.postLikeRepository = postLikeRepository;
         this.goodsLikeRepository = goodsLikeRepository;
         this.storeLikeRepository = storeLikeRepository;
         this.videoLikeRepository = videoLikeRepository;
@@ -136,22 +130,16 @@ public class LegacyMemberController {
         this.keywordService = keywordService;
         this.legacyNotificationService = legacyNotificationService;
         this.revenuePaymentRepository = revenuePaymentRepository;
-        this.videoScrapService = videoScrapService;
+        this.legacyVideoScrapService = legacyVideoScrapService;
         this.commentService = commentService;
         this.memberTermService = memberTermService;
     }
 
     @GetMapping("/me")
-    public EntityModel<MemberMeInfo> getMe(Principal principal,
-                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        log.debug("member id: {}", principal.getName());
+    public EntityModel<MemberMeInfo> getMe(@RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        MemberMeInfo memberMeInfo = legacyMemberService.getMyInfo(lang);
 
-        List<TermTypeResponse> termTypeResponses =
-                memberTermService.getOptionalTermAcceptStatus(Long.parseLong(principal.getName()));
-
-        return memberRepository.findByIdAndDeletedAtIsNull(Long.parseLong(principal.getName()))
-                .map(m -> EntityModel.of(new MemberMeInfo(m, pointRatio, revenueRatio, termTypeResponses)))
-                .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+        return EntityModel.of(memberMeInfo);
     }
 
     @PatchMapping()
@@ -164,7 +152,7 @@ public class LegacyMemberController {
 
         if (!member.isVisible()) { // when first called
             if (StringUtils.isEmpty(updateMemberRequest.getUsername())) {
-                throw new BadRequestException("username_required", "Username required.");
+                throw new BadRequestException("Username required.");
             }
         }
 
@@ -289,7 +277,7 @@ public class LegacyMemberController {
         LikeCountResponse response = new LikeCountResponse();
         response.setGoods(goodsLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
         response.setStore(storeLikeRepository.countByCreatedById(legacyMemberService.currentMemberId()));
-        response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(legacyMemberService.currentMemberId()));
+//        response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(legacyMemberService.currentMemberId()));
         response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNullAndStatus(legacyMemberService.currentMemberId(), LIKE));
         return response;
     }
@@ -301,7 +289,7 @@ public class LegacyMemberController {
         LikeCountResponse response = new LikeCountResponse();
         response.setGoods(goodsLikeRepository.countByCreatedById(id));
         response.setStore(storeLikeRepository.countByCreatedById(id));
-        response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(id));
+//        response.setPost(postLikeRepository.countByCreatedByIdAndPostDeletedAtIsNull(id));
         response.setVideo(videoLikeRepository.countByCreatedByIdAndVideoDeletedAtIsNullAndStatus(id, LIKE));
         return response;
     }
@@ -329,9 +317,9 @@ public class LegacyMemberController {
                                       @RequestParam(required = false) String cursor,
                                       @RequestParam(required = false) String type,
                                       @RequestParam(required = false) String state) {
-        Slice<Video> list = videoService.findMyVideos(legacyMemberService.currentMember(), type, state, cursor, count);
-        List<VideoController.VideoInfo> videos = new ArrayList<>();
-        list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+        Slice<Video> list = legacyVideoService.findMyVideos(legacyMemberService.currentMember(), type, state, cursor, count);
+        List<LegacyVideoController.VideoInfo> videos = new ArrayList<>();
+        list.stream().forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
 
         String nextCursor = null;
         if (videos.size() > 0) {
@@ -355,9 +343,9 @@ public class LegacyMemberController {
         Member member = memberRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
-        Slice<Video> list = videoService.findMemberVideos(member, type, state, cursor, count);
-        List<VideoController.VideoInfo> videos = new ArrayList<>();
-        list.stream().forEach(v -> videos.add(videoService.generateVideoInfo(v)));
+        Slice<Video> list = legacyVideoService.findMemberVideos(member, type, state, cursor, count);
+        List<LegacyVideoController.VideoInfo> videos = new ArrayList<>();
+        list.stream().forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
 
         String nextCursor = null;
         if (videos.size() > 0) {
@@ -555,7 +543,7 @@ public class LegacyMemberController {
                                             @RequestParam(defaultValue = "100") int count,
                                             @RequestParam(defaultValue = "0") long cursor) {
         RevenuePayment revenuePayment = revenuePaymentRepository.findById(revenuePaymentId)
-                .orElseThrow(() -> new NotFoundException("revenue_payment_not_found", "RevenuePayment not found: " + revenuePaymentId));
+                .orElseThrow(() -> new NotFoundException("RevenuePayment not found: " + revenuePaymentId));
 
         PageRequest pageable = PageRequest.of(0, count, Sort.by("id").ascending());
         Slice<Revenue> list = revenueRepository.findByRevenuePaymentAndConfirmedIsTrueAndIdGreaterThanEqual(revenuePayment, cursor, pageable);
@@ -580,10 +568,10 @@ public class LegacyMemberController {
 
         log.debug("count: {}, cursor: {}", count, cursor);
         Long memberId = legacyMemberService.currentMemberId();
-        List<VideoScrap> list = videoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
-        List<VideoController.VideoScrapInfo> scraps = new ArrayList<>();
+        List<VideoScrap> list = legacyVideoScrapService.findByMemberId(memberId, cursor, Visibility.PUBLIC, pageRequest);
+        List<LegacyVideoController.VideoScrapInfo> scraps = new ArrayList<>();
         list.stream().forEach(scrap -> scraps.add(
-                new VideoController.VideoScrapInfo(scrap, videoService.generateVideoInfo(scrap.getVideo()))));
+                new LegacyVideoController.VideoScrapInfo(scrap, legacyVideoService.generateVideoInfo(scrap.getVideo()))));
 
         String nextCursor = null;
         if (scraps.size() > 0) {
@@ -595,10 +583,11 @@ public class LegacyMemberController {
                 .withCursor(nextCursor).toBuild();
     }
 
+
     private CursorResponse createLikeResponse(Long memberId, String category, int count, Long cursor, String uri, Long broker) {
         switch (category) {
-            case "post":
-                return createPostLikeResponse(memberId, category, count, cursor, uri);
+//            case "post":
+//                return createPostLikeResponse(memberId, category, count, cursor, uri);
             case "goods":
                 return createGoodsLikeResponse(memberId, category, count, cursor, uri, TimeSaleCondition.createWithBroker(broker));
             case "store":
@@ -610,35 +599,35 @@ public class LegacyMemberController {
         }
     }
 
-    private CursorResponse createPostLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
-        PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
-        Slice<PostLike> postLikes;
-        List<PostController.PostLikeInfo> result = new ArrayList<>();
-
-        if (cursor != null) {
-            postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndPostDeletedAtIsNull(new Date(cursor), memberId, pageable);
-        } else {
-            postLikes = postLikeRepository.findByCreatedByIdAndPostDeletedAtIsNull(memberId, pageable);
-        }
-
-        postLikes.stream().forEach(like -> {
-            PostController.PostLikeInfo info = new PostController.PostLikeInfo(like,
-                    legacyMemberService.getMemberInfo(like.getCreatedBy()), legacyMemberService.getMemberInfo(like.getPost().getCreatedBy()));
-            postLikeRepository.findByPostIdAndCreatedById(like.getPost().getId(), memberId)
-                    .ifPresent(likeByMe -> info.getPost().setLikeId(likeByMe.getId()));
-            result.add(info);
-        });
-
-        String nextCursor = null;
-        if (result.size() > 0) {
-            nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
-        }
-
-        return new CursorResponse.Builder<>(uri, result)
-                .withCategory(category)
-                .withCursor(nextCursor)
-                .withCount(count).toBuild();
-    }
+//    private CursorResponse createPostLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
+//        PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
+//        Slice<PostLike> postLikes;
+//        List<PostController.PostLikeInfo> result = new ArrayList<>();
+//
+//        if (cursor != null) {
+//            postLikes = postLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndPostDeletedAtIsNull(new Date(cursor), memberId, pageable);
+//        } else {
+//            postLikes = postLikeRepository.findByCreatedByIdAndPostDeletedAtIsNull(memberId, pageable);
+//        }
+//
+//        postLikes.stream().forEach(like -> {
+//            PostController.PostLikeInfo info = new PostController.PostLikeInfo(like,
+//                    legacyMemberService.getMemberInfo(like.getCreatedBy()), legacyMemberService.getMemberInfo(like.getPost().getCreatedBy()));
+//            postLikeRepository.findByPostIdAndCreatedById(like.getPost().getId(), memberId)
+//                    .ifPresent(likeByMe -> info.getPost().setLikeId(likeByMe.getId()));
+//            result.add(info);
+//        });
+//
+//        String nextCursor = null;
+//        if (result.size() > 0) {
+//            nextCursor = String.valueOf(result.get(result.size() - 1).getCreatedAt().getTime());
+//        }
+//
+//        return new CursorResponse.Builder<>(uri, result)
+//                .withCategory(category)
+//                .withCursor(nextCursor)
+//                .withCount(count).toBuild();
+//    }
 
     private CursorResponse createGoodsLikeResponse(Long memberId, String category, int count, Long cursor, String uri, TimeSaleCondition timeSaleCondition) {
         PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
@@ -701,7 +690,7 @@ public class LegacyMemberController {
     private CursorResponse createVideoLikeResponse(Long memberId, String category, int count, Long cursor, String uri) {
         PageRequest pageable = PageRequest.of(0, count, Sort.by("createdAt").descending());
         Slice<VideoLike> videoLikes;
-        List<VideoController.VideoInfo> result = new ArrayList<>();
+        List<LegacyVideoController.VideoInfo> result = new ArrayList<>();
 
         if (cursor != null) {
             videoLikes = videoLikeRepository.findByCreatedAtBeforeAndCreatedByIdAndVideoDeletedAtIsNullAndStatus(
@@ -711,7 +700,7 @@ public class LegacyMemberController {
         }
 
         for (VideoLike like : videoLikes) {
-            result.add(videoService.generateVideoInfo(like.getVideo()));
+            result.add(legacyVideoService.generateVideoInfo(like.getVideo()));
         }
 
         String nextCursor = null;

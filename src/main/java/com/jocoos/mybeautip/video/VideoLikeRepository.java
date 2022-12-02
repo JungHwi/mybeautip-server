@@ -6,9 +6,12 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 public interface VideoLikeRepository extends JpaRepository<VideoLike, Long> {
+    List<VideoLike> findByVideoIdInAndCreatedByIdAndStatus(List<Long> videoIds, Long memberId, LikeStatus status);
+
     Optional<VideoLike> findByVideoIdAndCreatedByIdAndStatus(Long videoId, Long memberId, LikeStatus status);
 
     Optional<VideoLike> findByIdAndVideoIdAndCreatedById(Long likeId, Long videoId, Long memberId);

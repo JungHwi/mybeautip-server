@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventJoinRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.address.Address;
 import com.jocoos.mybeautip.member.address.AddressRepository;
@@ -38,7 +39,6 @@ public class RouletteEventService extends EventTypeAbstractService {
                 .memberId(member.getId())
                 .eventId(event.getId())
                 .status(EventJoinStatus.WIN)
-                .eventProductId(eventProduct.getId())
                 .eventProduct(eventProduct)
                 .recipientInfo(super.getRecipientInfo(eventProduct, address))
                 .build();
@@ -66,7 +66,7 @@ public class RouletteEventService extends EventTypeAbstractService {
                 return product.winPrize();
             }
         }
-        throw new BadRequestException("sold_out", "All product is sold out.");
+        throw new BadRequestException(ErrorCode.SOLD_OUT, "All product is sold out.");
     }
 
     private void valid(Event event, Address address) {
@@ -80,7 +80,7 @@ public class RouletteEventService extends EventTypeAbstractService {
                 .count();
 
         if (availableProduct <= 0) {
-            throw new BadRequestException("sold_out", "All product is sold out.");
+            throw new BadRequestException(ErrorCode.SOLD_OUT, "All product is sold out.");
         }
     }
 }

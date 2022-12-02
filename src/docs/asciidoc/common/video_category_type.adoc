@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[video_category_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-video_category_type.adoc[]

@@ -8,6 +8,7 @@ buildscript {
     awsSdkVersion = '1.10.73'
     jacksonDataFormatVersion = '2.13.2'
     log4jVersion = '2.17.1'
+    queryDslVersion = '5.0.0'
     snippetsDir = file('build/generated-snippets')
   }
   repositories {
@@ -18,6 +19,7 @@ buildscript {
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springVersion}"
+//    classpath "gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10"
   }
 }
 
@@ -27,7 +29,9 @@ plugins {
 }
 
 configurations {
-  compile.exclude module: 'spring-boot-starter-logging'
+  all {
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+  }
   asciidoctorExtensions
 }
 
@@ -53,8 +57,8 @@ springBoot {
   }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 17
+targetCompatibility = 17
 
 repositories {
   mavenCentral()
@@ -70,7 +74,18 @@ dependencies {
   implementation("org.apache.logging.log4j:log4j-core:${log4jVersion}")
   implementation("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
   implementation("org.springframework.boot:spring-boot-starter-data-rest:${springVersion}")
+
   implementation("org.springframework.boot:spring-boot-starter-data-jpa:${springVersion}")
+  implementation("com.infobip:infobip-spring-data-jpa-querydsl-boot-starter:7.2.0")
+
+  implementation "com.querydsl:querydsl-jpa:5.0.0"
+  implementation "com.querydsl:querydsl-core:5.0.0"
+  annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jpa"
+  annotationProcessor 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+  annotationProcessor 'javax.annotation:javax.annotation-api:1.3.2'
+//  implementation("com.querydsl:querydsl-core:${queryDslVersion}")
+//  annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
+
   implementation("org.springframework.boot:spring-boot-starter-security:${springVersion}")
   implementation("org.springframework.boot:spring-boot-starter-aop:${springVersion}")
   implementation("org.springframework.boot:spring-boot-starter-mail:${springVersion}")
@@ -82,24 +97,31 @@ dependencies {
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonDataFormatVersion}")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jacksonDataFormatVersion}")
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonDataFormatVersion}")
-  implementation("org.mapstruct:mapstruct:1.4.2.Final")
-  annotationProcessor "org.mapstruct:mapstruct:1.4.2.Final"
-  annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
-  implementation("org.projectlombok:lombok:1.18.10")
-  annotationProcessor("org.projectlombok:lombok:1.18.10")
+  implementation("org.projectlombok:lombok:1.18.24")
+  annotationProcessor("org.projectlombok:lombok:1.18.24")
+  implementation("org.mapstruct:mapstruct:1.5.3.Final")
+  annotationProcessor "org.mapstruct:mapstruct:1.5.3.Final"
+  annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
   implementation('org.flywaydb:flyway-core:7.15.0')
   implementation('javax.xml.bind:jaxb-api')
 
+  implementation("com.infobip:infobip-spring-data-jpa-querydsl-boot-starter:7.2.0")
+  implementation "com.querydsl:querydsl-jpa:5.0.0"
+  implementation "com.querydsl:querydsl-core:5.0.0"
+  annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jpa"
+  annotationProcessor 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final'
+  annotationProcessor 'javax.annotation:javax.annotation-api:1.3.2'
+
   implementation('org.apache.commons:commons-exec:1.3')
-  implementation('org.apache.commons:commons-lang3:3.7')
-  implementation('org.apache.commons:commons-collections4:4.2')
-  implementation('org.apache.httpcomponents:httpclient:4.5.5')
+  implementation('org.apache.commons:commons-lang3:3.12.0')
+  implementation('org.apache.commons:commons-collections4:4.4')
+  implementation('org.apache.httpcomponents:httpclient:4.5.13')
   implementation('org.json:json:20180813')
   implementation('mysql:mysql-connector-java')
   implementation('com.h2database:h2')
   implementation('com.amazonaws:aws-java-sdk-sts:1.11.375')
   implementation('org.jsoup:jsoup:1.11.2')
-  implementation('redis.clients:jedis:2.9.0')
+  implementation('redis.clients:jedis:4.2.1')
   implementation('io.jsonwebtoken:jjwt:0.9.0')
   asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
   testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
@@ -107,21 +129,28 @@ dependencies {
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
   testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
-  testImplementation("org.projectlombok:lombok:1.18.10")
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.10")
+  testImplementation("org.projectlombok:lombok:1.18.24")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
 
 }
 
 test {
-  outputs.dir snippetsDir
+  doFirst {
+    systemProperty 'spring.profiles.active', System.getProperty("profile", "local")
+//    println "# test environment: " + systemProperties['spring.profiles.active']
+  }
   useJUnitPlatform()
+  outputs.dir snippetsDir
+  testLogging {
+    exceptionFormat "full"
+  }
 }
 
 asciidoctor {
-  dependsOn test
   mkdir snippetsDir
   configurations 'asciidoctorExtensions'
   inputs.dir snippetsDir
+  dependsOn test
 
   sources{
     include("**/*.adoc","**/common/*.adoc")
@@ -134,11 +163,18 @@ asciidoctor.doFirst {
   delete file('src/main/resources/static/docs')
 }
 
-
 task copyDocument(type: Copy) {
   dependsOn asciidoctor
-  from file("build/docs/asciidoc")
-  into file("src/main/resources/static/docs")
+
+  from 'build/docs/asciidoc'
+  into 'src/main/resources/static/docs'
+}
+
+task copyDocumentForJar(type: Copy) {
+  dependsOn asciidoctor
+
+  from 'build/docs/asciidoc'
+  into 'build/resources/main/static/docs'
 }
 
 build {
@@ -146,17 +182,7 @@ build {
 }
 
 bootJar {
+  dependsOn copyDocumentForJar
   baseName = 'mybeautip-server'
   version = '1.1.1'
-  dependsOn asciidoctor
-  from ("${asciidoctor.outputDir}/html5") {
-    into 'static/docs'
-  }
-}
-
-eclipse {
-  classpath {
-    containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
-    containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
-  }
 }

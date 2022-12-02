@@ -8,7 +8,6 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -29,6 +28,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void writeCommunity() throws Exception {
         WriteCommunityRequest request = WriteCommunityRequest.builder()
                 .categoryId(4L)
@@ -60,6 +60,11 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
+                                fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
+                                fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
+                                fieldWithPath("votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
+                                fieldWithPath("votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
                                 fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글수"),
@@ -69,6 +74,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                                 fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                                fieldWithPath("relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                                 fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
@@ -87,8 +93,6 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void uploadFiles() throws Exception {
-        MockMultipartFile image = new MockMultipartFile("image", "image.png", "image/png", "<<png data>>".getBytes());
-
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .multipart("/api/1/community/files")
                         .file("files", "mockup".getBytes()))
@@ -131,6 +135,11 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
                                 fieldWithPath("content.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("content.[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
+                                fieldWithPath("content.[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
+                                fieldWithPath("content.[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
+                                fieldWithPath("content.[].votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
+                                fieldWithPath("content.[].votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
                                 fieldWithPath("content.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("content.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
@@ -140,6 +149,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                                 fieldWithPath("content.[].relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                                 fieldWithPath("content.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                                fieldWithPath("content.[].relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
                                 fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
                                 fieldWithPath("content.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                                 fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
@@ -176,6 +186,11 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
+                                fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
+                                fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
+                                fieldWithPath("votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
+                                fieldWithPath("votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
                                 fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
@@ -185,6 +200,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                                 fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                                fieldWithPath("relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                                 fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
@@ -202,6 +218,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void editCommunity() throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("title", "Test Title");
@@ -233,6 +250,11 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
+                                fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
+                                fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
+                                fieldWithPath("votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
+                                fieldWithPath("votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
                                 fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
@@ -242,6 +264,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_like").type(JsonFieldType.BOOLEAN).description("글 좋아요 여부"),
                                 fieldWithPath("relation_info.is_block").type(JsonFieldType.BOOLEAN).description("작성자 차단 여부"),
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
+                                fieldWithPath("relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                                 fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
@@ -349,6 +372,36 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                 responseFields(
                         fieldWithPath("is_report").type(JsonFieldType.BOOLEAN).description("신고 여부"),
                         fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("커뮤니티 신고수")
+                ))
+        );
+    }
+
+    @Test
+    @Transactional
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    void scrap() throws Exception {
+        BooleanDto bool = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/api/1/community/{community_id}/scrap", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bool)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("community_scrap",
+                pathParameters(
+                        parameterWithName("community_id").description("글 ID")
+                ),
+                requestFields(
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("스크랩 여부")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("스크랩 아이디"),
+                        fieldWithPath("type").type(JsonFieldType.STRING).description("스크랩 타입"),
+                        fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("스크랩 커뮤니티 아이디"),
+                        fieldWithPath("is_scrap").type(JsonFieldType.BOOLEAN).description("스크랩 여부"),
+                        fieldWithPath("created_at").type(JsonFieldType.STRING).description("스크랩 생성일시")
                 ))
         );
     }

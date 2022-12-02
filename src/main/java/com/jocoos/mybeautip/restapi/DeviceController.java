@@ -71,7 +71,7 @@ public class DeviceController {
     public ResponseEntity releaseDevice(@Valid @RequestBody ReleaseDeviceRequest request) {
         deviceRepository.findById(request.getDeviceId())
                 .map(deviceService::releaseDevice)
-                .orElseThrow(() -> new NotFoundException("device_not_found", "Device not found: " + request.getDeviceId()));
+                .orElseThrow(() -> new NotFoundException("Device not found: " + request.getDeviceId()));
         return new ResponseEntity(HttpStatus.OK);
     }
 

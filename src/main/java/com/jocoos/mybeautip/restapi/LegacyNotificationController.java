@@ -153,7 +153,7 @@ public class LegacyNotificationController {
                     notificationRepository.save(n);
                     return new ResponseEntity(HttpStatus.OK);
                 })
-                .orElseThrow(() -> new NotFoundException("notification_not_found", "invalid notification id"));
+                .orElseThrow(() -> new NotFoundException("invalid notification id"));
     }
 
     @Data
