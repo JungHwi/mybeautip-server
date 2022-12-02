@@ -28,6 +28,7 @@ import com.jocoos.mybeautip.video.VideoRepository;
 import com.jocoos.mybeautip.video.report.VideoReport;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +52,7 @@ import static com.jocoos.mybeautip.domain.member.code.MemberStatus.ACTIVE;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
 
 
+@RequiredArgsConstructor
 @Slf4j
 @RestController
 @RequestMapping("/api/admin/manual")
@@ -77,45 +79,6 @@ public class AdminController {
     private final GoodsService goodsService;
     private final LegacyMemberService legacyMemberService;
 
-    public AdminController(
-//            PostRepository postRepository,
-                           BannerRepository bannerRepository,
-                           MemberRepository memberRepository,
-                           GoodsRepository goodsRepository,
-                           MemberRecommendationRepository memberRecommendationRepository,
-                           GoodsRecommendationRepository goodsRecommendationRepository,
-                           MotdRecommendationRepository motdRecommendationRepository,
-                           MotdRecommendationBaseRepository motdRecommendationBaseRepository,
-                           KeywordRecommendationRepository keywordRecommendationRepository,
-                           ReportRepository reportRepository,
-                           StoreRepository storeRepository,
-                           VideoRepository videoRepository,
-                           VideoReportRepository videoReportRepository,
-                           ScheduleRepository scheduleRepository, OrderRepository orderRepository, TagRepository tagRepository,
-                           LegacyVideoService legacyVideoService,
-                           TagService tagService,
-                           GoodsService goodsService, LegacyMemberService legacyMemberService) {
-//        this.postRepository = postRepository;
-        this.bannerRepository = bannerRepository;
-        this.memberRepository = memberRepository;
-        this.goodsRepository = goodsRepository;
-        this.memberRecommendationRepository = memberRecommendationRepository;
-        this.goodsRecommendationRepository = goodsRecommendationRepository;
-        this.motdRecommendationRepository = motdRecommendationRepository;
-        this.motdRecommendationBaseRepository = motdRecommendationBaseRepository;
-        this.keywordRecommendationRepository = keywordRecommendationRepository;
-        this.reportRepository = reportRepository;
-        this.storeRepository = storeRepository;
-        this.videoRepository = videoRepository;
-        this.videoReportRepository = videoReportRepository;
-        this.scheduleRepository = scheduleRepository;
-        this.orderRepository = orderRepository;
-        this.tagRepository = tagRepository;
-        this.tagService = tagService;
-        this.legacyVideoService = legacyVideoService;
-        this.goodsService = goodsService;
-        this.legacyMemberService = legacyMemberService;
-    }
 
     @GetMapping(value = "/memberDetails", params = {"isDeleted=true"})
     public ResponseEntity<Page<MemberDetailInfo>> getDeletedMemberDetails(
@@ -531,35 +494,7 @@ public class AdminController {
                 pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         }
 
-        Page<Video> videos = null;
-        if (isDeleted) {
-            videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNotNull(type, states, pageable);
-        } else {
-            videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNull(type, states, pageable);
-        }
-
-        return responseVideos(videos);
-    }
-
-    private ResponseEntity<Page<MotdDetailInfo>> responseVideos(Page<Video> videos) {
-
-        Member admin = legacyMemberService.currentMember();
-        Page<MotdDetailInfo> details = videos.map(v -> {
-            MotdDetailInfo info = new MotdDetailInfo(v);
-            motdRecommendationRepository.findByVideoId(v.getId())
-                    .ifPresent(r -> info.setRecommendation(r));
-
-
-            // FIXME: Video is reported by admin?
-            videoReportRepository.findByVideoIdAndCreatedById(v.getId(), admin.getId())
-                    .ifPresent(r -> info.setVideoReportId(r.getId()));
-
-            Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getId(), PageRequest.of(0, 1));
-            info.setReportCount(reports.getTotalElements());
-
-            return info;
-        });
-
+        Page<MotdDetailInfo> details = legacyVideoService.findByTypeAndStates(null, type, states, pageable, isDeleted);
         return new ResponseEntity<>(details, HttpStatus.OK);
     }
 
@@ -594,14 +529,8 @@ public class AdminController {
                 pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         }
 
-        Page<Video> videos = null;
-        if (isDeleted) {
-            videos = videoRepository.findByMemberIdAndTypeAndStateInAndDeletedAtIsNotNull(memberId, type, states, pageable);
-        } else {
-            videos = videoRepository.findByMemberIdAndTypeAndStateInAndDeletedAtIsNull(memberId, type, states, pageable);
-        }
-
-        return responseVideos(videos);
+        Page<MotdDetailInfo> details = legacyVideoService.findByTypeAndStates(memberId, type, states, pageable, isDeleted);
+        return new ResponseEntity<>(details, HttpStatus.OK);
     }
 
     @GetMapping("/recommendedMotdDetails")
