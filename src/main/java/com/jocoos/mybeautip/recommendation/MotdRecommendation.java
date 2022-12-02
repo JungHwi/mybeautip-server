@@ -23,7 +23,7 @@ public class MotdRecommendation extends MemberAuditable {
     private Long videoId;
 
     @MapsId
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "video_id")
     private Video video;
 
