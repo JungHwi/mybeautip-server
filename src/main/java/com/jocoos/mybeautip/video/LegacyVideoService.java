@@ -422,7 +422,7 @@ public class LegacyVideoService {
 
         return createdVideo;
     }
-    
+
     public List<VideoCategoryMapping> createCategory(Video video, List<Integer> videoCategoryIds) {
         List<VideoCategoryMapping> categories = new ArrayList<>();
         List<VideoCategory> videoCategoryList = videoCategoryRepository.findAllByIdIn(videoCategoryIds);
