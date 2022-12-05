@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -23,8 +24,7 @@ import java.util.Date;
 
 import static com.jocoos.mybeautip.domain.member.code.GrantType.*;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.AVATAR;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.HTTP_PREFIX;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.*;
 import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
@@ -144,7 +144,6 @@ public class Member {
     public Member(SignupRequest request) {
         this.status = MemberStatus.ACTIVE;
         this.link = parseLink(request.getGrantType());
-        this.username = StringUtils.isBlank(request.getUsername()) ? RandomUtils.generateUsername() : request.getUsername();
         this.email = StringUtils.isBlank(request.getEmail()) ? "" : request.getEmail();
         this.point = 0;
         this.visible = false;
@@ -199,9 +198,13 @@ public class Member {
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber.trim()
-                .replace("-", "")
-                .replace(" ", "");
+        if (StringUtils.isEmpty(phoneNumber)) {
+            this.phoneNumber = null;
+        } else {
+            this.phoneNumber = phoneNumber.trim()
+                    .replace("-", "")
+                    .replace(" ", "");
+        }
     }
 
     public Member usePoint(int point) {
@@ -256,11 +259,63 @@ public class Member {
         return birthday.getAgeGroupByTen();
     }
 
+    public Member changeStatus(MemberStatus status) {
+        switch (status) {
+            case WITHDRAWAL -> withdrawal();
+            case DORMANT -> dormant();
+            case SUSPENDED -> suspend();
+            case EXILE -> exile();
+        }
+
+        return this;
+    }
+
     public ZonedDateTime getCreatedAtZoned() {
         return toUTCZoned(createdAt);
     }
 
     public ZonedDateTime getModifiedAtZoned() {
         return toUTCZoned(modifiedAt);
+    }
+
+    private void dormant() {
+        this.status = MemberStatus.DORMANT;
+        this.username = DISABLE_USERNAME;
+        this.avatarFilename = DEFAULT_AVATAR_FILE_NAME;
+        this.tag = StringUtils.EMPTY;
+        this.visible = false;
+        this.email = StringUtils.EMPTY;
+        this.phoneNumber = StringUtils.EMPTY;
+        this.birthday = null;
+        this.permission = NumberUtils.INTEGER_ZERO;
+        this.intro = StringUtils.EMPTY;
+        this.point = NumberUtils.INTEGER_ZERO;
+        this.followerCount = NumberUtils.INTEGER_ZERO;
+        this.followingCount = NumberUtils.INTEGER_ZERO;
+        this.reportCount = NumberUtils.INTEGER_ZERO;
+        this.publicVideoCount = NumberUtils.INTEGER_ZERO;
+        this.totalVideoCount = NumberUtils.INTEGER_ZERO;
+        this.revenue = NumberUtils.INTEGER_ZERO;
+        this.revenueModifiedAt = null;
+        this.pushable = false;
+    }
+
+    private void suspend() {
+        this.status = MemberStatus.SUSPENDED;
+    }
+
+    private void exile() {
+        this.status = MemberStatus.EXILE;
+    }
+
+    private void withdrawal() {
+        this.status = MemberStatus.WITHDRAWAL;
+        this.visible = false;
+        this.avatarFilename = DEFAULT_AVATAR_FILE_NAME;
+        this.followingCount = 0;
+        this.followerCount = 0;
+        this.publicVideoCount = 0;
+        this.totalVideoCount = 0;
+        this.deletedAt = new Date();
     }
 }

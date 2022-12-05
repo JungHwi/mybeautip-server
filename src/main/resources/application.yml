@@ -42,10 +42,12 @@ spring:
     locations: classpath:db/mysql
   jpa:
     properties:
-      hibernate.globally_quoted_identifiers: true
-      hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
-      hibernate.jdbc.batch_versioned_data: false
-      hibernate.format_sql: true
+      hibernate:
+        globally_quoted_identifiers: true
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        jdbc:
+          batch_versioned_data: false
+        format_sql: true
     show-sql: true
   servlet:
     multipart:
@@ -167,9 +169,6 @@ mybeautip:
 
 cloud:
   aws:
-    credentials:
-      accessKey: AKIA3JYLF6P2BKTHA2DM #mybeautip
-      secretKey: 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
     region:
       static: ap-northeast-2
     s3:

@@ -9,9 +9,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum PopupType implements CodeValue {
 
-    SIGNUP("회원가입 한 뒤"),
+    SIGNUP("회원 가입한 뒤"),
     COMEBACK("간만에 로그인"),
-    LOGIN("로그인 한 뒤");
+    LOGIN("로그인 한 뒤"),
+    NOTICE("공지 사항"),
+    WAKEUP("휴면 복귀");
 
     private final String description;
 

@@ -23,6 +23,8 @@ public enum ErrorCode implements CodeValue {
     ALREADY_REGISTRATION("이미 초대코드 등록함"),
     ALREADY_MEMBER("이미 가입된 회원"),
     DORMANT_MEMBER("휴면회원"),
+    SUSPENDED_MEMBER("정지된 회원"),
+    EXILED_MEMBER("추방된 회원"),
     NOT_YET_REJOIN("재가입 불가"),
     ROLE_NOT_FOUND("역할 정보 없음"),
     DUPLICATE_PHONE("전화번호 중복"),
@@ -33,6 +35,7 @@ public enum ErrorCode implements CodeValue {
     NO_PHONE("전화번호 정보 없음"),
     ADDRESS_TOO_MANY_ADDRESS("address.too_many_addresses"),
     NO_ADDRESS("주소 정보 없음"),
+    RANDOM_USERNAME_NOT_FOUND("랜덤 닉네임 찾지 못함"),
 
     // EVENT
     NOT_STARTED_EVENT("아직 시작 안 한 이벤트"),

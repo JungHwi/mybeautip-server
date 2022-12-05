@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
+import com.jocoos.mybeautip.domain.member.service.MemberService;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -55,6 +56,7 @@ import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 public class LegacyMemberController {
 
     private static final String MEMBER_NOT_FOUND = "member.not_found";
+    private final MemberService memberService;
     private final LegacyMemberService legacyMemberService;
     private final GoodsService goodsService;
     private final LegacyVideoService legacyVideoService;
@@ -91,7 +93,8 @@ public class LegacyMemberController {
     @Value("${mybeautip.revenue.revenue-ratio-live}")
     private int revenueRatio;
 
-    public LegacyMemberController(LegacyMemberService legacyMemberService,
+    public LegacyMemberController(MemberService memberService,
+                                  LegacyMemberService legacyMemberService,
                                   GoodsService goodsService,
                                   LegacyVideoService legacyVideoService,
                                   MemberRepository memberRepository,
@@ -112,6 +115,7 @@ public class LegacyMemberController {
                                   LegacyVideoScrapService legacyVideoScrapService,
                                   CommentService commentService,
                                   MemberTermService memberTermService) {
+        this.memberService = memberService;
         this.legacyMemberService = legacyMemberService;
         this.goodsService = goodsService;
         this.legacyVideoService = legacyVideoService;
@@ -156,7 +160,7 @@ public class LegacyMemberController {
             }
         }
 
-        legacyMemberService.checkUsernameValidation(member.getId(), updateMemberRequest.getUsername(), lang);
+        memberService.checkUsernameValidation(member.getId(), updateMemberRequest.getUsername(), lang);
 
         member = legacyMemberService.updateMember(updateMemberRequest, member);
         return new ResponseEntity<>(legacyMemberService.getMemberInfo(member), HttpStatus.OK);

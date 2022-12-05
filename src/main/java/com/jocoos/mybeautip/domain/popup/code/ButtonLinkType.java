@@ -8,7 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ButtonLinkType implements CodeValue {
 
-    EVENT("이벤트");
+    EVENT("이벤트"),
+    PREVIOUS("이전 화면");
 
     private final String description;
 

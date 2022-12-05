@@ -9,4 +9,5 @@ public class ErrorResponse {
 
     private String error;
     private String errorDescription;
+    private Object contents;
 }
