@@ -15,11 +15,11 @@ import org.apache.commons.lang3.StringUtils;
 @NoArgsConstructor
 public class MemberStatusRequest implements OperationLogInterface {
 
-    private long memberId;
+    private Long memberId;
     private MemberStatus beforeStatus;
     private MemberStatus afterStatus;
     private String description;
-    private long adminId;
+    private Long adminId;
     private Member adminMember;
 
     public MemberStatusRequest(MemberStatus status) {

@@ -210,12 +210,9 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                 ),
                 requestFields(
                         fieldWithPath("after_status").type(JsonFieldType.STRING).description(generateLinkCode(MEMBER_STATUS)),
-                        fieldWithPath("admin_id").ignored(),
-                        fieldWithPath("member_id").ignored(),
                         fieldWithPath("description").ignored(),
-                        fieldWithPath("created_by").ignored(),
-                        fieldWithPath("target_id").ignored(),
-                        fieldWithPath("operation_type").ignored()
+                        fieldWithPath("operation_type").ignored(),
+                        fieldWithPath("target_id").ignored()
                 )));
     }
 }

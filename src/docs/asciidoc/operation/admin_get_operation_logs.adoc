@@ -1,0 +1,3 @@
+== Admin Get Operation Logs API
+
+operation::admin_get_operation_logs[snippets='http-request,request-parameters,http-response,response-fields']

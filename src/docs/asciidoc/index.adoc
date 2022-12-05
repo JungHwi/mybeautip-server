@@ -122,3 +122,6 @@ include::overview.adoc[]
 * link:community/admin_get_community_comments.html[커뮤니티 댓글 조회 API, window=_blank]
 * link:community/admin_hide_community_comment.html[커뮤니티 댓글 숨김 API, window=_blank]
 
+== Operation API
+* link:operation/admin_get_operation_logs.html[운영 로그 조회 API, window=_blank]
+

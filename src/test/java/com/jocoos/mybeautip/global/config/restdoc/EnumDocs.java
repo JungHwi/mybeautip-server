@@ -71,4 +71,8 @@ public class EnumDocs {
 
     // Scrap
     Map<String, String> scrapType;
+
+    // Operation
+    Map<String, String> operationTargetType;
+    Map<String, String> operationType;
 }

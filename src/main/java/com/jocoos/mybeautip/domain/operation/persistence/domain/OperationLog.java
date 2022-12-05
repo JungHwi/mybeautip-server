@@ -37,7 +37,7 @@ public class OperationLog extends CreatedDateAuditable {
     @Column
     private String description;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "created_by")
     private Member createdBy;
 }

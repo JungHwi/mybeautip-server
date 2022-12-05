@@ -1,12 +1,11 @@
 package com.jocoos.mybeautip.domain.operation.persistence.repository.log;
 
-import com.jocoos.mybeautip.domain.operation.code.OperationType;
+import com.jocoos.mybeautip.domain.operation.dto.OperationLogSearchCondition;
 import com.jocoos.mybeautip.domain.operation.persistence.domain.OperationLog;
-
-import java.util.List;
-import java.util.Set;
+import org.springframework.data.domain.Page;
 
 public interface OperationLogCustomRepository {
 
-    List<OperationLog> getOperationLogList(Set<OperationType>)
+    Page<OperationLog> findByLogs(OperationLogSearchCondition condition);
+
 }
