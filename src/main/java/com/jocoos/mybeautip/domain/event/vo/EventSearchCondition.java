@@ -15,6 +15,7 @@ import java.util.Set;
 @Getter
 @Builder
 public class EventSearchCondition {
+
     private final EventType type;
     private final Set<EventStatus> statuses;
     private final Boolean isVisible;
@@ -37,5 +38,9 @@ public class EventSearchCondition {
 
     public Date getEndAt() {
         return searchOption == null ? null : searchOption.getEndAtDate();
+    }
+
+    public Boolean isTopFix() {
+        return searchOption == null ? null : searchOption.getIsTopFix();
     }
 }
