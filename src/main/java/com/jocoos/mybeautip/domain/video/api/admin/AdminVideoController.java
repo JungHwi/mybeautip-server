@@ -40,6 +40,7 @@ public class AdminVideoController {
             @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
             @RequestParam(required = false, name = "is_reported") Boolean isReported,
             @RequestParam(required = false, name = "is_top_fix") Boolean isTopFix,
+            @RequestParam(required = false, name = "is_recommended") Boolean isRecommended,
             @RequestParam(required = false) Visibility visibility) {
 
         SearchOption searchOption = SearchOption.builder()
@@ -55,6 +56,7 @@ public class AdminVideoController {
         AdminVideoSearchCondition condition = AdminVideoSearchCondition.builder()
                 .categoryId(categoryId)
                 .visibility(visibility)
+                .isRecommended(isRecommended)
                 .pageable(PageRequest.of(page - 1, size, Direction.fromString(order), sort))
                 .searchOption(searchOption)
                 .build();

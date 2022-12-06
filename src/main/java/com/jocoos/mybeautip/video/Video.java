@@ -113,6 +113,9 @@ public class Video {
     @Column
     private Boolean isTopFix;
 
+    @Column
+    private Boolean isRecommend;
+
     @Transient
     private boolean isFirstOpen;
 

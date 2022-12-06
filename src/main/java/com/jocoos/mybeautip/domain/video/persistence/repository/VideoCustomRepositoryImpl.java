@@ -134,7 +134,8 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         loeCreatedAt(condition.endAtDate()),
                         isReported(condition.isReported()),
                         isTopFix(condition.isTopFix()),
-                        eqVisibility(condition.visibility())
+                        eqVisibility(condition.visibility()),
+                        isRecommended(condition.isRecommended())
                 ));
 
         dynamicQueryForCommentSearch(condition, baseQuery);
@@ -169,6 +170,13 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 Ops.STRING_CONTAINS_IC,
                 Expressions.path(String.class, video, searchOption.getSearchField()),
                 Expressions.constant(searchOption.getKeyword()));
+    }
+
+    private BooleanExpression isRecommended(Boolean isRecommended) {
+        if (isRecommended == null) {
+            return null;
+        }
+        return isRecommended ? video.isRecommend.isTrue() : video.isRecommend.isFalse();
     }
 
     private BooleanExpression isReported(Boolean isReported) {

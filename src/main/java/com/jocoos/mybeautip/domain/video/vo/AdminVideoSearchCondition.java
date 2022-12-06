@@ -12,6 +12,7 @@ import java.util.Date;
 @Builder
 public record AdminVideoSearchCondition(Integer categoryId,
                                         Visibility visibility,
+                                        Boolean isRecommended,
                                         Pageable pageable,
                                         SearchOption searchOption) {
     public Sort sort() {
