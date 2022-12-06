@@ -81,11 +81,6 @@ public class AdminMemberController {
         return ResponseEntity.ok(service.getReportHistory(memberId, PageRequest.of(page - 1, size)));
     }
 
-    @PatchMapping("/member/{memberId}/memo")
-    public ResponseEntity<IdDto> updateMemo(@PathVariable Long memberId, @RequestBody AdminMemoRequest request) {
-        return ResponseEntity.ok(new IdDto(service.updateMemo(memberId, request.memo())));
-    }
-
     @PatchMapping("/member/username/refresh")
     public ResponseEntity refreshUsername() {
         service.refreshUsername();
