@@ -447,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h3 id="_admin_get_operation_logs_api_http_request">HTTP request</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /admin/operation/log?target_id=5&amp;types=MEMBER_EXILE,MEMBER_SUSPENDED HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /admin/operation/log?target_id=327&amp;types=MEMBER_EXILE,MEMBER_SUSPENDED, HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -509,70 +509,19 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 1537
+Content-Length: 268
 
 {
-  "total" : 6,
+  "total" : 1,
   "content" : [ {
-    "id" : 15,
-    "operation_type" : "MEMBER_EXILE",
-    "created_at" : "2022-12-05 16:39:16 +0900",
-    "admin_member" : {
-      "id" : 1,
-      "email" : "mybeautip@mybeatip.tv",
-      "username" : "mybeautip.tv"
-    },
-    "cursor" : "15"
-  }, {
-    "id" : 11,
-    "operation_type" : "MEMBER_EXILE",
-    "created_at" : "2022-12-02 08:59:55 +0900",
-    "admin_member" : {
-      "id" : 1,
-      "email" : "mybeautip@mybeatip.tv",
-      "username" : "mybeautip.tv"
-    },
-    "cursor" : "11"
-  }, {
-    "id" : 10,
+    "id" : 22,
     "operation_type" : "MEMBER_SUSPENDED",
-    "created_at" : "2022-12-02 08:59:27 +0900",
+    "created_at" : "2022-12-06 14:48:48 +0900",
     "admin_member" : {
       "id" : 1,
       "email" : "mybeautip@mybeatip.tv",
       "username" : "mybeautip.tv"
-    },
-    "cursor" : "10"
-  }, {
-    "id" : 9,
-    "operation_type" : "MEMBER_SUSPENDED",
-    "created_at" : "2022-12-01 16:42:20 +0900",
-    "admin_member" : {
-      "id" : 1,
-      "email" : "mybeautip@mybeatip.tv",
-      "username" : "mybeautip.tv"
-    },
-    "cursor" : "9"
-  }, {
-    "id" : 8,
-    "operation_type" : "MEMBER_EXILE",
-    "created_at" : "2022-12-01 16:41:15 +0900",
-    "admin_member" : {
-      "id" : 1,
-      "email" : "mybeautip@mybeatip.tv",
-      "username" : "mybeautip.tv"
-    },
-    "cursor" : "8"
-  }, {
-    "id" : 3,
-    "operation_type" : "MEMBER_EXILE",
-    "created_at" : "2022-12-01 16:10:02 +0900",
-    "admin_member" : {
-      "id" : 1,
-      "email" : "mybeautip@mybeatip.tv",
-      "username" : "mybeautip.tv"
-    },
-    "cursor" : "3"
+    }
   } ]
 }</code></pre>
 </div>
@@ -636,7 +585,7 @@ Content-Length: 1537
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">content.[].admin_member</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">운영자 정보</p></td>
 </tr>
@@ -676,7 +625,7 @@ Content-Length: 1537
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-12-05 16:24:18 +0900
+Last updated 2022-12-06 09:22:08 +0900
 </div>
 </div>
 </body>

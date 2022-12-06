@@ -261,6 +261,7 @@ public class Member {
 
     public Member changeStatus(MemberStatus status) {
         switch (status) {
+            case ACTIVE -> active();
             case WITHDRAWAL -> withdrawal();
             case DORMANT -> dormant();
             case SUSPENDED -> suspend();
@@ -306,6 +307,10 @@ public class Member {
 
     private void exile() {
         this.status = MemberStatus.EXILE;
+    }
+
+    private void active() {
+        this.status = MemberStatus.ACTIVE;
     }
 
     private void withdrawal() {
