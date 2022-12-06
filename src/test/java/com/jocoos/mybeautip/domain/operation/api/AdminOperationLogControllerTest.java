@@ -36,7 +36,7 @@ class AdminOperationLogControllerTest extends RestDocsTestSupport {
                 ),
                 responseFields(
                         fieldWithPath("total").type(JsonFieldType.NUMBER).description("총 운영 로그 개수"),
-                        fieldWithPath("content").type(JsonFieldType.ARRAY).description("운영 로그 목록"),
+                        fieldWithPath("content").type(JsonFieldType.ARRAY).description("운영 로그 목록").optional(),
                         fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("운영 로그 ID"),
                         fieldWithPath("content.[].operation_type").type(JsonFieldType.STRING).description(generateLinkCode(OPERATION_TYPE)),
                         fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("운영 작업한 일시").attributes(getZonedDateFormat()),

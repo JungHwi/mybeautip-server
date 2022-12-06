@@ -21,7 +21,7 @@ class MemberControllerTest extends RestDocsTestSupport {
 
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
-    void getMyCommunities() throws Exception {
+    void getRandomUsername() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .get("/api/1/member/random-username")
                         .contentType(MediaType.APPLICATION_JSON))
