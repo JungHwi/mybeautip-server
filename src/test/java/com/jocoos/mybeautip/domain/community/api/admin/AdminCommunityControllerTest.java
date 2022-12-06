@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.api.admin;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
@@ -13,6 +14,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
@@ -31,6 +33,7 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
     @Test
     void writeCommunity() throws Exception {
         WriteCommunityRequest request = WriteCommunityRequest.builder()
+                .status(NORMAL)
                 .categoryId(5L)
                 .title("Mock Title")
                 .contents("Mock Contents")
