@@ -97,6 +97,9 @@ public enum ErrorCode implements CodeValue {
     COMMENT_NOT_FOUND("댓글 정보 없음"),
     INVALID_REQUEST_BODY("잘못된 요청"),
 
+    // Fix
+    NOT_SUPPORTED_FIX_STATUS("상단 고정이 가능한 상태가 아닙니다"),
+
     // THIRD PARTY
     S3_ERROR("S3 에러"),
 
