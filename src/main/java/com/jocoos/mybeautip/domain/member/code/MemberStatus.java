@@ -9,7 +9,9 @@ import lombok.Getter;
 public enum MemberStatus implements CodeValue {
     ACTIVE("활동 중인 정상 상태"),
     DORMANT("휴면상태"),
-    WITHDRAWAL("탈퇴 상태");
+    WITHDRAWAL("탈퇴 상태"),
+    SUSPENDED("정지 상태"),
+    EXILE("추방 상태");
 
     private final String description;
 

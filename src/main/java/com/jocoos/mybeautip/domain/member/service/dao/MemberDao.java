@@ -7,16 +7,20 @@ import com.jocoos.mybeautip.domain.member.persistence.repository.MemberMemoRepos
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 
-
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class MemberDao {
@@ -27,7 +31,8 @@ public class MemberDao {
 
     @Transactional(readOnly = true)
     public Member getMember(long memberId) {
-        return repository.getById(memberId);
+        return repository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("Not found member info. id - " + memberId));
     }
     
     @Transactional(readOnly = true)
@@ -61,5 +66,26 @@ public class MemberDao {
     @Transactional(readOnly = true)
     public Page<MemberBasicSearchResult> getMembers(MemberSearchCondition condition) {
         return repository.getMembers(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByUsername(String username) {
+        return repository.existsByUsername(username);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByTag(String tag) {
+        return repository.existsByTag(tag);
+    }
+
+    @Transactional
+    public List<Member> getDormantTarget() {
+        ZonedDateTime targetDate = ZonedDateTime.now().minusYears(1);
+        return repository.findByStatusAndLastLoggedAtLessThan(MemberStatus.ACTIVE, targetDate);
+    }
+
+    @Transactional
+    public Member updateStatus(Member member, MemberStatus status) {
+        return member.changeStatus(status);
     }
 }

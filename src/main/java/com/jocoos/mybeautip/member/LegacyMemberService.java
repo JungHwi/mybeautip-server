@@ -7,14 +7,12 @@ import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.SettingNotificationDto;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
-import com.jocoos.mybeautip.domain.member.service.SocialMemberService;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
-import com.jocoos.mybeautip.global.constant.RegexConstants;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -30,18 +28,14 @@ import com.jocoos.mybeautip.member.report.ReportRepository;
 import com.jocoos.mybeautip.member.vo.Birthday;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.LegacyMemberController;
-import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import com.jocoos.mybeautip.support.AttachmentService;
-import com.jocoos.mybeautip.support.RandomUtils;
 import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.word.BannedWord;
 import com.jocoos.mybeautip.word.BannedWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -51,8 +45,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
@@ -249,34 +245,6 @@ public class LegacyMemberService {
         }
     }
 
-    public void checkUsernameValidation(String username, String lang) {
-        checkUsernameValidation(0L, username, lang);
-    }
-
-    public void checkUsernameValidation(Long userId, String username, String lang) {
-        if (StringUtils.isBlank(username) || username.length() < 2 || username.length() > 10) {
-            throw new BadRequestException("username length must be between 2 and 10 characters.");
-        }
-
-        if (!(username.matches(RegexConstants.regexForUsername))) {
-            throw new BadRequestException(ErrorCode.INVALID_CHAR, "Username does not match the format");
-        }
-
-        if (NumberUtils.isDigits(username)) {
-            throw new BadRequestException(ErrorCode.INVALID_CHAR_ONLY_DIGIT, "Username does not use only digit.");
-        }
-
-        List<Member> otherMembers = memberRepository.findByUsername(username).stream()
-                .filter(i -> i.getId() != userId)
-                .collect(Collectors.toList());
-
-        if (!otherMembers.isEmpty()) {
-            throw new BadRequestException(ErrorCode.ALREADY_USED, "Username already in use");
-        }
-
-        bannedWordService.findWordAndThrowException(BannedWord.CATEGORY_USERNAME, username, lang);
-    }
-
     public void checkEmailValidation(String email, String lang) {
         if (email.length() > 50 || !email.matches(emailRegex)) {
             throw new BadRequestException("Email does not match the format");
@@ -285,56 +253,6 @@ public class LegacyMemberService {
 
     public boolean hasCommentPostPermission(Member member) {
         return ((member.getPermission() & Member.COMMENT_POST) == Member.COMMENT_POST);
-    }
-
-    // Check ASPECT
-    @Transactional
-    public Member register(SignupRequest signupRequest) {
-        Member member = new Member(signupRequest);
-        member = adjustUniqueInfo(member);
-        Member registeredMember = memberRepository.save(member);
-
-        SocialMemberService socialMemberService = socialMemberFactory.getSocialMemberService(member.getLink());
-        socialMemberService.save(signupRequest, member.getId());
-
-        return registeredMember;
-    }
-
-    public Member adjustUniqueInfo(Member member) {
-        member = adjustTag(member);
-        return adjustUserName(member);
-    }
-
-    private Member adjustTag(Member member) {
-        String tag = member.getTag();
-        for (int retry = 0; retry < 5; retry++) {
-            if (StringUtils.isNotBlank(tag) && !memberRepository.existsByTag(tag)) {
-                member.setTag(tag);
-                return member;
-            }
-            tag = RandomUtils.generateTag();
-        }
-
-        log.warn("Member is Duplicate Tag. Id : " + member.getId());
-        slackService.duplicateTag(member.getId());
-        return member;
-    }
-
-    public Member adjustUserName(Member member) {
-        String username = member.getUsername();
-        try {
-            checkUsernameValidation(member.getId(), username, Locale.KOREAN.getLanguage());
-        } catch (BadRequestException ex) {
-            for (int retry = 0; retry < 5; retry++) {
-                username = RandomUtils.generateUsername();
-                if (!memberRepository.existsByUsername(username)) {
-                    member.setUsername(username);
-                    return member;
-                }
-            }
-            slackService.duplicateUsername(member.getUsername());
-        }
-        return member;
     }
 
     @Transactional

@@ -192,7 +192,15 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         ),
                         customResponseFields("custom-response", beneathPath("data.placard_link_type").withSubsectionId("placard_link_type"),
                                 attributes(key("title").value("PlacardLinkType")),
-                                enumConvertFieldDescriptor((enumDocs.getPlacardLinkType())))
+                                enumConvertFieldDescriptor((enumDocs.getPlacardLinkType()))),
+                        // Operation
+                        customResponseFields("custom-response", beneathPath("data.operation_type").withSubsectionId("operation_type"),
+                                attributes(key("title").value("OperationType")),
+                                enumConvertFieldDescriptor((enumDocs.getOperationType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.operation_target_type").withSubsectionId("operation_target_type"),
+                                attributes(key("title").value("OperationTargetType")),
+                                enumConvertFieldDescriptor((enumDocs.getOperationTargetType())))
                 ));
     }
 

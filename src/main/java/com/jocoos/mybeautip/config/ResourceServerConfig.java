@@ -32,6 +32,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/batch/**").hasRole("ADMIN")
                 .antMatchers(POST, "/api/*/member/signup/**").hasAnyRole("GUEST")
+                .antMatchers(PATCH, "/api/*/member/wakeup").hasAnyRole("GUEST")
                 .antMatchers(GET, "/api/*/words").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/api/**/notification").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/api/admin/**").hasAnyRole("STORE", "ADMIN")

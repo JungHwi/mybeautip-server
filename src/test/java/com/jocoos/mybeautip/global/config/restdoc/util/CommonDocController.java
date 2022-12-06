@@ -6,6 +6,8 @@ import com.jocoos.mybeautip.domain.event.code.*;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.notification.code.*;
+import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
+import com.jocoos.mybeautip.domain.operation.code.OperationType;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
 import com.jocoos.mybeautip.domain.placard.code.PlacardTabType;
@@ -99,6 +101,10 @@ public class CommonDocController {
         // Scrap
         Map<String, String> scrapType = getDocs(ScrapType.values());
 
+        // Operation
+        Map<String, String> operationType = getDocs(OperationType.values());
+        Map<String, String> operationTargetType = getDocs(OperationTargetType.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .deviceOs(deviceOs)
@@ -149,6 +155,9 @@ public class CommonDocController {
                         .searchType(searchType)
                 // Scrap
                         .scrapType(scrapType)
+                // Operation
+                        .operationTargetType(operationTargetType)
+                        .operationType(operationType)
                 .build()
         );
     }
