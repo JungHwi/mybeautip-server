@@ -48,18 +48,19 @@ public interface PlacardConverter {
     })
     List<PlacardResponse> convertToResponse(List<Placard> placardList, @Context PlacardTabType tabType);
 
-    @Mapping(target = "detailList", ignore = true)
-    @Mapping(target = "startedAt", ignore = true)
-    @Mapping(target = "endedAt", ignore = true)
-    Placard convert(PlacardRequest request);
-
-    @AfterMapping
-    default void convert(@MappingTarget Placard.PlacardBuilder placardBuilder, PlacardRequest request) {
-        placardBuilder
+    default Placard convert(PlacardRequest request) {
+        return Placard.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .linkArgument(request.getLinkArgument())
+                .linkType(request.getLinkType())
+                .color(request.getColor())
+                .status(request.getStatus())
                 .startedAt(request.startedAtToUTCZoned())
-                .endedAt(request.endedAtToUTCZoned());
+                .endedAt(request.endedAtToUTCZoned())
+                .build();
     }
-
+    
     default PlacardDetail convertToDetail(String imageUrl) {
         return PlacardDetail
                 .builder()
