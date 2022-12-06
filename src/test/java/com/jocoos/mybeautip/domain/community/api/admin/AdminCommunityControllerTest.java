@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.community.api.admin;
 
-import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
