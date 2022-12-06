@@ -63,7 +63,8 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                                 parameterWithName("order").attributes(getDefault("DESC")).description("정렬 방향").optional(),
                                 parameterWithName("search").description("검색 필드,검색 키워드").optional(),
                                 parameterWithName("startAt").description("검색 시작일").optional(),
-                                parameterWithName("endAt").description("검색 종료").optional()
+                                parameterWithName("endAt").description("검색 종료").optional(),
+                                parameterWithName("is_top_fix").description("상단 고정 여부 (boolean)").optional()
                         ),
                         responseFields(
                                 fieldWithPath("total").type(JsonFieldType.NUMBER).description("총 개수"),
@@ -300,5 +301,23 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                         )
                 )
         );
+    }
+
+    @Transactional
+    @Test
+    void deleteEvent() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .delete("/admin/event/{event_id}", 1))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_delete_event",
+                pathParameters(
+                        parameterWithName("event_id").description("이벤트 ID")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("이벤트 ID")
+                )
+        ));
     }
 }
