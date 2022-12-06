@@ -16,6 +16,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {MemberConverter.class})
 public abstract class OperationLogConverter {
 
+    @Mapping(target = "id", ignore = true)
     public abstract OperationLog convertsToEntity(OperationLogRequest request);
 
     public OperationLogRequest converts(OperationLogInterface request) {
