@@ -1,0 +1,3 @@
+== Get Random Username API
+
+operation::get_random_username[snippets='http-request,http-response,response-fields']

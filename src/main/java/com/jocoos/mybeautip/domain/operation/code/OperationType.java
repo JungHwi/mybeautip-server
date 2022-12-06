@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum OperationType implements CodeValue {
     MEMBER_SUSPENDED("회원 정지", OperationTargetType.MEMBER),
+    MEMBER_SUSPENDED_OFF("회원 정지 해제", OperationTargetType.MEMBER),
     MEMBER_EXILE("회원 추방", OperationTargetType.MEMBER);
 
     private final String description;

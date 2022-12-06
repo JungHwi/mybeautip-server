@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.domain.operation.persistence.domain;
 
-import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
 import com.jocoos.mybeautip.domain.operation.code.OperationType;
+import com.jocoos.mybeautip.global.config.jpa.CreatedAtBaseEntity;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class OperationLog extends CreatedDateAuditable {
+public class OperationLog extends CreatedAtBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +37,7 @@ public class OperationLog extends CreatedDateAuditable {
     @Column
     private String description;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "created_by")
     private Member createdBy;
 }

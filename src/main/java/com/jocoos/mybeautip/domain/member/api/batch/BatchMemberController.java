@@ -21,4 +21,10 @@ public class BatchMemberController {
         int result = service.changeDormantMember();
         return new ResponseEntity<>(new IntegerDto(result), HttpStatus.OK);
     }
+
+    @PatchMapping("/member/suspended")
+    public ResponseEntity<IntegerDto> offSuspendedMember() {
+        int result = service.offSuspendedMember();
+        return new ResponseEntity<>(new IntegerDto(result), HttpStatus.OK);
+    }
 }
