@@ -124,10 +124,14 @@ include::overview.adoc[]
 * link:community/admin_hide_community.html[커뮤니티 숨김 API, window=_blank]
 * link:community/admin_win_community.html[커뮤니티 마왕픽 선정 API, window=_blank]
 * link:community/admin_get_community_status.html[커뮤니티 카테고리 조회 API, window=_blank]
+* link:community/admin_write_community.html[커뮤니티 작성 API, window=_blank]
+* link:community/admin_edit_community.html[커뮤니티 수정 API, window=_blank]
 
 === Community Comment API
 * link:community/admin_get_community_comments.html[커뮤니티 댓글 조회 API, window=_blank]
 * link:community/admin_hide_community_comment.html[커뮤니티 댓글 숨김 API, window=_blank]
+* link:community/admin_write_community_comment.html[커뮤니티 댓글 작성 API, window=_blank]
+* link:community/admin_edit_community_comment.html[커뮤니티 댓글 수정 API, window=_blank]
 
 == Operation API
 * link:operation/admin_get_operation_logs.html[운영 로그 조회 API, window=_blank]

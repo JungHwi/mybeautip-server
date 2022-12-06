@@ -104,6 +104,9 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
                 .andDo(print());
 
         result.andDo(document("admin_edit_community",
+                        pathParameters(
+                                parameterWithName("community_id").description("어드민 작성 게시글 ID")
+                        ),
                         requestFields(
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목. 속닥속닥에서만 필수").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
