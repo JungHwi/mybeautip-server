@@ -21,7 +21,7 @@ public class CommunityAuthority {
     }
 
     public static CommunityAuthority readAllRoleWriteUserAdmin() {
-        return new CommunityAuthority(Set.of(USER, ADMIN), ALL_ROLES);
+        return new CommunityAuthority(ALL_ROLES, Set.of(USER, ADMIN));
     }
 
     public static CommunityAuthority readAllRoleNoWriteRole() {
