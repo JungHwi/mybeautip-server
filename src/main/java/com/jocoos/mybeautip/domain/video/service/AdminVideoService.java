@@ -55,13 +55,20 @@ public class AdminVideoService {
     }
 
     @Transactional
+    public Long recommend(Long videoId, boolean isRecommended) {
+        Video video = videoDao.getVideo(videoId);
+        video.recommend(isRecommended);
+        return video.getId();
+    }
+
+    @Transactional
     public List<Long> arrange(List<Long> sortedIds) {
         return videoDao.arrangeByIndex(sortedIds);
     }
 
     private void fixAndChangeSortOrder(Video video, boolean isTopFix) {
         if (isTopFix) {
-            video.validCanFix();
+            video.validNotDelete();
             videoDao.fixAndAddToLastOrder(video.getId());
         } else {
             videoDao.unFixAndSortingToNull(video.getId());

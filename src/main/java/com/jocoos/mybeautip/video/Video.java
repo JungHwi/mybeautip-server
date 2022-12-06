@@ -175,17 +175,25 @@ public class Video {
 
     public void delete() {
         this.deletedAt = new Date();
-        unFix();
+        disableFixAndRecommend();
     }
 
-    public void validCanFix() {
+    public void recommend(boolean isRecommended) {
+        if (isRecommended) {
+            validNotDelete();
+        }
+        this.isRecommend = isRecommended;
+    }
+
+    public void validNotDelete() {
         if (deletedAt != null) {
-            throw new BadRequestException("삭제된 영상은 고정할 수 없습니다.");
+            throw new BadRequestException("삭제된 영상입니다.");
         }
     }
 
-    public void unFix() {
+    private void disableFixAndRecommend() {
         this.isTopFix = false;
+        this.isRecommend = false;
         this.sorting = null;
     }
 

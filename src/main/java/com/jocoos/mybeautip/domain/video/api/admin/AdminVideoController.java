@@ -74,6 +74,11 @@ public class AdminVideoController {
         return ResponseEntity.ok(new IdDto(service.hide(videoId, request.isBool())));
     }
 
+    @PatchMapping("/video/{videoId}/recommend")
+    public ResponseEntity<IdDto> recommendVideo(@PathVariable Long videoId, @RequestBody BooleanDto request) {
+        return ResponseEntity.ok(new IdDto(service.recommend(videoId, request.isBool())));
+    }
+
     @DeleteMapping("/video/{videoId}")
     public ResponseEntity<IdDto> deleteVideo(@PathVariable Long videoId) {
         return ResponseEntity.ok(new IdDto(service.delete(videoId)));
