@@ -10,6 +10,8 @@ import com.jocoos.mybeautip.domain.member.service.dao.UsernameCombinationWordDao
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
+import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
+import com.jocoos.mybeautip.domain.operation.code.OperationType;
 import com.jocoos.mybeautip.domain.operation.converter.OperationLogConverter;
 import com.jocoos.mybeautip.domain.operation.dto.OperationLogRequest;
 import com.jocoos.mybeautip.domain.operation.service.dao.OperationLogDao;
@@ -114,6 +116,28 @@ public class AdminMemberService {
         for (Member member : members) {
             dormantMemberDao.changeToDormantMember(member);
             member.changeStatus(MemberStatus.DORMANT);
+            result++;
+        }
+
+        return result;
+    }
+
+    @Transactional
+    public int offSuspendedMember() {
+        int result = 0;
+        List<Member> members = memberDao.getSuspendedTarget();
+        for (Member member : members) {
+            MemberStatus memberStatus = member.getStatus();
+            member.changeStatus(MemberStatus.ACTIVE);
+
+            OperationLogRequest logRequest = OperationLogRequest.builder()
+                    .targetId(String.valueOf(member.getId()))
+                    .targetType(OperationTargetType.MEMBER)
+                    .operationType(OperationType.MEMBER_SUSPENDED_OFF)
+                    .description(String.format("%s -> %s", memberStatus.name(), MemberStatus.ACTIVE.name()))
+                    .build();
+
+            operationLogDao.logging(logRequest);
             result++;
         }
 

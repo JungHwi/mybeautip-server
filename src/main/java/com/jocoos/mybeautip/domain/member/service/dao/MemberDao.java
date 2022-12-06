@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
+import com.jocoos.mybeautip.support.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +68,13 @@ public class MemberDao {
     public List<Member> getDormantTarget() {
         ZonedDateTime targetDate = ZonedDateTime.now().minusYears(1);
         return repository.findByStatusAndLastLoggedAtLessThan(MemberStatus.ACTIVE, targetDate);
+    }
+
+    @Transactional
+    public List<Member> getSuspendedTarget() {
+        ZonedDateTime targetDate = ZonedDateTime.now().minusWeeks(2);
+        Date date = DateUtils.toDate(targetDate);
+        return repository.findByStatusAndModifiedAtLessThan(MemberStatus.SUSPENDED, date);
     }
 
     @Transactional

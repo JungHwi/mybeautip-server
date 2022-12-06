@@ -23,7 +23,7 @@ class AdminOperationLogControllerTest extends RestDocsTestSupport {
     @Test
     void getOperationLogs() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/admin/operation/log?target_id=5&types=MEMBER_EXILE,MEMBER_SUSPENDED"))
+                        .get("/admin/operation/log?target_id=327&types=MEMBER_EXILE,MEMBER_SUSPENDED,"))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -40,8 +40,7 @@ class AdminOperationLogControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("운영 로그 ID"),
                         fieldWithPath("content.[].operation_type").type(JsonFieldType.STRING).description(generateLinkCode(OPERATION_TYPE)),
                         fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("운영 작업한 일시").attributes(getZonedDateFormat()),
-                        fieldWithPath("content.[].cursor").ignored(),
-                        fieldWithPath("content.[].admin_member").type(JsonFieldType.OBJECT).description("운영자 정보"),
+                        fieldWithPath("content.[].admin_member").type(JsonFieldType.OBJECT).description("운영자 정보").optional(),
                         fieldWithPath("content.[].admin_member.id").type(JsonFieldType.NUMBER).description("운영자 아이디"),
                         fieldWithPath("content.[].admin_member.username").type(JsonFieldType.STRING).description("작성자 이름"),
                         fieldWithPath("content.[].admin_member.email").type(JsonFieldType.STRING).description("운영자 이메일").optional(),
