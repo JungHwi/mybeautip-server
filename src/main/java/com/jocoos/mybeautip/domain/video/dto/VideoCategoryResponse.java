@@ -20,4 +20,9 @@ public class VideoCategoryResponse {
     private String shapeUrl;
 
     private VideoMaskType maskType;
+
+    public VideoCategoryResponse(Integer id, String title) {
+        this.id = id;
+        this.title = title;
+    }
 }

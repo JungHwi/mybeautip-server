@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,5 +46,18 @@ public class CommunityCategory {
 
     public boolean isCategoryType(CommunityCategoryType type) {
         return Objects.equals(type, this.type);
+    }
+
+
+    public void validReadAuth(Role role) {
+        type.validReadAuth(role);
+    }
+
+    public void validWrite(Community community) {
+        type.validWrite(community);
+    }
+
+    public void validContent(Role role, String contents) {
+        type.validContent(role, contents);
     }
 }

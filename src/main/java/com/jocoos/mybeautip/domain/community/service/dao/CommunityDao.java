@@ -31,9 +31,7 @@ public class CommunityDao {
 
     private final CommunityCategoryDao categoryDao;
     private final CommunityRepository repository;
-
     private final CommunityConverter converter;
-
     private final EntityManager em;
 
     @Transactional
@@ -43,8 +41,7 @@ public class CommunityDao {
 
         Community community = converter.convert(request);
         community.setMember(request.getMember());
-
-        community.valid();
+        community.validWrite();
 
         return repository.save(community);
     }
@@ -153,5 +150,9 @@ public class CommunityDao {
 
     public void setCommentCount(Long communityId, int count) {
         repository.setCommentCount(communityId, count);
+    }
+
+    public void hardDelete(Community community) {
+        repository.delete(community);
     }
 }

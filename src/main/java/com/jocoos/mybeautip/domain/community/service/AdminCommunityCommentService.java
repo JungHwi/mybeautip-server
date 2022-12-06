@@ -2,10 +2,13 @@ package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.domain.community.converter.AdminCommunityCommentConverter;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityCommentResponse;
+import com.jocoos.mybeautip.domain.community.dto.EditCommunityCommentRequest;
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +20,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
+
 @RequiredArgsConstructor
 @Service
 public class AdminCommunityCommentService {
@@ -25,6 +30,7 @@ public class AdminCommunityCommentService {
     private final CommunityCategoryDao categoryDao;
     private final CommunityCommentDeleteService deleteService;
     private final AdminCommunityCommentConverter converter;
+    private final CommunityCommentCRUDService crudService;
 
     @Transactional(readOnly = true)
     public PageResponse<AdminCommunityCommentResponse> getComments(Long communityId, Pageable pageable) {
@@ -60,5 +66,24 @@ public class AdminCommunityCommentService {
         CommunityComment comment = communityCommentDao.get(commentId);
         deleteService.hide(comment, isHide);
         return comment.getId();
+    }
+
+    @Transactional
+    public AdminCommunityCommentResponse write(WriteCommunityCommentRequest request) {
+        return converter.convert(crudService.write(request));
+    }
+
+    @Transactional
+    public Long edit(EditCommunityCommentRequest request) {
+        CommunityComment communityComment = communityCommentDao.get(request.getCommunityId(), request.getCommentId());
+        validAdminWrite(communityComment);
+        communityComment.setContents(request.getContents());
+        return communityComment.getId();
+    }
+
+    private void validAdminWrite(CommunityComment communityComment) {
+        if (!communityComment.isAdminWrite()) {
+            throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin is Deletable");
+        }
     }
 }

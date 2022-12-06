@@ -34,7 +34,16 @@ public class CommunityFile {
         this.file = file;
     }
 
+    public CommunityFile(String file, Community community) {
+        this.file = file;
+        this.community = community;
+    }
+
     public String getFileUrl() {
         return toUrl(file, COMMUNITY, community.getId());
+    }
+
+    public boolean isUrlEqual(String url) {
+        return getFileUrl().equals(url);
     }
 }

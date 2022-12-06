@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.vo;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import lombok.Builder;
@@ -12,7 +13,8 @@ import java.util.List;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 
 @Builder
-public record CommunitySearchCondition(Long eventId,
+public record CommunitySearchCondition(CommunityStatus status,
+                                       Long eventId,
                                        Long memberId,
                                        ZonedDateTime cursor,
                                        Pageable pageable,

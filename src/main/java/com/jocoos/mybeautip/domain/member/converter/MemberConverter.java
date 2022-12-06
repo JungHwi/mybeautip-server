@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.member.converter;
 
 import com.jocoos.mybeautip.admin.AdminMember;
-import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
+import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.member.Member;
@@ -85,10 +85,10 @@ public interface MemberConverter {
     }
 
 
-    CommunityMemberResponse convertToCommunityMember(Member member);
+    MemberResponse convertToCommunityMember(Member member);
 
     @AfterMapping
-    default void convertToCommunityMember(@MappingTarget CommunityMemberResponse response, Member member) {
+    default void convertToCommunityMember(@MappingTarget MemberResponse response, Member member) {
         response.setAvatarUrl(toUrl(member.getAvatarFilename(), AVATAR));
     }
 }

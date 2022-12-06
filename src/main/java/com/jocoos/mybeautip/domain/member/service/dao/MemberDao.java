@@ -1,9 +1,7 @@
 package com.jocoos.mybeautip.domain.member.service.dao;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.domain.member.persistence.domain.MemberMemo;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
-import com.jocoos.mybeautip.domain.member.persistence.repository.MemberMemoRepository;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
@@ -27,7 +25,6 @@ public class MemberDao {
 
     private final MemberRepository repository;
     private final MemberDetailRepository memberDetailRepository;
-    private final MemberMemoRepository memberMemoRepository;
 
     @Transactional(readOnly = true)
     public Member getMember(long memberId) {
@@ -48,19 +45,6 @@ public class MemberDao {
     @Transactional(readOnly = true)
     public Long countInvitedFriends(Long memberId) {
         return memberDetailRepository.countByInviterId(memberId);
-    }
-
-    @Transactional
-    public void updateMemberMemo(Long memberId, String memo) {
-        Member member = getMember(memberId);
-        memberMemoRepository.findByMember(member)
-                .ifPresentOrElse(
-                        memberMemo -> memberMemo.update(memo),
-                        () -> saveMemo(member, memo));
-    }
-
-    private void saveMemo(Member member, String memo) {
-        memberMemoRepository.save(new MemberMemo(memo, member));
     }
 
     @Transactional(readOnly = true)

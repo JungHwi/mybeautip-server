@@ -1,16 +1,22 @@
 package com.jocoos.mybeautip.domain.community.service;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.AdminCommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
+import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCategoryDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
+import com.jocoos.mybeautip.member.LegacyMemberService;
+import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +35,19 @@ public class AdminCommunityService {
     private final CommunityDao communityDao;
     private final EventDao eventDao;
     private final AdminCommunityConverter converter;
-    private final CommunityCommentDeleteService deleteService;
+    private final CommunityCommentDeleteService commentDeleteService;
+    private final CommunityFileService fileService;
+    private final LegacyMemberService legacyMemberService;
+
+    @Transactional
+    public AdminCommunityResponse write(WriteCommunityRequest request) {
+        setMember(request);
+        setFileDto(request);
+        Community community = communityDao.write(request);
+        fileService.write(request.getFiles(), community.getId());
+        return converter.convert(community);
+    }
+
 
     @Transactional(readOnly = true)
     public List<CommunityCategoryResponse> getCategories() {
@@ -38,8 +56,12 @@ public class AdminCommunityService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<AdminCommunityResponse> getCommunities(Long categoryId, Pageable pageable, SearchOption searchOption) {
-        CommunitySearchCondition condition = getSearchCondition(categoryId, pageable, searchOption);
+    public PageResponse<AdminCommunityResponse> getCommunities(CommunityStatus status,
+                                                               Long categoryId,
+                                                               Long eventId,
+                                                               Pageable pageable,
+                                                               SearchOption searchOption) {
+        CommunitySearchCondition condition = getSearchCondition(status, categoryId, eventId, pageable, searchOption);
         Page<AdminCommunityResponse> page = communityDao.getCommunitiesAllStatus(condition);
         return new PageResponse<>(page.getTotalElements(), page.getContent());
     }
@@ -49,6 +71,15 @@ public class AdminCommunityService {
         Community community = communityDao.get(communityId);
         String eventTitle = getEventTitle(community.getEventId());
         return converter.convert(community, eventTitle);
+    }
+
+    @Transactional
+    public Long edit(Long communityId, PatchCommunityRequest request) {
+        Community community = communityDao.get(communityId);
+        community.edit(request.getTitle(), request.getContents());
+        editFiles(request, community);
+        communityDao.save(community);
+        return community.getId();
     }
 
     @Transactional
@@ -70,14 +101,44 @@ public class AdminCommunityService {
     public Long hideCommunity(Long communityId, boolean isHide) {
         Community community = communityDao.get(communityId);
         community.hide(isHide);
-        deleteService.hide(communityId, isHide);
+        commentDeleteService.hide(communityId, isHide);
         return community.getId();
     }
 
-    private CommunitySearchCondition getSearchCondition(Long categoryId, Pageable pageable, SearchOption searchOption) {
+    @Transactional
+    public Long delete(Long communityId) {
+        Community community = communityDao.get(communityId);
+        community.deleteAdminWrite();
+        commentDeleteService.delete(community.getId());
+        return community.getId();
+    }
+
+    private void setMember(WriteCommunityRequest request) {
+        Member member = legacyMemberService.currentMember();
+        request.setMember(member);
+    }
+
+    private void setFileDto(WriteCommunityRequest request) {
+        request.fileUrlsToFileDto();
+    }
+
+    private void editFiles(PatchCommunityRequest request, Community community) {
+        List<FileDto> editFiles = request.getFileDto(community.getCommunityFileList());
+        fileService.editFiles(community, editFiles);
+        request.getImageUrls().ifPresent(community::sortFilesByRequestIndex);
+    }
+
+    private CommunitySearchCondition getSearchCondition(CommunityStatus status,
+                                                        Long categoryId,
+                                                        Long eventId,
+                                                        Pageable pageable,
+                                                        SearchOption searchOption) {
         return CommunitySearchCondition.builder()
+                .status(status)
+                .eventId(eventId)
                 .pageable(pageable)
                 .searchOption(searchOption)
+                .eventId(eventId)
                 .categories(getCategories(categoryId))
                 .build();
     }

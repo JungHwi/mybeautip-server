@@ -23,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
+import static com.jocoos.mybeautip.domain.event.code.EventStatus.END;
+import static com.jocoos.mybeautip.domain.event.code.EventStatus.PROGRESS;
 import static com.jocoos.mybeautip.global.util.FileUtil.isChange;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
@@ -75,7 +77,7 @@ public class AdminEventService {
         copyOriginalEventFiles(event, request);
 
         event = eventDao.edit(event, request);
-
+        event.unFixByStatusChange(request.getStatus());
         editEventFile(request);
         return converter.convert(event);
     }
@@ -97,12 +99,19 @@ public class AdminEventService {
                 .build();
     }
 
+    @Transactional
+    public Long delete(Long eventId) {
+        Event event = eventDao.getEvent(eventId);
+        eventDao.hardDelete(event);
+        return eventId;
+    }
+
     private int startStatus() {
         List<Event> eventList = eventDao.findStartEvent();
         List<Long> ids = eventList.stream()
                 .map(Event::getId)
                 .toList();
-        return eventDao.updateStatus(ids, EventStatus.PROGRESS);
+        return eventDao.updateStatus(ids, PROGRESS);
     }
 
     private int endStatus() {
@@ -110,7 +119,7 @@ public class AdminEventService {
         List<Long> ids = eventList.stream()
                 .map(Event::getId)
                 .toList();
-        return eventDao.updateStatus(ids, EventStatus.END);
+        return eventDao.updateStatusAndIsTopFixAndSorting(ids, END, false, null);
     }
 
     private void copyOriginalEventFiles(Event event, EditEventRequest request) {

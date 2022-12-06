@@ -1,11 +1,15 @@
 package com.jocoos.mybeautip.domain.community.api.admin;
 
+import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +24,116 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class AdminCommunityControllerTest extends RestDocsTestSupport {
+
+
+    @Transactional
+    @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Test
+    void writeCommunity() throws Exception {
+        WriteCommunityRequest request = WriteCommunityRequest.builder()
+                .categoryId(5L)
+                .title("Mock Title")
+                .contents("Mock Contents")
+                .build();
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .post("/admin/community")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andDo(print());
+
+        result.andDo(document("admin_write_community",
+                        requestFields(
+                                fieldWithPath("category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                                fieldWithPath("event_id").type(JsonFieldType.NUMBER).description("이벤트 아이디. 써봐줄게 일때 관련된 이벤트 아이디.").optional(),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_STATUS)),
+                                fieldWithPath("title").type(JsonFieldType.NUMBER).description("제목").optional(),
+                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("image_urls").type(JsonFieldType.ARRAY).description("이미지 URL").optional()
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 ID"),
+                                fieldWithPath("is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부").optional(),
+                                fieldWithPath("is_top_fix").type(JsonFieldType.BOOLEAN).description("상단 고정 여부").optional(),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_STATUS)),
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
+                                fieldWithPath("event_title").type(JsonFieldType.STRING).description("이벤트 제목").optional(),
+                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용").optional(),
+                                fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
+                                fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
+                                fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
+                                fieldWithPath("votes.[].count").type(JsonFieldType.NUMBER).description("투표 수"),
+                                fieldWithPath("votes.[].is_voted").type(JsonFieldType.BOOLEAN).description("투표 파일에 대한 유저 투표 여부"),
+                                fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
+                                fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
+                                fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
+                                fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
+                                fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                                fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보.").optional(),
+                                fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(generateLinkCode(MEMBER_STATUS)).optional(),
+                                fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
+                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
+                                fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                                fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
+                                fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(generateLinkCode(COMMUNITY_CATEGORY_TYPE)),
+                                fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목")
+                        )
+                )
+        );
+    }
+
+    @Transactional
+    @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Test
+    void editCommunity() throws Exception {
+        PatchCommunityRequest request = PatchCommunityRequest
+                .builder()
+                .contents(JsonNullable.of("수정"))
+                .build();
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/admin/community/{community_id}", 10)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_edit_community",
+                        requestFields(
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목. 속닥속닥에서만 필수").optional(),
+                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("image_urls").type(JsonFieldType.ARRAY).description("이미지 URL").optional()
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 ID")
+                        )
+                )
+        );
+    }
+
+    @Transactional
+    @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Test
+    void deleteAdminWriteCommunity() throws Exception {
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .delete("/admin/community/{community_id}", 10))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_delete_community",
+                        pathParameters(
+                                parameterWithName("community_id").description("어드민 작성 게시글 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("커뮤니티 ID")
+                        )
+                )
+        );
+    }
 
     @Test
     void getAdminCategories() throws Exception {

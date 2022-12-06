@@ -62,4 +62,11 @@ public class ZonedDateTimeUtil {
         }
         return localDate.atStartOfDay(zoneId).withZoneSameInstant(UTC);
     }
+
+    public static ZonedDateTime toUTCZoned(LocalDateTime localDateTime, ZoneId zoneId) {
+        if (localDateTime == null) {
+            return null;
+        }
+        return localDateTime.atZone(zoneId).withZoneSameInstant(UTC);
+    }
 }

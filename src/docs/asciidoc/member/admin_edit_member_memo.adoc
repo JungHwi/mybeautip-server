@@ -1,0 +1,3 @@
+== Edit Member Memo API
+
+operation::admin_edit_member_memo[snippets='http-request,path-parameters,request-fields,http-response,response-fields']

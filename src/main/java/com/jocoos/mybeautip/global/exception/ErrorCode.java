@@ -16,6 +16,7 @@ public enum ErrorCode implements CodeValue {
     INVALID_DATE_FORMAT("날짜 포맷 오류"),
     ALREADY_USED("이미 사용중"),
     BANNED_WORD("금칙어 포함"),
+    NOT_A_WRITER("작성자가 아님"),
 
     // MEMBER
     MEMBER_NOT_FOUND("회원 정보 없음"),
@@ -37,6 +38,9 @@ public enum ErrorCode implements CodeValue {
     NO_ADDRESS("주소 정보 없음"),
     RANDOM_USERNAME_NOT_FOUND("랜덤 닉네임 찾지 못함"),
 
+    // MEMBER MEMO
+    MEMBER_MEMO_NOT_FOUND("메모 정보 없음"),
+
     // EVENT
     NOT_STARTED_EVENT("아직 시작 안 한 이벤트"),
     CAN_NOT_JOIN_STATUS("참가 할 수 없는 이벤트"),
@@ -50,6 +54,8 @@ public enum ErrorCode implements CodeValue {
     NOT_SUPPORTED_VOTE_NUM("요구되는 파일 수와 다름"),
     DUPLICATE_VOTE("투표는 한번만 가능함"),
     COMMUNITY_VOTE_NOT_MATCH("게시물에 등록된 파일이 아님"),
+    TOO_MANY_FILE("파일 수가 너무 많음"),
+    CATEGORY_NO_WRITABLE("작성이 가능한 카테고리가 아님"),
 
     // VIDEO
     VIDEO_NOT_FOUND("비디오 정보 없음"),
@@ -91,8 +97,16 @@ public enum ErrorCode implements CodeValue {
     COMMENT_NOT_FOUND("댓글 정보 없음"),
     INVALID_REQUEST_BODY("잘못된 요청"),
 
+    // Fix
+    NOT_SUPPORTED_FIX_STATUS("상단 고정이 가능한 상태가 아닙니다"),
+
     // THIRD PARTY
-    S3_ERROR("S3 에러");
+    S3_ERROR("S3 에러"),
+
+
+    // Placard
+    ONLY_ACTIVE_CAN_FIX("활성화된 플랜카드만 고정됨")
+    ;
 
     private final String description;
 

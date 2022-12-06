@@ -3,10 +3,7 @@ package com.jocoos.mybeautip.domain.video.converter;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.video.VideoCategoryMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -19,8 +16,10 @@ public interface VideoCategoryConverter {
     @Mappings({
         @Mapping(target = "shapeUrl", source = "shapeFile", qualifiedByName = "convertToUrl")
     })
+    @Named("all")
     VideoCategoryResponse convert(VideoCategory entity);
 
+    @IterableMapping(qualifiedByName = "all")
     List<VideoCategoryResponse> convert(List<VideoCategory> entity);
 
     @Mappings({
@@ -39,4 +38,12 @@ public interface VideoCategoryConverter {
         return toUrl(shapeFile, VIDEO_CATEGORY);
     }
 
+
+    @IterableMapping(qualifiedByName = "exclude_shape_info")
+    List<VideoCategoryResponse> excludeShapeInfo(List<VideoCategory> categories);
+
+    @Named("exclude_shape_info")
+    @Mapping(target = "shapeUrl", ignore = true)
+    @Mapping(target = "maskType", ignore = true)
+    VideoCategoryResponse excludeShapeInfo(VideoCategory category);
 }

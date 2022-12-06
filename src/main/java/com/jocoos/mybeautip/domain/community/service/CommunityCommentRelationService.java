@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.domain.community.service;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
-import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
+import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentLike;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCommentReport;
@@ -71,7 +71,7 @@ public class CommunityCommentRelationService {
         List<Long> writerIds = communityCommentResponses.stream()
                 .map(CommunityCommentResponse::getMember)
                 .collect(Collectors.toList()).stream()
-                .map(CommunityMemberResponse::getId)
+                .map(MemberResponse::getId)
                 .collect(Collectors.toList());
 
         Map<Long, CommunityCommentLike> likeMap = getLikeMap(member.getId(), commentIds);

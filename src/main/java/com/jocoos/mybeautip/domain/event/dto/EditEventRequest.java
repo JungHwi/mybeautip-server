@@ -21,8 +21,6 @@ public class EditEventRequest {
     @NotNull(message = "status must not be null")
     private EventStatus status;
 
-    private Integer sorting;
-
     @NotNull(message = "visible must not be null")
     private Boolean isVisible;
 

@@ -34,16 +34,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/api/admin/manual/videos")
-public class AdminVideoController {
+public class LegacyAdminVideoController {
     private final LegacyVideoService legacyVideoService;
     private final LegacyMemberService legacyMemberService;
     private final VideoRepository videoRepository;
     private final ViewRecodingRepository viewRecodingRepository;
 
-    public AdminVideoController(LegacyVideoService legacyVideoService,
-                                LegacyMemberService legacyMemberService,
-                                VideoRepository videoRepository,
-                                ViewRecodingRepository viewRecodingRepository) {
+    public LegacyAdminVideoController(LegacyVideoService legacyVideoService,
+                                      LegacyMemberService legacyMemberService,
+                                      VideoRepository videoRepository,
+                                      ViewRecodingRepository viewRecodingRepository) {
         this.legacyVideoService = legacyVideoService;
         this.legacyMemberService = legacyMemberService;
         this.videoRepository = videoRepository;

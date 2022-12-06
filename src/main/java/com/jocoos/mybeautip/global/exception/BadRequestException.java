@@ -33,6 +33,10 @@ public class BadRequestException extends MybeautipException {
         super(errorCode, e);
     }
 
+    public BadRequestException(ErrorCode errorCode) {
+        super(errorCode, errorCode.getDescription());
+    }
+
     private String createErrorDescription(FieldError error) {
         return String.format("%s %s", error.getField(), error.getDefaultMessage());
     }

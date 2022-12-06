@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.*;
 import com.jocoos.mybeautip.domain.member.service.AdminMemberService;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
-import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -80,11 +79,6 @@ public class AdminMemberController {
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size) {
         return ResponseEntity.ok(service.getReportHistory(memberId, PageRequest.of(page - 1, size)));
-    }
-
-    @PatchMapping("/member/{memberId}/memo")
-    public ResponseEntity<IdDto> updateMemo(@PathVariable Long memberId, @RequestBody AdminMemoRequest request) {
-        return ResponseEntity.ok(new IdDto(service.updateMemo(memberId, request.memo())));
     }
 
     @PatchMapping("/member/username/refresh")

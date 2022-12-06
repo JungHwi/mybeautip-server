@@ -76,12 +76,6 @@ public class AdminMemberService {
         return converter.toPointResponse(memberPoints);
     }
 
-    @Transactional
-    public Long updateMemo(Long memberId, String memo) {
-        memberDao.updateMemberMemo(memberId, memo);
-        return memberId;
-    }
-
     @Transactional(readOnly = true)
     public PageResponse<AdminMemberReportResponse> getReportHistory(Long memberId, Pageable pageable) {
         return contentReportDao.getAllAccusedBy(memberId, pageable);
