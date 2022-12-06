@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.member.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
+import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberMemo;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
@@ -16,13 +16,13 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 public class MemoResponse {
     private final Long id;
     private final String content;
-    private final CommunityMemberResponse member;
+    private final MemberResponse member;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime createdAt;
 
     @QueryProjection
-    public MemoResponse(MemberMemo memberMemo, CommunityMemberResponse memberResponse) {
+    public MemoResponse(MemberMemo memberMemo, MemberResponse memberResponse) {
         this.id = memberMemo.getId();
         this.content = memberMemo.getContent();
         this.member = memberResponse;
@@ -32,7 +32,7 @@ public class MemoResponse {
     public MemoResponse(MemberMemo memberMemo) {
         this.id = memberMemo.getId();
         this.content = memberMemo.getContent();
-        this.member = new CommunityMemberResponse(memberMemo.getCreatedBy().getId(), memberMemo.getCreatedBy().getUsername());
+        this.member = new MemberResponse(memberMemo.getCreatedBy().getId(), memberMemo.getCreatedBy().getUsername());
         this.createdAt = memberMemo.getCreatedAt();
     }
 }

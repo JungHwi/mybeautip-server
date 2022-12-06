@@ -31,6 +31,11 @@ public class MemberResponse {
         this.avatarUrl = toUrl(avatarFilename, AVATAR);
     }
 
+    @QueryProjection
+    public MemberResponse(Long id, String username) {
+        this(id, null, username, null);
+    }
+
 
     public static MemberResponse from(Member member) {
         return new MemberResponse(

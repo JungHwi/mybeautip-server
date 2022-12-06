@@ -84,6 +84,6 @@ public class AdminVideoController {
 
     @PatchMapping("/video/order")
     public ResponseEntity<SortOrderDto> changeOrderOfVideo(@RequestBody SortOrderDto request) {
-        return ResponseEntity.ok(new SortOrderDto(service.arrange(request.sortedIds())));
+        return ResponseEntity.ok(new SortOrderDto(service.arrange(request.getSortedIds())));
     }
 }

@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.member.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
-import com.jocoos.mybeautip.domain.community.dto.QCommunityMemberResponse;
+import com.jocoos.mybeautip.domain.community.dto.QMemberResponse;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
@@ -145,8 +145,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         return new QMemoResponse(memberMemo, memberResponse(memoCreatedBy).skipNulls());
     }
 
-    private QCommunityMemberResponse memberResponse(QMember member) {
-        return new QCommunityMemberResponse(member.id, member.username);
+    private QMemberResponse memberResponse(QMember member) {
+        return new QMemberResponse(member.id, member.username);
     }
 
     private static BooleanExpression eqId(Long memberId) {
