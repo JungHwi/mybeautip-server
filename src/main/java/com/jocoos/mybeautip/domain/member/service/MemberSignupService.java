@@ -118,7 +118,7 @@ public class MemberSignupService {
             case DORMANT:
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
                         .memberId(member.getId())
-                        .date(member.getLastLoggedAt().plusYears(1))
+                        .date(member.getModifiedAtZoned())
                         .build();
                 throw new BadRequestException(ErrorCode.DORMANT_MEMBER, "dormant_member", response);
             case WITHDRAWAL:

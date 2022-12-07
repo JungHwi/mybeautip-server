@@ -72,7 +72,7 @@ public class SocialLoginService {
             case DORMANT -> {
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
                         .memberId(member.getId())
-                        .date(member.getLastLoggedAt().plusYears(1))
+                        .date(member.getModifiedAtZoned())
                         .build();
                 throw new BadRequestException(ErrorCode.DORMANT_MEMBER, "휴면 회원", response);
             }

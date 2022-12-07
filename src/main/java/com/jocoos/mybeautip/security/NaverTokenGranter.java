@@ -71,7 +71,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
             case DORMANT -> {
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
                         .memberId(member.getId())
-                        .date(member.getLastLoggedAt().plusYears(1))
+                        .date(member.getModifiedAtZoned())
                         .build();
                 String responseString = StringConvertUtil.convertToJson(response);
                 throw new AuthenticationMemberNotFoundException(ErrorCode.DORMANT_MEMBER, responseString);
