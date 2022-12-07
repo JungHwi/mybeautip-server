@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.member.api.batch;
 
 import com.jocoos.mybeautip.domain.member.service.AdminMemberService;
+import com.jocoos.mybeautip.domain.member.service.social.DormantMemberService;
 import com.jocoos.mybeautip.global.dto.single.IntegerDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,10 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class BatchMemberController {
 
     private final AdminMemberService service;
+    private final DormantMemberService dormantMemberService;
 
     @PatchMapping("/member/dormant")
     public ResponseEntity<IntegerDto> changeDormantMember() {
-        int result = service.changeDormantMember();
+        int result = dormantMemberService.changeDormantMember();
         return new ResponseEntity<>(new IntegerDto(result), HttpStatus.OK);
     }
 

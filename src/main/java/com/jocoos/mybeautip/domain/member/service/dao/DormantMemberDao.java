@@ -16,8 +16,11 @@ public class DormantMemberDao {
     private final DormantMemberRepository repository;
     private final DormantMemberConverter converter;
 
-    @Transactional()
+    @Transactional
     public DormantMember changeToDormantMember(Member member) {
+        if (repository.existsById(member.getId())) {
+            return repository.getById(member.getId());
+        }
         DormantMember dormantMember = converter.convertForDormant(member);
         return repository.save(dormantMember);
     }
