@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 // FIXME 꼭 지우기 바람!! 현재는 서비스 개발이 운영보다 중요하다고 판단하여 Test Package 만듬.
 // FIXME 지울 때 ResourceServerConfig 에서 /test/** 권한 열려 있는 것도 함께 삭제.
-@Profile("!production")
+@Profile({"local", "dev", "stage"})
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/test")
