@@ -41,8 +41,8 @@ public class AdminEventController {
     @GetMapping("/event")
     public ResponseEntity<PageResponse<AdminEventResponse>> getEvents(
             @RequestParam(required = false) EventStatus status,
-            @RequestParam(required = false, defaultValue = "1") Long page,
-            @RequestParam(required = false, defaultValue = "10") Long size,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "createdAt") String sort,
             @RequestParam(required = false, defaultValue = "DESC") String order,
             @RequestParam(required = false) String search,
@@ -61,8 +61,9 @@ public class AdminEventController {
 
         EventSearchCondition condition = EventSearchCondition.builder()
                 .statuses(status == null ? null : Collections.singleton(status))
+                .communityCategoryId(communityCategoryId)
                 .searchOption(searchOption)
-                .paging(Paging.page(page - 1, size))
+                .paging(Paging.offsetBased(page, size))
                 .sort(new Sort(sort, order))
                 .build();
 

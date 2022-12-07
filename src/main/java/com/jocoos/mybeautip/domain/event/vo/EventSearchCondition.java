@@ -23,6 +23,7 @@ public class EventSearchCondition {
     private final Paging paging;
     private final Sort sort;
     private final SearchOption searchOption;
+    private final Long communityCategoryId;
 
     public boolean isOrderByJoinCount() {
         return sort.isOrderByJoinCount();
