@@ -64,7 +64,8 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                                 parameterWithName("search").description("검색 필드,검색 키워드").optional(),
                                 parameterWithName("startAt").description("검색 시작일").optional(),
                                 parameterWithName("endAt").description("검색 종료").optional(),
-                                parameterWithName("is_top_fix").description("상단 고정 여부 (boolean)").optional()
+                                parameterWithName("is_top_fix").description("상단 고정 여부 (boolean)").optional(),
+                                parameterWithName("community_category_id").description("커뮤니티 카테고리 ID").optional()
                         ),
                         responseFields(
                                 fieldWithPath("total").type(JsonFieldType.NUMBER).description("총 개수"),

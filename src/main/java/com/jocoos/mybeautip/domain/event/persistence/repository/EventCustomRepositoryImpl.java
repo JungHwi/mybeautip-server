@@ -104,24 +104,26 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                         loeCreatedAt(condition.getEndAt()),
                         startAtBefore(condition.getBetween()),
                         endAtAfter(condition.getBetween()),
-                        isTopFix(condition.isTopFix())
+                        isTopFix(condition.isTopFix()),
+                        eqRelationId(condition.getCommunityCategoryId())
                 ));
     }
 
     private JPAQuery<Event> paging(JPAQuery<Event> baseQuery, Paging paging) {
+
         if (paging == null) {
             return baseQuery;
         }
-        
 
-        if (paging.isNoOffset()) {
-            return baseQuery
+        return switch (paging.getType()) {
+            case NO_PAGING -> baseQuery;
+            case OFFSET -> baseQuery
+                    .offset(paging.getOffset())
                     .limit(paging.getSize());
-        }
-
-        return baseQuery
-                .offset(paging.getOffset())
-                .limit(paging.getSize());
+            case CURSOR -> baseQuery
+                    .where()
+                    .limit(paging.getSize());
+        };
     }
 
     private JPAQuery<Event> orderByDefault(JPAQuery<Event> query) {
@@ -175,6 +177,10 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
 
     private BooleanExpression eqId(Long eventId) {
         return eventId == null ? null : event.id.eq(eventId);
+    }
+
+    private BooleanExpression eqRelationId(Long relationId) {
+        return relationId == null ? null : event.relationId.eq(relationId);
     }
 
     private BooleanExpression isTopFix(Boolean isTopFix) {
