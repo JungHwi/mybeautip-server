@@ -109,18 +109,6 @@ public class AdminMemberService {
         content.forEach(c -> c.setReportCount(idCountMap.getOrDefault(c.getId(), 0)));
     }
 
-    @Transactional
-    public int changeDormantMember() {
-        int result = 0;
-        List<Member> members = memberDao.getDormantTarget();
-        for (Member member : members) {
-            dormantMemberDao.changeToDormantMember(member);
-            member.changeStatus(MemberStatus.DORMANT);
-            result++;
-        }
-
-        return result;
-    }
 
     @Transactional
     public int offSuspendedMember() {
