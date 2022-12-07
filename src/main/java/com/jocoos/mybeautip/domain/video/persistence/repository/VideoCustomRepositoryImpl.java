@@ -134,7 +134,8 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         loeCreatedAt(condition.endAtDate()),
                         isReported(condition.isReported()),
                         isTopFix(condition.isTopFix()),
-                        eqVisibility(condition.visibility())
+                        eqVisibility(condition.visibility()),
+                        isRecommended(condition.isRecommended())
                 ));
 
         dynamicQueryForCommentSearch(condition, baseQuery);
@@ -169,6 +170,13 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 Ops.STRING_CONTAINS_IC,
                 Expressions.path(String.class, video, searchOption.getSearchField()),
                 Expressions.constant(searchOption.getKeyword()));
+    }
+
+    private BooleanExpression isRecommended(Boolean isRecommended) {
+        if (isRecommended == null) {
+            return null;
+        }
+        return isRecommended ? video.isRecommended.isTrue() : video.isRecommended.isFalse();
     }
 
     private BooleanExpression isReported(Boolean isReported) {
@@ -210,7 +218,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     }
 
     private JPAQuery<Video> baseSearchQuery(VideoSearchCondition condition) {
-        return repository.query(query -> query
+        JPAQuery<Video> baseQuery = repository.query(query -> query
                 .select(video)
                 .from(video)
                 .join(video.member, member).fetchJoin()
@@ -220,11 +228,18 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         searchCondition(condition.getKeyword()),
                         lessOrEqualThanCreatedAt(condition.getCursor()),
                         eqVisibility(PUBLIC),
+                        isRecommended(condition.getIsRecommended()),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
                 )
-                .limit(condition.getSize())
                 .orderBy(video.createdAt.desc()));
+
+        if (condition.getSize() != 0) {
+            baseQuery
+                    .limit(condition.getSize());
+        }
+
+        return baseQuery;
     }
 
     private void updateAllSortingNullAndIsTopFixFalse() {

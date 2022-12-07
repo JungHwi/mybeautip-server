@@ -9,7 +9,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 
 import java.util.Collection;
 import java.util.Date;
@@ -154,8 +153,5 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
     List<Video> findByIdInAndVisibility(List<Long> ids, String visibility);
 
     List<Video> findByIdIn(List<Long> ids);
-
-    // FIXME 팝업 임시 비디오 연결 위한 메소드 변경 후 삭제할것
-    Video findByOutputType(String eventId);
 
 }
