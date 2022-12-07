@@ -180,6 +180,30 @@ class AdminVideoControllerTest extends RestDocsTestSupport {
 
     @Test
     @Transactional
+    void recommendVideo() throws Exception {
+        BooleanDto request = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/admin/video/{video_id}/recommend", 3)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_recommend_video",
+                pathParameters(
+                        parameterWithName("video_id").description("비디오 ID")
+                ),
+                requestFields(
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("추천 여부")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("비디오 ID")
+                )));
+    }
+
+    @Test
+    @Transactional
     void changeOrderVideo() throws Exception {
         List<Long> ids = List.of(5L, 4L, 3L);
         SortOrderDto request = new SortOrderDto(ids);
