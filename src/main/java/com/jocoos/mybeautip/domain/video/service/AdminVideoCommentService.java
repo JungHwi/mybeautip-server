@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.video.service;
 
+import com.jocoos.mybeautip.domain.video.converter.VideoCommentConverter;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoCommentResponse;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoCommentDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
@@ -16,6 +17,15 @@ public class AdminVideoCommentService {
 
     private final VideoCommentDao videoCommentDao;
     private final VideoCommentDeleteService deleteService;
+    private final VideoCommentConverter converter;
+
+    @Transactional
+    public AdminVideoCommentResponse write(Long videoId, String content, Long parentId) {
+        Comment comment = converter.convert(videoId, content, parentId);
+        Comment savedComment = videoCommentDao.save(comment);
+        return new AdminVideoCommentResponse(savedComment);
+    }
+    
 
     @Transactional(readOnly = true)
     public PageResponse<AdminVideoCommentResponse> getVideoComments(Long videoId, Pageable pageable) {

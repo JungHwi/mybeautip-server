@@ -29,11 +29,8 @@ public class AdminVideoCommentResponse {
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime createdAt;
 
-
-    @QueryProjection
-    public AdminVideoCommentResponse(Comment comment, Member member, List<AdminVideoCommentResponse> children) {
-        this(comment, member);
-        this.children = children;
+    public AdminVideoCommentResponse(Comment comment) {
+        this(comment, comment.getCreatedBy());
     }
 
     @QueryProjection
@@ -45,5 +42,12 @@ public class AdminVideoCommentResponse {
         this.reportCount = comment.getReportCount();
         this.createdAt = comment.getCreatedAtUTCZoned();
         this.member = MemberResponse.from(member);
+    }
+
+
+    @QueryProjection
+    public AdminVideoCommentResponse(Comment comment, Member member, List<AdminVideoCommentResponse> children) {
+        this(comment, member);
+        this.children = children;
     }
 }

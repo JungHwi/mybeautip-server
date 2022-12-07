@@ -1,15 +1,21 @@
 package com.jocoos.mybeautip.domain.video.api.admin;
 
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoCommentResponse;
+import com.jocoos.mybeautip.domain.video.dto.WriteVideoCommentRequest;
 import com.jocoos.mybeautip.domain.video.service.AdminVideoCommentService;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
@@ -19,6 +25,16 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 public class AdminVideoCommentController {
 
     private final AdminVideoCommentService service;
+
+    @PostMapping("/video/{videoId}/comment")
+    public ResponseEntity<AdminVideoCommentResponse> write(@PathVariable Long videoId,
+                                                           @RequestBody WriteVideoCommentRequest request) {
+        AdminVideoCommentResponse response = service.write(videoId, request.getComment(), request.getParentId());
+        URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .build()
+                .toUri();
+        return ResponseEntity.created(location).body(response);
+    }
 
     @GetMapping("/video/{videoId}/comment")
     public ResponseEntity<PageResponse<AdminVideoCommentResponse>> getVideoComments(
