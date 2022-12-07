@@ -29,6 +29,18 @@ public class VideoDao {
                 .cursor(cursor)
                 .size(size)
                 .build();
+        return getVideos(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Video> getRecommendedVideos() {
+        VideoSearchCondition condition = VideoSearchCondition.builder()
+                .isRecommended(true)
+                .build();
+        return repository.getVideos(condition);
+    }
+
+    public List<Video> getVideos(VideoSearchCondition condition) {
         return repository.getVideos(condition);
     }
 
@@ -39,7 +51,10 @@ public class VideoDao {
 
     @Transactional(readOnly = true)
     public List<Video> getVideos(int size) {
-        return getVideos(null, null, size);
+        VideoSearchCondition condition = VideoSearchCondition.builder()
+                .size(size)
+                .build();
+        return getVideos(condition);
     }
 
     @Transactional(readOnly = true)

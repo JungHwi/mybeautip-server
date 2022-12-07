@@ -114,7 +114,7 @@ public class Video {
     private Boolean isTopFix;
 
     @Column
-    private Boolean isRecommend;
+    private Boolean isRecommended;
 
     @Transient
     private boolean isFirstOpen;
@@ -182,7 +182,7 @@ public class Video {
         if (isRecommended) {
             validNotDelete();
         }
-        this.isRecommend = isRecommended;
+        this.isRecommended = isRecommended;
     }
 
     public void validNotDelete() {
@@ -193,7 +193,7 @@ public class Video {
 
     private void disableFixAndRecommend() {
         this.isTopFix = false;
-        this.isRecommend = false;
+        this.isRecommended = false;
         this.sorting = null;
     }
 

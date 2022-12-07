@@ -27,6 +27,12 @@ public class VideoService {
     }
 
     @Transactional(readOnly = true)
+    public List<VideoResponse> findRecommendedVideos() {
+        List<Video> videos = videoDao.getRecommendedVideos();
+        return videoConvertService.toResponses(videos);
+    }
+
+    @Transactional(readOnly = true)
     public VideoResponse getVideo(long videoId) {
         Video video = videoDao.getVideo(videoId);
         return videoConvertService.toResponse(video);
