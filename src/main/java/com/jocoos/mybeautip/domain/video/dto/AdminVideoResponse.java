@@ -26,6 +26,7 @@ public class AdminVideoResponse {
     private final String title;
     private final String content;
     private final Boolean isTopFix;
+    private final Boolean isRecommended;
     private final int viewCount;
     private final int likeCount;
     private final int commentCount;
@@ -47,6 +48,7 @@ public class AdminVideoResponse {
         this.title = video.getTitle();
         this.content = video.getContent();
         this.isTopFix = video.isTopFixTrueOrNull();
+        this.isRecommended = video.isRecommendedTrueOrNull();
         this.viewCount = video.getViewCount();
         this.likeCount = video.getLikeCount();
         this.commentCount = video.getCommentCount();

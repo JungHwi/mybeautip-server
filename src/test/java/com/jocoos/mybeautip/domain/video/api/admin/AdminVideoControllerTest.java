@@ -42,7 +42,8 @@ class AdminVideoControllerTest extends RestDocsTestSupport {
                         parameterWithName("start_at").description("검색 시작일자").attributes(getLocalDateFormat()).optional(),
                         parameterWithName("end_at").description("검색 종료일자").attributes(getLocalDateFormat()).optional(),
                         parameterWithName("is_reported").description("신고 여부 (boolean)").optional(),
-                        parameterWithName("is_top_fix").description("상단 고정 여부 (boolean)").optional()
+                        parameterWithName("is_top_fix").description("상단 고정 여부 (boolean)").optional(),
+                        parameterWithName("is_recommended").description("추천 여부 (boolean)").optional()
                 ),
                 responseFields(
                         fieldWithPath("total").type(JsonFieldType.NUMBER).description("총 비디오 개수"),
@@ -93,6 +94,7 @@ class AdminVideoControllerTest extends RestDocsTestSupport {
                         fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
                         fieldWithPath("content").type(JsonFieldType.STRING).description("내용").optional(),
                         fieldWithPath("is_top_fix").type(JsonFieldType.BOOLEAN).description("상단 고정 여부").optional(),
+                        fieldWithPath("is_recommended").type(JsonFieldType.BOOLEAN).description("추천 여부").optional(),
                         fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                         fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                         fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),

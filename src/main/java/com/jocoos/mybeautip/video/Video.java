@@ -200,4 +200,8 @@ public class Video {
     public Boolean isTopFixTrueOrNull() {
         return TRUE.equals(isTopFix) ? isTopFix : null;
     }
+
+    public Boolean isRecommendedTrueOrNull() {
+        return TRUE.equals(isRecommended) ? isRecommended : null;
+    }
 }
