@@ -64,5 +64,10 @@ public class VideoCommentDao {
     public Comment save(Comment comment) {
         return repository.save(comment);
     }
+
+    public Comment get(Long videoId, Long commentId) {
+        return repository.findByIdAndVideoId(commentId, videoId)
+                .orElseThrow(() -> new NotFoundException("video comment not exists, id - " + commentId));
+    }
 }
 

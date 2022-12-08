@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.member.comment;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.global.code.CodeValue;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.util.StringUtils;
@@ -10,8 +12,7 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DEFAULT;
-import static com.jocoos.mybeautip.member.comment.Comment.CommentState.getType;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 import static com.jocoos.mybeautip.member.comment.Comment.CommentState.*;
 
@@ -105,6 +106,17 @@ public class Comment extends MemberAuditable {
 
     public boolean isChild() {
         return parentId != null;
+    }
+
+    public void editComment(String editedComment, Member editor) {
+        validEditAuth(editor);
+        this.comment = editedComment;
+    }
+
+    private void validEditAuth(Member editor) {
+        if (createdBy.isAdmin() && !editor.isAdmin()) {
+            throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin Can Accessible");
+        }
     }
 
     @Getter
