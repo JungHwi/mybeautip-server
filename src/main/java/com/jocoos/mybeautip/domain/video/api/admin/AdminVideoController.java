@@ -33,7 +33,7 @@ public class AdminVideoController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "createdAt") String sort,
+            @RequestParam(required = false, defaultValue = "startedAt") String sort,
             @RequestParam(required = false, defaultValue = "DESC") String order,
             @RequestParam(required = false) String search,
             @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
