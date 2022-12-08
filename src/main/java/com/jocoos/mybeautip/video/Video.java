@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.DELETE;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
 import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
@@ -116,6 +118,9 @@ public class Video {
     @Column
     private Boolean isRecommended;
 
+    @Enumerated(EnumType.STRING)
+    private VideoStatus status;
+
     @Transient
     private boolean isFirstOpen;
 
@@ -174,6 +179,7 @@ public class Video {
     }
 
     public void delete() {
+        this.status = DELETE;
         this.deletedAt = new Date();
         disableFixAndRecommend();
     }
