@@ -1,14 +1,6 @@
 package com.jocoos.mybeautip.video;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
@@ -21,10 +13,18 @@ import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.watches.VideoWatchService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.OPEN;
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.RESERVE;
 
 @Slf4j
 @Service
@@ -51,6 +51,7 @@ public class VideoUpdateService {
       video = new Video(member);
       BeanUtils.copyProperties(request, video);
       videoRepository.save(video);
+      VideoStatus status = OPEN;
 
       if (StringUtils.isNotEmpty(video.getContent())) {
         tagService.increaseRefCount(video.getContent());
@@ -68,6 +69,7 @@ public class VideoUpdateService {
           log.info("startedAt: {}", startedAt);
           Date date = DateUtils.stringFormatToDate(startedAt);
           video.setStartedAt(date);
+          status = RESERVE;
         }
 
         // if data had category array
@@ -98,7 +100,7 @@ public class VideoUpdateService {
             video.setRelatedGoodsCount(videoGoods.size());
           }
         }
-
+        video.setStatus(status);
         log.debug("{}", video);
       }
     } else {
