@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.domain.member.api.front;
 
 
+import com.jocoos.mybeautip.domain.member.service.DormantMemberService;
 import com.jocoos.mybeautip.domain.member.service.MemberService;
-import com.jocoos.mybeautip.domain.member.service.social.DormantMemberService;
 import com.jocoos.mybeautip.domain.popup.dto.PopupResponse;
 import com.jocoos.mybeautip.global.dto.single.LongDto;
 import com.jocoos.mybeautip.global.dto.single.StringDto;

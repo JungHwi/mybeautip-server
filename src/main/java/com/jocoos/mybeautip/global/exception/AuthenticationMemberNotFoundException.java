@@ -12,7 +12,7 @@ public class AuthenticationMemberNotFoundException extends ClientAuthenticationE
 
     public AuthenticationMemberNotFoundException(ErrorCode errorCode, String msg) {
         super(msg);
-        this.errorCode =  errorCode;
+        this.errorCode = errorCode;
     }
 
     public AuthenticationMemberNotFoundException(String msg, Throwable t) {
@@ -27,7 +27,7 @@ public class AuthenticationMemberNotFoundException extends ClientAuthenticationE
 
     @Override
     public String getOAuth2ErrorCode() {
-        return this.errorCode.name();
+        return this.errorCode.name().toLowerCase();
     }
 
 

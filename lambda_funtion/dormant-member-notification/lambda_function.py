@@ -15,5 +15,5 @@ def call(environment, header):
     url = os.environ["URL_" + environment]
     response = requests.patch(url, headers=header)
     data = response.json()
-    print("[%s] DormantMember Count: %d" % (
+    print("[%s] DormantMemberNotification Count: %d" % (
         environment, data["number"]))
