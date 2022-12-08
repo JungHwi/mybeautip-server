@@ -28,6 +28,8 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
 
     List<Member> findByStatusAndLastLoggedAtLessThan(MemberStatus status, ZonedDateTime date);
 
+    List<Member> findByStatusAndLastLoggedAtGreaterThanEqualAndLastLoggedAtLessThan(MemberStatus status, ZonedDateTime date1, ZonedDateTime date2);
+
     List<Member> findByStatusAndModifiedAtLessThan(MemberStatus status, Date date);
 
     Optional<Member> findByTag(String tag);

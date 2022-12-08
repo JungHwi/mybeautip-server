@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -64,10 +65,19 @@ public class MemberDao {
         return repository.existsByTag(tag);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Member> getDormantTarget() {
-        ZonedDateTime targetDate = ZonedDateTime.now().minusYears(1);
+        ZonedDateTime targetDate = ZonedDateTime.now().minusYears(1).plusDays(1).truncatedTo(ChronoUnit.DAYS);
         return repository.findByStatusAndLastLoggedAtLessThan(MemberStatus.ACTIVE, targetDate);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Member> getDormantNotificationTarget() {
+        ZonedDateTime lastYear = ZonedDateTime.now().minusYears(1).truncatedTo(ChronoUnit.DAYS);
+        List<Member> memberList = repository.findByStatusAndLastLoggedAtGreaterThanEqualAndLastLoggedAtLessThan(MemberStatus.ACTIVE, lastYear.plusDays(30), lastYear.plusDays(31));
+        memberList.addAll(repository.findByStatusAndLastLoggedAtGreaterThanEqualAndLastLoggedAtLessThan(MemberStatus.ACTIVE, lastYear.plusDays(7), lastYear.plusDays(8)));
+        memberList.addAll(repository.findByStatusAndLastLoggedAtGreaterThanEqualAndLastLoggedAtLessThan(MemberStatus.ACTIVE, lastYear.plusDays(1), lastYear.plusDays(2)));
+        return memberList;
     }
 
     @Transactional

@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.zzz_test.service;
 
+import com.jocoos.mybeautip.domain.member.service.DormantMemberService;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
-import com.jocoos.mybeautip.domain.member.service.social.DormantMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

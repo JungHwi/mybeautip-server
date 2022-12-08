@@ -1,9 +1,8 @@
-package com.jocoos.mybeautip.domain.member.service.social;
+package com.jocoos.mybeautip.domain.member.service;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.DormantMemberConverter;
 import com.jocoos.mybeautip.domain.member.persistence.domain.DormantMember;
-import com.jocoos.mybeautip.domain.member.service.MemberService;
 import com.jocoos.mybeautip.domain.member.service.dao.DormantMemberDao;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.domain.popup.dto.PopupResponse;
