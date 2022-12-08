@@ -30,7 +30,7 @@ public class AdminVideoController {
 
     @GetMapping("/video")
     public ResponseEntity<PageResponse<AdminVideoResponse>> getVideos(
-            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(name = "category_id", required = false) Integer categoryId,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "createdAt") String sort,
@@ -38,9 +38,9 @@ public class AdminVideoController {
             @RequestParam(required = false) String search,
             @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
             @RequestParam(name = "end_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
-            @RequestParam(required = false, name = "is_reported") Boolean isReported,
-            @RequestParam(required = false, name = "is_top_fix") Boolean isTopFix,
-            @RequestParam(required = false, name = "is_recommended") Boolean isRecommended,
+            @RequestParam(name = "is_reported", required = false) Boolean isReported,
+            @RequestParam(name = "is_top_fix", required = false) Boolean isTopFix,
+            @RequestParam(name = "is_recommended", required = false) Boolean isRecommended,
             @RequestParam(required = false) Visibility visibility) {
 
         SearchOption searchOption = SearchOption.builder()
