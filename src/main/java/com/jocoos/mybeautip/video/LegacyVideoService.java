@@ -50,7 +50,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
@@ -58,8 +57,10 @@ import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.RESERVE;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
+import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
 import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 
 @RequiredArgsConstructor
@@ -587,6 +588,8 @@ public class LegacyVideoService {
                 Date startedAt = DateUtils.stringFormatToDate(extraData.getStartedAt());
                 log.info("{}", startedAt);
                 target.setStartedAt(startedAt);
+                target.setStatus(RESERVE);
+                target.setVisibility(PRIVATE.name());
             }
         }
 

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.video;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCustomRepository;
 import com.jocoos.mybeautip.member.Member;
 import org.springframework.data.domain.Page;
@@ -154,4 +155,5 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
 
     List<Video> findByIdIn(List<Long> ids);
 
+    List<Video> findByVisibilityAndStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(String visibility, VideoStatus status, Date startedAt);
 }
