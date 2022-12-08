@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.video.code.VideoStatus.RESERVE;
-import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
+import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
 
 @Service
 @RequiredArgsConstructor
@@ -104,7 +104,7 @@ public class VideoDao {
 
     @Transactional(readOnly = true)
     public List<Video> findVideosToOpen() {
-        return repository.findByVisibilityAndStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(PRIVATE.name(), RESERVE, new Date());
+        return repository.findByVisibilityAndStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(PUBLIC.name(), RESERVE, new Date());
     }
 
     @Transactional

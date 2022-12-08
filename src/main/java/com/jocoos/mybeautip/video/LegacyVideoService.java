@@ -60,7 +60,6 @@ import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.val
 import static com.jocoos.mybeautip.domain.video.code.VideoStatus.RESERVE;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
-import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
 import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 
 @RequiredArgsConstructor
@@ -589,7 +588,6 @@ public class LegacyVideoService {
                 log.info("{}", startedAt);
                 target.setStartedAt(startedAt);
                 target.setStatus(RESERVE);
-                target.setVisibility(PRIVATE.name());
             }
         }
 

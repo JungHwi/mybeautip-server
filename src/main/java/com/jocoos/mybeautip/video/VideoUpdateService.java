@@ -52,6 +52,7 @@ public class VideoUpdateService {
       BeanUtils.copyProperties(request, video);
       videoRepository.save(video);
       VideoStatus status = OPEN;
+      Date startedAtDate = video.getCreatedAt();
 
       if (StringUtils.isNotEmpty(video.getContent())) {
         tagService.increaseRefCount(video.getContent());
@@ -67,11 +68,11 @@ public class VideoUpdateService {
           String startedAt = String.valueOf(extraData.getStartedAt());
 
           log.info("startedAt: {}", startedAt);
-          Date date = DateUtils.stringFormatToDate(startedAt);
-          video.setStartedAt(date);
+          startedAtDate = DateUtils.stringFormatToDate(startedAt);
           status = RESERVE;
         }
 
+        video.setStartedAt(startedAtDate);
         // if data had category array
         if (!StringUtils.isBlank(extraData.getCategory())) {
           List<VideoCategoryMapping> categories = parseCategory(video, extraData.getCategory());

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.video.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.dto.QAdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
@@ -238,6 +239,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         searchCondition(condition.getKeyword()),
                         lessOrEqualThanCreatedAt(condition.getCursor()),
                         eqVisibility(PUBLIC),
+                        eqStatus(OPEN),
                         isRecommended(condition.getIsRecommended()),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
@@ -250,6 +252,10 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
         }
 
         return baseQuery;
+    }
+
+    private BooleanExpression eqStatus(VideoStatus status) {
+        return status == null ? null : video.status.eq(status);
     }
 
     private void updateAllSortingNullAndIsTopFixFalse() {
