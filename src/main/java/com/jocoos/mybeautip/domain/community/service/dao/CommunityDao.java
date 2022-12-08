@@ -1,7 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service.dao;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
-import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.converter.CommunityConverter;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
@@ -24,6 +23,8 @@ import javax.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +67,7 @@ public class CommunityDao {
 
     @Transactional(readOnly = true)
     public List<Community> get(long memberId, long id, Pageable pageable) {
-        return repository.findByMemberIdAndStatusAndIdLessThan(memberId, CommunityStatus.NORMAL, id, pageable).getContent();
+        return repository.findByMemberIdAndIdLessThan(memberId, id, pageable).getContent();
     }
 
     @Transactional(readOnly = true)
