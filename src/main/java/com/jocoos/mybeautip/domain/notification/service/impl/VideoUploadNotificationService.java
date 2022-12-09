@@ -20,6 +20,7 @@ import com.jocoos.mybeautip.support.RandomUtils;
 import com.jocoos.mybeautip.video.Video;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +42,7 @@ public class VideoUploadNotificationService implements NotificationService<Video
     private final AppPushService pushService;
     private final TemplateType templateType = TemplateType.VIDEO_UPLOAD;
 
+    @Async
     @Override
     public void send(Video video) {
         int messageIndex = getMessageRandomIndex();

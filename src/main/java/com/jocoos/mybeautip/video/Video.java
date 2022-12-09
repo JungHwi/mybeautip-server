@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -15,6 +16,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.DELETE;
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.OPEN;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
 import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
@@ -116,6 +119,9 @@ public class Video {
     @Column
     private Boolean isRecommended;
 
+    @Enumerated(EnumType.STRING)
+    private VideoStatus status;
+
     @Transient
     private boolean isFirstOpen;
 
@@ -169,11 +175,13 @@ public class Video {
                 .toList();
     }
 
-    public void hide(boolean isHide) {
+    public void visible(boolean isHide) {
         this.visibility = isHide ? PRIVATE.name() : PUBLIC.name();
     }
 
     public void delete() {
+        this.visibility = PRIVATE.name();
+        this.status = DELETE;
         this.deletedAt = new Date();
         disableFixAndRecommend();
     }
@@ -203,5 +211,9 @@ public class Video {
 
     public Boolean isRecommendedTrueOrNull() {
         return TRUE.equals(isRecommended) ? isRecommended : null;
+    }
+
+    public boolean isOpenAndVisible() {
+        return visibility.equals(PUBLIC.name()) && status.equals(OPEN);
     }
 }

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.video.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.dto.QAdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.OPEN;
 import static com.jocoos.mybeautip.domain.video.persistence.domain.QVideoCategory.videoCategory;
 import static com.jocoos.mybeautip.global.code.SearchField.COMMENT;
 import static com.jocoos.mybeautip.member.QMember.member;
@@ -81,6 +83,15 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .set(video.sorting, orderCount)
                 .set(video.isTopFix, true)
                 .where(eqId(videoId))
+                .execute());
+    }
+
+    @Override
+    public long openVideos(List<Video> videos) {
+        return repository.update(query -> query
+                .set(video.visibility, PUBLIC.name())
+                .set(video.status, OPEN)
+                .where(video.in(videos))
                 .execute());
     }
 
@@ -159,7 +170,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                     SimplePath<Video> path = Expressions.path(Video.class, video, order.getProperty());
                     return new OrderSpecifier(direction, path);
                 })
-                .orElse(video.createdAt.desc());
+                .orElse(video.startedAt.desc());
     }
 
     private BooleanExpression searchInnerField(SearchOption searchOption) {
@@ -228,6 +239,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         searchCondition(condition.getKeyword()),
                         lessOrEqualThanCreatedAt(condition.getCursor()),
                         eqVisibility(PUBLIC),
+                        eqStatus(OPEN),
                         isRecommended(condition.getIsRecommended()),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
@@ -240,6 +252,10 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
         }
 
         return baseQuery;
+    }
+
+    private BooleanExpression eqStatus(VideoStatus status) {
+        return status == null ? null : video.status.eq(status);
     }
 
     private void updateAllSortingNullAndIsTopFixFalse() {

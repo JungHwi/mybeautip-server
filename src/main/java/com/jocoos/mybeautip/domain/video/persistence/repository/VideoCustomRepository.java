@@ -21,4 +21,6 @@ public interface VideoCustomRepository {
     List<Long> arrangeByIndex(List<Long> sortedIds);
 
     void fixAndAddToLastOrder(Long videoId);
+
+    long openVideos(List<Video> videos);
 }

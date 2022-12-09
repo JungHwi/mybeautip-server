@@ -33,7 +33,7 @@ public class AdminVideoController {
             @RequestParam(name = "category_id", required = false) Integer categoryId,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "createdAt") String sort,
+            @RequestParam(required = false, defaultValue = "startedAt") String sort,
             @RequestParam(required = false, defaultValue = "DESC") String order,
             @RequestParam(required = false) String search,
             @RequestParam(name = "start_at", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
@@ -69,9 +69,9 @@ public class AdminVideoController {
         return ResponseEntity.ok(service.getVideo(videoId));
     }
 
-    @PatchMapping("/video/{videoId}/hide")
-    public ResponseEntity<IdDto> hideVide(@PathVariable Long videoId, @RequestBody BooleanDto request) {
-        return ResponseEntity.ok(new IdDto(service.hide(videoId, request.isBool())));
+    @PatchMapping("/video/{videoId}/visibility")
+    public ResponseEntity<IdDto> changeVisibilityOfVideo(@PathVariable Long videoId, @RequestBody BooleanDto request) {
+        return ResponseEntity.ok(new IdDto(service.changeVisibility(videoId, request.isBool())));
     }
 
     @PatchMapping("/video/{videoId}/recommend")
