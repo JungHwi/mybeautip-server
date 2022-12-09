@@ -87,10 +87,9 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     }
 
     @Override
-    public long openVideos(List<Video> videos) {
+    public long bulkUpdateStatus(List<Video> videos, VideoStatus status) {
         return repository.update(query -> query
-                .set(video.visibility, PUBLIC.name())
-                .set(video.status, OPEN)
+                .set(video.status, status)
                 .where(video.in(videos))
                 .execute());
     }

@@ -216,4 +216,8 @@ public class Video {
     public boolean isOpenAndVisible() {
         return visibility.equals(PUBLIC.name()) && status.equals(OPEN);
     }
+
+    public boolean isPublic() {
+        return visibility.equals(PUBLIC.name());
+    }
 }
