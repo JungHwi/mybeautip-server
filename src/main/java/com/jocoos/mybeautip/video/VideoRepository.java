@@ -155,5 +155,5 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
 
     List<Video> findByIdIn(List<Long> ids);
 
-    List<Video> findByVisibilityAndStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(String visibility, VideoStatus status, Date startedAt);
+    List<Video> findByStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(VideoStatus status, Date startedAt);
 }

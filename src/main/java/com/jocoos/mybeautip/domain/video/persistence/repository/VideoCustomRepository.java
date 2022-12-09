@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.video.persistence.repository;
 
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
 import com.jocoos.mybeautip.domain.video.vo.VideoSearchCondition;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface VideoCustomRepository {
+    long bulkUpdateStatus(List<Video> videos, VideoStatus status);
     void unFixAndSortingToNull(Long videoId);
 
     Page<AdminVideoResponse> getVideos(AdminVideoSearchCondition condition);
@@ -21,6 +23,4 @@ public interface VideoCustomRepository {
     List<Long> arrangeByIndex(List<Long> sortedIds);
 
     void fixAndAddToLastOrder(Long videoId);
-
-    long openVideos(List<Video> videos);
 }

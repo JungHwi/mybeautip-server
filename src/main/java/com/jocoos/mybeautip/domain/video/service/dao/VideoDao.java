@@ -17,8 +17,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.OPEN;
 import static com.jocoos.mybeautip.domain.video.code.VideoStatus.RESERVE;
-import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
 
 @Service
 @RequiredArgsConstructor
@@ -104,11 +104,11 @@ public class VideoDao {
 
     @Transactional(readOnly = true)
     public List<Video> findVideosToOpen() {
-        return repository.findByVisibilityAndStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(PUBLIC.name(), RESERVE, new Date());
+        return repository.findByStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(RESERVE, new Date());
     }
 
     @Transactional
     public long openVideos(List<Video> videos) {
-        return repository.openVideos(videos);
+        return repository.bulkUpdateStatus(videos, OPEN);
     }
 }
