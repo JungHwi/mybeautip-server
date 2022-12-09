@@ -14,6 +14,7 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.MEMBER_STATUS;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.VIDEO_STATUS;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -52,6 +53,7 @@ class AdminVideoControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].video_key").type(JsonFieldType.STRING).description("비디오키"),
                         fieldWithPath("content.[].url").type(JsonFieldType.STRING).description("비디오 Url"),
                         fieldWithPath("content.[].visibility").type(JsonFieldType.STRING).description("공개 여부"),
+                        fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(VIDEO_STATUS)),
                         fieldWithPath("content.[].thumbnail_url").type(JsonFieldType.STRING).description("썸네일 URL"),
                         fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목"),
                         fieldWithPath("content.[].content").type(JsonFieldType.STRING).description("내용").optional(),
@@ -91,6 +93,7 @@ class AdminVideoControllerTest extends RestDocsTestSupport {
                         fieldWithPath("video_key").type(JsonFieldType.STRING).description("비디오키"),
                         fieldWithPath("url").type(JsonFieldType.STRING).description("비디오 Url"),
                         fieldWithPath("visibility").type(JsonFieldType.STRING).description("공개 여부"),
+                        fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(VIDEO_STATUS)),
                         fieldWithPath("thumbnail_url").type(JsonFieldType.STRING).description("썸네일 URL"),
                         fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
                         fieldWithPath("content").type(JsonFieldType.STRING).description("내용").optional(),
@@ -101,6 +104,7 @@ class AdminVideoControllerTest extends RestDocsTestSupport {
                         fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
                         fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
                         fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                        fieldWithPath("started_at").type(JsonFieldType.STRING).description("게시일").attributes(getZonedDateFormat()),
                         fieldWithPath("duration").type(JsonFieldType.NUMBER).description("비디오 길이"),
                         fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보."),
                         fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),

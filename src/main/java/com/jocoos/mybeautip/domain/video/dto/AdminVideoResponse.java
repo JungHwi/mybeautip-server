@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.video.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.video.Video;
@@ -19,8 +20,9 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 public class AdminVideoResponse {
 
     private final Long id;
-    private final String visibility;
     private final String videoKey;
+    private final String visibility;
+    private final VideoStatus status;
     private final String url;
     private final String thumbnailUrl;
     private final String title;
@@ -36,13 +38,17 @@ public class AdminVideoResponse {
     private final MemberResponse member;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
+    private final ZonedDateTime startedAt;
+
+    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime createdAt;
 
     @QueryProjection
     public AdminVideoResponse(Video video, Member member, List<VideoCategory> categories) {
         this.id = video.getId();
-        this.visibility = video.getVisibility();
         this.videoKey = video.getVideoKey();
+        this.visibility = video.getVisibility();
+        this.status = video.getStatus();
         this.url = video.getUrl();
         this.thumbnailUrl = video.getThumbnailUrl();
         this.title = video.getTitle();
@@ -53,8 +59,9 @@ public class AdminVideoResponse {
         this.likeCount = video.getLikeCount();
         this.commentCount = video.getCommentCount();
         this.reportCount = video.getReportCount();
-        this.createdAt = video.getCreatedAtZoned();
         this.duration = video.getDuration();
+        this.startedAt = video.getStartedAtZoned();
+        this.createdAt = video.getCreatedAtZoned();
         this.category = setCategory(categories);
         this.member = MemberResponse.from(member);
     }
