@@ -104,18 +104,6 @@ public class ControllerExceptionAdvice {
         return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
-    @ExceptionHandler({ AuthenticationMemberNotFoundException.class })
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationMemberNotFoundException ex) {
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .error(ex.getOAuth2ErrorCode())
-                .errorDescription(ex.getMessage())
-                .contents(ex.getContents())
-                .build();
-        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
-    }
-
-
     public ResponseEntity<Object> handleNumberFormatException(NumberFormatException e) {
         log.debug("handleNumberFormatException called");
         ErrorResponse errorResponse = ErrorResponse.builder()

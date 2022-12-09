@@ -12,6 +12,7 @@ import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -118,7 +119,7 @@ public class MemberSignupService {
             case DORMANT:
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
                         .memberId(member.getId())
-                        .date(member.getModifiedAtZoned())
+                        .date(ZonedDateTimeUtil.toString(member.getModifiedAtZoned()))
                         .build();
                 throw new BadRequestException(ErrorCode.DORMANT_MEMBER, "dormant_member", response);
             case WITHDRAWAL:

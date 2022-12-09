@@ -5,7 +5,7 @@ import com.jocoos.mybeautip.domain.member.dto.ExceptionMemberResponse;
 import com.jocoos.mybeautip.global.exception.AuthenticationException;
 import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
-import com.jocoos.mybeautip.global.util.StringConvertUtil;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -71,18 +71,16 @@ public class NaverTokenGranter extends AbstractTokenGranter {
             case DORMANT -> {
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
                         .memberId(member.getId())
-                        .date(member.getModifiedAtZoned())
+                        .date(ZonedDateTimeUtil.toString(member.getModifiedAtZoned()))
                         .build();
-                String responseString = StringConvertUtil.convertToJson(response);
-                throw new AuthenticationMemberNotFoundException(ErrorCode.DORMANT_MEMBER, responseString);
+                throw new AuthenticationMemberNotFoundException(ErrorCode.DORMANT_MEMBER, "휴면 회원", response);
             }
             case SUSPENDED -> {
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
                         .memberId(member.getId())
-                        .date(member.getModifiedAtZoned().plusDays(14))
+                        .date(ZonedDateTimeUtil.toString(member.getModifiedAtZoned().plusDays(14)))
                         .build();
-                String responseString = StringConvertUtil.convertToJson(response);
-                throw new AuthenticationMemberNotFoundException(ErrorCode.SUSPENDED_MEMBER, responseString);
+                throw new AuthenticationMemberNotFoundException(ErrorCode.SUSPENDED_MEMBER, "정지 회원", response);
             }
             case EXILE -> throw new AuthenticationMemberNotFoundException(ErrorCode.EXILED_MEMBER, "추방된 회원");
             default ->
