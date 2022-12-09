@@ -220,4 +220,8 @@ public class Video {
     public boolean isPublic() {
         return visibility.equals(PUBLIC.name());
     }
+
+    public ZonedDateTime getStartedAtZoned() {
+        return toUTCZoned(startedAt);
+    }
 }
