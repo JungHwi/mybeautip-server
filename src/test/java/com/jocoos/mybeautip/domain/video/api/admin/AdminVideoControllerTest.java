@@ -64,6 +64,7 @@ class AdminVideoControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
                         fieldWithPath("content.[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
                         fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
+                        fieldWithPath("content.[].started_at").type(JsonFieldType.STRING).description("게시일").attributes(getZonedDateFormat()),
                         fieldWithPath("content.[].duration").type(JsonFieldType.NUMBER).description("비디오 길이"),
                         fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
                         fieldWithPath("content.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
