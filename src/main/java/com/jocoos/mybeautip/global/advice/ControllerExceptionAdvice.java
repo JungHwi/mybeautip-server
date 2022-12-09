@@ -49,6 +49,7 @@ public class ControllerExceptionAdvice {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(e.getMessage())
                 .errorDescription(e.getDescription())
+                .contents(e.getContents())
                 .build();
         return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
@@ -100,6 +101,17 @@ public class ControllerExceptionAdvice {
                 .errorDescription(message.toString())
                 .build();
 
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ AuthenticationMemberNotFoundException.class })
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationMemberNotFoundException ex) {
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(ex.getOAuth2ErrorCode())
+                .errorDescription(ex.getMessage())
+                .contents(ex.getContents())
+                .build();
         return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
