@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.security;
 import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
 import com.jocoos.mybeautip.domain.member.dto.ExceptionMemberResponse;
 import com.jocoos.mybeautip.global.exception.*;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.member.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,14 +73,14 @@ public class SocialLoginService {
             case DORMANT -> {
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
                         .memberId(member.getId())
-                        .date(member.getModifiedAtZoned())
+                        .date(ZonedDateTimeUtil.toString(member.getModifiedAtZoned()))
                         .build();
                 throw new BadRequestException(ErrorCode.DORMANT_MEMBER, "휴면 회원", response);
             }
             case SUSPENDED -> {
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
                         .memberId(member.getId())
-                        .date(member.getModifiedAtZoned().plusDays(14))
+                        .date(ZonedDateTimeUtil.toString(member.getModifiedAtZoned().plusDays(14)))
                         .build();
                 throw new BadRequestException(ErrorCode.SUSPENDED_MEMBER, "정지 회원", response);
             }
