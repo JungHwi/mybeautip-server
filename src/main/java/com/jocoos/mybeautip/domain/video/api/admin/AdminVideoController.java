@@ -69,7 +69,7 @@ public class AdminVideoController {
         return ResponseEntity.ok(service.getVideo(videoId));
     }
 
-    @PatchMapping("/video/{videoId}/visibility")
+    @PatchMapping("/video/{videoId}/hide")
     public ResponseEntity<IdDto> changeVisibilityOfVideo(@PathVariable Long videoId, @RequestBody BooleanDto request) {
         return ResponseEntity.ok(new IdDto(service.changeVisibility(videoId, request.isBool())));
     }

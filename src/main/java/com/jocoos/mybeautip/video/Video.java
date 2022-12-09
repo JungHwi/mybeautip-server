@@ -175,7 +175,7 @@ public class Video {
                 .toList();
     }
 
-    public void visible(boolean isHide) {
+    public void hide(boolean isHide) {
         this.visibility = isHide ? PRIVATE.name() : PUBLIC.name();
     }
 

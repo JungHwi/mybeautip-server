@@ -36,10 +36,10 @@ public class AdminVideoService {
     }
 
     @Transactional
-    public Long changeVisibility(Long videoId, boolean isVisible) {
+    public Long changeVisibility(Long videoId, boolean isHide) {
         Video video = videoDao.getVideo(videoId);
-        video.visible(isVisible);
-        commentDeleteService.hide(videoId, isVisible);
+        video.hide(isHide);
+        commentDeleteService.hide(videoId, isHide);
         sendMessages(video);
         return video.getId();
     }
