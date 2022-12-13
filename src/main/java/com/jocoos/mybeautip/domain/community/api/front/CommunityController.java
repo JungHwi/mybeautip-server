@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class CommunityController {
     private final LegacyMemberService legacyMemberService;
 
     @PostMapping(value = "/1/community")
-    public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody @Valid WriteCommunityRequest request) {
+    public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody WriteCommunityRequest request) {
         CommunityResponse response = service.write(request);
 
         return ResponseEntity.ok(response);

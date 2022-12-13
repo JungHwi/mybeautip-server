@@ -1,17 +1,24 @@
 package com.jocoos.mybeautip.domain.video.service.dao;
 
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
+import com.jocoos.mybeautip.domain.video.dto.AdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
+import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
 import com.jocoos.mybeautip.domain.video.vo.VideoSearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
+
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.OPEN;
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.RESERVE;
 
 @Service
 @RequiredArgsConstructor
@@ -26,12 +33,32 @@ public class VideoDao {
                 .cursor(cursor)
                 .size(size)
                 .build();
+        return getVideos(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Video> getRecommendedVideos() {
+        VideoSearchCondition condition = VideoSearchCondition.builder()
+                .isRecommended(true)
+                .build();
+        return repository.getVideos(condition);
+    }
+
+    public List<Video> getVideos(VideoSearchCondition condition) {
+        return repository.getVideos(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AdminVideoResponse> getVideos(AdminVideoSearchCondition condition) {
         return repository.getVideos(condition);
     }
 
     @Transactional(readOnly = true)
     public List<Video> getVideos(int size) {
-        return getVideos(null, null, size);
+        VideoSearchCondition condition = VideoSearchCondition.builder()
+                .size(size)
+                .build();
+        return getVideos(condition);
     }
 
     @Transactional(readOnly = true)
@@ -58,5 +85,30 @@ public class VideoDao {
     @Transactional
     public void setCommentCount(Long videoId, int count) {
         repository.setCommentCount(videoId, count);
+    }
+
+    @Transactional
+    public List<Long> arrangeByIndex(List<Long> sortedIds) {
+        return repository.arrangeByIndex(sortedIds);
+    }
+
+    @Transactional
+    public void fixAndAddToLastOrder(Long videoId) {
+        repository.fixAndAddToLastOrder(videoId);
+    }
+
+    @Transactional
+    public void unFixAndSortingToNull(Long videoId) {
+        repository.unFixAndSortingToNull(videoId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Video> findVideosToOpen() {
+        return repository.findByStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(RESERVE, new Date());
+    }
+
+    @Transactional
+    public long openVideos(List<Video> videos) {
+        return repository.bulkUpdateStatus(videos, OPEN);
     }
 }

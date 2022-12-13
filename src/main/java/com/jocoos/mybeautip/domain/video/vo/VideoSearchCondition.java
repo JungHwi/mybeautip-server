@@ -16,10 +16,16 @@ public class VideoSearchCondition {
     private final Integer categoryId;
     private final Date cursor;
     private final int size;
+    private final Boolean isRecommended;
 
     @Builder
-    public VideoSearchCondition(String keyword, VideoCategoryResponse category, ZonedDateTime cursor, int size) {
+    public VideoSearchCondition(String keyword,
+                                 VideoCategoryResponse category,
+                                 ZonedDateTime cursor,
+                                int size,
+                                Boolean isRecommended) {
         this.size = size;
+        this.isRecommended = isRecommended;
         this.keyword = setKeyword(keyword);
         this.categoryId = setCategoryId(category);
         this.cursor = setDateCursor(cursor);

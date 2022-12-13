@@ -6,11 +6,12 @@ import com.jocoos.mybeautip.domain.member.persistence.repository.MemberCustomRep
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, Long>, MemberCustomRepository {
@@ -24,6 +25,12 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
     boolean existsByUsername(String username);
 
     List<Member> findByUsername(String username);
+
+    List<Member> findByStatusAndLastLoggedAtLessThan(MemberStatus status, ZonedDateTime date);
+
+    List<Member> findByStatusAndLastLoggedAtGreaterThanEqualAndLastLoggedAtLessThan(MemberStatus status, ZonedDateTime date1, ZonedDateTime date2);
+
+    List<Member> findByStatusAndModifiedAtLessThan(MemberStatus status, Date date);
 
     Optional<Member> findByTag(String tag);
 
@@ -47,6 +54,7 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
     @Query("UPDATE Member m set m.point = m.point + ?2 WHERE m.id = ?1")
     void updateMemberPoint(long memberId, int point);
 
+    @Transactional
     @Modifying
     @Query("update Member m set m.lastLoggedAt = current_timestamp where m.id = ?1")
     void updateLastLoggedAt(Long memberId);

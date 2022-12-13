@@ -11,9 +11,8 @@ import java.util.Map;
 public interface EventCustomRepository {
     List<Event> getEvents(EventSearchCondition condition);
     Map<EventStatus, Long> getEventStatesWithNum();
-
     List<EventSearchResult> getEventsWithJoinCount(EventSearchCondition condition);
-
     Long getTotalCount(EventSearchCondition condition);
-
+    Integer getLastSortOrder();
+    List<Long> arrangeByIndex(List<Long> sortedIds);
 }

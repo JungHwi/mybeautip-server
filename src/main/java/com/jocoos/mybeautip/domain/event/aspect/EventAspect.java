@@ -24,7 +24,7 @@ public class EventAspect {
     private final EventService eventService;
     private final EventTypeFactory eventTypeFactory;
 
-    @AfterReturning(value = "execution(* com.jocoos.mybeautip.member.LegacyMemberService.register(..))", returning = "result")
+    @AfterReturning(value = "execution(* com.jocoos.mybeautip.domain.member.service.MemberService.register(..))", returning = "result")
     public void signupEventAspect(JoinPoint joinPoint, Object result) {
         Member member = null;
         if (result instanceof Member) {

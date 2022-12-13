@@ -1,7 +1,9 @@
 package com.jocoos.mybeautip.domain.member.converter;
 
-import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
+import com.jocoos.mybeautip.admin.AdminMember;
+import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
+import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
@@ -12,6 +14,16 @@ import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 @Mapper(componentModel = "spring")
 public interface MemberConverter {
+
+    @Mappings({
+            @Mapping(target = "avatarUrl", ignore = true),
+    })
+    SimpleMemberInfo convertToSimple(Member member);
+
+    @AfterMapping
+    default void convertToAdminMember(@MappingTarget SimpleMemberInfo response, AdminMember adminMember) {
+        response.setAvatarUrl(toUrl(adminMember.getMember().getAvatarFilename(), AVATAR));
+    }
 
     @Mappings({
             @Mapping(target = "member", source = "member"),
@@ -73,10 +85,10 @@ public interface MemberConverter {
     }
 
 
-    CommunityMemberResponse convertToCommunityMember(Member member);
+    MemberResponse convertToCommunityMember(Member member);
 
     @AfterMapping
-    default void convertToCommunityMember(@MappingTarget CommunityMemberResponse response, Member member) {
+    default void convertToCommunityMember(@MappingTarget MemberResponse response, Member member) {
         response.setAvatarUrl(toUrl(member.getAvatarFilename(), AVATAR));
     }
 }

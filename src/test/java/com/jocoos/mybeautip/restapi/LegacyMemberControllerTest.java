@@ -37,9 +37,9 @@ class LegacyMemberControllerTest extends RestDocsTestSupport {
                         fieldWithPath("status").type(JsonFieldType.STRING).description("멤버 상태")
                                 .description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                         fieldWithPath("grant_type").type(JsonFieldType.STRING)
-                                .description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.GRANT_TYPE)),
+                                .description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.GRANT_TYPE)).optional(),
                         fieldWithPath("username").type(JsonFieldType.STRING).description("멤버 이름"),
-                        fieldWithPath("email").type(JsonFieldType.STRING).description("멤버 이메일"),
+                        fieldWithPath("email").type(JsonFieldType.STRING).description("멤버 이메일").optional(),
                         fieldWithPath("phone_number").type(JsonFieldType.STRING).description("전화 번호").optional(),
                         fieldWithPath("avatar_url").type(JsonFieldType.STRING).description("멤버 아바타 이미지 url"),
                         fieldWithPath("permission.chat_post").type(JsonFieldType.BOOLEAN).description(""),

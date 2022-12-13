@@ -112,6 +112,14 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("VideoMaskType")),
                                 enumConvertFieldDescriptor((enumDocs.getVideoMaskType()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.video_comment_status").withSubsectionId("video_comment_status"),
+                                attributes(key("title").value("VideoCommentStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getVideoCommentStatus()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.video_status").withSubsectionId("video_status"),
+                                attributes(key("title").value("VideoStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getVideoStatus()))
+                        ),
                         // Notification
                         customResponseFields("custom-response", beneathPath("data.notification_link_type").withSubsectionId("notification_link_type"),
                                 attributes(key("title").value("NotificationLinkType")),
@@ -192,7 +200,15 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         ),
                         customResponseFields("custom-response", beneathPath("data.placard_link_type").withSubsectionId("placard_link_type"),
                                 attributes(key("title").value("PlacardLinkType")),
-                                enumConvertFieldDescriptor((enumDocs.getPlacardLinkType())))
+                                enumConvertFieldDescriptor((enumDocs.getPlacardLinkType()))),
+                        // Operation
+                        customResponseFields("custom-response", beneathPath("data.operation_type").withSubsectionId("operation_type"),
+                                attributes(key("title").value("OperationType")),
+                                enumConvertFieldDescriptor((enumDocs.getOperationType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.operation_target_type").withSubsectionId("operation_target_type"),
+                                attributes(key("title").value("OperationTargetType")),
+                                enumConvertFieldDescriptor((enumDocs.getOperationTargetType())))
                 ));
     }
 

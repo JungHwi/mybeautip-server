@@ -1,14 +1,18 @@
 package com.jocoos.mybeautip.domain.video.service.dao;
 
+import com.jocoos.mybeautip.domain.video.dto.AdminVideoCommentResponse;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.Comment.CommentState;
 import com.jocoos.mybeautip.member.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DELETED;
 import static java.util.Collections.singletonList;
 
 @RequiredArgsConstructor
@@ -23,8 +27,8 @@ public class VideoCommentDao {
     }
 
     @Transactional
-    public void delete(List<Long> ids) {
-        repository.updateState(ids, DELETED.value());
+    public void updateStatus(List<Long> ids, CommentState state) {
+        repository.updateState(ids, state.value());
     }
 
     @Transactional
@@ -46,4 +50,24 @@ public class VideoCommentDao {
     public void setCommentCount(Long commentId, int count) {
         repository.setCommentCount(singletonList(commentId), count);
     }
+
+    @Transactional(readOnly = true)
+    public Page<AdminVideoCommentResponse> getCommentsWithChild(Long videoId, Pageable pageable) {
+        return repository.getCommentsWithChild(videoId, pageable);
+    }
+
+    public Comment get(Long commentId) {
+        return repository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("video comment not exists, id - " + commentId));
+    }
+
+    public Comment save(Comment comment) {
+        return repository.save(comment);
+    }
+
+    public Comment get(Long videoId, Long commentId) {
+        return repository.findByIdAndVideoId(commentId, videoId)
+                .orElseThrow(() -> new NotFoundException("video comment not exists, id - " + commentId));
+    }
 }
+

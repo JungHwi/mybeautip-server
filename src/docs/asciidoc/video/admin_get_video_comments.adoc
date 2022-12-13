@@ -1,0 +1,3 @@
+== Admin Get Video Comments API
+
+operation::admin_get_video_comments[snippets='http-request,path-parameters,http-response,response-fields']

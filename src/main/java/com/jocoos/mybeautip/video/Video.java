@@ -1,5 +1,8 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
+import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -7,10 +10,18 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.DELETE;
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.OPEN;
+import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
+import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
+import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
+import static java.lang.Boolean.TRUE;
 
 @Getter
 @Setter
@@ -98,6 +109,19 @@ public class Video {
     @JoinColumn(name = "owner")
     private Member member;
 
+    // is_top_fix true 인것만 정렬 가능
+    @Column
+    private Integer sorting;
+
+    @Column
+    private Boolean isTopFix;
+
+    @Column
+    private Boolean isRecommended;
+
+    @Enumerated(EnumType.STRING)
+    private VideoStatus status;
+
     @Transient
     private boolean isFirstOpen;
 
@@ -139,5 +163,65 @@ public class Video {
             }
             this.categoryMapping.addAll(categoryMapping);
         }
+    }
+
+    public ZonedDateTime getCreatedAtZoned() {
+        return toUTCZoned(createdAt);
+    }
+
+    public List<VideoCategory> getCategories() {
+        return categoryMapping.stream()
+                .map(VideoCategoryMapping::getVideoCategory)
+                .toList();
+    }
+
+    public void hide(boolean isHide) {
+        this.visibility = isHide ? PRIVATE.name() : PUBLIC.name();
+    }
+
+    public void delete() {
+        this.visibility = PRIVATE.name();
+        this.status = DELETE;
+        this.deletedAt = new Date();
+        disableFixAndRecommend();
+    }
+
+    public void recommend(boolean isRecommended) {
+        if (isRecommended) {
+            validNotDelete();
+        }
+        this.isRecommended = isRecommended;
+    }
+
+    public void validNotDelete() {
+        if (deletedAt != null) {
+            throw new BadRequestException("삭제된 영상입니다.");
+        }
+    }
+
+    private void disableFixAndRecommend() {
+        this.isTopFix = false;
+        this.isRecommended = false;
+        this.sorting = null;
+    }
+
+    public Boolean isTopFixTrueOrNull() {
+        return TRUE.equals(isTopFix) ? isTopFix : null;
+    }
+
+    public Boolean isRecommendedTrueOrNull() {
+        return TRUE.equals(isRecommended) ? isRecommended : null;
+    }
+
+    public boolean isOpenAndVisible() {
+        return visibility.equals(PUBLIC.name()) && status.equals(OPEN);
+    }
+
+    public boolean isPublic() {
+        return visibility.equals(PUBLIC.name());
+    }
+
+    public ZonedDateTime getStartedAtZoned() {
+        return toUTCZoned(startedAt);
     }
 }

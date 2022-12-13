@@ -2,9 +2,6 @@ package com.jocoos.mybeautip.support;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -37,11 +34,6 @@ public class S3StorageService implements StorageService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    @Value("${cloud.aws.credentials.accessKey}")
-    private String awsAccessKeyID;
-
-    @Value("${cloud.aws.credentials.secretKey}")
-    private String awsSecretAccessKey;
 
     @Value("${cloud.aws.sts.token-validity-duration-seconds}")
     private String tokenValidityDurations;
@@ -54,12 +46,10 @@ public class S3StorageService implements StorageService {
     }
 
     public Credentials getAWSSTSCredentials() {
-        AWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKeyID, awsSecretAccessKey);
         int durationSeconds = Integer.parseInt(tokenValidityDurations);
 
         AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard()
                 .withRegion(Regions.AP_NORTHEAST_2)
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                 .build();
 
         GetSessionTokenRequest request = new GetSessionTokenRequest().withDurationSeconds(durationSeconds);
@@ -69,9 +59,7 @@ public class S3StorageService implements StorageService {
     }
 
     private AmazonS3 getS3Client() {
-        AWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKeyID, awsSecretAccessKey);
         return AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                 .withRegion(region)
                 .build();
     }

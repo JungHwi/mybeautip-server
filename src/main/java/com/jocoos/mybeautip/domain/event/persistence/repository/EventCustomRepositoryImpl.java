@@ -23,10 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEvent.event;
 import static com.jocoos.mybeautip.domain.event.persistence.domain.QEventJoin.eventJoin;
 import static com.querydsl.core.group.GroupBy.groupBy;
+import static com.querydsl.core.types.dsl.Expressions.nullExpression;
 import static com.querydsl.sql.SQLExpressions.count;
 import static io.jsonwebtoken.lang.Collections.isEmpty;
 
@@ -65,6 +67,22 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
     }
 
     @Override
+    public Integer getLastSortOrder() {
+        return repository.query(query -> query
+                .select(event.fixSorting.sorting)
+                .from(event)
+                .orderBy(event.fixSorting.sorting.desc())
+                .fetchFirst());
+    }
+
+    @Override
+    public List<Long> arrangeByIndex(List<Long> sortedIds) {
+        allIsTopFixFalseAndSortingToNull();
+        IntStream.range(0, sortedIds.size()).forEach(index -> isTopFixTrueAndSortingByIndex(sortedIds, index));
+        return getSortedIds();
+    }
+
+    @Override
     public Map<EventStatus, Long> getEventStatesWithNum() {
         return repository.query(query -> query
                 .select(event.status, count(event))
@@ -85,30 +103,33 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                         goeCreatedAt(condition.getStartAt()),
                         loeCreatedAt(condition.getEndAt()),
                         startAtBefore(condition.getBetween()),
-                        endAtAfter(condition.getBetween())
+                        endAtAfter(condition.getBetween()),
+                        isTopFix(condition.isTopFix()),
+                        eqRelationId(condition.getCommunityCategoryId())
                 ));
     }
 
     private JPAQuery<Event> paging(JPAQuery<Event> baseQuery, Paging paging) {
+
         if (paging == null) {
             return baseQuery;
         }
-        
 
-        if (paging.isNoOffset()) {
-            return baseQuery
+        return switch (paging.getType()) {
+            case NO_PAGING -> baseQuery;
+            case OFFSET -> baseQuery
+                    .offset(paging.getOffset())
                     .limit(paging.getSize());
-        }
-
-        return baseQuery
-                .offset(paging.getOffset())
-                .limit(paging.getSize());
+            case CURSOR -> baseQuery
+                    .where()
+                    .limit(paging.getSize());
+        };
     }
 
     private JPAQuery<Event> orderByDefault(JPAQuery<Event> query) {
         return query
                 .orderBy(event.statusSorting.asc().nullsLast(),
-                        event.sorting.asc().nullsLast(),
+                        event.fixSorting.sorting.asc().nullsLast(),
                         event.createdAt.desc(),
                         event.id.desc());
     }
@@ -128,6 +149,45 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
                 .groupBy(event.id)
                 .orderBy(joinCount.desc(), event.createdAt.desc(), event.id.desc())
                 .fetch();
+    }
+
+    private void allIsTopFixFalseAndSortingToNull() {
+        repository.update(query -> query
+                .set(event.fixSorting.sorting, nullExpression())
+                .set(event.fixSorting.isTopFix, false)
+                .execute());
+    }
+
+    private void isTopFixTrueAndSortingByIndex(List<Long> sortedIds, int index) {
+        repository.update(query -> query
+                .set(event.fixSorting.sorting, index + 1)
+                .set(event.fixSorting.isTopFix, true)
+                .where(eqId(sortedIds.get(index)))
+                .execute());
+    }
+
+    private List<Long> getSortedIds() {
+        return repository.query(query -> query
+                .select(event.id)
+                .from(event)
+                .where(isTopFix(true))
+                .orderBy(event.fixSorting.sorting.asc())
+                .fetch());
+    }
+
+    private BooleanExpression eqId(Long eventId) {
+        return eventId == null ? null : event.id.eq(eventId);
+    }
+
+    private BooleanExpression eqRelationId(Long relationId) {
+        return relationId == null ? null : event.relationId.eq(relationId);
+    }
+
+    private BooleanExpression isTopFix(Boolean isTopFix) {
+        if (isTopFix == null) {
+            return null;
+        }
+        return isTopFix ? event.fixSorting.isTopFix.isTrue() : event.fixSorting.isTopFix.isFalse();
     }
 
     private BooleanExpression goeCreatedAt(Date dateTime) {

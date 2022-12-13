@@ -1,0 +1,3 @@
+== Admin Hide Video Comment API
+
+operation::admin_hide_video_comment[snippets='http-request,path-parameters,request-fields,http-response,response-fields']

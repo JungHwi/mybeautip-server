@@ -1,19 +1,19 @@
 package com.jocoos.mybeautip.domain.video.vo;
 
 import com.jocoos.mybeautip.member.comment.Comment;
+import com.jocoos.mybeautip.member.comment.Comment.CommentState;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 @Getter
-@RequiredArgsConstructor
 public class VideoComments {
 
     private final List<Comment> comments;
@@ -22,10 +22,18 @@ public class VideoComments {
         this.comments = singletonList(child);
     }
 
-    public VideoComments(Comment comment, List<Comment> children) {
-        children.add(comment);
-        this.comments = children.stream()
-                .filter(Comment::isNormal)
+    public VideoComments(Comment parent, List<Comment> children, CommentState state) {
+        children.add(parent);
+        this.comments = setComments(children, state);
+    }
+
+    public VideoComments(List<Comment> comments, CommentState state) {
+        this.comments = setComments(comments, state);
+    }
+
+    private List<Comment> setComments(List<Comment> children, CommentState state) {
+        return children.stream()
+                .filter(comment -> comment.eqState(state))
                 .toList();
     }
 
@@ -48,17 +56,28 @@ public class VideoComments {
 
     public Map<Long, List<Long>> activityCountMap() {
         Map<Long, Long> memberCountMap = memberIdCountMap();
-        return countMemberIdsMap(memberCountMap);
+        return countMemberIds(memberCountMap);
+    }
+
+    public Map<Long, List<Long>> parentCountMap() {
+        Map<Long, Long> childCountMap = childCountMap();
+        return countMemberIds(childCountMap);
     }
 
     private Map<Long, Long> memberIdCountMap() {
         return comments.stream()
-                .collect(Collectors.groupingBy(Comment::getMemberId, Collectors.counting()));
+                .collect(groupingBy(Comment::getMemberId, counting()));
     }
 
-    private Map<Long, List<Long>> countMemberIdsMap(Map<Long, Long> memberCountMap) {
+    private Map<Long, Long> childCountMap() {
+        return comments.stream()
+                .filter(Comment::isChild)
+                .collect(groupingBy(Comment::getParentId, counting()));
+    }
+
+    private Map<Long, List<Long>> countMemberIds(Map<Long, Long> memberIdCountMap) {
         Map<Long, List<Long>> countMemberIdsMap = new HashMap<>();
-        memberCountMap.forEach((k, v) -> countMemberIdsMap.computeIfAbsent(v, u -> new ArrayList<>()).add(k));
+        memberIdCountMap.forEach((k, v) -> countMemberIdsMap.computeIfAbsent(v, u -> new ArrayList<>()).add(k));
         return countMemberIdsMap;
     }
 }

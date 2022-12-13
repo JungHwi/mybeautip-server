@@ -13,6 +13,8 @@ public class PopupTypeServiceFactory {
     private final SignupPopupService signupPopupService;
     private final ComebackPopupService comebackPopupService;
     private final LoginPopupService loginPopupService;
+    private final NoticePopupService noticePopupService;
+    private final WakeupPopupService wakeupPopupService;
 
     public final PopupTypeService getPopupLinkService(PopupType popupType) {
         switch (popupType) {
@@ -22,6 +24,10 @@ public class PopupTypeServiceFactory {
                 return comebackPopupService;
             case LOGIN:
                 return loginPopupService;
+            case NOTICE:
+                return noticePopupService;
+            case WAKEUP:
+                return wakeupPopupService;
             default:
                 throw new BadRequestException("Request popup is " + popupType.name());
         }

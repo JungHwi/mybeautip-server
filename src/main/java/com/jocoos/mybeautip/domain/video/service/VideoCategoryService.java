@@ -22,10 +22,14 @@ public class VideoCategoryService {
 
     @Transactional(readOnly = true)
     public List<VideoCategoryResponse> getVideoCategoryList() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.ASC, "sort"));
-        List<VideoCategory> categories = repository.findAllBy(pageable);
-
+        List<VideoCategory> categories = getAllCategories();
         return converter.convert(categories);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VideoCategoryResponse> getVideoCategoriesExcludeShapeInfo() {
+        List<VideoCategory> categories = getAllCategories();
+        return converter.excludeShapeInfo(categories);
     }
 
     @Transactional(readOnly = true)
@@ -39,5 +43,10 @@ public class VideoCategoryService {
     public List<VideoCategoryResponse> getVideoCategoryList(List<Integer> ids) {
         List<VideoCategory> videoCategories = repository.findAllByIdIn(ids);
         return converter.convert(videoCategories);
+    }
+
+    private List<VideoCategory> getAllCategories() {
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.ASC, "sort"));
+        return repository.findAllBy(pageable);
     }
 }

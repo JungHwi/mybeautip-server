@@ -18,11 +18,13 @@ public interface EventRepository extends ExtendedQuerydslJpaRepository<Event, Lo
     List<Event> findByTypeAndStatus(EventType type, EventStatus status);
     Event findTopByTypeAndStatus(EventType type, EventStatus status);
     List<Event> findByIdIn(Set<Long> eventIds);
-
     List<Event> findByReservationAtLessThanEqualAndStatus(ZonedDateTime now, EventStatus status);
     List<Event> findByEndAtLessThanEqualAndStatus(ZonedDateTime now, EventStatus status);
-
     @Modifying
     @Query("UPDATE Event e SET e.status = :status WHERE e.id in :ids")
     int updateStatus(List<Long> ids, EventStatus status);
+
+    @Modifying
+    @Query("UPDATE Event e SET e.status = :status, e.fixSorting.isTopFix = :isTopFix, e.fixSorting.sorting = :sorting WHERE e.id in :ids")
+    int updateStatusAndIsTopFixAndSorting(List<Long> ids, EventStatus status, Boolean isTopFix, Integer sorting);
 }

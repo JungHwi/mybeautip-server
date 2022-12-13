@@ -1,9 +1,11 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
-import com.jocoos.mybeautip.global.exception.AuthenticationDormantMemberException;
+import com.jocoos.mybeautip.domain.member.dto.ExceptionMemberResponse;
 import com.jocoos.mybeautip.global.exception.AuthenticationException;
 import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -40,7 +41,6 @@ public class NaverTokenGranter extends AbstractTokenGranter {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
         Map<String, String> requestParameters = tokenRequest.getRequestParameters();
         String naverId = requestParameters.get("social_id");
@@ -63,13 +63,28 @@ public class NaverTokenGranter extends AbstractTokenGranter {
                 .orElseThrow(() -> new AuthenticationMemberNotFoundException("No such member. member id - " + naverMember.getMemberId()));
 
         switch (member.getStatus()) {
-            case ACTIVE:
+            case ACTIVE -> {
                 signupEventService.join(member);
+                memberRepository.updateLastLoggedAt(member.getId());
                 return generateToken(member, client, tokenRequest);
-            case DORMANT:
-                throw new AuthenticationDormantMemberException("Dormant Member. member id - " + naverMember.getMemberId());
-            default:
-                throw new AuthenticationMemberNotFoundException("No such member. member id - " + naverMember.getMemberId());
+            }
+            case DORMANT -> {
+                ExceptionMemberResponse response = ExceptionMemberResponse.builder()
+                        .memberId(member.getId())
+                        .date(ZonedDateTimeUtil.toString(member.getModifiedAtZoned()))
+                        .build();
+                throw new AuthenticationMemberNotFoundException(ErrorCode.DORMANT_MEMBER, "휴면 회원", response);
+            }
+            case SUSPENDED -> {
+                ExceptionMemberResponse response = ExceptionMemberResponse.builder()
+                        .memberId(member.getId())
+                        .date(ZonedDateTimeUtil.toString(member.getModifiedAtZoned().plusDays(14)))
+                        .build();
+                throw new AuthenticationMemberNotFoundException(ErrorCode.SUSPENDED_MEMBER, "정지 회원", response);
+            }
+            case EXILE -> throw new AuthenticationMemberNotFoundException(ErrorCode.EXILED_MEMBER, "추방된 회원");
+            default ->
+                    throw new AuthenticationMemberNotFoundException("No such member. member id - " + naverMember.getMemberId());
         }
     }
 

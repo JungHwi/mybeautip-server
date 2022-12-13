@@ -1,0 +1,3 @@
+== Admin Delete Event API
+
+operation::admin_delete_event[snippets='http-request,path-parameters,http-response,response-fields']
