@@ -64,8 +64,8 @@ alter table videos add column is_recommended boolean default false after is_top_
 
 alter table videos add column status varchar(20) after video_key;
 
-alter table notices change column min_version min_version varchar(20);
-alter table notices change column max_version max_version varchar(20);
+alter table notices change column min_version min_version varchar(50);
+alter table notices change column max_version max_version varchar(50);
 
 -- Rollback
 # drop table username_combination_word;
