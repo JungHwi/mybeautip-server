@@ -2,7 +2,7 @@ FROM public.ecr.aws/amazoncorretto/amazoncorretto:17
 
 WORKDIR /mybeautip-server
 
-ADD build/libs/mybeautip-server.jar app.jar
+ADD build/libs/mybeautip-server-1.1.1.jar app.jar
 
 ENV SERVER_PROFILE production
 
