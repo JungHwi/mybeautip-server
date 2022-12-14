@@ -186,4 +186,5 @@ build {
 
 bootJar {
   dependsOn copyDocumentForJar
+  archiveFileName.set("mybeautip-server.jar")
 }
