@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
+import static org.springframework.util.StringUtils.hasText;
 
 @Getter
 @RequiredArgsConstructor
@@ -54,7 +55,7 @@ public class MemberSearchResult {
         this.avatarUrl = member.getAvatarUrl();
         this.username = member.getUsername();
         this.email = member.getEmail();
-        this.phoneNumber = member.getPhoneNumber();
+        this.phoneNumber = getPhoneNumber(member, address);
         this.point = member.getPoint();
         this.isPushable = member.getPushable();
         this.grantType = member.getGrantType();
@@ -73,4 +74,10 @@ public class MemberSearchResult {
         this.totalVideoCommentCount = activityCount.getAllVideoCommentCount();
     }
 
+    public String getPhoneNumber(Member member, Address address) {
+        if (hasText(member.getPhoneNumber())) {
+            return member.getPhoneNumber();
+        }
+        return address == null ? null : address.getPhone();
+    }
 }
