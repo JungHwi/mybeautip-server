@@ -150,7 +150,8 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
         result.andDo(document("admin_get_community_status",
                 responseFields(
                         fieldWithPath("[].id").type(JsonFieldType.NUMBER).description("커뮤니티 카테고리 ID"),
-                        fieldWithPath("[].title").type(JsonFieldType.STRING).description("커뮤니티 카테고리 이름")
+                        fieldWithPath("[].title").type(JsonFieldType.STRING).description("커뮤니티 카테고리 이름"),
+                        fieldWithPath("[].type").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_CATEGORY_TYPE))
                 )));
     }
 
