@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.video.service;
 import com.jocoos.mybeautip.domain.video.converter.VideoCommentConverter;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoCommentResponse;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoCommentDao;
+import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminVideoCommentService {
 
     private final VideoCommentDao videoCommentDao;
+    private final VideoDao videoDao;
     private final VideoCommentDeleteService deleteService;
     private final VideoCommentConverter converter;
 
@@ -24,6 +26,7 @@ public class AdminVideoCommentService {
     public AdminVideoCommentResponse write(Long videoId, String content, Long parentId) {
         Comment comment = converter.convert(videoId, content, parentId);
         Comment savedComment = videoCommentDao.save(comment);
+        updateCommentCount(videoId, savedComment);
         return new AdminVideoCommentResponse(savedComment);
     }
 
@@ -46,5 +49,12 @@ public class AdminVideoCommentService {
         comment.hide(isHide);
         deleteService.hide(comment, isHide);
         return comment.getId();
+    }
+
+    private void updateCommentCount(Long videoId, Comment savedComment) {
+        videoDao.commentCount(videoId, 1);
+        if (savedComment.isChild()) {
+            videoCommentDao.commentCount(savedComment.getParentId(), 1);
+        }
     }
 }
