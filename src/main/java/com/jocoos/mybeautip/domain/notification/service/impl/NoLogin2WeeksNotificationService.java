@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.notification.service.impl;
 
-import com.jocoos.mybeautip.domain.member.vo.ZonedDateTimeDay;
+import com.jocoos.mybeautip.global.vo.Day;
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -51,7 +51,7 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
 
     @Transactional
     public void occurs() {
-        List<ZonedDateTimeDay> noLoginNotificationDays = getNoLoginNotificationDays();
+        List<Day> noLoginNotificationDays = getNoLoginNotificationDays();
         List<Member> noLoginMembers = memberRepository.getMemberLastLoggedAtSameDayIn(noLoginNotificationDays);
         send(noLoginMembers);
     }
@@ -73,13 +73,13 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
         }
     }
 
-    private List<ZonedDateTimeDay> getNoLoginNotificationDays() {
+    private List<Day> getNoLoginNotificationDays() {
         LocalDate before2Weeks = LocalDate.now().minusWeeks(2);
         LocalDate before4Weeks = LocalDate.now().minusWeeks(4);
         LocalDate before6Weeks = LocalDate.now().minusWeeks(6);
 
         return Stream.of(before2Weeks, before4Weeks, before6Weeks)
-                .map(localDate -> new ZonedDateTimeDay(localDate, ZoneId.systemDefault()))
+                .map(localDate -> new Day(localDate, ZoneId.systemDefault()))
                 .toList();
     }
 

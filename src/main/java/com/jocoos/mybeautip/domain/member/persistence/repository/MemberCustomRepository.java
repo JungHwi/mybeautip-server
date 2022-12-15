@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
-import com.jocoos.mybeautip.domain.member.vo.ZonedDateTimeDay;
+import com.jocoos.mybeautip.global.vo.Day;
 import com.jocoos.mybeautip.member.Member;
 import org.springframework.data.domain.Page;
 
@@ -18,5 +18,5 @@ public interface MemberCustomRepository {
 
     Page<MemberBasicSearchResult> getMembers(MemberSearchCondition condition);
 
-    List<Member> getMemberLastLoggedAtSameDayIn(List<ZonedDateTimeDay> lastLoggedAt);
+    List<Member> getMemberLastLoggedAtSameDayIn(List<Day> lastLoggedAt);
 }
