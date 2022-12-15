@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.member.converter.DormantMemberConverter;
 import com.jocoos.mybeautip.domain.member.persistence.domain.DormantMember;
 import com.jocoos.mybeautip.domain.member.service.dao.DormantMemberDao;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
+import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.domain.popup.dto.PopupResponse;
 import com.jocoos.mybeautip.domain.popup.service.PopupService;
 import com.jocoos.mybeautip.member.Member;
@@ -14,8 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DORMANT_WAKEUP_POINT;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +42,7 @@ public class DormantMemberService {
     @Transactional
     public PopupResponse wakeup(long memberId) {
         Member member = toMember(memberId);
-        memberPointService.earnPoint(member, DORMANT_WAKEUP_POINT);
+        memberPointService.earnPoint(ActivityPointType.WAKEUP, null, member);
         return popupService.getWakeupPopup();
     }
 

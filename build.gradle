@@ -186,6 +186,5 @@ build {
 
 bootJar {
   dependsOn copyDocumentForJar
-  baseName = 'mybeautip-server'
-  version = '1.1.1'
+  archiveFileName.set("mybeautip-server.jar")
 }

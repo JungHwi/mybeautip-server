@@ -18,6 +18,9 @@ public enum ErrorCode implements CodeValue {
     BANNED_WORD("금칙어 포함"),
     NOT_A_WRITER("작성자가 아님"),
 
+    // LOGIN
+    INVALID_TOKEN("잘못된 토큰"),
+
     // MEMBER
     MEMBER_NOT_FOUND("회원 정보 없음"),
     MEMBER_DUPLICATED("중복 회원"),

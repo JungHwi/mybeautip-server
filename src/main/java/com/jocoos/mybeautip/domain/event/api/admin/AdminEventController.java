@@ -63,7 +63,7 @@ public class AdminEventController {
                 .statuses(status == null ? null : Collections.singleton(status))
                 .communityCategoryId(communityCategoryId)
                 .searchOption(searchOption)
-                .paging(Paging.offsetBased(page, size))
+                .paging(Paging.offsetBased(page - 1, size))
                 .sort(new Sort(sort, order))
                 .build();
 
