@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.notification.service.impl;
 
+import com.jocoos.mybeautip.domain.member.vo.ZonedDateTimeDay;
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -24,11 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -46,11 +49,11 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
 
     private final TemplateType templateType = TemplateType.NO_LOGIN_2WEEKS;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public void occurs() {
-        LocalDateTime before2Weeks = LocalDateTime.now().minusWeeks(2);
-        List<Member> noLoginUser = memberRepository.findByVisibleIsTrueAndPushableIsTrueAndLastLoggedAtLessThan(before2Weeks);
-        send(noLoginUser);
+        List<ZonedDateTimeDay> noLoginNotificationDays = getNoLoginNotificationDays();
+        List<Member> noLoginMembers = memberRepository.getMemberLastLoggedAtSameDayIn(noLoginNotificationDays);
+        send(noLoginMembers);
     }
 
     @Override
@@ -68,6 +71,16 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
             NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, targetInfo, arguments);
             sendAppPush(messageIndex, notificationCenterEntity.getId(), targetInfo, arguments);
         }
+    }
+
+    private List<ZonedDateTimeDay> getNoLoginNotificationDays() {
+        LocalDate before2Weeks = LocalDate.now().minusWeeks(2);
+        LocalDate before4Weeks = LocalDate.now().minusWeeks(4);
+        LocalDate before6Weeks = LocalDate.now().minusWeeks(6);
+
+        return Stream.of(before2Weeks, before4Weeks, before6Weeks)
+                .map(localDate -> new ZonedDateTimeDay(localDate, ZoneId.systemDefault()))
+                .toList();
     }
 
     private NotificationCenterEntity sendCenter(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {

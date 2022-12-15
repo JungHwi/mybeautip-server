@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -130,7 +129,7 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
 
     List<Member> findByVisibleIsTrueAndPushableIsTrue();
 
-    List<Member> findByVisibleIsTrueAndPushableIsTrueAndLastLoggedAtLessThan(LocalDateTime localDateTime);
+    List<Member> findByVisibleIsTrueAndPushableIsTrueAndLastLoggedAtLessThan(ZonedDateTime localDateTime);
 
     @Query("SELECT m FROM Member m WHERE LENGTH(m.tag) < 1")
     List<Member> selectTagIsEmpty();
