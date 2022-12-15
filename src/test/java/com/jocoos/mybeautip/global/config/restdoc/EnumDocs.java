@@ -24,6 +24,7 @@ public class EnumDocs {
     Map<String, String> skinType;
     Map<String, String> skinWorry;
     Map<String, String> grantType;
+    Map<String, String> role;
 
     // Event
     Map<String, String> eventStatus;

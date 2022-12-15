@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.notification.code.*;
 import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
 import com.jocoos.mybeautip.domain.operation.code.OperationType;
@@ -55,6 +56,7 @@ public class CommonDocController {
         Map<String, String> skinType = getDocs(SkinType.values());
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
         Map<String, String> grantType = getDocs(GrantType.values());
+        Map<String, String> role = getDocs(Role.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -122,6 +124,7 @@ public class CommonDocController {
                         .skinType(skinType)
                         .skinWorry(skinWorry)
                         .grantType(grantType)
+                        .role(role)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)

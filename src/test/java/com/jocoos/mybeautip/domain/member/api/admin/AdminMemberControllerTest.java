@@ -52,6 +52,7 @@ class AdminMemberControllerTest extends RestDocsTestSupport {
                 ),
                 responseFields(
                         fieldWithPath("id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                        fieldWithPath("role").type(JsonFieldType.STRING).description(generateLinkCode(ROLE)),
                         fieldWithPath("avatar_url").type(JsonFieldType.STRING).description("아바타 이미지 URL"),
                         fieldWithPath("username").type(JsonFieldType.STRING).description("닉네임"),
                         fieldWithPath("email").type(JsonFieldType.STRING).description("이메일").optional(),
