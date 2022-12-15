@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.notification.service.impl;
 
-import com.jocoos.mybeautip.global.vo.Day;
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -17,12 +16,12 @@ import com.jocoos.mybeautip.domain.notification.service.MemberNotificationServic
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
+import com.jocoos.mybeautip.global.vo.Day;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -30,7 +29,6 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -50,19 +48,19 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
     private final TemplateType templateType = TemplateType.NO_LOGIN_2WEEKS;
 
     @Transactional
-    public void occurs() {
+    public int occurs() {
         List<Day> noLoginNotificationDays = getNoLoginNotificationDays();
         List<Member> noLoginMembers = memberRepository.getMemberLastLoggedAtSameDayIn(noLoginNotificationDays);
         send(noLoginMembers);
+        return noLoginMembers.size();
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(List<Member> members) {
         int messageIndex = getMessageRandomIndex();
         List<Long> ids = members.stream()
                 .map(Member::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         List<NotificationTargetInfo> targetInfoList = getTargetInfo(ids);
 
