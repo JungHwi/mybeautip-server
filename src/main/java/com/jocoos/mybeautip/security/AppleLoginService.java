@@ -7,7 +7,8 @@ import com.jocoos.mybeautip.client.apple.dto.AppleTokenRequest;
 import com.jocoos.mybeautip.client.apple.dto.AppleTokenResponse;
 import com.jocoos.mybeautip.client.apple.dto.RevokeRequest;
 import com.jocoos.mybeautip.config.Oauth2Config;
-import com.jocoos.mybeautip.global.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.AppleMember;
 import com.jocoos.mybeautip.member.AppleMemberRepository;
@@ -60,7 +61,7 @@ public class AppleLoginService implements LoginService {
         AppleTokenResponse tokenResponse = appleClient.getToken(tokenRequest);
         String refreshToken = tokenResponse.getRefreshToken();
         if (StringUtils.isBlank(refreshToken)) {
-            throw new AuthenticationException("Refresh token required");
+            throw new BadRequestException(ErrorCode.INVALID_TOKEN, "Failed to get kakao access token.");
         }
 
         // FIXME 기존 회원들 refreshToken 저장을 위해 코드 추가. 적당한 시점에 코드 삭제.
