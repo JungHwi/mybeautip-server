@@ -77,6 +77,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("GrantType")),
                                 enumConvertFieldDescriptor((enumDocs.getGrantType()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.role").withSubsectionId("role"),
+                                attributes(key("title").value("Role")),
+                                enumConvertFieldDescriptor((enumDocs.getRole()))
+                        ),
                         // Event
                         customResponseFields("custom-response", beneathPath("data.event_status").withSubsectionId("event_status"),
                                 attributes(key("title").value("EventStatus")),
