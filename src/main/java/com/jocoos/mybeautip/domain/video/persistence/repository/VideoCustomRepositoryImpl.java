@@ -243,7 +243,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
                 )
-                .orderBy(video.createdAt.desc()));
+                .orderBy(video.sorting.asc().nullsLast(), video.createdAt.desc()));
 
         if (condition.getSize() != 0) {
             baseQuery
