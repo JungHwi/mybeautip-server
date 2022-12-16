@@ -40,7 +40,6 @@ public class AdminVideoService {
         Video video = videoDao.getVideo(videoId);
         video.hide(isHide);
         commentDeleteService.hide(videoId, isHide);
-        sendMessages(video);
         return video.getId();
     }
 
@@ -77,14 +76,6 @@ public class AdminVideoService {
             videoDao.fixAndAddToLastOrder(video.getId());
         } else {
             videoDao.unFixAndSortingToNull(video.getId());
-        }
-    }
-
-    private void sendMessages(Video video) {
-        if (video.isOpenAndVisible()) {
-            // aop 도입 고려 (slack 및 notification 공통화)
-            slackService.makeVideoPublic(video);
-            notificationService.send(video);
         }
     }
 }
