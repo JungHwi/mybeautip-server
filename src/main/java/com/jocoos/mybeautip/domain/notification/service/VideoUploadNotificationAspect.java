@@ -14,6 +14,8 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 
+import static com.jocoos.mybeautip.domain.video.code.VideoStatus.OPEN;
+
 
 @Slf4j
 @Aspect
@@ -58,9 +60,12 @@ public class VideoUploadNotificationAspect {
     }
   }
 
+  // FIXME PLAN D 때 AOP 리팩토링한 것으로 교체할 것
   private boolean verifyPublicVideo(Video video) {
     return "UPLOADED".equals(video.getType()) &&
-        "VOD".equals(video.getState()) && "PUBLIC".equals(video.getVisibility());
+        "VOD".equals(video.getState())
+            && "PUBLIC".equals(video.getVisibility())
+            && OPEN.equals(video.getStatus());
   }
 
   @Async
