@@ -145,7 +145,8 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         isReported(condition.isReported()),
                         isTopFix(condition.isTopFix()),
                         eqVisibility(condition.visibility()),
-                        isRecommended(condition.isRecommended())
+                        isRecommended(condition.isRecommended()),
+                        video.deletedAt.isNull()
                 ));
 
         dynamicQueryForCommentSearch(condition, baseQuery);
