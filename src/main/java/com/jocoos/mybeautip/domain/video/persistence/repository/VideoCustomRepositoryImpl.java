@@ -146,6 +146,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         isTopFix(condition.isTopFix()),
                         eqVisibility(condition.visibility()),
                         isRecommended(condition.isRecommended()),
+                        eqStatus(condition.status()),
                         video.deletedAt.isNull()
                 ));
 
