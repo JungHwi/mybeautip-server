@@ -256,7 +256,7 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
         BooleanDto request = new BooleanDto(true);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/admin/community/{community_id}/hiding", 1)
+                        .patch("/admin/community/{community_id}/hide", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -281,7 +281,7 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
         BooleanDto request = new BooleanDto(true);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/admin/community/{community_id}/winning", 8)
+                        .patch("/admin/community/{community_id}/win", 8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
