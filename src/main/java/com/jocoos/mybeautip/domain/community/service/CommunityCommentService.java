@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service;
 
+import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.converter.CommunityCommentConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
@@ -23,11 +24,13 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +47,7 @@ public class CommunityCommentService {
     private final CommunityCommentDeleteService deleteService;
     private final CommunityCommentConverter converter;
     private final CommunityCommentCRUDService crudService;
+    private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
@@ -125,6 +129,11 @@ public class CommunityCommentService {
         }
 
         communityComment.setContents(request.getContents());
+
+        if (!CollectionUtils.isEmpty(request.getFiles())) {
+            communityComment.setFile(request.getUploadFilename());
+            awsS3Handler.editFiles(request.getFiles(), COMMUNITY_COMMENT.getDirectory(communityComment.getId()));
+        }
 
         dao.save(communityComment);
 
