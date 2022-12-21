@@ -13,6 +13,7 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.FILE_NOT_EDITABLE;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
 
 @RequiredArgsConstructor
 @Service
@@ -23,6 +24,11 @@ public class CommunityFileService {
     @Transactional
     public void write(List<FileDto> files, Long communityId) {
         awsS3Handler.copy(files, COMMUNITY.getDirectory(communityId));
+    }
+
+    @Transactional
+    public void write(FileDto file, Long commentId) {
+        awsS3Handler.copy(file, COMMUNITY_COMMENT.getDirectory(commentId));
     }
 
     @Transactional

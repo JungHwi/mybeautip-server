@@ -56,6 +56,9 @@ public class CommunityComment extends BaseEntity {
     @Column
     private int reportCount;
 
+    @Column
+    private String file;
+
     @ManyToOne
     @JoinColumn(name = "member_id", insertable = false, updatable = false)
     private Member member;

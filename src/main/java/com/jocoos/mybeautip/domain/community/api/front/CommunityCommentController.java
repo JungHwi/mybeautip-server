@@ -2,8 +2,10 @@ package com.jocoos.mybeautip.domain.community.api.front;
 
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityCommentService;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -54,10 +56,11 @@ public class CommunityCommentController {
     }
 
     @PostMapping("/1/community/{community_id}/comment")
-    public ResponseEntity<CommunityCommentResponse> writeComment(@PathVariable("community_id") long communityId,
+    public ResponseEntity<CommunityCommentResponse> writeComment(@CurrentMember MyBeautipUserDetails userDetails,
+                                                                 @PathVariable("community_id") long communityId,
                                                                  @RequestBody WriteCommunityCommentRequest request) {
         request.setCommunityId(communityId);
-
+        request.setMember(userDetails.getMember());
         return ResponseEntity.ok(communityCommentService.write(request));
     }
 

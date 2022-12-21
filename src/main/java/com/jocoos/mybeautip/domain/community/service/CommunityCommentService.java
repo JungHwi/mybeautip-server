@@ -43,6 +43,7 @@ public class CommunityCommentService {
     private final ActivityPointService activityPointService;
     private final CommunityCommentDeleteService deleteService;
     private final CommunityCommentConverter converter;
+    private final CommunityCommentCRUDService crudService;
 
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
@@ -89,18 +90,8 @@ public class CommunityCommentService {
 
     @Transactional
     public CommunityCommentResponse write(WriteCommunityCommentRequest request) {
-        valid(request);
-        Member member = legacyMemberService.currentMember();
-        request.setMember(member);
-
-        Community community = communityDao.get(request.getCommunityId());
-        request.setCategoryId(community.getCategoryId());
-
-        CommunityComment communityComment = dao.write(request);
-
-        if (community.getCategory().getType() == CommunityCategoryType.BLIND) {
-            communityDao.updateSortedAt(community.getId());
-        }
+        Member member = request.getMember();
+        CommunityComment communityComment = crudService.write(request);
 
         CommunityCommentResponse response = converter.convert(communityComment);
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,

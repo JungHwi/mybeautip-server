@@ -4,9 +4,11 @@ import com.jocoos.mybeautip.domain.community.dto.AdminCommunityCommentResponse;
 import com.jocoos.mybeautip.domain.community.dto.EditCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityCommentService;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +27,11 @@ public class AdminCommunityCommentController {
     private final AdminCommunityCommentService service;
 
     @PostMapping("/community/{communityId}/comment")
-    public ResponseEntity<AdminCommunityCommentResponse> writeComment(@PathVariable Long communityId,
+    public ResponseEntity<AdminCommunityCommentResponse> writeComment(@CurrentMember MyBeautipUserDetails userDetails,
+                                                                      @PathVariable Long communityId,
                                                                       @RequestBody WriteCommunityCommentRequest request) {
         request.setCommunityId(communityId);
+        request.setMember(userDetails.getMember());
         AdminCommunityCommentResponse response = service.write(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
                 .build()

@@ -5,9 +5,7 @@ import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -18,11 +16,17 @@ public interface CommunityCommentConverter {
             @Mapping(target = "memberId", source = "member.id"),
             @Mapping(target = "status", constant = "NORMAL"),
             @Mapping(target = "id", ignore = true),
+            @Mapping(target = "file", ignore = true),
             @Mapping(target = "likeCount", ignore = true),
             @Mapping(target = "commentCount", ignore = true),
             @Mapping(target = "reportCount", ignore = true)
     })
     CommunityComment convert(WriteCommunityCommentRequest request);
+
+    @AfterMapping
+    default void convert(@MappingTarget CommunityComment comment, WriteCommunityCommentRequest request) {
+        comment.setFile(request.getFilename());
+    }
 
     @Mappings({
         @Mapping(target = "relationInfo", ignore = true)
