@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member.comment;
 
+import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
@@ -31,6 +32,7 @@ import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.DELETE_VI
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.VIDEO_COMMENT;
 
 @Slf4j
 @Service
@@ -54,6 +56,7 @@ public class CommentService {
     private final MemberActivityCountDao activityCountDao;
     private final ActivityPointService activityPointService;
     private final VideoCommentDeleteService deleteService;
+    private final AwsS3Handler awsS3Handler;
 
     @Transactional
     public List<CommentInfo> getComments(CommentSearchCondition condition, Pageable pageable) {
@@ -111,6 +114,7 @@ public class CommentService {
         }
 
         BeanUtils.copyProperties(request, comment);
+        comment.setFile(request.getFilename());
         comment = commentRepository.save(comment);
 
         tagService.touchRefCount(comment.getComment());
@@ -121,6 +125,10 @@ public class CommentService {
             mentionService.updateCommentWithMention(comment, mentionTags);
         } else {
             legacyNotificationService.notifyAddComment(comment);
+        }
+
+        if (request.getFile() != null) {
+            awsS3Handler.copy(request.getFile(), VIDEO_COMMENT.getDirectory(comment.getId()));
         }
 
         activityPointService.gainActivityPoint(WRITE_VIDEO_COMMENT, validDomainAndReceiver(comment, comment.getId(), member));
