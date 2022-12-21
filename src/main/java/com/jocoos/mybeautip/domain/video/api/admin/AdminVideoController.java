@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.video.api.admin;
 
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.service.AdminVideoService;
 import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
@@ -30,6 +31,7 @@ public class AdminVideoController {
 
     @GetMapping("/video")
     public ResponseEntity<PageResponse<AdminVideoResponse>> getVideos(
+            @RequestParam(required = false) VideoStatus status,
             @RequestParam(name = "category_id", required = false) Integer categoryId,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
@@ -54,6 +56,7 @@ public class AdminVideoController {
                 .build();
 
         AdminVideoSearchCondition condition = AdminVideoSearchCondition.builder()
+                .status(status)
                 .categoryId(categoryId)
                 .visibility(visibility)
                 .isRecommended(isRecommended)

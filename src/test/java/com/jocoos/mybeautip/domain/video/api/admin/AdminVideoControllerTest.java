@@ -34,6 +34,7 @@ class AdminVideoControllerTest extends RestDocsTestSupport {
 
         result.andDo(document("admin_get_videos",
                 requestParameters(
+                        parameterWithName("status").description(generateLinkCode(VIDEO_STATUS)).optional(),
                         parameterWithName("category_id").description("카테고리 아이디").optional(),
                         parameterWithName("page").description("페이지 넘버").optional().attributes(getDefault(1)),
                         parameterWithName("size").description("페이지 사이즈").optional().attributes(getDefault(10)),

@@ -1,16 +1,20 @@
 package com.jocoos.mybeautip.domain.member.code;
 
+import com.jocoos.mybeautip.global.code.CodeValue;
 import com.jocoos.mybeautip.member.Member;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Set;
 
+@Getter
 @RequiredArgsConstructor
-public enum Role {
-    GUEST("ROLE_GUEST"),
-    USER("ROLE_USER"),
-    ADMIN("ROLE_ADMIN");
+public enum Role implements CodeValue {
+    GUEST("게스트", "ROLE_GUEST"),
+    USER("유저", "ROLE_USER"),
+    ADMIN("어드민", "ROLE_ADMIN");
 
+    private final String description;
     private final String authority;
 
     public static final Set<Role> ALL_ROLES = Set.of(values());
@@ -20,5 +24,10 @@ public enum Role {
             return GUEST;
         }
         return member.getRole();
+    }
+
+    @Override
+    public String getName() {
+        return name();
     }
 }

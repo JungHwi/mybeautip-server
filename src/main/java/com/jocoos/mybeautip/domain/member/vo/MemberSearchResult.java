@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.member.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberActivityCount;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
@@ -24,6 +25,7 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 public class MemberSearchResult {
     private final Long id;
+    private final Role role;
     private final String avatarUrl;
     private final String username;
     private final String email;
@@ -52,6 +54,7 @@ public class MemberSearchResult {
     @QueryProjection
     public MemberSearchResult(Member member, Address address, MemberDetail memberDetail, MemberActivityCount activityCount, List<MemoResponse> memoResponses) {
         this.id = member.getId();
+        this.role = Role.from(member);
         this.avatarUrl = member.getAvatarUrl();
         this.username = member.getUsername();
         this.email = member.getEmail();

@@ -59,6 +59,7 @@ public enum ErrorCode implements CodeValue {
     COMMUNITY_VOTE_NOT_MATCH("게시물에 등록된 파일이 아님"),
     TOO_MANY_FILE("파일 수가 너무 많음"),
     CATEGORY_NO_WRITABLE("작성이 가능한 카테고리가 아님"),
+    FILE_NOT_EDITABLE("파일 수정이 불가함"),
 
     // VIDEO
     VIDEO_NOT_FOUND("비디오 정보 없음"),

@@ -16,19 +16,20 @@ import com.jocoos.mybeautip.domain.notification.service.MemberNotificationServic
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
+import com.jocoos.mybeautip.global.vo.Day;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -46,20 +47,20 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
 
     private final TemplateType templateType = TemplateType.NO_LOGIN_2WEEKS;
 
-    @Transactional(readOnly = true)
-    public void occurs() {
-        LocalDateTime before2Weeks = LocalDateTime.now().minusWeeks(2);
-        List<Member> noLoginUser = memberRepository.findByVisibleIsTrueAndPushableIsTrueAndLastLoggedAtLessThan(before2Weeks);
-        send(noLoginUser);
+    @Transactional
+    public int occurs() {
+        List<Day> noLoginNotificationDays = getNoLoginNotificationDays();
+        List<Member> noLoginMembers = memberRepository.getMemberLastLoggedAtSameDayIn(noLoginNotificationDays);
+        send(noLoginMembers);
+        return noLoginMembers.size();
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void send(List<Member> members) {
         int messageIndex = getMessageRandomIndex();
         List<Long> ids = members.stream()
                 .map(Member::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         List<NotificationTargetInfo> targetInfoList = getTargetInfo(ids);
 
@@ -68,6 +69,16 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
             NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, targetInfo, arguments);
             sendAppPush(messageIndex, notificationCenterEntity.getId(), targetInfo, arguments);
         }
+    }
+
+    private List<Day> getNoLoginNotificationDays() {
+        LocalDate before2Weeks = LocalDate.now().minusWeeks(2);
+        LocalDate before4Weeks = LocalDate.now().minusWeeks(4);
+        LocalDate before6Weeks = LocalDate.now().minusWeeks(6);
+
+        return Stream.of(before2Weeks, before4Weeks, before6Weeks)
+                .map(localDate -> new Day(localDate, ZoneId.systemDefault()))
+                .toList();
     }
 
     private NotificationCenterEntity sendCenter(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {

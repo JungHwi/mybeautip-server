@@ -7,11 +7,14 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
 import com.jocoos.mybeautip.domain.member.dto.QMemoResponse;
 import com.jocoos.mybeautip.domain.member.vo.*;
+import com.jocoos.mybeautip.global.vo.Day;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.QMember;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.AbstractGroupExpression;
 import com.querydsl.core.types.Ops;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -83,6 +86,19 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         return getPage(fetchBasicSearchResult(offsetSearchQuery), condition.pageable(), countQuery::fetchOne);
     }
 
+    @Override
+    public List<Member> getMemberLastLoggedAtSameDayIn(List<Day> lastLoggedAt) {
+        return repository.query(query -> query
+                .select(member)
+                .from(member)
+                .where(
+                        eqPushable(true),
+                        eqVisible(true),
+                        lastLoggedAtSameDayIn(lastLoggedAt)
+                )
+                .fetch());
+    }
+
     private JPAQuery<?> baseSearchQuery(MemberSearchCondition condition) {
         return repository.query(query -> query
                 .from(member)
@@ -120,6 +136,27 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .where(block.status.eq(BLOCK));
     }
 
+    private BooleanBuilder lastLoggedAtSameDayIn(List<Day> days) {
+        Predicate[] isSameDays = days.stream()
+                .map(this::lastLoggedAtBetween)
+                .toArray(Predicate[]::new);
+        return new BooleanBuilder().andAnyOf(isSameDays);
+    }
+
+    private BooleanExpression eqVisible(Boolean visible) {
+        if (visible == null) {
+            return null;
+        }
+        return visible ? member.visible.isTrue() : member.visible.isFalse();
+    }
+
+    private BooleanExpression eqPushable(Boolean pushable) {
+        if (pushable == null) {
+            return null;
+        }
+        return pushable ? member.pushable.isTrue() : member.pushable.isFalse();
+    }
+
     private BooleanExpression searchByKeyword(SearchOption searchOption) {
         if (searchOption == null || searchOption.isNoSearch()) {
             return null;
@@ -147,6 +184,10 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     private QMemberResponse memberResponse(QMember member) {
         return new QMemberResponse(member.id, member.username);
+    }
+
+    private BooleanExpression lastLoggedAtBetween(Day day) {
+        return member.lastLoggedAt.between(day.getStartOfDay(), day.getEndOfDay());
     }
 
     private static BooleanExpression eqId(Long memberId) {
