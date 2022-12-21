@@ -58,6 +58,7 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].link_type").type(JsonFieldType.STRING).description(generateLinkCode(PLACARD_LINK_TYPE)),
                         fieldWithPath("content.[].image_url").type(JsonFieldType.STRING).description("이미지 Url"),
                         fieldWithPath("content.[].description").type(JsonFieldType.STRING).description("배너명 (플랜카드 설명)").optional(),
+                        fieldWithPath("content.[].is_top_fix").type(JsonFieldType.BOOLEAN).description("고정 여부 (true 일 때만 응답)").optional(),
                         fieldWithPath("content.[].start_at").type(JsonFieldType.STRING).description("시작일시").attributes(getZonedDateFormat()),
                         fieldWithPath("content.[].end_at").type(JsonFieldType.STRING).description("종료일시").attributes(getZonedDateFormat()),
                         fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("생성일시").attributes(getZonedDateFormat())

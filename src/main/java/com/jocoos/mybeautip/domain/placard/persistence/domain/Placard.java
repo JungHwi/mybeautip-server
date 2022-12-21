@@ -19,6 +19,7 @@ import static com.jocoos.mybeautip.domain.placard.code.PlacardStatus.ACTIVE;
 import static com.jocoos.mybeautip.domain.placard.code.PlacardStatus.INACTIVE;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ONLY_ACTIVE_CAN_FIX;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
+import static java.lang.Boolean.TRUE;
 
 @Entity
 @Getter
@@ -128,5 +129,9 @@ public class Placard extends CreatedDateAuditable {
         detailList.stream()
                 .findFirst()
                 .ifPresent(detail -> detail.replaceFile(imageUrl));
+    }
+
+    public Boolean isTopFixTrueOrNull() {
+        return TRUE.equals(isTopFix) ? true : null;
     }
 }

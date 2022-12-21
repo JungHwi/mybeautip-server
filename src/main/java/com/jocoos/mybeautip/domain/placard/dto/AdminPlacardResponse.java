@@ -21,6 +21,7 @@ public class AdminPlacardResponse {
     private final PlacardLinkType linkType;
     private final String imageUrl;
     private final String description;
+    private final Boolean isTopFix;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime startAt;
@@ -41,5 +42,6 @@ public class AdminPlacardResponse {
         this.startAt = placard.getStartedAt();
         this.endAt = placard.getEndedAt();
         this.createdAt = placard.getCreatedAtZoned();
+        this.isTopFix = placard.isTopFixTrueOrNull();
     }
 }
