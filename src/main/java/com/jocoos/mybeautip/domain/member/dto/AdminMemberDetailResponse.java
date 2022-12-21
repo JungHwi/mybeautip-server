@@ -22,6 +22,7 @@ public class AdminMemberDetailResponse {
     private final GrantType grantType;
     private final String avatarUrl;
     private final String username;
+    private final String name;
     private final String email;
     private final String phoneNumber;
 

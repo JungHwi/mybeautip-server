@@ -24,7 +24,10 @@ public class MemberResponse {
     private String avatarUrl;
 
     @QueryProjection
-    public MemberResponse(Long id, MemberStatus status, String username, String avatarFilename) {
+    public MemberResponse(Long id,
+                          MemberStatus status,
+                          String username,
+                          String avatarFilename) {
         this.id = id;
         this.status = status;
         this.username = username;

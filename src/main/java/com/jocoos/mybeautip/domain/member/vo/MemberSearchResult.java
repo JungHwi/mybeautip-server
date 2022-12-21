@@ -28,6 +28,7 @@ public class MemberSearchResult {
     private final Role role;
     private final String avatarUrl;
     private final String username;
+    private final String name;
     private final String email;
     private final String phoneNumber;
     private final int point;
@@ -65,6 +66,7 @@ public class MemberSearchResult {
         this.ageGroup = member.getAgeGroup();
         this.createdAt = member.getCreatedAtZoned();
         this.modifiedAt = member.getModifiedAtZoned();
+        this.name = address == null ? null : address.getRecipient();
         this.address = address == null ? null : address.getWholeAddress();
         this.skinType = memberDetail == null ? null : memberDetail.getSkinType();
         this.skinWorry = memberDetail == null ? null : memberDetail.getSkinWorry();

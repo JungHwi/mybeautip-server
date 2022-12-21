@@ -26,6 +26,16 @@ public enum Role implements CodeValue {
         return member.getRole();
     }
 
+    public static Role from(Integer link) {
+        if (link == null) {
+            return GUEST;
+        }
+        if (link == 0) {
+            return ADMIN;
+        }
+        return USER;
+    }
+
     @Override
     public String getName() {
         return name();
