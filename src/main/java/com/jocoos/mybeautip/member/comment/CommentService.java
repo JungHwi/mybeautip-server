@@ -23,6 +23,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,6 +143,10 @@ public class CommentService {
         tagService.updateHistory(comment.getComment(), request.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
 
         comment.setComment(request.getComment());
+        if (!CollectionUtils.isEmpty(request.getFiles())) {
+            comment.setFile(request.getUploadFilename());
+            awsS3Handler.editFiles(request.getFiles(), VIDEO_COMMENT.getDirectory(comment.getId()));
+        }
         return commentRepository.save(comment);
     }
 
