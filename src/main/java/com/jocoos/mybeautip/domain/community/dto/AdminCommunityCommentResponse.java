@@ -23,7 +23,7 @@ public class AdminCommunityCommentResponse {
     private final String contents;
     private final int likeCount;
     private final int reportCount;
-    private MemberResponse member;
+    private AdminMemberResponse member;
     private final List<AdminCommunityCommentResponse> children;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
