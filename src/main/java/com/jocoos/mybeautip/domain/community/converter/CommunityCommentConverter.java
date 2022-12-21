@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.community.converter;
 
 import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
+import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse.CommunityCommentResponseBuilder;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
@@ -29,9 +30,15 @@ public interface CommunityCommentConverter {
     }
 
     @Mappings({
-        @Mapping(target = "relationInfo", ignore = true)
+        @Mapping(target = "relationInfo", ignore = true),
+        @Mapping(target = "fileUrl", ignore = true)
     })
     CommunityCommentResponse convert(CommunityComment entity);
+
+    @AfterMapping
+    default void convert(@MappingTarget CommunityCommentResponseBuilder response, CommunityComment communityComment) {
+        response.fileUrl(communityComment.getFileUrl());
+    }
 
     List<CommunityCommentResponse> convert(List<CommunityComment> entity);
 

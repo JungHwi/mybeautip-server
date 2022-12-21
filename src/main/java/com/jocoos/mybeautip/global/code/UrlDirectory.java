@@ -10,7 +10,7 @@ public enum UrlDirectory implements CodeValue {
     SHARE("친구 초대 공유", "share/"),
     AVATAR("아바타", "avatar/"),
     COMMUNITY("커뮤니티", "community/%s/"),
-    COMMUNITY_COMMENT("커뮤니티 댓글", "community_comment/%s"),
+    COMMUNITY_COMMENT("커뮤니티 댓글", "community_comment/%s/"),
     VIDEO_CATEGORY("비디오 카테고리", "video_category/"),
     EVENT("이벤트", "event/"),
     EVENT_PRODUCT("이벤트 상품", "event/product/"),
