@@ -1,7 +1,7 @@
-package com.jocoos.mybeautip.domain.notice.persistence.repository;
+package com.jocoos.mybeautip.domain.popupnotice.persistence.repository;
 
-import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
-import com.jocoos.mybeautip.domain.notice.persistence.domain.PopupNotice;
+import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
+import com.jocoos.mybeautip.domain.popupnotice.persistence.domain.PopupNotice;
 import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
 
 import java.time.ZonedDateTime;

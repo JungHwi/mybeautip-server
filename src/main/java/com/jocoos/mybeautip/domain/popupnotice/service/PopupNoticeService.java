@@ -1,9 +1,9 @@
-package com.jocoos.mybeautip.domain.notice.service;
+package com.jocoos.mybeautip.domain.popupnotice.service;
 
-import com.jocoos.mybeautip.domain.notice.converter.PopupNoticeConverter;
-import com.jocoos.mybeautip.domain.notice.dto.PopupNoticeResponse;
-import com.jocoos.mybeautip.domain.notice.persistence.domain.PopupNotice;
-import com.jocoos.mybeautip.domain.notice.service.dao.PopupNoticeDao;
+import com.jocoos.mybeautip.domain.popupnotice.converter.PopupNoticeConverter;
+import com.jocoos.mybeautip.domain.popupnotice.dto.PopupNoticeResponse;
+import com.jocoos.mybeautip.domain.popupnotice.persistence.domain.PopupNotice;
+import com.jocoos.mybeautip.domain.popupnotice.service.dao.PopupNoticeDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

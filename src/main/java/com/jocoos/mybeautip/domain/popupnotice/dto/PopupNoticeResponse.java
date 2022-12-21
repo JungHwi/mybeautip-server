@@ -1,6 +1,6 @@
-package com.jocoos.mybeautip.domain.notice.dto;
+package com.jocoos.mybeautip.domain.popupnotice.dto;
 
-import com.jocoos.mybeautip.domain.notice.code.NoticeLinkType;
+import com.jocoos.mybeautip.domain.popupnotice.code.NoticeLinkType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

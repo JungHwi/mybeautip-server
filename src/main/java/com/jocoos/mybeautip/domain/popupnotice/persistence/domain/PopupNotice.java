@@ -1,8 +1,8 @@
-package com.jocoos.mybeautip.domain.notice.persistence.domain;
+package com.jocoos.mybeautip.domain.popupnotice.persistence.domain;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import com.jocoos.mybeautip.domain.notice.code.NoticeLinkType;
-import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
+import com.jocoos.mybeautip.domain.popupnotice.code.NoticeLinkType;
+import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

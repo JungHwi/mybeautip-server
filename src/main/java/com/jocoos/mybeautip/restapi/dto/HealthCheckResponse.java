@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class NoticeResponse {
+public class HealthCheckResponse {
     private String latestVersion;
 
     private List<NoticeInfo> content;

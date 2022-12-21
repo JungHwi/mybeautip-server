@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.notice.api.front;
+package com.jocoos.mybeautip.domain.popupnotice.api.front;
 
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import org.junit.jupiter.api.Test;

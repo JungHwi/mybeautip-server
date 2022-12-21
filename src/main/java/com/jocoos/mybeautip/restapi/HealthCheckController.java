@@ -2,12 +2,12 @@ package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.app.AppInfo;
 import com.jocoos.mybeautip.app.AppInfoRepository;
-import com.jocoos.mybeautip.devices.NoticeService;
+import com.jocoos.mybeautip.devices.HealthCheckService;
 import com.jocoos.mybeautip.domain.popup.service.PopupService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.restapi.dto.HealthCheckResponse;
 import com.jocoos.mybeautip.restapi.dto.NoticeInfo;
-import com.jocoos.mybeautip.restapi.dto.NoticeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/1/notices", produces = MediaType.APPLICATION_JSON_VALUE)
-public class NoticeController {
+@RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
+public class HealthCheckController {
 
     private final LegacyMemberService legacyMemberService;
-    private final NoticeService noticeService;
+    private final HealthCheckService healthCheckService;
     private final MessageService messageService;
     private final AppInfoRepository appInfoRepository;
     private final PopupService popupService;
@@ -37,21 +37,32 @@ public class NoticeController {
     @Value("${mybeautip.revenue.revenue-ratio-vod}")
     private int revenueRatioForVod;
 
-    @GetMapping
-    public ResponseEntity<NoticeResponse> getNotices(@RequestParam("device_os") String deviceOs,
-                                                     @RequestParam("app_version") String appVersion,
-                                                     @RequestParam(defaultValue = "ko") String lang,
-                                                     @RequestHeader(value = "Accept-Language", defaultValue = "ko") String language) {
+    @Deprecated
+    @GetMapping("/1/notices")
+    public ResponseEntity<HealthCheckResponse> getNotices(@RequestParam("device_os") String deviceOs,
+                                                          @RequestParam("app_version") String appVersion,
+                                                          @RequestParam(defaultValue = "ko") String lang,
+                                                          @RequestHeader(value = "Accept-Language", defaultValue = "ko") String language) {
+
+        return this.healthCheck(deviceOs, appVersion, lang, language);
+    }
+
+    @GetMapping("/1/healthcheck")
+    public ResponseEntity<HealthCheckResponse> healthCheck(@RequestParam("device_os") String deviceOs,
+                                                           @RequestParam("app_version") String appVersion,
+                                                           @RequestParam(defaultValue = "ko") String lang,
+                                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String language) {
+
         deviceOs = deviceOs.trim();
 
-        List<NoticeInfo> notices = noticeService.findByOs(deviceOs, appVersion)
+        List<NoticeInfo> notices = healthCheckService.findByOs(deviceOs, appVersion)
                 .stream().map(input -> new NoticeInfo(input.getType(),
                         messageService.getMessage(input.getMessage(), language)))
                 .collect(Collectors.toList());
 
         legacyMemberService.updateLastLoggedAt();
 
-        NoticeResponse response = new NoticeResponse();
+        HealthCheckResponse response = new HealthCheckResponse();
         PageRequest pageable = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<AppInfo> list = appInfoRepository.findByOs(deviceOs, pageable);
         response.setLatestVersion((list.size() > 0) ? list.get(0).getVersion() : "");

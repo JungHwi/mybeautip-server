@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface NoticeRepository extends JpaRepository<Notice, Long> {
+public interface HealthCheckRepository extends JpaRepository<HealthCheck, Long> {
 
-    List<Notice> findByOs(String os);
+    List<HealthCheck> findByOs(String os);
 }

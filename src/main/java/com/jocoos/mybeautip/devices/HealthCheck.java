@@ -13,8 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "notices")
-public class Notice extends MemberAuditable {
+public class HealthCheck extends MemberAuditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

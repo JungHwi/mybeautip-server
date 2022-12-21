@@ -7,16 +7,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class NoticeService {
+public class HealthCheckService {
 
-    private final NoticeRepository noticeRepository;
+    private final HealthCheckRepository healthCheckRepository;
 
-    public NoticeService(NoticeRepository noticeRepository) {
-        this.noticeRepository = noticeRepository;
+    public HealthCheckService(HealthCheckRepository healthCheckRepository) {
+        this.healthCheckRepository = healthCheckRepository;
     }
 
-    public List<Notice> findByOs(String os, String version) {
-        return noticeRepository.findByOs(os).stream()
+    public List<HealthCheck> findByOs(String os, String version) {
+        return healthCheckRepository.findByOs(os).stream()
                 .filter(input -> {
                     Version request = Version.parse(version);
                     Version min = Version.parse(input.getMinVersion());
