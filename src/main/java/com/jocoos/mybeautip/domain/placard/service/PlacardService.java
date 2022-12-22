@@ -4,9 +4,11 @@ import com.jocoos.mybeautip.domain.placard.converter.PlacardConverter;
 import com.jocoos.mybeautip.domain.placard.dto.PlacardResponse;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
 import com.jocoos.mybeautip.domain.placard.persistence.repository.PlacardRepository;
+import com.jocoos.mybeautip.domain.placard.vo.PlacardSearchCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.placard.code.PlacardStatus.ACTIVE;
@@ -20,8 +22,13 @@ public class PlacardService {
 
     private final PlacardConverter placardConverter;
 
-    public List<PlacardResponse> getPlacardList() {
-        List<Placard> placardList = placardRepository.findByActivePlacard(ACTIVE, HOME);
-        return placardConverter.convertToResponse(placardList, HOME);
+    public List<PlacardResponse> getActivePlacards() {
+        PlacardSearchCondition condition = PlacardSearchCondition.builder()
+                .status(ACTIVE)
+                .type(HOME)
+                .between(ZonedDateTime.now())
+                .build();
+        List<Placard> placards = placardRepository.getPlacards(condition);
+        return placardConverter.convertToResponse(placards, HOME);
     }
 }

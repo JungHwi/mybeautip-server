@@ -19,7 +19,7 @@ public class PlacardController {
 
     @GetMapping("/1/placard")
     public ResponseEntity<List<PlacardResponse>> getPlacardList() {
-        List<PlacardResponse> placardResponseList = placardService.getPlacardList();
+        List<PlacardResponse> placardResponseList = placardService.getActivePlacards();
 
         return ResponseEntity.ok(placardResponseList);
     }
