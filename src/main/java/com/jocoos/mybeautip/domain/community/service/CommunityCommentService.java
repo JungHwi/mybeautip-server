@@ -98,12 +98,11 @@ public class CommunityCommentService {
 
         CommunityComment communityComment = dao.write(request);
 
-        CommunityCommentResponse response = converter.convert(communityComment);
-
         if (community.getCategory().getType() == CommunityCategoryType.BLIND) {
             communityDao.updateSortedAt(community.getId());
         }
 
+        CommunityCommentResponse response = converter.convert(communityComment);
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
                                                validDomainAndReceiver(communityComment, communityComment.getId(), member));
         activityCountDao.updateAllCommunityCommentCount(member, 1);

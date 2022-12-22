@@ -31,13 +31,14 @@ public enum ActivityPointType implements CodeValue {
     VIDEO_LIKE("영상 콘텐츠 좋아요", 10),
     VIDEO_SCRAP("영상 콘텐츠 스크랩", 10),
 
-
     DELETE_COMMUNITY("게시물 삭제", 25),
     DELETE_PHOTO_COMMUNITY("포토 게시물 삭제", 50),
     DELETE_COMMUNITY_COMMENT("게시물 댓글 삭제", 1),
     DELETE_VIDEO_COMMENT("비디오 댓글 삭제", 1),
     CANCEL_VIDEO_LIKE("영상 콘텐츠 좋아요 취소", 5),
-    CANCEL_VIDEO_SCRAP("영상 콘텐츠 스크랩 취소", 5);
+    CANCEL_VIDEO_SCRAP("영상 콘텐츠 스크랩 취소", 5),
+
+    WAKEUP("휴면 계정 해제 포인트 적립", 1000);
 
     private final String description;
     private final int point;

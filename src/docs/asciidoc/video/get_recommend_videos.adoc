@@ -1,0 +1,3 @@
+== Get Recommended Videos API
+
+operation::get_recommend_videos[snippets='http-request,http-response,response-fields']

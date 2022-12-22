@@ -12,7 +12,8 @@ public enum TemplateType implements CodeValue {
     COMMUNITY_LIKE_1("글에 하트가 처음 달렸을 때, 글 작성자에게"),
     COMMUNITY_LIKE_20("글에 하트가 20개 달렸을 때, 글 작성자에게"),
     COMMUNITY_COMMENT_REPLY("댓글에 대댓글이 달렸을 때, 댓글 작성자에게"),
-    NO_LOGIN_2WEEKS("로그인 안 한지 2주째...");
+    NO_LOGIN_2WEEKS("로그인 안 한지 2주째..."),
+    DORMANT_MEMBER("휴면 회원 예정자에게(30/7/1 일전)");
 
     private final String description;
 

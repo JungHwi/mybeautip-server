@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.domain.popup.service;
 
+import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
+import com.jocoos.mybeautip.domain.popup.code.PopupType;
 import com.jocoos.mybeautip.domain.popup.converter.PopupConverter;
 import com.jocoos.mybeautip.domain.popup.dto.PopupResponse;
 import com.jocoos.mybeautip.domain.popup.persistence.domain.Popup;
@@ -32,6 +34,12 @@ public class PopupService {
         }
 
         return null;
+    }
+
+    @Transactional(readOnly = true)
+    public PopupResponse getWakeupPopup() {
+        Popup popup = repository.findTopByTypeAndStatus(PopupType.WAKEUP, PopupStatus.ACTIVE);
+        return converter.convert(popup);
     }
 }
 

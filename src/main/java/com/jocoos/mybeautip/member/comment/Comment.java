@@ -1,17 +1,20 @@
 package com.jocoos.mybeautip.member.comment;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import com.jocoos.mybeautip.global.code.CodeValue;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.member.Member;
+import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
-import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DEFAULT;
-import static com.jocoos.mybeautip.member.comment.Comment.CommentState.getType;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
+import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
+import static com.jocoos.mybeautip.member.comment.Comment.CommentState.*;
 
 @NoArgsConstructor
 @Data
@@ -65,10 +68,6 @@ public class Comment extends MemberAuditable {
         this.state = commentState.value();
     }
 
-    public boolean isBlinded() {
-        return CommentState.BLINDED.value() == this.state || CommentState.BLINDED_BY_ADMIN.value() == this.state;
-    }
-
     public CommentState getCommentState() {
         return getType(this.state);
     }
@@ -89,17 +88,47 @@ public class Comment extends MemberAuditable {
         return createdBy.getId();
     }
 
-    public enum CommentState {
-        DEFAULT(0),
-        DELETED(1),
-        BLINDED(2),
-        BLINDED_BY_ADMIN(4);
+    public CommentState getStateString() {
+        return getType(state);
+    }
 
-        private int value;
+    public ZonedDateTime getCreatedAtUTCZoned() {
+        return toUTCZoned(createdAt);
+    }
 
-        CommentState(int value) {
-            this.value = value;
+    public void hide(boolean isHide) {
+        this.state = isHide ? BLINDED_BY_ADMIN.value : DEFAULT.value;
+    }
+
+    public boolean eqState(CommentState state) {
+        return this.state == state.value;
+    }
+
+    public boolean isChild() {
+        return parentId != null;
+    }
+
+    public void editComment(String editedComment, Member editor) {
+        validEditAuth(editor);
+        this.comment = editedComment;
+    }
+
+    private void validEditAuth(Member editor) {
+        if (createdBy.isAdmin() && !editor.isAdmin()) {
+            throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin Can Accessible");
         }
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum CommentState implements CodeValue {
+        DEFAULT(0, "정상"),
+        DELETED(1, "삭제"),
+        BLINDED(2, ""),
+        BLINDED_BY_ADMIN(4, "어드민 숨김");
+
+        private final int value;
+        private final String description;
 
         public static CommentState getType(int value) {
             CommentState state = DEFAULT;
@@ -116,5 +145,11 @@ public class Comment extends MemberAuditable {
         public int value() {
             return this.value;
         }
+
+        @Override
+        public String getName() {
+            return this.name();
+        }
     }
 }
+

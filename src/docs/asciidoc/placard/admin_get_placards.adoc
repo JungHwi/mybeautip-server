@@ -1,0 +1,3 @@
+== Admin Get Placards API
+
+operation::admin_get_placards[snippets='http-request,request-parameters,http-response,response-fields']

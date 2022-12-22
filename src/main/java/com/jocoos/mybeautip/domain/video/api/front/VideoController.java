@@ -37,4 +37,9 @@ public class VideoController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/1/videos/recommend")
+    public ResponseEntity<List<VideoResponse>> getRecommendedVideos() {
+        return ResponseEntity.ok(service.findRecommendedVideos());
+    }
 }

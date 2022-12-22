@@ -1,0 +1,3 @@
+== Member Wakeup API
+
+operation::member_wakeup[snippets='http-request,response-fields']

@@ -32,7 +32,7 @@ public class AdminCommunityResponse {
     private final Boolean isWin;
     private final Boolean isTopFix;
     private final CommunityCategoryResponse category;
-    private final CommunityMemberResponse member;
+    private final AdminMemberResponse member;
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) private final ZonedDateTime createdAt;
     private List<String> fileUrl;
     private List<VoteResponse> votes;
@@ -40,7 +40,7 @@ public class AdminCommunityResponse {
     @QueryProjection
     public AdminCommunityResponse(Community community,
                                   CommunityCategoryResponse category,
-                                  CommunityMemberResponse member,
+                                  AdminMemberResponse member,
                                   String eventTitle) {
         this.id = community.getId();
         this.status = community.getStatus();
@@ -61,7 +61,7 @@ public class AdminCommunityResponse {
     public AdminCommunityResponse(Community community,
                                   List<CommunityFile> files,
                                   CommunityCategoryResponse category,
-                                  CommunityMemberResponse member,
+                                  AdminMemberResponse member,
                                   String eventTitle) {
         this(community, category, member, eventTitle);
         this.fileUrl = getFileUrl(files);

@@ -38,7 +38,6 @@ public abstract class AdminEventConverter {
             @Mapping(target = "relationId", source = "event.relationId"),
             @Mapping(target = "status", source = "request.status"),
             @Mapping(target = "isVisible", source = "request.isVisible"),
-            @Mapping(target = "sorting", source = "request.sorting"),
             @Mapping(target = "title", source = "request.title"),
             @Mapping(target = "description", source = "request.description"),
             @Mapping(target = "needPoint", source = "request.needPoint"),

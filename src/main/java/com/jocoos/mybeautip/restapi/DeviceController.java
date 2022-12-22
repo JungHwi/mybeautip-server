@@ -99,7 +99,7 @@ public class DeviceController {
         private String deviceLanguage;
 
         @NotNull
-        @Size(max = 10)
+        @Size(max = 20)
         private String appVersion;
 
         @NotNull

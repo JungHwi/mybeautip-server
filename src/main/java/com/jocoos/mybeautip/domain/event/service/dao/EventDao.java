@@ -93,4 +93,25 @@ public class EventDao {
     public int updateStatus(List<Long> ids, EventStatus status) {
         return repository.updateStatus(ids, status);
     }
+
+    @Transactional
+    public int updateStatusAndIsTopFixAndSorting(List<Long> ids, EventStatus status, Boolean isTopFix, Integer sorting) {
+        return repository.updateStatusAndIsTopFixAndSorting(ids, status, isTopFix, sorting);
+    }
+
+    @Transactional(readOnly = true)
+    public int getLastSortOrder() {
+        Integer lastSortOrder = repository.getLastSortOrder();
+        return lastSortOrder == null ? 1 : lastSortOrder + 1;
+    }
+
+    @Transactional
+    public List<Long> arrangeByIndex(List<Long> sortedIds) {
+        return repository.arrangeByIndex(sortedIds);
+    }
+
+    @Transactional
+    public void hardDelete(Event event) {
+        repository.delete(event);
+    }
 }

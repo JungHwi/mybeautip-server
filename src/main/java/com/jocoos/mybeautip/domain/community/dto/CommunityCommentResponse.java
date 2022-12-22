@@ -43,7 +43,7 @@ public class CommunityCommentResponse implements CursorInterface {
 
     private CommunityRelationInfo relationInfo;
 
-    private CommunityMemberResponse member;
+    private MemberResponse member;
 
     @Override
     @JsonIgnore

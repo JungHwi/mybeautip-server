@@ -22,13 +22,6 @@ public class CommunityCategoryService {
     private final CommunityCategoryRepository repository;
     private final CommunityCategoryConverter converter;
 
-    public List<CommunityCategoryResponse> getCommunityCategoryList() {
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.ASC, "sort"));
-        List<CommunityCategory> categories = repository.findAllBy(pageable);
-
-        return converter.convert(categories);
-    }
-
     public List<CommunityCategoryResponse> getLowerCategoryList(CommunityCategoryType type) {
         CommunityCategory category = repository.findByType(type)
                 .orElseThrow(() -> new BadRequestException("CommunityCategoryType is not supported. type - " + type));

@@ -1,9 +1,6 @@
 package com.jocoos.mybeautip.domain.community.converter;
 
-import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
-import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
-import com.jocoos.mybeautip.domain.community.dto.CommunityMemberResponse;
-import com.jocoos.mybeautip.domain.community.dto.VoteResponse;
+import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import org.mapstruct.Mapper;
@@ -16,7 +13,6 @@ public abstract class AdminCommunityConverter {
 
     public abstract List<CommunityCategoryResponse> convert(List<CommunityCategory> adminCategories);
 
-    @Mapping(target = "type", ignore = true)
     @Mapping(target = "hint", ignore = true)
     protected abstract CommunityCategoryResponse convert(CommunityCategory adminCategory);
 
@@ -40,13 +36,13 @@ public abstract class AdminCommunityConverter {
 
     private AdminCommunityResponse getResponse(Community community, String eventTitle) {
         CommunityCategoryResponse categoryResponse = CommunityCategoryResponse.from(community.getCategory());
-        CommunityMemberResponse memberResponse = CommunityMemberResponse.from(community.getMember());
+        AdminMemberResponse memberResponse = AdminMemberResponse.from(community.getMember());
         return toResponse(community, categoryResponse, memberResponse, eventTitle);
     }
 
     private AdminCommunityResponse toResponse(Community community,
                                               CommunityCategoryResponse categoryResponse,
-                                              CommunityMemberResponse memberResponse,
+                                              AdminMemberResponse memberResponse,
                                               String eventTitle) {
         return new AdminCommunityResponse(
                 community,
@@ -54,5 +50,9 @@ public abstract class AdminCommunityConverter {
                 categoryResponse,
                 memberResponse,
                 eventTitle);
+    }
+
+    public AdminCommunityResponse convert(Community community) {
+        return convert(community, null);
     }
 }

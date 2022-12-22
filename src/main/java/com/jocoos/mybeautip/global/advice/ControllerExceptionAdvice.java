@@ -5,12 +5,14 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.ConstraintViolationException;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -47,6 +49,7 @@ public class ControllerExceptionAdvice {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(e.getMessage())
                 .errorDescription(e.getDescription())
+                .contents(e.getContents())
                 .build();
         return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
@@ -87,7 +90,19 @@ public class ControllerExceptionAdvice {
         return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public final ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        List<String> message = e.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
+                .toList();
 
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(BAD_REQUEST.name().toLowerCase())
+                .errorDescription(message.toString())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
+    }
 
     public ResponseEntity<Object> handleNumberFormatException(NumberFormatException e) {
         log.debug("handleNumberFormatException called");

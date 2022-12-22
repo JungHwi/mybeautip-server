@@ -124,6 +124,25 @@ public class MemberPointService {
         memberRepository.save(member);
     }
 
+    @Transactional
+    public void earnPoint(Member member, int point) {
+        Date expiryDate = DateUtils.addDay(DEFAULT_POINT_EXPIRATION_DAY);
+        MemberPoint memberPoint = builder()
+                .member(member)
+                .point(point)
+                .state(STATE_EARNED_POINT)
+                .earnedAt(new Date())
+                .expiryAt(expiryDate)
+                .remind(true)
+                .build();
+
+        memberPointRepository.save(memberPoint);
+
+        memberPointDetailService.earnPoints(memberPoint, member.getPoint());
+
+        member.earnPoint(point);
+    }
+
     public void usePoints(Event event, Member member) {
         if (event.getNeedPoint() <= 0) {
             return;

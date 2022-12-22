@@ -1,7 +1,9 @@
 package com.jocoos.mybeautip.domain.community.api.admin;
 
+import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
-import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
+import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
+import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
@@ -13,10 +15,11 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/admin")
@@ -25,14 +28,31 @@ public class AdminCommunityController {
 
     private final AdminCommunityService service;
 
-    @GetMapping("/community/category")
-    public ResponseEntity<List<CommunityCategoryResponse>> getCommunityCategories() {
-        return ResponseEntity.ok(service.getCategories());
+    @PostMapping("/community")
+    public ResponseEntity<AdminCommunityResponse> write(@RequestBody WriteCommunityRequest request) {
+        AdminCommunityResponse response = service.write(request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .path("/{id}")
+                .buildAndExpand(response.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(response);
+    }
+
+    @PatchMapping("/community/{communityId}")
+    public ResponseEntity<IdDto> edit(@PathVariable Long communityId, @RequestBody PatchCommunityRequest request) {
+        return ResponseEntity.ok(new IdDto(service.edit(communityId, request)));
+    }
+
+    @DeleteMapping("/community/{communityId}")
+    public ResponseEntity<IdDto> deleteAdminWrite(@PathVariable Long communityId) {
+        return ResponseEntity.ok(new IdDto(service.delete(communityId)));
     }
 
     @GetMapping("/community")
     public ResponseEntity<PageResponse<AdminCommunityResponse>> getCommunities(
             @RequestParam(required = false, name = "category_id") Long categoryId,
+            @RequestParam(required = false, name= "event_id") Long eventId,
+            @RequestParam(required = false) CommunityStatus status,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "sortedAt") String sort,
@@ -51,7 +71,7 @@ public class AdminCommunityController {
                 .isReported(isReported)
                 .build();
 
-        return ResponseEntity.ok(service.getCommunities(categoryId, pageRequest, searchOption));
+        return ResponseEntity.ok(service.getCommunities(status, categoryId, eventId, pageRequest, searchOption));
     }
 
     @GetMapping("/community/{communityId}")
@@ -59,7 +79,7 @@ public class AdminCommunityController {
         return ResponseEntity.ok(service.getCommunity(communityId));
     }
 
-    @PatchMapping("/community/{communityId}/winning")
+    @PatchMapping("/community/{communityId}/win")
     public ResponseEntity<IdDto> winCommunity(@PathVariable Long communityId, @RequestBody BooleanDto request) {
         return ResponseEntity.ok(new IdDto(service.winCommunity(communityId, request.isBool())));
     }
@@ -69,7 +89,7 @@ public class AdminCommunityController {
         return ResponseEntity.ok(new IdDto(service.fixCommunity(communityId, request.isBool())));
     }
 
-    @PatchMapping("/community/{communityId}/hiding")
+    @PatchMapping("/community/{communityId}/hide")
     public ResponseEntity<IdDto> hideCommunity(@PathVariable Long communityId, @RequestBody BooleanDto request) {
         return ResponseEntity.ok(new IdDto(service.hideCommunity(communityId, request.isBool())));
     }

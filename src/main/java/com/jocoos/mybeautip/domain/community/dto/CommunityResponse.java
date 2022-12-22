@@ -56,7 +56,7 @@ public class CommunityResponse implements CursorInterface {
 
     private CommunityRelationInfo relationInfo;
 
-    private CommunityMemberResponse member;
+    private MemberResponse member;
 
     private CommunityCategoryResponse category;
 

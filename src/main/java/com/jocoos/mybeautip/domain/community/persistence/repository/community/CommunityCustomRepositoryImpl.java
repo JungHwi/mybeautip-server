@@ -72,8 +72,8 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     @Override
     public List<Community> getCommunities(CommunitySearchCondition condition, Pageable pageable) {
         JPAQuery<Community> query = baseSearchQuery(condition.categories(),
-                                                              condition.cursor(),
-                                                              pageable.getPageSize());
+                condition.cursor(),
+                pageable.getPageSize());
         query.orderBy(order(condition.isCategoryDrip()));
         addWhereConditionOptional(condition, query);
         dynamicQueryForLogin(query, condition.memberId());
@@ -89,7 +89,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
         for (Community community : communityList) {
             List<CommunityVote> votes = communityVoteMap.getOrDefault(community.getId(), new ArrayList<>());
-                community.setCommunityVoteList(votes);
+            community.setCommunityVoteList(votes);
         }
 
         return communityList;
@@ -97,22 +97,12 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     @Override
     public Page<AdminCommunityResponse> getCommunitiesAllStatus(CommunitySearchCondition condition) {
-        List<AdminCommunityResponse> responses = repository.query(query -> query
-                        .select(new QAdminCommunityResponse(community, new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title), new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename), event.title))
-                        .from(community)
-                        .join(member).on(community.member.eq(member))
-                        .join(communityCategory).on(community.category.eq(communityCategory))
-                        .leftJoin(event).on(community.eventId.eq(event.id))
-                        .where(
-                                inCategories(condition.categories()),
-                                searchByKeyword(condition.searchOption()),
-                                createdAtAfter(condition.getStartAt()),
-                                createdAtBefore(condition.getEndAt()),
-                                isReported(condition.isReported())
-                        )
-                        .orderBy(getOrders(condition.getSort()))
-                        .offset(condition.getOffset())
-                        .limit(condition.getPageSize()))
+        JPAQuery<AdminCommunityResponse> baseQuery = getBaseQuery(condition);
+
+        List<AdminCommunityResponse> responses = baseQuery
+                .orderBy(getOrders(condition.getSort()))
+                .offset(condition.getOffset())
+                .limit(condition.getPageSize())
                 .fetch();
 
         List<Long> ids = responses.stream().map(AdminCommunityResponse::getId).toList();
@@ -134,19 +124,31 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
             response.setVotes(votesMap);
         }
 
-        JPAQuery<Long> countQuery = repository.query(query -> query
-                .select(count(community))
+        JPAQuery<Long> countQuery = getBaseQuery(condition).select(count(community));
+
+        return PageableExecutionUtils.getPage(responses, condition.pageable(), countQuery::fetchOne);
+    }
+
+    private JPAQuery<AdminCommunityResponse> getBaseQuery(CommunitySearchCondition condition) {
+        return repository.query(query -> query
+                .select(new QAdminCommunityResponse(community, categoryResponse(), memberResponseWithRole(), event.title))
                 .from(community)
                 .join(member).on(community.member.eq(member))
+                .join(communityCategory).on(community.category.eq(communityCategory))
+                .leftJoin(event).on(community.eventId.eq(event.id))
                 .where(
+                        eqStatus(condition.status()),
                         inCategories(condition.categories()),
                         searchByKeyword(condition.searchOption()),
                         createdAtAfter(condition.getStartAt()),
-                        createdAtBefore(condition.getEndAt())
+                        createdAtBefore(condition.getEndAt()),
+                        isReported(condition.isReported()),
+                        eqEventId(condition.eventId())
                 ));
+    }
 
-
-        return PageableExecutionUtils.getPage(responses, condition.pageable(), countQuery::fetchOne);
+    private static QCommunityCategoryResponse categoryResponse() {
+        return new QCommunityCategoryResponse(communityCategory.id, communityCategory.type, communityCategory.title);
     }
 
     private BooleanExpression isReported(Boolean isReported) {
@@ -317,7 +319,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private void addWhereConditionOptional(CommunitySearchCondition condition, JPAQuery<Community> defaultQuery) {
         if (condition.isCategoryDrip()) {
-            addWhereCondition(defaultQuery, eqEventId(condition.eventId()), eqIsWin(condition.isFirstSearch()));
+            addWhereCondition(defaultQuery, eqEventIdWithValid(condition.eventId()), eqIsWin(condition.isFirstSearch()));
         }
     }
 
@@ -353,8 +355,12 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .fetch();
     }
 
-    private QCommunityMemberResponse memberResponse() {
-        return new QCommunityMemberResponse(member.id, member.status, member.username, member.avatarFilename);
+    private QAdminMemberResponse memberResponseWithRole() {
+        return new QAdminMemberResponse(memberResponse(), member.link);
+    }
+
+    private QMemberResponse memberResponse() {
+        return new QMemberResponse(member.id, member.status, member.username, member.avatarFilename);
     }
 
     private BooleanExpression lessThanSortedAt(ZonedDateTime cursor) {
@@ -369,11 +375,15 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return isFirstSearch ? null : community.isWin.isNull();
     }
 
-    private BooleanExpression eqEventId(Long eventId) {
+    private BooleanExpression eqEventIdWithValid(Long eventId) {
         if (eventId == null || eventId < NumberUtils.LONG_ONE) {
             throw new BadRequestException(BAD_REQUEST, "event_id is required to search DRIP category.");
         }
         return community.eventId.eq(eventId);
+    }
+
+    private BooleanExpression eqEventId(Long eventId) {
+        return eventId == null ? null : community.eventId.eq(eventId);
     }
 
     private BooleanExpression eqStatus(CommunityStatus status) {
@@ -401,7 +411,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     private BooleanBuilder containsContents(String keyword) {
-        return nullSafeBuilder(() ->  community.contents.contains(keyword));
+        return nullSafeBuilder(() -> community.contents.contains(keyword));
     }
 
     private BooleanBuilder containsTitle(String keyword) {

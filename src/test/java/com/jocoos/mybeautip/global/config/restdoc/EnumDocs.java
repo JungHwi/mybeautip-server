@@ -24,6 +24,7 @@ public class EnumDocs {
     Map<String, String> skinType;
     Map<String, String> skinWorry;
     Map<String, String> grantType;
+    Map<String, String> role;
 
     // Event
     Map<String, String> eventStatus;
@@ -38,6 +39,8 @@ public class EnumDocs {
     // Video
     Map<String, String> videoCategoryType;
     Map<String, String> videoMaskType;
+    Map<String, String> videoCommentStatus;
+    Map<String, String> videoStatus;
 
     // Notification
     Map<String, String> notificationLinkType;
@@ -71,4 +74,8 @@ public class EnumDocs {
 
     // Scrap
     Map<String, String> scrapType;
+
+    // Operation
+    Map<String, String> operationTargetType;
+    Map<String, String> operationType;
 }

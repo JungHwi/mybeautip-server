@@ -1,7 +1,8 @@
 package com.jocoos.mybeautip.security;
 
 import com.jocoos.mybeautip.config.Oauth2Config;
-import com.jocoos.mybeautip.global.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +28,7 @@ public class KakaoLoginService implements LoginService {
         log.debug("accessToken: {}", accessToken);
 
         if (StringUtils.isBlank(accessToken)) {
-            throw new AuthenticationException("Access token required");
+            throw new BadRequestException(ErrorCode.INVALID_TOKEN, "Failed to get kakao access token.");
         }
         return getUserData(accessToken);
     }

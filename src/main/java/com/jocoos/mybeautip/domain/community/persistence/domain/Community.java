@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVote;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -10,19 +11,21 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.DRIP;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
-import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_VOTE_NUM;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
+import static com.jocoos.mybeautip.global.util.ImageFileConvertUtil.toFileName;
+import static com.jocoos.mybeautip.global.util.JsonNullableUtils.changeIfPresent;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
@@ -79,6 +82,7 @@ public class Community extends BaseEntity {
     @Column(columnDefinition = "DATETIME(3)")
     private ZonedDateTime sortedAt;
 
+    @OrderBy("id")
     @OneToMany(mappedBy = "community", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<CommunityFile> communityFileList = new ArrayList<>();
 
@@ -118,58 +122,6 @@ public class Community extends BaseEntity {
         this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFileName(fileName)));
     }
 
-    public void valid() {
-        switch (this.category.getType()) {
-            case BLIND:
-                validCommunity();
-                validBlind();
-                break;
-            case DRIP:
-                validCommunity();
-                validDrip();
-                break;
-            case VOTE:
-                validCommunity();
-                validVote(this.communityVoteList.size());
-                break;
-            default:
-                validCommunity();
-        }
-    }
-
-    public void setContents(String contents) {
-        validContents(contents);
-        this.contents = contents;
-    }
-
-    private void validContents(String contents) {
-        if (StringUtils.isBlank(contents) || contents.replace(StringUtils.SPACE, StringUtils.EMPTY).length() < 5) {
-            throw new BadRequestException("Content length must be at least 5.");
-        }
-    }
-
-    private void validCommunity() {
-        validContents(this.contents);
-    }
-
-    private void validBlind() {
-        if (StringUtils.isBlank(this.title) || this.title.length() < 5) {
-            throw new BadRequestException("Community title of Blind Category must be over 5 length");
-        }
-    }
-
-    private void validDrip() {
-        if (this.eventId == null || this.eventId < 1) {
-            throw new BadRequestException("Community of drip category needs event_id.");
-        }
-    }
-
-    private void validVote(int voteNum) {
-        if (voteNum != 0 && voteNum != 2) {
-            throw new BadRequestException(NOT_SUPPORTED_VOTE_NUM.getDescription());
-        }
-    }
-
     public boolean isContentLongerThanOrSame(int length) {
         return trimAllWhitespace(this.contents).length() >= length;
     }
@@ -178,11 +130,10 @@ public class Community extends BaseEntity {
         return !isEmpty(this.communityFileList);
     }
 
-    public boolean isVoteAndIncludeFile(int fileNum) {
+    public boolean isVoteAndIncludeFile() {
         if (!this.category.isCategoryType(VOTE)) {
             return false;
         }
-        validVote(fileNum);
         return !Collections.isEmpty(this.communityVoteList) || !Collections.isEmpty(this.communityFileList);
     }
 
@@ -201,7 +152,7 @@ public class Community extends BaseEntity {
     }
 
     public boolean isVotesEmpty() {
-        return CollectionUtils.isEmpty(communityVoteList);
+        return isEmpty(communityVoteList);
     }
 
     public void win(boolean isWin) {
@@ -219,4 +170,66 @@ public class Community extends BaseEntity {
       this.status = status.hide(isHide);
     }
 
+    public void edit(JsonNullable<String> title,
+                     JsonNullable<String> contents) {
+        changeIfPresent(title, this::editTitle);
+        changeIfPresent(contents, this::editContents);
+    }
+
+    public void deleteAdminWrite() {
+        validAdminWrite();
+        delete();
+    }
+
+    private void editTitle(String title) {
+        this.title = title;
+    }
+
+    private void editContents(String contents) {
+        validContent(contents);
+        this.contents = contents;
+    }
+
+    public void sortFilesByRequestIndex(List<String> sortedUrls) {
+        if (communityFileList.size() == sortedUrls.size()) {
+            IntStream.range(0, communityFileList.size())
+                    .forEach(index -> replaceFileIfDiff(sortedUrls.get(index), communityFileList.get(index)));
+        }
+    }
+
+    private void replaceFileIfDiff(String url, CommunityFile file) {
+        if (!file.isUrlEqual(url)) {
+            file.setFile(toFileName(url));
+        }
+    }
+
+    private void validContent(String contents) {
+        category.validContent(getMemberRole(), contents);
+    }
+
+    public void validReadAuth(Role role) {
+        category.validReadAuth(role);
+    }
+
+    public void validWrite() {
+        category.validWrite(this);
+    }
+
+    public void validAdminWrite() {
+        if(!member.isAdmin()) {
+            throw new BadRequestException(ACCESS_DENIED, "not a admin write community, community id - " + id);
+        }
+    }
+
+    public Role getMemberRole() {
+        return Role.from(member);
+    }
+
+    public int getFileSize() {
+        return communityFileList.size();
+    }
+
+    public int getVoteSize() {
+        return communityVoteList.size();
+    }
 }

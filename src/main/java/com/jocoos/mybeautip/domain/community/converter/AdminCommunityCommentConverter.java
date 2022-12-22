@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.domain.community.converter;
 
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityCommentResponse;
+import com.jocoos.mybeautip.domain.community.dto.AdminMemberResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
+import com.jocoos.mybeautip.member.Member;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +20,17 @@ import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.B
 public interface AdminCommunityCommentConverter {
 
     @Mapping(target = ".", source = "entity")
+    @Mapping(target = "member", source = "entity.member", qualifiedByName = "toAdminMemberResponse")
     AdminCommunityCommentResponse convert(CommunityComment entity, List<AdminCommunityCommentResponse> children);
 
     @Mapping(target = "children", ignore = true)
+    @Mapping(target = "member", source = "comment.member", qualifiedByName = "toAdminMemberResponse")
     AdminCommunityCommentResponse convert(CommunityComment comment);
+
+    @Named(value = "toAdminMemberResponse")
+    default AdminMemberResponse convertToUrl(Member member) {
+        return AdminMemberResponse.from(member);
+    }
 
     default List<AdminCommunityCommentResponse> convert(List<CommunityComment> entities, List<CommunityComment> children, CommunityCategory category) {
         Map<Long, List<AdminCommunityCommentResponse>> childrenMap = children.stream()

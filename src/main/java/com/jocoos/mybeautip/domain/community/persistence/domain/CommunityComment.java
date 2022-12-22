@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.persistence.*;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
+import static com.jocoos.mybeautip.domain.member.code.Role.ADMIN;
 
 @Getter
 @Setter
@@ -68,7 +70,6 @@ public class CommunityComment extends BaseEntity {
 
     public void setContents(String contents) {
         validContents(contents);
-
         this.contents = contents;
     }
 
@@ -98,4 +99,7 @@ public class CommunityComment extends BaseEntity {
         return this.status == status;
     }
 
+    public boolean isAdminWrite() {
+        return Role.from(member).equals(ADMIN);
+    }
 }

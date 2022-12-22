@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.member.service;
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
+import com.jocoos.mybeautip.domain.member.dto.ExceptionMemberResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
@@ -11,6 +12,7 @@ import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -46,7 +48,6 @@ public class MemberSignupService {
     private final MemberService memberService;
     private final LegacyMemberService legacyMemberService;
     private final AppleLoginService appleLoginService;
-
     private final MemberRepository memberRepository;
     private final MemberLeaveLogRepository memberLeaveLogRepository;
 
@@ -66,7 +67,7 @@ public class MemberSignupService {
 
         savaAndSetAvatarUrlIfExists(request);
 
-        Member member = legacyMemberService.register(request);
+        Member member = memberService.register(request);
         activityCountDao.init(member);
 
         MemberEntireInfo memberEntireInfo = memberConverter.convert(member);
@@ -116,7 +117,11 @@ public class MemberSignupService {
             case ACTIVE:
                 throw new BadRequestException(ErrorCode.ALREADY_MEMBER, "already_member");
             case DORMANT:
-                throw new BadRequestException(ErrorCode.DORMANT_MEMBER, "dormant_member");
+                ExceptionMemberResponse response = ExceptionMemberResponse.builder()
+                        .memberId(member.getId())
+                        .date(ZonedDateTimeUtil.toString(member.getModifiedAtZoned()))
+                        .build();
+                throw new BadRequestException(ErrorCode.DORMANT_MEMBER, "dormant_member", response);
             case WITHDRAWAL:
                 LocalDateTime availableRejoin = DateUtils.toLocalDateTime(member.getDeletedAt(), ZoneId.systemDefault()).plusSeconds(REJOIN_AVAILABLE_SECOND);
                 if (availableRejoin.isAfter(LocalDateTime.now())) {

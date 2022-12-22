@@ -5,7 +5,10 @@ import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.notification.code.*;
+import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
+import com.jocoos.mybeautip.domain.operation.code.OperationType;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
 import com.jocoos.mybeautip.domain.placard.code.PlacardTabType;
@@ -19,10 +22,12 @@ import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.global.code.*;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
 import com.jocoos.mybeautip.member.code.SkinType;
 import com.jocoos.mybeautip.member.code.SkinWorry;
+import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.point.UsePointService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +56,7 @@ public class CommonDocController {
         Map<String, String> skinType = getDocs(SkinType.values());
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
         Map<String, String> grantType = getDocs(GrantType.values());
+        Map<String, String> role = getDocs(Role.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -65,6 +71,8 @@ public class CommonDocController {
         // Video
         Map<String, String> videoCategoryType = getDocs(VideoCategoryType.values());
         Map<String, String> videoMaskType = getDocs(VideoMaskType.values());
+        Map<String, String> videoCommentStatus = getDocs(Comment.CommentState.values());
+        Map<String, String> videoStatus = getDocs(VideoStatus.values());
 
         // Notification
         Map<String, String> notificationLinkType = getDocs(NotificationLinkType.values());
@@ -99,6 +107,10 @@ public class CommonDocController {
         // Scrap
         Map<String, String> scrapType = getDocs(ScrapType.values());
 
+        // Operation
+        Map<String, String> operationType = getDocs(OperationType.values());
+        Map<String, String> operationTargetType = getDocs(OperationTargetType.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .deviceOs(deviceOs)
@@ -112,6 +124,7 @@ public class CommonDocController {
                         .skinType(skinType)
                         .skinWorry(skinWorry)
                         .grantType(grantType)
+                        .role(role)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)
@@ -123,6 +136,8 @@ public class CommonDocController {
                 // Video
                         .videoCategoryType(videoCategoryType)
                         .videoMaskType(videoMaskType)
+                        .videoCommentStatus(videoCommentStatus)
+                        .videoStatus(videoStatus)
                 // Notification
                         .notificationLinkType(notificationLinkType)
                         .messageType(messageType)
@@ -149,6 +164,9 @@ public class CommonDocController {
                         .searchType(searchType)
                 // Scrap
                         .scrapType(scrapType)
+                // Operation
+                        .operationTargetType(operationTargetType)
+                        .operationType(operationType)
                 .build()
         );
     }
