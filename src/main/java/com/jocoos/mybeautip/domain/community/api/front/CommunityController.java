@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.community.api.front;
 
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
+import com.jocoos.mybeautip.domain.file.ValidFile;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Validated
 public class CommunityController {
 
     private final CommunityService service;
@@ -41,7 +44,7 @@ public class CommunityController {
     }
 
     @PostMapping(value = "/1/community/files", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<List<String>> uploadFile(@RequestPart List<MultipartFile> files) {
+    public ResponseEntity<List<String>> uploadFile(@ValidFile @RequestPart List<MultipartFile> files) {
         List<String> urls = service.upload(files);
 
         return ResponseEntity.ok(urls);
