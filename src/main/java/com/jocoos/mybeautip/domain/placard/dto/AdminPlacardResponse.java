@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.placard.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
@@ -43,5 +44,22 @@ public class AdminPlacardResponse {
         this.endAt = placard.getEndedAt();
         this.createdAt = placard.getCreatedAtZoned();
         this.isTopFix = placard.isTopFixTrueOrNull();
+    }
+
+    @Getter
+    public static class Detail {
+
+        @JsonUnwrapped
+        private final AdminPlacardResponse response;
+        private final String title;
+        private final String linkArgument;
+        private final String color;
+
+        public Detail(Placard placard) {
+            this.response = new AdminPlacardResponse(placard);
+            this.title = placard.getTitle();
+            this.linkArgument = placard.getLinkArgument();
+            this.color = placard.getColor();
+        }
     }
 }
