@@ -66,6 +66,34 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
         ));
     }
 
+    @Test
+    void getPlacard() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .get("/admin/placard/{placard_id}", 1))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_get_placard",
+                pathParameters(
+                        parameterWithName("placard_id").description("플랜카드 ID")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("플랜카드 ID"),
+                        fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(PLACARD_STATUS)),
+                        fieldWithPath("title").type(JsonFieldType.STRING).description("백 타이틀"),
+                        fieldWithPath("link_type").type(JsonFieldType.STRING).description(generateLinkCode(PLACARD_LINK_TYPE)),
+                        fieldWithPath("link_argument").type(JsonFieldType.STRING).description("링크 연결 파라미터").optional(),
+                        fieldWithPath("image_url").type(JsonFieldType.STRING).description("이미지 Url"),
+                        fieldWithPath("description").type(JsonFieldType.STRING).description("배너명 (플랜카드 설명)").optional(),
+                        fieldWithPath("color").type(JsonFieldType.STRING).description("색깔"),
+                        fieldWithPath("is_top_fix").type(JsonFieldType.BOOLEAN).description("고정 여부 (true 일 때만 응답)").optional(),
+                        fieldWithPath("start_at").type(JsonFieldType.STRING).description("시작일시").attributes(getZonedDateFormat()),
+                        fieldWithPath("end_at").type(JsonFieldType.STRING).description("종료일시").attributes(getZonedDateFormat()),
+                        fieldWithPath("created_at").type(JsonFieldType.STRING).description("생성일시").attributes(getZonedDateFormat())
+                )
+        ));
+    }
+
     @Transactional
     @Test
     void createPlacard() throws Exception {
