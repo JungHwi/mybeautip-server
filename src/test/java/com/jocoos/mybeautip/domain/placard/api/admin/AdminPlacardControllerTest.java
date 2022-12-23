@@ -13,7 +13,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.placard.code.PlacardLinkType.EVENT;
@@ -70,7 +70,7 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
     @Test
     void createPlacard() throws Exception {
 
-        PlacardRequest request = new PlacardRequest(ACTIVE, "https://static-dev.mybeautip.com/avatar/x", "title", EVENT, "2", "description", "#color", LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+        PlacardRequest request = new PlacardRequest(ACTIVE, "https://static-dev.mybeautip.com/avatar/x", "title", EVENT, "2", "description", "#color", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .post("/admin/placard")
