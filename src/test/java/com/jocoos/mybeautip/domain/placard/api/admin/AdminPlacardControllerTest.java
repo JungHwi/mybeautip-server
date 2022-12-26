@@ -98,7 +98,15 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
     @Test
     void createPlacard() throws Exception {
 
-        PlacardRequest request = new PlacardRequest(ACTIVE, "https://static-dev.mybeautip.com/avatar/x", "title", EVENT, "2", "description", "#color", ZonedDateTime.now(), ZonedDateTime.now().plusDays(1));
+        PlacardRequest request = new PlacardRequest(ACTIVE,
+                "https://static-dev.mybeautip.com/avatar/filename",
+                "title",
+                EVENT,
+                "2",
+                "description",
+                "#color",
+                ZonedDateTime.now(),
+                ZonedDateTime.now().plusDays(1));
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .post("/admin/placard")

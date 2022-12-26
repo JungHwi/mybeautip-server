@@ -139,6 +139,7 @@ include::overview.adoc[]
 * link:operation/admin_get_operation_logs.html[운영 로그 조회 API, window=_blank]
 
 === Placard API
+* link:placard/admin_get_placard.html[플랜카드 단일 조회 API, window=_blank]
 * link:placard/admin_get_placards.html[플랜카드 조회 API, window=_blank]
 * link:placard/admin_create_placard.html[플랜카드 생성 API, window=_blank]
 * link:placard/admin_edit_placard.html[플랜카드 수정 API, window=_blank]
