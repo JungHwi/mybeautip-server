@@ -1,0 +1,3 @@
+== Admin Get Placard API
+
+operation::admin_get_placard[snippets='http-request,path-parameters,http-response,response-fields']
