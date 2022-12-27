@@ -100,6 +100,13 @@ public class AdminEventService {
     }
 
     @Transactional
+    public Long hide(Long eventId, boolean isHide) {
+        Event event = eventDao.getEvent(eventId);
+        event.hide(isHide);
+        return event.getId();
+    }
+
+    @Transactional
     public Long delete(Long eventId) {
         Event event = eventDao.getEvent(eventId);
         eventDao.hardDelete(event);
