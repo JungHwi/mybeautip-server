@@ -69,7 +69,7 @@ public class SlackService {
         if (isPrivateVideo) {
             sb.append(String.format("영상제목: [%s] %s, 비디오 키: %s, 공개일: %s\n", video.getCategoryNames(), video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())));
         } else {
-            sb.append(String.format("영상제목: %s\n", video.getTitle()));
+            sb.append(String.format("영상제목: [%s] %s, 비디오 키: %s, 공개일: %s\n", video.getCategoryNames(), video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())));
         }
         sb.append(String.format("%s```", generateRelatedGoodsInfo(video)));
         send(sb.toString());
