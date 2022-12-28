@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -67,10 +68,9 @@ public class CommunityCommentController {
     @PutMapping("/1/community/{community_id}/comment/{comment_id}")
     public ResponseEntity<CommunityCommentResponse> editComment(@PathVariable("community_id") long communityId,
                                                                 @PathVariable("comment_id") long commentId,
-                                                                @RequestBody EditCommunityCommentRequest request) {
+                                                                @RequestBody @Valid EditCommunityCommentRequest request) {
         request.setCommunityId(communityId);
         request.setCommentId(commentId);
-
         return ResponseEntity.ok(communityCommentService.edit(request));
     }
 

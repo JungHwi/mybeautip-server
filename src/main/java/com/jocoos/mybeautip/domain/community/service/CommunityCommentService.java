@@ -129,15 +129,21 @@ public class CommunityCommentService {
         }
 
         communityComment.setContents(request.getContents());
-
-        if (!CollectionUtils.isEmpty(request.getFiles())) {
-            communityComment.setFile(request.getUploadFilename());
-            awsS3Handler.editFiles(request.getFiles(), COMMUNITY_COMMENT.getDirectory(communityComment.getId()));
-        }
+        editFile(communityComment, request);
 
         dao.save(communityComment);
 
         return getComment(member, communityComment);
+    }
+
+    private void editFile(CommunityComment communityComment, EditCommunityCommentRequest request) {
+        if (!CollectionUtils.isEmpty(request.getFiles())) {
+            if (communityComment.containFile() && request.isOnlyUpload()) {
+                throw new BadRequestException("comment already had file. delete needed");
+            }
+            communityComment.setFile(request.getUploadFilename());
+            awsS3Handler.editFiles(request.getFiles(), COMMUNITY_COMMENT.getDirectory(communityComment.getId()));
+        }
     }
 
     private CommunityCommentResponse getComment(Member member, CommunityComment communityComment) {

@@ -51,8 +51,8 @@ spring:
     show-sql: true
   servlet:
     multipart:
-      maxFileSize: 30MB
-      maxRequestSize: 30MB
+      maxFileSize: 100MB
+      maxRequestSize: 150MB
 
 security:
   oauth2:

@@ -111,4 +111,8 @@ public class CommunityComment extends BaseEntity {
     public String getFileUrl() {
         return toUrl(file, COMMUNITY_COMMENT, id);
     }
+
+    public boolean containFile() {
+        return file != null;
+    }
 }

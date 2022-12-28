@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
@@ -42,7 +43,7 @@ public class AdminCommunityCommentController {
     @PatchMapping("/community/{communityId}/comment/{commentId}")
     public ResponseEntity<IdDto> editComment(@PathVariable long communityId,
                                              @PathVariable long commentId,
-                                             @RequestBody EditCommunityCommentRequest request) {
+                                             @RequestBody @Valid EditCommunityCommentRequest request) {
         request.setCommunityId(communityId);
         request.setCommentId(commentId);
         return ResponseEntity.ok(new IdDto(service.edit(request)));

@@ -27,7 +27,9 @@ public class WriteCommunityCommentRequest {
 
     private FileDto file;
 
+    private String fileUrl;
+
     public String getFilename() {
-        return FileUtil.getFileName(file.getUrl());
+        return file == null ? null : FileUtil.getFileName(file.getUrl());
     }
 }

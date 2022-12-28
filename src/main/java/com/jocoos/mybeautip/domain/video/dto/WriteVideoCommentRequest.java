@@ -17,6 +17,6 @@ public class WriteVideoCommentRequest {
     private final Long parentId;
 
     public String getFilename() {
-        return FileUtil.getFileName(file.getUrl());
+        return file == null ? null : FileUtil.getFileName(file.getUrl());
     }
 }
