@@ -1,8 +1,11 @@
 package com.jocoos.mybeautip.domain.video.api.front;
 
 import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
+import com.jocoos.mybeautip.domain.video.dto.VideoViewResponse;
 import com.jocoos.mybeautip.domain.video.service.VideoService;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,5 +44,11 @@ public class VideoController {
     @GetMapping("/1/videos/recommend")
     public ResponseEntity<List<VideoResponse>> getRecommendedVideos() {
         return ResponseEntity.ok(service.findRecommendedVideos());
+    }
+
+    @PostMapping("/1/video/{videoId}/view-count")
+    public ResponseEntity<VideoViewResponse> addVideoViewCount(@CurrentMember MyBeautipUserDetails userDetails,
+                                                               @PathVariable Long videoId) {
+        return ResponseEntity.ok(service.addViewCount(videoId, userDetails.getUsername()));
     }
 }

@@ -15,6 +15,8 @@ import javax.persistence.*;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.member.code.Role.ADMIN;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
+import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 
 @Getter
 @Setter
@@ -55,6 +57,9 @@ public class CommunityComment extends BaseEntity {
 
     @Column
     private int reportCount;
+
+    @Column
+    private String file;
 
     @ManyToOne
     @JoinColumn(name = "member_id", insertable = false, updatable = false)
@@ -101,5 +106,13 @@ public class CommunityComment extends BaseEntity {
 
     public boolean isAdminWrite() {
         return Role.from(member).equals(ADMIN);
+    }
+
+    public String getFileUrl() {
+        return toUrl(file, COMMUNITY_COMMENT, id);
+    }
+
+    public boolean containFile() {
+        return file != null;
     }
 }

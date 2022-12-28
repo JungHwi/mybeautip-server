@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service;
 
+import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.converter.CommunityCommentConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
@@ -23,11 +24,13 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +46,8 @@ public class CommunityCommentService {
     private final ActivityPointService activityPointService;
     private final CommunityCommentDeleteService deleteService;
     private final CommunityCommentConverter converter;
+    private final CommunityCommentCRUDService crudService;
+    private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
@@ -89,18 +94,8 @@ public class CommunityCommentService {
 
     @Transactional
     public CommunityCommentResponse write(WriteCommunityCommentRequest request) {
-        valid(request);
-        Member member = legacyMemberService.currentMember();
-        request.setMember(member);
-
-        Community community = communityDao.get(request.getCommunityId());
-        request.setCategoryId(community.getCategoryId());
-
-        CommunityComment communityComment = dao.write(request);
-
-        if (community.getCategory().getType() == CommunityCategoryType.BLIND) {
-            communityDao.updateSortedAt(community.getId());
-        }
+        Member member = request.getMember();
+        CommunityComment communityComment = crudService.write(request);
 
         CommunityCommentResponse response = converter.convert(communityComment);
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
@@ -134,10 +129,21 @@ public class CommunityCommentService {
         }
 
         communityComment.setContents(request.getContents());
+        editFile(communityComment, request);
 
         dao.save(communityComment);
 
         return getComment(member, communityComment);
+    }
+
+    private void editFile(CommunityComment communityComment, EditCommunityCommentRequest request) {
+        if (!CollectionUtils.isEmpty(request.getFiles())) {
+            if (communityComment.containFile() && request.isOnlyUpload()) {
+                throw new BadRequestException("comment already had file. delete needed");
+            }
+            communityComment.setFile(request.getUploadFilename());
+            awsS3Handler.editFiles(request.getFiles(), COMMUNITY_COMMENT.getDirectory(communityComment.getId()));
+        }
     }
 
     private CommunityCommentResponse getComment(Member member, CommunityComment communityComment) {

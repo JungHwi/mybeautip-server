@@ -133,27 +133,9 @@ public interface VideoRepository extends ExtendedQuerydslJpaRepository<Video, Lo
 
     Page<Video> findByMemberIdAndTypeAndStateInAndDeletedAtIsNotNull(Long owner, String type, Collection<String> states, Pageable pageable);
 
-    Page<Video> findByTypeAndDeletedAtIsNull(String type, Pageable pageable);
-
-    Page<Video> findByTypeAndDeletedAtIsNotNull(String type, Pageable pageable);
-
-    Page<Video> findByState(String state, Pageable pageable);
-
-    Page<Video> findByStateAndMemberIdIn(String state, Collection<Long> owners, Pageable pageable);
-
-    Page<Video> findByTypeAndStateInAndReportCountGreaterThanAndDeletedAtIsNull(String type, Collection<String> state, Long reportCount, Pageable pageable);
-
-    Page<Video> findByTypeAndStateInAndReportCountGreaterThanAndDeletedAtIsNotNull(String type, Collection<String> state, Long reportCount, Pageable pageable);
-
     Page<Video> findByTypeAndStateInAndAndCreatedAtBetweenAndDeletedAtIsNull(String type, Collection<String> state, Date from, Date now, Pageable pageable);
 
     Optional<Video> findTopByMemberIdAndCreatedAtBetweenAndDeletedAtIsNullOrderByCreatedAtDesc(Long owner, Date from, Date to);
-
-    List<Video> findAllByVisibilityAndStateInAndCreatedAtBeforeAndDeletedAtIsNullOrderByCreatedAtDesc(String visibility, List<String> states, Date date, Pageable pageable);
-
     List<Video> findByIdInAndVisibility(List<Long> ids, String visibility);
-
-    List<Video> findByIdIn(List<Long> ids);
-
     List<Video> findByStatusAndStartedAtLessThanEqualAndDeletedAtIsNull(VideoStatus status, Date startedAt);
 }

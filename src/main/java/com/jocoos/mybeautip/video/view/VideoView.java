@@ -35,6 +35,11 @@ public class VideoView extends MemberAuditable {
     @LastModifiedDate
     private Date modifiedAt;
 
+    public VideoView(Video video) {
+        this.video = video;
+        this.viewCount = 1;
+    }
+
     public VideoView(Video video, Member member) {
         this.video = video;
         this.createdBy = member;

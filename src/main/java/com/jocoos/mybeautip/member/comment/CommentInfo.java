@@ -27,11 +27,13 @@ public class CommentInfo {
     private Integer reportCount;
     private Integer state;
     private Set<MentionTag> mentionInfo;
+    private String fileUrl;
 
     public CommentInfo(Comment comment) {
         BeanUtils.copyProperties(comment, this);
         setCommentRef(comment);
         this.createdBy = new MemberMeInfo(comment.getCreatedBy());
+        this.fileUrl = comment.getFileUrl();
     }
 
     public CommentInfo(Comment comment, MemberInfo createdBy) {
