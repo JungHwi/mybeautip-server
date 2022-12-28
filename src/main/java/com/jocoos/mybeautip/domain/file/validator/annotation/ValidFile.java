@@ -1,4 +1,6 @@
-package com.jocoos.mybeautip.domain.file;
+package com.jocoos.mybeautip.domain.file.validator.annotation;
+
+import com.jocoos.mybeautip.domain.file.validator.FileValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
