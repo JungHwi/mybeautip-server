@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.member.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberActivityCount;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
@@ -24,8 +25,10 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 public class MemberSearchResult {
     private final Long id;
+    private final Role role;
     private final String avatarUrl;
     private final String username;
+    private final String name;
     private final String email;
     private final String phoneNumber;
     private final int point;
@@ -52,6 +55,7 @@ public class MemberSearchResult {
     @QueryProjection
     public MemberSearchResult(Member member, Address address, MemberDetail memberDetail, MemberActivityCount activityCount, List<MemoResponse> memoResponses) {
         this.id = member.getId();
+        this.role = Role.from(member);
         this.avatarUrl = member.getAvatarUrl();
         this.username = member.getUsername();
         this.email = member.getEmail();
@@ -62,6 +66,7 @@ public class MemberSearchResult {
         this.ageGroup = member.getAgeGroup();
         this.createdAt = member.getCreatedAtZoned();
         this.modifiedAt = member.getModifiedAtZoned();
+        this.name = address == null ? null : address.getRecipient();
         this.address = address == null ? null : address.getWholeAddress();
         this.skinType = memberDetail == null ? null : memberDetail.getSkinType();
         this.skinWorry = memberDetail == null ? null : memberDetail.getSkinWorry();

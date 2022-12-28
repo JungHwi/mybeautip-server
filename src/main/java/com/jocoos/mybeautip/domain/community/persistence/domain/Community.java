@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVote;
+import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -105,8 +106,8 @@ public class Community extends BaseEntity {
         return this;
     }
 
-    public void addFile(String fileName) {
-        CommunityFile communityFile = new CommunityFile(getFileName(fileName));
+    public void addFile(FileType type, String fileName) {
+        CommunityFile communityFile = new CommunityFile(type, getFileName(fileName));
         communityFile.setCommunity(this);
         if (this.category.isCategoryType(VOTE)) {
             CommunityVote communityVote = new CommunityVote(this, communityFile);
@@ -231,5 +232,13 @@ public class Community extends BaseEntity {
 
     public int getVoteSize() {
         return communityVoteList.size();
+    }
+
+    public void setVote() {
+        if (VOTE.equals(category.getType())) {
+            this.communityVoteList = communityFileList.stream()
+                    .map(file -> new CommunityVote(this, file))
+                    .toList();
+        }
     }
 }

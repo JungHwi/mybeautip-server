@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.event.dto.EditEventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventProductRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
@@ -74,6 +75,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].type").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_TYPE)),
                                 fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_STATUS)),
                                 fieldWithPath("content.[].is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부"),
+                                fieldWithPath("content.[].is_top_fix").type(JsonFieldType.BOOLEAN).description("상단 고정 여부").optional(),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("content.[].description").type(JsonFieldType.STRING).description("설명"),
                                 fieldWithPath("content.[].thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
@@ -104,6 +106,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_TYPE)),
                                 fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(EVENT_STATUS)),
                                 fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부"),
+                                fieldWithPath("is_top_fix").type(JsonFieldType.BOOLEAN).description("상단 고정 여부").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("description").type(JsonFieldType.STRING).description("설명"),
                                 fieldWithPath("thumbnail_image_url").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
@@ -302,6 +305,31 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                         )
                 )
         );
+    }
+
+    @Transactional
+    @Test
+    void fixEvent() throws Exception {
+        BooleanDto request = new BooleanDto(true);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/admin/event/{event_id}/hide", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_hide_event",
+                pathParameters(
+                        parameterWithName("event_id").description("이벤트 ID")
+                ),
+                requestFields(
+                        fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("숨김 여부")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("이벤트 ID")
+                )
+        ));
     }
 
     @Transactional

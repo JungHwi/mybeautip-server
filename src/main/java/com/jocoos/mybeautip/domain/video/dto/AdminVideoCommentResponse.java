@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.video.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
+import com.jocoos.mybeautip.domain.community.dto.AdminMemberResponse;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.Comment.CommentState;
@@ -21,9 +21,10 @@ public class AdminVideoCommentResponse {
     private final Long id;
     private final CommentState status;
     private final String contents;
+    private final String fileUrl;
     private final int likeCount;
     private final int reportCount;
-    private MemberResponse member;
+    private AdminMemberResponse member;
     private List<AdminVideoCommentResponse> children;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
@@ -38,10 +39,11 @@ public class AdminVideoCommentResponse {
         this.id = comment.getId();
         this.status = comment.getStateString();
         this.contents = comment.getComment();
+        this.fileUrl = comment.getFileUrl();
         this.likeCount = comment.getLikeCount();
         this.reportCount = comment.getReportCount();
         this.createdAt = comment.getCreatedAtUTCZoned();
-        this.member = MemberResponse.from(member);
+        this.member = AdminMemberResponse.from(member);
     }
 
 

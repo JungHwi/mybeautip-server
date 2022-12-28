@@ -87,6 +87,14 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     }
 
     @Override
+    public void addViewCount(Long videoId, int addCount) {
+        repository.update(query -> query
+                .set(video.viewCount, video.viewCount.add(addCount))
+                .where(eqId(videoId))
+                .execute());
+    }
+
+    @Override
     public long bulkUpdateStatus(List<Video> videos, VideoStatus status) {
         return repository.update(query -> query
                 .set(video.status, status)
@@ -145,7 +153,9 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         isReported(condition.isReported()),
                         isTopFix(condition.isTopFix()),
                         eqVisibility(condition.visibility()),
-                        isRecommended(condition.isRecommended())
+                        isRecommended(condition.isRecommended()),
+                        eqStatus(condition.status()),
+                        video.deletedAt.isNull()
                 ));
 
         dynamicQueryForCommentSearch(condition, baseQuery);
@@ -243,7 +253,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
                 )
-                .orderBy(video.createdAt.desc()));
+                .orderBy(video.sorting.asc().nullsLast(), video.createdAt.desc()));
 
         if (condition.getSize() != 0) {
             baseQuery

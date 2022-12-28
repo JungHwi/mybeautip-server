@@ -30,7 +30,7 @@ public class PlacardDao {
 
     @Transactional(readOnly = true)
     public Page<AdminPlacardResponse> getPlacards(PlacardSearchCondition condition) {
-        return repository.getPlacards(condition);
+        return repository.getPlacardsWithCount(condition);
     }
 
     @Transactional(readOnly = true)

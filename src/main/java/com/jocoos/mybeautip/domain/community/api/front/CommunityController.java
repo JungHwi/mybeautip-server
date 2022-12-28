@@ -15,10 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -38,13 +36,6 @@ public class CommunityController {
         CommunityResponse response = service.write(request);
 
         return ResponseEntity.ok(response);
-    }
-
-    @PostMapping(value = "/1/community/files", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<List<String>> uploadFile(@RequestPart List<MultipartFile> files) {
-        List<String> urls = service.upload(files);
-
-        return ResponseEntity.ok(urls);
     }
 
     @GetMapping(value = "/1/community")

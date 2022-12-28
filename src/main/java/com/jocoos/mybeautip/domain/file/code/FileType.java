@@ -9,7 +9,8 @@ import lombok.RequiredArgsConstructor;
 public enum FileType implements CodeValue {
 
     IMAGE("이미지"),
-    VIDEO("비디오");
+    VIDEO("비디오")
+    ;
 
     private final String description;
 

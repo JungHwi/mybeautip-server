@@ -51,8 +51,8 @@ spring:
     show-sql: true
   servlet:
     multipart:
-      maxFileSize: 30MB
-      maxRequestSize: 30MB
+      maxFileSize: 100MB
+      maxRequestSize: 150MB
 
 security:
   oauth2:
@@ -166,6 +166,8 @@ mybeautip:
   billing:
     time-between-reset: 60000 # 1 minute (milliseconds)
     max-error-count: 18
+  image-file-limit-mb: 5
+  video-file-count-limit: 1
 
 cloud:
   aws:

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
+import com.jocoos.mybeautip.domain.file.code.FileType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,10 +28,14 @@ public class CommunityFile {
     @JoinColumn(name = "community_id")
     private Community community;
 
+    @Enumerated(EnumType.STRING)
+    private FileType type;
+
     @Column
     private String file;
 
-    public CommunityFile(String file) {
+    public CommunityFile(FileType type, String file) {
+        this.type = type;
         this.file = file;
     }
 

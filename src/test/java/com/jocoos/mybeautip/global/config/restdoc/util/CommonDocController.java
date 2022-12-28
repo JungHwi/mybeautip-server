@@ -3,8 +3,10 @@ package com.jocoos.mybeautip.global.config.restdoc.util;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
+import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.notification.code.*;
 import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
 import com.jocoos.mybeautip.domain.operation.code.OperationType;
@@ -48,6 +50,7 @@ public class CommonDocController {
         Map<String, String> telecom = getDocs(Telecom.values());
         Map<String, String> urlDirectory = getDocs(UrlDirectory.values());
         Map<String, String> fileOperationType = getDocs(FileOperationType.values());
+        Map<String, String> fileType = getDocs(FileType.values());
         Map<String, String> sortField = getDocs(SortField.values());
 
         // Member
@@ -55,6 +58,7 @@ public class CommonDocController {
         Map<String, String> skinType = getDocs(SkinType.values());
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
         Map<String, String> grantType = getDocs(GrantType.values());
+        Map<String, String> role = getDocs(Role.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -116,12 +120,14 @@ public class CommonDocController {
                         .telecom(telecom)
                         .urlDirectory(urlDirectory)
                         .fileOperationType(fileOperationType)
+                        .fileType(fileType)
                         .sortField(sortField)
                 // Member
                         .memberStatus(memberStatus)
                         .skinType(skinType)
                         .skinWorry(skinWorry)
                         .grantType(grantType)
+                        .role(role)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)

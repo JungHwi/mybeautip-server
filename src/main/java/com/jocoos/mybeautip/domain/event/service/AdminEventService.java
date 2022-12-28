@@ -59,7 +59,7 @@ public class AdminEventService {
     }
 
     public List<String> upload(List<MultipartFile> files) {
-        return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
+        return awsS3Handler.upload(files, UrlDirectory.TEMP_IMAGE.getDirectory());
     }
 
     @Transactional
@@ -97,6 +97,13 @@ public class AdminEventService {
                 .startCount(startEvent)
                 .endCount(endEvent)
                 .build();
+    }
+
+    @Transactional
+    public Long hide(Long eventId, boolean isHide) {
+        Event event = eventDao.getEvent(eventId);
+        event.hide(isHide);
+        return event.getId();
     }
 
     @Transactional

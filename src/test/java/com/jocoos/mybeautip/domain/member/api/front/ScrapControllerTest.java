@@ -10,6 +10,8 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.FILE_TYPE;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -44,7 +46,10 @@ public class ScrapControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
-                                fieldWithPath("content.[].file_url").type(JsonFieldType.ARRAY).description("파일 URL").optional(),
+                                fieldWithPath("content.[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                                fieldWithPath("content.[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("content.[].files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                                fieldWithPath("content.[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                                 fieldWithPath("content.[].votes").type(JsonFieldType.ARRAY).description("투표 URL").optional(),
                                 fieldWithPath("content.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),

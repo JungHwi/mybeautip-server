@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.video.vo;
 
+import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.global.code.SearchField;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.video.Visibility;
@@ -10,7 +11,8 @@ import org.springframework.data.domain.Sort;
 import java.util.Date;
 
 @Builder
-public record AdminVideoSearchCondition(Integer categoryId,
+public record AdminVideoSearchCondition(VideoStatus status,
+                                        Integer categoryId,
                                         Visibility visibility,
                                         Boolean isRecommended,
                                         Pageable pageable,

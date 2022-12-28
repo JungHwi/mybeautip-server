@@ -2,10 +2,12 @@ package com.jocoos.mybeautip.domain.placard.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
+import com.jocoos.mybeautip.domain.placard.code.PlacardTabType;
 import com.jocoos.mybeautip.domain.placard.dto.AdminPlacardResponse;
 import com.jocoos.mybeautip.domain.placard.dto.QAdminPlacardResponse;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
 import com.jocoos.mybeautip.domain.placard.vo.PlacardSearchCondition;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
@@ -19,10 +21,11 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static com.jocoos.mybeautip.domain.placard.persistence.domain.QPlacard.placard;
+import static com.jocoos.mybeautip.domain.placard.persistence.domain.QPlacardDetail.placardDetail;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
 
 @Repository
-public class PlacardCustomRepositoryImpl implements  PlacardCustomRepository {
+public class PlacardCustomRepositoryImpl implements PlacardCustomRepository {
 
     private final ExtendedQuerydslJpaRepository<Placard, Long> repository;
 
@@ -32,10 +35,19 @@ public class PlacardCustomRepositoryImpl implements  PlacardCustomRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminPlacardResponse> getPlacards(PlacardSearchCondition condition) {
+    public Page<AdminPlacardResponse> getPlacardsWithCount(PlacardSearchCondition condition) {
         List<AdminPlacardResponse> contents = getContents(condition);
         Long count = getCount(baseConditionQuery(condition));
         return new PageImpl<>(contents, condition.pageable(), count);
+    }
+
+    @Override
+    public List<Placard> getPlacards(PlacardSearchCondition condition) {
+        return baseConditionQuery(condition)
+                .select(placard)
+                .join(placardDetail).on(placardDetail.placard.eq(placard))
+                .orderBy(sortingAscCreatedAtDesc())
+                .fetch();
     }
 
     @Override
@@ -115,20 +127,23 @@ public class PlacardCustomRepositoryImpl implements  PlacardCustomRepository {
                 .select(new QAdminPlacardResponse(placard))
                 .offset(condition.offset())
                 .limit(condition.limit())
-                .orderBy(placard.sorting.asc().nullsLast(), placard.createdAt.desc())
+                .orderBy(sortingAscCreatedAtDesc())
                 .fetch();
     }
 
     private JPAQuery<?> baseConditionQuery(PlacardSearchCondition condition) {
         return repository.query(query -> query
-                        .from(placard)
-                        .where(
-                                eqStatus(condition.status()),
-                                searchTitle(condition.keyword()),
-                                goeStartedAt(condition.startAt()),
-                                loeStartedAt(condition.endAt()),
-                                eqIsTopFix(condition.IsTopFix())
-                        ));
+                .from(placard)
+                .where(
+                        eqStatus(condition.status()),
+                        eqTabTye(condition.type()),
+                        searchTitle(condition.keyword()),
+                        ltStartedAt(condition.between()),
+                        gtEndedAt(condition.between()),
+                        goeStartedAt(condition.startAt()),
+                        loeStartedAt(condition.endAt()),
+                        eqIsTopFix(condition.IsTopFix())
+                ));
     }
 
     private Long getCount(JPAQuery<?> conditionQuery) {
@@ -136,6 +151,22 @@ public class PlacardCustomRepositoryImpl implements  PlacardCustomRepository {
                 .select(placard.count())
                 .fetchOne();
         return count == null ? 0 : count;
+    }
+
+    private OrderSpecifier<?>[] sortingAscCreatedAtDesc() {
+        return new OrderSpecifier[]{placard.sorting.asc().nullsLast(), placard.createdAt.desc()};
+    }
+
+    private BooleanExpression gtEndedAt(ZonedDateTime endedAt) {
+        return endedAt == null ? null : placard.endedAt.gt(endedAt);
+    }
+
+    private BooleanExpression ltStartedAt(ZonedDateTime startedAt) {
+        return startedAt == null ? null : placard.startedAt.lt(startedAt);
+    }
+
+    private BooleanExpression eqTabTye(PlacardTabType tabType) {
+        return tabType == null ? null : placardDetail.tabType.eq(tabType);
     }
 
     private BooleanExpression eqIsTopFix(Boolean isTopFix) {

@@ -9,8 +9,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static com.jocoos.mybeautip.domain.search.code.SearchType.COMMUNITY;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*;
-import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS;
-import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.SEARCH_TYPE;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -50,7 +49,10 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("community.[].event_id").type(JsonFieldType.NUMBER).description("이벤트 ID").optional(),
                         fieldWithPath("community.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                         fieldWithPath("community.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
-                        fieldWithPath("community.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                        fieldWithPath("community.[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                        fieldWithPath("community.[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                        fieldWithPath("community.[].files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                        fieldWithPath("community.[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                         fieldWithPath("community.[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                         fieldWithPath("community.[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                         fieldWithPath("community.[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),

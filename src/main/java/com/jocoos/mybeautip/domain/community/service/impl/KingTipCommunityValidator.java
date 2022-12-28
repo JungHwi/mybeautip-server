@@ -20,6 +20,6 @@ public class KingTipCommunityValidator extends CommunityCommonValidator {
 
     @Override
     public void validCommunity(Community community) {
-        super.validFileSize(community.getFileSize(), KING_TIP_FILE_SIZE_LIMIT);
+        super.validFileCount(community.getFileSize(), KING_TIP_FILE_SIZE_LIMIT);
     }
 }

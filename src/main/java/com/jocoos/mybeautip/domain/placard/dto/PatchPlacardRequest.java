@@ -4,12 +4,17 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
 import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import lombok.Builder;
 import lombok.Getter;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
+import java.util.List;
 
+import static com.jocoos.mybeautip.global.code.FileOperationType.DELETE;
+import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 import static com.jocoos.mybeautip.global.util.JsonNullableUtils.getIfPresent;
 
@@ -18,19 +23,30 @@ import static com.jocoos.mybeautip.global.util.JsonNullableUtils.getIfPresent;
 @SuppressWarnings({"FieldMayBeFinal", ""})
 public class PatchPlacardRequest {
 
-    private JsonNullable<PlacardStatus> status = JsonNullable.undefined();
-    private JsonNullable<String> imageUrl = JsonNullable.undefined();
-    private JsonNullable<String> title = JsonNullable.undefined();
-    private JsonNullable<PlacardLinkType> linkType = JsonNullable.undefined();
-    private JsonNullable<String> linkArgument = JsonNullable.undefined();
-    private JsonNullable<String> description = JsonNullable.undefined();
-    private JsonNullable<String> color = JsonNullable.undefined();
+    @NotNull
+    private JsonNullable<PlacardStatus> status;
 
-    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
-    private JsonNullable<ZonedDateTime> startedAt = JsonNullable.undefined();
+    @NotNull
+    private JsonNullable<String> imageUrl;
 
+    @NotNull
+    private JsonNullable<String> title;
+
+    @NotNull
+    private JsonNullable<PlacardLinkType> linkType;
+    private JsonNullable<String> linkArgument;
+    private JsonNullable<String> description;
+
+    @NotNull
+    private JsonNullable<String> color;
+
+    @NotNull
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
-    private JsonNullable<ZonedDateTime> endedAt = JsonNullable.undefined();
+    private JsonNullable<ZonedDateTime> startedAt;
+
+    @NotNull
+    @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
+    private JsonNullable<ZonedDateTime> endedAt;
 
 
     public Placard edit(Placard placard) {
@@ -46,5 +62,12 @@ public class PatchPlacardRequest {
                 .endedAt(getIfPresent(endedAt, placard.getEndedAt()))
                 .imageUrl(getIfPresent(imageUrl, placard.getImageUrl()))
                 .build();
+    }
+
+    public List<FileDto> getFileDto(String originalImageUrl) {
+        if (imageUrl.isPresent()) {
+           return List.of(new FileDto(DELETE, originalImageUrl), new FileDto(UPLOAD, imageUrl.get()));
+        }
+        return List.of();
     }
 }

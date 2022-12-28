@@ -17,6 +17,7 @@ public class EnumDocs {
     Map<String, String> telecom;
     Map<String, String> urlDirectory;
     Map<String, String> fileOperationType;
+    Map<String, String> fileType;
     Map<String, String> sortField;
 
     // Member
@@ -24,6 +25,7 @@ public class EnumDocs {
     Map<String, String> skinType;
     Map<String, String> skinWorry;
     Map<String, String> grantType;
+    Map<String, String> role;
 
     // Event
     Map<String, String> eventStatus;

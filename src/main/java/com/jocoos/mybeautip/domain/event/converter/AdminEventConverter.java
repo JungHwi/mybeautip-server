@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
+import static java.lang.Boolean.TRUE;
 
 @Mapper(componentModel = "spring", uses = {AdminEventProductConverter.class})
 public abstract class AdminEventConverter {
@@ -123,5 +124,10 @@ public abstract class AdminEventConverter {
     @Named("fileToUrl")
     protected String fileToUrl(String file) {
         return ImageUrlConvertUtil.toUrl(file, UrlDirectory.EVENT);
+    }
+
+    @Named("isTrueOrNull")
+    protected Boolean isTrueOrNull(Boolean isTopFix) {
+        return TRUE.equals(isTopFix) ? true : null;
     }
 }

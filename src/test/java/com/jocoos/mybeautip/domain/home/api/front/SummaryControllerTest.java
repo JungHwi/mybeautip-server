@@ -11,6 +11,8 @@ import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.B
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateMilliFormat;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.FILE_TYPE;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -45,7 +47,10 @@ class SummaryControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].community.[].event_title").type(JsonFieldType.STRING).description("이벤트 제목").optional(),
                         fieldWithPath("content.[].community.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                         fieldWithPath("content.[].community.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
-                        fieldWithPath("content.[].community.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                        fieldWithPath("content.[].community.[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                        fieldWithPath("content.[].community.[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                        fieldWithPath("content.[].community.[].files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                        fieldWithPath("content.[].community.[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                         fieldWithPath("content.[].community.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
                         fieldWithPath("content.[].community.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                         fieldWithPath("content.[].community.[].comment_count").type(JsonFieldType.NUMBER).description("댓글/대댓글수"),
@@ -88,7 +93,10 @@ class SummaryControllerTest extends RestDocsTestSupport {
                         fieldWithPath("[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                         fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목").optional(),
                         fieldWithPath("[].contents").type(JsonFieldType.STRING).description("내용"),
-                        fieldWithPath("[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                        fieldWithPath("[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                        fieldWithPath("[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                        fieldWithPath("[].files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                        fieldWithPath("[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                         fieldWithPath("[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                         fieldWithPath("[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                         fieldWithPath("[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
@@ -132,7 +140,10 @@ class SummaryControllerTest extends RestDocsTestSupport {
                         fieldWithPath("[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                         fieldWithPath("[].title").type(JsonFieldType.STRING).description("제목").optional(),
                         fieldWithPath("[].contents").type(JsonFieldType.STRING).description("내용"),
-                        fieldWithPath("[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                        fieldWithPath("[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                        fieldWithPath("[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                        fieldWithPath("[].files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                        fieldWithPath("[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                         fieldWithPath("[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                         fieldWithPath("[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                         fieldWithPath("[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),

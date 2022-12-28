@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[skin_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-role.adoc[]

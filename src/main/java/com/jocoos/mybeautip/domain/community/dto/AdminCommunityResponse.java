@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import org.springframework.util.CollectionUtils;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -32,15 +32,15 @@ public class AdminCommunityResponse {
     private final Boolean isWin;
     private final Boolean isTopFix;
     private final CommunityCategoryResponse category;
-    private final MemberResponse member;
+    private final AdminMemberResponse member;
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) private final ZonedDateTime createdAt;
-    private List<String> fileUrl;
+    private List<FileDto> files;
     private List<VoteResponse> votes;
 
     @QueryProjection
     public AdminCommunityResponse(Community community,
                                   CommunityCategoryResponse category,
-                                  MemberResponse member,
+                                  AdminMemberResponse member,
                                   String eventTitle) {
         this.id = community.getId();
         this.status = community.getStatus();
@@ -61,10 +61,12 @@ public class AdminCommunityResponse {
     public AdminCommunityResponse(Community community,
                                   List<CommunityFile> files,
                                   CommunityCategoryResponse category,
-                                  MemberResponse member,
+                                  AdminMemberResponse member,
                                   String eventTitle) {
         this(community, category, member, eventTitle);
-        this.fileUrl = getFileUrl(files);
+        this.files = files.stream()
+                .map(FileDto::from)
+                .toList();
     }
 
     public void setVotes(Map<Long, List<VoteResponse>> votesMap) {
@@ -76,19 +78,13 @@ public class AdminCommunityResponse {
             return;
         }
         this.votes = votes;
-        this.fileUrl = new ArrayList<>();
-    }
-
-    public List<String> getFileUrl(List<CommunityFile> files) {
-        if (CollectionUtils.isEmpty(files)) {
-            return Collections.emptyList();
-        }
-        return files.stream()
-                .map(CommunityFile::getFileUrl)
-                .toList();
+        this.files = new ArrayList<>();
     }
 
     public void setFileUrls(Map<Long, List<CommunityFile>> fileMap) {
-        this.fileUrl = getFileUrl(fileMap.getOrDefault(id, new ArrayList<>()));
+        this.files = fileMap.getOrDefault(id, new ArrayList<>())
+                .stream()
+                .map(FileDto::from)
+                .toList();
     }
 }

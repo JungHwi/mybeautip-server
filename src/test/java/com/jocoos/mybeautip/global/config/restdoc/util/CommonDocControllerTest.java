@@ -56,6 +56,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("FileOperationType")),
                                 enumConvertFieldDescriptor((enumDocs.getFileOperationType()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.file_type").withSubsectionId("file_type"),
+                                attributes(key("title").value("FileOperationType")),
+                                enumConvertFieldDescriptor((enumDocs.getFileType()))
+                        ),
                         customResponseFields("custom-response", beneathPath("data.sort_field").withSubsectionId("sort_field"),
                                 attributes(key("title").value("SortField")),
                                 enumConvertFieldDescriptor((enumDocs.getSortField()))
@@ -76,6 +80,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         customResponseFields("custom-response", beneathPath("data.grant_type").withSubsectionId("grant_type"),
                                 attributes(key("title").value("GrantType")),
                                 enumConvertFieldDescriptor((enumDocs.getGrantType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.role").withSubsectionId("role"),
+                                attributes(key("title").value("Role")),
+                                enumConvertFieldDescriptor((enumDocs.getRole()))
                         ),
                         // Event
                         customResponseFields("custom-response", beneathPath("data.event_status").withSubsectionId("event_status"),

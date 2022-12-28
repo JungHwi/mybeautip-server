@@ -30,7 +30,7 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     @Transactional
     void writeVideoComment() throws Exception {
-        WriteVideoCommentRequest request = new WriteVideoCommentRequest("content", null);
+        WriteVideoCommentRequest request = new WriteVideoCommentRequest("content", null, null);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .post("/admin/video/{video_id}/comment", 3)
@@ -58,7 +58,8 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
                                 fieldWithPath("member.status").type(JsonFieldType.STRING).description(generateLinkCode(MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
-                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
+                                fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
+                                fieldWithPath("member.role").type(JsonFieldType.STRING).description(generateLinkCode(ROLE))
                         )
                 )
         );
@@ -114,6 +115,7 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("비디오 댓글 ID"),
                         fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(VIDEO_COMMENT_STATUS)),
                         fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용"),
+                        fieldWithPath("content.[].file_url").type(JsonFieldType.STRING).description("이미지 URL").optional(),
                         fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                         fieldWithPath("content.[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
                         fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
@@ -121,6 +123,7 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description(generateLinkCode(MEMBER_STATUS)),
                         fieldWithPath("content.[].member.username").type(JsonFieldType.STRING).description("작성자 이름"),
                         fieldWithPath("content.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
+                        fieldWithPath("content.[].member.role").type(JsonFieldType.STRING).description(generateLinkCode(ROLE)),
                         fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
 
                         fieldWithPath("content.[].children").type(JsonFieldType.ARRAY).description("대댓글 목록, children 필드가 없는 것을 제외하고 본 응답과 동일").optional(),
@@ -134,6 +137,7 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].children.[].member.status").type(JsonFieldType.STRING).description(generateLinkCode(MEMBER_STATUS)).optional().ignored(),
                         fieldWithPath("content.[].children.[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional().ignored(),
                         fieldWithPath("content.[].children.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional().ignored(),
+                        fieldWithPath("content.[].children.[].member.role").type(JsonFieldType.STRING).description(generateLinkCode(ROLE)).optional().ignored(),
                         fieldWithPath("content.[].children.[].created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()).optional().ignored()
                 )
         ));

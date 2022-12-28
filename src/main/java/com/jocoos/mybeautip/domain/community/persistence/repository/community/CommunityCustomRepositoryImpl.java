@@ -131,7 +131,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
     private JPAQuery<AdminCommunityResponse> getBaseQuery(CommunitySearchCondition condition) {
         return repository.query(query -> query
-                .select(new QAdminCommunityResponse(community, categoryResponse(), memberResponse(), event.title))
+                .select(new QAdminCommunityResponse(community, categoryResponse(), memberResponseWithRole(), event.title))
                 .from(community)
                 .join(member).on(community.member.eq(member))
                 .join(communityCategory).on(community.category.eq(communityCategory))
@@ -303,7 +303,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .transform(groupBy(communityFile.community.id).as(list(communityFile))));
 
         for (SummaryCommunityResult result : results) {
-            result.setThumbnailUrl(fileMap);
+            result.setThumbnailFile(fileMap);
         }
 
         return results;
@@ -353,6 +353,10 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .join(event).on(community.eventId.eq(event.id))
                 .on(community.eventId.eq(event.id))
                 .fetch();
+    }
+
+    private QAdminMemberResponse memberResponseWithRole() {
+        return new QAdminMemberResponse(memberResponse(), member.link);
     }
 
     private QMemberResponse memberResponse() {

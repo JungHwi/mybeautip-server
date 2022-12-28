@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.placard.vo;
 
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
+import com.jocoos.mybeautip.domain.placard.code.PlacardTabType;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import lombok.Builder;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,8 @@ import java.time.ZonedDateTime;
 
 @Builder
 public record PlacardSearchCondition(PlacardStatus status,
+                                     PlacardTabType type,
+                                     ZonedDateTime between,
                                      SearchOption searchOption,
                                      Pageable pageable) {
 

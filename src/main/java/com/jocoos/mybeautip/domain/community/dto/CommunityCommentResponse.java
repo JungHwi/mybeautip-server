@@ -32,6 +32,8 @@ public class CommunityCommentResponse implements CursorInterface {
 
     private String contents;
 
+    private String fileUrl;
+
     private Integer likeCount;
 
     private Integer commentCount;
