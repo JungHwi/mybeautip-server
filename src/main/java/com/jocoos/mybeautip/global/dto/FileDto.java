@@ -5,14 +5,20 @@ import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.global.code.FileOperationType;
 import lombok.*;
 
+import static com.jocoos.mybeautip.domain.file.code.FileType.IMAGE;
+import static com.jocoos.mybeautip.domain.file.code.FileType.VIDEO;
+import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
+
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileDto {
+
     private FileOperationType operation;
-    private FileType type;
+    private FileType type = IMAGE;
+    private String thumbnailUrl;
     private String url;
 
     public FileDto(FileOperationType operation, String url) {
@@ -20,10 +26,36 @@ public class FileDto {
         this.url = url;
     }
 
-    public static FileDto from(CommunityFile file) {
-        return FileDto.builder()
-                .type(file.getType())
-                .url(file.getFileUrl())
-                .build();
+    public FileDto(FileType type, String url) {
+        this.type = type;
+        this.url = url;
+        if (VIDEO.equals(type)) {
+            this.thumbnailUrl = thumbnailUrl();
+        }
     }
+
+    public static FileDto from(CommunityFile file) {
+        return new FileDto(file.getType(), file.getFileUrl());
+    }
+
+    public boolean containThumbnail() {
+        return thumbnailUrl != null;
+    }
+
+    public String filename() {
+        return getFileName(url);
+    }
+
+    public String requestThumbnailFilename() {
+        return getFileName(thumbnailUrl);
+    }
+
+    public String thumbnailFilename() {
+        return getFileName(thumbnailUrl());
+    }
+
+    private String thumbnailUrl() {
+        return url + "_thumbnail";
+    }
+
 }

@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jocoos.mybeautip.global.code.UrlDirectory.TEMP_IMAGE;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.TEST_FILE;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.getUri;
@@ -62,11 +63,16 @@ public class AwsS3Handler {
             return "";
         }
 
-        String filename = getFileName(fileDto.getUrl());
+        String filename = fileDto.filename();
 
         String path = service.copy(
-                UrlDirectory.TEMP.getDirectory() + filename,
+                UrlDirectory.getDirectory(fileDto.getType()) + filename,
                 destination + filename);
+
+        if (fileDto.containThumbnail()) {
+            service.copy(TEMP_IMAGE.getDirectory() + fileDto.requestThumbnailFilename(),
+                    destination + fileDto.thumbnailFilename());
+        }
 
         return cloudFront + path;
     }
@@ -84,7 +90,7 @@ public class AwsS3Handler {
         }
 
         String path = service.copy(
-                UrlDirectory.TEMP.getDirectory() + filename,
+                TEMP_IMAGE.getDirectory() + filename,
                 destination + filename);
 
         return cloudFront + path;
