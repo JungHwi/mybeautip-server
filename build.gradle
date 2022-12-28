@@ -108,6 +108,8 @@ dependencies {
   implementation("com.infobip:infobip-spring-data-jpa-querydsl-boot-starter:7.2.0")
   implementation("org.openapitools:jackson-databind-nullable:0.2.4")
 
+//  kapt "com.querydsl:querydsl-apt:4.2.1:hibernate"
+//  runtimeOnly group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.7.22'
   implementation "com.querydsl:querydsl-jpa:5.0.0"
   implementation "com.querydsl:querydsl-core:5.0.0"
   annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jpa"
@@ -128,9 +130,11 @@ dependencies {
   implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonDataFormatVersion}")
   implementation("org.projectlombok:lombok:1.18.24")
   annotationProcessor("org.projectlombok:lombok:1.18.24")
+  testImplementation("org.projectlombok:lombok:1.18.24")
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
   implementation("org.mapstruct:mapstruct:1.5.3.Final")
-  annotationProcessor "org.mapstruct:mapstruct:1.5.3.Final"
-  annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+  annotationProcessor("org.mapstruct:mapstruct:1.5.3.Final")
+  annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
   implementation('org.flywaydb:flyway-core:7.15.0')
   implementation('javax.xml.bind:jaxb-api')
 
@@ -151,9 +155,6 @@ dependencies {
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
   testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
-  testImplementation("org.projectlombok:lombok:1.18.24")
-  testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
-
 }
 
 test {

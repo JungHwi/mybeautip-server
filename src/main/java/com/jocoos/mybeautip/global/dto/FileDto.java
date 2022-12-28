@@ -12,4 +12,8 @@ public class FileDto {
 
     private FileOperationType operation;
     private String url;
+
+    public String getUrl() {
+        return this.url;
+    }
 }

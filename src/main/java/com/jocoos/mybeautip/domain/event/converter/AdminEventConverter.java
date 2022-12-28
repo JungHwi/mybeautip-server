@@ -88,21 +88,25 @@ public abstract class AdminEventConverter {
         event.setBannerImageFile(getFileName(request.getBannerImageUrl()));
     }
 
-    @Mapping(target = "detailImageUrl", source = "event.imageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "thumbnailImageUrl", source = "event.thumbnailImageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "bannerImageUrl", source = "event.bannerImageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "shareSquareImageUrl", source = "event.shareSquareImageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "shareRectangleImageUrl", source = "event.shareRectangleImageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "product", source = "event.eventProductList")
-    @Mapping(target = "needPoint", source = "event.needPoint")
+    @Mappings({
+            @Mapping(target = "detailImageUrl", source = "event.imageFile", qualifiedByName = "fileToUrl"),
+            @Mapping(target = "thumbnailImageUrl", source = "event.thumbnailImageFile", qualifiedByName = "fileToUrl"),
+            @Mapping(target = "bannerImageUrl", source = "event.bannerImageFile", qualifiedByName = "fileToUrl"),
+            @Mapping(target = "shareSquareImageUrl", source = "event.shareSquareImageFile", qualifiedByName = "fileToUrl"),
+            @Mapping(target = "shareRectangleImageUrl", source = "event.shareRectangleImageFile", qualifiedByName = "fileToUrl"),
+            @Mapping(target = "product", source = "event.eventProductList"),
+            @Mapping(target = "needPoint", source = "event.needPoint")
+    })
     public abstract AdminEventResponse convertWithAllImages(Event event, Long joinCount);
 
-    @Mapping(target = "detailImageUrl", ignore = true)
-    @Mapping(target = "thumbnailImageUrl", source = "event.thumbnailImageFile", qualifiedByName = "fileToUrl")
-    @Mapping(target = "bannerImageUrl", ignore = true)
-    @Mapping(target = "shareSquareImageUrl", ignore = true)
-    @Mapping(target = "shareRectangleImageUrl", ignore = true)
-    @Mapping(target = "needPoint", source = "event.needPoint")
+    @Mappings({
+            @Mapping(target = "detailImageUrl", ignore = true),
+            @Mapping(target = "thumbnailImageUrl", source = "event.thumbnailImageFile", qualifiedByName = "fileToUrl"),
+            @Mapping(target = "bannerImageUrl", ignore = true),
+            @Mapping(target = "shareSquareImageUrl", ignore = true),
+            @Mapping(target = "shareRectangleImageUrl", ignore = true),
+            @Mapping(target = "needPoint", source = "event.needPoint")
+    })
     abstract AdminEventResponse convert(Event event, Long joinCount);
 
     @Mappings({

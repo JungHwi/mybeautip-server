@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.popupnotice.dto.PopupNoticeResponse;
 import com.jocoos.mybeautip.domain.popupnotice.persistence.domain.PopupNotice;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 
 import java.util.List;
@@ -14,8 +15,10 @@ import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 @Mapper(componentModel = "spring")
 public interface PopupNoticeConverter {
 
-    @Mapping(target = "imageUrl", source = "filename", qualifiedByName = "filename_to_url")
-    @Mapping(target = "parameter", source = "linkArgument")
+    @Mappings({
+            @Mapping(target = "imageUrl", source = "filename", qualifiedByName = "filename_to_url"),
+            @Mapping(target = "parameter", source = "linkArgument")
+    })
     PopupNoticeResponse convert(PopupNotice notice);
 
     List<PopupNoticeResponse> convert(List<PopupNotice> notices);
