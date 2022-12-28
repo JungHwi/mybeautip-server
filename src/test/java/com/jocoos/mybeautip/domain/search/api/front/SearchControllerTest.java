@@ -51,6 +51,7 @@ class SearchControllerTest extends RestDocsTestSupport {
                         fieldWithPath("community.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
                         fieldWithPath("community.[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
                         fieldWithPath("community.[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                        fieldWithPath("community.[].files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
                         fieldWithPath("community.[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                         fieldWithPath("community.[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                         fieldWithPath("community.[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),

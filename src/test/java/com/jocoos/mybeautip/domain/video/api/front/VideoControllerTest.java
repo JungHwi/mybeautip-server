@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateMilliFormat;
@@ -246,5 +248,24 @@ class VideoControllerTest extends RestDocsTestSupport {
                         )
                 )
         );
+    }
+
+    @Transactional
+    @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Test
+    void addViewCount() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/api/1/video/{video_id}/view-count", 10001))
+                .andExpect(status().isOk());
+
+        result.andDo(document("add_view_count_video",
+                pathParameters(
+                        parameterWithName("video_id").description("비디오 아이디")
+                ),
+                responseFields(
+                        fieldWithPath("id").type(JsonFieldType.NUMBER).description("비디오 ID"),
+                        fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("비디오 조회수")
+                )
+        ));
     }
 }
