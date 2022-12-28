@@ -56,6 +56,7 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
                                 fieldWithPath("files.[].type").type(JsonFieldType.STRING).description("파일 타입").description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
                                 fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL")
                                 ),
                         responseFields(
@@ -69,6 +70,7 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
                                 fieldWithPath("files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
                                 fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
+                                fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL"),
                                 fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                                 fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                                 fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
@@ -120,6 +122,7 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
                                 fieldWithPath("files.[].type").type(JsonFieldType.STRING).description("파일 타입").description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
                                 fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL")
                         ),
                         responseFields(
@@ -195,6 +198,7 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
                         fieldWithPath("content.[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
                         fieldWithPath("content.[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                        fieldWithPath("content.[].files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
                         fieldWithPath("content.[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                         fieldWithPath("content.[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                         fieldWithPath("content.[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
@@ -241,6 +245,7 @@ class AdminCommunityControllerTest extends RestDocsTestSupport {
                         fieldWithPath("contents").type(JsonFieldType.STRING).description("내용").optional(),
                         fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
                         fieldWithPath("files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                        fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
                         fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                         fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                         fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),

@@ -15,6 +15,33 @@ public class FileService {
     private final AwsS3Handler awsS3Handler;
 
     public List<String> upload(List<MultipartFile> files) {
-        return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
+        List<String> imageUrls = getImageFileStream(files);
+        List<String> videoUrls = getVideoFileStream(files);
+        imageUrls.addAll(videoUrls);
+        return imageUrls;
+    }
+
+    private List<String> getImageFileStream(List<MultipartFile> files) {
+        List<MultipartFile> images = files.stream()
+                .filter(this::isImage)
+                .toList();
+        return awsS3Handler.upload(images, UrlDirectory.TEMP_IMAGE.getDirectory());
+    }
+
+    private List<String> getVideoFileStream(List<MultipartFile> files) {
+        List<MultipartFile> videos = files.stream()
+                .filter(this::isVideo)
+                .toList();
+        return awsS3Handler.upload(videos, UrlDirectory.TEMP_VIDEO.getDirectory());
+    }
+
+    private boolean isImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && contentType.startsWith("image/");
+    }
+
+    private boolean isVideo(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && contentType.startsWith("video/");
     }
 }

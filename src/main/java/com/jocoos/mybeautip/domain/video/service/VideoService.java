@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.domain.video.dto.VideoResponse;
 import com.jocoos.mybeautip.domain.video.dto.VideoViewResponse;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
 import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +20,6 @@ public class VideoService {
     private final VideoCategoryService categoryService;
     private final VideoConvertService videoConvertService;
     private final VideoStatSeriesFactory videoStatSeriesFactory;
-    private final VideoRepository repository;
 
     @Transactional(readOnly = true)
     public List<VideoResponse> findVideos(Integer categoryId, ZonedDateTime cursor, int size) {

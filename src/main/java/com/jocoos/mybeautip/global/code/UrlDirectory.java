@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.code;
 
+import com.jocoos.mybeautip.domain.file.code.FileType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,7 +18,9 @@ public enum UrlDirectory implements CodeValue {
     EVENT_PRODUCT("이벤트 상품", "event/product/"),
     POPUP("팝업", "popup/"),
     PLACARD("플래카드", "placard/"),
-    TEMP("임시 폴더", "temp/");
+    TEMP_IMAGE("임시 이미지 폴더", "temp/image/"),
+    TEMP_VIDEO("임시 비디오 폴더", "temp/video/")
+    ;
 
     private final String description;
     private final String directory;
@@ -34,5 +37,12 @@ public enum UrlDirectory implements CodeValue {
             default:
                 return this.directory;
         }
+    }
+
+    public static String getDirectory(FileType type) {
+       return switch (type) {
+            case IMAGE -> TEMP_IMAGE.directory;
+           case VIDEO -> TEMP_VIDEO.directory;
+        };
     }
 }
