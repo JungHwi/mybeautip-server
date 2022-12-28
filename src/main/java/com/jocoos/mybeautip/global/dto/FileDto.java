@@ -15,6 +15,11 @@ public class FileDto {
     private FileType type;
     private String url;
 
+    public FileDto(FileOperationType operation, String url) {
+        this.operation = operation;
+        this.url = url;
+    }
+
     public static FileDto from(CommunityFile file) {
         return FileDto.builder()
                 .type(file.getType())

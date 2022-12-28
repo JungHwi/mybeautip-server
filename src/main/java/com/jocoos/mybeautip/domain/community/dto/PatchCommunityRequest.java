@@ -1,12 +1,12 @@
 package com.jocoos.mybeautip.domain.community.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import lombok.Builder;
 import lombok.Getter;
 import org.openapitools.jackson.nullable.JsonNullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,7 +20,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 public class PatchCommunityRequest {
     private JsonNullable<String> title;
     private JsonNullable<String> contents;
-    private List<FileDto> files = new ArrayList<>();
+    private List<FileDto> files;
 
     public List<FileDto> getFileDto(List<CommunityFile> communityFiles) {
         List<FileDto> originalFiles = toFileDto(communityFiles);
@@ -29,6 +29,7 @@ public class PatchCommunityRequest {
         return concatList(deleteFiles, uploadFiles);
     }
 
+    @JsonIgnore
     public List<String> getImageUrls() {
         return files.stream().map(FileDto::getUrl).toList();
     }

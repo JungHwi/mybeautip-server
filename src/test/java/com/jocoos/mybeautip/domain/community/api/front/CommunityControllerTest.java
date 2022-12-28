@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -98,9 +99,10 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void uploadFiles() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("files", "file", "image/jpeg", "mock".getBytes());
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .multipart("/api/1/community/files")
-                        .file("files", "mockup".getBytes()))
+                        .file(file))
                 .andExpect(status().isOk())
                 .andDo(print());
 
