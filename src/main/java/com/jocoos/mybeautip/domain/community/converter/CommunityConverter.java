@@ -77,18 +77,22 @@ public interface CommunityConverter {
     List<CommunityResponse> convert(List<Community> community);
 
     @Mappings({
-            @Mapping(target = "fileUrl", source = "communityFileList", qualifiedByName = "convert_community_main_file")
+            @Mapping(target = "file", source = "communityFileList", qualifiedByName = "convert_community_main_file")
     })
     MyCommunityResponse convertToMyCommunity(Community community);
 
     List<MyCommunityResponse> convertToMyCommunity(List<Community> community);
 
     @Named("convert_community_main_file")
-    default String convertToUrl(List<CommunityFile> file) {
+    default FileDto convertToUrl(List<CommunityFile> file) {
         if (CollectionUtils.isEmpty(file)) {
             return null;
         }
-        return convertToUrl(file.get(0));
+        return convertToFileDto(file.get(0));
+    }
+
+    default FileDto convertToFileDto(CommunityFile file) {
+        return FileDto.from(file);
     }
 
     @Named(value = "convertToUrl")

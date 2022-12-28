@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import lombok.*;
 
@@ -29,7 +30,7 @@ public class MyCommunityResponse implements CursorInterface {
 
     private String contents;
 
-    private String fileUrl;
+    private FileDto file;
 
     private Integer commentCount;
 
