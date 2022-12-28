@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
-import static com.jocoos.mybeautip.global.exception.ErrorCode.FILE_NOT_EDITABLE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.FILE_NOT_EDITABLE;
 
 @RequiredArgsConstructor
 @Service
@@ -28,7 +28,9 @@ public class CommunityFileService {
 
     @Transactional
     public void write(FileDto file, Long commentId) {
-        awsS3Handler.copy(file, COMMUNITY_COMMENT.getDirectory(commentId));
+        if (file != null) {
+            awsS3Handler.copy(file, COMMUNITY_COMMENT.getDirectory(commentId));
+        }
     }
 
     @Transactional
@@ -45,7 +47,7 @@ public class CommunityFileService {
         for (FileDto fileDto : fileDtoList) {
             switch (fileDto.getOperation()) {
                 case UPLOAD:
-                    community.addFile(fileDto.getUrl());
+                    community.addFile(fileDto.getType(), fileDto.getUrl());
                     break;
                 case DELETE:
                     community.removeFile(fileDto.getUrl());

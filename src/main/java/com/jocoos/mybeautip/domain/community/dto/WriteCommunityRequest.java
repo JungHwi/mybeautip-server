@@ -26,21 +26,14 @@ public class WriteCommunityRequest {
 
     private String contents;
     private List<FileDto> files;
-    private List<String> imageUrls;
-
     private Member member;
 
     private CommunityCategory category;
 
-    public void fileUrlsToFileDto() {
-        if (!isEmpty(imageUrls)) {
-            this.files = imageUrls.stream()
-                    .map(this::toFileDto)
-                    .toList();
+    public void setFileOperationToUpload() {
+        if (!isEmpty(files)) {
+            files.forEach(file -> file.setOperation(UPLOAD));
         }
     }
 
-    private FileDto toFileDto(String url) {
-        return new FileDto(UPLOAD, url);
-    }
 }

@@ -17,6 +17,7 @@ public class EnumDocs {
     Map<String, String> telecom;
     Map<String, String> urlDirectory;
     Map<String, String> fileOperationType;
+    Map<String, String> fileType;
     Map<String, String> sortField;
 
     // Member

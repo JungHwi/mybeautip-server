@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.domain.community.api.front;
 
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
-import com.jocoos.mybeautip.domain.file.ValidFile;
+import com.jocoos.mybeautip.domain.file.validator.annotation.ValidFile;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;

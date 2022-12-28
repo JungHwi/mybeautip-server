@@ -19,7 +19,7 @@ public interface SummaryConverter {
     @Mapping(target = "eventTitle", source = "result.eventTitle")
     @Mapping(target = "title", source = "result.community.title")
     @Mapping(target = "contents", source = "result.community.contents")
-    @Mapping(target = "fileUrl", source = "result.thumbnailUrl")
+    @Mapping(target = "files", source = "result.thumbnailFile")
     @Mapping(target = "votes", source = "result.voteResponses")
     @Mapping(target = "viewCount", source = "result.community.viewCount")
     @Mapping(target = "likeCount", source = "result.community.likeCount")
