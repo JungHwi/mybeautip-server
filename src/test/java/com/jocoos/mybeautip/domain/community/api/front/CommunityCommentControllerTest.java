@@ -194,9 +194,9 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         ),
                         requestFields(
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("file").type(JsonFieldType.ARRAY).description("이미지 파일 List").optional(),
-                                fieldWithPath("file.[].operation").type(JsonFieldType.OBJECT).description(generateLinkCode(FILE_OPERATION_TYPE)),
-                                fieldWithPath("file.[].url").type(JsonFieldType.OBJECT).description("이미지 URL")
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("이미지 파일 List").optional(),
+                                fieldWithPath("files.[].operation").type(JsonFieldType.OBJECT).description(generateLinkCode(FILE_OPERATION_TYPE)),
+                                fieldWithPath("files.[].url").type(JsonFieldType.OBJECT).description("이미지 URL")
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 ID"),
