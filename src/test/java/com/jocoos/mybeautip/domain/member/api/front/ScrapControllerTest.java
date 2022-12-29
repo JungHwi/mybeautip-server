@@ -26,7 +26,7 @@ public class ScrapControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void getScrap() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/my/scrap")
+                        .get("/api/2/my/scrap")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());

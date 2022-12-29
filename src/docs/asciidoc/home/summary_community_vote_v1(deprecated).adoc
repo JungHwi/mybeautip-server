@@ -1,0 +1,4 @@
+== Summary Community Vote API V1 (Deprecated)
+==== 비디오 업로드 개발 후 Deprecated될 예정입니다
+
+operation::summary_community_vote_v1[snippets='http-request,path-parameters,http-response,response-fields']

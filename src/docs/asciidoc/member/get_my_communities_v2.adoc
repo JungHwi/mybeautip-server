@@ -1,0 +1,3 @@
+== Get My Communities API V2
+
+operation::get_my_communities[snippets='http-request,request-parameters,http-response,response-fields']

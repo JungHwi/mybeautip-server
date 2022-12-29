@@ -29,7 +29,7 @@ class MyCommunityControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void getMyCommunities() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/my/community")
+                        .get("/api/2/my/community")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());

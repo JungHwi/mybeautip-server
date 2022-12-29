@@ -41,7 +41,7 @@ public class CommunityResponse implements CursorInterface {
     private String contents;
 
     private List<FileDto> files;
-
+    private List<String> fileUrl;
     private List<VoteResponse> votes;
 
     private Integer viewCount;
@@ -137,5 +137,10 @@ public class CommunityResponse implements CursorInterface {
         if (BLIND.equals(this.category.getType())) {
             this.contents = null;
         }
+    }
+
+    public void toV1() {
+        this.fileUrl = files.stream().map(FileDto::getUrl).toList();
+        this.files = null;
     }
 }
