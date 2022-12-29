@@ -28,12 +28,25 @@ public class MyCommunityController {
     private final CommunityCommentService commentService;
 
     @GetMapping(value = "/1/my/community")
+    public ResponseEntity<CursorResultResponse<MyCommunityResponse>> getMyCommunitiesV1(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
+                                                                                      @RequestParam(required = false, defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
+        List<MyCommunityResponse> response = communityService.getMyCommunities(cursor, pageable);
+        for (MyCommunityResponse myCommunityResponse : response) {
+            myCommunityResponse.toV1();
+        }
+        CursorResultResponse<MyCommunityResponse> result = new CursorResultResponse<>(response);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = "/2/my/community")
     public ResponseEntity<CursorResultResponse<MyCommunityResponse>> getMyCommunities(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
                                                                                       @RequestParam(required = false, defaultValue = "20") int size) {
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
         List<MyCommunityResponse> response = communityService.getMyCommunities(cursor, pageable);
-
         CursorResultResponse<MyCommunityResponse> result = new CursorResultResponse<>(response);
 
         return ResponseEntity.ok(result);

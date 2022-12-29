@@ -1,3 +1,0 @@
-== Get Community API
-
-operation::get_community[snippets='http-request,path-parameters,http-response,response-fields']

@@ -1,0 +1,3 @@
+== Get Community Scraps API V2
+
+operation::get_community_scraps[snippets='http-request,request-parameters,http-response,response-fields']

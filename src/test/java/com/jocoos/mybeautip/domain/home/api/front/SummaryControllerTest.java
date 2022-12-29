@@ -26,7 +26,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
     @Test
     void summaryCommunityTop() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/summary/community/top"))
+                        .get("/api/2/summary/community/top"))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -78,7 +78,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
     @Test
     void summaryCommunityVote() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/summary/community/{type}", VOTE))
+                        .get("/api/2/summary/community/{type}", VOTE))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -126,7 +126,7 @@ class SummaryControllerTest extends RestDocsTestSupport {
     @Test
     void summaryCommunityBlind() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/summary/community/{type}", BLIND))
+                        .get("/api/2/summary/community/{type}", BLIND))
                 .andExpect(status().isOk())
                 .andDo(print());
 
