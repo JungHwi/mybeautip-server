@@ -36,4 +36,8 @@ public class FileService {
         String contentType = file.getContentType();
         return contentType != null && contentType.startsWith("image/");
     }
+
+    public List<String> uploadV1(List<MultipartFile> files) {
+        return awsS3Handler.upload(files, TEMP_IMAGE.getDirectory());
+    }
 }
