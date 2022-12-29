@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.util.FileUtil;
 import com.jocoos.mybeautip.member.Member;
@@ -28,6 +29,7 @@ public class EditCommunityCommentRequest {
 
     private Member member;
 
+    @JsonIgnore
     public String getUploadFilename() {
         return files.stream()
                 .filter(file -> UPLOAD.equals(file.getOperation()))
@@ -36,6 +38,7 @@ public class EditCommunityCommentRequest {
                 .orElse(null);
     }
 
+    @JsonIgnore
     @AssertTrue(message = "files can only have one upload, one delete each")
     public boolean isFileSizeUnderLimit() {
         if (isEmpty(files)) {
@@ -56,6 +59,7 @@ public class EditCommunityCommentRequest {
                 .count();
     }
 
+    @JsonIgnore
     public boolean isOnlyUpload() {
         if (isEmpty(files)) {
             return false;
