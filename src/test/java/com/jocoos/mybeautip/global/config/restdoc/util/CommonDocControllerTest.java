@@ -216,7 +216,16 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         ),
                         customResponseFields("custom-response", beneathPath("data.operation_target_type").withSubsectionId("operation_target_type"),
                                 attributes(key("title").value("OperationTargetType")),
-                                enumConvertFieldDescriptor((enumDocs.getOperationTargetType())))
+                                enumConvertFieldDescriptor((enumDocs.getOperationTargetType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.notice_status").withSubsectionId("notice_status"),
+                                attributes(key("title").value("NoticeStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getNoticeStatus()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.notice_sort").withSubsectionId("notice_sort"),
+                                attributes(key("title").value("NoticeSort")),
+                                enumConvertFieldDescriptor((enumDocs.getNoticeSort()))
+                        )
                 ));
     }
 

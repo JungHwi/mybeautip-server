@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.notice.persistence.domain;
 
 import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
-import com.jocoos.mybeautip.global.config.jpa.CreatedAtBaseEntity;
+import com.jocoos.mybeautip.global.config.jpa.AllBaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Notice extends CreatedAtBaseEntity {
+public class Notice extends AllBaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,16 +25,20 @@ public class Notice extends CreatedAtBaseEntity {
     @Enumerated(EnumType.STRING)
     private NoticeStatus status;
 
+    @Column
+    private Boolean isImportant;
+
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
+    private int viewCount;
+
     @OneToMany(mappedBy = "notice", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<NoticeFile> files;
-
-
 
     @PostPersist
     public void postPersist() {

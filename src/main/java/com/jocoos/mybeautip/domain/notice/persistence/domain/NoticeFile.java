@@ -17,6 +17,7 @@ public class NoticeFile {
     private Long id;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private FileType type;
 
     @Column(nullable = false)

@@ -8,10 +8,9 @@ import com.jocoos.mybeautip.domain.notice.persistence.domain.Notice;
 import com.jocoos.mybeautip.domain.notice.persistence.repository.NoticeRepository;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,14 +26,28 @@ public class NoticeDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Notice> search(SearchNoticeRequest request) {
+    public Page<Notice> search(SearchNoticeRequest request) {
         return repository.search(request);
     }
 
     @Transactional(readOnly = true)
     public Notice get(long id) {
+        return this.get(id, false);
+    }
+
+    @Transactional(readOnly = true)
+    public Notice get(long id, boolean isView) {
+        if (isView) {
+            this.countViewCount(id);
+        }
+
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Notice not found. id - " + id));
+    }
+
+    @Transactional
+    public void countViewCount(long id) {
+        repository.viewCount(id);
     }
 
     @Transactional

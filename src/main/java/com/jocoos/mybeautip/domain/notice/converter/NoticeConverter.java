@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.domain.notice.converter;
 
+import com.amazonaws.util.CollectionUtils;
+import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.notice.dto.NoticeResponse;
 import com.jocoos.mybeautip.domain.notice.dto.WriteNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.persistence.domain.Notice;
@@ -12,39 +14,58 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
-public interface NoticeConverter {
+@Mapper(componentModel = "spring", uses = {MemberConverter.class})
+public abstract class NoticeConverter {
 
-    @Mappings({
-            @Mapping(target = "status", constant = "ACTIVE")
-    })
-    Notice converts(WriteNoticeRequest request);
+    abstract public Notice converts(WriteNoticeRequest request);
 
-    NoticeResponse converts(Notice notice);
+    abstract public NoticeResponse converts(Notice notice);
+
+    abstract public List<NoticeResponse> converts(List<Notice> noticeList);
+
+    public Page<NoticeResponse> convertsToResponsePage(Page<Notice> noticePage) {
+        if (noticePage == null) {
+            return new PageImpl<>(new ArrayList<>());
+        }
+
+        List<Notice> noticeList = noticePage.getContent();
+        if (CollectionUtils.isNullOrEmpty(noticeList)) {
+            return new PageImpl<>(new ArrayList<>());
+        }
+
+        List<NoticeResponse> responseList = this.converts(noticeList);
+        return new PageImpl<>(responseList, noticePage.getPageable(), noticePage.getTotalElements());
+    }
 
     @Mappings({
             @Mapping(target = "type", constant = "IMAGE"),
             @Mapping(target = "file", source = "url", qualifiedByName = "urlToFile"),
             @Mapping(target = "notice", ignore = true)
     })
-    NoticeFile converts(FileDto file);
+    abstract public NoticeFile converts(FileDto file);
 
-    List<NoticeFile> convertToNoticeFiles(List<FileDto> files);
+    abstract public List<NoticeFile> convertToNoticeFiles(List<FileDto> files);
 
-    FileDto converts(NoticeFile entity);
+    @Mappings({
+            @Mapping(target = "url", source = "file", qualifiedByName = "fileToUrl")
+    })
+    abstract public FileDto converts(NoticeFile entity);
 
-    List<FileDto> convertToFileDto(List<NoticeFile> entity);
+    abstract public List<FileDto> convertToFileDto(List<NoticeFile> entity);
 
     @Named("urlToFile")
-    default String urlToFile(String url) {
+    public String urlToFile(String url) {
         return FileUtil.getFileName(url);
     }
 
     @Named("fileToUrl")
-    default String fileToUrl(String file) {
+    public String fileToUrl(String file) {
         return ImageUrlConvertUtil.toUrl(file, UrlDirectory.NOTICE);
     }
 }

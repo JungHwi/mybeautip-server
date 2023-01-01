@@ -2,10 +2,9 @@ package com.jocoos.mybeautip.domain.notice.persistence.repository.impl;
 
 import com.jocoos.mybeautip.domain.notice.dto.SearchNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.persistence.domain.Notice;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface NoticeCustomRepository {
 
-    List<Notice> search(SearchNoticeRequest request);
+    Page<Notice> search(SearchNoticeRequest request);
 }
