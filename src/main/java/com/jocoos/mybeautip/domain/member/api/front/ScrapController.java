@@ -26,7 +26,27 @@ public class ScrapController {
 
     private final ScrapService service;
 
+    /**
+     * @deprecated
+     */
+    @Deprecated(since = "클라이언트 비디오 업로드 완성 후", forRemoval = true)
     @GetMapping("/1/my/scrap")
+    public ResponseEntity<CursorResultResponse<CommunityScrapResponse>> getScrapsDeprecated(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
+                                                                                  @RequestParam(required = false, defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
+        List<CommunityScrapResponse> response = service.getScrapList(ScrapType.COMMUNITY, cursor, pageable);
+
+        for (CommunityScrapResponse communityScrapResponse : response) {
+            communityScrapResponse.getCommunityResponse().toV1();
+        }
+
+        CursorResultResponse<CommunityScrapResponse> result = new CursorResultResponse<>(response);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/2/my/scrap")
     public ResponseEntity<CursorResultResponse<CommunityScrapResponse>> getScraps(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) long cursor,
                                                                                   @RequestParam(required = false, defaultValue = "20") int size) {
 

@@ -25,7 +25,7 @@ class SearchControllerTest extends RestDocsTestSupport {
     void searchCommunityTest() throws Exception {
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/search")
+                        .get("/api/2/search")
                         .param("type", "COMMUNITY")
                         .param("keyword", "1")
                         .param("size", "20"))
@@ -83,7 +83,7 @@ class SearchControllerTest extends RestDocsTestSupport {
     @Test
     void searchVideoTest() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/search")
+                        .get("/api/2/search")
                         .param("type", "VIDEO")
                         .param("keyword", "1")
                         .param("size", "20"))

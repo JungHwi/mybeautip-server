@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.dto.CommunityCategoryResponse;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import lombok.*;
 
@@ -29,6 +30,7 @@ public class MyCommunityResponse implements CursorInterface {
 
     private String contents;
 
+    private FileDto file;
     private String fileUrl;
 
     private Integer commentCount;
@@ -56,5 +58,10 @@ public class MyCommunityResponse implements CursorInterface {
                 this.title = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
             }
         }
+    }
+
+    public void toV1() {
+        this.fileUrl = file == null ? null : file.getUrl();
+        this.file = null;
     }
 }

@@ -1,12 +1,15 @@
 package com.jocoos.mybeautip.domain.file.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
-import com.jocoos.mybeautip.global.code.UrlDirectory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.jocoos.mybeautip.global.code.UrlDirectory.TEMP_IMAGE;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.TEMP_VIDEO;
 
 @RequiredArgsConstructor
 @Service
@@ -15,24 +18,18 @@ public class FileService {
     private final AwsS3Handler awsS3Handler;
 
     public List<String> upload(List<MultipartFile> files) {
-        List<String> imageUrls = getImageFileStream(files);
-        List<String> videoUrls = getVideoFileStream(files);
-        imageUrls.addAll(videoUrls);
-        return imageUrls;
+        List<String> fileUrls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            fileUrls.add(upload(file));
+        }
+        return fileUrls;
     }
 
-    private List<String> getImageFileStream(List<MultipartFile> files) {
-        List<MultipartFile> images = files.stream()
-                .filter(this::isImage)
-                .toList();
-        return awsS3Handler.upload(images, UrlDirectory.TEMP_IMAGE.getDirectory());
-    }
-
-    private List<String> getVideoFileStream(List<MultipartFile> files) {
-        List<MultipartFile> videos = files.stream()
-                .filter(this::isVideo)
-                .toList();
-        return awsS3Handler.upload(videos, UrlDirectory.TEMP_VIDEO.getDirectory());
+    private String upload(MultipartFile file) {
+        if (isImage(file)) {
+            return awsS3Handler.upload(file, TEMP_IMAGE.getDirectory());
+        }
+        return awsS3Handler.upload(file, TEMP_VIDEO.getDirectory());
     }
 
     private boolean isImage(MultipartFile file) {
@@ -40,8 +37,7 @@ public class FileService {
         return contentType != null && contentType.startsWith("image/");
     }
 
-    private boolean isVideo(MultipartFile file) {
-        String contentType = file.getContentType();
-        return contentType != null && contentType.startsWith("video/");
+    public List<String> uploadV1(List<MultipartFile> files) {
+        return awsS3Handler.upload(files, TEMP_IMAGE.getDirectory());
     }
 }

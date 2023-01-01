@@ -1,0 +1,4 @@
+== Write Community API V1 (Deprecated)
+==== 비디오 업로드 개발 후 Deprecated될 예정입니다
+
+operation::write_community_v1[snippets='http-request,request-fields,http-response,response-fields']

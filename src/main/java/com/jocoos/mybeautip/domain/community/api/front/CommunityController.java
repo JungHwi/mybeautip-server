@@ -31,14 +31,14 @@ public class CommunityController {
     private final ScrapService scrapService;
     private final LegacyMemberService legacyMemberService;
 
-    @PostMapping(value = "/1/community")
+    @PostMapping(value = "/2/community")
     public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody WriteCommunityRequest request) {
         CommunityResponse response = service.write(request);
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(value = "/1/community")
+    @GetMapping(value = "/2/community")
     public ResponseEntity<CursorResultResponse<CommunityResponse>> getCommunities(@RequestParam(required = false, defaultValue = "1", name = "category_id") Long categoryId,
                                                                                   @RequestParam(required = false, name = "event_id") Long eventId,
                                                                                   @RequestParam(required = false) ZonedDateTime cursor,
@@ -59,7 +59,7 @@ public class CommunityController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = "/1/community/{community_id}")
+    @GetMapping(value = "/2/community/{community_id}")
     public ResponseEntity<CommunityResponse> getCommunity(@PathVariable(name = "community_id") long communityId) {
 
         CommunityResponse response = service.getCommunity(communityId);
@@ -67,7 +67,7 @@ public class CommunityController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping(value = "/1/community/{community_id}")
+    @PutMapping(value = "/2/community/{community_id}")
     public ResponseEntity<CommunityResponse> editCommunity(@PathVariable(name = "community_id") long communityId,
                                                            @RequestBody EditCommunityRequest request) {
         request.setCommunityId(communityId);

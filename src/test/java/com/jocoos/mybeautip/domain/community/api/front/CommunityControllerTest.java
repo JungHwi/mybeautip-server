@@ -40,7 +40,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .post("/api/1/community")
+                        .post("/api/2/community")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -122,7 +122,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     void getCommunities() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community")
+                        .get("/api/2/community")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -180,7 +180,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     void getCommunity() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community/{community_id}", 1)
+                        .get("/api/2/community/{community_id}", 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -241,7 +241,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
         map.put("files", null);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .put("/api/1/community/{community_id}", 1)
+                        .put("/api/2/community/{community_id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(map)))
                 .andExpect(status().isOk())

@@ -29,7 +29,7 @@ public class FileController {
 
     @Deprecated(since = "PlanD")
     @PostMapping(value = "/1/community/files", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<List<String>> uploadFile(@RequestPart @ValidFile List<MultipartFile> files) {
-        return ResponseEntity.ok(service.upload(files));
+    public ResponseEntity<List<String>> uploadFile(@RequestPart List<MultipartFile> files) {
+        return ResponseEntity.ok(service.uploadV1(files));
     }
 }

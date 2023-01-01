@@ -1,9 +1,11 @@
 package com.jocoos.mybeautip.domain.community.api.front;
 
+import com.jocoos.mybeautip.domain.community.dto.EditCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -13,11 +15,16 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+import static com.jocoos.mybeautip.domain.file.code.FileType.IMAGE;
+import static com.jocoos.mybeautip.global.code.FileOperationType.DELETE;
+import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.FILE_OPERATION_TYPE;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.FILE_TYPE;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -53,8 +60,9 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("content.[].community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
                                 fieldWithPath("content.[].parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
-                                fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("content.[].file_url").type(JsonFieldType.STRING).description("이미지 URL").optional(),
                                 fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("content.[].comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
                                 fieldWithPath("content.[].report_count").type(JsonFieldType.NUMBER).description("대댓글수"),
@@ -65,7 +73,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("content.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("content.[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                                 fieldWithPath("content.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
                         )
@@ -95,8 +103,9 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
                                 fieldWithPath("parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
-                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("file_url").type(JsonFieldType.STRING).description("이미지 URL").optional(),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
@@ -108,7 +117,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
                         )
@@ -122,6 +131,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
     void writeComment() throws Exception {
         WriteCommunityCommentRequest request = WriteCommunityCommentRequest.builder()
                 .contents("Mock Comment Contents")
+                .file(new FileDto(UPLOAD, "imageUrl"))
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
@@ -137,15 +147,20 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                         ),
                         requestFields(
                                 fieldWithPath("parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
-                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용")
+                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("file").type(JsonFieldType.OBJECT).description("이미지").optional(),
+                                fieldWithPath("file.type").type(JsonFieldType.ARRAY).attributes(getDefault(IMAGE)).description(FILE_TYPE).ignored(),
+                                fieldWithPath("file.operation").type(JsonFieldType.STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
+                                fieldWithPath("file.url").type(JsonFieldType.STRING).description("이미지 URL")
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
                                 fieldWithPath("category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
                                 fieldWithPath("parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
-                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("file_url").type(JsonFieldType.STRING).description("이미지 URL").optional(),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
@@ -157,7 +172,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
                         )
@@ -169,13 +184,16 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     @Transactional
     void editComment() throws Exception {
-        Map<String, Object> map = new HashMap<>();
-        map.put("contents", "Test Contents");
+
+        EditCommunityCommentRequest request = EditCommunityCommentRequest.builder()
+                .contents("content")
+                .files(List.of(new FileDto(DELETE, "delete image url"), new FileDto(UPLOAD, "upload image url")))
+                .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .put("/api/1/community/{community_id}/comment/{comment_id}", 1, 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(map)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -185,15 +203,20 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 parameterWithName("comment_id").description("댓글 ID")
                         ),
                         requestFields(
-                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용")
+                                fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("이미지 파일 List").optional(),
+                                fieldWithPath("files.[].type").type(JsonFieldType.ARRAY).attributes(getDefault(IMAGE)).description(FILE_TYPE).ignored(),
+                                fieldWithPath("files.[].operation").type(JsonFieldType.STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
+                                fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("이미지 URL")
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 ID"),
                                 fieldWithPath("category_id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
                                 fieldWithPath("community_id").type(JsonFieldType.NUMBER).description("커뮤니티 아이디"),
                                 fieldWithPath("parent_id").type(JsonFieldType.NUMBER).description("부모 댓글 아이디").optional(),
-                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("file_url").type(JsonFieldType.STRING).description("이미지 URL").optional(),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("comment_count").type(JsonFieldType.NUMBER).description("대댓글수"),
@@ -205,7 +228,7 @@ class CommunityCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_report").type(JsonFieldType.BOOLEAN).description("글 신고 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional()
 
