@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.code.Role;
+import com.jocoos.mybeautip.domain.notice.code.NoticeSort;
 import com.jocoos.mybeautip.domain.notification.code.*;
 import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
 import com.jocoos.mybeautip.domain.operation.code.OperationType;
@@ -18,6 +19,7 @@ import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.domain.popup.code.ButtonLinkType;
 import com.jocoos.mybeautip.domain.popup.code.PopupDisplayType;
 import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
+import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
@@ -113,6 +115,10 @@ public class CommonDocController {
         Map<String, String> operationType = getDocs(OperationType.values());
         Map<String, String> operationTargetType = getDocs(OperationTargetType.values());
 
+        // Notice
+        Map<String, String> noticeStatus = getDocs(NoticeStatus.values());
+        Map<String, String> noticeSort = getDocs(NoticeSort.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .deviceOs(deviceOs)
@@ -170,6 +176,9 @@ public class CommonDocController {
                 // Operation
                         .operationTargetType(operationTargetType)
                         .operationType(operationType)
+                // Notice
+                        .noticeStatus(noticeStatus)
+                        .noticeSort(noticeSort)
                 .build()
         );
     }

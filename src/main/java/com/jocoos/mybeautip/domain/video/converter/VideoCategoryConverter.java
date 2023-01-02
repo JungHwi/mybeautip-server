@@ -43,7 +43,9 @@ public interface VideoCategoryConverter {
     List<VideoCategoryResponse> excludeShapeInfo(List<VideoCategory> categories);
 
     @Named("exclude_shape_info")
-    @Mapping(target = "shapeUrl", ignore = true)
-    @Mapping(target = "maskType", ignore = true)
+    @Mappings({
+            @Mapping(target = "shapeUrl", ignore = true),
+            @Mapping(target = "maskType", ignore = true)
+    })
     VideoCategoryResponse excludeShapeInfo(VideoCategory category);
 }

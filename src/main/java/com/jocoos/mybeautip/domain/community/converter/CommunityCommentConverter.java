@@ -14,7 +14,7 @@ import java.util.List;
 public interface CommunityCommentConverter {
 
     @Mappings({
-            @Mapping(target = "memberId", source = "member.id"),
+            @Mapping(target = "memberId", source = "request.member.id"),
             @Mapping(target = "status", constant = "NORMAL"),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "file", ignore = true),

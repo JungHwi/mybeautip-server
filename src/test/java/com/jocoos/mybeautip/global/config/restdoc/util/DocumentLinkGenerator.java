@@ -41,6 +41,8 @@ public class DocumentLinkGenerator {
         PLACARD_STATUS("placard_status", "플랜카드 상태"),
         VIDEO_COMMENT_STATUS("video_comment_status", "비디오 댓글 상태"),
         VIDEO_STATUS("video_status", "비디오 상태"),
+        NOTICE_STATUS("notice_status", "공지 상태"),
+        NOTICE_SORT("notice_sort","공지 정렬 기준"),
         ROLE("role", "멤버 권한")
         ;
 

@@ -79,4 +79,8 @@ public class EnumDocs {
     // Operation
     Map<String, String> operationTargetType;
     Map<String, String> operationType;
+
+    // Notice
+    Map<String, String> noticeStatus;
+    Map<String, String> noticeSort;
 }

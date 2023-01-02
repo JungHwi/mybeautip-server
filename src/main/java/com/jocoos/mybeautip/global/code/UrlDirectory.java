@@ -18,6 +18,7 @@ public enum UrlDirectory implements CodeValue {
     EVENT_PRODUCT("이벤트 상품", "event/product/"),
     POPUP("팝업", "popup/"),
     PLACARD("플래카드", "placard/"),
+    NOTICE("공지사항", "notice/"),
     TEMP_IMAGE("임시 이미지 폴더", "temp/image/"),
     TEMP_VIDEO("임시 비디오 폴더", "temp/video/")
     ;
