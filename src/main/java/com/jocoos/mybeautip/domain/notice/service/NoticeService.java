@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.notice.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.notice.converter.NoticeConverter;
+import com.jocoos.mybeautip.domain.notice.dto.NoticeListResponse;
 import com.jocoos.mybeautip.domain.notice.dto.NoticeResponse;
 import com.jocoos.mybeautip.domain.notice.dto.SearchNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.dto.WriteNoticeRequest;
@@ -32,9 +33,9 @@ public class NoticeService {
     }
 
     @Transactional(readOnly = true)
-    public Page<NoticeResponse> search(SearchNoticeRequest request) {
+    public Page<NoticeListResponse> search(SearchNoticeRequest request) {
         Page<Notice> noticePage = dao.search(request);
-        return converter.convertsToResponsePage(noticePage);
+        return converter.convertsToListResponsePage(noticePage);
     }
 
     @Transactional(readOnly = true)

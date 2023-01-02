@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.notice.converter;
 
 import com.amazonaws.util.CollectionUtils;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
+import com.jocoos.mybeautip.domain.notice.dto.NoticeListResponse;
 import com.jocoos.mybeautip.domain.notice.dto.NoticeResponse;
 import com.jocoos.mybeautip.domain.notice.dto.WriteNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.persistence.domain.Notice;
@@ -29,6 +30,9 @@ public abstract class NoticeConverter {
 
     abstract public List<NoticeResponse> converts(List<Notice> noticeList);
 
+
+    abstract public List<NoticeListResponse> convertsToListResponse(List<Notice> noticeList);
+
     public Page<NoticeResponse> convertsToResponsePage(Page<Notice> noticePage) {
         if (noticePage == null) {
             return new PageImpl<>(new ArrayList<>());
@@ -40,6 +44,20 @@ public abstract class NoticeConverter {
         }
 
         List<NoticeResponse> responseList = this.converts(noticeList);
+        return new PageImpl<>(responseList, noticePage.getPageable(), noticePage.getTotalElements());
+    }
+
+    public Page<NoticeListResponse> convertsToListResponsePage(Page<Notice> noticePage) {
+        if (noticePage == null) {
+            return new PageImpl<>(new ArrayList<>());
+        }
+
+        List<Notice> noticeList = noticePage.getContent();
+        if (CollectionUtils.isNullOrEmpty(noticeList)) {
+            return new PageImpl<>(new ArrayList<>());
+        }
+
+        List<NoticeListResponse> responseList = this.convertsToListResponse(noticeList);
         return new PageImpl<>(responseList, noticePage.getPageable(), noticePage.getTotalElements());
     }
 
@@ -67,5 +85,16 @@ public abstract class NoticeConverter {
     @Named("fileToUrl")
     public String fileToUrl(String file) {
         return ImageUrlConvertUtil.toUrl(file, UrlDirectory.NOTICE);
+    }
+
+    public FileDto convertsFileList(List<NoticeFile> entities) {
+        if (CollectionUtils.isNullOrEmpty(entities)) {
+            return null;
+        }
+
+        return entities.stream()
+                .findFirst()
+                .map(entity -> converts(entity))
+                .orElse(null);
     }
 }

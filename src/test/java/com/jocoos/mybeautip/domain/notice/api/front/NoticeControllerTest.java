@@ -35,23 +35,16 @@ class NoticeControllerTest extends RestDocsTestSupport {
                                 parameterWithName("size").description("페이지 사이즈").attributes(getDefault(20)).optional()
                         ),
                         responseFields(
-                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서"),
+                                fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),
                                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("조회 결과 목록"),
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(NOTICE_STATUS)),
                                 fieldWithPath("content.[].is_important").type(JsonFieldType.BOOLEAN).description("중요 공지 여부").optional(),
                                 fieldWithPath("content.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목"),
-                                fieldWithPath("content.[].description").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("content.[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
                                 fieldWithPath("content.[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
                                 fieldWithPath("content.[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
-                                fieldWithPath("content.[].modified_at").type(JsonFieldType.STRING).description("수정 일시").attributes(getZonedDateFormat()),
-                                fieldWithPath("content.[].modified_by").type(JsonFieldType.OBJECT).description("수정자 정보"),
-                                fieldWithPath("content.[].modified_by.id").type(JsonFieldType.NUMBER).description("수정자 아이디"),
-                                fieldWithPath("content.[].modified_by.email").type(JsonFieldType.STRING).description("수정자 이메일"),
-                                fieldWithPath("content.[].modified_by.username").type(JsonFieldType.STRING).description("수정자 닉네임"),
-                                fieldWithPath("content.[].modified_by.avatar_url").type(JsonFieldType.STRING).description("수정자 아바타 URL"),
                                 fieldWithPath("content.[].created_at").type(JsonFieldType.STRING).description("작성 일시").attributes(getZonedDateFormat()),
                                 fieldWithPath("content.[].created_by").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("content.[].created_by.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
@@ -97,8 +90,7 @@ class NoticeControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("created_by.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
                                 fieldWithPath("created_by.email").type(JsonFieldType.STRING).description("작성자 이메일"),
                                 fieldWithPath("created_by.username").type(JsonFieldType.STRING).description("작성자 닉네임"),
-                                fieldWithPath("created_by.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
-                                fieldWithPath("cursor").ignored()
+                                fieldWithPath("created_by.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL")
                         )
                 )
         );

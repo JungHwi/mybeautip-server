@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.notice.api.front;
 
+import com.jocoos.mybeautip.domain.notice.dto.NoticeListResponse;
 import com.jocoos.mybeautip.domain.notice.dto.NoticeResponse;
 import com.jocoos.mybeautip.domain.notice.dto.SearchNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.service.NoticeService;
@@ -26,8 +27,8 @@ public class NoticeController {
     private final NoticeService service;
 
     @GetMapping("/1/notice")
-    public ResponseEntity<CursorResultResponse<NoticeResponse>> list(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
-                                                                     @RequestParam(required = false, defaultValue = "20") int size) {
+    public ResponseEntity<CursorResultResponse<NoticeListResponse>> list(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
+                                                                                  @RequestParam(required = false, defaultValue = "20") int size) {
         List<Sort.Order> orders = new ArrayList<>();
         orders.add(new Sort.Order(Sort.Direction.DESC, "isImportant", Sort.NullHandling.NULLS_LAST));
         orders.add(new Sort.Order(Sort.Direction.DESC, "id"));
@@ -39,8 +40,8 @@ public class NoticeController {
                 .pageable(pageable)
                 .build();
 
-        Page<NoticeResponse> response = service.search(request);
-        CursorResultResponse<NoticeResponse> result = new CursorResultResponse<>(response.getContent());
+        Page<NoticeListResponse> response = service.search(request);
+        CursorResultResponse<NoticeListResponse> result = new CursorResultResponse<>(response.getContent());
         return ResponseEntity.ok(result);
     }
 

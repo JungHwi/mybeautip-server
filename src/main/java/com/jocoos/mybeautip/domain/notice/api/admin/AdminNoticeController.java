@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.notice.api.admin;
 
 import com.jocoos.mybeautip.domain.notice.code.NoticeSort;
+import com.jocoos.mybeautip.domain.notice.dto.NoticeListResponse;
 import com.jocoos.mybeautip.domain.notice.dto.NoticeResponse;
 import com.jocoos.mybeautip.domain.notice.dto.SearchNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.dto.WriteNoticeRequest;
@@ -31,13 +32,13 @@ public class AdminNoticeController {
     }
 
     @GetMapping("/notice")
-    public ResponseEntity<PageResponse<NoticeResponse>> search(@RequestParam(required = false, defaultValue = "1") int page,
-                                                               @RequestParam(required = false, defaultValue = "10") int size,
-                                                               @RequestParam(required = false, defaultValue = "ID") NoticeSort sort,
-                                                               @RequestParam(required = false, defaultValue = "DESC") String order,
-                                                               @RequestParam(required = false) String search,
-                                                               @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") ZonedDateTime startAt,
-                                                               @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") ZonedDateTime endAt) {
+    public ResponseEntity<PageResponse<NoticeListResponse>> search(@RequestParam(required = false, defaultValue = "1") int page,
+                                                                   @RequestParam(required = false, defaultValue = "10") int size,
+                                                                   @RequestParam(required = false, defaultValue = "ID") NoticeSort sort,
+                                                                   @RequestParam(required = false, defaultValue = "DESC") String order,
+                                                                   @RequestParam(required = false) String search,
+                                                                   @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") ZonedDateTime startAt,
+                                                                   @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") ZonedDateTime endAt) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.fromString(order), sort.getColumn());
 
@@ -48,7 +49,7 @@ public class AdminNoticeController {
                 .pageable(pageRequest)
                 .build();
 
-        Page<NoticeResponse> result = service.search(request);
+        Page<NoticeListResponse> result = service.search(request);
 
         return ResponseEntity.ok(new PageResponse<>(result));
     }
