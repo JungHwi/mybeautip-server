@@ -1,12 +1,18 @@
 package com.jocoos.mybeautip.domain.placard.api.admin;
 
+import com.jocoos.mybeautip.PlacardFixture;
 import com.jocoos.mybeautip.domain.placard.dto.PatchPlacardRequest;
 import com.jocoos.mybeautip.domain.placard.dto.PlacardRequest;
+import com.jocoos.mybeautip.domain.placard.persistence.domain.Placard;
+import com.jocoos.mybeautip.domain.placard.persistence.repository.PlacardRepository;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.SortOrderDto;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -15,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.PlacardFixture.createPlacards;
 import static com.jocoos.mybeautip.domain.placard.code.PlacardLinkType.EVENT;
 import static com.jocoos.mybeautip.domain.placard.code.PlacardStatus.ACTIVE;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault;
@@ -23,6 +31,7 @@ import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeG
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.PLACARD_LINK_TYPE;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.PLACARD_STATUS;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
+import static java.util.Collections.shuffle;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -33,8 +42,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class AdminPlacardControllerTest extends RestDocsTestSupport {
 
+    @Autowired
+    private PlacardRepository placardRepository;
+    private Placard fixture;
+
+    @BeforeAll
+    public void init() {
+        fixture = placardRepository.save(PlacardFixture.makePlacard());
+    }
+
+    @AfterAll
+    public void after() {
+        placardRepository.deleteAll();
+    }
+
     @Test
     void getPlacards() throws Exception {
+        placardRepository.saveAll(createPlacards(11));
+
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .get("/admin/placard"))
                 .andExpect(status().isOk())
@@ -146,13 +171,14 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
     @Transactional
     @Test
     void editPlacard() throws Exception {
+
         PatchPlacardRequest request = PatchPlacardRequest
                 .builder()
                 .title(JsonNullable.of("수정"))
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/admin/placard/{placard_id}", 1)
+                        .patch("/admin/placard/{placard_id}", fixture.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -183,7 +209,7 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
     @Test
     void deletePlacard() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .delete("/admin/placard/{placard_id}", 1))
+                        .delete("/admin/placard/{placard_id}", fixture.getId()))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -203,7 +229,7 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
         BooleanDto request = new BooleanDto(true);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/admin/placard/{placard_id}/fix", 1)
+                        .patch("/admin/placard/{placard_id}/fix", fixture.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -228,7 +254,7 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
         BooleanDto request = new BooleanDto(true);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/admin/placard/{placard_id}/status", 1)
+                        .patch("/admin/placard/{placard_id}/status", fixture.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -250,8 +276,17 @@ class AdminPlacardControllerTest extends RestDocsTestSupport {
     @Transactional
     @Test
     void changeOrderOfPlacards() throws Exception {
-        SortOrderDto request = new SortOrderDto(List.of(3L, 4L, 5L));
 
+        // given
+        List<Placard> placards = placardRepository.saveAll(createPlacards(3));
+        List<Long> ids = placards.stream()
+                .map(Placard::getId)
+                .collect(Collectors.toList());
+        shuffle(ids);
+
+        SortOrderDto request = new SortOrderDto(ids);
+
+        // when & then
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .patch("/admin/placard/order")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,14 +1,23 @@
 package com.jocoos.mybeautip.domain.event.api.admin;
 
+import com.jocoos.mybeautip.EventFixture;
+import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
+import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository;
 import com.jocoos.mybeautip.domain.event.code.EventProductType;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.event.dto.EditEventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventProductRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventRequest;
+import com.jocoos.mybeautip.domain.event.persistence.domain.Event;
+import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -18,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 
+import static com.jocoos.mybeautip.CommunityCategoryFixture.createCommunityCategory;
 import static com.jocoos.mybeautip.domain.event.code.SortField.CREATED_AT;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*;
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
@@ -29,7 +39,24 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdminEventControllerTest extends RestDocsTestSupport {
+
+    @Autowired
+    private EventRepository eventRepository;
+    @Autowired
+    private CommunityCategoryRepository communityCategoryRepository;
+    private Event eventFixture;
+
+    @BeforeAll
+    private void init() {
+        eventFixture = eventRepository.save(EventFixture.createEvent(EventType.DRIP));
+    }
+
+    @AfterAll
+    public void after() {
+        eventRepository.deleteAll();
+    }
 
     @Test
     void getStatus() throws Exception {
@@ -93,7 +120,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
     @Test
     void getEvent() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/admin/event/{event_id}", 1))
+                        .get("/admin/event/{event_id}", eventFixture.getId()))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -153,6 +180,8 @@ class AdminEventControllerTest extends RestDocsTestSupport {
     @Transactional
     @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void createEvent() throws Exception {
+        communityCategoryRepository.save(createCommunityCategory(CommunityCategoryType.DRIP));
+
         EventProductRequest productRequest = EventProductRequest.builder()
                 .type(EventProductType.POINT)
                 .price(3000)
@@ -253,7 +282,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .put("/admin/event/{event_id}", 4)
+                        .put("/admin/event/{event_id}", eventFixture.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -336,7 +365,7 @@ class AdminEventControllerTest extends RestDocsTestSupport {
     @Test
     void deleteEvent() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .delete("/admin/event/{event_id}", 1))
+                        .delete("/admin/event/{event_id}", eventFixture.getId()))
                 .andExpect(status().isOk())
                 .andDo(print());
 

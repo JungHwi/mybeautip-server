@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.global.config.restdoc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jocoos.mybeautip.MySqlContainer;
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.member.Member;
@@ -19,9 +20,11 @@ import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.MockMvcOperationPreprocessorsConfigurer;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
+import org.springframework.test.context.TestConstructor;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
@@ -32,10 +35,13 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 
 @Disabled
 @Import({RestDocsConfig.class})
-@ExtendWith(RestDocumentationExtension.class)
+@ExtendWith({RestDocumentationExtension.class})
+@ExtendWith(MySqlContainer.class)
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
+@Transactional
 @SpringBootTest
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 public class RestDocsTestSupport {
 
     @Autowired
