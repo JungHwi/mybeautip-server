@@ -33,7 +33,7 @@ public class AdminCommunityCommentResponse {
     private final Long parentId;
 
     public void blindMember() {
-        this.member = null;
+        member.blindExceptRole();
         if (!CollectionUtils.isEmpty(children)) {
             children.forEach(AdminCommunityCommentResponse::blindMember);
         }
