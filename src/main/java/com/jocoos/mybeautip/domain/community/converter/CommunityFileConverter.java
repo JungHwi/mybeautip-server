@@ -18,14 +18,17 @@ public interface CommunityFileConverter {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "community", ignore = true)
     @Mapping(target = "file", source = "url", qualifiedByName = "toFilename")
-    CommunityFile convert(FileDto fileDto);
+    CommunityFile toEntity(FileDto fileDto);
 
     @IterableMapping(nullValueMappingStrategy = RETURN_DEFAULT)
-    List<CommunityFile> convert(List<FileDto> fileDto);
+    List<CommunityFile> toEntity(List<FileDto> fileDto);
 
     @Mapping(target = "operation", ignore = true)
     @Mapping(target = "url", source = "fileUrl")
-    FileDto convert(CommunityFile communityFile);
+    FileDto toDto(CommunityFile communityFile);
+
+    @IterableMapping(nullValueMappingStrategy = RETURN_DEFAULT)
+    List<FileDto> toDto(List<CommunityFile> communityFiles);
 
     @Named("toFilename")
     default String toFilename(String url) {
