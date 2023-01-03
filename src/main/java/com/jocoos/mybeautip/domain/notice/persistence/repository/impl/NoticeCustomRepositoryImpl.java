@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.domain.notice.persistence.repository.impl;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
 import com.jocoos.mybeautip.domain.notice.dto.SearchNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.persistence.domain.Notice;
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -68,6 +68,10 @@ public class NoticeCustomRepositoryImpl implements NoticeCustomRepository {
 
     private BooleanExpression eqStatus(NoticeStatus status) {
         return status == null ? null : notice.status.eq(status);
+    }
+
+    private BooleanExpression isVisible(Boolean isVisible) {
+        return isVisible == null ? null : notice.isVisible.eq(isVisible);
     }
 
     private BooleanExpression likeTitle(String search) {

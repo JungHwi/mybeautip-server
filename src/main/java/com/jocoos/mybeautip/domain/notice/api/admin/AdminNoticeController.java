@@ -1,10 +1,8 @@
 package com.jocoos.mybeautip.domain.notice.api.admin;
 
 import com.jocoos.mybeautip.domain.notice.code.NoticeSort;
-import com.jocoos.mybeautip.domain.notice.dto.NoticeListResponse;
-import com.jocoos.mybeautip.domain.notice.dto.NoticeResponse;
-import com.jocoos.mybeautip.domain.notice.dto.SearchNoticeRequest;
-import com.jocoos.mybeautip.domain.notice.dto.WriteNoticeRequest;
+import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
+import com.jocoos.mybeautip.domain.notice.dto.*;
 import com.jocoos.mybeautip.domain.notice.service.NoticeService;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +42,7 @@ public class AdminNoticeController {
 
         SearchNoticeRequest request = SearchNoticeRequest.builder()
                 .search(search)
+                .status(NoticeStatus.NORMAL)
                 .startAt(startAt)
                 .endAt(endAt)
                 .pageable(pageRequest)
@@ -58,5 +57,14 @@ public class AdminNoticeController {
     public ResponseEntity<NoticeResponse> get(@PathVariable long noticeId) {
         NoticeResponse result = service.get(noticeId);
         return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/notice/{noticeId}")
+    public ResponseEntity<NoticeResponse> edit(@PathVariable long noticeId,
+                                               @RequestBody EditNoticeRequest request) {
+
+        request.setId(noticeId);
+        NoticeResponse response = service.edit(request);
+        return ResponseEntity.ok(response);
     }
 }

@@ -39,6 +39,7 @@ class NoticeControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("조회 결과 목록"),
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(NOTICE_STATUS)),
+                                fieldWithPath("content.[].is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부").optional(),
                                 fieldWithPath("content.[].is_important").type(JsonFieldType.BOOLEAN).description("중요 공지 여부").optional(),
                                 fieldWithPath("content.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목"),
@@ -72,6 +73,7 @@ class NoticeControllerTest extends RestDocsTestSupport {
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(NOTICE_STATUS)),
+                                fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부").optional(),
                                 fieldWithPath("is_important").type(JsonFieldType.BOOLEAN).description("중요 공지 여부").optional(),
                                 fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),

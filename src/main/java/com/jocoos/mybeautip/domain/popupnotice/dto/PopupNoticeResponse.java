@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.popupnotice.dto;
 
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeLinkType;
+import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeLinkType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,7 +12,7 @@ public class PopupNoticeResponse {
 
     private final String imageUrl;
 
-    private final NoticeLinkType linkType;
+    private final PopupNoticeLinkType linkType;
 
     private final String parameter;
 

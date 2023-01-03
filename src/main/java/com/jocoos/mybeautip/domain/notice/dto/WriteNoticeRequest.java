@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.notice.dto;
 
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import java.util.List;
 @Builder
 public class WriteNoticeRequest {
 
-    private NoticeStatus status;
+    private Boolean isVisible;
 
     private String title;
 

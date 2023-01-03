@@ -2,10 +2,7 @@ package com.jocoos.mybeautip.domain.notice.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.notice.converter.NoticeConverter;
-import com.jocoos.mybeautip.domain.notice.dto.NoticeListResponse;
-import com.jocoos.mybeautip.domain.notice.dto.NoticeResponse;
-import com.jocoos.mybeautip.domain.notice.dto.SearchNoticeRequest;
-import com.jocoos.mybeautip.domain.notice.dto.WriteNoticeRequest;
+import com.jocoos.mybeautip.domain.notice.dto.*;
 import com.jocoos.mybeautip.domain.notice.persistence.domain.Notice;
 import com.jocoos.mybeautip.domain.notice.service.dao.NoticeDao;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +25,18 @@ public class NoticeService {
     public NoticeResponse write(WriteNoticeRequest request) {
         Notice notice = dao.write(request);
         awsS3Handler.copy(request.getFiles(), NOTICE.getDirectory());
+
+        return converter.converts(notice);
+    }
+
+    @Transactional
+    public NoticeResponse edit(EditNoticeRequest request) {
+        Notice notice = dao.get(request.getId());
+        notice.editTitle(request.getTitle());
+        notice.editDescription(request.getDescription());
+        notice.editFiles(request.getFiles());
+
+        awsS3Handler.editFiles(request.getFiles(), NOTICE.getDirectory());
 
         return converter.converts(notice);
     }

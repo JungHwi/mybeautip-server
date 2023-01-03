@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.notice.persistence.domain;
 
-import com.mybeautip.global.code.FileType;
+import com.jocoos.mybeautip.domain.file.code.FileType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -26,4 +26,8 @@ public class NoticeFile {
     @Setter
     @ManyToOne
     private Notice notice;
+
+    public void editFile(String file) {
+        this.file = file;
+    }
 }
