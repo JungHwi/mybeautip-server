@@ -10,7 +10,7 @@ import lombok.Getter;
 public class AdminMemberResponse {
 
     @JsonUnwrapped
-    private final MemberResponse memberResponse;
+    private MemberResponse memberResponse;
     private final Role role;
 
     @QueryProjection
@@ -22,5 +22,9 @@ public class AdminMemberResponse {
     public static AdminMemberResponse from(Member member) {
         MemberResponse memberResponse = MemberResponse.from(member);
         return new AdminMemberResponse(memberResponse, member.getLink());
+    }
+
+    public void blindExceptRole() {
+        memberResponse = null;
     }
 }
