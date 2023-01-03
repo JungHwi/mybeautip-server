@@ -15,6 +15,7 @@ public class SearchNoticeRequest extends SearchDto {
 
     private NoticeStatus status;
     private Boolean isVisible;
+    private Boolean isImportant;
     private String search;
     private ZonedDateTime startAt;
     private ZonedDateTime endAt;

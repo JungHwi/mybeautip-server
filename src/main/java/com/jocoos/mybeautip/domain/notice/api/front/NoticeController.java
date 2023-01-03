@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_LONG_STRING;
-
 @RequestMapping("/api")
 @RestController
 @RequiredArgsConstructor
@@ -27,8 +25,8 @@ public class NoticeController {
     private final NoticeService service;
 
     @GetMapping("/1/notice")
-    public ResponseEntity<CursorResultResponse<NoticeListResponse>> list(@RequestParam(required = false, defaultValue = MAX_LONG_STRING) Long cursor,
-                                                                                  @RequestParam(required = false, defaultValue = "20") int size) {
+    public ResponseEntity<CursorResultResponse<NoticeListResponse>> list(@RequestParam(required = false) Long cursor,
+                                                                         @RequestParam(required = false, defaultValue = "20") int size) {
         List<Sort.Order> orders = new ArrayList<>();
         orders.add(new Sort.Order(Sort.Direction.DESC, "isImportant", Sort.NullHandling.NULLS_LAST));
         orders.add(new Sort.Order(Sort.Direction.DESC, "id"));
@@ -38,6 +36,7 @@ public class NoticeController {
                 .status(NoticeStatus.NORMAL)
                 .isVisible(true)
                 .cursor(cursor)
+                .isImportant(cursor == null ? null : false)
                 .pageable(pageable)
                 .build();
 

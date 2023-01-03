@@ -185,8 +185,7 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].created_by.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
                         fieldWithPath("content.[].created_by.email").type(JsonFieldType.STRING).description("작성자 이메일"),
                         fieldWithPath("content.[].created_by.username").type(JsonFieldType.STRING).description("작성자 닉네임"),
-                        fieldWithPath("content.[].created_by.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL"),
-                        fieldWithPath("content.[].cursor").ignored()
+                        fieldWithPath("content.[].created_by.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL")
                 )
             )
         );

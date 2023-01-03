@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.notice.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
 import com.jocoos.mybeautip.global.dto.FileDto;
@@ -36,6 +37,7 @@ public class NoticeListResponse implements CursorInterface {
     private FileDto file;
 
     @Override
+    @JsonIgnore
     public String getCursor() {
         return String.valueOf(id);
     }

@@ -58,6 +58,9 @@ public class NoticeCustomRepositoryImpl implements NoticeCustomRepository {
                 .from(notice)
                 .innerJoin(member).on(notice.createdBy.id.eq(member.id))
                 .where(
+                        lessCursor(request.getCursor()),
+                        isVisible(request.getIsVisible()),
+                        isImportant(request.getIsImportant()),
                         eqStatus(request.getStatus()),
                         likeTitle(request.getSearch()),
                         afterStartAt(request.getStartAt()),
@@ -70,8 +73,16 @@ public class NoticeCustomRepositoryImpl implements NoticeCustomRepository {
         return status == null ? null : notice.status.eq(status);
     }
 
+    private BooleanExpression lessCursor(Long cursor) {
+        return cursor == null ? null : notice.id.lt(cursor);
+    }
+
     private BooleanExpression isVisible(Boolean isVisible) {
         return isVisible == null ? null : notice.isVisible.eq(isVisible);
+    }
+
+    private BooleanExpression isImportant(Boolean isImportant) {
+        return isImportant == null ? null : notice.isImportant.isNull();
     }
 
     private BooleanExpression likeTitle(String search) {
