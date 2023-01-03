@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.popupnotice.persistence.repository;
 
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
+import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeStatus;
 import com.jocoos.mybeautip.domain.popupnotice.persistence.domain.PopupNotice;
 import com.jocoos.mybeautip.global.config.jpa.DefaultJpaRepository;
 
@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface PopupNoticeRepository extends DefaultJpaRepository<PopupNotice, Long> {
 
-    List<PopupNotice> findAllByStatusAndEndedAtAfter(NoticeStatus status, ZonedDateTime dateTime);
+    List<PopupNotice> findAllByStatusAndEndedAtAfter(PopupNoticeStatus status, ZonedDateTime dateTime);
 
 }

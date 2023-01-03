@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus.ACTIVE;
+import static com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeStatus.ACTIVE;
 
 @RequiredArgsConstructor
 @Service

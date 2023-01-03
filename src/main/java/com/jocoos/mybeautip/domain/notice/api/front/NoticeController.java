@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.domain.notice.api.front;
 
+import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
 import com.jocoos.mybeautip.domain.notice.dto.NoticeListResponse;
 import com.jocoos.mybeautip.domain.notice.dto.NoticeResponse;
 import com.jocoos.mybeautip.domain.notice.dto.SearchNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.service.NoticeService;
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +35,8 @@ public class NoticeController {
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(orders));
         SearchNoticeRequest request = SearchNoticeRequest.builder()
-                .status(NoticeStatus.ACTIVE)
+                .status(NoticeStatus.NORMAL)
+                .isVisible(true)
                 .cursor(cursor)
                 .pageable(pageable)
                 .build();

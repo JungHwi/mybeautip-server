@@ -24,12 +24,19 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {MemberConverter.class})
 public abstract class NoticeConverter {
 
+    @Mappings({
+            @Mapping(target = "status", constant = "NORMAL")
+    })
     abstract public Notice converts(WriteNoticeRequest request);
 
     abstract public NoticeResponse converts(Notice notice);
 
     abstract public List<NoticeResponse> converts(List<Notice> noticeList);
 
+    @Mappings({
+            @Mapping(target = "file", source = "files", qualifiedByName = "mainFileToUrl")
+    })
+    abstract public NoticeListResponse convertsToListResponse(Notice notice);
 
     abstract public List<NoticeListResponse> convertsToListResponse(List<Notice> noticeList);
 
@@ -87,6 +94,7 @@ public abstract class NoticeConverter {
         return ImageUrlConvertUtil.toUrl(file, UrlDirectory.NOTICE);
     }
 
+    @Named("mainFileToUrl")
     public FileDto convertsFileList(List<NoticeFile> entities) {
         if (CollectionUtils.isNullOrEmpty(entities)) {
             return null;

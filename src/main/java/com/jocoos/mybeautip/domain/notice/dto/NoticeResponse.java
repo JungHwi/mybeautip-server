@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.domain.notice.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
+import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +19,8 @@ public class NoticeResponse {
     private long id;
 
     private NoticeStatus status;
+
+    private Boolean isVisible;
 
     private Boolean isImportant;
 

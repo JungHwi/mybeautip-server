@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.domain.popupnotice.persistence.domain;
 
 import com.jocoos.mybeautip.audit.CreatedDateAuditable;
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeLinkType;
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
+import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeLinkType;
+import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeStatus;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,14 +21,14 @@ public class PopupNotice extends CreatedDateAuditable {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private NoticeStatus status;
+    private PopupNoticeStatus status;
 
     @Column
     private String filename;
 
     @Column
     @Enumerated(EnumType.STRING)
-    private NoticeLinkType linkType;
+    private PopupNoticeLinkType linkType;
 
     @Column
     private String linkArgument;

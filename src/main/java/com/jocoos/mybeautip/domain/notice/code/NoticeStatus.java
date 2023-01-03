@@ -1,15 +1,15 @@
-package com.jocoos.mybeautip.global.code;
+package com.jocoos.mybeautip.domain.notice.code;
 
+import com.jocoos.mybeautip.global.code.CodeValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum FileOperationType implements CodeValue {
+public enum NoticeStatus implements CodeValue {
 
-    KEEP("유지"),
-    UPLOAD("신규 업로드"),
-    DELETE("삭제");
+    NORMAL("일반 상태"),
+    DELETE("삭제 상태");
 
     private final String description;
 

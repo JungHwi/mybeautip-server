@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.notice.api.admin;
 
+import com.jocoos.mybeautip.domain.notice.dto.EditNoticeRequest;
 import com.jocoos.mybeautip.domain.notice.dto.WriteNoticeRequest;
-import com.jocoos.mybeautip.domain.popupnotice.code.NoticeStatus;
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -28,7 +28,7 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
     @Transactional
     void write() throws Exception {
         WriteNoticeRequest request = WriteNoticeRequest.builder()
-                .status(NoticeStatus.ACTIVE)
+                .isVisible(true)
                 .title("TEST TITLE")
                 .description("TEST DESCRIPTION")
                 .build();
@@ -42,7 +42,7 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
 
         result.andDo(document("admin_write_notice",
                 requestFields(
-                        fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(NOTICE_STATUS)),
+                        fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부"),
                         fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                         fieldWithPath("description").type(JsonFieldType.STRING).description("상세 내용"),
                         fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
@@ -51,6 +51,7 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
                 responseFields(
                         fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
                         fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(NOTICE_STATUS)),
+                        fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부").optional(),
                         fieldWithPath("is_important").type(JsonFieldType.BOOLEAN).description("중요 공지 여부").optional(),
                         fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                         fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
@@ -70,6 +71,59 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
                         fieldWithPath("created_by.email").type(JsonFieldType.STRING).description("작성자 이메일"),
                         fieldWithPath("created_by.username").type(JsonFieldType.STRING).description("작성자 닉네임"),
                         fieldWithPath("created_by.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL")
+                        )
+                )
+        );
+    }
+
+    @Test
+    @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
+    void edit() throws Exception {
+        EditNoticeRequest request = new EditNoticeRequest(null, true, "EDIT TEST TITLE", "EDIT TEST DESCRIPTION", null);
+
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .put("/admin/notice/{noticeId}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_edit_notice",
+                        pathParameters(
+                                parameterWithName("noticeId").description("공지 ID")
+                        ),
+                        requestFields(
+                                fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부"),
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
+                                fieldWithPath("description").type(JsonFieldType.STRING).description("상세 내용"),
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                                fieldWithPath("files.[].operation").type(JsonFieldType.STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
+                                fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(NOTICE_STATUS)),
+                                fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부").optional(),
+                                fieldWithPath("is_important").type(JsonFieldType.BOOLEAN).description("중요 공지 여부").optional(),
+                                fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
+                                fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
+                                fieldWithPath("description").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                                fieldWithPath("files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
+                                fieldWithPath("modified_at").type(JsonFieldType.STRING).description("수정 일시").attributes(getZonedDateFormat()),
+                                fieldWithPath("modified_by").type(JsonFieldType.OBJECT).description("수정자 정보"),
+                                fieldWithPath("modified_by.id").type(JsonFieldType.NUMBER).description("수정자 아이디"),
+                                fieldWithPath("modified_by.email").type(JsonFieldType.STRING).description("수정자 이메일"),
+                                fieldWithPath("modified_by.username").type(JsonFieldType.STRING).description("수정자 닉네임"),
+                                fieldWithPath("modified_by.avatar_url").type(JsonFieldType.STRING).description("수정자 아바타 URL"),
+                                fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성 일시").attributes(getZonedDateFormat()),
+                                fieldWithPath("created_by").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("created_by.id").type(JsonFieldType.NUMBER).description("작성자 아이디"),
+                                fieldWithPath("created_by.email").type(JsonFieldType.STRING).description("작성자 이메일"),
+                                fieldWithPath("created_by.username").type(JsonFieldType.STRING).description("작성자 닉네임"),
+                                fieldWithPath("created_by.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL")
                         )
                 )
         );
@@ -101,6 +155,7 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content").type(JsonFieldType.ARRAY).description("조회 결과 목록"),
                         fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
                         fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(NOTICE_STATUS)),
+                        fieldWithPath("content.[].is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부").optional(),
                         fieldWithPath("content.[].is_important").type(JsonFieldType.BOOLEAN).description("중요 공지 여부").optional(),
                         fieldWithPath("content.[].view_count").type(JsonFieldType.NUMBER).description("조회수"),
                         fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목"),
@@ -136,6 +191,7 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
                 responseFields(
                         fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
                         fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(NOTICE_STATUS)),
+                        fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부").optional(),
                         fieldWithPath("is_important").type(JsonFieldType.BOOLEAN).description("중요 공지 여부").optional(),
                         fieldWithPath("view_count").type(JsonFieldType.NUMBER).description("조회수"),
                         fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),

@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.client.aws.s3;
 import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
-import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.S3UrlUploadException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -117,14 +116,8 @@ public class AwsS3Handler {
         List<String> result = new ArrayList<>();
         for (FileDto fileDto : fileDtoList) {
             switch (fileDto.getOperation()) {
-                case UPLOAD:
-                    result.add(copy(fileDto, destination));
-                    break;
-                case DELETE:
-                    delete(fileDto);
-                    break;
-                default:
-                    throw new BadRequestException("not_support_file_operation");
+                case UPLOAD -> result.add(copy(fileDto, destination));
+                case DELETE -> delete(fileDto);
             }
         }
         return result;
