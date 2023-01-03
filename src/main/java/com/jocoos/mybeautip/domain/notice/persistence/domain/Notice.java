@@ -48,6 +48,10 @@ public class Notice extends AllBaseEntity {
     @OneToMany(mappedBy = "notice", fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<NoticeFile> files;
 
+    public void delete() {
+        this.status = NoticeStatus.DELETE;
+    }
+
     public void editTitle(String title) {
         if (StringUtils.isEmpty(title)) {
             return;

@@ -25,6 +25,22 @@ public class NoticeDao {
         return repository.save(notice);
     }
 
+    @Transactional
+    public Notice edit(EditNoticeRequest request) {
+        Notice notice = this.get(request.getId());
+        notice.editTitle(request.getTitle());
+        notice.editDescription(request.getDescription());
+        notice.editFiles(request.getFiles());
+
+        return notice;
+    }
+
+    @Transactional
+    public void delete(long noticeId) {
+        Notice notice = this.get(noticeId);
+        notice.delete();
+    }
+
     @Transactional(readOnly = true)
     public Page<Notice> search(SearchNoticeRequest request) {
         return repository.search(request);

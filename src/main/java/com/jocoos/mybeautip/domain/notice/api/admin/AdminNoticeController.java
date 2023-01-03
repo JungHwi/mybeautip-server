@@ -67,4 +67,10 @@ public class AdminNoticeController {
         NoticeResponse response = service.edit(request);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/notice/{noticeId}")
+    public ResponseEntity delete(@PathVariable long noticeId) {
+        service.delete(noticeId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

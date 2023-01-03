@@ -31,14 +31,15 @@ public class NoticeService {
 
     @Transactional
     public NoticeResponse edit(EditNoticeRequest request) {
-        Notice notice = dao.get(request.getId());
-        notice.editTitle(request.getTitle());
-        notice.editDescription(request.getDescription());
-        notice.editFiles(request.getFiles());
-
+        Notice notice = dao.edit(request);
         awsS3Handler.editFiles(request.getFiles(), NOTICE.getDirectory());
 
         return converter.converts(notice);
+    }
+
+    @Transactional
+    public void delete(long noticeId) {
+        dao.delete(noticeId);
     }
 
     @Transactional(readOnly = true)
