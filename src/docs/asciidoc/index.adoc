@@ -189,6 +189,8 @@ include::overview.adoc[]
 * link:notice/admin_search_notice.html[공지사항 목록 조회 API, window=_blank]
 * link:notice/admin_get_notice.html[공지사항 상세 조회 API, window=_blank]
 * link:notice/admin_write_notice.html[공지사항 작성 API, window=_blank]
+* link:notice/admin_edit_notice.html[공지사항 수정 API, window=_blank]
+* link:notice/admin_delete_notice.html[공지사항 삭제 API, window=_blank]
 
 [[TEST-API-LIST]]
 == Test API (향후에 꼭 지울 것)

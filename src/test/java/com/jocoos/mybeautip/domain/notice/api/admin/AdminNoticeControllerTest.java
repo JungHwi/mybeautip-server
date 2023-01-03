@@ -132,6 +132,24 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
     @Test
     @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     @Transactional
+    void delete() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .delete("/admin/notice/{noticeId}", 1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("admin_delete_notice",
+                        pathParameters(
+                                parameterWithName("noticeId").description("공지 ID")
+                        )
+                )
+        );
+    }
+
+    @Test
+    @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
+    @Transactional
     void search() throws Exception {
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
