@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum PopupNoticeLinkType implements CodeValue {
-    EVENT("이벤트"),
     HOME("홈 화면"),
-    QUIT("종료");
+    EVENT("이벤트"),
+    NOTICE("공지 사항");
 
     private final String description;
 
