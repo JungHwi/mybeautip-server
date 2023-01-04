@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.app.AppInfo;
 import com.jocoos.mybeautip.app.AppInfoRepository;
 import com.jocoos.mybeautip.devices.HealthCheckService;
 import com.jocoos.mybeautip.domain.popup.service.PopupService;
@@ -11,8 +10,6 @@ import com.jocoos.mybeautip.restapi.dto.NoticeInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,9 +60,6 @@ public class HealthCheckController {
         legacyMemberService.updateLastLoggedAt();
 
         HealthCheckResponse response = new HealthCheckResponse();
-        PageRequest pageable = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createdAt"));
-        List<AppInfo> list = appInfoRepository.findByOs(deviceOs, pageable);
-        response.setLatestVersion((list.size() > 0) ? list.get(0).getVersion() : "");
         response.setContent(notices);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
