@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.domain.notice.api.admin;
 
 import com.jocoos.mybeautip.domain.notice.code.NoticeSort;
-import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
 import com.jocoos.mybeautip.domain.notice.dto.*;
 import com.jocoos.mybeautip.domain.notice.service.NoticeService;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,7 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
+import static com.jocoos.mybeautip.domain.notice.code.NoticeStatus.NORMAL;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,19 +35,27 @@ public class AdminNoticeController {
     @GetMapping("/notice")
     public ResponseEntity<PageResponse<NoticeListResponse>> search(@RequestParam(required = false, defaultValue = "1") int page,
                                                                    @RequestParam(required = false, defaultValue = "10") int size,
-                                                                   @RequestParam(required = false, defaultValue = "ID") NoticeSort sort,
+                                                                   @RequestParam(required = false, defaultValue = "id") String sort,
                                                                    @RequestParam(required = false, defaultValue = "DESC") String order,
                                                                    @RequestParam(required = false) String search,
-                                                                   @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") ZonedDateTime startAt,
-                                                                   @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") ZonedDateTime endAt) {
+                                                                   @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
+                                                                   @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt) {
 
-        PageRequest pageRequest = PageRequest.of(page - 1, size, Sort.Direction.fromString(order), sort.getColumn());
+        PageRequest pageRequest = PageRequest.of(
+                page - 1, size,
+                Sort.Direction.fromString(order),
+                NoticeSort.getColumn(sort));
 
-        SearchNoticeRequest request = SearchNoticeRequest.builder()
-                .search(search)
-                .status(NoticeStatus.NORMAL)
+        SearchOption searchOption = SearchOption.builder()
+                .searchQueryString(search)
                 .startAt(startAt)
                 .endAt(endAt)
+                .zoneId(ZoneId.of("Asia/Seoul"))
+                .build();
+
+        SearchNoticeRequest request = SearchNoticeRequest.builder()
+                .search(searchOption)
+                .status(NORMAL)
                 .pageable(pageRequest)
                 .build();
 

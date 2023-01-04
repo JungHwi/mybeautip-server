@@ -62,7 +62,7 @@ public class NoticeCustomRepositoryImpl implements NoticeCustomRepository {
                         isVisible(request.getIsVisible()),
                         isImportant(request.getIsImportant()),
                         eqStatus(request.getStatus()),
-                        likeTitle(request.getSearch()),
+                        containsICTitle(request.getSearchKeyword()),
                         afterStartAt(request.getStartAt()),
                         beforeEndAt(request.getEndAt())
                 )
@@ -85,8 +85,8 @@ public class NoticeCustomRepositoryImpl implements NoticeCustomRepository {
         return isImportant == null ? null : notice.isImportant.isNull();
     }
 
-    private BooleanExpression likeTitle(String search) {
-        return StringUtils.isBlank(search) ? null : notice.title.like(search);
+    private BooleanExpression containsICTitle(String search) {
+        return StringUtils.isBlank(search) ? null : notice.title.containsIgnoreCase(search);
     }
 
     private BooleanExpression afterStartAt(ZonedDateTime startAt) {

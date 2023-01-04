@@ -162,9 +162,9 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
                 requestParameters(
                         parameterWithName("page").description("페이지").attributes(getDefault(1)).optional(),
                         parameterWithName("size").description("페이지 사이즈").attributes(getDefault(20)).optional(),
-                        parameterWithName("sort").description(generateLinkCode(NOTICE_SORT)).attributes(getDefault("ID")).optional(),
+                        parameterWithName("sort").description(generateLinkCode(NOTICE_SORT)).attributes(getDefault("id")).optional(),
                         parameterWithName("order").description("정령 방식").attributes(getDefault("DESC")).optional(),
-                        parameterWithName("search").description("제목").optional(),
+                        parameterWithName("search").description("title,keyword").optional(),
                         parameterWithName("start_at").description("작성일 조회조건 - 시작").optional(),
                         parameterWithName("end_At").description("작성일 조회조건 - 끝").optional()
                 ),
