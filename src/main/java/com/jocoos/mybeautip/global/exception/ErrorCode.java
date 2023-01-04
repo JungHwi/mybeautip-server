@@ -17,6 +17,7 @@ public enum ErrorCode implements CodeValue {
     ALREADY_USED("이미 사용중"),
     BANNED_WORD("금칙어 포함"),
     NOT_A_WRITER("작성자가 아님"),
+    INVALID_SORT_FIELD("지원하는 정렬 필드가 아님"),
 
     // LOGIN
     INVALID_TOKEN("잘못된 토큰"),
@@ -112,7 +113,7 @@ public enum ErrorCode implements CodeValue {
 
 
     // Placard
-    ONLY_ACTIVE_CAN_FIX("활성화된 플랜카드만 고정됨")
+    ONLY_ACTIVE_CAN_FIX("활성화된 플랜카드만 고정됨"),
     ;
 
     private final String description;
