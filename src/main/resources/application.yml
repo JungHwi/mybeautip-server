@@ -4,10 +4,6 @@ server:
     enabled: true
 
 spring:
-  data:
-    rest:
-      base-path: /api/admin
-      default-page-size: 10
   main:
     banner-mode: off
 #    lazy-initialization: true
