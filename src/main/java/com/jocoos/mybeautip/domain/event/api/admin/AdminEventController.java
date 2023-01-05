@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.event.dto.EventRequest;
 import com.jocoos.mybeautip.domain.event.dto.EventStatusResponse;
 import com.jocoos.mybeautip.domain.event.service.AdminEventService;
 import com.jocoos.mybeautip.domain.event.vo.EventSearchCondition;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.vo.Paging;
 import com.jocoos.mybeautip.global.vo.SearchOption;
@@ -95,6 +96,11 @@ public class AdminEventController {
 
         AdminEventResponse response = service.edit(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/event/{eventId}/hide")
+    public ResponseEntity<IdDto> hideEvent(@PathVariable Long eventId, @RequestBody BooleanDto isHide) {
+        return ResponseEntity.ok(new IdDto(service.hide(eventId, isHide.isBool())));
     }
 
     @DeleteMapping("/event/{eventId}")

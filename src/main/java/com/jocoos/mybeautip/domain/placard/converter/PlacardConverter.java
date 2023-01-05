@@ -56,8 +56,8 @@ public interface PlacardConverter {
                 .linkType(request.getLinkType())
                 .color(request.getColor())
                 .status(request.getStatus())
-                .startedAt(request.startedAtToUTCZoned())
-                .endedAt(request.endedAtToUTCZoned())
+                .startedAt(request.getStartedAt())
+                .endedAt(request.getEndedAt())
                 .build();
     }
     

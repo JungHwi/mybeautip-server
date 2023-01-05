@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.placard.api.admin;
 
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
+import com.jocoos.mybeautip.domain.placard.dto.AdminPlacardDetailResponse;
 import com.jocoos.mybeautip.domain.placard.dto.AdminPlacardResponse;
 import com.jocoos.mybeautip.domain.placard.dto.PatchPlacardRequest;
 import com.jocoos.mybeautip.domain.placard.dto.PlacardRequest;
@@ -66,8 +67,13 @@ public class AdminPlacardController {
         return ResponseEntity.created(location).body(response);
     }
 
+    @GetMapping("/placard/{placardId}")
+    public ResponseEntity<AdminPlacardDetailResponse> getPlacard(@PathVariable Long placardId) {
+        return ResponseEntity.ok(service.getPlacard(placardId));
+    }
+
     @PatchMapping("/placard/{placardId}")
-    public ResponseEntity<IdDto> edit(@PathVariable Long placardId, @RequestBody PatchPlacardRequest request) {
+    public ResponseEntity<IdDto> edit(@PathVariable Long placardId, @RequestBody @Valid PatchPlacardRequest request) {
         return ResponseEntity.ok(new IdDto(service.edit(placardId, request)));
     }
 

@@ -103,6 +103,7 @@ include::overview.adoc[]
 * link:event/admin_get_event_status.html[이벤트 상태 목록 조회 API, window=_blank]
 * link:event/admin_get_event.html[이벤트 상세 조회 API, window=_blank]
 * link:event/admin_fix_event.html[이벤트 고정 API, window=_blank]
+* link:event/admin_hide_event.html[이벤트 고정 API, window=_blank]
 * link:event/admin_change_order_events.html[이벤트 순서 변경 API, window=_blank]
 * link:event/admin_delete_event.html[이벤트 삭제 API, window=_blank]
 
@@ -139,6 +140,7 @@ include::overview.adoc[]
 * link:operation/admin_get_operation_logs.html[운영 로그 조회 API, window=_blank]
 
 === Placard API
+* link:placard/admin_get_placard.html[플랜카드 단일 조회 API, window=_blank]
 * link:placard/admin_get_placards.html[플랜카드 조회 API, window=_blank]
 * link:placard/admin_create_placard.html[플랜카드 생성 API, window=_blank]
 * link:placard/admin_edit_placard.html[플랜카드 수정 API, window=_blank]

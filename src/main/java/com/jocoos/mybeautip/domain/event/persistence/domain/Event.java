@@ -121,4 +121,8 @@ public class Event extends ModifiedDateAuditable {
             unFix();
         }
     }
+
+    public void hide(boolean isHide) {
+        isVisible = isHide;
+    }
 }
