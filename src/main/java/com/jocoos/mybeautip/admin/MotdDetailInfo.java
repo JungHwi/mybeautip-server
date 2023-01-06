@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.admin;
 
+import com.jocoos.mybeautip.admin.dto.MotdRecommendationInfo;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.recommendation.MotdRecommendation;
 import com.jocoos.mybeautip.restapi.LegacyVideoController;
@@ -13,7 +14,7 @@ import org.springframework.beans.BeanUtils;
 @EqualsAndHashCode(callSuper = false)
 @Data
 public class MotdDetailInfo extends LegacyVideoController.VideoInfo {
-    private MotdRecommendation recommendation;
+    private MotdRecommendationInfo recommendation;
     private Long reportCount;
     private MemberInfo member;
     private Long videoReportId;
@@ -27,6 +28,10 @@ public class MotdDetailInfo extends LegacyVideoController.VideoInfo {
 
     public MotdDetailInfo(Video video, MotdRecommendation recommendation) {
         this(video);
-        this.recommendation = recommendation;
+        this.recommendation = new MotdRecommendationInfo(recommendation);
+    }
+
+    public void setRecommendation(MotdRecommendation recommendation) {
+        this.recommendation = new MotdRecommendationInfo(recommendation);
     }
 }

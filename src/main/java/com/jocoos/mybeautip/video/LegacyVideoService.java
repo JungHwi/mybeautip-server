@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.video;
 
+import com.jocoos.mybeautip.admin.MotdDetailInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
@@ -23,6 +24,7 @@ import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderRepository;
 import com.jocoos.mybeautip.recoding.ViewRecoding;
 import com.jocoos.mybeautip.recoding.ViewRecodingRepository;
+import com.jocoos.mybeautip.recommendation.MotdRecommendationRepository;
 import com.jocoos.mybeautip.restapi.CallbackController;
 import com.jocoos.mybeautip.restapi.LegacyVideoController;
 import com.jocoos.mybeautip.support.DateUtils;
@@ -40,10 +42,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -91,6 +92,8 @@ public class LegacyVideoService {
     private final ActivityPointService activityPointService;
     private final VideoCategoryService videoCategoryService;
     private final VideoCategoryRepository videoCategoryRepository;
+    private final MotdRecommendationRepository motdRecommendationRepository;
+
 
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
@@ -422,7 +425,7 @@ public class LegacyVideoService {
 
         return createdVideo;
     }
-    
+
     public List<VideoCategoryMapping> createCategory(Video video, List<Integer> videoCategoryIds) {
         List<VideoCategoryMapping> categories = new ArrayList<>();
         List<VideoCategory> videoCategoryList = videoCategoryRepository.findAllByIdIn(videoCategoryIds);
@@ -889,5 +892,46 @@ public class LegacyVideoService {
     public List<Video> findByIdInAndVisibility(List<Long> ids, Visibility visibility) {
         String visibilityName = visibility != null ? visibility.name() : Visibility.PUBLIC.name();
         return videoRepository.findByIdInAndVisibility(ids, visibilityName);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MotdDetailInfo> findByTypeAndStates(Long memberId, String type, Collection<String> states, Pageable pageable, boolean isDeleted) {
+        Page<Video> videos = null;
+        if (memberId != null) {
+            if (isDeleted) {
+                videos = videoRepository.findByMemberIdAndTypeAndStateInAndDeletedAtIsNotNull(memberId, type, states, pageable);
+            } else {
+                videos = videoRepository.findByMemberIdAndTypeAndStateInAndDeletedAtIsNull(memberId, type, states, pageable);
+            }
+        } else {
+            if (isDeleted) {
+                videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNotNull(type, states, pageable);
+            } else {
+                videos = videoRepository.findByTypeAndStateInAndDeletedAtIsNull(type, states, pageable);
+            }
+        }
+
+        return responseVideos(videos);
+    }
+
+    private Page<MotdDetailInfo> responseVideos(Page<Video> videos) {
+        Member admin = legacyMemberService.currentMember();
+        Page<MotdDetailInfo> details = videos.map(v -> {
+            MotdDetailInfo info = new MotdDetailInfo(v);
+            motdRecommendationRepository.findByVideoId(v.getId())
+                .ifPresent(r -> info.setRecommendation(r));
+
+
+            // FIXME: Video is reported by admin?
+            videoReportRepository.findByVideoIdAndCreatedById(v.getId(), admin.getId())
+                .ifPresent(r -> info.setVideoReportId(r.getId()));
+
+            Page<VideoReport> reports = videoReportRepository.findByVideoId(v.getId(), PageRequest.of(0, 1));
+            info.setReportCount(reports.getTotalElements());
+
+            return info;
+        });
+
+        return details;
     }
 }
