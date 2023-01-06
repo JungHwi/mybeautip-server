@@ -24,8 +24,9 @@ create table notice_file (
 alter table community_comment add column file char(16) after contents;
 alter table comments add column file char(16) after comment;
 alter table community_file add column type varchar(20) after community_id;
-update community_file set type='IMAGE';
 
+# Migration
+# update community_file set type='IMAGE';
 
 # rename health_check to notices;
 # drop table notice;
