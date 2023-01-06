@@ -2,8 +2,10 @@ package com.jocoos.mybeautip.domain.community.api.front;
 
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.service.CommunityCommentService;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -54,20 +57,20 @@ public class CommunityCommentController {
     }
 
     @PostMapping("/1/community/{community_id}/comment")
-    public ResponseEntity<CommunityCommentResponse> writeComment(@PathVariable("community_id") long communityId,
+    public ResponseEntity<CommunityCommentResponse> writeComment(@CurrentMember MyBeautipUserDetails userDetails,
+                                                                 @PathVariable("community_id") long communityId,
                                                                  @RequestBody WriteCommunityCommentRequest request) {
         request.setCommunityId(communityId);
-
+        request.setMember(userDetails.getMember());
         return ResponseEntity.ok(communityCommentService.write(request));
     }
 
     @PutMapping("/1/community/{community_id}/comment/{comment_id}")
     public ResponseEntity<CommunityCommentResponse> editComment(@PathVariable("community_id") long communityId,
                                                                 @PathVariable("comment_id") long commentId,
-                                                                @RequestBody EditCommunityCommentRequest request) {
+                                                                @RequestBody @Valid EditCommunityCommentRequest request) {
         request.setCommunityId(communityId);
         request.setCommentId(commentId);
-
         return ResponseEntity.ok(communityCommentService.edit(request));
     }
 

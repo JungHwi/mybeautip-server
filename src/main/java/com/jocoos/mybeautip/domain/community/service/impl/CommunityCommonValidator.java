@@ -20,12 +20,12 @@ public abstract class CommunityCommonValidator implements CommunityValidator {
 
     protected void validByRole(Role role, String contents, int fileSize) {
         validContentsByRole(role, contents);
-        validFileSize(fileSize, DEFAULT_AVAILABLE_FILE_SIZE);
+        validFileCount(fileSize, DEFAULT_AVAILABLE_FILE_SIZE);
     }
 
-    protected void validFileSize(int fileSize, int limit) {
-        if (fileSize > limit) {
-            throw new BadRequestException(TOO_MANY_FILE, "file size limit " + limit + " request file size " + fileSize);
+    protected void validFileCount(int fileCount, int limit) {
+        if (fileCount > limit) {
+            throw new BadRequestException(TOO_MANY_FILE, "file count limit " + limit + " request file count " + fileCount);
         }
     }
 

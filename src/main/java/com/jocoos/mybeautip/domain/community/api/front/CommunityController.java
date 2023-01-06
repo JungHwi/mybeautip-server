@@ -15,10 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -33,21 +31,14 @@ public class CommunityController {
     private final ScrapService scrapService;
     private final LegacyMemberService legacyMemberService;
 
-    @PostMapping(value = "/1/community")
+    @PostMapping(value = "/2/community")
     public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody WriteCommunityRequest request) {
         CommunityResponse response = service.write(request);
 
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(value = "/1/community/files", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<List<String>> uploadFile(@RequestPart List<MultipartFile> files) {
-        List<String> urls = service.upload(files);
-
-        return ResponseEntity.ok(urls);
-    }
-
-    @GetMapping(value = "/1/community")
+    @GetMapping(value = "/2/community")
     public ResponseEntity<CursorResultResponse<CommunityResponse>> getCommunities(@RequestParam(required = false, defaultValue = "1", name = "category_id") Long categoryId,
                                                                                   @RequestParam(required = false, name = "event_id") Long eventId,
                                                                                   @RequestParam(required = false) ZonedDateTime cursor,
@@ -68,7 +59,7 @@ public class CommunityController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = "/1/community/{community_id}")
+    @GetMapping(value = "/2/community/{community_id}")
     public ResponseEntity<CommunityResponse> getCommunity(@PathVariable(name = "community_id") long communityId) {
 
         CommunityResponse response = service.getCommunity(communityId);
@@ -76,7 +67,7 @@ public class CommunityController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping(value = "/1/community/{community_id}")
+    @PutMapping(value = "/2/community/{community_id}")
     public ResponseEntity<CommunityResponse> editCommunity(@PathVariable(name = "community_id") long communityId,
                                                            @RequestBody EditCommunityRequest request) {
         request.setCommunityId(communityId);

@@ -1,0 +1,3 @@
+== Summary Community Top API V2
+
+operation::summary_community_top[snippets='http-request,http-response,response-fields']

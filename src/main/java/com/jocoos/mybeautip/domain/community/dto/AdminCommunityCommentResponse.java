@@ -21,6 +21,7 @@ public class AdminCommunityCommentResponse {
     private final Long id;
     private final CommunityStatus status;
     private final String contents;
+    private final String fileUrl;
     private final int likeCount;
     private final int reportCount;
     private AdminMemberResponse member;

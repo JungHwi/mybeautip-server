@@ -1,5 +1,8 @@
 package com.jocoos.mybeautip.domain.community.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.global.dto.FileDto;
+import com.jocoos.mybeautip.global.util.FileUtil;
 import com.jocoos.mybeautip.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +25,13 @@ public class WriteCommunityCommentRequest {
     private String contents;
 
     private Member member;
+
+    private FileDto file;
+
+    private String fileUrl;
+
+    @JsonIgnore
+    public String getFilename() {
+        return file == null ? null : FileUtil.getFileName(file.getUrl());
+    }
 }

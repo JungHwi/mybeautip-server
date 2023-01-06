@@ -34,3 +34,5 @@ Configutation:
         level: info
       - name: org.hibernate.type.descriptor.sql.BasicBinder # SQL Bind Parameter Log
         level: trace
+      - name: org.testcontainers
+        level: debug

@@ -1,0 +1,3 @@
+== Admin Edit Notice API
+
+operation::admin_edit_notice[snippets='http-request,path-parameters,request-fields,http-response,response-fields']

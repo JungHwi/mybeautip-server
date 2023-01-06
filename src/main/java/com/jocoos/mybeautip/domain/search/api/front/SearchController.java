@@ -21,14 +21,34 @@ import java.time.ZonedDateTime;
 
 @RequiredArgsConstructor
 @Validated
-@RequestMapping("/api/1")
+@RequestMapping("/api")
 @RestController
 public class SearchController {
 
     private final LegacyMemberService legacyMemberService;
     private final SearchService searchService;
 
-    @GetMapping("/search")
+    /**
+     * @deprecated
+     */
+    @Deprecated(since = "클라이언트 비디오 업로드 완성 후", forRemoval = true)
+    @GetMapping("/1/search")
+    public ResponseEntity<SearchResponse<?>> searchDeprecated(
+            @RequestParam(required = false, defaultValue = "COMMUNITY") SearchType type,
+            @RequestParam @KeywordConstraint String keyword,
+            @RequestParam(required = false) ZonedDateTime cursor,
+            @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
+
+        Member member = legacyMemberService.currentMember();
+        KeywordSearchCondition condition = new KeywordSearchCondition(keyword, member, cursor, size);
+
+        SearchResponse<?> response = searchService.search(type, condition, member);
+        response.toV1();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/2/search")
     public ResponseEntity<SearchResponse<?>> search(
             @RequestParam(required = false, defaultValue = "COMMUNITY") SearchType type,
             @RequestParam @KeywordConstraint String keyword,
@@ -41,7 +61,7 @@ public class SearchController {
         return ResponseEntity.ok(searchService.search(type, condition, member));
     }
 
-    @GetMapping("/search/count")
+    @GetMapping("/1/search/count")
     public ResponseEntity<CountResponse> searchCount(
             @RequestParam(required = false, defaultValue = "COMMUNITY") SearchType type,
             @RequestParam @KeywordConstraint String keyword) {

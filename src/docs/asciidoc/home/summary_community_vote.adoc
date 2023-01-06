@@ -1,3 +1,0 @@
-== Summary Community API
-
-operation::summary_community_vote[snippets='http-request,path-parameters,http-response,response-fields']

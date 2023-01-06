@@ -5,10 +5,12 @@ import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
 import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -29,8 +31,9 @@ public class AdminCommunityController {
     private final AdminCommunityService service;
 
     @PostMapping("/community")
-    public ResponseEntity<AdminCommunityResponse> write(@RequestBody WriteCommunityRequest request) {
-        AdminCommunityResponse response = service.write(request);
+    public ResponseEntity<AdminCommunityResponse> write(@CurrentMember MyBeautipUserDetails userDetails,
+                                                        @RequestBody WriteCommunityRequest request) {
+        AdminCommunityResponse response = service.write(request, userDetails.getMember());
         URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
                 .path("/{id}")
                 .buildAndExpand(response.getId())
@@ -51,7 +54,7 @@ public class AdminCommunityController {
     @GetMapping("/community")
     public ResponseEntity<PageResponse<AdminCommunityResponse>> getCommunities(
             @RequestParam(required = false, name = "category_id") Long categoryId,
-            @RequestParam(required = false, name= "event_id") Long eventId,
+            @RequestParam(required = false, name = "event_id") Long eventId,
             @RequestParam(required = false) CommunityStatus status,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,

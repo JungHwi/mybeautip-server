@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.WithUserDetails;
@@ -18,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*;
+import static com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
@@ -37,7 +40,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                 .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .post("/api/1/community")
+                        .post("/api/2/community")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -49,17 +52,22 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("event_id").type(JsonFieldType.NUMBER).description("이벤트 아이디. 드립N드림 일때 관련된 이벤트 아이디.").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목. 수근수근에서만 필수").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("['files']").type(JsonFieldType.ARRAY).description("파일 작업 정보 목록").optional(),
-                                fieldWithPath("['files'].operation").type(JsonFieldType.STRING).description("파일 상태").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.FILE_OPERATION_TYPE)),
-                                fieldWithPath("['files'].url").type(JsonFieldType.STRING).description("파일 URL")
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 작업 정보 목록").optional(),
+                                fieldWithPath("files.[].operation").type(JsonFieldType.STRING).description("파일 상태").description(generateLinkCode(FILE_OPERATION_TYPE)),
+                                fieldWithPath("files.[].type").type(JsonFieldType.STRING).description("파일 타입").description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                                fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL")
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
-                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_STATUS)),
                                 fieldWithPath("is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                                fieldWithPath("files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                                fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                                 fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                                 fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                                 fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
@@ -77,12 +85,12 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
                                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                                fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                                fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
                                 fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
                                 fieldWithPath("category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                         )
@@ -93,9 +101,10 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     @WithUserDetails(value = "4", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     void uploadFiles() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("files", "file", "image/jpeg", "mock".getBytes());
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .multipart("/api/1/community/files")
-                        .file("files", "mockup".getBytes()))
+                        .file(file))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -113,7 +122,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     void getCommunities() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community")
+                        .get("/api/2/community")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -130,11 +139,14 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("커뮤니티 글 목록"),
                                 fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("글 ID"),
                                 fieldWithPath("content.[].is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
-                                fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_STATUS)),
                                 fieldWithPath("content.[].event_id").type(JsonFieldType.NUMBER).description("이벤트 ID").optional(),
                                 fieldWithPath("content.[].title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용").optional(),
-                                fieldWithPath("content.[].['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("content.[].files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                                fieldWithPath("content.[].files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("content.[].files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                                fieldWithPath("content.[].files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                                 fieldWithPath("content.[].votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                                 fieldWithPath("content.[].votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                                 fieldWithPath("content.[].votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
@@ -152,12 +164,12 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("content.[].relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
                                 fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
                                 fieldWithPath("content.[].member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("content.[].member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("content.[].member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                                 fieldWithPath("content.[].member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
                                 fieldWithPath("content.[].category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
                                 fieldWithPath("content.[].category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                                fieldWithPath("content.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                                fieldWithPath("content.[].category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
                                 fieldWithPath("content.[].category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
                                 fieldWithPath("content.[].category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                         )
@@ -168,7 +180,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
     @Test
     void getCommunity() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .get("/api/1/community/{community_id}", 1)
+                        .get("/api/2/community/{community_id}", 1)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -179,13 +191,16 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
-                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_STATUS)),
                                 fieldWithPath("is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                                 fieldWithPath("event_id").type(JsonFieldType.NUMBER).description("이벤트 ID").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
                                 fieldWithPath("is_like").type(JsonFieldType.BOOLEAN).description("좋아요 여부").optional(),
-                                fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                                fieldWithPath("files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                                fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                                 fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                                 fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                                 fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
@@ -203,12 +218,12 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
                                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                                fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                                fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
                                 fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
                                 fieldWithPath("category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                         )
@@ -226,7 +241,7 @@ public class CommunityControllerTest extends RestDocsTestSupport {
         map.put("files", null);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .put("/api/1/community/{community_id}", 1)
+                        .put("/api/2/community/{community_id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(map)))
                 .andExpect(status().isOk())
@@ -239,17 +254,22 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                         requestFields(
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("['files']").type(JsonFieldType.ARRAY).description("파일 작업 정보 목록").optional(),
-                                fieldWithPath("['files'].operation").type(JsonFieldType.STRING).description("파일 상태").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.FILE_OPERATION_TYPE)),
-                                fieldWithPath("['files'].url").type(JsonFieldType.STRING).description("파일 URL")
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 작업 정보 목록").optional(),
+                                fieldWithPath("files.[].operation").type(JsonFieldType.STRING).description("파일 상태").description(generateLinkCode(FILE_OPERATION_TYPE)),
+                                fieldWithPath("files.[].type").type(JsonFieldType.STRING).description("파일 타입").description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                                fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL")
                         ),
                         responseFields(
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("글 ID"),
-                                fieldWithPath("status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_STATUS)),
+                                fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(COMMUNITY_STATUS)),
                                 fieldWithPath("is_win").type(JsonFieldType.BOOLEAN).description("당첨 여부. 현재는 드립N드림의 당첨 여부").optional(),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("['file_url']").type(JsonFieldType.ARRAY).description("파일 URL List").optional(),
+                                fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
+                                fieldWithPath("files.[].type").type(JsonFieldType.STRING).description(generateLinkCode(FILE_TYPE)),
+                                fieldWithPath("files.[].thumbnail_url").type(JsonFieldType.STRING).description("파일 썸네일 URL").optional(),
+                                fieldWithPath("files.[].url").type(JsonFieldType.STRING).description("파일 URL"),
                                 fieldWithPath("votes").type(JsonFieldType.ARRAY).description("투표 파일 List").optional(),
                                 fieldWithPath("votes.[].id").type(JsonFieldType.NUMBER).description("투표 파일 아이디"),
                                 fieldWithPath("votes.[].file_url").type(JsonFieldType.STRING).description("투표 파일 URL"),
@@ -267,12 +287,12 @@ public class CommunityControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("relation_info.is_scrap").type(JsonFieldType.BOOLEAN).description("글 스크랩 여부"),
                                 fieldWithPath("member").type(JsonFieldType.OBJECT).description("작성자 정보"),
                                 fieldWithPath("member.id").type(JsonFieldType.NUMBER).description("작성자 아이디").optional(),
-                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
+                                fieldWithPath("member.status").type(JsonFieldType.STRING).description(generateLinkCode(DocumentLinkGenerator.DocUrl.MEMBER_STATUS)),
                                 fieldWithPath("member.username").type(JsonFieldType.STRING).description("작성자 이름").optional(),
                                 fieldWithPath("member.avatar_url").type(JsonFieldType.STRING).description("작성자 아바타 URL").optional(),
                                 fieldWithPath("category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
                                 fieldWithPath("category.id").type(JsonFieldType.NUMBER).description("카테고리 아이디"),
-                                fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(DocumentLinkGenerator.generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
+                                fieldWithPath("category.type").type(JsonFieldType.STRING).description("카테고리 구분").description(generateLinkCode(DocumentLinkGenerator.DocUrl.COMMUNITY_CATEGORY_TYPE)),
                                 fieldWithPath("category.title").type(JsonFieldType.STRING).description("카테고리 제목"),
                                 fieldWithPath("category.hint").type(JsonFieldType.STRING).description("카테고리 힌트")
                         )

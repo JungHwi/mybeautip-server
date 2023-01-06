@@ -59,7 +59,7 @@ public class AdminEventService {
     }
 
     public List<String> upload(List<MultipartFile> files) {
-        return awsS3Handler.upload(files, UrlDirectory.TEMP.getDirectory());
+        return awsS3Handler.upload(files, UrlDirectory.TEMP_IMAGE.getDirectory());
     }
 
     @Transactional

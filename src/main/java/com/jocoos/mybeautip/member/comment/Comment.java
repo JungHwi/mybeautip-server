@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.member.comment;
 import com.jocoos.mybeautip.audit.MemberAuditable;
 import com.jocoos.mybeautip.global.code.CodeValue;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,6 +13,7 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import static com.jocoos.mybeautip.global.code.UrlDirectory.VIDEO_COMMENT;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 import static com.jocoos.mybeautip.member.comment.Comment.CommentState.*;
@@ -59,6 +61,9 @@ public class Comment extends MemberAuditable {
      */
     @Column
     private int state;
+
+    @Column
+    private String file;
 
     @Column(nullable = false)
     @LastModifiedDate
@@ -117,6 +122,10 @@ public class Comment extends MemberAuditable {
         if (createdBy.isAdmin() && !editor.isAdmin()) {
             throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin Can Accessible");
         }
+    }
+
+    public String getFileUrl() {
+        return ImageUrlConvertUtil.toUrl(file, VIDEO_COMMENT, id);
     }
 
     @Getter

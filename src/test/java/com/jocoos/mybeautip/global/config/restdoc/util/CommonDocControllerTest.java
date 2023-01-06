@@ -56,6 +56,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("FileOperationType")),
                                 enumConvertFieldDescriptor((enumDocs.getFileOperationType()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.file_type").withSubsectionId("file_type"),
+                                attributes(key("title").value("FileOperationType")),
+                                enumConvertFieldDescriptor((enumDocs.getFileType()))
+                        ),
                         customResponseFields("custom-response", beneathPath("data.sort_field").withSubsectionId("sort_field"),
                                 attributes(key("title").value("SortField")),
                                 enumConvertFieldDescriptor((enumDocs.getSortField()))
@@ -212,7 +216,16 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         ),
                         customResponseFields("custom-response", beneathPath("data.operation_target_type").withSubsectionId("operation_target_type"),
                                 attributes(key("title").value("OperationTargetType")),
-                                enumConvertFieldDescriptor((enumDocs.getOperationTargetType())))
+                                enumConvertFieldDescriptor((enumDocs.getOperationTargetType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.notice_status").withSubsectionId("notice_status"),
+                                attributes(key("title").value("NoticeStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getNoticeStatus()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.notice_sort").withSubsectionId("notice_sort"),
+                                attributes(key("title").value("NoticeSort")),
+                                enumConvertFieldDescriptor((enumDocs.getNoticeSort()))
+                        )
                 ));
     }
 

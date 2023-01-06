@@ -87,6 +87,14 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     }
 
     @Override
+    public void addViewCount(Long videoId, int addCount) {
+        repository.update(query -> query
+                .set(video.viewCount, video.viewCount.add(addCount))
+                .where(eqId(videoId))
+                .execute());
+    }
+
+    @Override
     public long bulkUpdateStatus(List<Video> videos, VideoStatus status) {
         return repository.update(query -> query
                 .set(video.status, status)

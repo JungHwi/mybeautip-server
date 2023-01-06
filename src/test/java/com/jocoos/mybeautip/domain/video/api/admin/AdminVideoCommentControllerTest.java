@@ -30,7 +30,7 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     @Transactional
     void writeVideoComment() throws Exception {
-        WriteVideoCommentRequest request = new WriteVideoCommentRequest("content", null);
+        WriteVideoCommentRequest request = new WriteVideoCommentRequest("content", null, null);
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .post("/admin/video/{video_id}/comment", 3)
@@ -51,6 +51,7 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
                                 fieldWithPath("id").type(JsonFieldType.NUMBER).description("댓글 아이디"),
                                 fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(VIDEO_COMMENT_STATUS)),
                                 fieldWithPath("contents").type(JsonFieldType.STRING).description("내용"),
+                                fieldWithPath("file_url").type(JsonFieldType.STRING).description("이미지 URL").optional(),
                                 fieldWithPath("like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                                 fieldWithPath("report_count").type(JsonFieldType.NUMBER).description("신고수"),
                                 fieldWithPath("created_at").type(JsonFieldType.STRING).description("작성일").attributes(getZonedDateFormat()),
@@ -115,6 +116,7 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("비디오 댓글 ID"),
                         fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(VIDEO_COMMENT_STATUS)),
                         fieldWithPath("content.[].contents").type(JsonFieldType.STRING).description("내용"),
+                        fieldWithPath("content.[].file_url").type(JsonFieldType.STRING).description("이미지 URL").optional(),
                         fieldWithPath("content.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수"),
                         fieldWithPath("content.[].report_count").type(JsonFieldType.NUMBER).description("신고수"),
                         fieldWithPath("content.[].member").type(JsonFieldType.OBJECT).description("작성자 정보."),
@@ -129,6 +131,7 @@ class AdminVideoCommentControllerTest extends RestDocsTestSupport {
                         fieldWithPath("content.[].children.[].id").type(JsonFieldType.NUMBER).description("비디오 댓글 ID").optional().ignored(),
                         fieldWithPath("content.[].children.[].status").type(JsonFieldType.STRING).description(generateLinkCode(VIDEO_COMMENT_STATUS)).optional().ignored(),
                         fieldWithPath("content.[].children.[].contents").type(JsonFieldType.STRING).description("내용").optional().ignored(),
+                        fieldWithPath("content.[].children.[].file_url").type(JsonFieldType.STRING).description("이미지 URL").optional().ignored(),
                         fieldWithPath("content.[].children.[].like_count").type(JsonFieldType.NUMBER).description("좋아요수").optional().ignored(),
                         fieldWithPath("content.[].children.[].report_count").type(JsonFieldType.NUMBER).description("신고수").optional().ignored(),
                         fieldWithPath("content.[].children.[].member").type(JsonFieldType.OBJECT).description("작성자 정보.").optional().ignored(),

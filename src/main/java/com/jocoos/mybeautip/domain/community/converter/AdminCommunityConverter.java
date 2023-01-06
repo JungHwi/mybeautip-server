@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {CommunityFileConverter.class})
 public abstract class AdminCommunityConverter {
 
     public abstract List<CommunityCategoryResponse> convert(List<CommunityCategory> adminCategories);

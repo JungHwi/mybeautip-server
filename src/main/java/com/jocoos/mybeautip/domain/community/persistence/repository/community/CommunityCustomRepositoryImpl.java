@@ -303,7 +303,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .transform(groupBy(communityFile.community.id).as(list(communityFile))));
 
         for (SummaryCommunityResult result : results) {
-            result.setThumbnailUrl(fileMap);
+            result.setThumbnailFile(fileMap);
         }
 
         return results;

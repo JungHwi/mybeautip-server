@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.search.dto;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.Getter;
@@ -40,5 +41,15 @@ public class SearchResponse<T extends CursorInterface> extends CursorResultRespo
         maps.put(VIDEO.name().toLowerCase(), super.getContent());
         super.contentToNull();
         return this;
+    }
+
+    public void toV1() {
+        Object o = maps.get(COMMUNITY.name().toLowerCase());
+        if (o instanceof List<?> list) {
+            List<CommunityResponse> communityResponses = (List<CommunityResponse>) list;
+            for (CommunityResponse communityResponse : communityResponses) {
+                communityResponse.toV1();
+            }
+        }
     }
 }

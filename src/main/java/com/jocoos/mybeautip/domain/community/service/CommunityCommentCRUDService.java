@@ -7,8 +7,6 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.member.LegacyMemberService;
-import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -20,19 +18,18 @@ public class CommunityCommentCRUDService {
 
     private final CommunityDao communityDao;
     private final CommunityCommentDao dao;
-    private final LegacyMemberService legacyMemberService;
+    private final CommunityFileService fileService;
 
 
     @Transactional
     public CommunityComment write(WriteCommunityCommentRequest request) {
         valid(request);
-        Member member = legacyMemberService.currentMember();
-        request.setMember(member);
 
         Community community = communityDao.get(request.getCommunityId());
         request.setCategoryId(community.getCategoryId());
 
         CommunityComment communityComment = dao.write(request);
+        fileService.write(request.getFile(), communityComment.getId());
 
         if (community.getCategory().getType() == CommunityCategoryType.BLIND) {
             communityDao.updateSortedAt(community.getId());

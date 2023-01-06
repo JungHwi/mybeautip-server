@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.member.converter;
 
-import com.jocoos.mybeautip.admin.AdminMember;
 import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
@@ -21,8 +20,8 @@ public interface MemberConverter {
     SimpleMemberInfo convertToSimple(Member member);
 
     @AfterMapping
-    default void convertToAdminMember(@MappingTarget SimpleMemberInfo response, AdminMember adminMember) {
-        response.setAvatarUrl(toUrl(adminMember.getMember().getAvatarFilename(), AVATAR));
+    default void convertToSimple(@MappingTarget SimpleMemberInfo response, Member member) {
+        response.setAvatarUrl(toUrl(member.getAvatarFilename(), AVATAR));
     }
 
     @Mappings({
