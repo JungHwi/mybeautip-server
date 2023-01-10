@@ -31,7 +31,8 @@ public class NoticeDao {
         notice.editTitle(request.getTitle());
         notice.editDescription(request.getDescription());
         notice.editFiles(request.getFiles());
-
+        notice.editVisible(request.getIsVisible());
+        notice.editImportant(request.getIsImportant());
         return notice;
     }
 

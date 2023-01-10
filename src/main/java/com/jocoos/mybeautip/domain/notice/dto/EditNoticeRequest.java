@@ -18,6 +18,8 @@ public class EditNoticeRequest {
 
     private Boolean isVisible;
 
+    private Boolean isImportant;
+
     private String title;
 
     private String description;
