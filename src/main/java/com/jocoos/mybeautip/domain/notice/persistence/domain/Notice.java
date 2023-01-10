@@ -66,6 +66,14 @@ public class Notice extends AllBaseEntity {
         this.description = description;
     }
 
+    public void editVisible(Boolean isVisible) {
+        this.isVisible = isVisible;
+    }
+
+    public void editImportant(Boolean isImportant) {
+        this.isImportant = isImportant;
+    }
+
     public void addFile(FileDto file) {
         if (file.getOperation() != FileOperationType.UPLOAD) {
             return;
