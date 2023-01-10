@@ -1,16 +1,14 @@
 package com.jocoos.mybeautip.domain.notice.dto;
 
 import com.jocoos.mybeautip.global.dto.FileDto;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@Builder
 @AllArgsConstructor
 public class EditNoticeRequest {
 

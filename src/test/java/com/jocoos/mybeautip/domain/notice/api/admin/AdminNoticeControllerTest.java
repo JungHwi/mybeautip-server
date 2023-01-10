@@ -80,7 +80,12 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
     @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
     @Transactional
     void edit() throws Exception {
-        EditNoticeRequest request = new EditNoticeRequest(null, true, "EDIT TEST TITLE", "EDIT TEST DESCRIPTION", null);
+        EditNoticeRequest request = EditNoticeRequest.builder()
+                .isVisible(true)
+                .isImportant(true)
+                .title("EDIT TEST TITLE")
+                .description("EDIT TEST DESCRIPTION")
+                .build();
 
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
                         .put("/admin/notice/{noticeId}", 1)
@@ -95,6 +100,7 @@ class AdminNoticeControllerTest extends RestDocsTestSupport {
                         ),
                         requestFields(
                                 fieldWithPath("is_visible").type(JsonFieldType.BOOLEAN).description("노출 여부"),
+                                fieldWithPath("is_important").type(JsonFieldType.BOOLEAN).description("중요 공지 여부"),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목").optional(),
                                 fieldWithPath("description").type(JsonFieldType.STRING).description("상세 내용"),
                                 fieldWithPath("files").type(JsonFieldType.ARRAY).description("파일 List").optional(),
