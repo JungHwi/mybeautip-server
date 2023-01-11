@@ -8,10 +8,7 @@ import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import io.jsonwebtoken.lang.Collections;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import javax.persistence.*;

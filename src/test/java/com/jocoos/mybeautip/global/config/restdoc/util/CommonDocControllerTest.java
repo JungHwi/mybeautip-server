@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.global.config.restdoc.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
-import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -21,7 +21,7 @@ import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class CommonDocControllerTest extends RestDocsTestSupport {
+public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
 
     @Test
     public void enums() throws Exception {

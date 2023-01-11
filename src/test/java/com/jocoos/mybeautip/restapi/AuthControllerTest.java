@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport;
 
-class AuthControllerTest extends RestDocsTestSupport {
+class AuthControllerTest extends RestDocsIntegrationTestSupport {
 
 //    @Test
 //    void getTokenForApp() throws Exception {
