@@ -10,7 +10,6 @@ import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
 import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
-import com.jocoos.mybeautip.restapi.dto.SignupRequest
 import com.jocoos.mybeautip.security.JwtTokenProvider
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
