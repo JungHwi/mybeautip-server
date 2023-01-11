@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.member.vo.BirthdayAttributeConverter;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned
 @AllArgsConstructor
 @Slf4j
 @EqualsAndHashCode(callSuper = false)
+@Builder
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "members")

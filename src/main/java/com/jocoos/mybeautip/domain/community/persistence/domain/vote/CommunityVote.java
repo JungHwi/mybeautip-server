@@ -29,6 +29,11 @@ public class CommunityVote {
     @Column
     private int voteCount;
 
+    public CommunityVote(CommunityFile communityFile) {
+        this.communityFile = communityFile;
+        this.voteCount = 0;
+    }
+
     public CommunityVote(Community community, CommunityFile communityFile) {
         this.communityFile = communityFile;
         this.community = community;

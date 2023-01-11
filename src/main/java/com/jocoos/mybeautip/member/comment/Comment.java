@@ -19,6 +19,7 @@ import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned
 import static com.jocoos.mybeautip.member.comment.Comment.CommentState.*;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity

@@ -1,8 +1,7 @@
 package com.jocoos.mybeautip.member.address;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.LastModifiedDate;
 

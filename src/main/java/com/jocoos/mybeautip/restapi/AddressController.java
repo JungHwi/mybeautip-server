@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.address.Address;
 import com.jocoos.mybeautip.member.address.AddressRepository;
 import com.jocoos.mybeautip.member.address.AddressService;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,6 +81,7 @@ public class AddressController {
     }
 
     @Data
+    @AllArgsConstructor
     public static class CreateAddressRequest {
         private Boolean base;
 

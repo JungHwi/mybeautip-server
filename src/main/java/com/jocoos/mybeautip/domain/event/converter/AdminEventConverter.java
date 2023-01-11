@@ -20,7 +20,7 @@ import java.util.Map;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static java.lang.Boolean.TRUE;
 
-@Mapper(componentModel = "spring", uses = {AdminEventProductConverter.class})
+@Mapper(componentModel = "spring", uses = {AdminEventProductConverter.class}, builder = @Builder(disableBuilder = true))
 public abstract class AdminEventConverter {
 
     public List<AdminEventResponse> convert(List<EventSearchResult> results) {
