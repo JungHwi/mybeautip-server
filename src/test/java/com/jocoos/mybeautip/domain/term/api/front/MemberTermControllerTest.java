@@ -1,17 +1,17 @@
-package com.jocoos.mybeautip.domain.term;
+package com.jocoos.mybeautip.domain.term.api.front;
 
 import com.jocoos.mybeautip.domain.term.dto.TermTypeRequest;
 import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
-import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport;
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.security.annotation.WithMockCustomUser;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class MemberTermControllerTest extends RestDocsTestSupport {
+class MemberTermControllerTest extends RestDocsIntegrationTestSupport {
     @MockBean
     private MemberTermService memberTermService;
 
@@ -36,21 +36,19 @@ class MemberTermControllerTest extends RestDocsTestSupport {
     private LegacyMemberService legacyMemberService;
 
     @DisplayName("[PATCH] /api/1/member/me/term/option/change - 선택 약관 동의로 변경 성공")
-    @WithMockCustomUser
     @Test
     void changeOptionalTermTrueByTypeSuccess() throws Exception {
 
         TermTypeRequest request = new TermTypeRequest(MARKETING_INFO, true);
         TermTypeResponse response = TermTypeResponse.builder().termType(MARKETING_INFO).isAccept(true).build();
 
-        long userId = getUserId();
-
-        given(legacyMemberService.currentMemberId()).willReturn(userId);
-        given(memberTermService.changeOptionalTermByType(request.getTermType(), userId, request.getIsAccept()))
+        given(legacyMemberService.currentMemberId()).willReturn(requestUser.getId());
+        given(memberTermService.changeOptionalTermByType(request.getTermType(), requestUser.getId(), request.getIsAccept()))
                 .willReturn(response);
 
         ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                         .patch("/api/1/member/me/term/option/change")
+                        .header(HttpHeaders.AUTHORIZATION, requestUserToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("utf-8")
                         .content(objectMapper.writeValueAsString(request)))
@@ -64,18 +62,17 @@ class MemberTermControllerTest extends RestDocsTestSupport {
     }
 
     @DisplayName("[PATCH] /api/1/member/me/term/option/change - 필수 약관은 선택 변경 불가")
-    @WithMockCustomUser
     @Test
     void changeOptionalTermFail() throws Exception {
         TermTypeRequest request = new TermTypeRequest(OVER_14, false);
         BadRequestException exception = new BadRequestException("only optional term can change");
-        long userId = getUserId();
 
-        given(legacyMemberService.currentMemberId()).willReturn(userId);
-        given(memberTermService.changeOptionalTermByType(request.getTermType(), userId, request.getIsAccept()))
+        given(legacyMemberService.currentMemberId()).willReturn(requestUser.getId());
+        given(memberTermService.changeOptionalTermByType(request.getTermType(), requestUser.getId(), request.getIsAccept()))
                 .willThrow(exception);
 
         mockMvc.perform(patch("/api/1/member/me/term/option/change")
+                        .header(HttpHeaders.AUTHORIZATION, requestUserToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("utf-8")
                         .content(objectMapper.writeValueAsString(request)))
