@@ -3,7 +3,7 @@ package com.jocoos.mybeautip.domain.member.api.front;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.MemberSignupService;
 import com.jocoos.mybeautip.domain.term.code.TermType;
-import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport;
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
@@ -45,7 +45,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Slf4j
-class SignupControllerTest extends RestDocsTestSupport {
+class SignupControllerTest extends RestDocsIntegrationTestSupport {
 
     @MockBean
     MemberSignupService signupService;
