@@ -11,13 +11,13 @@ import com.jocoos.mybeautip.domain.event.dto.EventProductRequest
 import com.jocoos.mybeautip.domain.event.dto.EventRequest
 import com.jocoos.mybeautip.domain.event.persistence.domain.Event
 import com.jocoos.mybeautip.domain.event.persistence.repository.EventRepository
-import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.constant.MybeautipConstant.TEST_FILE_URL
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
+import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
 import com.jocoos.mybeautip.testutil.fixture.makeEvent
 import com.jocoos.mybeautip.testutil.fixture.makeEvents
 import org.junit.jupiter.api.Test
@@ -28,6 +28,7 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
+import org.springframework.security.test.context.support.WithUserDetails
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -169,27 +170,29 @@ class AdminEventControllerTest(
         )
     }
 
-//    @Test
-//    @WithUserDetails(value = "1", userDetailsServiceBeanName = "mybeautipUserDetailsService")
-//    fun uploadFiles() {
-//        val result: ResultActions = mockMvc.perform(
-//            multipart("/admin/event/files")
-//                .file("files", "mockup".toByteArray())
-//        )
-//            .andExpect(status().isOk)
-//            .andDo(print())
-//        result.andDo(
-//            document(
-//                "admin_upload_event_file",
-//                RequestDocumentation.requestParts(
-//                    RequestDocumentation.partWithName("files").description("업로드할 파일 목록")
-//                ),
-//                responseFields(
-//                    fieldWithPath("[]").type(ARRAY).description("UPLOAD 된 파일 URL")
-//                )
-//            )
-//        )
-//    }
+    @Test
+    fun uploadFiles() {
+        val result = mockMvc
+            .perform(
+                multipart("/admin/event/files")
+                    .file("files", "mockup".toByteArray())
+                    .header(AUTHORIZATION, defaultAdminToken)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_upload_event_file",
+                requestParts(
+                    partWithName("files").description("업로드할 파일 목록")
+                ),
+                responseFields(
+                    fieldWithPath("[]").type(ARRAY).description("UPLOAD 된 파일 URL")
+                )
+            )
+        )
+    }
 
     @Test
     fun createEvent() {

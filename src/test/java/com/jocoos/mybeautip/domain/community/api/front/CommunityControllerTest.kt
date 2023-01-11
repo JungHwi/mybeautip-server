@@ -11,7 +11,6 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRep
 import com.jocoos.mybeautip.domain.notification.code.TemplateType.COMMUNITY_LIKE_1
 import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationMessageCenterRepository
 import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationMessagePushRepository
-import com.jocoos.mybeautip.testutil.fixture.*
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
@@ -19,6 +18,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.gen
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
+import com.jocoos.mybeautip.testutil.fixture.*
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -27,11 +27,13 @@ import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
+import org.springframework.security.test.context.support.WithUserDetails
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -538,6 +540,35 @@ class CommunityControllerTest(
                     fieldWithPath("community_id").type(NUMBER).description("스크랩 커뮤니티 아이디"),
                     fieldWithPath("is_scrap").type(BOOLEAN).description("스크랩 여부"),
                     fieldWithPath("created_at").type(STRING).description("스크랩 생성일시")
+                )
+            )
+        )
+    }
+
+    @Test
+    fun uploadFiles() {
+
+        // given
+        val file = MockMultipartFile("files", "file", "image/jpeg", "mock".toByteArray())
+
+        // when & then
+        val result = mockMvc
+            .perform(
+                multipart("/api/1/community/files")
+                    .file(file)
+                    .header(AUTHORIZATION, defaultAdminToken)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "upload_file_community",
+                requestParts(
+                    partWithName("files").description("업로드할 파일 목록")
+                ),
+                responseFields(
+                    fieldWithPath("[]").type(ARRAY).description("UPLOAD 된 파일 URL")
                 )
             )
         )
