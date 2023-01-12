@@ -75,14 +75,14 @@ public class CommunityComment extends BaseEntity {
         return this;
     }
 
-    public void edit(String contents, Files files, Member editMember) {
-        validOnlyOneFile(files);
-        validSameWriter(editMember);
+    public void edit(String editedContents, Files files, Member editor) {
+        validIsSingleFile(files);
+        validSameWriter(editor);
 
-        String filenameToSet = files.getUploadFilename(file);
-        validContents(contents, filenameToSet);
-        this.contents = contents;
-        this.file = filenameToSet;
+        String editedFilename = files.getUploadFilename(file);
+        validContents(editedContents, editedFilename);
+        this.contents = editedContents;
+        this.file = editedFilename;
     }
 
     public void valid() {
@@ -117,7 +117,7 @@ public class CommunityComment extends BaseEntity {
         return file != null;
     }
 
-    private void validOnlyOneFile(Files files) {
+    private void validIsSingleFile(Files files) {
         if (containFile() && files.isOnlyUpload()) {
             throw new BadRequestException("comment already had file. delete needed");
         }
