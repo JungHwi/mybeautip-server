@@ -118,16 +118,16 @@ public class CommunityComment extends BaseEntity {
         }
     }
 
-    private void validEditAuth(Member editMember) {
-        if (Role.isAdmin(editMember)) {
+    private void validEditAuth(Member editor) {
+        if (Role.isAdmin(editor)) {
             validAdminWrite();
             return;
         }
-        validSameWriter(editMember);
+        validSameWriter(editor);
     }
 
-    private void validSameWriter(Member editMember) {
-        if (!member.getId().equals(editMember.getId())) {
+    private void validSameWriter(Member editor) {
+        if (!member.getId().equals(editor.getId())) {
             throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
         }
     }

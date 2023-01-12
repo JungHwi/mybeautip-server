@@ -118,13 +118,13 @@ public class Comment extends MemberAuditable {
         return parentId != null;
     }
 
-    public void edit(String editComment, Files editFiles, Member editMember) {
-        validOnlyOneFile(editFiles);
-        validEditAuth(editMember);
+    public void edit(String editedComment, Files editedFiles, Member editor) {
+        validOnlyOneFile(editedFiles);
+        validEditAuth(editor);
 
-        String editFilename = editFiles.getUploadFilename(file);
-        validContents(editComment, editFilename);
-        this.comment = editComment;
+        String editFilename = editedFiles.getUploadFilename(file);
+        validContents(editedComment, editFilename);
+        this.comment = editedComment;
         this.file = editFilename;
     }
 
@@ -136,16 +136,16 @@ public class Comment extends MemberAuditable {
         validContents(this.comment, this.file);
     }
 
-    private void validEditAuth(Member editMember) {
-        if (Role.isAdmin(editMember)) {
+    private void validEditAuth(Member editor) {
+        if (Role.isAdmin(editor)) {
             validAdminWrite();
             return;
         }
-        validSameWriter(editMember);
+        validSameWriter(editor);
     }
 
-    private void validSameWriter(Member editMember) {
-        if (!createdBy.getId().equals(editMember.getId())) {
+    private void validSameWriter(Member editor) {
+        if (!createdBy.getId().equals(editor.getId())) {
             throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
         }
     }
