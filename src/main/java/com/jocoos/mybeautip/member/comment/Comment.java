@@ -132,6 +132,10 @@ public class Comment extends MemberAuditable {
         return ImageUrlConvertUtil.toUrl(file, VIDEO_COMMENT, id);
     }
 
+    public void valid() {
+        validContents(this.comment, this.file);
+    }
+
     private void validEditAuth(Member editMember) {
         if (Role.isAdmin(editMember)) {
             validAdminWrite();
