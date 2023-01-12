@@ -118,7 +118,7 @@ public class CommunityComment extends BaseEntity {
     }
 
     private void validIsSingleFile(Files files) {
-        if (containFile() && files.isOnlyUpload()) {
+        if (containFile() && files.isSingleUpload()) {
             throw new BadRequestException("comment already had file. delete needed");
         }
     }

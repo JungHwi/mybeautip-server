@@ -27,7 +27,7 @@ public class Files {
                 .orElse(null);
     }
 
-    public boolean isOnlyUpload() {
+    public boolean isSingleUpload() {
         return fileCollection.size() == 1 && countUploadFile() == 1;
     }
 
