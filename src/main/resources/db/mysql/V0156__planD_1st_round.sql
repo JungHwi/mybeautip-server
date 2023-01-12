@@ -22,6 +22,7 @@ create table notice_file (
 ) comment '공지사항 파일 정보';
 
 alter table community_comment add column file char(16) after contents;
+alter table community_comment change column contents contents text comment '내용';
 alter table comments add column file char(16) after comment;
 alter table community_file add column type varchar(20) after community_id;
 
@@ -32,6 +33,7 @@ alter table community_file add column type varchar(20) after community_id;
 # drop table notice;
 # drop table notice_file;
 # alter table community_comment drop column file;
+# alter table community_comment change column contents contents text not null comment '내용';
 # alter table comments drop column file;
 # alter table community_file drop column type;
 # delete from flyway_schema_history where version = '0156';
