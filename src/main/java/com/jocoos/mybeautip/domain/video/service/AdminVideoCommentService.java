@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.video.service;
 
 import com.jocoos.mybeautip.domain.video.converter.VideoCommentConverter;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoCommentResponse;
+import com.jocoos.mybeautip.domain.video.dto.WriteVideoCommentRequest;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoCommentDao;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
@@ -23,8 +24,8 @@ public class AdminVideoCommentService {
     private final VideoCommentConverter converter;
 
     @Transactional
-    public AdminVideoCommentResponse write(Long videoId, String content, Long parentId) {
-        Comment comment = converter.convert(videoId, content, parentId);
+    public AdminVideoCommentResponse write(Long videoId, WriteVideoCommentRequest request) {
+        Comment comment = converter.convert(videoId, request);
         Comment savedComment = videoCommentDao.save(comment);
         updateCommentCount(videoId, savedComment);
         return new AdminVideoCommentResponse(savedComment);
