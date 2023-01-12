@@ -18,6 +18,6 @@ public interface VideoCommentConverter {
 
     @AfterMapping
     default void convert(@MappingTarget Comment comment, WriteVideoCommentRequest request) {
-        comment.setFile(request.getFilename());
+        comment.setFile(request.filename());
     }
 }

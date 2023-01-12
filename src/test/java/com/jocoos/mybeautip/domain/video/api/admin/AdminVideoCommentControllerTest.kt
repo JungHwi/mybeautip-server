@@ -1,12 +1,16 @@
 package com.jocoos.mybeautip.domain.video.api.admin
 
+import com.jocoos.mybeautip.domain.video.dto.PatchVideoCommentRequest
 import com.jocoos.mybeautip.domain.video.dto.WriteVideoCommentRequest
 import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository
+import com.jocoos.mybeautip.global.code.FileOperationType
+import com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.testutil.fixture.makeVideo
 import com.jocoos.mybeautip.testutil.fixture.makeVideoCategory
@@ -22,6 +26,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import org.openapitools.jackson.nullable.JsonNullable
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -62,7 +67,8 @@ class AdminVideoCommentControllerTest(
     fun writeVideoComment() {
 
         // given
-        val request = WriteVideoCommentRequest("content", null, null)
+        val file = FileDto(UPLOAD, "url")
+        val request = WriteVideoCommentRequest("content", file, null)
 
         // when & then
         val result = mockMvc.perform(
@@ -82,7 +88,11 @@ class AdminVideoCommentControllerTest(
                 ),
                 requestFields(
                     fieldWithPath("parent_id").type(NUMBER).description("부모 댓글 아이디").optional(),
-                    fieldWithPath("contents").type(STRING).description("내용")
+                    fieldWithPath("contents").type(STRING).description("내용").optional(),
+                    fieldWithPath("file").type(OBJECT).description("파일 객체").optional(),
+                    fieldWithPath("file.type").type(OBJECT).description("파일 타입").ignored(),
+                    fieldWithPath("file.operation").type(STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
+                    fieldWithPath("file.url").type(STRING).description("파일 URL"),
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 아이디"),
@@ -106,10 +116,13 @@ class AdminVideoCommentControllerTest(
     @Test
     fun editVideoComment() {
 
+        // given
         val commentId: Long = makeVideoComment()
-        val request = mapOf("contents" to "Test Contents")
 
+        val editFiles = listOf(FileDto(UPLOAD, "url"))
+        val request = PatchVideoCommentRequest(JsonNullable.of("edit contents"), editFiles)
 
+        // when & then
         val result = mockMvc
             .perform(
                 patch("/admin/video/{video_id}/comment/{comment_id}", video.id, commentId)
@@ -128,7 +141,11 @@ class AdminVideoCommentControllerTest(
                     parameterWithName("comment_id").description("댓글 ID")
                 ),
                 requestFields(
-                    fieldWithPath("contents").type(STRING).description("내용")
+                    fieldWithPath("contents").type(STRING).description("내용"),
+                    fieldWithPath("files").type(ARRAY).description("파일 객체").optional(),
+                    fieldWithPath("files.[].type").type(OBJECT).description("파일 타입").ignored(),
+                    fieldWithPath("files.[].operation").type(STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
+                    fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 ID")

@@ -7,7 +7,7 @@ public record WriteVideoCommentRequest(String contents,
                                        FileDto file,
                                        Long parentId) {
 
-    public String getFilename() {
+    public String filename() {
         return file == null ? null : FileUtil.getFileName(file.getUrl());
     }
 }
