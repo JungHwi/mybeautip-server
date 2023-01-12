@@ -1,9 +1,12 @@
 package com.jocoos.mybeautip.member.comment;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.code.CodeValue;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.util.ImageUrlConvertUtil;
+import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -17,6 +20,7 @@ import static com.jocoos.mybeautip.global.code.UrlDirectory.VIDEO_COMMENT;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 import static com.jocoos.mybeautip.member.comment.Comment.CommentState.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -114,19 +118,50 @@ public class Comment extends MemberAuditable {
         return parentId != null;
     }
 
-    public void editComment(String editedComment, Member editor) {
-        validEditAuth(editor);
-        this.comment = editedComment;
-    }
+    public void edit(String editComment, Files editFiles, Member editMember) {
+        validOnlyOneFile(editFiles);
+        validEditAuth(editMember);
 
-    private void validEditAuth(Member editor) {
-        if (createdBy.isAdmin() && !editor.isAdmin()) {
-            throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin Can Accessible");
-        }
+        String editFilename = editFiles.getUploadFilename(file);
+        validContents(editComment, editFilename);
+        this.comment = editComment;
+        this.file = editFilename;
     }
 
     public String getFileUrl() {
         return ImageUrlConvertUtil.toUrl(file, VIDEO_COMMENT, id);
+    }
+
+    private void validEditAuth(Member editMember) {
+        if (Role.isAdmin(editMember)) {
+            validAdminWrite();
+            return;
+        }
+        validSameWriter(editMember);
+    }
+
+    private void validSameWriter(Member editMember) {
+        if (!createdBy.getId().equals(editMember.getId())) {
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
+        }
+    }
+
+    private void validAdminWrite() {
+        if (!Role.isAdmin(createdBy)) {
+            throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin is Deletable");
+        }
+    }
+
+    private void validOnlyOneFile(Files files) {
+        if (file != null && files.isSingleUpload()) {
+            throw new BadRequestException("comment already had file. delete needed");
+        }
+    }
+
+    private void validContents(String contents, String file) {
+        if (isBlank(contents) && isBlank(file)) {
+            throw new BadRequestException("Content And File must not be empty.");
+        }
     }
 
     @Getter

@@ -43,7 +43,7 @@ public class AdminVideoCommentController {
                                       @PathVariable Long commentId,
                                       @CurrentMember MyBeautipUserDetails userDetails,
                                       @RequestBody @Valid PatchVideoCommentRequest request) {
-        return ResponseEntity.ok(new IdDto(service.edit(videoId, commentId, userDetails.getMember(), request.getContents())));
+        return ResponseEntity.ok(new IdDto(service.edit(videoId, commentId, userDetails.getMember(), request)));
     }
 
     @GetMapping("/video/{videoId}/comment")

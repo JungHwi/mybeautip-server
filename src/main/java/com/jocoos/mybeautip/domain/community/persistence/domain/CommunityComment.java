@@ -12,7 +12,6 @@ import lombok.*;
 import javax.persistence.*;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
-import static com.jocoos.mybeautip.domain.member.code.Role.ADMIN;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
@@ -77,7 +76,7 @@ public class CommunityComment extends BaseEntity {
 
     public void edit(String editedContents, Files files, Member editor) {
         validIsSingleFile(files);
-        validSameWriter(editor);
+        validEditAuth(editor);
 
         String editedFilename = files.getUploadFilename(file);
         validContents(editedContents, editedFilename);
@@ -105,10 +104,6 @@ public class CommunityComment extends BaseEntity {
         return this.status == status;
     }
 
-    public boolean isNotAdminWrite() {
-        return !Role.from(member).equals(ADMIN);
-    }
-
     public String getFileUrl() {
         return toUrl(file, COMMUNITY_COMMENT, id);
     }
@@ -123,8 +118,8 @@ public class CommunityComment extends BaseEntity {
         }
     }
 
-    private void validEditMember(Member editMember) {
-        if (ADMIN.equals(Role.from(editMember))) {
+    private void validEditAuth(Member editMember) {
+        if (Role.isAdmin(editMember)) {
             validAdminWrite();
             return;
         }
@@ -138,7 +133,7 @@ public class CommunityComment extends BaseEntity {
     }
 
     private void validAdminWrite() {
-        if (isNotAdminWrite()) {
+        if (!Role.isAdmin(member)) {
             throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin is Deletable");
         }
     }
