@@ -3,18 +3,21 @@ package com.jocoos.mybeautip.domain.community.persistence.domain;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
 import static com.jocoos.mybeautip.domain.member.code.Role.ADMIN;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static lombok.AccessLevel.PROTECTED;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Getter
 @Setter
@@ -72,19 +75,18 @@ public class CommunityComment extends BaseEntity {
         return this;
     }
 
-    public void setContents(String contents) {
-        validContents(contents);
+    public void edit(String contents, Files files, Member editMember) {
+        validOnlyOneFile(files);
+        validSameWriter(editMember);
+
+        String filenameToSet = files.getUploadFilename(file);
+        validContents(contents, filenameToSet);
         this.contents = contents;
+        this.file = filenameToSet;
     }
 
     public void valid() {
-        validContents(this.contents);
-    }
-
-    private void validContents(String contents) {
-        if (StringUtils.isBlank(contents)) {
-            throw new BadRequestException("Content must not be empty.");
-        }
+        validContents(this.contents, this.file);
     }
 
     public boolean isCommentSameOrLongerThan(int length) {
@@ -113,5 +115,23 @@ public class CommunityComment extends BaseEntity {
 
     public boolean containFile() {
         return file != null;
+    }
+
+    private void validOnlyOneFile(Files files) {
+        if (containFile() && files.isOnlyUpload()) {
+            throw new BadRequestException("comment already had file. delete needed");
+        }
+    }
+
+    private void validSameWriter(Member editMember) {
+        if (!member.getId().equals(editMember.getId())) {
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
+        }
+    }
+
+    private void validContents(String contents, String file) {
+        if (isBlank(contents) && isBlank(file)) {
+            throw new BadRequestException("Content And File must not be empty.");
+        }
     }
 }
