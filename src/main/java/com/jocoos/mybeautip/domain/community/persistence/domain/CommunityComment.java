@@ -105,8 +105,8 @@ public class CommunityComment extends BaseEntity {
         return this.status == status;
     }
 
-    public boolean isAdminWrite() {
-        return Role.from(member).equals(ADMIN);
+    public boolean isNotAdminWrite() {
+        return !Role.from(member).equals(ADMIN);
     }
 
     public String getFileUrl() {
@@ -123,9 +123,23 @@ public class CommunityComment extends BaseEntity {
         }
     }
 
+    private void validEditMember(Member editMember) {
+        if (ADMIN.equals(Role.from(editMember))) {
+            validAdminWrite();
+            return;
+        }
+        validSameWriter(editMember);
+    }
+
     private void validSameWriter(Member editMember) {
         if (!member.getId().equals(editMember.getId())) {
             throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
+        }
+    }
+
+    private void validAdminWrite() {
+        if (isNotAdminWrite()) {
+            throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin is Deletable");
         }
     }
 
