@@ -16,6 +16,7 @@ public class Files {
         this.fileCollection = List.of();
     }
 
+
     public String getUploadFilename(String originalFilename) {
         if (CollectionUtils.isEmpty(fileCollection)) {
             return originalFilename;

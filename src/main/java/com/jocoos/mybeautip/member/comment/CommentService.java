@@ -117,6 +117,7 @@ public class CommentService {
         BeanUtils.copyProperties(request, comment);
         comment.setFile(request.getFilename());
         comment = commentRepository.save(comment);
+        comment.valid();
 
         tagService.touchRefCount(comment.getComment());
         tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
@@ -147,6 +148,7 @@ public class CommentService {
             comment.setFile(request.getUploadFilename());
             awsS3Handler.editFiles(request.getFiles(), VIDEO_COMMENT.getDirectory(comment.getId()));
         }
+        comment.valid();
         return commentRepository.save(comment);
     }
 

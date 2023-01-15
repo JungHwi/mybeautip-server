@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.community.api.admin;
 
 import com.jocoos.mybeautip.domain.community.dto.AdminCommunityCommentResponse;
-import com.jocoos.mybeautip.domain.community.dto.EditCommunityCommentRequest;
+import com.jocoos.mybeautip.domain.community.dto.PatchCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.dto.WriteCommunityCommentRequest;
 import com.jocoos.mybeautip.domain.community.service.AdminCommunityCommentService;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
@@ -41,12 +41,11 @@ public class AdminCommunityCommentController {
     }
 
     @PatchMapping("/community/{communityId}/comment/{commentId}")
-    public ResponseEntity<IdDto> editComment(@PathVariable long communityId,
+    public ResponseEntity<IdDto> editComment(@CurrentMember MyBeautipUserDetails userDetails,
+                                             @PathVariable long communityId,
                                              @PathVariable long commentId,
-                                             @RequestBody @Valid EditCommunityCommentRequest request) {
-        request.setCommunityId(communityId);
-        request.setCommentId(commentId);
-        return ResponseEntity.ok(new IdDto(service.edit(request)));
+                                             @RequestBody @Valid PatchCommunityCommentRequest request) {
+        return ResponseEntity.ok(new IdDto(service.edit(request, communityId, commentId, userDetails.getMember())));
     }
 
     @GetMapping("community/{communityId}/comment")
