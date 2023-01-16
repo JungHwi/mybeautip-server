@@ -43,7 +43,6 @@ class LegacyVideoControllerCommentTest(
 ) : RestDocsIntegrationTestSupport() {
 
     private lateinit var category: VideoCategory
-
     private lateinit var video: Video
 
     @BeforeAll
@@ -117,7 +116,7 @@ class LegacyVideoControllerCommentTest(
 
         result.andDo(
             document(
-                "admin_edit_video_comment",
+                "edit_video_comment",
                 pathParameters(
                     parameterWithName("video_id").description("비디오 ID"),
                     parameterWithName("comment_id").description("댓글 ID"),
