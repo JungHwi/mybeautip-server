@@ -145,53 +145,6 @@ public class LegacyVideoController {
         return videoInfo;
     }
 
-//    @GetMapping("{id}")
-//    @Deprecated
-//    public VideoInfo getVideos(@PathVariable Long id,
-//                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-//        return videoRepository.findByIdAndDeletedAtIsNull(id)
-//                .map(legacyVideoService::generateVideoInfo)
-//                .orElseThrow(() -> new NotFoundException(ErrorCode.VIDEO_NOT_FOUND, messageService.getMessage(VIDEO_NOT_FOUND, lang)));
-//    }
-//
-//    @GetMapping
-//    @Deprecated
-//    public CursorResponse getVideos(@RequestParam(defaultValue = "50") int count,
-//                                    @RequestParam(required = false) String cursor,
-//                                    @RequestParam(required = false) String type,
-//                                    @RequestParam(required = false) String state,
-//                                    @RequestParam(required = false) String sort) {
-//        Slice<Video> list = legacyVideoService.findVideos(type, state, cursor, count, sort);
-//
-//        List<VideoInfo> videos = new ArrayList<>();
-//        list.filter(video -> "live".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
-//        list.filter(video -> "vod".equalsIgnoreCase(video.getState())).forEach(v -> videos.add(legacyVideoService.generateVideoInfo(v)));
-//
-//        String nextCursor = null;
-//        if (videos.size() > 0) {
-//            if (sort == null) {
-//                nextCursor = String.valueOf(videos.get(videos.size() - 1).getCreatedAt().getTime());
-//            } else {
-//                switch (sort) {
-//                    case "like":
-//                        nextCursor = String.valueOf(videos.get(videos.size() - 1).getLikeCount());
-//                        break;
-//                    case "view":
-//                    default:
-//                        nextCursor = String.valueOf(videos.get(videos.size() - 1).getViewCount());
-//                        break;
-//                }
-//            }
-//        }
-//
-//        return new CursorResponse.Builder<>("/api/1/videos", videos)
-//                .withType(type)
-//                .withState(state)
-//                .withSort(sort)
-//                .withCount(count)
-//                .withCursor(nextCursor).toBuild();
-//    }
-
     @GetMapping("/search")
     public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
                                        @RequestParam(required = false) String cursor,

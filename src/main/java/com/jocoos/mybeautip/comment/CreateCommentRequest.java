@@ -3,12 +3,14 @@ package com.jocoos.mybeautip.comment;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.util.FileUtil;
 import com.jocoos.mybeautip.member.mention.MentionTag;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
+@Builder
 public class CreateCommentRequest {
 
     @Size(max = 500)
