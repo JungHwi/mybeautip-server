@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 
@@ -17,6 +18,7 @@ import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static lombok.AccessLevel.PROTECTED;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.springframework.util.StringUtils.hasText;
 
 @Getter
 @Setter
@@ -89,7 +91,7 @@ public class CommunityComment extends BaseEntity {
     }
 
     public boolean isCommentSameOrLongerThan(int length) {
-        return this.contents.length() >= length;
+        return hasText(contents) && contents.length() >= length;
     }
 
     public boolean isParent() {
