@@ -39,4 +39,17 @@ public class PopupNotice extends CreatedDateAuditable {
     @Column
     private ZonedDateTime endedAt;
 
+    public PopupNotice(PopupNoticeStatus status,
+                       String filename,
+                       PopupNoticeLinkType linkType,
+                       String linkArgument,
+                       ZonedDateTime startedAt,
+                       ZonedDateTime endedAt) {
+        this.status = status;
+        this.filename = filename;
+        this.linkType = linkType;
+        this.linkArgument = linkArgument;
+        this.startedAt = startedAt;
+        this.endedAt = endedAt;
+    }
 }

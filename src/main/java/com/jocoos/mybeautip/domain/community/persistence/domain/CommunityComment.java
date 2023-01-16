@@ -3,25 +3,26 @@ package com.jocoos.mybeautip.domain.community.persistence.domain;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.Member;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
+import lombok.*;
 
 import javax.persistence.*;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.DELETE;
-import static com.jocoos.mybeautip.domain.member.code.Role.ADMIN;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+import static lombok.AccessLevel.PROTECTED;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = PROTECTED)
 @Entity
 @Table(name = "community_comment")
 public class CommunityComment extends BaseEntity {
@@ -73,19 +74,18 @@ public class CommunityComment extends BaseEntity {
         return this;
     }
 
-    public void setContents(String contents) {
-        validContents(contents);
-        this.contents = contents;
+    public void edit(String editedContents, Files files, Member editor) {
+        validIsSingleFile(files);
+        validEditAuth(editor);
+
+        String editedFilename = files.getUploadFilename(file);
+        validContents(editedContents, editedFilename);
+        this.contents = editedContents;
+        this.file = editedFilename;
     }
 
     public void valid() {
-        validContents(this.contents);
-    }
-
-    private void validContents(String contents) {
-        if (StringUtils.isBlank(contents)) {
-            throw new BadRequestException("Content must not be empty.");
-        }
+        validContents(this.contents, this.file);
     }
 
     public boolean isCommentSameOrLongerThan(int length) {
@@ -104,15 +104,43 @@ public class CommunityComment extends BaseEntity {
         return this.status == status;
     }
 
-    public boolean isAdminWrite() {
-        return Role.from(member).equals(ADMIN);
-    }
-
     public String getFileUrl() {
         return toUrl(file, COMMUNITY_COMMENT, id);
     }
 
     public boolean containFile() {
         return file != null;
+    }
+
+    private void validIsSingleFile(Files files) {
+        if (containFile() && files.isSingleUpload()) {
+            throw new BadRequestException("comment already had file. delete needed");
+        }
+    }
+
+    private void validEditAuth(Member editor) {
+        if (Role.isAdmin(editor)) {
+            validAdminWrite();
+            return;
+        }
+        validSameWriter(editor);
+    }
+
+    private void validSameWriter(Member editor) {
+        if (!member.getId().equals(editor.getId())) {
+            throw new AccessDeniedException(ACCESS_DENIED, "This is not yours.");
+        }
+    }
+
+    private void validAdminWrite() {
+        if (!Role.isAdmin(member)) {
+            throw new BadRequestException(ACCESS_DENIED, "Only Comment Written By Admin is Deletable");
+        }
+    }
+
+    private void validContents(String contents, String file) {
+        if (isBlank(contents) && isBlank(file)) {
+            throw new BadRequestException("Content And File must not be empty.");
+        }
     }
 }

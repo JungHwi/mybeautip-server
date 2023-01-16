@@ -5,14 +5,15 @@ import com.jocoos.mybeautip.domain.notification.code.NotificationLinkType;
 import com.jocoos.mybeautip.domain.notification.code.TemplateType;
 import com.jocoos.mybeautip.domain.notification.persistence.converter.NotificationLinkTypeListConverter;
 import com.jocoos.mybeautip.global.code.Language;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
 @ToString
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "notification_message_push")
 public class NotificationMessagePushEntity {

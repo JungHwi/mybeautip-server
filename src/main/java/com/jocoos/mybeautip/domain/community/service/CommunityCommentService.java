@@ -24,7 +24,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -99,7 +98,7 @@ public class CommunityCommentService {
 
         CommunityCommentResponse response = converter.convert(communityComment);
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
-                                               validDomainAndReceiver(communityComment, communityComment.getId(), member));
+                validDomainAndReceiver(communityComment, communityComment.getId(), member));
         activityCountDao.updateAllCommunityCommentCount(member, 1);
         return relationService.setRelationInfo(member, response);
     }
@@ -121,32 +120,17 @@ public class CommunityCommentService {
 
     @Transactional
     public CommunityCommentResponse edit(EditCommunityCommentRequest request) {
-        Member member = legacyMemberService.currentMember();
+        Member requestMember = request.getMember();
         CommunityComment communityComment = dao.get(request.getCommunityId(), request.getCommentId());
 
-        if (!communityComment.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
-        }
-
-        communityComment.setContents(request.getContents());
-        editFile(communityComment, request);
-
+        communityComment.edit(request.getContents(), request.fileDtoToFiles(), requestMember);
         dao.save(communityComment);
 
-        return getComment(member, communityComment);
+        awsS3Handler.editFiles(request.getFiles(), COMMUNITY_COMMENT.getDirectory(communityComment.getId()));
+        return convertToResponse(requestMember, communityComment);
     }
 
-    private void editFile(CommunityComment communityComment, EditCommunityCommentRequest request) {
-        if (!CollectionUtils.isEmpty(request.getFiles())) {
-            if (communityComment.containFile() && request.isOnlyUpload()) {
-                throw new BadRequestException("comment already had file. delete needed");
-            }
-            communityComment.setFile(request.getUploadFilename());
-            awsS3Handler.editFiles(request.getFiles(), COMMUNITY_COMMENT.getDirectory(communityComment.getId()));
-        }
-    }
-
-    private CommunityCommentResponse getComment(Member member, CommunityComment communityComment) {
+    private CommunityCommentResponse convertToResponse(Member member, CommunityComment communityComment) {
         CommunityCommentResponse response = converter.convert(communityComment);
         return relationService.setRelationInfo(member, response);
     }
@@ -182,7 +166,7 @@ public class CommunityCommentService {
     private void gainActivityPoint(boolean isLike, Member receiver, CommunityCommentLike like) {
         if (isLike) {
             activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY_COMMENT,
-                                                   validDomainAndReceiver(like, like.getId(), receiver));
+                    validDomainAndReceiver(like, like.getId(), receiver));
         }
     }
 

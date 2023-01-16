@@ -34,6 +34,7 @@ import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VID
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.VIDEO_COMMENT;
+import static org.springframework.util.StringUtils.*;
 
 @Slf4j
 @Service
@@ -117,9 +118,12 @@ public class CommentService {
         BeanUtils.copyProperties(request, comment);
         comment.setFile(request.getFilename());
         comment = commentRepository.save(comment);
+        comment.valid();
 
-        tagService.touchRefCount(comment.getComment());
-        tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+        if (hasText(comment.getComment())) {
+            tagService.touchRefCount(comment.getComment());
+            tagService.addHistory(comment.getComment(), TagService.TAG_COMMENT, comment.getId(), comment.getCreatedBy());
+        }
 
         List<MentionTag> mentionTags = request.getMentionTags();
         if (mentionTags != null && mentionTags.size() > 0) {
@@ -147,6 +151,7 @@ public class CommentService {
             comment.setFile(request.getUploadFilename());
             awsS3Handler.editFiles(request.getFiles(), VIDEO_COMMENT.getDirectory(comment.getId()));
         }
+        comment.valid();
         return commentRepository.save(comment);
     }
 

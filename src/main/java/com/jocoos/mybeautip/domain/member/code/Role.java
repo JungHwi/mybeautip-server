@@ -36,6 +36,10 @@ public enum Role implements CodeValue {
         return USER;
     }
 
+    public static boolean isAdmin(Member member) {
+        return ADMIN.equals(from(member));
+    }
+
     @Override
     public String getName() {
         return name();

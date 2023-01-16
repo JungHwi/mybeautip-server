@@ -20,6 +20,7 @@ import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.domain.popup.code.ButtonLinkType;
 import com.jocoos.mybeautip.domain.popup.code.PopupDisplayType;
 import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
+import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeLinkType;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
@@ -102,6 +103,9 @@ public class CommonDocController {
         Map<String, String> popupDisplayType = getDocs(PopupDisplayType.values());
         Map<String, String> popupStatus = getDocs(PopupStatus.values());
 
+        // Popup Notice
+        Map<String, String> popupNoticeLinkType = getDocs(PopupNoticeLinkType.values());
+
         // Term
         Map<String, String> termType = getDocs(TermType.values());
 
@@ -167,6 +171,8 @@ public class CommonDocController {
                         .buttonLinkType(buttonLinkType)
                         .popupDisplayType(popupDisplayType)
                         .popupStatus(popupStatus)
+                // Popup Notice
+                        .popupNoticeLinkType(popupNoticeLinkType)
                 // Term
                         .termType(termType)
                 // Search

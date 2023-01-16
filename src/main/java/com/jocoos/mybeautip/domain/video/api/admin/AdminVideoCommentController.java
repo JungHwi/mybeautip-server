@@ -31,7 +31,7 @@ public class AdminVideoCommentController {
     @PostMapping("/video/{videoId}/comment")
     public ResponseEntity<AdminVideoCommentResponse> write(@PathVariable Long videoId,
                                                            @RequestBody @Valid WriteVideoCommentRequest request) {
-        AdminVideoCommentResponse response = service.write(videoId, request.getContents(), request.getParentId());
+        AdminVideoCommentResponse response = service.write(videoId, request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
                 .build()
                 .toUri();
@@ -40,10 +40,10 @@ public class AdminVideoCommentController {
 
     @PatchMapping("/video/{videoId}/comment/{commentId}")
     public ResponseEntity<IdDto> edit(@PathVariable Long videoId,
-                                     @PathVariable Long commentId,
-                                     @CurrentMember MyBeautipUserDetails userDetails,
-                                     @RequestBody @Valid PatchVideoCommentRequest request) {
-        return ResponseEntity.ok(new IdDto(service.edit(videoId, commentId, userDetails.getMember(), request.getContents())));
+                                      @PathVariable Long commentId,
+                                      @CurrentMember MyBeautipUserDetails userDetails,
+                                      @RequestBody @Valid PatchVideoCommentRequest request) {
+        return ResponseEntity.ok(new IdDto(service.edit(videoId, commentId, userDetails.getMember(), request)));
     }
 
     @GetMapping("/video/{videoId}/comment")

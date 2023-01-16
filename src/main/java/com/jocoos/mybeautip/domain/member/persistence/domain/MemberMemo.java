@@ -44,7 +44,7 @@ public class MemberMemo extends BaseEntity {
     }
 
     public void validSameWriter(Member editedBy) {
-        if (!createdBy.equals(editedBy)) {
+        if (!createdBy.getId().equals(editedBy.getId())) {
             throw new BadRequestException(NOT_A_WRITER);
         }
     }

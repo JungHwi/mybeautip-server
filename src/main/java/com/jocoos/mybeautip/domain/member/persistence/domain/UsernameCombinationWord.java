@@ -22,4 +22,9 @@ public class UsernameCombinationWord {
 
     @Column(nullable = false)
     private String word;
+
+    public UsernameCombinationWord(int sequence, String word) {
+        this.sequence = sequence;
+        this.word = word;
+    }
 }

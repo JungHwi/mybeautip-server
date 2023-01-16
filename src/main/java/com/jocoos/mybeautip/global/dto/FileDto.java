@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.global.dto;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.global.code.FileOperationType;
+import com.jocoos.mybeautip.global.vo.FileVo;
 import lombok.*;
 
 import static com.jocoos.mybeautip.domain.file.code.FileType.IMAGE;
@@ -36,6 +37,15 @@ public class FileDto {
 
     public static FileDto from(CommunityFile file) {
         return new FileDto(file.getType(), file.getFileUrl());
+    }
+
+    public FileVo toFile() {
+        return FileVo.builder()
+                .operation(operation)
+                .type(type)
+                .thumbnailUrl(thumbnailUrl)
+                .url(url)
+                .build();
     }
 
     public boolean containThumbnail() {

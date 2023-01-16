@@ -22,7 +22,7 @@ import java.util.List;
 public class Popup extends CreatedDateAuditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column
     @Enumerated(EnumType.STRING)

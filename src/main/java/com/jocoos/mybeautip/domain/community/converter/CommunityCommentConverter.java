@@ -25,8 +25,9 @@ public interface CommunityCommentConverter {
     CommunityComment convert(WriteCommunityCommentRequest request);
 
     @AfterMapping
-    default void convert(@MappingTarget CommunityComment comment, WriteCommunityCommentRequest request) {
-        comment.setFile(request.getFilename());
+    default void convert(@MappingTarget CommunityComment.CommunityCommentBuilder comment,
+                         WriteCommunityCommentRequest request) {
+        comment.file(request.getFilename());
     }
 
     @Mappings({

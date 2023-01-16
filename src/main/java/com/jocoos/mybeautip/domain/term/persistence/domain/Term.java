@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.term.code.TermUsedInType;
 import com.jocoos.mybeautip.domain.term.persistence.converter.TermUsedInTypeListConverter;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,6 +21,7 @@ import java.util.Objects;
     versionChangeStatus - 약관 업데이트 내용의 타입
  */
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "terms")
 @Entity
@@ -27,7 +29,7 @@ public class Term extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     // 2021-07-28 현재 서버에서 약관을 관리하지 않기 때문에 임시로 넣은 칼럼, 추후 서버에서 약관 관리한다면 드롭할것
     @Enumerated(EnumType.STRING)

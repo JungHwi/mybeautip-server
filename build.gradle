@@ -149,9 +149,14 @@ dependencies {
   implementation('org.jsoup:jsoup:1.11.2')
   implementation('redis.clients:jedis:4.2.1')
   implementation('io.jsonwebtoken:jjwt:0.9.0')
+
   asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+
   testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
+  testImplementation("io.rest-assured:rest-assured-all:4.5.1")
+  testImplementation("io.rest-assured:kotlin-extensions:4.5.1")
+  
   testImplementation "org.testcontainers:testcontainers:1.17.6"
   testImplementation "org.testcontainers:junit-jupiter:1.17.6"
   testImplementation "org.testcontainers:mysql:1.17.6"
@@ -159,6 +164,10 @@ dependencies {
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
   testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+
+  testImplementation("org.projectlombok:lombok:1.18.24")
+
+  testAnnotationProcessor("org.projectlombok:lombok:1.18.24")
 }
 
 test {

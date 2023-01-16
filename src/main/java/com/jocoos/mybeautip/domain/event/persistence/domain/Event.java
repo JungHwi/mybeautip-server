@@ -4,10 +4,7 @@ import com.jocoos.mybeautip.audit.ModifiedDateAuditable;
 import com.jocoos.mybeautip.domain.event.code.EventStatus;
 import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.annotations.Formula;
 
@@ -24,6 +21,7 @@ import static com.jocoos.mybeautip.global.exception.ErrorCode.NOT_SUPPORTED_FIX_
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "event")
 public class Event extends ModifiedDateAuditable {
 
