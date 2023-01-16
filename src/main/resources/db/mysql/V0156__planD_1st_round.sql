@@ -24,6 +24,7 @@ create table notice_file (
 alter table community_comment add column file char(16) after contents;
 alter table community_comment change column contents contents text comment '내용';
 alter table comments add column file char(16) after comment;
+alter table comments change column comment comment varchar(500) comment '내용';
 alter table community_file add column type varchar(20) after community_id;
 
 # Migration
