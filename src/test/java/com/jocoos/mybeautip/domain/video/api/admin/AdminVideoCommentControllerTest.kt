@@ -285,24 +285,4 @@ class AdminVideoCommentControllerTest(
 
         return id
     }
-
-//    private fun makeVideoComment(): Long {
-//
-//        // given
-//        val request = WriteVideoCommentRequest("content", null, null)
-//
-//        // when & then
-//        val result = mockMvc
-//            .perform(
-//                post("/admin/video/{video_id}/comment", video.id)
-//                    .header(AUTHORIZATION, defaultAdminToken)
-//                    .contentType(APPLICATION_JSON)
-//                    .content(objectMapper.writeValueAsString(request))
-//            )
-//
-//        val contentAsString: String = result.andReturn().response.contentAsString
-//        val response: AdminVideoCommentResponse =
-//            objectMapper.readValue(contentAsString, AdminVideoCommentResponse::class.java)
-//        return response.id
-//    }
 }
