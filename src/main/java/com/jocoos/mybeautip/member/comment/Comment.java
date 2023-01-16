@@ -10,7 +10,6 @@ import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
@@ -21,6 +20,8 @@ import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 import static com.jocoos.mybeautip.member.comment.Comment.CommentState.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,7 +44,7 @@ public class Comment extends MemberAuditable {
     @Column
     private Boolean locked = false;
 
-    @Column(nullable = false)
+    @Column
     private String comment;
 
     @Column
@@ -83,7 +84,7 @@ public class Comment extends MemberAuditable {
     }
 
     public boolean isCommentSameOrLongerThan(int length) {
-        return StringUtils.trimAllWhitespace(this.comment).length() >= length;
+        return hasText(comment) && trimAllWhitespace(comment).length() >= length;
     }
 
     public boolean isParent() {
