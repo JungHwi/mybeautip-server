@@ -196,6 +196,11 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("PopupStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getPopupStatus()))
                         ),
+                        // Popup Notice
+                        customResponseFields("custom-response", beneathPath("data.popup_notice_link_type").withSubsectionId("popup_notice_link_type"),
+                                attributes(key("title").value("PopupNoticeLinkType")),
+                                enumConvertFieldDescriptor((enumDocs.getPopupNoticeLinkType()))
+                        ),
                         // TERM
                         customResponseFields("custom-response", beneathPath("data.term_type").withSubsectionId("term_type"),
                                 attributes(key("title").value("TermType")),
