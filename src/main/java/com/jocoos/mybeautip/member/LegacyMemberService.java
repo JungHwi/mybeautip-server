@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.slack.aspect.annotation.SendSlack;
 import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
@@ -30,6 +31,7 @@ import com.jocoos.mybeautip.restapi.LegacyMemberController;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import com.jocoos.mybeautip.support.AttachmentService;
 import com.jocoos.mybeautip.video.Video;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,11 +50,14 @@ import java.util.Optional;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.INPUT_EXTRA_INFO;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainIdAndReceiver;
+import static com.jocoos.mybeautip.domain.slack.aspect.code.MessageType.MEMBER_REPORT;
+import static com.jocoos.mybeautip.domain.slack.aspect.code.MessageType.MEMBER_WITHDRAWAL;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.S3_ERROR;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class LegacyMemberService {
 
@@ -75,49 +80,13 @@ public class LegacyMemberService {
 
 
     private final ActivityPointService activityPointService;
-
     private final AwsS3Handler awsS3Handler;
-
     private final String PATH_AVATAR = "avatar";
     private final String emailRegex = "[A-Za-z0-9_-]+[\\.\\+A-Za-z0-9_-]*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})";
 
     @Value("${mybeautip.aws.cf.domain}")
     private String cloudFront;
 
-    public LegacyMemberService(MessageService messageService,
-                               MemberTermService memberTermService,
-                               MemberRepository memberRepository,
-                               MemberDetailRepository memberDetailRepository,
-                               FollowingRepository followingRepository,
-                               ReportRepository reportRepository,
-                               BlockService blockService,
-                               FacebookMemberRepository facebookMemberRepository,
-                               KakaoMemberRepository kakaoMemberRepository,
-                               NaverMemberRepository naverMemberRepository,
-                               AppleMemberRepository appleMemberRepository,
-                               MemberLeaveLogRepository memberLeaveLogRepository,
-                               AttachmentService attachmentService,
-                               ActivityPointService activityPointService,
-                               AwsS3Handler awsS3Handler,
-                               BroadcastPermissionDao broadcastPermissionDao) {
-
-        this.messageService = messageService;
-        this.memberTermService = memberTermService;
-        this.memberRepository = memberRepository;
-        this.memberDetailRepository = memberDetailRepository;
-        this.followingRepository = followingRepository;
-        this.reportRepository = reportRepository;
-        this.blockService = blockService;
-        this.facebookMemberRepository = facebookMemberRepository;
-        this.kakaoMemberRepository = kakaoMemberRepository;
-        this.naverMemberRepository = naverMemberRepository;
-        this.appleMemberRepository = appleMemberRepository;
-        this.memberLeaveLogRepository = memberLeaveLogRepository;
-        this.attachmentService = attachmentService;
-        this.activityPointService = activityPointService;
-        this.awsS3Handler = awsS3Handler;
-        this.broadcastPermissionDao = broadcastPermissionDao;
-    }
 
     public Long currentMemberId() {
         return Optional.ofNullable(currentMember()).map(Member::getId).orElse(null);
@@ -252,6 +221,7 @@ public class LegacyMemberService {
         memberRepository.updateLastLoggedAt(memberId);
     }
 
+    @SendSlack(messageType = MEMBER_REPORT)
     @Transactional
     public Report reportMember(Member me, long targetId, int reasonCode, String reason, Video video, String lang) {
         Member you = memberRepository.findByIdAndDeletedAtIsNull(targetId)
@@ -317,8 +287,9 @@ public class LegacyMemberService {
         return !StringUtils.isBlank(request.getAvatarUrl()) && !request.getAvatarUrl().startsWith(cloudFront);
     }
 
+    @SendSlack(messageType = MEMBER_WITHDRAWAL)
     @Transactional
-    public void deleteMember(LegacyMemberController.DeleteMemberRequest request, Member member) {
+    public MemberLeaveLog deleteMember(LegacyMemberController.DeleteMemberRequest request, Member member) {
         int link = member.getLink();
         switch (link) {
             case 1:
@@ -351,7 +322,7 @@ public class LegacyMemberService {
         memberRepository.saveAndFlush(member);
 
         log.debug(String.format("Member deleted: %d, %s, %s", member.getId(), member.getUsername(), member.getDeletedAt()));
-        memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
+        return memberLeaveLogRepository.save(new MemberLeaveLog(member, request.getReason()));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

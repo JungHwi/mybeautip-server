@@ -4,6 +4,10 @@ import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
+import com.jocoos.mybeautip.domain.notification.aspect.annotation.SendNotification;
+import com.jocoos.mybeautip.domain.notification.code.TemplateType;
+import com.jocoos.mybeautip.domain.slack.aspect.annotation.SendSlack;
+import com.jocoos.mybeautip.domain.slack.aspect.code.MessageType;
 import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
@@ -49,10 +53,10 @@ public class VideoUpdateService {
 
     private final AwsS3Handler awsS3Handler;
 
-
+    @SendSlack(messageType = MessageType.VIDEO_UPLOAD)
+    @SendNotification(templateTypes = TemplateType.VIDEO_UPLOAD)
     @Transactional
     public Video created(CallbackController.CallbackStartVideoRequest request) {
-
         if (StringUtils.isNotEmpty(request.getData())) {
             VideoExtraData extraData = videoDataService.getDataObject(request.getData());
             if (extraData.getCommunityId() != null) {
