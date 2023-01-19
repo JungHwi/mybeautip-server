@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.video.service;
 
-import com.jocoos.mybeautip.domain.notification.service.impl.VideoUploadNotificationService;
+import com.jocoos.mybeautip.domain.notification.aspect.service.impl.VideoUploadNotificationService;
 import com.jocoos.mybeautip.domain.video.dto.VideoOpenBatchResult;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
 import com.jocoos.mybeautip.support.slack.SlackService;

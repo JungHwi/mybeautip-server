@@ -213,15 +213,15 @@ public class Video {
         return TRUE.equals(isRecommended) ? isRecommended : null;
     }
 
-    public boolean isOpenAndVisible() {
-        return visibility.equals(PUBLIC.name()) && status.equals(OPEN);
-    }
-
-    public boolean isPublic() {
-        return visibility.equals(PUBLIC.name());
+    public boolean isOpenAndPublic() {
+        return isPublic() && status.equals(OPEN);
     }
 
     public ZonedDateTime getStartedAtZoned() {
         return toUTCZoned(startedAt);
+    }
+
+    public boolean isPublic() {
+        return visibility.equals(PUBLIC.name());
     }
 }
