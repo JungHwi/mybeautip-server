@@ -1,5 +1,6 @@
-package com.jocoos.mybeautip.domain.notification.service.impl;
+package com.jocoos.mybeautip.domain.notification.aspect.service.impl;
 
+import com.jocoos.mybeautip.domain.notification.aspect.service.AspectNotificationService;
 import com.jocoos.mybeautip.domain.notification.client.AppPushService;
 import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
@@ -13,7 +14,6 @@ import com.jocoos.mybeautip.domain.notification.persistence.repository.Notificat
 import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationMessageCenterRepository;
 import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationMessagePushRepository;
 import com.jocoos.mybeautip.domain.notification.service.MemberNotificationService;
-import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.support.RandomUtils;
@@ -22,27 +22,40 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.jocoos.mybeautip.domain.notification.code.TemplateType.VIDEO_UPLOAD;
+
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class VideoUploadNotificationService implements NotificationService<Video> {
+public class VideoUploadNotificationService implements AspectNotificationService<Video> {
 
+    private static final TemplateType TEMPLATE_TYPE = VIDEO_UPLOAD;
     private final MemberNotificationService memberNotificationService;
     private final NotificationCenterRepository notificationCenterRepository;
     private final NotificationMessageCenterRepository messageCenterRepository;
     private final NotificationMessagePushRepository messagePushRepository;
     private final NotificationMessagePushConverter pushConverter;
     private final AppPushService pushService;
-    private final TemplateType templateType = TemplateType.VIDEO_UPLOAD;
+
+    @Override
+    public TemplateType getTemplateType() {
+        return TEMPLATE_TYPE;
+    }
 
     @Async
+    @Override
+    public void occurs(Object object) {
+        if (object instanceof Video video && video.isOpenAndPublic()) {
+                send(video);
+        }
+    }
+
     @Override
     public void send(Video video) {
         int messageIndex = getMessageRandomIndex();
@@ -57,8 +70,7 @@ public class VideoUploadNotificationService implements NotificationService<Video
         }
     }
 
-    @Transactional
-    public void send(NotificationMessageCenterEntity messageCenter, NotificationMessagePushEntity pushMessage, NotificationTargetInfo targetInfo, Video video) {
+    private void send(NotificationMessageCenterEntity messageCenter, NotificationMessagePushEntity pushMessage, NotificationTargetInfo targetInfo, Video video) {
         Map<String, String> arguments = getArgument(targetInfo.getNickname(), video);
         NotificationCenterEntity notificationCenterEntity = sendCenter(messageCenter, video.getThumbnailUrl(), targetInfo, arguments);
         sendAppPush(pushMessage, video.getThumbnailUrl(), notificationCenterEntity.getId(), targetInfo, arguments);
@@ -83,12 +95,12 @@ public class VideoUploadNotificationService implements NotificationService<Video
     }
 
     private int getMessageRandomIndex() {
-        int count = messageCenterRepository.countByTemplateIdAndLastVersionIsTrue(templateType);
+        int count = messageCenterRepository.countByTemplateIdAndLastVersionIsTrue(TEMPLATE_TYPE);
         return RandomUtils.getRandomIndex(count);
     }
 
     private NotificationMessageCenterEntity getCenterMessage(int index) {
-        List<NotificationMessageCenterEntity> entities = messageCenterRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
+        List<NotificationMessageCenterEntity> entities = messageCenterRepository.findByTemplateIdAndLastVersionIsTrue(TEMPLATE_TYPE);
         return entities.get(index);
     }
 
@@ -98,7 +110,7 @@ public class VideoUploadNotificationService implements NotificationService<Video
     }
 
     private NotificationMessagePushEntity getMessagePushEntity(int index) {
-        List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(templateType);
+        List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(TEMPLATE_TYPE);
         return entities.get(index);
     }
 
