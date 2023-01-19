@@ -21,6 +21,7 @@ public class NotificationSendAspect {
 
     private final AspectNotificationServiceFactory aspectNotificationServiceFactory;
 
+    // 알림 메세지 형식이 다르기 때문에 Factory 통해 타입에 따른 메세지 형식을 가져와 전송
     @AfterReturning(value = "@annotation(sendNotification)", returning = "result")
     public void sendNotification(JoinPoint joinPoint, SendNotification sendNotification, Object result) {
         log.debug("joinPoint: {}", joinPoint.toLongString());

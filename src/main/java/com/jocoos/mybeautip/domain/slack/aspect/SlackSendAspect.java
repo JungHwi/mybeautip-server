@@ -24,6 +24,7 @@ public class SlackSendAspect {
     private final SlackService slackService;
     private final MessageConverterFactory converterFactory;
 
+    // 슬랙 메세지 형식이 다르기 때문에 Factory 통해 타입에 따른 메세지 형식을 가져와 전송
     @AfterReturning(value = "@annotation(sendSlack)", returning = "result")
     public void sendSlack(JoinPoint joinPoint, SendSlack sendSlack, Object result) {
 
