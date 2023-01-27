@@ -1,0 +1,3 @@
+== TEST to active member API
+
+operation::test_to_active_member[snippets='http-request,path-parameters,http-response']
