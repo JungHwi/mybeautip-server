@@ -6,7 +6,6 @@ import com.jocoos.mybeautip.global.exception.AuthenticationException;
 import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.ErrorResponse;
-import com.jocoos.mybeautip.global.interceptor.MemberStatusCheckInterceptor;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.security.*;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
-import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
@@ -93,7 +91,7 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     private SignupEventService signupEventService;
 
     @Autowired
-    private MemberStatusCheckInterceptor memberStatusCheckInterceptor;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Value("${mybeautip.security.access-token-validity-seconds}")
     private int accessTokenValiditySeconds;
@@ -115,7 +113,6 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                 .tokenGranter(tokenGranter(endpoints))
                 .tokenStore(jwtTokenStore())
                 .userDetailsService(userDetailService)
-                .addInterceptor(memberStatusCheckInterceptor)
                 .exceptionTranslator(authorizationWebResponseExceptionTranslator());
     }
 
@@ -236,9 +233,11 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 memberRepository,
                                 adminMemberRepository,
                                 passwordEncoder),
-                        new RefreshTokenGranter(endpoints.getTokenServices(),
+                        new MemberStatusCheckRefreshTokenGranter(endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
-                                endpoints.getOAuth2RequestFactory())
+                                endpoints.getOAuth2RequestFactory(),
+                                memberRepository,
+                                jwtTokenProvider)
                 )
         );
     }
