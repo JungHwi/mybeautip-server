@@ -19,7 +19,7 @@ mybeautip:
     image-path:
       domain: https://static.mybeautip.com/common/
   security:
-    access-token-validity-seconds: 600     # 10 minutes
+    access-token-validity-seconds: 30     # 30 seconds for test
     refresh-token-validity-seconds: 1814400    # 21 days
   slack:
     key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
