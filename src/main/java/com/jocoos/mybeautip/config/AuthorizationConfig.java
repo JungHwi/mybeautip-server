@@ -2,8 +2,11 @@ package com.jocoos.mybeautip.config;
 
 import com.jocoos.mybeautip.admin.AdminMemberRepository;
 import com.jocoos.mybeautip.domain.event.service.impl.SignupEventService;
+import com.jocoos.mybeautip.global.exception.AuthenticationException;
 import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.ErrorResponse;
+import com.jocoos.mybeautip.global.interceptor.MemberStatusCheckInterceptor;
 import com.jocoos.mybeautip.member.*;
 import com.jocoos.mybeautip.security.*;
 import lombok.extern.slf4j.Slf4j;
@@ -11,17 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.provider.CompositeTokenGranter;
-import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
@@ -32,8 +32,9 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Slf4j
 @Configuration
@@ -91,6 +92,9 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
     @Autowired
     private SignupEventService signupEventService;
 
+    @Autowired
+    private MemberStatusCheckInterceptor memberStatusCheckInterceptor;
+
     @Value("${mybeautip.security.access-token-validity-seconds}")
     private int accessTokenValiditySeconds;
 
@@ -111,26 +115,22 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                 .tokenGranter(tokenGranter(endpoints))
                 .tokenStore(jwtTokenStore())
                 .userDetailsService(userDetailService)
+                .addInterceptor(memberStatusCheckInterceptor)
                 .exceptionTranslator(authorizationWebResponseExceptionTranslator());
     }
 
     public WebResponseExceptionTranslator authorizationWebResponseExceptionTranslator() {
-        return new DefaultWebResponseExceptionTranslator() {
+        return (Exception e) -> {
 
-            @Override
-            public ResponseEntity<OAuth2Exception> translate(Exception e) throws Exception {
-                if (e instanceof AuthenticationMemberNotFoundException ex) {
-                    ErrorResponse errorResponse = ErrorResponse.builder()
-                            .error(ex.getErrorCode().name().toLowerCase())
-                            .errorDescription(ex.getMessage())
-                            .contents(ex.getContents())
-                            .build();
-                    return new ResponseEntity(errorResponse, HttpStatus.valueOf(ex.getHttpErrorCode()));
-                }
-                Map responseMap = new HashMap();
-                responseMap.put("message", e.getMessage());
-                return new ResponseEntity(responseMap, HttpStatus.UNAUTHORIZED);
+            if (e instanceof AuthenticationMemberNotFoundException ex) {
+                return toErrorResponse(ex.getErrorCode(), ex.getMessage(), ex.getContents(), ex.getHttpErrorCode());
             }
+
+            if (e instanceof AuthenticationException ex) {
+                return toErrorResponse(ex.getErrorCode(), ex.getMessage(), ex.getContents(), ex.getHttpErrorCode());
+            }
+
+            return ResponseEntity.status(UNAUTHORIZED).body(Map.of("message", e.getMessage()));
         };
     }
 
@@ -241,5 +241,14 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 endpoints.getOAuth2RequestFactory())
                 )
         );
+    }
+
+    private ResponseEntity<ErrorResponse> toErrorResponse(ErrorCode errorCode, String description, Object contents, int statusCode) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(errorCode.name().toLowerCase())
+                .errorDescription(description)
+                .contents(contents)
+                .build();
+        return ResponseEntity.status(statusCode).body(errorResponse);
     }
 }
