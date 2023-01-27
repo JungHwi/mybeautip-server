@@ -93,20 +93,17 @@ public class JwtTokenProvider {
         pkcs8Pem = pkcs8Pem.replace("-----BEGIN RSA PRIVATE KEY-----", "");
         pkcs8Pem = pkcs8Pem.replace("-----END RSA PRIVATE KEY-----", "");
         pkcs8Pem = pkcs8Pem.replaceAll("\\s+", "");
-        // Base64 decode the result
 
+        // Base64 decode the result
         byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(pkcs8Pem);
+
         // extract the private key
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
-        KeyFactory kf = null;
         try {
-            kf = KeyFactory.getInstance("RSA");
-            PrivateKey privateKey = kf.generatePrivate(keySpec);
-            return privateKey;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return kf.generatePrivate(keySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            log.debug("", e);
         }
 
         return null;
