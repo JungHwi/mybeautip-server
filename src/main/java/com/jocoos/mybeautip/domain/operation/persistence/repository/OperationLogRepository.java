@@ -5,5 +5,5 @@ import com.jocoos.mybeautip.domain.operation.persistence.domain.OperationLog;
 import com.jocoos.mybeautip.domain.operation.persistence.repository.log.OperationLogCustomRepository;
 
 public interface OperationLogRepository extends ExtendedQuerydslJpaRepository<OperationLog, Long>, OperationLogCustomRepository {
-
+    void deleteByTargetId(String memberId);
 }

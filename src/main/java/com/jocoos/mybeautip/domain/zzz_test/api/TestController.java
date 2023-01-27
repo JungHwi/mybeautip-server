@@ -25,4 +25,9 @@ public class TestController {
         testService.toDormantMember(memberId);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @PatchMapping("/member/{memberId}/active")
+    public void toActiveTest(@PathVariable long memberId) {
+        testService.toActiveMember(memberId);
+    }
 }
