@@ -18,11 +18,26 @@ class TestControllerTest extends RestDocsIntegrationTestSupport {
     @Transactional
     void toDormantTest() throws Exception {
         ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
-                        .patch("/test/member/{memberId}/dormant", 4))
+                        .patch("/test/member/{memberId}/dormant", requestUser.getId()))
                 .andExpect(status().isOk())
                 .andDo(print());
 
         result.andDo(document("test_to_dormant_member",
+                pathParameters(
+                        parameterWithName("memberId").description("Member ID")
+                )
+        ));
+    }
+
+    @Test
+    @Transactional
+    void toActiveTest() throws Exception {
+        ResultActions result = mockMvc.perform(RestDocumentationRequestBuilders
+                        .patch("/test/member/{memberId}/active", requestUser.getId()))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        result.andDo(document("test_to_active_member",
                 pathParameters(
                         parameterWithName("memberId").description("Member ID")
                 )
