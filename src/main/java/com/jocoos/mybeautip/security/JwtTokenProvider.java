@@ -54,7 +54,7 @@ public class JwtTokenProvider {
         claims.put(PAYLOAD_USER_NAME, authentication.getPrincipal());
         claims.put(PAYLOAD_SCOPE, Arrays.asList("read", "write"));
         claims.put(PAYLOAD_JTI, jti);
-        claims.put(PAYLOAD_CLIENT_ID, "mybeautip-web");
+        claims.put(PAYLOAD_CLIENT_ID, "mybeautip-mobile");
 
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
         PrivateKey privateKey = getPrivateKey();
