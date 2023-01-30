@@ -61,9 +61,9 @@ public class JwtTokenProvider {
 
         String accessToken = Jwts.builder()
                 .setHeader(header)
+                .setClaims(claims)
                 .setExpiration(accessTokenExpiresIn)
                 .setSubject(String.valueOf(authentication.getPrincipal()))
-                .setClaims(claims)
                 .signWith(signatureAlgorithm, privateKey)
                 .compact();
 
@@ -72,8 +72,8 @@ public class JwtTokenProvider {
         claims.put(PAYLOAD_ATI, jti);
         String refreshToken = Jwts.builder()
                 .setHeader(header)
-                .setSubject(String.valueOf(authentication.getPrincipal()))
                 .setClaims(claims)
+                .setSubject(String.valueOf(authentication.getPrincipal()))
                 .setExpiration(refreshTokenExpiration)
                 .signWith(signatureAlgorithm, privateKey)
                 .compact();
