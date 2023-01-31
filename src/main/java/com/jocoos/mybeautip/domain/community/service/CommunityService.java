@@ -105,10 +105,6 @@ public class CommunityService {
         return communityResponses;
     }
 
-    public List<String> upload(List<MultipartFile> files) {
-        return awsS3Handler.upload(files, UrlDirectory.TEMP_IMAGE.getDirectory());
-    }
-
     @Transactional
     public void delete(long communityId) {
         Member member = legacyMemberService.currentMember();

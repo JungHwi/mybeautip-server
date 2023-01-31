@@ -58,10 +58,6 @@ public class AdminEventService {
         return converter.convertWithAllImages(event, joinCount);
     }
 
-    public List<String> upload(List<MultipartFile> files) {
-        return awsS3Handler.upload(files, UrlDirectory.TEMP_IMAGE.getDirectory());
-    }
-
     @Transactional
     public AdminEventResponse create(EventRequest request) {
         Long relationId = getRelationIdByType(request);

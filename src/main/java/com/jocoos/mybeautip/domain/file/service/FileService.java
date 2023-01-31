@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.file.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,33 +12,31 @@ import java.util.List;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.TEMP_IMAGE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.TEMP_VIDEO;
 
+@Log4j2
 @RequiredArgsConstructor
 @Service
 public class FileService {
 
     private final AwsS3Handler awsS3Handler;
+    private final FileContentTypeService contentTypeService;
 
     public List<String> upload(List<MultipartFile> files) {
         List<String> fileUrls = new ArrayList<>();
         for (MultipartFile file : files) {
-            fileUrls.add(upload(file));
+            String contentType = contentTypeService.getContentType(file);
+            fileUrls.add(upload(file, contentType));
         }
         return fileUrls;
     }
 
-    private String upload(MultipartFile file) {
-        if (isImage(file)) {
-            return awsS3Handler.upload(file, TEMP_IMAGE.getDirectory());
+    private String upload(MultipartFile file, String contentType) {
+        if (isImage(contentType)) {
+            return awsS3Handler.upload(file, contentType, TEMP_IMAGE.getDirectory());
         }
-        return awsS3Handler.upload(file, TEMP_VIDEO.getDirectory());
+        return awsS3Handler.upload(file, contentType, TEMP_VIDEO.getDirectory());
     }
 
-    private boolean isImage(MultipartFile file) {
-        String contentType = file.getContentType();
+    private boolean isImage(String contentType) {
         return contentType != null && contentType.startsWith("image/");
-    }
-
-    public List<String> uploadV1(List<MultipartFile> files) {
-        return awsS3Handler.upload(files, TEMP_IMAGE.getDirectory());
     }
 }
