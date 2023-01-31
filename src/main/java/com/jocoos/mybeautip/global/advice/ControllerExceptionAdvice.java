@@ -14,6 +14,7 @@ import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Log4j2
 @RestControllerAdvice
@@ -111,5 +112,15 @@ public class ControllerExceptionAdvice {
                 .contents(e.getContents())
                 .build();
         return new ResponseEntity<>(errorResponse, e.getHttpStatus());
+    }
+
+    @ExceptionHandler(FileIOException.class)
+    public final ResponseEntity<ErrorResponse> handleFileIOException(FileIOException e) {
+        log.debug("File IO Exception Thrown ", e);
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(INTERNAL_SERVER_ERROR.name().toLowerCase())
+                .errorDescription(e.getMessage())
+                .build();
+        return ResponseEntity.internalServerError().body(errorResponse);
     }
 }
