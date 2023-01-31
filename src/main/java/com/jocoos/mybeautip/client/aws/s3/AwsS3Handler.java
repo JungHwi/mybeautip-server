@@ -29,20 +29,10 @@ public class AwsS3Handler {
     @Value("${mybeautip.aws.cf.domain}")
     private String cloudFront;
 
-    public List<String> upload(List<MultipartFile> files, String directory) {
-        List<String> result = new ArrayList<>();
-
-        for (MultipartFile file : files) {
-            result.add(upload(file, directory));
-        }
-
-        return result;
-    }
-
-    public String upload(MultipartFile file, String directory) {
+    public String upload(MultipartFile file, String contentType, String directory) {
         String filename = RandomUtils.generateFilename();
 
-        String path = service.upload(file, directory + filename);
+        String path = service.upload(file, contentType, directory + filename);
 
         return cloudFront + path;
     }

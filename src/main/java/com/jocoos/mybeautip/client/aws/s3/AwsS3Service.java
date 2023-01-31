@@ -35,13 +35,13 @@ public class AwsS3Service {
     @Value("${mybeautip.aws.s3.read-timeout-ms}")
     private int readTimeout;
 
-    public String upload(MultipartFile file, String key) {
+    public String upload(MultipartFile file, String contentType, String key) {
         AmazonS3 s3Client = credentialService.getS3Client();
         ObjectMetadata metadata = new ObjectMetadata();
         PutObjectResult result;
         try {
             metadata.setContentLength(file.getBytes().length);
-            metadata.setContentType(file.getContentType());
+            metadata.setContentType(contentType);
 
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file.getInputStream(), metadata);
             result = s3Client.putObject(putObjectRequest);

@@ -139,29 +139,6 @@ class CommunityControllerTest(
         )
     }
 
-//    @Test
-//    fun uploadFiles() {
-//        val file = MockMultipartFile("files", "file", "image/jpeg", "mock".toByteArray())
-//        val result: ResultActions = mockMvc.perform(
-//            RestDocumentationRequestBuilders
-//                .multipart("/api/1/community/files")
-//                .file(file)
-//        )
-//            .andExpect(status().isOk)
-//            .andDo(print())
-//        result.andDo(
-//            document(
-//                "upload_file_community",
-//                RequestDocumentation.requestParts(
-//                    RequestDocumentation.partWithName("files").description("업로드할 파일 목록")
-//                ),
-//                responseFields(
-//                    fieldWithPath("[]").type(ARRAY).description("UPLOAD 된 파일 URL")
-//                )
-//            )
-//        )
-//    }
-
     @Test
     fun getCommunities() {
 
