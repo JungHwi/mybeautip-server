@@ -66,7 +66,7 @@ public class FileDto {
     }
 
     private String thumbnailUrl() {
-        return url + "_thumbnail";
+        return url + "_thumbnail.jpg";
     }
 
 }
