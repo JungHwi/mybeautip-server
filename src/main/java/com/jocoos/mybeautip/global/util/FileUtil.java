@@ -1,8 +1,13 @@
 package com.jocoos.mybeautip.global.util;
 
+import com.jocoos.mybeautip.domain.file.code.FileUrlDomain;
 import org.apache.commons.lang3.StringUtils;
 
 public class FileUtil {
+
+    public static String getFileName(String path, FileUrlDomain domain) {
+        return domain.getGetFilename().apply(path);
+    }
 
     public static String getFileName(String path) {
         if (StringUtils.isBlank(path)) {

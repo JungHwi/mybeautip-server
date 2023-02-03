@@ -26,6 +26,7 @@ alter table community_comment change column contents contents text comment '내�
 alter table comments add column file char(16) after comment;
 alter table comments change column comment comment varchar(500) comment '내용';
 alter table community_file add column type varchar(20) after community_id;
+alter table community_file add column domain varchar(20) after type;
 
 # Migration
 # update community_file set type='IMAGE';

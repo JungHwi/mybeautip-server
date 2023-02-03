@@ -93,6 +93,7 @@ class AdminVideoCommentControllerTest(
                     fieldWithPath("file.type").type(OBJECT).description("파일 타입").ignored(),
                     fieldWithPath("file.operation").type(STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
                     fieldWithPath("file.url").type(STRING).description("파일 URL"),
+                    fieldWithPath("file.need_transcode").type(BOOLEAN).ignored()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 아이디"),
@@ -146,6 +147,7 @@ class AdminVideoCommentControllerTest(
                     fieldWithPath("files.[].type").type(OBJECT).description("파일 타입").ignored(),
                     fieldWithPath("files.[].operation").type(STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
                     fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("files.[].need_transcode").type(BOOLEAN).ignored()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 ID")

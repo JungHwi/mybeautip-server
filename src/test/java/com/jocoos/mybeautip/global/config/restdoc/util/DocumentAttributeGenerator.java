@@ -14,6 +14,10 @@ public class DocumentAttributeGenerator {
         return key(KEY_DEFAULT).value(defaultValue);
     }
 
+    public static Attributes.Attribute getDefault(boolean defaultValue) {
+        return key(KEY_DEFAULT).value(defaultValue);
+    }
+
     public static Attributes.Attribute getZonedDateFormat() {
         return key(KEY_FORMAT).value(ZONE_DATE_TIME_FORMAT);
     }

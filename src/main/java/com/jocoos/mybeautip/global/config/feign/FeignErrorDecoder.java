@@ -6,11 +6,14 @@ import feign.codec.ErrorDecoder;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.temporal.ChronoField.INSTANT_SECONDS;
 
 @Log4j2
@@ -25,8 +28,17 @@ public class FeignErrorDecoder implements ErrorDecoder {
             Date retryAfter = new Date(TimeUnit.SECONDS.toMillis(offsetDateTime.getLong(INSTANT_SECONDS)));
             return new RetryableException(response.status(), format("%s 요청이 성공하지 못했습니다. - status: %s, headers: %s", methodKey, response.status(), response.headers()), response.request().httpMethod(), retryAfter, response.request());
         }
+        log.debug(response.request());
+        try {
+            String requestBody = new String(response.request().body(), UTF_8);
+            log.debug("request body : {}", requestBody);
 
-        return new IllegalStateException(format("%s 요청이 성공하지 못했습니다. Retry 합니다. - cause: %s, headers: %s", methodKey, response.status(), response.headers()));
+            InputStream inputStream = response.body().asInputStream();
+            String responseBody = new String(inputStream.readAllBytes(), UTF_8);
+            return new IllegalStateException(format("%s 요청이 성공하지 못했습니다. Retry 합니다. - cause: %s, headers: %s body: %s", methodKey, response.status(), response.headers(), responseBody));
+        } catch (IOException e) {
+            return new IllegalStateException(format("%s 요청이 성공하지 못했습니다. Retry 합니다. - cause: %s, headers: %s and error occur reading body", methodKey, response.status(), response.headers()));
+        }
     }
 
     private boolean isRetry(Response response) {

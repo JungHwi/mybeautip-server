@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.community.service;
 
-import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.dto.*;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory;
@@ -16,7 +15,6 @@ import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityResponse;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
-import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -26,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -51,7 +48,6 @@ public class CommunityService {
     private final CommunityReportDao reportDao;
     private final MemberActivityCountDao activityCountDao;
     private final CommunityConvertService convertService;
-    private final AwsS3Handler awsS3Handler;
     private final CommunityCommentDeleteService commentDeleteService;
     private final CommunityFileService fileService;
 
@@ -60,7 +56,6 @@ public class CommunityService {
         Member member = legacyMemberService.currentMember();
         request.setMember(member);
         Community community = communityDao.write(request);
-        fileService.write(request.getFiles(), community.getId());
 
         if (community.getCategory().getType() == DRIP) {
             eventJoinService.join(community.getEventId(), request.getMember().getId());
@@ -70,6 +65,7 @@ public class CommunityService {
                 validDomainAndReceiver(community, community.getId(), community.getMember()));
         activityCountDao.updateAllCommunityCount(member, 1);
 
+        uploadFiles(request, community);
         return convertService.toResponse(community.getMember(), community);
     }
 
@@ -133,7 +129,8 @@ public class CommunityService {
 
         community.setTitle(request.getTitle());
         community.setContents(request.getContents());
-        fileService.editFiles(community, request.getFiles());
+
+        editFiles(request, community);
 
         return convertService.toResponse(community.getMember(), community);
     }
@@ -184,6 +181,22 @@ public class CommunityService {
                 .isReport(isReport)
                 .reportCount(community.getReportCount())
                 .build();
+    }
+
+    private void uploadFiles(WriteCommunityRequest request, Community community) {
+        if (request.containTranscodeRequest()) {
+            fileService.writeWithTranscode(request.getFiles(), community.getId());
+        } else {
+            fileService.write(request.getFiles(), community.getId());
+        }
+    }
+
+    private void editFiles(EditCommunityRequest request, Community community) {
+        if (request.containTranscodeRequest()) {
+            fileService.editFilesWithTranscode(community, request.getFiles());
+        } else {
+            fileService.editFiles(community, request.getFiles());
+        }
     }
 
     private CommunitySearchCondition createSearchCondition(SearchCommunityRequest request) {
