@@ -183,7 +183,11 @@ management:
       base-path: /monitor
 
 flipflop:
-  app-key: testapp3
+  app-key: A92258B859
+  access-token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZW1iZXJfaWQiOiI0OCIsInNjb3BlIjpbImd1ZXN0Il0sImV4cCI6MTk3NzI5MDYyMSwianRpIjoiRmRRTjFRS19FNkFXWVFMT2F5NWU0dUhScUQ0IiwiY2xpZW50X2lkIjoiZ3Vlc3QifQ.QKdrfCMguOlOQkcL3h1qh2YlXCPL_bYmSF8duslLG6o
+  url: https://dev-api.flipflop.tv
+  aws.s3.domain: https://static.flipflop.tv/
+  default-filename: vod
 
 #redis:
 #  host: localhost
