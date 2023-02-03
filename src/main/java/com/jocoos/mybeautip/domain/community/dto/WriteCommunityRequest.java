@@ -33,7 +33,7 @@ public class WriteCommunityRequest {
     }
 
     public boolean containTranscodeRequest() {
-        return Optional.of(files)
+        return Optional.ofNullable(files)
                 .orElse(List.of())
                 .stream()
                 .anyMatch(FileDto::isNeedTranscode);

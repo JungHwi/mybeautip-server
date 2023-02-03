@@ -221,7 +221,8 @@ class CommunityCommentControllerTest(
                     fieldWithPath("file.type").type(ARRAY).attributes(getDefault(IMAGE)).description(FILE_TYPE)
                         .ignored(),
                     fieldWithPath("file.operation").type(STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
-                    fieldWithPath("file.url").type(STRING).description("이미지 URL")
+                    fieldWithPath("file.url").type(STRING).description("이미지 URL"),
+                    fieldWithPath("file.need_transcode").type(BOOLEAN).ignored()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 아이디"),
@@ -294,7 +295,8 @@ class CommunityCommentControllerTest(
                     fieldWithPath("files.[].type").type(ARRAY).attributes(getDefault(IMAGE)).description(FILE_TYPE)
                         .ignored(),
                     fieldWithPath("files.[].operation").type(STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
-                    fieldWithPath("files.[].url").type(STRING).description("이미지 URL")
+                    fieldWithPath("files.[].url").type(STRING).description("이미지 URL"),
+                    fieldWithPath("files.[].need_transcode").type(BOOLEAN).ignored()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 ID"),

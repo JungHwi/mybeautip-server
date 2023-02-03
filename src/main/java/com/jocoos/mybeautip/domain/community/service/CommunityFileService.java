@@ -6,7 +6,6 @@ import com.jocoos.mybeautip.domain.file.service.FlipFlopService;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +19,7 @@ import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.FILE_NOT_EDITABLE;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @RequiredArgsConstructor
 @Service
@@ -29,6 +29,9 @@ public class CommunityFileService {
     private final FlipFlopService flipFlopService;
 
     public void writeWithTranscode(List<FileDto> files, long communityId) {
+        if (isEmpty(files)) {
+            return;
+        }
         awsS3Handler.copy(files, COMMUNITY.getDirectory(communityId));
 
         List<String> videoUrls = files.stream()
@@ -55,7 +58,7 @@ public class CommunityFileService {
             throw new BadRequestException(FILE_NOT_EDITABLE);
         }
 
-        if (CollectionUtils.isEmpty(fileDtoList)) {
+        if (isEmpty(fileDtoList)) {
             return;
         }
 
