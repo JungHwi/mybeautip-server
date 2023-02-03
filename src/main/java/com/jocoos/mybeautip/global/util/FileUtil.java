@@ -1,8 +1,17 @@
 package com.jocoos.mybeautip.global.util;
 
+import com.jocoos.mybeautip.domain.file.code.FileUrlDomain;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 public class FileUtil {
+
+    @Value("${flipflop.default-filename")
+
+
+    public static String getFileName(String path, FileUrlDomain domain) {
+        return domain.getGetFilename().apply(path);
+    }
 
     public static String getFileName(String path) {
         if (StringUtils.isBlank(path)) {

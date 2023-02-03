@@ -2,7 +2,8 @@ package com.jocoos.mybeautip.domain.file.service;
 
 import com.jocoos.mybeautip.domain.file.code.FileSupportType;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.exception.FileIOException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
+import com.jocoos.mybeautip.global.exception.InternalServerException;
 import lombok.RequiredArgsConstructor;
 import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class FileContentTypeService {
         try(InputStream inputStream = file.getInputStream()) {
             return tika.detect(inputStream);
         } catch (IOException e) {
-            throw new FileIOException("Error Reading File", e);
+            throw new InternalServerException(ErrorCode.FILE_IO_EXCEPTION, e);
         }
     }
 

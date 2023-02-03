@@ -42,7 +42,7 @@ public class AdminCommunityService {
         request.setMember(member);
         request.setFileOperationToUpload();
         Community community = communityDao.write(request);
-        fileService.write(request.getFiles(), community.getId());
+        fileService.writeWithTranscode(request.getFiles(), community.getId());
         return converter.convert(community);
     }
 
@@ -113,7 +113,7 @@ public class AdminCommunityService {
 
     private void editFiles(PatchCommunityRequest request, Community community) {
         List<FileDto> editFiles = request.getFileDto(community.getCommunityFileList());
-        fileService.editFiles(community, editFiles);
+        fileService.editFilesWithTranscode(community, editFiles);
         community.sortFilesByRequestIndex(request.getImageUrls());
     }
 

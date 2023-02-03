@@ -15,9 +15,9 @@ import static org.mapstruct.NullValueMappingStrategy.RETURN_DEFAULT;
 @Mapper(componentModel = "spring")
 public interface CommunityFileConverter {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "community", ignore = true)
+    // FLIP FLOP 업로드는 콜백 형식 밖에 없으므르 MYBEAUTIP 상수 처리
     @Mapping(target = "file", source = "url", qualifiedByName = "toFilename")
+    @Mapping(target = "domain", constant = "MYBEAUTIP")
     CommunityFile toEntity(FileDto fileDto);
 
     @IterableMapping(nullValueMappingStrategy = RETURN_DEFAULT)

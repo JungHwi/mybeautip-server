@@ -21,6 +21,7 @@ public class FileDto {
     private FileType type = IMAGE;
     private String thumbnailUrl;
     private String url;
+    private boolean needTranscode = false;
 
     public FileDto(FileOperationType operation, String url) {
         this.operation = operation;

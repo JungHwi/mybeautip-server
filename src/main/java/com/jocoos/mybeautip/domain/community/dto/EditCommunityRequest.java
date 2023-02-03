@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.member.Member;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Optional;
 
 @Data
 public class EditCommunityRequest {
@@ -17,4 +18,11 @@ public class EditCommunityRequest {
     private List<FileDto> files;
 
     private Member member;
+
+    public boolean containTranscodeRequest() {
+        return Optional.ofNullable(files)
+                .orElse(List.of())
+                .stream()
+                .anyMatch(FileDto::isNeedTranscode);
+    }
 }

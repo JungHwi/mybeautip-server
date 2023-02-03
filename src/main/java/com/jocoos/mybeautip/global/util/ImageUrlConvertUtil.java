@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.util;
 
+import com.jocoos.mybeautip.domain.file.code.FileUrlDomain;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,11 +11,14 @@ public class ImageUrlConvertUtil {
 
     private static String CF_DOMAIN;
     private static String S3_DOMAIN;
+    private static String FLIP_FLOP_DOMAIN;
 
     public ImageUrlConvertUtil(@Value("${mybeautip.aws.cf.domain}") String cf,
-                               @Value("${mybeautip.aws.s3.domain}") String s3) {
+                               @Value("${mybeautip.aws.s3.domain}") String s3,
+                               @Value("${flipflop.aws.s3.domain}") String flipFlop) {
         CF_DOMAIN = cf;
         S3_DOMAIN = s3;
+        FLIP_FLOP_DOMAIN = flipFlop;
     }
 
     public static String toUrl(String filename, UrlDirectory directory) {
@@ -25,6 +29,13 @@ public class ImageUrlConvertUtil {
         } else {
             return CF_DOMAIN + directory.getDirectory() + filename;
         }
+    }
+
+    public static String toUrl(FileUrlDomain domain, String filename, UrlDirectory directory, Long id) {
+        return switch (domain) {
+            case MYBEAUTIP -> toUrl(filename, directory, id);
+            case FLIPFLOP -> FLIP_FLOP_DOMAIN + filename;
+        };
     }
 
     public static String toUrl(String filename, UrlDirectory directory, Long id) {
