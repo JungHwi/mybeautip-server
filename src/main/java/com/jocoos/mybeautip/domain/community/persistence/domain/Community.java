@@ -3,12 +3,16 @@ package com.jocoos.mybeautip.domain.community.persistence.domain;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.community.persistence.domain.vote.CommunityVote;
 import com.jocoos.mybeautip.domain.file.code.FileType;
+import com.jocoos.mybeautip.domain.file.code.FileUrlDomain;
 import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import io.jsonwebtoken.lang.Collections;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import javax.persistence.*;
@@ -103,8 +107,22 @@ public class Community extends BaseEntity {
         return this;
     }
 
-    public void addFile(FileType type, String fileName) {
-        CommunityFile communityFile = new CommunityFile(type, getFileName(fileName));
+    public void changeVideo(FileUrlDomain domain, String url) {
+        communityFileList.stream()
+                .filter(CommunityFile::isVideo)
+                .findAny()
+                .ifPresent(file -> file.change(domain, getFileName(url, domain)));
+    }
+
+    public CommunityFile getVideoUrl() {
+        return communityFileList.stream()
+                .filter(CommunityFile::isVideo)
+                .findAny()
+                .orElse(null);
+    }
+
+    public void addFile(FileType type, FileUrlDomain domain, String url) {
+        CommunityFile communityFile = new CommunityFile(type, domain, getFileName(url, domain));
         communityFile.setCommunity(this);
         if (this.category.isCategoryType(VOTE)) {
             CommunityVote communityVote = new CommunityVote(this, communityFile);
@@ -113,11 +131,11 @@ public class Community extends BaseEntity {
         this.getCommunityFileList().add(communityFile);
     }
 
-    public void removeFile(String fileName) {
+    public void removeFile(String url) {
         if (this.category.isCategoryType(VOTE)) {
-            this.communityVoteList.removeIf(vote -> vote.getCommunityFile().getFile().equals(getFileName(fileName)));
+            this.communityVoteList.removeIf(vote -> vote.getCommunityFile().isUrlEqual(url));
         }
-        this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFileName(fileName)));
+        this.getCommunityFileList().removeIf(communityFile -> communityFile.isUrlEqual(url));
     }
 
     public boolean isContentLongerThanOrSame(int length) {

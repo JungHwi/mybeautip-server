@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.file.validator;
 
-import com.jocoos.mybeautip.domain.file.code.FileSupportType;
 import com.jocoos.mybeautip.domain.file.validator.annotation.ValidFile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.unit.DataSize;
@@ -33,8 +32,7 @@ public class FileValidator implements ConstraintValidator<ValidFile, List<Multip
     }
 
     private boolean isTypeAndFileSizeInvalid(MultipartFile file, ConstraintValidatorContext context) {
-        return isUnSupportedContentType(file.getContentType(), context) ||
-                isExceedImageFileSizeLimit(file.getContentType(), file.getSize(), context);
+        return isExceedImageFileSizeLimit(file.getContentType(), file.getSize(), context);
     }
 
     private boolean isExceedVideoCountLimit(List<MultipartFile> files, ConstraintValidatorContext context) {
@@ -45,14 +43,6 @@ public class FileValidator implements ConstraintValidator<ValidFile, List<Multip
 
         if (videoCount > videoLimitNum) {
             addConstraintViolation(context, "too many video");
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isUnSupportedContentType(String contentType, ConstraintValidatorContext context) {
-        if (!FileSupportType.isSupport(contentType)) {
-            addConstraintViolation(context, "unsupported file content type " + contentType);
             return true;
         }
         return false;

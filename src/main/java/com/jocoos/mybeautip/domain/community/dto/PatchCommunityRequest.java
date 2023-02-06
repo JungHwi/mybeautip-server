@@ -10,6 +10,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.jocoos.mybeautip.domain.file.code.FileType.VIDEO;
 import static com.jocoos.mybeautip.global.code.FileOperationType.DELETE;
 import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -50,7 +51,12 @@ public class PatchCommunityRequest {
         List<FileDto> uploadFiles = editFiles.stream()
                 .filter(editFile -> !originalFiles.contains(editFile))
                 .toList();
-        uploadFiles.forEach(file -> file.setOperation(UPLOAD));
+        uploadFiles.forEach(file -> {
+            file.setOperation(UPLOAD);
+            if (file.getType() == VIDEO) {
+                file.setNeedTranscode(true);
+            }
+        });
         return uploadFiles;
     }
 

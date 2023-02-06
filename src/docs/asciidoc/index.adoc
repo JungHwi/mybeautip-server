@@ -201,3 +201,4 @@ include::overview.adoc[]
 
 === Member API
 * link:zzz_test/test_to_dormant_member.html[(테스트) 강제로 휴면 회원으로 전환 API, window=_blank]
+* link:zzz_test/test_to_acitve_member.html[(테스트) 강제로 정상 회원으로 전환 API, window=_blank]

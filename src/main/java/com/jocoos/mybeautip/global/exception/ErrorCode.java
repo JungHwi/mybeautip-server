@@ -18,6 +18,9 @@ public enum ErrorCode implements CodeValue {
     BANNED_WORD("금칙어 포함"),
     NOT_A_WRITER("작성자가 아님"),
     INVALID_SORT_FIELD("지원하는 정렬 필드가 아님"),
+    JSON_SERIALIZATION_EXCEPTION("JSON 직렬화 중 오류 발생"),
+    FILE_IO_EXCEPTION("파일 IO 오류"),
+
 
     // LOGIN
     INVALID_TOKEN("잘못된 토큰"),

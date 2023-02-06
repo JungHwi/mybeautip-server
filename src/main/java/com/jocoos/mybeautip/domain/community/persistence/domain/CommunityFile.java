@@ -1,20 +1,22 @@
 package com.jocoos.mybeautip.domain.community.persistence.domain;
 
 import com.jocoos.mybeautip.domain.file.code.FileType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.jocoos.mybeautip.domain.file.code.FileUrlDomain;
+import lombok.*;
 
 import javax.persistence.*;
 
+import static com.jocoos.mybeautip.domain.file.code.FileType.VIDEO;
+import static com.jocoos.mybeautip.domain.file.code.FileUrlDomain.MYBEAUTIP;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+import static javax.persistence.EnumType.STRING;
+import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = PROTECTED)
 @Entity
 @Table(name = "community_file")
 public class CommunityFile {
@@ -28,14 +30,19 @@ public class CommunityFile {
     @JoinColumn(name = "community_id")
     private Community community;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(STRING)
     private FileType type;
+
+    @Enumerated(STRING)
+    private FileUrlDomain domain;
 
     @Column
     private String file;
 
-    public CommunityFile(FileType type, String file) {
+    @Builder
+    public CommunityFile(FileType type, FileUrlDomain domain, String file) {
         this.type = type;
+        this.domain = domain == null ? MYBEAUTIP : domain;
         this.file = file;
     }
 
@@ -45,10 +52,19 @@ public class CommunityFile {
     }
 
     public String getFileUrl() {
-        return toUrl(file, COMMUNITY, community.getId());
+        return toUrl(domain, file, COMMUNITY, community.getId());
     }
 
     public boolean isUrlEqual(String url) {
         return getFileUrl().equals(url);
+    }
+
+    public void change(FileUrlDomain domain, String fileName) {
+        this.domain = domain;
+        this.file = fileName;
+    }
+
+    public boolean isVideo() {
+        return type == VIDEO;
     }
 }

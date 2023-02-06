@@ -34,8 +34,8 @@ public class AdminVideoCommentService {
         Comment comment = converter.convert(videoId, request);
         Comment savedComment = videoCommentDao.save(comment);
         updateCommentCount(videoId, savedComment);
-        if (request.file() != null) {
-            awsS3Handler.copy(request.file(), VIDEO_COMMENT.getDirectory(comment.getId()));
+        if (request.getFile() != null) {
+            awsS3Handler.copy(request.getFile(), VIDEO_COMMENT.getDirectory(comment.getId()));
         }
         return new AdminVideoCommentResponse(savedComment);
     }

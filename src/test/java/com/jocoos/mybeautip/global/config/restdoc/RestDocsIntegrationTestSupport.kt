@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.testutil.container.TestContainerConfig
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.GROUP
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
+import com.jocoos.mybeautip.domain.file.service.FlipFlopService
 import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
 import com.jocoos.mybeautip.testutil.fixture.makeMember
@@ -14,7 +15,7 @@ import com.jocoos.mybeautip.security.JwtTokenProvider
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.*
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
@@ -70,6 +71,9 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     @MockBean
     protected lateinit var awsS3Handler: AwsS3Handler
 
+    @MockBean
+    protected lateinit var flipFlopService: FlipFlopService
+
     protected lateinit var requestUser: Member
     protected lateinit var requestUserToken: String
 
@@ -110,6 +114,7 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
             .build()
 
         given(awsS3Handler.copy(any(FileDto::class.java), any())).willReturn("{domain}/{file_directory}/filename")
+        flipFlopService.transcode(anyList(), anyLong())
     }
 
 }

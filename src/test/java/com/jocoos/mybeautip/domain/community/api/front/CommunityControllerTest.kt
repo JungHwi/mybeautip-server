@@ -96,7 +96,12 @@ class CommunityControllerTest(
                     fieldWithPath("files.[].type").type(STRING).description("파일 타입")
                         .description(generateLinkCode(FILE_TYPE)),
                     fieldWithPath("files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL").optional(),
-                    fieldWithPath("files.[].url").type(STRING).description("파일 URL")
+                    fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("files.[].need_transcode")
+                        .type(BOOLEAN)
+                        .description("비디오 파일 트랜스코딩 필요 여부 (현 ios true 요청하면 됩니다)")
+                        .attributes(getDefault(false))
+                        .optional()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("글 ID"),
@@ -138,29 +143,6 @@ class CommunityControllerTest(
             )
         )
     }
-
-//    @Test
-//    fun uploadFiles() {
-//        val file = MockMultipartFile("files", "file", "image/jpeg", "mock".toByteArray())
-//        val result: ResultActions = mockMvc.perform(
-//            RestDocumentationRequestBuilders
-//                .multipart("/api/1/community/files")
-//                .file(file)
-//        )
-//            .andExpect(status().isOk)
-//            .andDo(print())
-//        result.andDo(
-//            document(
-//                "upload_file_community",
-//                RequestDocumentation.requestParts(
-//                    RequestDocumentation.partWithName("files").description("업로드할 파일 목록")
-//                ),
-//                responseFields(
-//                    fieldWithPath("[]").type(ARRAY).description("UPLOAD 된 파일 URL")
-//                )
-//            )
-//        )
-//    }
 
     @Test
     fun getCommunities() {
@@ -331,7 +313,12 @@ class CommunityControllerTest(
                     fieldWithPath("files.[].type").type(STRING).description("파일 타입")
                         .description(generateLinkCode(FILE_TYPE)),
                     fieldWithPath("files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL").optional(),
-                    fieldWithPath("files.[].url").type(STRING).description("파일 URL")
+                    fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("files.[].need_transcode")
+                        .type(BOOLEAN)
+                        .description("비디오 파일 트랜스코딩 필요 여부 (현 ios true 요청하면 됩니다)")
+                        .attributes(getDefault(false))
+                        .optional()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("글 ID"),
@@ -587,23 +574,4 @@ class CommunityControllerTest(
             )
         );
     }
-
-//    fun saveCommunityByApiCall() {
-//        val request = WriteCommunityRequest.builder()
-//            .categoryId(communityCategory.id)
-//            .title("Mock Title")
-//            .contents("Mock Contents")
-//            .build()
-//
-//        Given {
-//            port(port)
-//            header(AUTHORIZATION, requestUserToken)
-//            contentType(APPLICATION_JSON_VALUE)
-//            body(request)
-//        } When {
-//            post("/api/1/community")
-//        } Then {
-//            status().isOk
-//        }
-//    }
 }

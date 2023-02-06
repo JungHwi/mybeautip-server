@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.validation.ConstraintViolationException;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -104,19 +103,23 @@ public class ControllerExceptionAdvice {
         return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 
-    public ResponseEntity<Object> handleNumberFormatException(NumberFormatException e) {
-        log.debug("handleNumberFormatException called");
+    @ExceptionHandler(AuthenticationException.class)
+    public final ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .error("bad_request")
+                .error(e.getErrorCode().name().toLowerCase())
                 .errorDescription(e.getMessage())
+                .contents(e.getContents())
                 .build();
-        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, e.getHttpStatus());
     }
 
-    private boolean isProduction() {
-        if (environment == null) {
-            return false;
-        }
-        return Arrays.asList(environment.getActiveProfiles()).contains("production");
+    @ExceptionHandler(InternalServerException.class)
+    public final ResponseEntity<ErrorResponse> handleFileIOException(InternalServerException e) {
+        log.debug("Internal Server Exception Thrown ", e);
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(e.getErrorCode().name().toLowerCase())
+                .errorDescription(e.getMessage())
+                .build();
+        return ResponseEntity.internalServerError().body(errorResponse);
     }
 }

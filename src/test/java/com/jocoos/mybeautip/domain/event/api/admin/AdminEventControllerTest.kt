@@ -23,6 +23,7 @@ import com.jocoos.mybeautip.testutil.fixture.makeEvents
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
@@ -172,10 +173,11 @@ class AdminEventControllerTest(
 
     @Test
     fun uploadFiles() {
+        val file = MockMultipartFile("files", "file", "image/jpeg", "mock".toByteArray())
         val result = mockMvc
             .perform(
                 multipart("/admin/event/files")
-                    .file("files", "mockup".toByteArray())
+                    .file(file)
                     .header(AUTHORIZATION, defaultAdminToken)
             )
             .andExpect(status().isOk)

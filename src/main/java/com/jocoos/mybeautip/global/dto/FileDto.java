@@ -21,6 +21,7 @@ public class FileDto {
     private FileType type = IMAGE;
     private String thumbnailUrl;
     private String url;
+    private boolean needTranscode = false;
 
     public FileDto(FileOperationType operation, String url) {
         this.operation = operation;
@@ -65,7 +66,7 @@ public class FileDto {
     }
 
     private String thumbnailUrl() {
-        return url + "_thumbnail";
+        return url + "_thumbnail.jpg";
     }
 
 }
