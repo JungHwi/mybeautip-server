@@ -53,9 +53,6 @@ cloud:
       bucket: mybeautip-stag
 
 flipflop:
-  url: https://api.flipflop.tv
-  access-token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZW1iZXJfaWQiOiIyNDAiLCJzY29wZSI6WyJndWVzdCJdLCJleHAiOjE5NzcyOTA2NDMsImp0aSI6InE0NVlsTWNaUDZJNk5rNTk5N1NaYjdzN09xVSIsImNsaWVudF9pZCI6Imd1ZXN0In0.LJ6CbyJSyLuu3MDIPr2zlnPumx8iQZcic4GsqYAaSs4
-  aws.s3.domain: https://static.flipflop.tv/A92258B859/videos/
   video:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
