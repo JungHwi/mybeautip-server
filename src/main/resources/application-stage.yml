@@ -53,6 +53,7 @@ cloud:
       bucket: mybeautip-stag
 
 flipflop:
+  app-key: 039BB3E64C
   video:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
