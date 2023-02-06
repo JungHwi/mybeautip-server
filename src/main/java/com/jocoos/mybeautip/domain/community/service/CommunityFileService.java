@@ -54,12 +54,12 @@ public class CommunityFileService {
     @Transactional
     public void editFiles(Community community, List<FileDto> fileDtoList) {
 
-        if (community.isVoteAndIncludeFile()) {
-            throw new BadRequestException(FILE_NOT_EDITABLE);
-        }
-
         if (isEmpty(fileDtoList)) {
             return;
+        }
+
+        if (community.isVoteAndIncludeFile()) {
+            throw new BadRequestException(FILE_NOT_EDITABLE);
         }
 
         for (FileDto fileDto : fileDtoList) {
