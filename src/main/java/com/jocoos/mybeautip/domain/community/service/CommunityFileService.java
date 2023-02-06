@@ -34,10 +34,7 @@ public class CommunityFileService {
         if (isEmpty(files)) {
             return;
         }
-
-        for (FileDto file : files) {
-            log.warn("{}", file.getUrl());
-        }
+        
         awsS3Handler.copy(files, COMMUNITY.getDirectory(communityId));
 
         List<String> videoUrls = files.stream()

@@ -84,7 +84,6 @@ public class AwsS3Service {
     }
 
     public String copy(String sourceKey, String destinationKey) {
-        log.warn("{}, {}", sourceKey, destinationKey);
         CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
 
         return copy(copyObjectRequest);
