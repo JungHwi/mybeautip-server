@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
+import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.video.code.VideoStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -26,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.file.code.FileUrlDomain.FLIPFLOP;
+import static com.jocoos.mybeautip.domain.file.code.FileUrlDomain.MYBEAUTIP;
 import static com.jocoos.mybeautip.domain.video.code.VideoStatus.OPEN;
 import static com.jocoos.mybeautip.domain.video.code.VideoStatus.RESERVE;
 
@@ -72,10 +74,10 @@ public class VideoUpdateService {
 
                 if (extraData.getCommunityId() != null) {
                     Community community = communityDao.get(extraData.getCommunityId());
-                    String originalUrl = community.getVideoUrl();
+                    CommunityFile originalFile = community.getVideoUrl();
                     community.changeVideo(FLIPFLOP, video.getUrl());
-                    if (originalUrl.contains("mybeautip")) {
-                        awsS3Handler.delete(originalUrl);
+                    if (originalFile.getDomain().equals(MYBEAUTIP)) {
+                        awsS3Handler.delete(originalFile.getFileUrl());
                     }
                     return null;
                 }

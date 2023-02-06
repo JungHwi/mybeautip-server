@@ -114,10 +114,9 @@ public class Community extends BaseEntity {
                 .ifPresent(file -> file.change(domain, getFileName(url, domain)));
     }
 
-    public String getVideoUrl() {
+    public CommunityFile getVideoUrl() {
         return communityFileList.stream()
                 .filter(CommunityFile::isVideo)
-                .map(CommunityFile::getFileUrl)
                 .findAny()
                 .orElse(null);
     }
