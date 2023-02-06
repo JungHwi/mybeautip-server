@@ -74,7 +74,9 @@ public class VideoUpdateService {
                     Community community = communityDao.get(extraData.getCommunityId());
                     String originalUrl = community.getVideoUrl();
                     community.changeVideo(FLIPFLOP, video.getUrl());
-                    awsS3Handler.delete(originalUrl);
+                    if (originalUrl.contains("mybeautip")) {
+                        awsS3Handler.delete(originalUrl);
+                    }
                     return null;
                 }
 
