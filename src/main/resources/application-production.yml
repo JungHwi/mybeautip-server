@@ -56,7 +56,8 @@ cloud:
       bucket: mybeautip-prod
 
 flipflop:
-  app-key: 9z27htVnKe
+  url: https://api.flipflop.tv
+  aws.s3.domain: https://static.flipflop.tv/A92258B859/videos/
   video:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 

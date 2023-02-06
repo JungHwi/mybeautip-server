@@ -22,7 +22,7 @@ spring:
 
 mybeautip:
   security:
-    access-token-validity-seconds: 15552000      # 180 days
+    access-token-validity-seconds: 600      # 10 minutes
     refresh-token-validity-seconds: 15552000     # 180 days
   aws:
     sns:
@@ -53,7 +53,8 @@ cloud:
       bucket: mybeautip-stag
 
 flipflop:
-  app-key: 9z27htVnKe
+  url: https://api.flipflop.tv
+  aws.s3.domain: https://static.flipflop.tv/A92258B859/videos/
   video:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
