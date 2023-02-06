@@ -131,11 +131,11 @@ public class Community extends BaseEntity {
         this.getCommunityFileList().add(communityFile);
     }
 
-    public void removeFile(String fileName) {
+    public void removeFile(String url) {
         if (this.category.isCategoryType(VOTE)) {
-            this.communityVoteList.removeIf(vote -> vote.getCommunityFile().getFile().equals(getFileName(fileName)));
+            this.communityVoteList.removeIf(vote -> vote.getCommunityFile().isUrlEqual(url));
         }
-        this.getCommunityFileList().removeIf(communityFile -> communityFile.getFile().equals(getFileName(fileName)));
+        this.getCommunityFileList().removeIf(communityFile -> communityFile.isUrlEqual(url));
     }
 
     public boolean isContentLongerThanOrSame(int length) {
