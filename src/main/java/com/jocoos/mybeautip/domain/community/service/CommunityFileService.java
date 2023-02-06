@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.file.service.FlipFlopService;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
+@Log4j2
 @RequiredArgsConstructor
 @Service
 public class CommunityFileService {
@@ -31,6 +33,10 @@ public class CommunityFileService {
     public void writeWithTranscode(List<FileDto> files, long communityId) {
         if (isEmpty(files)) {
             return;
+        }
+
+        for (FileDto file : files) {
+            log.warn("{}", file.getUrl());
         }
         awsS3Handler.copy(files, COMMUNITY.getDirectory(communityId));
 
