@@ -52,12 +52,27 @@ public class VideoUpdateService {
 
     @Transactional
     public Video created(CallbackController.CallbackStartVideoRequest request) {
+
+        if (StringUtils.isNotEmpty(request.getData())) {
+            VideoExtraData extraData = videoDataService.getDataObject(request.getData());
+            if (extraData.getCommunityId() != null) {
+                Community community = communityDao.get(extraData.getCommunityId());
+                CommunityFile originalFile = community.getVideoUrl();
+                community.changeVideo(FLIPFLOP, request.getUrl());
+                if (originalFile != null && originalFile.getDomain().equals(MYBEAUTIP)) {
+                    awsS3Handler.delete(originalFile.getFileUrl());
+                }
+                return null;
+            }
+        }
+
         Member member = findMember(Long.parseLong(request.getUserId()));
         Video video;
 
         if ("UPLOADED".equals(request.getType())) {
             video = new Video(member);
             BeanUtils.copyProperties(request, video);
+            videoRepository.save(video);
             VideoStatus status = OPEN;
             Date startedAtDate = video.getCreatedAt();
 
@@ -71,16 +86,6 @@ public class VideoUpdateService {
             if (StringUtils.isNotEmpty(request.getData())) {
                 VideoExtraData extraData = videoDataService.getDataObject(request.getData());
                 log.info("{}", extraData);
-
-                if (extraData.getCommunityId() != null) {
-                    Community community = communityDao.get(extraData.getCommunityId());
-                    CommunityFile originalFile = community.getVideoUrl();
-                    community.changeVideo(FLIPFLOP, video.getUrl());
-                    if (originalFile.getDomain().equals(MYBEAUTIP)) {
-                        awsS3Handler.delete(originalFile.getFileUrl());
-                    }
-                    return null;
-                }
 
                 if (!StringUtils.isBlank(extraData.getStartedAt())) {
                     String startedAt = String.valueOf(extraData.getStartedAt());
