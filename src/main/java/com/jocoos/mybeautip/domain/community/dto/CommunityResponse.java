@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
+import static com.jocoos.mybeautip.domain.file.code.FileType.IMAGE;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
@@ -140,7 +141,12 @@ public class CommunityResponse implements CursorInterface {
     }
 
     public void toV1() {
-        this.fileUrl = files.stream().map(FileDto::getUrl).toList();
+        this.fileUrl = files.stream()
+                .map(fileDto -> {
+                    if (fileDto.getType().equals(IMAGE)) return fileDto.getUrl();
+                    else return fileDto.getThumbnailUrl();
+                })
+                .toList();
         this.files = null;
     }
 }

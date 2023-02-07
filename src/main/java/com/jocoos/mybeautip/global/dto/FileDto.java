@@ -6,6 +6,8 @@ import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.vo.FileVo;
 import lombok.*;
 
+import java.util.Objects;
+
 import static com.jocoos.mybeautip.domain.file.code.FileType.IMAGE;
 import static com.jocoos.mybeautip.domain.file.code.FileType.VIDEO;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
@@ -69,4 +71,20 @@ public class FileDto {
         return url + "_thumbnail.jpg";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FileDto fileDto = (FileDto) o;
+        return needTranscode == fileDto.needTranscode &&
+                operation == fileDto.operation &&
+                type == fileDto.type &&
+                Objects.equals(thumbnailUrl, fileDto.thumbnailUrl) &&
+                Objects.equals(url, fileDto.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(operation, type, thumbnailUrl, url, needTranscode);
+    }
 }
