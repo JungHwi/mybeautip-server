@@ -44,6 +44,7 @@ import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
 import static com.querydsl.sql.SQLExpressions.count;
+import static com.querydsl.sql.SQLExpressions.countDistinct;
 
 @Repository
 public class VideoCustomRepositoryImpl implements VideoCustomRepository {
@@ -223,7 +224,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     @Override
     public Long countBy(String keyword) {
         return repository.query(query -> query
-                .select(count(video))
+                .select(countDistinct(video))
                 .from(video)
                 .join(member).on(video.member.eq(member))
                 .join(videoCategoryMapping).on(video.categoryMapping.contains(videoCategoryMapping))
@@ -231,6 +232,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .where(
                         searchCondition(keyword),
                         eqVisibility(PUBLIC),
+                        eqStatus(OPEN),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
                 )
