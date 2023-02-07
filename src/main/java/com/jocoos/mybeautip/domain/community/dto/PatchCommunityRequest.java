@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import static com.jocoos.mybeautip.domain.file.code.FileType.VIDEO;
 import static com.jocoos.mybeautip.global.code.FileOperationType.DELETE;
 import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Getter
 @Builder
@@ -64,7 +63,4 @@ public class PatchCommunityRequest {
         return Stream.concat(deleteFiles.stream(), uploadFiles.stream()).toList();
     }
 
-    public boolean containFile() {
-        return !isEmpty(files);
-    }
 }
