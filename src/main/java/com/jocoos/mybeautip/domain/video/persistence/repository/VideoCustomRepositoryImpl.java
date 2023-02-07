@@ -231,6 +231,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
                 .where(
                         searchCondition(keyword),
                         eqVisibility(PUBLIC),
+                        eqStatus(OPEN),
                         inState(Arrays.asList("LIVE", "VOD")),
                         video.deletedAt.isNull()
                 )
