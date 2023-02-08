@@ -29,6 +29,8 @@ public class MyCommunityCommentResponse implements CursorInterface {
 
     private String contents;
 
+    private String fileUrl;
+
     private Integer reportCount;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
