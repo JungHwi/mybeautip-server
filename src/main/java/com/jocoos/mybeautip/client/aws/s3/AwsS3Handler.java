@@ -105,6 +105,9 @@ public class AwsS3Handler {
 
         List<String> result = new ArrayList<>();
         for (FileDto fileDto : fileDtoList) {
+            if (fileDto.getOperation() == null) {
+                continue;
+            }
             switch (fileDto.getOperation()) {
                 case UPLOAD -> result.add(copy(fileDto, destination));
                 case DELETE -> delete(fileDto);
