@@ -8,7 +8,6 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.Member;
 import lombok.*;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 
