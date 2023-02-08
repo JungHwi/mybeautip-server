@@ -119,7 +119,7 @@ class MyCommunityControllerTest(
                     fieldWithPath("content.[].community_id").type(NUMBER).description("커뮤니티 아이디"),
                     fieldWithPath("content.[].parent_id").type(NUMBER).description("부모 댓글 아이디").optional(),
                     fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(COMMUNITY_STATUS)),
-                    fieldWithPath("content.[].contents").type(STRING).description("내용"),
+                    fieldWithPath("content.[].contents").type(STRING).description("내용").optional(),
                     fieldWithPath("content.[].file_url").type(STRING).description("이미지 URL").optional(),
                     fieldWithPath("content.[].report_count").type(NUMBER).description("대댓글수"),
                     fieldWithPath("content.[].created_at").type(STRING).description("작성일")
