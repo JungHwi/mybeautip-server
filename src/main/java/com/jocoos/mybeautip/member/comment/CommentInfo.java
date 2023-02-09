@@ -31,6 +31,9 @@ public class CommentInfo {
 
     public CommentInfo(Comment comment) {
         BeanUtils.copyProperties(comment, this);
+        if (comment.getComment() == null) {
+            this.comment = "";
+        }
         setCommentRef(comment);
         this.createdBy = new MemberMeInfo(comment.getCreatedBy());
         this.fileUrl = comment.getFileUrl();

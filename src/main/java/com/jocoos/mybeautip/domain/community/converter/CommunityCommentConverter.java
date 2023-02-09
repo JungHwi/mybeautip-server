@@ -31,8 +31,9 @@ public interface CommunityCommentConverter {
     }
 
     @Mappings({
-        @Mapping(target = "relationInfo", ignore = true),
-        @Mapping(target = "fileUrl", ignore = true)
+            @Mapping(target = "contents", defaultValue = ""),
+            @Mapping(target = "relationInfo", ignore = true),
+            @Mapping(target = "fileUrl", ignore = true)
     })
     CommunityCommentResponse convert(CommunityComment entity);
 
@@ -43,6 +44,7 @@ public interface CommunityCommentConverter {
 
     List<CommunityCommentResponse> convert(List<CommunityComment> entity);
 
+    @Mapping(target = "contents", defaultValue = "")
     MyCommunityCommentResponse convertToMyComment(CommunityComment entity);
 
     List<MyCommunityCommentResponse> convertToMyComment(List<CommunityComment> entities);
