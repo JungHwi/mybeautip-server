@@ -2,7 +2,6 @@ package com.jocoos.mybeautip.domain.community.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.global.dto.FileDto;
-import com.jocoos.mybeautip.global.vo.FileVo;
 import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.Member;
 import lombok.Builder;
@@ -13,6 +12,8 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.global.code.FileOperationType.DELETE;
 import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 
@@ -51,14 +52,31 @@ public class EditCommunityCommentRequest {
                 .count();
     }
 
-    public Files fileDtoToFiles() {
+    public Files fileDtoToFiles(String originalFileUrl) {
         if (isEmpty(files)) {
             return new Files();
         }
-        List<FileVo> fileVos = files.stream()
+
+        // web front edit file request is active like PUT, overwrite file of original file
+        if (isRequestFileIsOverwriteRequest()) {
+            String requestUrl = files.get(0).getUrl();
+            if (requestUrl.equals(originalFileUrl)) {
+                return new Files();
+            }
+            files.get(0).setOperation(UPLOAD);
+            if (originalFileUrl != null) {
+                files.add(new FileDto(DELETE, originalFileUrl));
+            }
+        }
+
+        return files.stream()
                 .map(FileDto::toFile)
-                .toList();
-        return new Files(fileVos);
+                .collect(collectingAndThen(toList(), Files::new));
+    }
+
+    @JsonIgnore
+    private boolean isRequestFileIsOverwriteRequest() {
+        return !isEmpty(files) && files.size() == 1 && files.get(0).getOperation() == null;
     }
 
 }

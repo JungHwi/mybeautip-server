@@ -148,7 +148,7 @@ public class CommentService {
 
         comment.setComment(request.getComment());
         if (!CollectionUtils.isEmpty(request.getFiles())) {
-            comment.setFile(request.getUploadFilename());
+            comment.setFile(request.getUploadFilename(comment.getFileUrl()));
             awsS3Handler.editFiles(request.getFiles(), VIDEO_COMMENT.getDirectory(comment.getId()));
         }
         comment.valid();

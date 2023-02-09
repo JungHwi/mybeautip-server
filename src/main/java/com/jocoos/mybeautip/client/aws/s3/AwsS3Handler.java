@@ -99,10 +99,6 @@ public class AwsS3Handler {
     }
 
     public List<String> editFiles(List<FileDto> fileDtoList, String destination) {
-        if (CollectionUtils.isEmpty(fileDtoList)) {
-            return null;
-        }
-
         List<String> result = new ArrayList<>();
         for (FileDto fileDto : fileDtoList) {
             if (fileDto.getOperation() == null) {

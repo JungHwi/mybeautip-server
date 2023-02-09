@@ -12,6 +12,7 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.global.code.FileOperationType.DELETE;
 import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Data
 @AllArgsConstructor
@@ -23,9 +24,21 @@ public class UpdateCommentRequest {
     private List<FileDto> files;
 
     @JsonIgnore
-    public String getUploadFilename() {
+    public String getUploadFilename(String originalFileUrl) {
         if (files.size() == 1 && files.get(0).getOperation().equals(DELETE)) {
             return null;
+        }
+
+        // web front edit file request is active like PUT, overwrite file of original file
+        if (isRequestFileIsOverwriteRequest()) {
+            String requestUrl = files.get(0).getUrl();
+            if (requestUrl.equals(originalFileUrl)) {
+                return originalFileUrl;
+            }
+            files.get(0).setOperation(UPLOAD);
+            if (originalFileUrl != null) {
+                files.add(new FileDto(DELETE, originalFileUrl));
+            }
         }
 
         FileDto uploadFile = files.stream()
@@ -34,5 +47,10 @@ public class UpdateCommentRequest {
                 .orElseThrow();
 
         return FileUtil.getFileName(uploadFile.getUrl());
+    }
+
+    @JsonIgnore
+    private boolean isRequestFileIsOverwriteRequest() {
+        return !isEmpty(files) && files.size() == 1 && files.get(0).getOperation() == null;
     }
 }
