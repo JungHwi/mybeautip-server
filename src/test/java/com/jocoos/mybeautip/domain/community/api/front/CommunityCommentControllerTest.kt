@@ -105,7 +105,7 @@ class CommunityCommentControllerTest(
                     fieldWithPath("content.[].community_id").type(NUMBER).description("커뮤니티 아이디"),
                     fieldWithPath("content.[].parent_id").type(NUMBER).description("부모 댓글 아이디").optional(),
                     fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(COMMUNITY_STATUS)),
-                    fieldWithPath("content.[].contents").type(STRING).description("내용"),
+                    fieldWithPath("content.[].contents").type(STRING).description("내용").optional(),
                     fieldWithPath("content.[].file_url").type(STRING).description("이미지 URL").optional(),
                     fieldWithPath("content.[].like_count").type(NUMBER).description("좋아요수"),
                     fieldWithPath("content.[].comment_count").type(NUMBER).description("대댓글수"),
@@ -162,7 +162,7 @@ class CommunityCommentControllerTest(
                     fieldWithPath("community_id").type(NUMBER).description("커뮤니티 아이디"),
                     fieldWithPath("parent_id").type(NUMBER).description("부모 댓글 아이디").optional(),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(COMMUNITY_STATUS)),
-                    fieldWithPath("contents").type(STRING).description("내용"),
+                    fieldWithPath("contents").type(STRING).description("내용").optional(),
                     fieldWithPath("file_url").type(STRING).description("이미지 URL").optional(),
                     fieldWithPath("is_like").type(BOOLEAN).description("좋아요 여부").optional(),
                     fieldWithPath("like_count").type(NUMBER).description("좋아요수"),
@@ -216,7 +216,7 @@ class CommunityCommentControllerTest(
                 requestFields(
                     fieldWithPath("parent_id").type(NUMBER).description("부모 댓글 아이디")
                         .optional(),
-                    fieldWithPath("contents").type(STRING).description("내용"),
+                    fieldWithPath("contents").type(STRING).description("내용 (contents 나 file 둘 중에 하나는 있어야 합니다)").optional(),
                     fieldWithPath("file").type(OBJECT).description("이미지").optional(),
                     fieldWithPath("file.type").type(ARRAY).attributes(getDefault(IMAGE)).description(FILE_TYPE)
                         .ignored(),
@@ -230,7 +230,7 @@ class CommunityCommentControllerTest(
                     fieldWithPath("community_id").type(NUMBER).description("커뮤니티 아이디"),
                     fieldWithPath("parent_id").type(NUMBER).description("부모 댓글 아이디").optional(),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(COMMUNITY_STATUS)),
-                    fieldWithPath("contents").type(STRING).description("내용"),
+                    fieldWithPath("contents").type(STRING).description("내용").optional(),
                     fieldWithPath("file_url").type(STRING).description("이미지 URL").optional(),
                     fieldWithPath("is_like").type(BOOLEAN).description("좋아요 여부").optional(),
                     fieldWithPath("like_count").type(NUMBER).description("좋아요수"),
@@ -290,7 +290,7 @@ class CommunityCommentControllerTest(
                     parameterWithName("comment_id").description("댓글 ID")
                 ),
                 requestFields(
-                    fieldWithPath("contents").type(STRING).description("내용"),
+                    fieldWithPath("contents").type(STRING).description("내용 (contents 나 file 둘 중에 하나는 존재하도록 해야합니다)").optional(),
                     fieldWithPath("files").type(ARRAY).description("이미지 파일 List").optional(),
                     fieldWithPath("files.[].type").type(ARRAY).attributes(getDefault(IMAGE)).description(FILE_TYPE)
                         .ignored(),
@@ -304,7 +304,7 @@ class CommunityCommentControllerTest(
                     fieldWithPath("community_id").type(NUMBER).description("커뮤니티 아이디"),
                     fieldWithPath("parent_id").type(NUMBER).description("부모 댓글 아이디").optional(),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(COMMUNITY_STATUS)),
-                    fieldWithPath("contents").type(STRING).description("내용"),
+                    fieldWithPath("contents").type(STRING).description("내용").optional(),
                     fieldWithPath("file_url").type(STRING).description("이미지 URL").optional(),
                     fieldWithPath("is_like").type(BOOLEAN).description("좋아요 여부").optional(),
                     fieldWithPath("like_count").type(NUMBER).description("좋아요수"),
