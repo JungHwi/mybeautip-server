@@ -74,7 +74,7 @@ class AdminCommunityCommentControllerTest(
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 아이디"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(COMMUNITY_STATUS)),
-                    fieldWithPath("contents").type(STRING).description("내용"),
+                    fieldWithPath("contents").type(STRING).description("내용").optional(),
                     fieldWithPath("file_url").type(STRING).description("이미지 URL").optional(),
                     fieldWithPath("like_count").type(NUMBER).description("좋아요수"),
                     fieldWithPath("report_count").type(NUMBER).description("신고수"),
@@ -156,7 +156,7 @@ class AdminCommunityCommentControllerTest(
                     fieldWithPath("content").type(ARRAY).description("커뮤니티 댓글 목록"),
                     fieldWithPath("content.[].id").type(NUMBER).description("커뮤니티 댓글 ID"),
                     fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(COMMUNITY_STATUS)),
-                    fieldWithPath("content.[].contents").type(STRING).description("내용"),
+                    fieldWithPath("content.[].contents").type(STRING).description("내용").optional(),
                     fieldWithPath("content.[].file_url").type(STRING).description("이미지 URL").optional(),
                     fieldWithPath("content.[].like_count").type(NUMBER).description("좋아요수"),
                     fieldWithPath("content.[].report_count").type(NUMBER).description("신고수"),

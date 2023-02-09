@@ -21,15 +21,6 @@ public class Files {
             return originalFilename;
         }
 
-        // for comment file PUT request
-        if (isSingleFile() && fileCollection.get(0).operation() == null) {
-            FileVo singleFile = fileCollection.get(0);
-            if (singleFile.filename().equals(originalFilename)) {
-                return originalFilename;
-            }
-            return singleFile.filename();
-        }
-
         return fileCollection.stream()
                 .filter(file -> UPLOAD.equals(file.operation()))
                 .findFirst()
@@ -38,11 +29,7 @@ public class Files {
     }
 
     public boolean isSingleUpload() {
-        return isSingleFile() && countUploadFile() == 1;
-    }
-
-    private boolean isSingleFile() {
-        return fileCollection.size() == 1;
+        return fileCollection.size() == 1 && countUploadFile() == 1;
     }
 
     private long countUploadFile() {

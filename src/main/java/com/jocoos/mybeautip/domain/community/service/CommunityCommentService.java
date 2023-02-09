@@ -17,6 +17,7 @@ import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
+import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -122,8 +123,9 @@ public class CommunityCommentService {
     public CommunityCommentResponse edit(EditCommunityCommentRequest request) {
         Member requestMember = request.getMember();
         CommunityComment communityComment = dao.get(request.getCommunityId(), request.getCommentId());
+        Files editedFiles = request.fileDtoToFiles(communityComment.getFileUrl());
 
-        communityComment.edit(request.getContents(), request.fileDtoToFiles(), requestMember);
+        communityComment.edit(request.getContents(), editedFiles, requestMember);
         dao.save(communityComment);
 
         awsS3Handler.editFiles(request.getFiles(), COMMUNITY_COMMENT.getDirectory(communityComment.getId()));
