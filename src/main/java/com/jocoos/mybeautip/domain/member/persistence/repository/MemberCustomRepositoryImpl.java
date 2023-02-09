@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.member.persistence.repository;
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.community.dto.QMemberResponse;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.code.InfluencerStatus;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
 import com.jocoos.mybeautip.domain.member.dto.QMemoResponse;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.jocoos.mybeautip.domain.member.persistence.domain.QInfluencer.influencer;
 import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberActivityCount.memberActivityCount;
 import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberDetail.memberDetail;
 import static com.jocoos.mybeautip.domain.member.persistence.domain.QMemberMemo.memberMemo;
@@ -101,13 +103,14 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     private JPAQuery<?> baseSearchQuery(MemberSearchCondition condition) {
         return repository.query(query -> query
-                .from(member)
+                .from(member).leftJoin(influencer).on(member.id.eq(influencer.id))
                 .where(
                         eqStatus(condition.status()),
                         eqGrantType(condition.grantType()),
                         startAtAfter(condition.getStartAt()),
                         endAtBefore(condition.getEndAt()),
-                        searchByKeyword(condition.searchOption())
+                        searchByKeyword(condition.searchOption()),
+                        isInfluencer(condition.searchOption())
                 ));
     }
 
@@ -125,7 +128,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     private List<MemberBasicSearchResult> fetchBasicSearchResult(JPAQuery<?> baseQuery) {
         return baseQuery
-                .select(new QMemberBasicSearchResult(member, memberActivityCount))
+                .select(new QMemberBasicSearchResult(member, memberActivityCount, influencer))
                 .innerJoin(memberActivityCount).on(member.eq(memberActivityCount.member))
                 .fetch();
     }
@@ -168,6 +171,18 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 Ops.STRING_CONTAINS_IC,
                 Expressions.path(String.class, member, searchOption.getSearchField()),
                 Expressions.constant(searchOption.getKeyword()));
+    }
+
+    private BooleanExpression isInfluencer(SearchOption searchOption) {
+        if (searchOption == null || searchOption.getIsInfluencer() == null) {
+            return null;
+        }
+
+        if (searchOption.getIsInfluencer()) {
+            return influencer.status.eq(InfluencerStatus.ACTIVE);
+        } else {
+            return influencer.status.eq(InfluencerStatus.INACTIVE).or(influencer.status.isNull());
+        }
     }
 
     private QMemberSearchResult memberSearchResult(QMember memoCreatedBy) {

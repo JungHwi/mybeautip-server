@@ -14,7 +14,7 @@ import org.mapstruct.Mapping;
 import java.util.List;
 import java.util.Map;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {InfluencerConverter.class})
 public interface AdminMemberConverter {
     default List<MemberStatusResponse> convert(Map<MemberStatus, Long> statusCountMap) {
         return MemberStatusResponse.from(statusCountMap);
@@ -32,6 +32,9 @@ public interface AdminMemberConverter {
                 .map(AdminMemberPointResponse::from)
                 .toList();
     }
+
+    @Mapping(target = "influencerInfo", source = "influencer")
+    AdminMemberResponse toResponse(MemberBasicSearchResult content);
 
     List<AdminMemberResponse> toListResponse(List<MemberBasicSearchResult> content);
 }

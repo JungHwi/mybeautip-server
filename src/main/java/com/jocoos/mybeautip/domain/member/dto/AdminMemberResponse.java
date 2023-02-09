@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.member.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
@@ -21,6 +22,7 @@ public record AdminMemberResponse(Long id,
                                   int orderCount,
                                   Boolean isPushable,
                                   Boolean isAgreeMarketingTerm,
+                                  @Setter InfluencerResponse influencerInfo,
                                   @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime createdAt,
                                   @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime modifiedAt) {
 }

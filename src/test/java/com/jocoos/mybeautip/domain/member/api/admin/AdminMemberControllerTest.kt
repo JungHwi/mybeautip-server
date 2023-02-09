@@ -3,10 +3,10 @@ package com.jocoos.mybeautip.domain.member.api.admin
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityReportRepository
 import com.jocoos.mybeautip.domain.member.code.MemberStatus.*
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusRequest
+import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepository
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberActivityCountRepository
 import com.jocoos.mybeautip.domain.term.code.TermType.MARKETING_INFO
 import com.jocoos.mybeautip.domain.term.persistence.repository.TermRepository
-import com.jocoos.mybeautip.testutil.fixture.*
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
@@ -16,6 +16,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.gen
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.member.point.MemberPointRepository
+import com.jocoos.mybeautip.testutil.fixture.*
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -34,7 +35,8 @@ class AdminMemberControllerTest(
     private val memberPointRepository: MemberPointRepository,
     private val memberActivityCountRepository: MemberActivityCountRepository,
     private val communityReportRepository: CommunityReportRepository,
-    private val termRepository: TermRepository
+    private val termRepository: TermRepository,
+    private val influencerRepository: InfluencerRepository
 ) : RestDocsIntegrationTestSupport() {
 
     @Test
@@ -131,8 +133,10 @@ class AdminMemberControllerTest(
     fun getMembers() {
 
         // given
-        memberRepository.save(makeMember())
+        val member = memberRepository.save(makeMember())
         termRepository.save(makeTerm(type = MARKETING_INFO))
+        memberActivityCountRepository.save(makeActivityCount(member))
+        influencerRepository.save(makeInfluencer(member))
 
         // when & then
         val result: ResultActions = mockMvc
@@ -150,6 +154,7 @@ class AdminMemberControllerTest(
                     parameterWithName("page").attributes(getDefault(1)).description("페이지 넘버").optional(),
                     parameterWithName("size").attributes(getDefault(10)).description("페이지 내 컨텐츠 개수").optional(),
                     parameterWithName("status").description("멤버 상태").optional(),
+                    parameterWithName("is_influencer").description("인플루언서 여부 > " + generateLinkCode(BOOLEAN_TYPE)).optional(),
                     parameterWithName("grant_type").description("가입").optional(),
                     parameterWithName("search").description("검색 (검색필드,검색어) 형식").optional(),
                     parameterWithName("start_at").description("검색 시작 일자").optional(),
@@ -171,6 +176,10 @@ class AdminMemberControllerTest(
                     fieldWithPath("content.[].order_count").type(NUMBER).description("주문 수"),
                     fieldWithPath("content.[].is_pushable").type(BOOLEAN).description("푸시 알림 동의 여부"),
                     fieldWithPath("content.[].is_agree_marketing_term").type(BOOLEAN).description("마케팅 동의 여부"),
+                    fieldWithPath("content.[].influencer_info").type(OBJECT).description("인플루언서 정보").optional(),
+                    fieldWithPath("content.[].influencer_info.influencer_status").type(STRING).description(generateLinkCode(INFLUENCER_STATUS)),
+                    fieldWithPath("content.[].influencer_info.broadcast_count").type(NUMBER).description("방송 횟수"),
+                    fieldWithPath("content.[].influencer_info.earned_at").type(STRING).description("인플루언서 권한 획득 일시").attributes(getZonedDateFormat()),
                     fieldWithPath("content.[].created_at").type(STRING).description("가입일자")
                         .attributes(getZonedDateFormat()),
                     fieldWithPath("content.[].modified_at").type(STRING).description("수정일자")

@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
 import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.code.InfluencerStatus;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.notice.code.NoticeSort;
@@ -48,6 +49,7 @@ public class CommonDocController {
     @GetMapping("/enums")
     public ApiResponseDto<EnumDocs> findEnums() {
         // Global
+        Map<String, String> booleanType = getDocs(BooleanType.values());
         Map<String, String> deviceOs = getDocs(DeviceOs.values());
         Map<String, String> language = getDocs(Language.values());
         Map<String, String> telecom = getDocs(Telecom.values());
@@ -58,6 +60,7 @@ public class CommonDocController {
 
         // Member
         Map<String, String> memberStatus = getDocs(MemberStatus.values());
+        Map<String, String> influencerStatus = getDocs(InfluencerStatus.values());
         Map<String, String> skinType = getDocs(SkinType.values());
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
         Map<String, String> grantType = getDocs(GrantType.values());
@@ -125,6 +128,7 @@ public class CommonDocController {
 
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
+                        .booleanType(booleanType)
                         .deviceOs(deviceOs)
                         .language(language)
                         .telecom(telecom)
@@ -134,6 +138,7 @@ public class CommonDocController {
                         .sortField(sortField)
                 // Member
                         .memberStatus(memberStatus)
+                        .influencerStatus(influencerStatus)
                         .skinType(skinType)
                         .skinWorry(skinWorry)
                         .grantType(grantType)

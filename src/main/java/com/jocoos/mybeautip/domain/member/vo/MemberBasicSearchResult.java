@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.member.vo;
 
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.persistence.domain.Influencer;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberActivityCount;
 import com.jocoos.mybeautip.member.Member;
 import com.querydsl.core.annotations.QueryProjection;
@@ -29,9 +30,10 @@ public class MemberBasicSearchResult {
     private final ZonedDateTime modifiedAt;
     private int reportCount;
     private Boolean isAgreeMarketingTerm;
+    private Influencer influencer;
 
     @QueryProjection
-    public MemberBasicSearchResult(Member member, MemberActivityCount activityCount) {
+    public MemberBasicSearchResult(Member member, MemberActivityCount activityCount, Influencer influencer) {
         this.id = member.getId();
         this.status = member.getStatus();
         this.avatarUrl = member.getAvatarUrl();
@@ -44,6 +46,7 @@ public class MemberBasicSearchResult {
         this.modifiedAt = member.getModifiedAtZoned();
         this.communityCount = activityCount.getCommunityCount();
         this.commentCount = activityCount.getTotalNormalCommentCount();
+        this.influencer = influencer;
     }
 
     public static void setIsAgreeMarketingTerm(List<MemberBasicSearchResult> contents, Map<Long, Boolean> agreeTermMap) {

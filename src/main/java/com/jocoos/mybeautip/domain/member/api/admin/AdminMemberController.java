@@ -34,6 +34,7 @@ public class AdminMemberController {
     @GetMapping("/member")
     public ResponseEntity<PageResponse<AdminMemberResponse>> getMembers(
             @RequestParam(required = false) MemberStatus status,
+            @RequestParam(name = "is_influencer", required = false) Boolean isInfluencer,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(name = "grant_type", required = false) GrantType grantType,
@@ -48,6 +49,7 @@ public class AdminMemberController {
                 .endAt(endAt)
                 .zoneId(ZoneId.of("Asia/Seoul"))
                 .isReported(isReported)
+                .isInfluencer(isInfluencer)
                 .build();
 
         MemberSearchCondition condition = MemberSearchCondition.builder()

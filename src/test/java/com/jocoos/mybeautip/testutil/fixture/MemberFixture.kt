@@ -1,7 +1,9 @@
 package com.jocoos.mybeautip.testutil.fixture
 
+import com.jocoos.mybeautip.domain.member.code.InfluencerStatus
 import com.jocoos.mybeautip.domain.member.code.MemberStatus
 import com.jocoos.mybeautip.domain.member.code.MemberStatus.ACTIVE
+import com.jocoos.mybeautip.domain.member.persistence.domain.Influencer
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberActivityCount
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberMemo
 import com.jocoos.mybeautip.domain.member.persistence.domain.UsernameCombinationWord
@@ -14,7 +16,7 @@ import com.jocoos.mybeautip.member.point.MemberPoint
 import com.jocoos.mybeautip.member.point.MemberPoint.STATE_EARNED_POINT
 import com.jocoos.mybeautip.member.vo.Birthday
 import java.time.ZonedDateTime
-import java.util.Date
+import java.util.*
 
 fun makeMembers(
     memberCount: Int,
@@ -79,6 +81,10 @@ fun makeMember(
         lastLoggedAt,
         deletedAt
     )
+}
+
+fun makeInfluencer(member: Member): Influencer {
+    return Influencer(member.id, InfluencerStatus.ACTIVE, 1, ZonedDateTime.now())
 }
 
 fun makeAddress(

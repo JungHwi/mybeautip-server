@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[influencer_status]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-influencer_status.adoc[]
