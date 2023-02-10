@@ -24,6 +24,7 @@ import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
 import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeLinkType;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
+import com.jocoos.mybeautip.domain.system.code.SystemOptionType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
@@ -57,6 +58,9 @@ public class CommonDocController {
         Map<String, String> fileOperationType = getDocs(FileOperationType.values());
         Map<String, String> fileType = getDocs(FileType.values());
         Map<String, String> sortField = getDocs(SortField.values());
+
+        // System
+        Map<String, String> systemOptionType = getDocs(SystemOptionType.values());
 
         // Member
         Map<String, String> memberStatus = getDocs(MemberStatus.values());
@@ -136,6 +140,8 @@ public class CommonDocController {
                         .fileOperationType(fileOperationType)
                         .fileType(fileType)
                         .sortField(sortField)
+                // System
+                        .systemOptionType(systemOptionType)
                 // Member
                         .memberStatus(memberStatus)
                         .influencerStatus(influencerStatus)

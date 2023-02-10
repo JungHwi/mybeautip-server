@@ -21,7 +21,6 @@ public enum ErrorCode implements CodeValue {
     JSON_SERIALIZATION_EXCEPTION("JSON 직렬화 중 오류 발생"),
     FILE_IO_EXCEPTION("파일 IO 오류"),
 
-
     // LOGIN
     INVALID_TOKEN("잘못된 토큰"),
 

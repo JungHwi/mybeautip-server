@@ -196,6 +196,9 @@ include::overview.adoc[]
 * link:notice/admin_edit_notice.html[공지사항 수정 API, window=_blank]
 * link:notice/admin_delete_notice.html[공지사항 삭제 API, window=_blank]
 
+=== System API
+* link:system/admin_edit_system_option.html[시스템 옵션 수정 API, window=_blank]
+
 [[TEST-API-LIST]]
 == Test API (향후에 꼭 지울 것)
 

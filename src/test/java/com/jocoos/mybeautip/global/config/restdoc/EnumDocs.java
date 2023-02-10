@@ -21,6 +21,9 @@ public class EnumDocs {
     Map<String, String> fileType;
     Map<String, String> sortField;
 
+    // System
+    Map<String, String> systemOptionType;
+
     // Member
     Map<String, String> memberStatus;
     Map<String, String> influencerStatus;

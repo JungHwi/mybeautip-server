@@ -68,6 +68,11 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("SortField")),
                                 enumConvertFieldDescriptor((enumDocs.getSortField()))
                         ),
+                        // System
+                        customResponseFields("custom-response", beneathPath("data.system_option_type").withSubsectionId("system_option_type"),
+                                attributes(key("title").value("SystemOptionType")),
+                                enumConvertFieldDescriptor((enumDocs.getSystemOptionType()))
+                        ),
                         // Member
                         customResponseFields("custom-response", beneathPath("data.member_status").withSubsectionId("member_status"),
                                 attributes(key("title").value("MemberStatus")),
