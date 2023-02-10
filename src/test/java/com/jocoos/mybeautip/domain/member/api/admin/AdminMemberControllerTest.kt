@@ -1,7 +1,9 @@
 package com.jocoos.mybeautip.domain.member.api.admin
 
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityReportRepository
+import com.jocoos.mybeautip.domain.member.code.InfluencerStatus
 import com.jocoos.mybeautip.domain.member.code.MemberStatus.*
+import com.jocoos.mybeautip.domain.member.dto.InfluencerRequest
 import com.jocoos.mybeautip.domain.member.dto.MemberStatusRequest
 import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepository
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberActivityCountRepository
@@ -177,9 +179,9 @@ class AdminMemberControllerTest(
                     fieldWithPath("content.[].is_pushable").type(BOOLEAN).description("푸시 알림 동의 여부"),
                     fieldWithPath("content.[].is_agree_marketing_term").type(BOOLEAN).description("마케팅 동의 여부"),
                     fieldWithPath("content.[].influencer_info").type(OBJECT).description("인플루언서 정보").optional(),
-                    fieldWithPath("content.[].influencer_info.influencer_status").type(STRING).description(generateLinkCode(INFLUENCER_STATUS)),
+                    fieldWithPath("content.[].influencer_info.status").type(STRING).description(generateLinkCode(INFLUENCER_STATUS)),
                     fieldWithPath("content.[].influencer_info.broadcast_count").type(NUMBER).description("방송 횟수"),
-                    fieldWithPath("content.[].influencer_info.earned_at").type(STRING).description("인플루언서 권한 획득 일시").attributes(getZonedDateFormat()),
+                    fieldWithPath("content.[].influencer_info.earned_at").type(STRING).description("인플루언서 권한 획득 일시").attributes(getZonedDateFormat()).optional(),
                     fieldWithPath("content.[].created_at").type(STRING).description("가입일자")
                         .attributes(getZonedDateFormat()),
                     fieldWithPath("content.[].modified_at").type(STRING).description("수정일자")
@@ -297,6 +299,39 @@ class AdminMemberControllerTest(
                     fieldWithPath("description").ignored(),
                     fieldWithPath("operation_type").ignored(),
                     fieldWithPath("target_id").ignored()
+                )
+            )
+        )
+    }
+
+    @Test
+    fun updateInfluencer() {
+        val member: Member = memberRepository.save(makeMember(status = ACTIVE))
+        val request = InfluencerRequest(InfluencerStatus.ACTIVE)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/admin/member/{member_id}/influencer", member.id)
+                    .header(AUTHORIZATION, defaultAdminToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_patch_influencer",
+                pathParameters(
+                    parameterWithName("member_id").description("회원 ID")
+                ),
+                requestFields(
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(INFLUENCER_STATUS))
+                ),
+                responseFields(
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(INFLUENCER_STATUS)),
+                    fieldWithPath("broadcast_count").type(NUMBER).description("방송 횟수"),
+                    fieldWithPath("earned_at").type(STRING).description("인플루언서 권한 획득 일시").attributes(getZonedDateFormat()).optional()
                 )
             )
         )

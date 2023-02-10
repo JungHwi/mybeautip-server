@@ -28,4 +28,19 @@ public class Influencer {
 
     @Column
     private ZonedDateTime earnedAt;
+
+    public void updateStatus(InfluencerStatus status) {
+        if (status == InfluencerStatus.ACTIVE && this.status != status) {
+            earnedAt = ZonedDateTime.now();
+        }
+
+        this.status = status;
+    }
+
+    public Influencer(long memberId) {
+        this.id = memberId;
+        this.status = InfluencerStatus.INACTIVE;
+        this.broadcastCount = 0;
+        this.earnedAt = null;
+    }
 }

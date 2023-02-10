@@ -34,6 +34,11 @@ public class MemberDao {
         return repository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Not found member info. id - " + memberId));
     }
+
+    @Transactional(readOnly = true)
+    public boolean existMember(long memberId) {
+        return repository.existsById(memberId);
+    }
     
     @Transactional(readOnly = true)
     public Map<MemberStatus, Long> getStatusesWithCount() {
