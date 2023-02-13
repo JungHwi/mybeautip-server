@@ -58,7 +58,10 @@ public class ScrapDao {
     }
 
     public boolean isExist(Member member) {
-        return repository.existsByMemberIdAndIsScrap(member.getId(), true)
-                || videoScrapRepository.existsByCreatedByAndStatus(member, SCRAP);
+        return repository.existsByMemberIdAndIsScrap(member.getId(), true) ||
+                // pageable for limit 1 query
+                !videoScrapRepository
+                .findOpenPublicVideoScraps(member, SCRAP, Pageable.ofSize(1))
+                .getContent().isEmpty();
     }
 }
