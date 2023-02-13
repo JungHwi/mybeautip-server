@@ -7,6 +7,11 @@ public class InternalServerException extends RuntimeException {
 
     private final ErrorCode errorCode;
 
+    public InternalServerException(ErrorCode errorCode, String description) {
+        super(description);
+        this.errorCode = errorCode;
+    }
+
     public InternalServerException(ErrorCode errorCode, Throwable cause) {
         super(errorCode.getDescription(), cause);
         this.errorCode = errorCode;

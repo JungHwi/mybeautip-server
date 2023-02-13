@@ -9,6 +9,7 @@ import lombok.Getter;
 public enum ErrorCode implements CodeValue {
 
     // COMMON
+    UNAUTHORIZED("로그인 안됨"),
     INTERNAL_SERVER_ERROR("서버 오류"),
     BAD_REQUEST("잘못된 요청"),
     ACCESS_DENIED("권한 없음"),
