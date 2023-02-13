@@ -39,11 +39,19 @@ public class CommunityFile {
     @Column
     private String file;
 
+    // only for video
+    @Column
+    private Integer duration;
+
     @Builder
-    public CommunityFile(FileType type, FileUrlDomain domain, String file) {
+    public CommunityFile(FileType type,
+                         FileUrlDomain domain,
+                         String file,
+                         Integer duration) {
         this.type = type;
         this.domain = domain == null ? MYBEAUTIP : domain;
         this.file = file;
+        this.duration = duration;
     }
 
     public CommunityFile(String file, Community community) {
@@ -59,9 +67,10 @@ public class CommunityFile {
         return getFileUrl().equals(url);
     }
 
-    public void change(FileUrlDomain domain, String fileName) {
+    public void change(FileUrlDomain domain, String fileName, Integer duration) {
         this.domain = domain;
         this.file = fileName;
+        this.duration = duration;
     }
 
     public boolean isVideo() {

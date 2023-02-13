@@ -68,7 +68,7 @@ public class CommunityFileService {
         for (FileDto fileDto : fileDtoList) {
             switch (fileDto.getOperation()) {
                 case UPLOAD:
-                    community.addFile(fileDto.getType(), MYBEAUTIP, fileDto.getUrl());
+                    community.addFile(fileDto.getType(), MYBEAUTIP, fileDto.getUrl(), fileDto.getDuration());
                     break;
                 case DELETE:
                     community.removeFile(fileDto.getUrl());

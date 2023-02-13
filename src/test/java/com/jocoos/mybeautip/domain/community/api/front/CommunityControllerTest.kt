@@ -97,9 +97,10 @@ class CommunityControllerTest(
                         .description(generateLinkCode(FILE_TYPE)),
                     fieldWithPath("files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL").optional(),
                     fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("files.[].duration").type(NUMBER).description("파일이 비디오일 때 영상 길이 ms (Android only)"),
                     fieldWithPath("files.[].need_transcode")
                         .type(BOOLEAN)
-                        .description("비디오 파일 트랜스코딩 필요 여부 (현 ios true 요청하면 됩니다)")
+                        .description("비디오 파일 트랜스코딩 필요 여부 (IOS only, true 요청하면 됩니다)")
                         .attributes(getDefault(false))
                         .optional()
                 ),
@@ -113,6 +114,7 @@ class CommunityControllerTest(
                     fieldWithPath("files.[].type").type(STRING).description(generateLinkCode(FILE_TYPE)),
                     fieldWithPath("files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL").optional(),
                     fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("files.[].duration").type(NUMBER).description("비디오 길이 ms").optional(),
                     fieldWithPath("votes").type(ARRAY).description("투표 파일 List").optional(),
                     fieldWithPath("votes.[].id").type(NUMBER).description("투표 파일 아이디"),
                     fieldWithPath("votes.[].file_url").type(STRING).description("투표 파일 URL"),
@@ -184,6 +186,7 @@ class CommunityControllerTest(
                     fieldWithPath("content.[].files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL")
                         .optional(),
                     fieldWithPath("content.[].files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("content.[].files.[].duration").type(NUMBER).description("비디오 길이 ms").optional(),
                     fieldWithPath("content.[].votes").type(ARRAY).description("투표 파일 List").optional(),
                     fieldWithPath("content.[].votes.[].id").type(NUMBER).description("투표 파일 아이디"),
                     fieldWithPath("content.[].votes.[].file_url").type(STRING).description("투표 파일 URL"),
@@ -249,6 +252,7 @@ class CommunityControllerTest(
                     fieldWithPath("files.[].type").type(STRING).description(generateLinkCode(FILE_TYPE)),
                     fieldWithPath("files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL").optional(),
                     fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("files.[].duration").type(NUMBER).description("비디오 길이 ms").optional(),
                     fieldWithPath("votes").type(ARRAY).description("투표 파일 List").optional(),
                     fieldWithPath("votes.[].id").type(NUMBER).description("투표 파일 아이디"),
                     fieldWithPath("votes.[].file_url").type(STRING).description("투표 파일 URL"),
@@ -330,6 +334,7 @@ class CommunityControllerTest(
                     fieldWithPath("files.[].type").type(STRING).description(generateLinkCode(FILE_TYPE)),
                     fieldWithPath("files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL").optional(),
                     fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("files.[].duration").type(NUMBER).description("비디오 길이 ms").optional(),
                     fieldWithPath("votes").type(ARRAY).description("투표 파일 List").optional(),
                     fieldWithPath("votes.[].id").type(NUMBER).description("투표 파일 아이디"),
                     fieldWithPath("votes.[].file_url").type(STRING).description("투표 파일 URL"),

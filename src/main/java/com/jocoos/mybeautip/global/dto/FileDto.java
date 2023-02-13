@@ -22,6 +22,7 @@ public class FileDto {
     private FileOperationType operation;
     private FileType type = IMAGE;
     private String thumbnailUrl;
+    private Integer duration;
     private String url;
     private boolean needTranscode = false;
 
@@ -30,16 +31,17 @@ public class FileDto {
         this.url = url;
     }
 
-    public FileDto(FileType type, String url) {
+    public FileDto(FileType type, String url, Integer duration) {
         this.type = type;
         this.url = url;
         if (VIDEO.equals(type)) {
             this.thumbnailUrl = thumbnailUrl();
+            this.duration = duration;
         }
     }
 
     public static FileDto from(CommunityFile file) {
-        return new FileDto(file.getType(), file.getFileUrl());
+        return new FileDto(file.getType(), file.getFileUrl(), file.getDuration());
     }
 
     public FileVo toFile() {
