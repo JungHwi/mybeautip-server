@@ -43,8 +43,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -554,27 +552,6 @@ public class LegacyVideoService {
             target.setOutputType(source.getOutputType());
         }
 
-        if (source.getVisibility() != null) {
-            String prevState = target.getVisibility();
-            String newState = source.getVisibility();
-
-            Member member = target.getMember();
-            if ("PUBLIC".equalsIgnoreCase(prevState) && "PRIVATE".equalsIgnoreCase(newState)) {
-                if (member.getPublicVideoCount() > 0) {
-                    memberRepository.updatePublicVideoCount(member.getId(), -1);
-                }
-                log.debug("Video state will be changed PUBLIC to PRIVATE: {}", target.getId());
-                target.setVisibility(newState);
-            }
-
-            if ("PRIVATE".equalsIgnoreCase(prevState) && "PUBLIC".equalsIgnoreCase(newState)) {
-                memberRepository.updatePublicVideoCount(member.getId(), 1);
-                log.debug("Video state will be changed PRIVATE to PUBLIC: {}", target.getId());
-                target.setVisibility(newState);
-            }
-            memberRepository.save(member);
-        }
-
         if (extraData != null) {
             if (!StringUtils.isBlank(extraData.getCategory())) {
                 String[] split = extraData.getCategory().split(",");
@@ -591,6 +568,14 @@ public class LegacyVideoService {
                 log.info("{}", startedAt);
                 target.setStartedAt(startedAt);
                 target.setStatus(RESERVE);
+            }
+
+            if (!StringUtils.isBlank(extraData.getTitle())) {
+                target.setTitle(extraData.getTitle());
+            }
+
+            if (!StringUtils.isBlank(extraData.getContent())) {
+                target.setContent(extraData.getContent());
             }
         }
 
