@@ -10,4 +10,6 @@ public class VideoExtraData {
     private String category;
     private String startedAt;
     private Long communityId;
+    private String title;
+    private String content;
 }

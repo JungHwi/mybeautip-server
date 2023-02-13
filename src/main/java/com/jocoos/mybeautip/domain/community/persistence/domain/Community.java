@@ -107,11 +107,11 @@ public class Community extends BaseEntity {
         return this;
     }
 
-    public void changeVideo(FileUrlDomain domain, String url) {
+    public void changeVideo(FileUrlDomain domain, String url, Integer duration) {
         communityFileList.stream()
                 .filter(CommunityFile::isVideo)
                 .findAny()
-                .ifPresent(file -> file.change(domain, getFileName(url, domain)));
+                .ifPresent(file -> file.change(domain, getFileName(url, domain), duration));
     }
 
     public CommunityFile getVideoUrl() {
@@ -121,8 +121,8 @@ public class Community extends BaseEntity {
                 .orElse(null);
     }
 
-    public void addFile(FileType type, FileUrlDomain domain, String url) {
-        CommunityFile communityFile = new CommunityFile(type, domain, getFileName(url, domain));
+    public void addFile(FileType type, FileUrlDomain domain, String url, Integer duration) {
+        CommunityFile communityFile = new CommunityFile(type, domain, getFileName(url, domain), duration);
         communityFile.setCommunity(this);
         if (this.category.isCategoryType(VOTE)) {
             CommunityVote communityVote = new CommunityVote(this, communityFile);

@@ -58,7 +58,7 @@ public class VideoUpdateService {
             if (extraData.getCommunityId() != null) {
                 Community community = communityDao.get(extraData.getCommunityId());
                 CommunityFile originalFile = community.getVideoUrl();
-                community.changeVideo(FLIPFLOP, request.getUrl());
+                community.changeVideo(FLIPFLOP, request.getUrl(), request.getDuration());
                 if (originalFile != null && originalFile.getDomain().equals(MYBEAUTIP)) {
                     awsS3Handler.delete(originalFile.getFileUrl());
                 }
