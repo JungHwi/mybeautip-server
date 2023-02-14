@@ -97,10 +97,11 @@ class CommunityControllerTest(
                         .description(generateLinkCode(FILE_TYPE)),
                     fieldWithPath("files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL").optional(),
                     fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
-                    fieldWithPath("files.[].duration").type(NUMBER).description("파일이 비디오일 때 영상 길이 ms (Android only)"),
+                    fieldWithPath("files.[].duration").type(NUMBER)
+                        .description("파일이 비디오일 때 영상 길이 ms (need_transcode가 false일 때 필요합니다)").optional(),
                     fieldWithPath("files.[].need_transcode")
                         .type(BOOLEAN)
-                        .description("비디오 파일 트랜스코딩 필요 여부 (IOS only, true 요청하면 됩니다)")
+                        .description("비디오 파일 트랜스코딩 필요 여부 (FlipFlop 트랜스코딩이 필요할 때 true)")
                         .attributes(getDefault(false))
                         .optional()
                 ),
