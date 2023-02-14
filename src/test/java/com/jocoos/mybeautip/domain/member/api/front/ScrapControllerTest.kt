@@ -74,6 +74,7 @@ class ScrapControllerTest(
                     fieldWithPath("content.[].files.[].thumbnail_url").type(STRING).description("파일 썸네일 URL")
                         .optional(),
                     fieldWithPath("content.[].files.[].url").type(STRING).description("파일 URL"),
+                    fieldWithPath("content.[].files.[].duration").type(NUMBER).description("비디오 길이 ms").optional(),
                     fieldWithPath("content.[].votes").type(ARRAY).description("투표 URL").optional(),
                     fieldWithPath("content.[].view_count").type(NUMBER).description("조회수"),
                     fieldWithPath("content.[].like_count").type(NUMBER).description("좋아요수"),
