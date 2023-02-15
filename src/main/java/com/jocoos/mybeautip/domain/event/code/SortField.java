@@ -12,6 +12,7 @@ public enum SortField implements CodeValue {
     CREATED_AT("생성일시", "createdAt"),
     JOIN_COUNT("참여수", "joinCount"),
     VIEW_COUNT("조회순", "viewCount"),
+    TOTAL_HEART_COUNT("총 하트순", "totalHeartCount"),
     LIKE_COUNT("좋이요순", "likeCount"),
     REPORT_COUNT("신고순", "reportCount");
 
