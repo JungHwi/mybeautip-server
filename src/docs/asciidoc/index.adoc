@@ -145,6 +145,9 @@ include::overview.adoc[]
 * link:member/admin_edit_member_memo.html[관리자 회원 메모 수정 API, window=_blank]
 * link:member/admin_delete_member_memo.html[관리자 회원 메모 삭제 API, window=_blank]
 
+=== Broadcast API
+* link:broadcast/admin_get_viewers.html[관리자 방송 시청자 목록 조회 API, window=_blank]
+
 === Community API
 * link:community/admin_get_community.html[커뮤니티 상세 조회 API, window=_blank]
 * link:community/admin_get_communities.html[커뮤니티 목록 조회 API, window=_blank]

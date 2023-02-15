@@ -3,12 +3,15 @@ package com.jocoos.mybeautip.domain.broadcast.persistence.domain;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @Entity
 public class BroadcastViewer {
 
@@ -16,11 +19,15 @@ public class BroadcastViewer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private long broadcastId;
+    @ManyToOne
+    @JoinColumn(name = "broadcast_id")
+    private Broadcast broadcast;
 
-    @Column(nullable = false)
-    private long memberId;
+    @Column
+    private Long memberId;
+
+    @Column(name = "sorted_username", nullable = false)
+    private String sortedUsername;
 
     @Enumerated(EnumType.STRING)
     private BroadcastViewerType type;
@@ -30,5 +37,8 @@ public class BroadcastViewer {
 
     @Column(nullable = false)
     private boolean isSuspended = false;
+
+    @Column(nullable = false)
+    private ZonedDateTime joinedAt;
 
 }

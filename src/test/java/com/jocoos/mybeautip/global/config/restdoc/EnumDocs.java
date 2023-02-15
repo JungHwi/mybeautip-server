@@ -32,6 +32,9 @@ public class EnumDocs {
     Map<String, String> grantType;
     Map<String, String> role;
 
+    // Broadcast
+    Map<String, String> broadcastViewerType;
+
     // Event
     Map<String, String> eventStatus;
     Map<String, String> eventJoinStatus;

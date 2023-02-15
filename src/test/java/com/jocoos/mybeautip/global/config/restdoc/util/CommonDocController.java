@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.config.restdoc.util;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
@@ -69,6 +70,9 @@ public class CommonDocController {
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
         Map<String, String> grantType = getDocs(GrantType.values());
         Map<String, String> role = getDocs(Role.values());
+
+        // Broadcast
+        Map<String, String> broadcastViewerType = getDocs(BroadcastViewerType.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -149,6 +153,8 @@ public class CommonDocController {
                         .skinWorry(skinWorry)
                         .grantType(grantType)
                         .role(role)
+                // Broadcast
+                        .broadcastViewerType(broadcastViewerType)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)

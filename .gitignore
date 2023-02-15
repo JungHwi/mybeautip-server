@@ -25,6 +25,7 @@ tools/*.zip
 
 .DS_Store
 /src/main/resources/static/docs/common/
+/src/main/resources/static/docs/broadcast/
 /src/main/resources/static/docs/community/
 /src/main/resources/static/docs/event/
 /src/main/resources/static/docs/home/
