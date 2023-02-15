@@ -3,13 +3,12 @@ package com.jocoos.mybeautip.domain.broadcast.api.front;
 import com.jocoos.mybeautip.domain.broadcast.dto.VodResponse;
 import com.jocoos.mybeautip.domain.broadcast.service.VodService;
 import com.jocoos.mybeautip.domain.event.code.SortField;
+import com.jocoos.mybeautip.global.dto.IsVisibleResponse;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,5 +28,10 @@ public class VodController {
         CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(cursor, sort, order, size);
         List<VodResponse> responses = service.getVodList(categoryId, cursorPaging);
         return new CursorResultResponse<>(responses);
+    }
+
+    @PatchMapping("/1/vod/{vodId}/visibility")
+    public IsVisibleResponse changeVodVisibility(@PathVariable Long vodId, @RequestBody BooleanDto isVisible) {
+        return service.changeVodVisibility(vodId, isVisible.isBool());
     }
 }

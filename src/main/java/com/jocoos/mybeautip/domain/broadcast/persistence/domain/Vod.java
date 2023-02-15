@@ -54,4 +54,8 @@ public class Vod extends BaseEntity {
     public String getThumbnailUrl() {
         return null;
     }
+
+    public void visible(boolean isVisible) {
+        this.isVisible = isVisible;
+    }
 }
