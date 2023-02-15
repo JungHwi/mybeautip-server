@@ -6,6 +6,8 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.service.util.ViewerUsernameUtil
+import com.jocoos.mybeautip.domain.member.code.InfluencerStatus
+import com.jocoos.mybeautip.domain.member.persistence.domain.Influencer
 import com.jocoos.mybeautip.member.Member
 import org.apache.tika.utils.StringUtils
 import java.time.ZonedDateTime
@@ -40,6 +42,20 @@ fun makeBroadcast(
         startedAt,
         endedAt,
         arrayListOf()
+    )
+}
+
+fun makeInfluencer(
+    id: Long,
+    status: InfluencerStatus = InfluencerStatus.ACTIVE,
+    broadcastCount: Int = 0,
+    earnedAt: ZonedDateTime = ZonedDateTime.now()
+) : Influencer {
+    return Influencer(
+        id,
+        status,
+        broadcastCount,
+        earnedAt
     )
 }
 
