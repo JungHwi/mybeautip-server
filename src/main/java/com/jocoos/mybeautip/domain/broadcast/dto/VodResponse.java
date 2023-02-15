@@ -11,6 +11,7 @@ import lombok.Getter;
 @Getter
 public class VodResponse implements CursorInterface {
     private final long id;
+    private final String url;
     private final String title;
     private final String thumbnailUrl;
     private final int viewCount;
@@ -20,6 +21,7 @@ public class VodResponse implements CursorInterface {
     @QueryProjection
     public VodResponse(Vod vod, Member member) {
         this.id = vod.getId();
+        this.url = vod.getUrl();
         this.title = vod.getTitle();
         this.thumbnailUrl = vod.getThumbnailUrl();
         this.viewCount = vod.getViewCount();

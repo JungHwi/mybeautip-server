@@ -31,8 +31,13 @@ public class VodController {
                                                      @RequestParam(required = false, defaultValue = "DESC") String order,
                                                      @RequestParam(required = false, defaultValue = "20") int size) {
         CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(cursor, sort, order, size);
-        List<VodResponse> responses = service.getVodList(categoryId, cursorPaging);
+        List<VodResponse> responses = service.getList(categoryId, cursorPaging);
         return new CursorResultResponse<>(responses);
+    }
+
+    @GetMapping("/1/vod/{vodId}")
+    public VodResponse getOne(@PathVariable long vodId) {
+        return service.get(vodId);
     }
 
     @PostMapping("/1/vod/{vodId}/report")
