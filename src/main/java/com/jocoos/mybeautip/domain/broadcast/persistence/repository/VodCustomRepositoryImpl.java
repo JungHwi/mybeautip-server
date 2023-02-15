@@ -45,8 +45,6 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
                 return getVodList(condition, comparablePath);
             }
         }
-
-
     }
 
     private <T extends Comparable<T>> List<VodResponse> getVodList(VodSearchCondition condition,
@@ -96,7 +94,7 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
                 : orderSpecifiers;
     }
 
-    private static BooleanExpression eqId(Long cursor) {
-        return cursor == null ? null : vod.id.eq(cursor);
+    private static BooleanExpression eqId(Long vodId) {
+        return vodId == null ? null : vod.id.eq(vodId);
     }
 }

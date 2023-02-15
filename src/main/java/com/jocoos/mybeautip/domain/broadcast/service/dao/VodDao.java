@@ -23,8 +23,14 @@ public class VodDao {
     }
 
     @Transactional(readOnly = true)
-    public Vod get(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("vod not found. id - " + id));
+    public Vod get(long vodId) {
+        return repository.findById(vodId)
+                .orElseThrow(() -> new NotFoundException("vod not found. id - " + vodId));
+    }
+
+    @Transactional(readOnly = true)
+    public Vod getForUpdate(Long vodId) {
+        return repository.selectForUpdate(vodId)
+                .orElseThrow(() -> new NotFoundException("vod not found. id - " + vodId));
     }
 }

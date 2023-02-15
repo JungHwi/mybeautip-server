@@ -16,6 +16,7 @@ public enum ErrorCode implements CodeValue {
     NOT_FOUND("정보 없음"),
     INVALID_DATE_FORMAT("날짜 포맷 오류"),
     ALREADY_USED("이미 사용중"),
+    ALREADY_REPORT("이미 신고됨"),
     BANNED_WORD("금칙어 포함"),
     NOT_A_WRITER("작성자가 아님"),
     INVALID_SORT_FIELD("지원하는 정렬 필드가 아님"),

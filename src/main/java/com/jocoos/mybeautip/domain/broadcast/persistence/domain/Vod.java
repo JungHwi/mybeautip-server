@@ -34,11 +34,14 @@ public class Vod extends BaseEntity {
     @Column
     private int viewCount;
 
+    @Column
+    private int reportCount;
+
     // generated column
     @Column(insertable = false, updatable = false)
     private int totalHeartCount;
 
-    @Column
+    @Column(insertable = false, updatable = false)
     private int liveHeartCount;
 
     @Column
@@ -57,5 +60,13 @@ public class Vod extends BaseEntity {
 
     public void visible(boolean isVisible) {
         this.isVisible = isVisible;
+    }
+
+    public void addReportCount(int addCount) {
+        this.reportCount += addCount;
+    }
+
+    public void addHeartCount(int addCount) {
+        this.vodHeartCount += addCount;
     }
 }
