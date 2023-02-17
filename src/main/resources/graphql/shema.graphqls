@@ -1,7 +1,7 @@
 type Vod {
     id: ID!
     url: String!
-    visibility: Boolean!
+    isVisible: Boolean!
     thumbnailUrl: String
     title: String
     duration: Int
@@ -30,6 +30,17 @@ type Member {
 type Query {
     vodList(paging: Paging, filter: Filter): [Vod]
     vodById(id: ID): Vod
+}
+
+type Mutation {
+    editVod(vodInput: VodInput): Vod
+}
+
+input VodInput {
+    id: ID!
+    title: String
+    isVisible: Boolean
+    thumbnail: String
 }
 
 input Paging {

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.persistence.domain;
 
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import javax.persistence.*;
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
+import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED)
@@ -65,11 +67,11 @@ public class Vod extends BaseEntity {
                int liveHeartCount,
                long memberId) {
         this.videoKey = videoKey;
-        this.title = title;
         this.category = category;
         this.liveHeartCount = liveHeartCount;
         this.memberId = memberId;
         this.isVisible = false;
+        setTitle(title);
     }
 
     public void visible(boolean isVisible) {
@@ -92,5 +94,20 @@ public class Vod extends BaseEntity {
     // TODO Need to check how thumbnail generate by Flipflop
     public String getThumbnailUrl() {
         return "ㅇ";
+    }
+
+    public void edit(String title,
+                     String thumbnail,
+                     Boolean isVisible) {
+        if (title != null) setTitle(title);
+        if (thumbnail != null) this.thumbnail = thumbnail;
+        if (isVisible != null) this.isVisible = isVisible;
+    }
+
+    private void setTitle(String title) {
+        if (trimAllWhitespace(title).length() > 25) {
+            throw new BadRequestException("");
+        }
+        this.title = title;
     }
 }

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
+import com.jocoos.mybeautip.domain.broadcast.dto.VodInput;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.VodReport;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.VodDao;
@@ -33,6 +34,13 @@ public class AdminVodGraphqlService {
     @Transactional(readOnly = true)
     public Vod get(long id) {
         return vodDao.get(id);
+    }
+
+    @Transactional
+    public Vod edit(VodInput vodInput) {
+        Vod vod = vodDao.get(vodInput.id());
+        vod.edit(vodInput.title(), vodInput.thumbnail(),  vodInput.isVisible());
+        return vod;
     }
 
     @Transactional(readOnly = true)

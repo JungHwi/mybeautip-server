@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin;
 
+import com.jocoos.mybeautip.domain.broadcast.dto.VodInput;
 import com.jocoos.mybeautip.domain.broadcast.dto.PagingFilter;
 import com.jocoos.mybeautip.domain.broadcast.dto.VodFilter;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
@@ -10,6 +11,7 @@ import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
@@ -36,6 +38,11 @@ public class AdminVodGraphQLController {
     @QueryMapping
     public Vod vodById(@Argument long id) {
         return service.get(id);
+    }
+
+    @MutationMapping
+    public Vod editVod(@Argument VodInput vodInput) {
+        return service.edit(vodInput);
     }
 
     @BatchMapping(typeName = "Vod", field = "reports")
