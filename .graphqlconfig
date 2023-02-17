@@ -1,0 +1,5 @@
+{
+  "name": "Graphql For Mybeautip",
+  "schemaPath": "src/main/resources/graphql/schema.graphqls",
+  "extensions": {}
+}

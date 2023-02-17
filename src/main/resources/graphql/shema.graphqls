@@ -1,0 +1,54 @@
+type Vod {
+    id: ID!
+    url: String!
+    visibility: Boolean!
+    thumbnailUrl: String
+    title: String
+    duration: Int
+    viewCount: Int
+    vodHeartCount: Int
+    liveHeartCount: Int
+    createdAt: String
+    member: Member
+    reports: [VodReport]
+}
+
+type VodReport {
+    id: ID!
+    reporter: Member
+    description: String
+    createdAt: String
+}
+
+type Member {
+    id: ID!
+    email: String
+    username: String
+    avatarUrl: String
+}
+
+type Query {
+    vodList(paging: Paging, filter: Filter): [Vod]
+    vodById(id: ID): Vod
+}
+
+input Paging {
+    page: Int = 1
+    size: Int = 5
+    sort: String
+    order: SortOrder
+}
+
+input Filter {
+    startAt: String
+    endAt:String
+    searchField: String
+    searchKeyword: String
+    isVisible: Boolean
+    isReported: Boolean
+}
+
+enum SortOrder {
+    ASC
+    DESC
+}

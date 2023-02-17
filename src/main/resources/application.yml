@@ -36,6 +36,9 @@ spring:
   flyway:
     baselineOnMigrate: false
     locations: classpath:db/mysql
+  graphql:
+    schema:
+      printer.enabled: true
   jpa:
     properties:
       hibernate:
