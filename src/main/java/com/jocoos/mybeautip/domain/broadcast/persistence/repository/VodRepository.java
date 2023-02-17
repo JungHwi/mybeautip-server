@@ -5,11 +5,13 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.graphql.data.GraphQlRepository;
 
 import java.util.Optional;
 
 import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
 
+@GraphQlRepository
 public interface VodRepository extends ExtendedQuerydslJpaRepository<Vod, Long>, VodCustomRepository {
 
     @Lock(value = PESSIMISTIC_WRITE)

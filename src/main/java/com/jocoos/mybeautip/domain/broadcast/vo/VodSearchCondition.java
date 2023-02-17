@@ -2,14 +2,19 @@ package com.jocoos.mybeautip.domain.broadcast.vo;
 
 import com.jocoos.mybeautip.domain.event.code.SortField;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
+import com.jocoos.mybeautip.global.vo.SearchOption;
 import lombok.Builder;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
 @Builder
 public record VodSearchCondition(List<Long> categoryIds,
-                                 CursorPaging<Long> cursorPaging) {
+                                 SearchOption searchOption,
+                                 Boolean isVisible,
+                                 CursorPaging<Long> cursorPaging,
+                                 Pageable pageable) {
     public SortField sortField() {
         return cursorPaging.nonUniqueCursor();
     }

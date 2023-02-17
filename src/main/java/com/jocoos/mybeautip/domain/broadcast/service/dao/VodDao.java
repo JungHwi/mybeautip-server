@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 @Service
@@ -18,19 +19,26 @@ public class VodDao {
     private final VodRepository repository;
 
     @Transactional(readOnly = true)
-    public List<VodResponse> getList(VodSearchCondition condition) {
+    public List<VodResponse> getListWithMember(VodSearchCondition condition) {
+        return repository.getVodListWithMember(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Vod> getList(VodSearchCondition condition) {
         return repository.getVodList(condition);
     }
 
     @Transactional(readOnly = true)
     public Vod get(long vodId) {
-        return repository.findById(vodId)
-                .orElseThrow(() -> new NotFoundException("vod not found. id - " + vodId));
+        return repository.findById(vodId).orElseThrow(vodNotFound(vodId));
     }
 
     @Transactional(readOnly = true)
-    public Vod getForUpdate(Long vodId) {
-        return repository.selectForUpdate(vodId)
-                .orElseThrow(() -> new NotFoundException("vod not found. id - " + vodId));
+    public Vod getForUpdate(long vodId) {
+        return repository.selectForUpdate(vodId).orElseThrow(vodNotFound(vodId));
+    }
+
+    private Supplier<NotFoundException> vodNotFound(long vodId) {
+        return () -> new NotFoundException("vod not found. id - " + vodId);
     }
 }

@@ -20,6 +20,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Log4j2
 @Service
@@ -100,5 +101,10 @@ public class MemberDao {
     @Transactional
     public Member updateStatus(Member member, MemberStatus status) {
         return member.changeStatus(status);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Member> getMembers(Set<Long> ids) {
+        return repository.findByIdIn(ids);
     }
 }

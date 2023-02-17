@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.persistence.domain;
 
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,9 +30,6 @@ public class Vod extends BaseEntity {
     private String thumbnail;
 
     @Column
-    private boolean isVisible;
-
-    @Column
     private int duration;
 
     @Column
@@ -44,7 +42,7 @@ public class Vod extends BaseEntity {
     @Column(insertable = false, updatable = false)
     private int totalHeartCount;
 
-    @Column(insertable = false, updatable = false)
+    @Column(updatable = false)
     private int liveHeartCount;
 
     @Column
@@ -53,9 +51,26 @@ public class Vod extends BaseEntity {
     @Column(nullable = false)
     private long memberId;
 
+    @Column
+    private boolean isVisible;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "category_id")
     private BroadcastCategory category;
+
+    @Builder
+    public Vod(String videoKey,
+               String title,
+               BroadcastCategory category,
+               int liveHeartCount,
+               long memberId) {
+        this.videoKey = videoKey;
+        this.title = title;
+        this.category = category;
+        this.liveHeartCount = liveHeartCount;
+        this.memberId = memberId;
+        this.isVisible = false;
+    }
 
     public void visible(boolean isVisible) {
         this.isVisible = isVisible;
@@ -74,8 +89,8 @@ public class Vod extends BaseEntity {
         return null;
     }
 
-    // TODO
+    // TODO Need to check how thumbnail generate by Flipflop
     public String getThumbnailUrl() {
-        return null;
+        return "ㅇ";
     }
 }

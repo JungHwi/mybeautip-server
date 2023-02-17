@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.time.ZonedDateTime;
 import java.time.chrono.ChronoZonedDateTime;
 import java.util.List;
 
@@ -29,8 +30,26 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
     }
 
     @Override
+    public List<Vod> getVodList(VodSearchCondition condition) {
+        return repository.query(query -> query
+                .select(vod)
+                .from(vod)
+                .where(
+                        searchTitle(condition.searchOption().getKeyword()),
+                        createdAtAfter(condition.searchOption().getStartAt()),
+                        createdAtBefore(condition.searchOption().getEndAt()),
+                        isReported(condition.searchOption().getIsReported()),
+                        isVisible(condition.isVisible())
+                )
+                .orderBy(getOrders(condition.pageable().getSort()))
+                .offset(condition.pageable().getOffset())
+                .limit(condition.pageable().getPageSize())
+                .fetch());
+    }
+
+    @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public List<VodResponse> getVodList(VodSearchCondition condition) {
+    public List<VodResponse> getVodListWithMember(VodSearchCondition condition) {
         PathBuilder<Vod> path = new PathBuilder<>(Vod.class, "vod");
         SortField sortField = condition.sortField();
         switch (sortField) {
@@ -92,6 +111,32 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
         return orderSpecifiers.length == 0
                 ? new OrderSpecifier[]{vod.createdAt.desc(), vod.id.desc()}
                 : orderSpecifiers;
+    }
+
+    private BooleanExpression isReported(Boolean isReported) {
+        if (isReported == null) {
+            return null;
+        }
+        return isReported ? vod.reportCount.goe(1) : vod.reportCount.eq(0);
+    }
+
+    private BooleanExpression isVisible(Boolean isVisible) {
+        if (isVisible == null) {
+            return null;
+        }
+        return isVisible ? vod.isVisible.isTrue() : vod.isVisible.isFalse();
+    }
+
+    private BooleanExpression searchTitle(String keyword) {
+        return keyword == null ? null : vod.title.containsIgnoreCase(keyword);
+    }
+
+    private BooleanExpression createdAtAfter(ZonedDateTime dateTime) {
+        return dateTime == null ? null : vod.createdAt.goe(dateTime);
+    }
+
+    private BooleanExpression createdAtBefore(ZonedDateTime dateTime) {
+        return dateTime == null ? null : vod.createdAt.loe(dateTime);
     }
 
     private static BooleanExpression eqId(Long vodId) {

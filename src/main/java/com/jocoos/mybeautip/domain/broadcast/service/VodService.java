@@ -38,7 +38,7 @@ public class VodService {
                 .categoryIds(getCategories(categoryId))
                 .cursorPaging(cursorPaging)
                 .build();
-        return vodDao.getList(condition);
+        return vodDao.getListWithMember(condition);
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +59,7 @@ public class VodService {
     public CountResponse report(long vodId, long reporterId, String description) {
         validIsFirstReport(vodId, reporterId);
         Vod reportedVod = vodDao.getForUpdate(vodId);
+        // TODO Report should save before select for update
         VodReport vodReport = new VodReport(reportedVod, reporterId, description);
         reportDao.save(vodReport);
         reportedVod.addReportCount(1);

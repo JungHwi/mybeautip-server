@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Set;
+
 @RequiredArgsConstructor
 @Service
 public class VodReportDao {
@@ -20,5 +23,10 @@ public class VodReportDao {
     @Transactional(readOnly = true)
     public boolean exist(long vodId, long reporterId) {
         return repository.existsByVodIdAndReporterId(vodId, reporterId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VodReport> getByVodIdIn(Set<Long> ids) {
+        return repository.findAllByVodIdIn(ids);
     }
 }
