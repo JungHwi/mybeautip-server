@@ -1,10 +1,12 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front;
 
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
+import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastViewerService;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.global.annotation.CheckPermission;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,5 +44,18 @@ public class BroadcastViewerController {
         List<ViewerResponse> responses = viewerService.search(condition);
 
         return ResponseEntity.ok(responses);
+    }
+
+    @CheckPermission({INFLUENCER})
+    @PatchMapping("/1/broadcast/{broadcast_id}/viewer/{member_id}/manager")
+    public ResponseEntity<ViewerResponse> grantManger(@PathVariable("broadcast_id") long broadcastId,
+                                                      @PathVariable("member_id") long memberId,
+                                                      @RequestBody BooleanDto isManager) {
+
+        GrantManagerRequest request = new GrantManagerRequest(broadcastId, memberId, isManager.isBool());
+
+        ViewerResponse response = viewerService.grantManager(request);
+
+        return ResponseEntity.ok(response);
     }
 }

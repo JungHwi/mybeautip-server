@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerato
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_TYPE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
@@ -16,6 +17,7 @@ import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.testutil.fixture.makeViewer
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.restdocs.payload.JsonFieldType
@@ -66,6 +68,39 @@ class BroadcastViewerControllerTest(
                     PayloadDocumentation.fieldWithPath("[].joined_at").type(JsonFieldType.STRING)
                         .description("채팅방 입장 시간").attributes(getZonedDateFormat())
                 )
+            )
+        )
+    }
+
+    @Test
+    fun grantManager() {
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        val viewer = saveViewer(broadcast = broadcast)
+        val request = BooleanDto(true)
+
+        val result: ResultActions = mockMvc.perform(
+            RestDocumentationRequestBuilders.patch("/api/1/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andDo(MockMvcResultHandlers.print())
+
+        result.andDo(
+            MockMvcRestDocumentation.document(
+                "grant_manager",
+                RequestDocumentation.pathParameters(
+                    RequestDocumentation.parameterWithName("broadcast_id").description("방송 ID"),
+                    RequestDocumentation.parameterWithName("member_id").description("회원 ID"),
+                ),
+                PayloadDocumentation.requestFields(
+                    PayloadDocumentation.fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("매니저 권한 여부")
+                ),
+                PayloadDocumentation.responseFields(
+                    PayloadDocumentation.fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    PayloadDocumentation.fieldWithPath("type").type(JsonFieldType.STRING)
+                        .description(generateLinkCode(BROADCAST_VIEWER_TYPE))
+                ),
             )
         )
     }

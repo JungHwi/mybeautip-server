@@ -51,6 +51,7 @@ include::overview.adoc[]
 
 === Broadcast API
 * link:broadcast/get_viewers.html[방송 시청자 목록 조회 API, window=_blank]
+* link:broadcast/grant_manager.html[채팅 관리자 설정 / 해제 API, window=_blank]
 
 === 이벤트 API
 * link:event/get_events.html[이벤트 목록 조회 API, window=_blank]
