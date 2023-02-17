@@ -100,6 +100,40 @@ class BroadcastViewerControllerTest(
         )
     }
 
+    @Test
+    fun suspend() {
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        val viewer = saveViewer(broadcast = broadcast)
+        val request = BooleanDto(true)
+
+        val result: ResultActions = mockMvc.perform(
+            RestDocumentationRequestBuilders.patch("/api/1/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andDo(MockMvcResultHandlers.print())
+
+        result.andDo(
+            MockMvcRestDocumentation.document(
+                "suspend",
+                RequestDocumentation.pathParameters(
+                    RequestDocumentation.parameterWithName("broadcast_id").description("방송 ID"),
+                    RequestDocumentation.parameterWithName("member_id").description("회원 ID"),
+                ),
+                PayloadDocumentation.requestFields(
+                    PayloadDocumentation.fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("채팅 정지 여부.")
+                ),
+                PayloadDocumentation.responseFields(
+                    PayloadDocumentation.fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    PayloadDocumentation.fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    PayloadDocumentation.fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    PayloadDocumentation.fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                ),
+            )
+        )
+    }
+
 
     fun saveViewer(
         broadcast: Broadcast,

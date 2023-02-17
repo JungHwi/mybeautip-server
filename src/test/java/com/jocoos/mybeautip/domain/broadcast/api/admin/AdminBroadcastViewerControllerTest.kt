@@ -127,7 +127,7 @@ class AdminBroadcastViewerControllerTest(
                     parameterWithName("member_id").description("회원 ID"),
                 ),
                 PayloadDocumentation.requestFields(
-                    fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("매니저 권한 여부")
+                    fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("채팅 정지 여부.")
                 ),
                 responseFields(
                     fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
