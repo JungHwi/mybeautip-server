@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastViewerConverter;
+import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
@@ -23,7 +24,7 @@ public class BroadcastViewerService {
     @Transactional(readOnly = true)
     public List<ViewerResponse> search(ViewerSearchCondition condition) {
         if (condition.getCursor() != null) {
-            BroadcastViewer viewer = dao.findByMemberId(condition.getCursor());
+            BroadcastViewer viewer = dao.getBroadcastViewer(condition.getBroadcastId(), condition.getCursor());
             ViewerCursorCondition cursorCondition = new ViewerCursorCondition(viewer.getType(), viewer.getSortedUsername());
             condition.setCursorCondition(cursorCondition);
         }
@@ -31,6 +32,13 @@ public class BroadcastViewerService {
         List<ViewerSearchResult> searchList = dao.search(condition);
 
         return converter.converts(searchList);
+    }
+
+    @Transactional
+    public ViewerResponse grantManager(GrantManagerRequest request) {
+        BroadcastViewer viewer = dao.grantManager(request);
+
+        return converter.converts(viewer);
     }
 
 }

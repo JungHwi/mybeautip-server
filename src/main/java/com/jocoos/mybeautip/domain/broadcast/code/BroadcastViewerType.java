@@ -8,11 +8,12 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BroadcastViewerType implements CodeValue {
 
-    MANAGER("채팅 관리자"),
-    MEMBER("회원"),
-    GUEST("비회원");
+    MANAGER("채팅 관리자", false),
+    MEMBER("회원", true),
+    GUEST("비회원", false);
 
     private final String description;
+    private final boolean availableManager;
 
     @Override
     public String getName() {

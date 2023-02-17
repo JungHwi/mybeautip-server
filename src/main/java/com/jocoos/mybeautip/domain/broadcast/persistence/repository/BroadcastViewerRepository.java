@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface BroadcastViewerRepository extends ExtendedQuerydslJpaRepository<BroadcastViewer, Long>, BroadcastViewerCustomRepository {
 
-    Optional<BroadcastViewer> findByMemberId(long memberId);
+    Optional<BroadcastViewer> findByBroadcastIdAndMemberId(long broadcastId, long memberId);
 
     boolean existsByBroadcastIdAndMemberIdAndType(long broadcastId, long memberId, BroadcastViewerType type);
 

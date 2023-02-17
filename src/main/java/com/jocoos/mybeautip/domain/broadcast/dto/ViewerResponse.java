@@ -9,7 +9,7 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 
 public record ViewerResponse(
         BroadcastViewerType type,
-        long memberId,
+        Long memberId,
         String username,
         String avatarUrl,
         @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime joinedAt) {

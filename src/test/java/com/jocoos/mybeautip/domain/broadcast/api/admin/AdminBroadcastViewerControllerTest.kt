@@ -58,7 +58,7 @@ class AdminBroadcastViewerControllerTest(
                 ),
                 responseFields(
                     fieldWithPath("[].type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
-                    fieldWithPath("[].member_id").type(JsonFieldType.NUMBER).description("회원 아이디"),
+                    fieldWithPath("[].member_id").type(JsonFieldType.NUMBER).description("회원 아이디").optional(),
                     fieldWithPath("[].username").type(JsonFieldType.STRING).description("회원명"),
                     fieldWithPath("[].avatar_url").type(JsonFieldType.STRING).description("회원 아바타 URL"),
                     fieldWithPath("[].joined_at").type(JsonFieldType.STRING).description("채팅방 입장 시간").attributes(getZonedDateFormat())

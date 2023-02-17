@@ -41,4 +41,14 @@ public class BroadcastViewer {
     @Column(nullable = false)
     private ZonedDateTime joinedAt;
 
+    public BroadcastViewer grantManager(boolean isManager) {
+        if (isManager && type.isAvailableManager()) {
+            type = BroadcastViewerType.MANAGER;
+        } else if(!isManager) {
+            type = BroadcastViewerType.MEMBER;
+        }
+
+        return this;
+    }
+
 }
