@@ -9,6 +9,7 @@ import lombok.Getter;
 public enum ErrorCode implements CodeValue {
 
     // COMMON
+    UNAUTHORIZED("로그인 안됨"),
     INTERNAL_SERVER_ERROR("서버 오류"),
     BAD_REQUEST("잘못된 요청"),
     ACCESS_DENIED("권한 없음"),
@@ -20,7 +21,6 @@ public enum ErrorCode implements CodeValue {
     INVALID_SORT_FIELD("지원하는 정렬 필드가 아님"),
     JSON_SERIALIZATION_EXCEPTION("JSON 직렬화 중 오류 발생"),
     FILE_IO_EXCEPTION("파일 IO 오류"),
-
 
     // LOGIN
     INVALID_TOKEN("잘못된 토큰"),

@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.*;
 import com.jocoos.mybeautip.domain.member.service.AdminMemberService;
+import com.jocoos.mybeautip.domain.member.service.InfluencerService;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
@@ -25,6 +26,7 @@ import java.util.List;
 public class AdminMemberController {
 
     private final AdminMemberService service;
+    private final InfluencerService influencerService;
 
     @GetMapping("/member/status")
     public ResponseEntity<List<MemberStatusResponse>> getStatusesWithCount() {
@@ -34,6 +36,7 @@ public class AdminMemberController {
     @GetMapping("/member")
     public ResponseEntity<PageResponse<AdminMemberResponse>> getMembers(
             @RequestParam(required = false) MemberStatus status,
+            @RequestParam(name = "is_influencer", required = false) Boolean isInfluencer,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(name = "grant_type", required = false) GrantType grantType,
@@ -48,6 +51,7 @@ public class AdminMemberController {
                 .endAt(endAt)
                 .zoneId(ZoneId.of("Asia/Seoul"))
                 .isReported(isReported)
+                .isInfluencer(isInfluencer)
                 .build();
 
         MemberSearchCondition condition = MemberSearchCondition.builder()
@@ -97,4 +101,14 @@ public class AdminMemberController {
 
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @PatchMapping("/member/{memberId}/influencer")
+    public ResponseEntity<InfluencerResponse> updateInfluencer(@PathVariable Long memberId,
+                                                               @RequestBody InfluencerRequest request) {
+
+        InfluencerResponse response = influencerService.updateInfluencer(memberId, request);
+
+        return ResponseEntity.ok(response);
+    }
+
 }

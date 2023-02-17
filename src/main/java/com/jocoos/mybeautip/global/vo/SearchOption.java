@@ -24,6 +24,7 @@ public class SearchOption {
     private final ZonedDateTime endAt;
     private final Boolean isReported;
     private final Boolean isTopFix;
+    private final Boolean isInfluencer;
 
     @Builder
     private SearchOption(SearchDomain domain,
@@ -32,7 +33,8 @@ public class SearchOption {
                          LocalDate endAt,
                          ZoneId zoneId,
                          Boolean isReported,
-                         Boolean isTopFix) {
+                         Boolean isTopFix,
+                         Boolean isInfluencer) {
         this.domain = domain;
         this.searchField = setSearchField(searchQueryString);
         this.keyword = setKeyword(searchQueryString);
@@ -40,6 +42,7 @@ public class SearchOption {
         this.endAt = endAt == null ? null : toUTCZoned(endAt, zoneId);
         this.isReported = isReported;
         this.isTopFix = isTopFix;
+        this.isInfluencer = isInfluencer;
     }
 
     private String setSearchField(String queryString) {

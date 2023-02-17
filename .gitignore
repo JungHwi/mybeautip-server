@@ -25,6 +25,7 @@ tools/*.zip
 
 .DS_Store
 /src/main/resources/static/docs/common/
+/src/main/resources/static/docs/broadcast/
 /src/main/resources/static/docs/community/
 /src/main/resources/static/docs/event/
 /src/main/resources/static/docs/home/
@@ -36,3 +37,8 @@ tools/*.zip
 /src/main/resources/static/docs/operation/
 /src/main/resources/static/docs/index.html
 /src/main/resources/static/docs/overview.html
+/src/main/resources/static/docs/placard/
+/src/main/resources/static/docs/notice/
+/src/main/resources/static/docs/system/
+/src/main/resources/static/docs/zzz_test/
+/src/main/resources/static/docs/file/
