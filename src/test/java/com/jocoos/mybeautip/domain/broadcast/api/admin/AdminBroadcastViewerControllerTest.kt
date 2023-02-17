@@ -64,6 +64,7 @@ class AdminBroadcastViewerControllerTest(
                     fieldWithPath("[].member_id").type(JsonFieldType.NUMBER).description("회원 아이디").optional(),
                     fieldWithPath("[].username").type(JsonFieldType.STRING).description("회원명"),
                     fieldWithPath("[].avatar_url").type(JsonFieldType.STRING).description("회원 아바타 URL"),
+                    fieldWithPath("[].is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
                     fieldWithPath("[].joined_at").type(JsonFieldType.STRING).description("채팅방 입장 시간").attributes(getZonedDateFormat())
                 )
             )
@@ -96,7 +97,43 @@ class AdminBroadcastViewerControllerTest(
                 ),
                 responseFields(
                     fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
-                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE))
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun suspend() {
+        val broadcast = saveBroadcast()
+        val viewer = saveViewer(broadcast = broadcast)
+        val request = BooleanDto(true)
+
+        val result: ResultActions = mockMvc.perform(
+            RestDocumentationRequestBuilders.patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
+                .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_suspend",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID"),
+                    parameterWithName("member_id").description("회원 ID"),
+                ),
+                PayloadDocumentation.requestFields(
+                    fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("매니저 권한 여부")
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
                 ),
             )
         )

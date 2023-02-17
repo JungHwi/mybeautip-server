@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastViewerRepository
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_TYPE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
@@ -51,22 +50,17 @@ class BroadcastViewerControllerTest(
                     RequestDocumentation.parameterWithName("broadcast_id").description("방송 ID")
                 ),
                 RequestDocumentation.requestParameters(
-                    RequestDocumentation.parameterWithName("type")
-                        .description(generateLinkCode(BROADCAST_VIEWER_TYPE))
-                        .optional()
-                        .attributes(getDefault(1)),
+                    RequestDocumentation.parameterWithName("type").description(generateLinkCode(BROADCAST_VIEWER_TYPE)).optional(),
                     RequestDocumentation.parameterWithName("cursor").description("커서. 회원 아이디").optional(),
                     RequestDocumentation.parameterWithName("size").description("페이지 사이즈").optional()
                 ),
                 PayloadDocumentation.responseFields(
-                    PayloadDocumentation.fieldWithPath("[].type").type(JsonFieldType.STRING)
-                        .description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    PayloadDocumentation.fieldWithPath("[].type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
                     PayloadDocumentation.fieldWithPath("[].member_id").type(JsonFieldType.NUMBER).description("회원 아이디"),
                     PayloadDocumentation.fieldWithPath("[].username").type(JsonFieldType.STRING).description("회원명"),
-                    PayloadDocumentation.fieldWithPath("[].avatar_url").type(JsonFieldType.STRING)
-                        .description("회원 아바타 URL"),
-                    PayloadDocumentation.fieldWithPath("[].joined_at").type(JsonFieldType.STRING)
-                        .description("채팅방 입장 시간").attributes(getZonedDateFormat())
+                    PayloadDocumentation.fieldWithPath("[].avatar_url").type(JsonFieldType.STRING).description("회원 아바타 URL"),
+                    PayloadDocumentation.fieldWithPath("[].is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    PayloadDocumentation.fieldWithPath("[].joined_at").type(JsonFieldType.STRING).description("채팅방 입장 시간").attributes(getZonedDateFormat())
                 )
             )
         )
@@ -98,8 +92,9 @@ class BroadcastViewerControllerTest(
                 ),
                 PayloadDocumentation.responseFields(
                     PayloadDocumentation.fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
-                    PayloadDocumentation.fieldWithPath("type").type(JsonFieldType.STRING)
-                        .description(generateLinkCode(BROADCAST_VIEWER_TYPE))
+                    PayloadDocumentation.fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    PayloadDocumentation.fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    PayloadDocumentation.fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
                 ),
             )
         )

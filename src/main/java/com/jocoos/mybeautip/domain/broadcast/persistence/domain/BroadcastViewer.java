@@ -51,4 +51,10 @@ public class BroadcastViewer {
         return this;
     }
 
+    public BroadcastViewer suspend(boolean isSuspended) {
+        this.isSuspended = isSuspended;
+
+        return this;
+    }
+
 }

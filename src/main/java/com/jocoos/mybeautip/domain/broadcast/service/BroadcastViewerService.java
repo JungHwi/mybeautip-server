@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.broadcast.service;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastViewerConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerCursorCondition;
@@ -41,4 +42,10 @@ public class BroadcastViewerService {
         return converter.converts(viewer);
     }
 
+    @Transactional
+    public ViewerResponse suspend(ViewerSuspendRequest request) {
+        BroadcastViewer viewer = dao.suspend(request);
+
+        return converter.converts(viewer);
+    }
 }

@@ -13,9 +13,9 @@ import java.util.List;
 public interface BroadcastViewerConverter {
 
     @Mappings({
+            @Mapping(target = "isSuspended", source = "suspended"),
             @Mapping(target = "username", ignore = true),
             @Mapping(target = "avatarUrl", ignore = true),
-            @Mapping(target = "joinedAt", ignore = true)
     })
     ViewerResponse converts(BroadcastViewer entity);
 
