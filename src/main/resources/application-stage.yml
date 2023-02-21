@@ -2,7 +2,7 @@ spring:
   config:
     activate:
       on-profile: stage
-    import: classpath:application-oauth-prod.yml
+    import: classpath:application-oauth-stag.yml
   datasource:
     master:
       hikari:
