@@ -38,6 +38,9 @@ public class BroadcastViewer {
     @Column(nullable = false)
     private boolean isSuspended = false;
 
+    @Column
+    private ZonedDateTime suspendedAt;
+
     @Column(nullable = false)
     private ZonedDateTime joinedAt;
 
@@ -54,6 +57,11 @@ public class BroadcastViewer {
     public BroadcastViewer suspend(boolean isSuspended) {
         this.isSuspended = isSuspended;
 
+        if (isSuspended) {
+            this.suspendedAt = ZonedDateTime.now();
+        } else {
+            this.suspendedAt = null;
+        }
         return this;
     }
 

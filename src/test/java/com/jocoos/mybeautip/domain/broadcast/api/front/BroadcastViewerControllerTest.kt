@@ -58,6 +58,7 @@ class BroadcastViewerControllerTest(
                 ),
                 responseFields(
                     fieldWithPath("[].type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("[].status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("[].member_id").type(JsonFieldType.NUMBER).description("회원 아이디"),
                     fieldWithPath("[].username").type(JsonFieldType.STRING).description("회원명"),
                     fieldWithPath("[].avatar_url").type(JsonFieldType.STRING).description("회원 아바타 URL"),

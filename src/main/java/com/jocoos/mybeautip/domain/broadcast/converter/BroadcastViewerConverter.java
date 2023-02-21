@@ -19,6 +19,9 @@ public interface BroadcastViewerConverter {
     })
     ViewerResponse converts(BroadcastViewer entity);
 
+    @Mappings({
+            @Mapping(target = "isSuspended", source = "suspended")
+    })
     ViewerResponse converts(ViewerSearchResult result);
 
     List<ViewerResponse> converts(List<ViewerSearchResult> results);

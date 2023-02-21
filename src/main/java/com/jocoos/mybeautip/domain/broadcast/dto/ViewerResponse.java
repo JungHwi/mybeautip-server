@@ -15,5 +15,6 @@ public record ViewerResponse(
         String username,
         String avatarUrl,
         boolean isSuspended,
+        @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime suspendedAt,
         @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime joinedAt) {
 }

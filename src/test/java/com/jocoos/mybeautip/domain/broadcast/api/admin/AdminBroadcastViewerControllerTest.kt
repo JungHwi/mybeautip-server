@@ -5,10 +5,8 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastViewerRepository
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_STATUS
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_TYPE
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.member.Member
@@ -56,17 +54,20 @@ class AdminBroadcastViewerControllerTest(
                     parameterWithName("broadcast_id").description("방송 ID")
                 ),
                 requestParameters(
-                    parameterWithName("type").description(generateLinkCode(BROADCAST_VIEWER_TYPE)).optional()
-                        .attributes(getDefault(1)),
+                    parameterWithName("type").description(generateLinkCode(BROADCAST_VIEWER_TYPE)).optional(),
+                    parameterWithName("status").description(generateLinkCode(BROADCAST_VIEWER_STATUS)).optional(),
+                    parameterWithName("suspended").description(generateLinkCode(BOOLEAN_TYPE)).optional(),
                     parameterWithName("cursor").description("커서. 회원 아이디").optional(),
                     parameterWithName("size").description("페이지 사이즈").optional()
                 ),
                 responseFields(
                     fieldWithPath("[].type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("[].status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("[].member_id").type(JsonFieldType.NUMBER).description("회원 아이디").optional(),
                     fieldWithPath("[].username").type(JsonFieldType.STRING).description("회원명"),
                     fieldWithPath("[].avatar_url").type(JsonFieldType.STRING).description("회원 아바타 URL"),
                     fieldWithPath("[].is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("[].suspended_at").type(JsonFieldType.STRING).description("정지 시간").attributes(getZonedDateFormat()).optional(),
                     fieldWithPath("[].joined_at").type(JsonFieldType.STRING).description("채팅방 입장 시간").attributes(getZonedDateFormat())
                 )
             )

@@ -26,7 +26,9 @@ public class AdminBroadcastViewerController {
 
     @GetMapping("/broadcast/{broadcast_id}/viewer")
     public ResponseEntity<List<ViewerResponse>> search(@PathVariable("broadcast_id") long broadcastId,
-                                                       @RequestParam(name = "type", required = false)BroadcastViewerType type,
+                                                       @RequestParam(name = "type", required = false) BroadcastViewerType type,
+                                                       @RequestParam(name = "status", required = false) BroadcastViewerStatus status,
+                                                       @RequestParam(name = "suspended", required = false) Boolean isSuspended,
                                                        @RequestParam(name = "cursor", required = false) Long cursor,
                                                        @RequestParam(required = false, defaultValue = "20") int size) {
 
@@ -34,8 +36,9 @@ public class AdminBroadcastViewerController {
 
         ViewerSearchCondition condition = ViewerSearchCondition.builder()
                 .broadcastId(broadcastId)
-                .status(BroadcastViewerStatus.ACTIVE)
+                .status(status)
                 .type(type)
+                .isSuspended(isSuspended)
                 .cursor(cursor)
                 .pageable(pageable)
                 .build();

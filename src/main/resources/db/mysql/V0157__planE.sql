@@ -36,7 +36,8 @@ create table broadcast_viewer (
     type varchar(20) not null comment '회원 구분',
     status varchar(20) not null comment '상태',
     is_suspended boolean not null comment '정지 여부',
-    joined_at datetime not null comment '참여일시'
+    suspended_at datetime comment '정지 일시',
+    joined_at datetime not null comment '참여 일시'
 ) comment '시청자 정보';
 
 

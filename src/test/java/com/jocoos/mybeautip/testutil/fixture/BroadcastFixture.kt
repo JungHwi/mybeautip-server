@@ -65,6 +65,7 @@ fun makeViewer(
     type: BroadcastViewerType? = BroadcastViewerType.MEMBER,
     status: BroadcastViewerStatus? = BroadcastViewerStatus.ACTIVE,
     isSuspended: Boolean = false,
+    suspendedAt: ZonedDateTime? = null,
     joinedAt: ZonedDateTime = ZonedDateTime.now(),
     member: Member
 ): BroadcastViewer {
@@ -76,6 +77,7 @@ fun makeViewer(
         type,
         status,
         isSuspended,
+        suspendedAt,
         joinedAt
     )
 }

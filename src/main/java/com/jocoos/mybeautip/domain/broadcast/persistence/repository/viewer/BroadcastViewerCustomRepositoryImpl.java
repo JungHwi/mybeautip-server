@@ -42,6 +42,7 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
                         broadcastViewer.broadcast.id.eq(condition.getBroadcastId()),
                         eqViewerType(condition.getType()),
                         eqViewerStatus(condition.getStatus()),
+                        isSuspended(condition.getIsSuspended()),
                         cursor(condition.getCursorCondition())
                 )
                 .orderBy(fieldType().asc(), broadcastViewer.sortedUsername.asc())
@@ -60,6 +61,10 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
         }
 
         return Expressions.stringTemplate("FIELD({0}, 'MANAGER', 'MEMBER', 'GUEST') ", type.name());
+    }
+
+    private BooleanExpression isSuspended(Boolean isSuspended) {
+        return isSuspended == null ? null : broadcastViewer.isSuspended.eq(isSuspended);
     }
 
     private BooleanExpression eqViewerStatus(BroadcastViewerStatus status) {
