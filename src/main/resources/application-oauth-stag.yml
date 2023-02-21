@@ -18,10 +18,10 @@ spring:
             token-uri: https://graph.facebook.com/v14.0/oauth/access_token
             token-method: GET
             user-info-uri: https://graph.facebook.com/me
-            client-id: 448301395614533
-            client-secret: 8da721bd036785894dda7b8f4963d211
+            client-id: 524484662517490
+            client-secret: 9bef0f6f54663af381b3ef86b0735d72
             fields: id,email,name,picture
-            redirect-uri: https://m-dev.mybeautip.com/oauth/facebook
+            redirect-uri: https://m-stag.mybeautip.com/oauth/facebook
           apple:
             token-uri: https://appleid.apple.com
             authorization-grant-type : authorization_code
