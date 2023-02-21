@@ -138,6 +138,35 @@ class BroadcastViewerControllerTest(
         )
     }
 
+    @Test
+    fun exile() {
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        val viewer = saveViewer(broadcast = broadcast)
+
+        val result: ResultActions = mockMvc.perform(
+            patch("/api/1/broadcast/{broadcast_id}/viewer/{member_id}/exile", broadcast.id, viewer.memberId)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "exile",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID"),
+                    parameterWithName("member_id").description("회원 ID"),
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                ),
+            )
+        )
+    }
+
 
     fun saveViewer(
         broadcast: Broadcast,

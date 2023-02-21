@@ -75,4 +75,14 @@ public class BroadcastViewerController {
 
         return ResponseEntity.ok(response);
     }
+
+    @CheckPermission({INFLUENCER, MANAGER})
+    @PatchMapping("/1/broadcast/{broadcast_id}/viewer/{member_id}/exile")
+    public ResponseEntity<ViewerResponse> exile(@PathVariable("broadcast_id") long broadcastId,
+                                                @PathVariable("member_id") long memberId) {
+
+        ViewerResponse response = viewerService.exile(broadcastId, memberId);
+
+        return ResponseEntity.ok(response);
+    }
 }

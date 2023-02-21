@@ -53,6 +53,7 @@ include::overview.adoc[]
 * link:broadcast/get_viewers.html[방송 시청자 목록 조회 API, window=_blank]
 * link:broadcast/grant_manager.html[채팅 관리자 설정 / 해제 API, window=_blank]
 * link:broadcast/suspend.html[유저 채팅 정지 / 해제 API, window=_blank]
+* link:broadcast/exile.html[유저 추방 API, window=_blank]
 
 === 이벤트 API
 * link:event/get_events.html[이벤트 목록 조회 API, window=_blank]
@@ -154,6 +155,7 @@ include::overview.adoc[]
 * link:broadcast/admin_get_viewers.html[방송 시청자 목록 조회 API, window=_blank]
 * link:broadcast/admin_grant_manager.html[채팅 관리자 설정 / 해제 API, window=_blank]
 * link:broadcast/admin_suspend.html[유저 채팅 정지 / 해제 API, window=_blank]
+* link:broadcast/admin_exile.html[유저 추방 API, window=_blank]
 
 === Community API
 * link:community/admin_get_community.html[커뮤니티 상세 조회 API, window=_blank]
