@@ -103,6 +103,10 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("BroadcastViewerType")),
                                 enumConvertFieldDescriptor((enumDocs.getBroadcastViewerType()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.broadcast_viewer_status").withSubsectionId("broadcast_viewer_status"),
+                                attributes(key("title").value("BroadcastViewerStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getBroadcastViewerStatus()))
+                        ),
                         // Event
                         customResponseFields("custom-response", beneathPath("data.event_status").withSubsectionId("event_status"),
                                 attributes(key("title").value("EventStatus")),

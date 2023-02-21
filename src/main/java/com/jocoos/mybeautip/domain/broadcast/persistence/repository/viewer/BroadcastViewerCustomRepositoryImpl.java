@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.persistence.repository.viewer;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.vo.QViewerSearchResult;
@@ -40,6 +41,7 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
                 .where(
                         broadcastViewer.broadcast.id.eq(condition.getBroadcastId()),
                         eqViewerType(condition.getType()),
+                        eqViewerStatus(condition.getStatus()),
                         cursor(condition.getCursorCondition())
                 )
                 .orderBy(fieldType().asc(), broadcastViewer.sortedUsername.asc())
@@ -58,6 +60,10 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
         }
 
         return Expressions.stringTemplate("FIELD({0}, 'MANAGER', 'MEMBER', 'GUEST') ", type.name());
+    }
+
+    private BooleanExpression eqViewerStatus(BroadcastViewerStatus status) {
+        return status == null ? null : broadcastViewer.status.eq(status);
     }
 
     private BooleanExpression eqViewerType(BroadcastViewerType type) {

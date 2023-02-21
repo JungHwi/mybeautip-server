@@ -49,4 +49,11 @@ public class BroadcastViewerDao {
 
         return viewer.suspend(request.isSuspended());
     }
+
+    @Transactional
+    public BroadcastViewer exile(long broadcastId, long memberId) {
+        BroadcastViewer viewer = getBroadcastViewer(broadcastId, memberId);
+
+        return viewer.exile();
+    }
 }

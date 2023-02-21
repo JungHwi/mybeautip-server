@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
@@ -38,6 +39,7 @@ public class BroadcastViewerController {
 
         ViewerSearchCondition condition = ViewerSearchCondition.builder()
                 .broadcastId(broadcastId)
+                .status(BroadcastViewerStatus.ACTIVE)
                 .type(type)
                 .cursor(cursor)
                 .pageable(pageable)

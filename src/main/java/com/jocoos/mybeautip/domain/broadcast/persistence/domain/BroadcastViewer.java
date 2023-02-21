@@ -57,4 +57,10 @@ public class BroadcastViewer {
         return this;
     }
 
+    public BroadcastViewer exile() {
+        this.status = BroadcastViewerStatus.EXILE;
+
+        return this;
+    }
+
 }

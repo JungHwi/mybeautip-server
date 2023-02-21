@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
@@ -33,6 +34,7 @@ public class AdminBroadcastViewerController {
 
         ViewerSearchCondition condition = ViewerSearchCondition.builder()
                 .broadcastId(broadcastId)
+                .status(BroadcastViewerStatus.ACTIVE)
                 .type(type)
                 .cursor(cursor)
                 .pageable(pageable)
@@ -63,6 +65,15 @@ public class AdminBroadcastViewerController {
         ViewerSuspendRequest request = new ViewerSuspendRequest(broadcastId, memberId, isSuspended.isBool());
 
         ViewerResponse response = viewerService.suspend(request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/broadcast/{broadcast_id}/viewer/{member_id}/exile")
+    public ResponseEntity<ViewerResponse> exile(@PathVariable("broadcast_id") long broadcastId,
+                                                @PathVariable("member_id") long memberId) {
+
+        ViewerResponse response = viewerService.exile(broadcastId, memberId);
 
         return ResponseEntity.ok(response);
     }

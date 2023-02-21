@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastVie
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_STATUS
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_TYPE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
@@ -19,7 +20,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
@@ -42,7 +44,7 @@ class AdminBroadcastViewerControllerTest(
         saveViewer(broadcast = broadcast);
 
         val result: ResultActions = mockMvc.perform(
-            RestDocumentationRequestBuilders.get("/admin/broadcast/{broadcast_id}/viewer", broadcast.id)
+            get("/admin/broadcast/{broadcast_id}/viewer", broadcast.id)
                 .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
         ).andExpect(status().isOk)
             .andDo(print())
@@ -78,7 +80,7 @@ class AdminBroadcastViewerControllerTest(
         val request = BooleanDto(true)
 
         val result: ResultActions = mockMvc.perform(
-            RestDocumentationRequestBuilders.patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
+            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
                 .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -98,6 +100,7 @@ class AdminBroadcastViewerControllerTest(
                 responseFields(
                     fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
                     fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
                     fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
                 ),
@@ -112,7 +115,7 @@ class AdminBroadcastViewerControllerTest(
         val request = BooleanDto(true)
 
         val result: ResultActions = mockMvc.perform(
-            RestDocumentationRequestBuilders.patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
+            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
                 .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -132,6 +135,36 @@ class AdminBroadcastViewerControllerTest(
                 responseFields(
                     fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
                     fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun exile() {
+        val broadcast = saveBroadcast()
+        val viewer = saveViewer(broadcast = broadcast)
+
+        val result: ResultActions = mockMvc.perform(
+            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/exile", broadcast.id, viewer.memberId)
+                .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_exile",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID"),
+                    parameterWithName("member_id").description("회원 ID"),
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
                     fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
                 ),

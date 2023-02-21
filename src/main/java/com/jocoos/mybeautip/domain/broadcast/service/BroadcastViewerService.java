@@ -48,4 +48,11 @@ public class BroadcastViewerService {
 
         return converter.converts(viewer);
     }
+
+    @Transactional
+    public ViewerResponse exile(long broadcastId, long memberId) {
+        BroadcastViewer viewer = dao.exile(broadcastId, memberId);
+
+        return converter.converts(viewer);
+    }
 }
