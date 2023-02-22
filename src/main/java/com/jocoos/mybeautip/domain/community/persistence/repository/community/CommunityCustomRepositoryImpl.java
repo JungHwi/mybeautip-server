@@ -180,7 +180,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     private BooleanExpression searchByKeyword(SearchOption searchOption) {
-        if (searchOption.isNoSearch()) {
+        if (searchOption.isNoKeywordSearch()) {
             return null;
         }
         if (Objects.equals(searchOption.getSearchField(), "username")) {

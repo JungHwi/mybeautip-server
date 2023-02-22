@@ -63,7 +63,7 @@ public class SearchOption {
         return DateUtils.toDate(endAt);
     }
 
-    public boolean isNoSearch() {
+    public boolean isNoKeywordSearch() {
         return searchField == null || keyword == null;
     }
 

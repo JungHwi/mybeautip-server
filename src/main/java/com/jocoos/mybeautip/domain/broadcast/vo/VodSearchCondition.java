@@ -15,7 +15,7 @@ public record VodSearchCondition(List<Long> categoryIds,
                                  Boolean isVisible,
                                  CursorPaging<Long> cursorPaging,
                                  Pageable pageable) {
-    public SortField sortField() {
+    public SortField nonUniqueCursor() {
         return cursorPaging.nonUniqueCursor();
     }
 

@@ -43,7 +43,6 @@ import static com.jocoos.mybeautip.video.Visibility.PRIVATE;
 import static com.jocoos.mybeautip.video.Visibility.PUBLIC;
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
-import static com.querydsl.sql.SQLExpressions.count;
 import static com.querydsl.sql.SQLExpressions.countDistinct;
 
 @Repository
@@ -184,7 +183,7 @@ public class VideoCustomRepositoryImpl implements VideoCustomRepository {
     }
 
     private BooleanExpression searchInnerField(SearchOption searchOption) {
-        if (searchOption == null || searchOption.isNoSearch() || searchOption.isOuterField()) {
+        if (searchOption == null || searchOption.isNoKeywordSearch() || searchOption.isOuterField()) {
             return null;
         }
         return Expressions.booleanOperation(

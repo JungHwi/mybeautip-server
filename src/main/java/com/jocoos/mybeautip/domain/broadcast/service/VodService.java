@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastCategoryType.GROUP;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ALREADY_REPORT;
 
 @RequiredArgsConstructor
@@ -77,13 +76,10 @@ public class VodService {
     }
 
     private List<Long> getCategories(long categoryId) {
-        BroadcastCategory category = categoryDao.getBroadcastCategory(categoryId);
-        if (category.isType(GROUP)) {
-            return categoryDao.getChildCategories(categoryId).stream()
-                    .map(BroadcastCategory::getId)
-                    .toList();
-        }
-        return List.of(category.getId());
+        return categoryDao.getCategories(categoryId)
+                .stream()
+                .map(BroadcastCategory::getId)
+                .toList();
     }
 
     private void validIsFirstReport(long vodId, long reporterId) {

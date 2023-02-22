@@ -9,19 +9,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastCategoryType.GROUP;
+
 @RequiredArgsConstructor
 @Service
 public class BroadcastCategoryDao {
     private final BroadcastCategoryRepository repository;
 
     @Transactional(readOnly = true)
-    public BroadcastCategory getBroadcastCategory(long categoryId) {
+    public List<BroadcastCategory> getCategories(long categoryId) {
+        BroadcastCategory category = getBroadcastCategory(categoryId);
+        if (category.isType(GROUP)) {
+            return getChildCategories(categoryId);
+        }
+        return List.of(category);
+    }
+
+    private BroadcastCategory getBroadcastCategory(long categoryId) {
         return repository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException(""));
     }
 
-    @Transactional(readOnly = true)
-    public List<BroadcastCategory> getChildCategories(long parentId) {
+    private List<BroadcastCategory> getChildCategories(long parentId) {
         return repository.findAllByParentId(parentId);
     }
 }

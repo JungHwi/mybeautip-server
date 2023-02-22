@@ -51,16 +51,16 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public List<VodResponse> getVodListWithMember(VodSearchCondition condition) {
         PathBuilder<Vod> path = new PathBuilder<>(Vod.class, "vod");
-        SortField sortField = condition.sortField();
-        switch (sortField) {
+        SortField nonUniqueSortField = condition.nonUniqueCursor();
+        switch (nonUniqueSortField) {
             case TOTAL_HEART_COUNT, VIEW_COUNT -> {
                 ComparablePath<Integer> comparablePath =
-                        path.getComparable(sortField.getFieldName(), Integer.class);
+                        path.getComparable(nonUniqueSortField.getFieldName(), Integer.class);
                 return getVodList(condition, comparablePath);
             }
             default -> {
                 ComparablePath<ChronoZonedDateTime> comparablePath =
-                        path.getComparable(sortField.getFieldName(), ChronoZonedDateTime.class);
+                        path.getComparable(nonUniqueSortField.getFieldName(), ChronoZonedDateTime.class);
                 return getVodList(condition, comparablePath);
             }
         }
