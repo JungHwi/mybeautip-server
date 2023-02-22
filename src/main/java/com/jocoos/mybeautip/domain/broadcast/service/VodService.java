@@ -9,7 +9,7 @@ import com.jocoos.mybeautip.domain.broadcast.service.dao.VodDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.VodReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.VodSearchCondition;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
-import com.jocoos.mybeautip.global.dto.CountResponse;
+import com.jocoos.mybeautip.global.dto.ReportCountResponse;
 import com.jocoos.mybeautip.global.dto.IsVisibleResponse;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
@@ -55,7 +55,7 @@ public class VodService {
     }
 
     @Transactional
-    public CountResponse report(long vodId, long reporterId, String description) {
+    public ReportCountResponse report(long vodId, long reporterId, String description) {
         validIsFirstReport(vodId, reporterId);
         Vod reportedVod = vodDao.getForUpdate(vodId);
         // TODO Report should save before select for update
@@ -64,15 +64,15 @@ public class VodService {
         reportedVod.addReportCount(1);
 
         // TODO Response values need to be discussed
-        return new CountResponse(reportedVod.getId(), reportedVod.getReportCount());
+        return new ReportCountResponse(reportedVod.getId(), reportedVod.getReportCount());
     }
 
     // TODO Need to use Redis or DynamoDb for concurrency control of many requests
     @Transactional
-    public CountResponse addHeartCount(long vodId, int addCount) {
+    public ReportCountResponse addHeartCount(long vodId, int addCount) {
         Vod vod = vodDao.getForUpdate(vodId);
         vod.addHeartCount(addCount);
-        return new CountResponse(vod.getId(), vod.getTotalHeartCount());
+        return new ReportCountResponse(vod.getId(), vod.getTotalHeartCount());
     }
 
     private List<Long> getCategories(long categoryId) {

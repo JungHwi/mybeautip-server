@@ -4,7 +4,10 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastStartedAtListResponse;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastReport;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.global.vo.Day;
@@ -26,6 +29,7 @@ import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSear
 public class BroadcastService {
 
     private final BroadcastDao broadcastDao;
+    private final BroadcastReportDao reportDao;
     private final BroadcastConverter converter;
 
     @Transactional(readOnly = true)
@@ -44,6 +48,14 @@ public class BroadcastService {
     public BroadcastStartedAtListResponse getDateList() {
         List<ZonedDateTime> results = broadcastDao.getStartedAtList(Pageable.ofSize(10)).getContent();
         return new BroadcastStartedAtListResponse(results);
+    }
+
+    // TODO 응답값 논의 필요
+    @Transactional
+    public void report(long broadcastId, long reporterId, String description) {
+        Broadcast broadcast = broadcastDao.get(broadcastId);
+        BroadcastReport report = new BroadcastReport(broadcast, reporterId, description);
+        reportDao.save(report);
     }
 
     private Day getDay(LocalDate localDate) {

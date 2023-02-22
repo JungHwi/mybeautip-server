@@ -4,13 +4,13 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastStartedAtListResponse;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
+import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,6 +34,13 @@ public class BroadcastController {
     @GetMapping("/1/broadcast/startedAt")
     public BroadcastStartedAtListResponse getDateList() {
         return service.getDateList();
+    }
+
+    @PostMapping("/1/broadcast/{broadcastId}/report")
+    public void report(@PathVariable long broadcastId,
+                                      @CurrentMember MyBeautipUserDetails userDetails,
+                                      @RequestBody ReportRequest request) {
+        service.report(broadcastId, userDetails.getMember().getId(), request.getDescription());
     }
 
 }

@@ -6,7 +6,7 @@ import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.event.code.SortField;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.IsVisibleResponse;
-import com.jocoos.mybeautip.global.dto.CountResponse;
+import com.jocoos.mybeautip.global.dto.ReportCountResponse;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IntegerDto;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
@@ -41,14 +41,14 @@ public class VodController {
     }
 
     @PostMapping("/1/vod/{vodId}/report")
-    public CountResponse report(@PathVariable long vodId,
-                                @CurrentMember MyBeautipUserDetails userDetails,
-                                @RequestBody ReportRequest request) {
+    public ReportCountResponse report(@PathVariable long vodId,
+                                      @CurrentMember MyBeautipUserDetails userDetails,
+                                      @RequestBody ReportRequest request) {
         return service.report(vodId, userDetails.getMember().getId(), request.getDescription());
     }
 
     @PostMapping("/1/vod/{vodId}/heart")
-    public CountResponse addHeartCount(@PathVariable long vodId, @RequestBody IntegerDto count) {
+    public ReportCountResponse addHeartCount(@PathVariable long vodId, @RequestBody IntegerDto count) {
         return service.addHeartCount(vodId, count.getNumber());
     }
 
