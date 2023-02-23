@@ -47,8 +47,9 @@ public class JwtTokenProvider {
         header.put(HEADER_TOKEN_ALG, "RS256");
         header.put(HEADER_TOKEN_TYPE, "JWT");
 
+
         long now = new Date().getTime();
-        Date accessTokenExpiresIn = new Date(now + (accessTokenValiditySeconds * 1000));
+        Date accessTokenExpiresIn = new Date(now + (accessTokenValiditySeconds * 1000L));
         Claims claims = Jwts.claims();
         String jti = UUID.randomUUID().toString();
         claims.put(PAYLOAD_USER_NAME, authentication.getPrincipal());
@@ -67,7 +68,7 @@ public class JwtTokenProvider {
                 .signWith(signatureAlgorithm, privateKey)
                 .compact();
 
-        Date refreshTokenExpiration = new Date(now + (refreshTokenValiditySeconds * 1000));
+        Date refreshTokenExpiration = new Date(now + (refreshTokenValiditySeconds * 1000L));
         claims.put(PAYLOAD_JTI, UUID.randomUUID());
         claims.put(PAYLOAD_ATI, jti);
         String refreshToken = Jwts.builder()
