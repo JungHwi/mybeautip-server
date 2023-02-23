@@ -84,7 +84,7 @@ mybeautip:
   addr:
     confirm-key: U01TX0FVVEgyMDE3MDExMDE1NDM0NTE4MjAx
   security:
-    access-token-validity-seconds: 86400      # 24 hours
+    access-token-validity-seconds: 2592000      # 30 days
     refresh-token-validity-seconds: 28800     # 8 hours
   aws:
     sns:
