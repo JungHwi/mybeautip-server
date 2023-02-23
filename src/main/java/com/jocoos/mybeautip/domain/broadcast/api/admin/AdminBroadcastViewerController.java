@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin;
 
+import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
@@ -23,6 +24,7 @@ import java.util.List;
 public class AdminBroadcastViewerController {
 
     private final BroadcastViewerService viewerService;
+    private final FlipFlopLiteService flipFlopLiteService;
 
     @GetMapping("/broadcast/{broadcast_id}/viewer")
     public ResponseEntity<List<ViewerResponse>> search(@PathVariable("broadcast_id") long broadcastId,

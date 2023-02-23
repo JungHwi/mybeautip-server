@@ -90,8 +90,12 @@ public class AwsS3Service {
     }
 
     public void delete(String targetKey) {
-        AmazonS3 s3Client = credentialService.getS3Client();
-        s3Client.deleteObject(new DeleteObjectRequest(bucketName, targetKey));
+        try {
+            AmazonS3 s3Client = credentialService.getS3Client();
+            s3Client.deleteObject(new DeleteObjectRequest(bucketName, targetKey));
+        } catch (AmazonS3Exception ex) {
+            log.warn("AWS S3 Delete Error Message : {}", ex.getErrorMessage());
+        }
     }
 
     private String copy(CopyObjectRequest copyObjectRequest) {

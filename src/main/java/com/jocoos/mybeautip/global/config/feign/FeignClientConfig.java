@@ -27,6 +27,11 @@ public class FeignClientConfig implements Jackson2ObjectMapperBuilderCustomizer 
         };
     }
 
+//    @Bean
+//    Logger.Level feignLoggerLevel() {
+//        return Logger.Level.FULL;
+//    }
+
     @Bean
     public FeignErrorDecoder decoder() {
         return new FeignErrorDecoder();

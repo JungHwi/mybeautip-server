@@ -189,6 +189,11 @@ flipflop:
   aws.s3.domain: https://static-dev.flipflop.tv/A92258B859/videos/
   default-filename: vod
 
+ffl:
+  api-key: 2M1WiYVIccFoTfAJQ3aUahOxQ37
+  api-secret: 2M1WicSwjNFYi5rv8gUSmZWTdFl
+  domain: https://api-dev.lite.flipflop.tv
+
 #redis:
 #  host: localhost
 #  port: 6379
