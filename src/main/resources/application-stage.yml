@@ -22,7 +22,7 @@ spring:
 
 mybeautip:
   security:
-    access-token-validity-seconds: 604800      # 7 hours
+    access-token-validity-seconds: 2592000      # 30 days
     refresh-token-validity-seconds: 15552000     # 180 days
   aws:
     sns:

@@ -25,7 +25,7 @@ mybeautip:
     member:
       rejoin-available-second: 7776000  # 90 days
   security:
-    access-token-validity-seconds: 15552000  # 180 days
+    access-token-validity-seconds: 2592000  # 30 days
     refresh-token-validity-seconds: 15552000 # 180 days
   aws:
     sns:
