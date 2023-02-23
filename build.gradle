@@ -179,10 +179,6 @@ test {
   useJUnitPlatform()
   outputs.dir snippetsDir
   testLogging {
-    showStandardStreams = true
-    showCauses = true
-    showExceptions = true
-    showStackTraces = true
     exceptionFormat "full"
   }
 }
