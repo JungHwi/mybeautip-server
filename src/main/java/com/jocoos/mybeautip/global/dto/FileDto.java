@@ -5,12 +5,14 @@ import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.vo.FileVo;
 import lombok.*;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
 import static com.jocoos.mybeautip.domain.file.code.FileType.IMAGE;
 import static com.jocoos.mybeautip.domain.file.code.FileType.VIDEO;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
+import static org.springframework.util.StringUtils.hasText;
 
 @Getter
 @Setter
@@ -54,7 +56,7 @@ public class FileDto {
     }
 
     public boolean containThumbnail() {
-        return thumbnailUrl != null;
+        return hasText(thumbnailUrl);
     }
 
     public String filename() {
