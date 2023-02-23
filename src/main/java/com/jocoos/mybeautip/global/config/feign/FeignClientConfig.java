@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.global.config.feign;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import feign.Logger;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
@@ -27,10 +28,10 @@ public class FeignClientConfig implements Jackson2ObjectMapperBuilderCustomizer 
         };
     }
 
-//    @Bean
-//    Logger.Level feignLoggerLevel() {
-//        return Logger.Level.FULL;
-//    }
+    @Bean
+    Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
 
     @Bean
     public FeignErrorDecoder decoder() {

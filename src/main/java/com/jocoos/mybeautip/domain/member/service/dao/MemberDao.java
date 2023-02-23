@@ -30,6 +30,11 @@ public class MemberDao {
     private final MemberDetailRepository memberDetailRepository;
 
     @Transactional(readOnly = true)
+    public List<Member> getAll() {
+        return repository.findAll();
+    }
+
+    @Transactional(readOnly = true)
     public Member getMember(long memberId) {
         return repository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Not found member info. id - " + memberId));

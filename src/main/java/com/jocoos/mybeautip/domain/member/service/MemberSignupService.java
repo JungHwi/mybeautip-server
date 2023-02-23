@@ -48,6 +48,7 @@ public class MemberSignupService {
     private final MemberService memberService;
     private final LegacyMemberService legacyMemberService;
     private final AppleLoginService appleLoginService;
+    private final ThirdPartyMemberService thirdPartyMemberService;
     private final MemberRepository memberRepository;
     private final MemberLeaveLogRepository memberLeaveLogRepository;
 
@@ -76,6 +77,7 @@ public class MemberSignupService {
         memberEntireInfo.setToken(accessTokenResponse);
 
         memberTermService.chooseTermsByTermType(request.getTermTypes(), member);
+        thirdPartyMemberService.integrateThirdPartyMember(member);
         return memberEntireInfo;
     }
 
