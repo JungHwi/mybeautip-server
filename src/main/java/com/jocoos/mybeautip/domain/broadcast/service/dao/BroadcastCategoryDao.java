@@ -18,14 +18,15 @@ public class BroadcastCategoryDao {
 
     @Transactional(readOnly = true)
     public List<BroadcastCategory> getCategories(long categoryId) {
-        BroadcastCategory category = getBroadcastCategory(categoryId);
+        BroadcastCategory category = getCategory(categoryId);
         if (category.isType(GROUP)) {
             return getChildCategories(categoryId);
         }
         return List.of(category);
     }
 
-    private BroadcastCategory getBroadcastCategory(long categoryId) {
+    @Transactional(readOnly = true)
+    public BroadcastCategory getCategory(long categoryId) {
         return repository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException(""));
     }

@@ -80,6 +80,20 @@ public class Broadcast extends CreatedAtBaseEntity {
     @OneToMany(mappedBy = "broadcast", fetch = LAZY, cascade = ALL, orphanRemoval = true)
     public List<BroadcastViewer> viewerList;
 
+    public Broadcast(Long memberId,
+                     String title,
+                     String thumbnail,
+                     String notice,
+                     ZonedDateTime startedAt,
+                     BroadcastCategory category) {
+        this.memberId = memberId;
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.notice = notice;
+        this.startedAt = startedAt;
+        this.category = category;
+    }
+
     public BroadcastCategoryType getCategoryType() {
         return category.getType();
     }

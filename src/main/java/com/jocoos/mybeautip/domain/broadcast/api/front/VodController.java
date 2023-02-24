@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.broadcast.dto.VodResponse;
 import com.jocoos.mybeautip.domain.broadcast.service.VodService;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.event.code.SortField;
+import com.jocoos.mybeautip.global.annotation.CheckPermission;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.IsVisibleResponse;
 import com.jocoos.mybeautip.global.dto.ReportCountResponse;
@@ -16,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.jocoos.mybeautip.global.code.PermissionType.INFLUENCER;
+import static com.jocoos.mybeautip.global.code.PermissionType.MANAGER;
 
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -36,7 +40,7 @@ public class VodController {
     }
 
     @GetMapping("/1/vod/{vodId}")
-    public VodResponse getOne(@PathVariable long vodId) {
+    public VodResponse get(@PathVariable long vodId) {
         return service.get(vodId);
     }
 
@@ -52,6 +56,7 @@ public class VodController {
         return service.addHeartCount(vodId, count.getNumber());
     }
 
+    @CheckPermission({INFLUENCER, MANAGER})
     @PatchMapping("/1/vod/{vodId}/visibility")
     public IsVisibleResponse changeVisibility(@PathVariable long vodId, @RequestBody BooleanDto isVisible) {
         return service.changeVodVisibility(vodId, isVisible.isBool());

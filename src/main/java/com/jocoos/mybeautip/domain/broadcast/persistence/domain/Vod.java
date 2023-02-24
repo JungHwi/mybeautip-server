@@ -64,11 +64,9 @@ public class Vod extends BaseEntity {
     public Vod(String videoKey,
                String title,
                BroadcastCategory category,
-               int liveHeartCount,
                long memberId) {
         this.videoKey = videoKey;
         this.category = category;
-        this.liveHeartCount = liveHeartCount;
         this.memberId = memberId;
         this.isVisible = false;
         setTitle(title);

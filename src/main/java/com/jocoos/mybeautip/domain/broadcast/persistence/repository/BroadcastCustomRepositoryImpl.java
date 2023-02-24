@@ -27,7 +27,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository {
 
     private static final String TUPLE_WITH_THREE_PARAMS = "({0}, {1}, {2})";
-    private static final StringTemplate BROADCAST_CURSOR_COMPARISON_TUPLE = stringTemplate(
+    private static final StringTemplate STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION = stringTemplate(
             TUPLE_WITH_THREE_PARAMS,
             broadcast.startedAt,
             broadcast.createdAt,
@@ -46,7 +46,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 .join(member).on(broadcast.memberId.eq(member.id))
                 .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory))
                 .where(
-                        startAt(condition.startOfDay(), condition.endOfDay()),
+                        startAtBetween(condition.startOfDay(), condition.endOfDay()),
                         createdAtAfter(condition.startAt()),
                         createdAtBefore(condition.endAt()),
                         searchByKeyword(condition.searchOption()),
@@ -83,7 +83,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 cursor);
 
         BooleanExpression isBroadcastTupleLessThanCursorValuesTuple =
-                BROADCAST_CURSOR_COMPARISON_TUPLE.lt(cursorValuesTuple);
+                STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION.lt(cursorValuesTuple);
 
         Integer sortedStatus = cursorValues.get(broadcast.sortedStatus);
         return broadcast.sortedStatus.gt(sortedStatus)
@@ -101,7 +101,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
         return broadcast.title.containsIgnoreCase(keyword);
     }
 
-    private BooleanExpression startAt(ZonedDateTime from, ZonedDateTime to) {
+    private BooleanExpression startAtBetween(ZonedDateTime from, ZonedDateTime to) {
         return from == null || to == null ? null : broadcast.startedAt.between(from, to);
     }
 

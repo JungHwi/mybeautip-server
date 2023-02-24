@@ -17,8 +17,7 @@ public record CursorPaging<T>(T uniqueCursor,
                 0,
                 size,
                 Direction.fromString(order),
-                sortField.getFieldName(), "id"
-        );
+                sortField.getFieldName(), "id");
         return new CursorPaging<>(id, sortField, pageable);
     }
 }

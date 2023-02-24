@@ -18,6 +18,11 @@ public class VodDao {
 
     private final VodRepository repository;
 
+    @Transactional
+    public void save() {
+
+    }
+
     @Transactional(readOnly = true)
     public List<VodResponse> getListWithMember(VodSearchCondition condition) {
         return repository.getVodListWithMember(condition);

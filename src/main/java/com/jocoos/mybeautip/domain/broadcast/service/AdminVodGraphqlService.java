@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
-import static com.jocoos.mybeautip.global.util.MapUtil.listValueMapFrom;
-import static com.jocoos.mybeautip.global.util.MapUtil.mapFrom;
+import static com.jocoos.mybeautip.global.util.ParentChildMapUtil.parentChildListMapFrom;
+import static com.jocoos.mybeautip.global.util.ParentChildMapUtil.parentChildMapFrom;
 
 @RequiredArgsConstructor
 @Service
@@ -45,7 +45,7 @@ public class AdminVodGraphqlService {
 
     @Transactional(readOnly = true)
     public Map<Vod, List<VodReport>> getVodReportsMap(List<Vod> vodList) {
-        return listValueMapFrom(
+        return parentChildListMapFrom(
                 vodList,
                 Vod::getId,
                 reportDao::getByVodIdIn,
@@ -55,7 +55,7 @@ public class AdminVodGraphqlService {
 
     @Transactional(readOnly = true)
     public Map<VodReport, Member> getVodReportReporterMap(List<VodReport> reports) {
-        return mapFrom(
+        return parentChildMapFrom(
                 reports,
                 VodReport::getReporterId,
                 memberDao::getMembers,
@@ -65,7 +65,7 @@ public class AdminVodGraphqlService {
 
     @Transactional(readOnly = true)
     public Map<Vod, Member> getVodMemberMap(List<Vod> vodList) {
-        return mapFrom(
+        return parentChildMapFrom(
                 vodList,
                 Vod::getMemberId,
                 memberDao::getMembers,
