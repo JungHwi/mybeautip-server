@@ -1,8 +1,11 @@
 package com.jocoos.mybeautip.client.flipfloplite;
 
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FflMemberInfo;
-import com.jocoos.mybeautip.client.flipfloplite.dto.TokenResponse;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLMemberInfo;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLTokenResponse;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomRequest;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.CreateBroadcastRequest;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +23,22 @@ public class FlipFlopLiteService {
     private final FlipFlopLiteClient client;
     private final FlipFlopLiteConverter converter;
 
-    public TokenResponse loginGuest() {
-        TokenResponse response = client.loginGuest();
+    public FFLVideoRoomResponse createVideoRoom(CreateBroadcastRequest request) {
+        FFLVideoRoomRequest fflRequest = converter.converts(request);
+        return client.createVideoRoom(fflRequest);
+    }
+
+    public FFLTokenResponse loginGuest() {
+        FFLTokenResponse response = client.loginGuest();
         return response;
     }
 
-    public TokenResponse login(Member member) {
-        FflMemberInfo fflMemberInfo = converter.converts(member);
+    public FFLTokenResponse login(Member member) {
+        FFLMemberInfo fflMemberInfo = converter.converts(member);
         return client.login(fflMemberInfo);
     }
 
-    public TokenResponse login(long memberId) {
+    public FFLTokenResponse login(long memberId) {
         Member member = memberDao.getMember(memberId);
         return this.login(member);
     }

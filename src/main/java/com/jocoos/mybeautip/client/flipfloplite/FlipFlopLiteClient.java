@@ -1,8 +1,10 @@
 package com.jocoos.mybeautip.client.flipfloplite;
 
 import com.jocoos.mybeautip.client.flipfloplite.config.FlipFlopLiteClientConfig;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FflMemberInfo;
-import com.jocoos.mybeautip.client.flipfloplite.dto.TokenResponse;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLMemberInfo;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLTokenResponse;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomRequest;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -10,9 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 public interface FlipFlopLiteClient {
 
     @PostMapping("/v2/apps/me/members/login-as-guest")
-    TokenResponse loginGuest();
+    FFLTokenResponse loginGuest();
 
     @PostMapping("/v2/apps/me/members/login")
-    TokenResponse login(FflMemberInfo memberInfo);
+    FFLTokenResponse login(FFLMemberInfo memberInfo);
+
+    @PostMapping("/v2/apps/me/video-rooms")
+    FFLVideoRoomResponse createVideoRoom(FFLVideoRoomRequest request);
 
 }
