@@ -1,10 +1,7 @@
 package com.jocoos.mybeautip.client.flipfloplite;
 
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLMemberInfo;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLTokenResponse;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomRequest;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse;
+import com.jocoos.mybeautip.client.flipfloplite.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.dto.CreateBroadcastRequest;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.member.Member;
@@ -43,6 +40,10 @@ public class FlipFlopLiteService {
         return this.login(member);
     }
 
+    public FFLStreamKeyResponse getStreamKey(long memberId) {
+        return client.getStreamKey(memberId);
+    }
+
     public int migration() {
         int count = 0;
         List<Member> memberList = memberDao.getAll();
@@ -52,4 +53,5 @@ public class FlipFlopLiteService {
         }
         return count;
     }
+
 }
