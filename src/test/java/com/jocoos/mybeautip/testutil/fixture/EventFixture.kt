@@ -30,8 +30,6 @@ fun makeEvent(
     startAt: ZonedDateTime = ZonedDateTime.now().minusDays(1),
     endAt: ZonedDateTime = ZonedDateTime.now().plusDays(1),
     reservationAt: ZonedDateTime = ZonedDateTime.now(),
-    sorting: Int? = null,
-    isTopFix: Boolean = false,
     eventProductList: List<EventProduct> = emptyList(),
     eventJoinList: List<EventJoin> = emptyList()
 ): Event {

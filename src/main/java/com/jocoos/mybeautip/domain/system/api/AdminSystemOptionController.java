@@ -16,6 +16,13 @@ public class AdminSystemOptionController {
 
     private final SystemOptionService service;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<SystemOptionResponse> get(@PathVariable SystemOptionType id) {
+        SystemOptionResponse result = service.get(id);
+
+        return ResponseEntity.ok(result);
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<SystemOptionResponse> update(@PathVariable SystemOptionType id,
                                                        @RequestBody BooleanDto value) {

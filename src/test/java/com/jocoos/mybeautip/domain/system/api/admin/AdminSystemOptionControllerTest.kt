@@ -10,16 +10,44 @@ import com.jocoos.mybeautip.testutil.fixture.makeSystemOption
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
 import org.springframework.restdocs.payload.JsonFieldType
-import org.springframework.restdocs.payload.PayloadDocumentation
-import org.springframework.restdocs.request.RequestDocumentation
+import org.springframework.restdocs.payload.PayloadDocumentation.*
+import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
+import org.springframework.restdocs.request.RequestDocumentation.pathParameters
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 class AdminSystemOptionControllerTest(private val systemOptionRepository: SystemOptionRepository) : RestDocsIntegrationTestSupport() {
+
+    val systemOption: SystemOption = systemOptionRepository.save(makeSystemOption())
+
+    @Test
+    fun getSystemOption() {
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/admin/system/{id}", systemOption.id)
+                    .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_get_system_option",
+                pathParameters(
+                    parameterWithName("id").description(generateLinkCode(SYSTEM_OPTION_TYPE))
+                ),
+                responseFields(
+                    fieldWithPath("id").type(JsonFieldType.STRING).description(generateLinkCode(SYSTEM_OPTION_TYPE)),
+                    fieldWithPath("value").type(JsonFieldType.BOOLEAN).description("시스템 옵션 설정 값"),
+                )
+            )
+        )
+    }
 
     @Test
     fun updateSystemOption() {
@@ -29,26 +57,26 @@ class AdminSystemOptionControllerTest(private val systemOptionRepository: System
 
         val result: ResultActions = mockMvc
             .perform(
-                RestDocumentationRequestBuilders.patch("/admin/system/{id}", systemOption.id)
+                patch("/admin/system/{id}", systemOption.id)
                     .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
-            .andExpect(MockMvcResultMatchers.status().isOk)
-            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk)
+            .andDo(print())
 
         result.andDo(
-            MockMvcRestDocumentation.document(
+            document(
                 "admin_edit_system_option",
-                RequestDocumentation.pathParameters(
-                    RequestDocumentation.parameterWithName("id").description(generateLinkCode(SYSTEM_OPTION_TYPE))
+                pathParameters(
+                    parameterWithName("id").description(generateLinkCode(SYSTEM_OPTION_TYPE))
                 ),
-                PayloadDocumentation.requestFields(
-                    PayloadDocumentation.fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("시스템 옵션 설정 값")
+                requestFields(
+                    fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("시스템 옵션 설정 값")
                 ),
-                PayloadDocumentation.responseFields(
-                    PayloadDocumentation.fieldWithPath("id").type(JsonFieldType.STRING).description(generateLinkCode(SYSTEM_OPTION_TYPE)),
-                    PayloadDocumentation.fieldWithPath("value").type(JsonFieldType.BOOLEAN).description("시스템 옵션 설정 값"),
+                responseFields(
+                    fieldWithPath("id").type(JsonFieldType.STRING).description(generateLinkCode(SYSTEM_OPTION_TYPE)),
+                    fieldWithPath("value").type(JsonFieldType.BOOLEAN).description("시스템 옵션 설정 값"),
                 )
             )
         )

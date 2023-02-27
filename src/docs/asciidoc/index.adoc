@@ -210,6 +210,7 @@ include::overview.adoc[]
 * link:notice/admin_delete_notice.html[공지사항 삭제 API, window=_blank]
 
 === System API
+* link:system/admin_get_system_option.html[시스템 옵션 조회 API, window=_blank]
 * link:system/admin_edit_system_option.html[시스템 옵션 수정 API, window=_blank]
 
 [[TEST-API-LIST]]

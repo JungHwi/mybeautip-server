@@ -1,0 +1,3 @@
+== Get System Option API
+
+operation::admin_get_system_option[snippets='http-request,path-parameters,http-response,response-fields']

@@ -19,9 +19,14 @@ public class SystemOptionDao {
     private final SystemOptionRepository repository;
 
     @Transactional(readOnly = true)
+    public SystemOption get(SystemOptionType id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new BadRequestException("SystemOption not found. - " + id.name()));
+    }
+
+    @Transactional(readOnly = true)
     public boolean getSystemOption(SystemOptionType type) {
-        return repository.findById(type)
-                .orElseThrow(() -> new BadRequestException("SystemOption not found. - " + type.name()))
+        return this.get(type)
                 .isValue();
     }
 
