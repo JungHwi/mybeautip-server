@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static java.time.ZonedDateTime.now;
@@ -41,6 +42,9 @@ public interface CommunityConverter {
 
     @AfterMapping
     default void afterMapping(@MappingTarget Community community) {
+        if (!BLIND.equals(community.getCategory().getType())) {
+            community.setTitle(null);
+        }
         community.setSortedAt(now());
         community.setVote();
     }
