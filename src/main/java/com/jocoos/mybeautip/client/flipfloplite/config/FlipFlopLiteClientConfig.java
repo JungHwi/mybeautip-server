@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jocoos.mybeautip.global.config.feign.FeignClientConfig;
 import feign.RequestInterceptor;
 import feign.codec.Encoder;
+import feign.codec.ErrorDecoder;
 import feign.form.spring.SpringFormEncoder;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -33,8 +34,13 @@ public class FlipFlopLiteClientConfig extends FeignClientConfig {
         };
     }
 
+//    @Bean
+//    public FlipFlopLiteErrorDecoder fflDecoder() {
+//        return new FlipFlopLiteErrorDecoder();
+//    }
+
     @Bean
-    public FlipFlopLiteErrorDecoder fflDecoder() {
+    public ErrorDecoder errorDecoder() {
         return new FlipFlopLiteErrorDecoder();
     }
 
@@ -65,17 +71,4 @@ public class FlipFlopLiteClientConfig extends FeignClientConfig {
         objectMapper.setDateFormat(new SimpleDateFormat(FFL_ZONE_DATE_TIME_FORMAT));
         return objectMapper;
     }
-
-//    @Override
-//    public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-//        jacksonObjectMapperBuilder
-//                .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
-//                .featuresToEnable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
-//                .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-//                .timeZone(TimeZone.getDefault())
-//                .modulesToInstall(new JavaTimeModule())
-//                .locale(Locale.getDefault())
-//                .simpleDateFormat(FFL_ZONE_DATE_TIME_FORMAT);
-//    }
-
 }

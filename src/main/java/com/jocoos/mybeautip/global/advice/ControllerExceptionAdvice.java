@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.advice;
 
+import com.jocoos.mybeautip.client.flipfloplite.exception.FFLException;
 import com.jocoos.mybeautip.global.exception.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.env.Environment;
@@ -121,5 +122,15 @@ public class ControllerExceptionAdvice {
                 .errorDescription(e.getMessage())
                 .build();
         return ResponseEntity.internalServerError().body(errorResponse);
+    }
+
+    @ExceptionHandler(FFLException.class)
+    public final ResponseEntity<ErrorResponse> handleFFLException(FFLException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(e.getErrorCode().name().toLowerCase())
+                .errorDescription(e.getErrorMessage())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
     }
 }
