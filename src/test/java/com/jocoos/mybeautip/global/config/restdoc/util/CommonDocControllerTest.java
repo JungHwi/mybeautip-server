@@ -36,6 +36,10 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
         result.andExpect(status().isOk())
                 .andDo(restDocs.document(
                         // Global
+                        customResponseFields("custom-response", beneathPath("data.boolean_type").withSubsectionId("boolean_type"),
+                                attributes(key("title").value("BooleanType")),
+                                enumConvertFieldDescriptor((enumDocs.getBooleanType()))
+                        ),
                         customResponseFields("custom-response", beneathPath("data.device_os").withSubsectionId("device_os"),
                                 attributes(key("title").value("DeviceOs")),
                                 enumConvertFieldDescriptor((enumDocs.getDeviceOs()))
@@ -64,10 +68,19 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("SortField")),
                                 enumConvertFieldDescriptor((enumDocs.getSortField()))
                         ),
+                        // System
+                        customResponseFields("custom-response", beneathPath("data.system_option_type").withSubsectionId("system_option_type"),
+                                attributes(key("title").value("SystemOptionType")),
+                                enumConvertFieldDescriptor((enumDocs.getSystemOptionType()))
+                        ),
                         // Member
                         customResponseFields("custom-response", beneathPath("data.member_status").withSubsectionId("member_status"),
                                 attributes(key("title").value("MemberStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getMemberStatus()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.influencer_status").withSubsectionId("influencer_status"),
+                                attributes(key("title").value("InfluencerStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getInfluencerStatus()))
                         ),
                         customResponseFields("custom-response", beneathPath("data.skin_type").withSubsectionId("skin_type"),
                                 attributes(key("title").value("SkinType")),
@@ -84,6 +97,15 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                         customResponseFields("custom-response", beneathPath("data.role").withSubsectionId("role"),
                                 attributes(key("title").value("Role")),
                                 enumConvertFieldDescriptor((enumDocs.getRole()))
+                        ),
+                        // Broadcast
+                        customResponseFields("custom-response", beneathPath("data.broadcast_viewer_type").withSubsectionId("broadcast_viewer_type"),
+                                attributes(key("title").value("BroadcastViewerType")),
+                                enumConvertFieldDescriptor((enumDocs.getBroadcastViewerType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.broadcast_viewer_status").withSubsectionId("broadcast_viewer_status"),
+                                attributes(key("title").value("BroadcastViewerStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getBroadcastViewerStatus()))
                         ),
                         // Event
                         customResponseFields("custom-response", beneathPath("data.event_status").withSubsectionId("event_status"),

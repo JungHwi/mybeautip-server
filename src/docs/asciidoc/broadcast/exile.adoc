@@ -1,0 +1,3 @@
+== Exile API
+
+operation::exile[snippets='http-request,path-parameters,http-response,response-fields']

@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.global.config.restdoc.util;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
 import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.code.InfluencerStatus;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.domain.notice.code.NoticeSort;
@@ -23,6 +26,7 @@ import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
 import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeLinkType;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
+import com.jocoos.mybeautip.domain.system.code.SystemOptionType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
@@ -48,6 +52,7 @@ public class CommonDocController {
     @GetMapping("/enums")
     public ApiResponseDto<EnumDocs> findEnums() {
         // Global
+        Map<String, String> booleanType = getDocs(BooleanType.values());
         Map<String, String> deviceOs = getDocs(DeviceOs.values());
         Map<String, String> language = getDocs(Language.values());
         Map<String, String> telecom = getDocs(Telecom.values());
@@ -56,12 +61,20 @@ public class CommonDocController {
         Map<String, String> fileType = getDocs(FileType.values());
         Map<String, String> sortField = getDocs(SortField.values());
 
+        // System
+        Map<String, String> systemOptionType = getDocs(SystemOptionType.values());
+
         // Member
         Map<String, String> memberStatus = getDocs(MemberStatus.values());
+        Map<String, String> influencerStatus = getDocs(InfluencerStatus.values());
         Map<String, String> skinType = getDocs(SkinType.values());
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
         Map<String, String> grantType = getDocs(GrantType.values());
         Map<String, String> role = getDocs(Role.values());
+
+        // Broadcast
+        Map<String, String> broadcastViewerType = getDocs(BroadcastViewerType.values());
+        Map<String, String> broadcastViewerStatus = getDocs(BroadcastViewerStatus.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -125,6 +138,7 @@ public class CommonDocController {
 
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
+                        .booleanType(booleanType)
                         .deviceOs(deviceOs)
                         .language(language)
                         .telecom(telecom)
@@ -132,12 +146,18 @@ public class CommonDocController {
                         .fileOperationType(fileOperationType)
                         .fileType(fileType)
                         .sortField(sortField)
+                // System
+                        .systemOptionType(systemOptionType)
                 // Member
                         .memberStatus(memberStatus)
+                        .influencerStatus(influencerStatus)
                         .skinType(skinType)
                         .skinWorry(skinWorry)
                         .grantType(grantType)
                         .role(role)
+                // Broadcast
+                        .broadcastViewerType(broadcastViewerType)
+                        .broadcastViewerStatus(broadcastViewerStatus)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)

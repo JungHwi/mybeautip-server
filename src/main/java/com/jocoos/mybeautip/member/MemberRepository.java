@@ -15,6 +15,8 @@ import java.util.*;
 
 public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, Long>, MemberCustomRepository {
 
+    List<Member> findAllBy();
+
     List<Member> findByIdIn(Set<Long> ids);
 
     boolean existsByTag(String tag);

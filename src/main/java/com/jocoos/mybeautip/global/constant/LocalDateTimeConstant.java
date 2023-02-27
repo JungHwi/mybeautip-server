@@ -8,4 +8,5 @@ public class LocalDateTimeConstant {
     public static final String LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String ZONE_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
     public static final String ZONE_DATE_TIME_MILLI_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS Z";
+    public static final String FFL_ZONE_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 }

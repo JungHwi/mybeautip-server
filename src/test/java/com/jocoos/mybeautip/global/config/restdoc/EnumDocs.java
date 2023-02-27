@@ -12,6 +12,7 @@ import java.util.Map;
 public class EnumDocs {
 
     // Global
+    Map<String, String> booleanType;
     Map<String, String> deviceOs;
     Map<String, String> language;
     Map<String, String> telecom;
@@ -20,12 +21,20 @@ public class EnumDocs {
     Map<String, String> fileType;
     Map<String, String> sortField;
 
+    // System
+    Map<String, String> systemOptionType;
+
     // Member
     Map<String, String> memberStatus;
+    Map<String, String> influencerStatus;
     Map<String, String> skinType;
     Map<String, String> skinWorry;
     Map<String, String> grantType;
     Map<String, String> role;
+
+    // Broadcast
+    Map<String, String> broadcastViewerType;
+    Map<String, String> broadcastViewerStatus;
 
     // Event
     Map<String, String> eventStatus;

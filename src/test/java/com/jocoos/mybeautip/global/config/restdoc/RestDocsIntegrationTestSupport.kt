@@ -1,17 +1,18 @@
 package com.jocoos.mybeautip.global.config.restdoc
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.jocoos.mybeautip.testutil.container.TestContainerConfig
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.GROUP
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
 import com.jocoos.mybeautip.domain.file.service.FlipFlopService
 import com.jocoos.mybeautip.global.dto.FileDto
-import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
-import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.security.JwtTokenProvider
+import com.jocoos.mybeautip.testutil.container.TestContainerConfig
+import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
+import com.jocoos.mybeautip.testutil.fixture.makeInfluencer
+import com.jocoos.mybeautip.testutil.fixture.makeMember
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
@@ -80,13 +81,20 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     protected lateinit var defaultAdmin: Member
     protected lateinit var defaultAdminToken: String
 
+    protected lateinit var defaultInfluencer: Member
+    protected lateinit var defaultInfluencerToken: String
+
     @PostConstruct
     private fun postConstruct() {
         communityCategoryRepository.save(makeCommunityCategory(id = 1, parentId = null, type = GROUP))
         defaultAdmin = memberRepository.save(makeMember(link = 0))
         requestUser = memberRepository.save(makeMember(link = 2))
+        defaultInfluencer = memberRepository.save(makeMember(link = 2))
+        makeInfluencer(id = defaultInfluencer.id)
+
         defaultAdminToken = "Bearer " + jwtTokenProvider.auth(defaultAdmin).accessToken
         requestUserToken = "Bearer " + jwtTokenProvider.auth(requestUser).accessToken
+        defaultInfluencerToken = "Bearer " + jwtTokenProvider.auth(defaultInfluencer).accessToken
     }
 
     @PreDestroy

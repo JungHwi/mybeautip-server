@@ -30,8 +30,10 @@ public class FeignErrorDecoder implements ErrorDecoder {
         }
         log.debug(response.request());
         try {
-            String requestBody = new String(response.request().body(), UTF_8);
-            log.debug("request body : {}", requestBody);
+            if (response.request().body() != null) {
+                String requestBody = new String(response.request().body(), UTF_8);
+                log.debug("request body : {}", requestBody);
+            }
 
             InputStream inputStream = response.body().asInputStream();
             String responseBody = new String(inputStream.readAllBytes(), UTF_8);
