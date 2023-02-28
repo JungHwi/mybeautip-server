@@ -14,6 +14,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Log4j2
+// FIXME 재훈님, 각 API Response 를 우선은 그냥 FFL 기준으로 작성 했습니다. 실제로 사용하기 전에 마이뷰팁에 맞게끔 여기서 convert 하도록 수정해 주세요.
 public class FlipFlopLiteService {
 
     private final MemberDao memberDao;
@@ -42,6 +43,10 @@ public class FlipFlopLiteService {
 
     public FFLVideoRoomResponse startVideoRoom(long videoRoomId) {
         return client.startVideoRoom(videoRoomId);
+    }
+
+    public FFLVideoRoomResponse endVideoRoom(long videoRoomId) {
+        return client.endVideoRoom(videoRoomId);
     }
 
     public FFLStreamKeyResponse getStreamKey(long memberId) {

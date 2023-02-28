@@ -8,9 +8,13 @@ public class FFLException extends RuntimeException {
     private final FFLErrorCode errorCode;
     private final String errorMessage;
 
-    public FFLException(FFLErrorCode errorCode, String errorMessage) {
-        super(errorCode.name());
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
+    public FFLException(String errorCode, String errorMessage) {
+        super(errorCode);
+        this.errorCode = FFLErrorCode.of(errorCode);
+        String message = errorMessage;
+        if (!errorCode.equals(this.errorCode.name())) {
+            message = String.format("[%s] %s", errorCode, errorMessage);
+        }
+        this.errorMessage = message;
     }
 }
