@@ -5,9 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.Logger;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
-import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
 import org.springframework.context.annotation.Bean;
-import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.util.Locale;
@@ -20,22 +18,8 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.LOCAL_D
 public class FeignClientConfig implements Jackson2ObjectMapperBuilderCustomizer {
 
     @Bean
-    public FeignFormatterRegistrar localDateFeignFormatterRegister() {
-        return registry -> {
-            DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
-            registrar.setUseIsoFormat(true);
-            registrar.registerFormatters(registry);
-        };
-    }
-
-    @Bean
     Logger.Level feignLoggerLevel() {
         return Logger.Level.FULL;
-    }
-
-    @Bean
-    public FeignErrorDecoder decoder() {
-        return new FeignErrorDecoder();
     }
 
     @Override

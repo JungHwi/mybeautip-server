@@ -40,6 +40,10 @@ public class FlipFlopLiteService {
         return this.login(member);
     }
 
+    public FFLVideoRoomResponse startVideoRoom(long videoRoomId) {
+        return client.startVideoRoom(videoRoomId);
+    }
+
     public FFLStreamKeyResponse getStreamKey(long memberId) {
         return client.getStreamKey(memberId);
     }
@@ -53,5 +57,4 @@ public class FlipFlopLiteService {
         }
         return count;
     }
-
 }

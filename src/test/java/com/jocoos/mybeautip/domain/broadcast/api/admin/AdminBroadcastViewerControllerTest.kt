@@ -116,7 +116,7 @@ class AdminBroadcastViewerControllerTest(
         val request = BooleanDto(true)
 
         val result: ResultActions = mockMvc.perform(
-            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
+            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/suspend", broadcast.id, viewer.memberId)
                 .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -138,7 +138,8 @@ class AdminBroadcastViewerControllerTest(
                     fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
                     fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
-                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat()),
+                    fieldWithPath("suspended_at").type(JsonFieldType.STRING).description("채팅 정지 일시").attributes(getZonedDateFormat()).optional()
                 ),
             )
         )

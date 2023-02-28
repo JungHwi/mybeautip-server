@@ -22,4 +22,6 @@ public interface FlipFlopLiteClient {
     @GetMapping("/v2/apps/me/members/{appUserId}/stream-key")
     FFLStreamKeyResponse getStreamKey(@PathVariable long appUserId);
 
+    @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/rtmp-broadcast/state/live")
+    FFLVideoRoomResponse startVideoRoom(@PathVariable long videoRoomId);
 }
