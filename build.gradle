@@ -176,6 +176,7 @@ dependencies {
 }
 
 test {
+  maxHeapSize = "1024m"
   doFirst {
     systemProperty 'spring.profiles.active', System.getProperty("profile", "local")
   }
