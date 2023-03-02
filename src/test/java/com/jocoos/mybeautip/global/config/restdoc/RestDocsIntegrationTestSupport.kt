@@ -2,6 +2,9 @@ package com.jocoos.mybeautip.global.config.restdoc
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastCategoryType
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
+import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastCategoryRepository
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.GROUP
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
 import com.jocoos.mybeautip.domain.file.service.FlipFlopService
@@ -10,6 +13,7 @@ import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.security.JwtTokenProvider
 import com.jocoos.mybeautip.testutil.container.TestContainerConfig
+import com.jocoos.mybeautip.testutil.fixture.makeBroadcastCategory
 import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
 import com.jocoos.mybeautip.testutil.fixture.makeInfluencer
 import com.jocoos.mybeautip.testutil.fixture.makeMember
@@ -67,6 +71,9 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     private lateinit var communityCategoryRepository: CommunityCategoryRepository
 
     @Autowired
+    private lateinit var broadcastCategoryRepository: BroadcastCategoryRepository
+
+    @Autowired
     private lateinit var jwtTokenProvider: JwtTokenProvider
 
     @MockBean
@@ -84,9 +91,15 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     protected lateinit var defaultInfluencer: Member
     protected lateinit var defaultInfluencerToken: String
 
+    protected lateinit var groupBroadcastCategory: BroadcastCategory
+
+    // FIXME IS THIS METHOD REALLY CALLED ONCE? SHOULD CHECK
     @PostConstruct
     private fun postConstruct() {
         communityCategoryRepository.save(makeCommunityCategory(id = 1, parentId = null, type = GROUP))
+        groupBroadcastCategory =
+            broadcastCategoryRepository.save(makeBroadcastCategory(parentId = null, type = BroadcastCategoryType.GROUP, title = "전체"))
+
         defaultAdmin = memberRepository.save(makeMember(link = 0))
         requestUser = memberRepository.save(makeMember(link = 2))
         defaultInfluencer = memberRepository.save(makeMember(link = 2))
@@ -100,7 +113,8 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     @PreDestroy
     private fun preDestroy() {
         communityCategoryRepository.deleteAll()
-        memberRepository.deleteAllInBatch(listOf(requestUser, defaultAdmin))
+        broadcastCategoryRepository.deleteAll()
+        memberRepository.deleteAllInBatch(listOf(requestUser, defaultAdmin, defaultInfluencer))
     }
 
     @BeforeEach

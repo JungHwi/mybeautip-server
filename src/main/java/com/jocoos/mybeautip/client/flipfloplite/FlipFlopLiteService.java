@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.client.flipfloplite;
 
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
-import com.jocoos.mybeautip.domain.broadcast.dto.CreateBroadcastRequest;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCreateRequest;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,10 @@ public class FlipFlopLiteService {
     private final FlipFlopLiteClient client;
     private final FlipFlopLiteConverter converter;
 
-    public FFLVideoRoomResponse createVideoRoom(CreateBroadcastRequest request) {
-        FFLVideoRoomRequest fflRequest = converter.converts(request);
-        return client.createVideoRoom(fflRequest);
+    public ExternalBroadcastInfo createVideoRoom(BroadcastCreateRequest request, long memberId) {
+        FFLVideoRoomRequest fflRequest = converter.converts(request, memberId);
+        FFLVideoRoomResponse response = client.createVideoRoom(fflRequest);
+        return converter.converts(response);
     }
 
     public FFLTokenResponse loginGuest() {

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin
 
+import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
@@ -14,16 +15,20 @@ import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.testutil.fixture.makeViewer
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation
-import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
-import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
+import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
@@ -33,7 +38,7 @@ class AdminBroadcastViewerControllerTest(
     private val broadcastRepository: BroadcastRepository,
     private val broadcastViewerRepository: BroadcastViewerRepository,
     private val memberRepository: MemberRepository
-) : RestDocsIntegrationTestSupport() {
+) : BroadcastTestSupport() {
 
     @Test
     fun search() {
@@ -43,7 +48,7 @@ class AdminBroadcastViewerControllerTest(
 
         val result: ResultActions = mockMvc.perform(
             get("/admin/broadcast/{broadcast_id}/viewer", broadcast.id)
-                .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+                .header(AUTHORIZATION, defaultAdminToken)
         ).andExpect(status().isOk)
             .andDo(print())
 
@@ -82,8 +87,8 @@ class AdminBroadcastViewerControllerTest(
 
         val result: ResultActions = mockMvc.perform(
             patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
-                .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
-                .contentType(MediaType.APPLICATION_JSON)
+                .header(AUTHORIZATION, defaultAdminToken)
+                .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         ).andExpect(status().isOk)
             .andDo(print())
@@ -95,7 +100,7 @@ class AdminBroadcastViewerControllerTest(
                     parameterWithName("broadcast_id").description("방송 ID"),
                     parameterWithName("member_id").description("회원 ID"),
                 ),
-                PayloadDocumentation.requestFields(
+                requestFields(
                     fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("매니저 권한 여부")
                 ),
                 responseFields(
@@ -116,9 +121,9 @@ class AdminBroadcastViewerControllerTest(
         val request = BooleanDto(true)
 
         val result: ResultActions = mockMvc.perform(
-            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/suspend", broadcast.id, viewer.memberId)
-                .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
-                .contentType(MediaType.APPLICATION_JSON)
+            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
+                .header(AUTHORIZATION, defaultAdminToken)
+                .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         ).andExpect(status().isOk)
             .andDo(print())
@@ -130,7 +135,7 @@ class AdminBroadcastViewerControllerTest(
                     parameterWithName("broadcast_id").description("방송 ID"),
                     parameterWithName("member_id").description("회원 ID"),
                 ),
-                PayloadDocumentation.requestFields(
+                requestFields(
                     fieldWithPath("bool").type(JsonFieldType.BOOLEAN).description("채팅 정지 여부.")
                 ),
                 responseFields(
@@ -183,7 +188,7 @@ class AdminBroadcastViewerControllerTest(
     }
 
     fun saveBroadcast(): Broadcast {
-        return broadcastRepository.save(makeBroadcast())
+        return broadcastRepository.save(makeBroadcast(category = defaultBroadcastCategory))
     }
 
     fun saveMember(): Member {

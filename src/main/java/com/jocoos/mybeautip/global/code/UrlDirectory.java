@@ -10,6 +10,7 @@ public enum UrlDirectory implements CodeValue {
 
     SHARE("친구 초대 공유", "share/"),
     AVATAR("아바타", "avatar/"),
+    BROADCAST("방송", "broadcast/%s/"),
     COMMUNITY("커뮤니티", "community/%s/"),
     COMMUNITY_COMMENT("커뮤니티 댓글", "community_comment/%s/"),
     VIDEO_CATEGORY("비디오 카테고리", "video_category/"),
@@ -20,7 +21,8 @@ public enum UrlDirectory implements CodeValue {
     PLACARD("플래카드", "placard/"),
     NOTICE("공지사항", "notice/"),
     TEMP_IMAGE("임시 이미지 폴더", "temp/image/"),
-    TEMP_VIDEO("임시 비디오 폴더", "temp/video/")
+    TEMP_VIDEO("임시 비디오 폴더", "temp/video/"),
+    VOD("VOD", "vod/%s/")
     ;
 
     private final String description;
@@ -33,7 +35,7 @@ public enum UrlDirectory implements CodeValue {
 
     public String getDirectory(Long id) {
         switch (this) {
-            case COMMUNITY, COMMUNITY_COMMENT, VIDEO_COMMENT:
+            case COMMUNITY, COMMUNITY_COMMENT, VIDEO_COMMENT, BROADCAST, VOD:
                 return String.format(this.directory, id);
             default:
                 return this.directory;

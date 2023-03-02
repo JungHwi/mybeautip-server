@@ -1,7 +1,9 @@
 package com.jocoos.mybeautip.global.config.restdoc.util;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
+import com.jocoos.mybeautip.domain.broadcast.code.VodSortField;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
@@ -75,6 +77,8 @@ public class CommonDocController {
         // Broadcast
         Map<String, String> broadcastViewerType = getDocs(BroadcastViewerType.values());
         Map<String, String> broadcastViewerStatus = getDocs(BroadcastViewerStatus.values());
+        Map<String, String> broadcastStatus = getDocs(BroadcastStatus.values());
+        Map<String, String> vodSortField = getDocs(VodSortField.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -158,6 +162,8 @@ public class CommonDocController {
                 // Broadcast
                         .broadcastViewerType(broadcastViewerType)
                         .broadcastViewerStatus(broadcastViewerStatus)
+                        .broadcastStatus(broadcastStatus)
+                        .vodSortField(vodSortField)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)

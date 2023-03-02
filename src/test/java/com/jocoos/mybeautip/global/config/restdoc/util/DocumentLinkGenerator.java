@@ -49,7 +49,9 @@ public class DocumentLinkGenerator {
         VIDEO_STATUS("video_status", "비디오 상태"),
         NOTICE_STATUS("notice_status", "공지 상태"),
         NOTICE_SORT("notice_sort","공지 정렬 기준"),
-        ROLE("role", "멤버 권한")
+        ROLE("role", "멤버 권한"),
+        BROADCAST_STATUS("broadcast_status", "방송 상태"),
+        VOD_SORT_FIELD("vod_sort_field", "VOD 정렬 기준")
         ;
 
         private final String pageId;

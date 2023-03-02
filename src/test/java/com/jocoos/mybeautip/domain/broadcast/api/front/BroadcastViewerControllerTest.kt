@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front
 
+import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
@@ -15,6 +16,7 @@ import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.testutil.fixture.makeViewer
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -32,7 +34,7 @@ class BroadcastViewerControllerTest(
     private val broadcastRepository: BroadcastRepository,
     private val broadcastViewerRepository: BroadcastViewerRepository,
     private val memberRepository: MemberRepository
-) : RestDocsIntegrationTestSupport() {
+) : BroadcastTestSupport() {
 
     @Test
     fun search() {
@@ -180,7 +182,7 @@ class BroadcastViewerControllerTest(
     fun saveBroadcast(
         memberId: Long
     ): Broadcast {
-        return broadcastRepository.save(makeBroadcast(memberId = memberId))
+        return broadcastRepository.save(makeBroadcast(memberId = memberId, category = defaultBroadcastCategory))
     }
 
     fun saveMember(): Member {

@@ -35,6 +35,8 @@ public class EnumDocs {
     // Broadcast
     Map<String, String> broadcastViewerType;
     Map<String, String> broadcastViewerStatus;
+    Map<String, String> broadcastStatus;
+    Map<String, String> vodSortField;
 
     // Event
     Map<String, String> eventStatus;
