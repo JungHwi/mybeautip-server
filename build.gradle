@@ -176,9 +176,6 @@ dependencies {
 }
 
 test {
-  minHeapSize = "256m"
-  maxHeapSize = "1024m"
-  jvmArgs "-XX:+UnlockExperimentalVMOptions"
   doFirst {
     systemProperty 'spring.profiles.active', System.getProperty("profile", "local")
   }
