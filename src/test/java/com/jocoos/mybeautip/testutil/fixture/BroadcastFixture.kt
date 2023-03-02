@@ -1,9 +1,14 @@
 package com.jocoos.mybeautip.testutil.fixture
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastCategoryType
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastCategoryType.CHAT
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.LIVE
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.SCHEDULED
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.service.util.ViewerUsernameUtil
 import com.jocoos.mybeautip.domain.member.code.InfluencerStatus
@@ -13,36 +18,25 @@ import org.apache.tika.utils.StringUtils
 import java.time.ZonedDateTime
 
 fun makeBroadcast(
-    id: Long? = null,
-    categoryId: Long = 2,
-    status: BroadcastStatus = BroadcastStatus.LIVE,
-    videoKey: String = "video_key",
+    category: BroadcastCategory,
+    status: BroadcastStatus = LIVE,
     memberId: Long = 1,
+    videoKey: Long = 1,
     title: String = "title",
-    url: String = "url",
     thumbnail: String = "thumbnail",
     notice: String = "notice",
-    pin: String = "pin",
-    heartCount: Int = Integer.valueOf(123),
-    startedAt: ZonedDateTime = ZonedDateTime.now(),
-    endedAt: ZonedDateTime? = null
+    startedAt: ZonedDateTime = ZonedDateTime.now()
 ): Broadcast {
-    return Broadcast(
-        id,
-        categoryId,
-        status,
-        videoKey,
-        memberId,
-        title,
-        url,
-        thumbnail,
-        notice,
-        pin,
-        heartCount,
-        startedAt,
-        endedAt,
-        arrayListOf()
-    )
+    return Broadcast(videoKey, memberId, status, title, thumbnail, notice, startedAt, category)
+}
+
+fun makeBroadcastCategory(
+    parentId: Long?,
+    type: BroadcastCategoryType = CHAT,
+    title: String = "title",
+    description: String = "description"
+) : BroadcastCategory {
+    return BroadcastCategory(parentId, type, title, description)
 }
 
 fun makeInfluencer(

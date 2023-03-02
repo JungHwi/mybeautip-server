@@ -1,0 +1,3 @@
+== Get Vod API
+
+operation::get_vod[snippets='http-request,path-parameters,http-response,response-fields']

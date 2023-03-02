@@ -1,0 +1,3 @@
+== Get Broadcast/VOD Categories API
+
+operation::get_broadcast_categories[snippets='http-request,http-response,response-fields']

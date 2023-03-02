@@ -1,0 +1,3 @@
+== Admin Get Broadcast List API
+
+operation::admin_get_broadcast_list[snippets='http-request,request-parameters,http-response,response-fields']

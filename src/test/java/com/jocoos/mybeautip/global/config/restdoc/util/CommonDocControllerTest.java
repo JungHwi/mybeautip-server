@@ -107,6 +107,10 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("BroadcastViewerStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getBroadcastViewerStatus()))
                         ),
+                        customResponseFields("custom-response", beneathPath("data.vod_sort_field").withSubsectionId("vod_sort_field"),
+                                attributes(key("title").value("VodSortField")),
+                                enumConvertFieldDescriptor((enumDocs.getVodSortField()))
+                        ),
                         // Event
                         customResponseFields("custom-response", beneathPath("data.event_status").withSubsectionId("event_status"),
                                 attributes(key("title").value("EventStatus")),
@@ -245,6 +249,7 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("OperationTargetType")),
                                 enumConvertFieldDescriptor((enumDocs.getOperationTargetType()))
                         ),
+                        // Notice
                         customResponseFields("custom-response", beneathPath("data.notice_status").withSubsectionId("notice_status"),
                                 attributes(key("title").value("NoticeStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getNoticeStatus()))
@@ -252,6 +257,11 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                         customResponseFields("custom-response", beneathPath("data.notice_sort").withSubsectionId("notice_sort"),
                                 attributes(key("title").value("NoticeSort")),
                                 enumConvertFieldDescriptor((enumDocs.getNoticeSort()))
+                        ),
+                        // Broadcast
+                        customResponseFields("custom-response", beneathPath("data.broadcast_status").withSubsectionId("broadcast_status"),
+                                attributes(key("title").value("BroadcastStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getBroadcastStatus()))
                         )
                 ));
     }
