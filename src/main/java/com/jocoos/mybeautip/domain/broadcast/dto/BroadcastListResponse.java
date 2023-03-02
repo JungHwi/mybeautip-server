@@ -12,7 +12,7 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 
 public record BroadcastListResponse(long id,
                                     BroadcastStatus status,
-                                    BroadcastCategoryInfo category,
+                                    BroadcastCategoryResponse category,
                                     String title,
                                     String thumbnailUrl,
                                     int viewerCount,

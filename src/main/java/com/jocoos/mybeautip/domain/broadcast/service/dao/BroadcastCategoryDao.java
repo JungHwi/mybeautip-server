@@ -31,6 +31,11 @@ public class BroadcastCategoryDao {
                 .orElseThrow(() -> new NotFoundException(""));
     }
 
+    @Transactional(readOnly = true)
+    public List<BroadcastCategory> getAll() {
+        return repository.findAll();
+    }
+
     private List<BroadcastCategory> getChildCategories(long parentId) {
         return repository.findAllByParentId(parentId);
     }
