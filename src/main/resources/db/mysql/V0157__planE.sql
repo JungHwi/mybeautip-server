@@ -18,11 +18,14 @@ create table broadcast (
     video_key varchar(10) not null comment '플립플랍 비디오 키',
     member_id bigint not null comment '회원 아이디',
     title varchar(25) not null comment '제목',
-    url varchar(200) not null comment '방송 URL',
+    url varchar(200) comment '방송 URL',
     thumbnail varchar(16) not null comment '방송 썸네일 파일',
     notice varchar(100) comment '공지사항',
     pin varchar(1000) comment '핀 채팅',
+    report_count int not null comment '신고 수',
     heart_count int not null comment '하트 수',
+    viewer_count int not null comment '시청자 수',
+    max_viewer_count int not null comment '최대 시청자 수',
     started_at datetime not null comment '방송 시작 일시',
     ended_at datetime comment '방송 종료 일시',
     created_at datetime not null comment '생성 일시'
@@ -40,7 +43,46 @@ create table broadcast_viewer (
     joined_at datetime not null comment '참여 일시'
 ) comment '시청자 정보';
 
+create table vod (
+                     id bigint auto_increment primary key comment 'VOD 아이디',
+                     category_id bigint not null comment '카테고리 아이디',
+                     member_id bigint not null comment '회원 아이디',
+                     video_key bigint not null comment '외부 비디오 키',
+                     status varchar(20) not null comment '상태',
+                     is_visible boolean not null comment '노출여부',
+                     title varchar(200) not null comment '제목',
+                     thumbnail varchar(16) not null comment '썸네일 파일',
+                     view_count int not null comment '조회수',
+                     report_count int not null,
+                     total_heart_count int generated always as (vod_heart_count + live_heart_count) stored not null comment '총 하트수',
+                     vod_heart_count int not null comment '하트수',
+                     live_heart_count int not null comment '라이브 하트수',
+                     duration bigint not null comment '영상 길이',
+                     created_at datetime not null comment 'VOD 생성시간',
+                     modified_at datetime not null comment 'VOD 수정시간'
+) charset = utf8mb4 comment 'VOD 정보';
+
+create table broadcast_category (
+                                    id bigint auto_increment comment '라이브 카테고리 아이디' primary key,
+                                    parent_id bigint comment '부모 카테고리 아이디',
+                                    type varchar(20) not null comment '카테고리 구분',
+                                    sort int comment '정렬순서',
+                                    title varchar(20) not null comment '카테고리 제목',
+                                    description varchar(100) not null comment '카테고리 설명'
+) charset = utf8mb4 comment '라이브 카테고리 정보';
+
+create table vod_report(
+                           id bigint auto_increment comment 'VOD 신고 아이디' primary key,
+                           reporter_id bigint not null comment '신고자 아이디',
+                           reported_id bigint not null comment '피신고자 아이디',
+                           vod_id bigint not null comment 'VOD 아이디',
+                           description varchar(100) comment '신고 사유',
+                           created_at datetime not null comment '생성시간',
+                           modified_at datetime not null comment '수정시간'
+) charset = utf8mb4 comment 'VOD 신고 정보';
 
 # drop table influencer;
 # drop table system_option;
 # drop table broadcast_viewer;
+# drop table vod;
+# drop table broadcast_category;

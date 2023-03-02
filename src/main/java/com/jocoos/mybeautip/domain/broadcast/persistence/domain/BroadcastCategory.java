@@ -36,6 +36,13 @@ public class BroadcastCategory {
     @Column
     private String description;
 
+    public BroadcastCategory(Long parentId, BroadcastCategoryType type, String title, String description) {
+        this.parentId = parentId;
+        this.type = type;
+        this.title = title;
+        this.description = description;
+    }
+
     public boolean isType(BroadcastCategoryType type) {
         return this.type == type;
     }
