@@ -7,7 +7,7 @@ phases:
   pre_build:
     commands:
       - echo start gradle build
-      - ./gradlew build -Dprofile=dev --info --stacktrace
+      - ./gradlew build -Dprofile=dev --debug --stacktrace
       - echo end of gradle build
       - ls -al build/libs/
       - aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 776875668468.dkr.ecr.ap-northeast-2.amazonaws.com
