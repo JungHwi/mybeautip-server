@@ -54,11 +54,11 @@ include::overview.adoc[]
 * link:broadcast/grant_manager.html[채팅 관리자 설정 / 해제 API, window=_blank]
 * link:broadcast/suspend.html[유저 채팅 정지 / 해제 API, window=_blank]
 * link:broadcast/exile.html[유저 추방 API, window=_blank]
-* link:broadcast/get_broadcast_categories.html[방송, VOD 카테고리 조회 API, window=_blank]
-* link:broadcast/get_vod_list.html[방송 목록 조회 API, window=_blank]
-* link:broadcast/get_vod.html[방송 상세 조회 API, window=_blank]
-* link:broadcast/report_vod.html[방송 신고 API, window=_blank]
-* link:broadcast/heart_vod.html[방송 하트 API, window=_blank]
+* link:broadcast/get_broadcast_categories.html[방송 및 VOD 카테고리 조회 API, window=_blank]
+* link:broadcast/get_vod_list.html[VOD 목록 조회 API, window=_blank]
+* link:broadcast/get_vod.html[VOD 상세 조회 API, window=_blank]
+* link:broadcast/report_vod.html[VOD 신고 API, window=_blank]
+* link:broadcast/heart_vod.html[VOD 하트 API, window=_blank]
 
 
 === 이벤트 API
