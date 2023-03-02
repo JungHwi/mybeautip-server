@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
+import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.VodResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
@@ -10,7 +11,6 @@ import com.jocoos.mybeautip.domain.broadcast.service.dao.VodReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.VodSearchCondition;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.global.dto.ReportCountResponse;
-import com.jocoos.mybeautip.global.dto.IsVisibleResponse;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
 import com.jocoos.mybeautip.member.Member;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ALREADY_REPORT;
 
 @RequiredArgsConstructor
@@ -36,6 +37,7 @@ public class VodService {
         VodSearchCondition condition = VodSearchCondition.builder()
                 .categoryIds(getCategories(categoryId))
                 .cursorPaging(cursorPaging)
+                .isVisible(true)
                 .build();
         return vodDao.getListWithMember(condition);
     }
@@ -43,36 +45,31 @@ public class VodService {
     @Transactional(readOnly = true)
     public VodResponse get(long vodId) {
         Vod vod = vodDao.get(vodId);
+        if (!vod.canWatch()) {
+            throw new BadRequestException(ACCESS_DENIED, "vod is not watchable");
+        }
         Member member = memberDao.getMember(vod.getMemberId());
         return new VodResponse(vod, member);
     }
 
     @Transactional
-    public IsVisibleResponse changeVodVisibility(long id, boolean isVisible) {
-        Vod vod = vodDao.get(id);
-        vod.visible(isVisible);
-        return new IsVisibleResponse(vod.getId(), vod.isVisible());
-    }
-
-    @Transactional
     public ReportCountResponse report(long vodId, long reporterId, String description) {
         validIsFirstReport(vodId, reporterId);
-        Vod reportedVod = vodDao.getForUpdate(vodId);
-        // TODO Report should save before select for update
+        Vod reportedVod = vodDao.get(vodId);
         VodReport vodReport = new VodReport(reportedVod, reporterId, description);
         reportDao.save(vodReport);
-        reportedVod.addReportCount(1);
 
-        // TODO Response values need to be discussed
-        return new ReportCountResponse(reportedVod.getId(), reportedVod.getReportCount());
+        vodDao.addReportCountAndFlush(vodId,1);
+        Vod updatedVod = vodDao.get(vodId);
+        return new ReportCountResponse(updatedVod.getId(), updatedVod.getReportCount());
     }
 
     // TODO Need to use Redis or DynamoDb for concurrency control of many requests
     @Transactional
-    public ReportCountResponse addHeartCount(long vodId, int addCount) {
+    public HeartCountResponse addHeartCount(long vodId, int addCount) {
         Vod vod = vodDao.getForUpdate(vodId);
         vod.addHeartCount(addCount);
-        return new ReportCountResponse(vod.getId(), vod.getTotalHeartCount());
+        return new HeartCountResponse(vod.getId(), vod.getTotalHeartCount());
     }
 
     private List<Long> getCategories(long categoryId) {

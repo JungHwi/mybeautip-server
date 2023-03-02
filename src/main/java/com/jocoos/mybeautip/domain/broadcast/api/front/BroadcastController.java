@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.domain.broadcast.api.front;
 
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastListResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastRequest;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCreateRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastStartedAtResponse;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
@@ -29,8 +29,9 @@ public class BroadcastController {
 
     @CheckPermission({INFLUENCER})
     @PostMapping("/1/broadcast")
-    public BroadcastListResponse create(@RequestBody BroadcastRequest request) {
-        return service.createBroadcastAndVod(request);
+    public BroadcastResponse create(@RequestBody BroadcastCreateRequest request,
+                                        @CurrentMember MyBeautipUserDetails userDetails) {
+        return service.createBroadcastAndVod(request, userDetails.getMember().getId());
     }
 
     @GetMapping("/1/broadcast")

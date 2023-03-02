@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.global.advice;
 import com.jocoos.mybeautip.client.flipfloplite.exception.FFLException;
 import com.jocoos.mybeautip.global.exception.*;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,12 +18,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Log4j2
 @RestControllerAdvice
 public class ControllerExceptionAdvice {
-
-    private Environment environment;
-
-    public ControllerExceptionAdvice(Environment environment) {
-        this.environment = environment;
-    }
 
     @ExceptionHandler(ConflictException.class)
     public final ResponseEntity<ErrorResponse> handleConflictException(ConflictException e) {

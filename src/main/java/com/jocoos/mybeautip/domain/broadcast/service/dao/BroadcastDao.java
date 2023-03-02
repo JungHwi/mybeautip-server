@@ -20,10 +20,20 @@ public class BroadcastDao {
 
     private final BroadcastRepository repository;
 
+    @Transactional
+    public Broadcast save(Broadcast broadcast) {
+        return repository.save(broadcast);
+    }
+
     @Transactional(readOnly = true)
     public Broadcast get(long broadcastId) {
         return repository.findById(broadcastId)
                 .orElseThrow(() -> new NotFoundException("Not found broadcast. id - " + broadcastId));
+    }
+
+    @Transactional(readOnly = true)
+    public BroadcastSearchResult getWithMemberAndCategory(long broadcastId) {
+        return repository.get(broadcastId);
     }
 
     @Transactional(readOnly = true)

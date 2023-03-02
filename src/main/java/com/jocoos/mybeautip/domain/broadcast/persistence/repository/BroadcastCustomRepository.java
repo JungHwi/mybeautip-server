@@ -8,4 +8,6 @@ import java.util.List;
 public interface BroadcastCustomRepository {
 
     List<BroadcastSearchResult> getList(BroadcastSearchCondition condition);
+
+    BroadcastSearchResult get(long broadcastId);
 }

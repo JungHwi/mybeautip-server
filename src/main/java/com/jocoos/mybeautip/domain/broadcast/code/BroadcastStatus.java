@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.code;
 
 import com.jocoos.mybeautip.global.code.CodeValue;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -25,6 +26,13 @@ public enum BroadcastStatus implements CodeValue {
 
     public static List<BroadcastStatus> getSearchStatuses(BroadcastStatus status) {
         return singletonListCache.computeIfAbsent(status, List::of);
+    }
+
+    public BroadcastStatus toEnd() {
+        if (this != LIVE) {
+            throw new BadRequestException("");
+        }
+        return END;
     }
 
     @Override

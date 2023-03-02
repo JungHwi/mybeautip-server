@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringTemplate;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
@@ -40,11 +41,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     @Override
     public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
-        return repository.query(query -> query
-                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member))
-                .from(broadcast)
-                .join(member).on(broadcast.memberId.eq(member.id))
-                .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory))
+        return repository.query(query -> searchResultWithMemberAndCategory(query)
                 .where(
                         startAtBetween(condition.startOfDay(), condition.endOfDay()),
                         createdAtAfter(condition.startAt()),
@@ -62,6 +59,21 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 .offset(condition.offset())
                 .limit(condition.size())
                 .fetch());
+    }
+
+    @Override
+    public BroadcastSearchResult get(long broadcastId) {
+        return repository.query(query -> searchResultWithMemberAndCategory(query)
+                .where(eqId(broadcastId))
+                .fetchOne());
+    }
+
+    private JPAQuery<BroadcastSearchResult> searchResultWithMemberAndCategory(JPAQuery<?> query) {
+        return query
+                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member))
+                .from(broadcast)
+                .join(member).on(broadcast.memberId.eq(member.id))
+                .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory));
     }
 
     // 커서 기반 페이지네이션과 유니크하지 않은 컬럼 정렬을 동시에 하기 위해 튜플 비교를 한다

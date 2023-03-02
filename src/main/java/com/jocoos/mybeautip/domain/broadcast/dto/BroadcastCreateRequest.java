@@ -11,7 +11,7 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 
 @Getter
 @RequiredArgsConstructor
-public class BroadcastRequest {
+public class BroadcastCreateRequest {
 
     @NotNull
     private final String title;
@@ -24,7 +24,7 @@ public class BroadcastRequest {
 
     @NotNull
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
-    private final ZonedDateTime startAt;
+    private final ZonedDateTime startedAt;
 
     private final String notice;
 

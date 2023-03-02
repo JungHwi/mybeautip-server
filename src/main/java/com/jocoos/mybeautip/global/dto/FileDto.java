@@ -5,12 +5,14 @@ import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.vo.FileVo;
 import lombok.*;
-import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.jocoos.mybeautip.domain.file.code.FileType.IMAGE;
 import static com.jocoos.mybeautip.domain.file.code.FileType.VIDEO;
+import static com.jocoos.mybeautip.global.code.FileOperationType.DELETE;
+import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -44,6 +46,20 @@ public class FileDto {
 
     public static FileDto from(CommunityFile file) {
         return new FileDto(file.getType(), file.getFileUrl(), file.getDuration());
+    }
+
+    public static List<FileDto> getUploadAndDeleteFileDtoList(@NonNull String uploadUrl, @NonNull String deleteUrl) {
+        FileDto uploadFile = FileDto.builder()
+                .url(uploadUrl)
+                .operation(UPLOAD)
+                .build();
+
+        FileDto deleteFile = FileDto.builder()
+                .url(deleteUrl)
+                .operation(DELETE)
+                .build();
+
+        return List.of(uploadFile, deleteFile);
     }
 
     public FileVo toFile() {

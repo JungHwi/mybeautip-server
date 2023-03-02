@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface VodCustomRepository {
     List<VodResponse> getVodListWithMember(VodSearchCondition condition);
-
     List<Vod> getVodList(VodSearchCondition condition);
 }

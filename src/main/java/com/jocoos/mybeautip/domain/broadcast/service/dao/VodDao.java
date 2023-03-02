@@ -19,8 +19,8 @@ public class VodDao {
     private final VodRepository repository;
 
     @Transactional
-    public void save() {
-
+    public Vod save(Vod vod) {
+        return repository.save(vod);
     }
 
     @Transactional(readOnly = true)
@@ -41,6 +41,11 @@ public class VodDao {
     @Transactional(readOnly = true)
     public Vod getForUpdate(long vodId) {
         return repository.selectForUpdate(vodId).orElseThrow(vodNotFound(vodId));
+    }
+
+    @Transactional
+    public void addReportCountAndFlush(long vodId, int count) {
+        repository.addReportCount2(vodId, count);
     }
 
     private Supplier<NotFoundException> vodNotFound(long vodId) {

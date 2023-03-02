@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
+
 @RequiredArgsConstructor
 @Service
 public class BroadcastReportDao {
@@ -15,5 +17,10 @@ public class BroadcastReportDao {
     @Transactional
     public BroadcastReport save(BroadcastReport report) {
         return repository.save(report);
+    }
+
+    @Transactional(readOnly = true)
+    public Long countReportedBroadcast(ZonedDateTime from) {
+        return repository.countDistinctByCreatedAtAfter(from);
     }
 }
