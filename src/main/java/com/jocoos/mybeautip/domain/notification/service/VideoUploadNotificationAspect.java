@@ -31,7 +31,7 @@ public class VideoUploadNotificationAspect {
       returning = "result")
   public void occurs(JoinPoint joinPoint, Object result) {
     log.debug("joinPoint: {}", joinPoint.toLongString());
-
+    
     if (result instanceof Video) {
       Video video = (Video) result;
       if (verifyPublicVideo(video)) {
@@ -39,8 +39,6 @@ public class VideoUploadNotificationAspect {
       }
 
       slackService.sendForVideo(video);
-    } else {
-      log.error("Must be Video. But this object is > " + result);
     }
   }
 
