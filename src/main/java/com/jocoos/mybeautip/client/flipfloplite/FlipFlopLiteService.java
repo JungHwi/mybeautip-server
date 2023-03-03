@@ -54,6 +54,10 @@ public class FlipFlopLiteService {
         return client.getStreamKey(memberId);
     }
 
+    public FFLChatTokenResponse getChatToken(long memberId) {
+        return client.getChatToken(memberId);
+    }
+
     public int migration() {
         int count = 0;
         List<Member> memberList = memberDao.getAll();

@@ -27,4 +27,8 @@ public interface FlipFlopLiteClient {
 
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/rtmp-broadcast/state/ended")
     FFLVideoRoomResponse endVideoRoom(@PathVariable long videoRoomId);
+
+    @PostMapping("/v2/apps/me/members/{appUserId}/chat-tokens")
+    FFLChatTokenResponse getChatToken(@PathVariable long appUserId);
+
 }
