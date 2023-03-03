@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.point.service.detail;
 
+import com.jocoos.mybeautip.testutil.container.TestContainerConfig;
 import com.jocoos.mybeautip.domain.point.service.MemberPointDetailService;
 import com.jocoos.mybeautip.global.util.TestMemberUtil;
 import com.jocoos.mybeautip.member.point.MemberPoint;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 //@ImportAutoConfiguration(classes = {DataSourceConfiguration.class, MemberPointDetailTestConfig.class})
 //@EnableJpaRepositories(basePackages = "com.jocoos.mybeautip.member")
 //@DataJpaTest
-public abstract class DefaultMemberPointDetailServiceTest {
+public abstract class DefaultMemberPointDetailServiceTest extends TestContainerConfig {
 
     @Autowired
     private MemberPointDetailService memberPointDetailService;

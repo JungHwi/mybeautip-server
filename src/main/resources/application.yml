@@ -4,10 +4,6 @@ server:
     enabled: true
 
 spring:
-  data:
-    rest:
-      base-path: /api/admin
-      default-page-size: 10
   main:
     banner-mode: off
 #    lazy-initialization: true
@@ -51,8 +47,8 @@ spring:
     show-sql: true
   servlet:
     multipart:
-      maxFileSize: 30MB
-      maxRequestSize: 30MB
+      maxFileSize: 100MB
+      maxRequestSize: 150MB
 
 security:
   oauth2:
@@ -88,7 +84,7 @@ mybeautip:
   addr:
     confirm-key: U01TX0FVVEgyMDE3MDExMDE1NDM0NTE4MjAx
   security:
-    access-token-validity-seconds: 86400      # 24 hours
+    access-token-validity-seconds: 2592000      # 30 days
     refresh-token-validity-seconds: 28800     # 8 hours
   aws:
     sns:
@@ -166,6 +162,8 @@ mybeautip:
   billing:
     time-between-reset: 60000 # 1 minute (milliseconds)
     max-error-count: 18
+  image-file-limit-mb: 5
+  video-file-count-limit: 1
 
 cloud:
   aws:
@@ -185,7 +183,11 @@ management:
       base-path: /monitor
 
 flipflop:
-  app-key: testapp3
+  app-key: A92258B859
+  access-token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZW1iZXJfaWQiOiI0OCIsInNjb3BlIjpbImd1ZXN0Il0sImV4cCI6MTk3NzI5MDYyMSwianRpIjoiRmRRTjFRS19FNkFXWVFMT2F5NWU0dUhScUQ0IiwiY2xpZW50X2lkIjoiZ3Vlc3QifQ.QKdrfCMguOlOQkcL3h1qh2YlXCPL_bYmSF8duslLG6o
+  url: https://dev-api.flipflop.tv
+  aws.s3.domain: https://static-dev.flipflop.tv/A92258B859/videos/
+  default-filename: vod
 
 #redis:
 #  host: localhost

@@ -3,9 +3,12 @@ package com.jocoos.mybeautip.global.config.restdoc.util;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
+import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.code.Role;
+import com.jocoos.mybeautip.domain.notice.code.NoticeSort;
+import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
 import com.jocoos.mybeautip.domain.notification.code.*;
 import com.jocoos.mybeautip.domain.operation.code.OperationTargetType;
 import com.jocoos.mybeautip.domain.operation.code.OperationType;
@@ -17,6 +20,7 @@ import com.jocoos.mybeautip.domain.point.code.PointStatusGroup;
 import com.jocoos.mybeautip.domain.popup.code.ButtonLinkType;
 import com.jocoos.mybeautip.domain.popup.code.PopupDisplayType;
 import com.jocoos.mybeautip.domain.popup.code.PopupStatus;
+import com.jocoos.mybeautip.domain.popupnotice.code.PopupNoticeLinkType;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.domain.term.code.TermType;
@@ -49,6 +53,7 @@ public class CommonDocController {
         Map<String, String> telecom = getDocs(Telecom.values());
         Map<String, String> urlDirectory = getDocs(UrlDirectory.values());
         Map<String, String> fileOperationType = getDocs(FileOperationType.values());
+        Map<String, String> fileType = getDocs(FileType.values());
         Map<String, String> sortField = getDocs(SortField.values());
 
         // Member
@@ -98,6 +103,9 @@ public class CommonDocController {
         Map<String, String> popupDisplayType = getDocs(PopupDisplayType.values());
         Map<String, String> popupStatus = getDocs(PopupStatus.values());
 
+        // Popup Notice
+        Map<String, String> popupNoticeLinkType = getDocs(PopupNoticeLinkType.values());
+
         // Term
         Map<String, String> termType = getDocs(TermType.values());
 
@@ -111,6 +119,10 @@ public class CommonDocController {
         Map<String, String> operationType = getDocs(OperationType.values());
         Map<String, String> operationTargetType = getDocs(OperationTargetType.values());
 
+        // Notice
+        Map<String, String> noticeStatus = getDocs(NoticeStatus.values());
+        Map<String, String> noticeSort = getDocs(NoticeSort.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .deviceOs(deviceOs)
@@ -118,6 +130,7 @@ public class CommonDocController {
                         .telecom(telecom)
                         .urlDirectory(urlDirectory)
                         .fileOperationType(fileOperationType)
+                        .fileType(fileType)
                         .sortField(sortField)
                 // Member
                         .memberStatus(memberStatus)
@@ -158,6 +171,8 @@ public class CommonDocController {
                         .buttonLinkType(buttonLinkType)
                         .popupDisplayType(popupDisplayType)
                         .popupStatus(popupStatus)
+                // Popup Notice
+                        .popupNoticeLinkType(popupNoticeLinkType)
                 // Term
                         .termType(termType)
                 // Search
@@ -167,6 +182,9 @@ public class CommonDocController {
                 // Operation
                         .operationTargetType(operationTargetType)
                         .operationType(operationType)
+                // Notice
+                        .noticeStatus(noticeStatus)
+                        .noticeSort(noticeSort)
                 .build()
         );
     }

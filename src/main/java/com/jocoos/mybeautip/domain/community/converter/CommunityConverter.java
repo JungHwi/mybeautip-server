@@ -12,43 +12,41 @@ import com.jocoos.mybeautip.global.dto.FileDto;
 import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.*;
 
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.VOTE;
+import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY;
-import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+import static java.time.ZonedDateTime.now;
 
-@Mapper(componentModel = "spring", uses = {CommunityCategoryConverter.class, MemberConverter.class})
+@Mapper(componentModel = "spring", uses = {CommunityCategoryConverter.class, MemberConverter.class, CommunityFileConverter.class})
 public interface CommunityConverter {
 
     @Mappings({
             @Mapping(target = "memberId", source = "member.id"),
+            @Mapping(target = "communityFileList", source = "files"),
+            @Mapping(target = "status", defaultValue = "NORMAL"),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "isWin", ignore = true),
-            @Mapping(target = "status", defaultValue = "NORMAL"),
             @Mapping(target = "viewCount", ignore = true),
             @Mapping(target = "likeCount", ignore = true),
             @Mapping(target = "commentCount", ignore = true),
             @Mapping(target = "reportCount", ignore = true),
             @Mapping(target = "sortedAt", ignore = true),
-            @Mapping(target = "communityFileList", ignore = true),
             @Mapping(target = "communityVoteList", ignore = true),
             @Mapping(target = "isTopFix", ignore = true)
     })
     Community convert(WriteCommunityRequest request);
 
     @AfterMapping
-    default void convert(@MappingTarget Community community, WriteCommunityRequest request) {
-        community.setSortedAt(ZonedDateTime.now());
-
-        if (CollectionUtils.isNotEmpty(request.getFiles())) {
-            setFileAndVote(community, request);
+    default void afterMapping(@MappingTarget Community community) {
+        if (!BLIND.equals(community.getCategory().getType())) {
+            community.setTitle(null);
         }
+        community.setSortedAt(now());
+        community.setVote();
     }
 
     @Mappings({
@@ -60,7 +58,7 @@ public interface CommunityConverter {
 
     @Mappings({
             @Mapping(target = "relationInfo", ignore = true),
-            @Mapping(target = "fileUrl", ignore = true),
+            @Mapping(target = "files", ignore = true),
             @Mapping(target = "votes", ignore = true),
             @Mapping(target = "eventTitle", ignore = true)
     })
@@ -69,63 +67,41 @@ public interface CommunityConverter {
     @AfterMapping
     default void convert(@MappingTarget CommunityResponse.CommunityResponseBuilder response, Community community) {
         if (community.getCommunityVoteList().isEmpty()) {
-            response.fileUrl(fileUrlsFrom(community.getCommunityFileList()));
+            List<FileDto> fileDto = community.getCommunityFileList()
+                    .stream()
+                    .map(FileDto::from)
+                    .toList();
+            response.files(fileDto);
         } else {
             response.votes(voteResponsesFrom(community.getCommunityVoteList()));
-            response.fileUrl(Collections.emptyList());
+            response.files(Collections.emptyList());
         }
     }
 
     List<CommunityResponse> convert(List<Community> community);
 
     @Mappings({
-            @Mapping(target = "fileUrl", source = "communityFileList", qualifiedByName = "convert_community_main_file")
+            @Mapping(target = "file", source = "communityFileList", qualifiedByName = "convert_community_main_file")
     })
     MyCommunityResponse convertToMyCommunity(Community community);
 
     List<MyCommunityResponse> convertToMyCommunity(List<Community> community);
 
     @Named("convert_community_main_file")
-    default String convertToUrl(List<CommunityFile> file) {
+    default FileDto convertToUrl(List<CommunityFile> file) {
         if (CollectionUtils.isEmpty(file)) {
             return null;
         }
-        return convertToUrl(file.get(0));
+        return convertToFileDto(file.get(0));
+    }
+
+    default FileDto convertToFileDto(CommunityFile file) {
+        return FileDto.from(file);
     }
 
     @Named(value = "convertToUrl")
     default String convertToUrl(CommunityFile file) {
         return toUrl(file.getFile(), COMMUNITY, file.getCommunity().getId());
-    }
-
-    default void setFileAndVote(Community community, WriteCommunityRequest request) {
-        if (VOTE.equals(request.getCategory().getType())) {
-            setCommunityFileAndVote(community, request);
-        } else {
-            setCommunityFile(community, request);
-        }
-    }
-
-    default List<CommunityFile> setCommunityFile(Community community, WriteCommunityRequest request) {
-        List<CommunityFile> communityFileList = new ArrayList<>();
-        for (FileDto requestFile : request.getFiles()) {
-            CommunityFile communityFile = new CommunityFile(getFileName(requestFile.getUrl()));
-            communityFileList.add(communityFile);
-        }
-        community.setCommunityFileList(communityFileList);
-        return communityFileList;
-    }
-
-    default void setCommunityFileAndVote(Community community, WriteCommunityRequest request) {
-        List<CommunityFile> communityFiles = setCommunityFile(community, request);
-        List<CommunityVote> communityVotes = communityFiles.stream()
-                .map(file -> new CommunityVote(community, file))
-                .collect(Collectors.toList());
-        community.setCommunityVoteList(communityVotes);
-    }
-
-    default List<String> fileUrlsFrom(List<CommunityFile> files) {
-        return files.stream().map(this::convertToUrl).collect(Collectors.toList());
     }
 
     default List<VoteResponse> voteResponsesFrom(List<CommunityVote> votes) {

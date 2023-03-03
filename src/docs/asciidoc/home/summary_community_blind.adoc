@@ -1,3 +1,0 @@
-== Summary Community Blind API
-
-operation::summary_community_blind[snippets='http-request,path-parameters,http-response,response-fields']

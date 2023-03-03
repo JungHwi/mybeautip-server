@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.member.converter;
 
-import com.jocoos.mybeautip.admin.AdminMember;
 import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
@@ -21,8 +20,8 @@ public interface MemberConverter {
     SimpleMemberInfo convertToSimple(Member member);
 
     @AfterMapping
-    default void convertToAdminMember(@MappingTarget SimpleMemberInfo response, AdminMember adminMember) {
-        response.setAvatarUrl(toUrl(adminMember.getMember().getAvatarFilename(), AVATAR));
+    default void convertToSimple(@MappingTarget SimpleMemberInfo response, Member member) {
+        response.setAvatarUrl(toUrl(member.getAvatarFilename(), AVATAR));
     }
 
     @Mappings({
@@ -53,12 +52,7 @@ public interface MemberConverter {
             @Mapping(target = "createdAt", ignore = true),
             @Mapping(target = "modifiedAt", ignore = true),
             @Mapping(target = "lastLoggedAt", ignore = true),
-            @Mapping(target = "deletedAt", ignore = true),
-            @Mapping(target = "usePoint", ignore = true),
-            @Mapping(target = "earnPoint", ignore = true),
-            @Mapping(target = "avatarFilenameFromUrl", ignore = true),
-            @Mapping(target = "avatarFilename", ignore = true),
-            @Mapping(target = "retrievePoint", ignore = true),
+            @Mapping(target = "deletedAt", ignore = true)
     })
     Member convertToMember(SignupRequest signupRequest);
 

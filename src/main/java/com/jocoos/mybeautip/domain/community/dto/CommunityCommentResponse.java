@@ -32,6 +32,8 @@ public class CommunityCommentResponse implements CursorInterface {
 
     private String contents;
 
+    private String fileUrl;
+
     private Integer likeCount;
 
     private Integer commentCount;
@@ -61,12 +63,15 @@ public class CommunityCommentResponse implements CursorInterface {
         // FIXME 관계나 상태에 따라 Title / Contents 변경. 어디다 치워 버리고 싶다.
         if (relationInfo.getIsBlock() && categoryType != CommunityCategoryType.BLIND) {
             this.contents = "차단된 사용자의 글이에요.";
+            this.fileUrl = null;
         } else if (this.reportCount >= 3) {
             this.contents = "커뮤니티 운영방침에 따라 블라인드 되었어요.";
         } else if (relationInfo.getIsReport()) {
             this.contents = "신고 접수 된 글이에요.";
+            this.fileUrl = null;
         } else if (this.status == CommunityStatus.DELETE) {
             this.contents = "삭제된 게시물이에요.";
+            this.fileUrl = null;
         }
 
         if (categoryType == CommunityCategoryType.BLIND && (member == null || !this.member.getId().equals(member.getId()))) {

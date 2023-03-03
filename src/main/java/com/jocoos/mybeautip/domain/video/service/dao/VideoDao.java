@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +26,7 @@ import static com.jocoos.mybeautip.domain.video.code.VideoStatus.RESERVE;
 public class VideoDao {
 
     private final VideoRepository repository;
+    private final EntityManager entityManager;
 
     @Transactional(readOnly = true)
     public List<Video> getVideos(VideoCategoryResponse category, ZonedDateTime cursor, int size) {
@@ -110,5 +112,17 @@ public class VideoDao {
     @Transactional
     public long openVideos(List<Video> videos) {
         return repository.bulkUpdateStatus(videos, OPEN);
+    }
+
+    @Transactional
+    public void addViewCount(Video video) {
+        repository.addViewCount(video.getId(), 1);
+    }
+
+    @Transactional(readOnly = true)
+    public Video getWithFlushAndClear(Long videoId) {
+        entityManager.flush();
+        entityManager.clear();
+        return getVideo(videoId);
     }
 }

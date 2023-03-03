@@ -17,6 +17,7 @@ public class EnumDocs {
     Map<String, String> telecom;
     Map<String, String> urlDirectory;
     Map<String, String> fileOperationType;
+    Map<String, String> fileType;
     Map<String, String> sortField;
 
     // Member
@@ -66,6 +67,9 @@ public class EnumDocs {
     Map<String, String> popupDisplayType;
     Map<String, String> popupStatus;
 
+    // Popup Notice
+    Map<String, String> popupNoticeLinkType;
+
     // Term
     Map<String, String> termType;
 
@@ -78,4 +82,8 @@ public class EnumDocs {
     // Operation
     Map<String, String> operationTargetType;
     Map<String, String> operationType;
+
+    // Notice
+    Map<String, String> noticeStatus;
+    Map<String, String> noticeSort;
 }

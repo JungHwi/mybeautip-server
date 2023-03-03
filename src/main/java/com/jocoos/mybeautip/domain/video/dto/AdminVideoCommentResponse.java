@@ -6,7 +6,9 @@ import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.comment.Comment;
 import com.jocoos.mybeautip.member.comment.Comment.CommentState;
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.time.ZonedDateTime;
@@ -21,6 +23,7 @@ public class AdminVideoCommentResponse {
     private final Long id;
     private final CommentState status;
     private final String contents;
+    private final String fileUrl;
     private final int likeCount;
     private final int reportCount;
     private AdminMemberResponse member;
@@ -38,6 +41,7 @@ public class AdminVideoCommentResponse {
         this.id = comment.getId();
         this.status = comment.getStateString();
         this.contents = comment.getComment();
+        this.fileUrl = comment.getFileUrl();
         this.likeCount = comment.getLikeCount();
         this.reportCount = comment.getReportCount();
         this.createdAt = comment.getCreatedAtUTCZoned();

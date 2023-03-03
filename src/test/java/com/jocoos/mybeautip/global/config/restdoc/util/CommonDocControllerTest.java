@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.global.config.restdoc.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
-import com.jocoos.mybeautip.global.config.restdoc.RestDocsTestSupport;
+import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -21,7 +21,7 @@ import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class CommonDocControllerTest extends RestDocsTestSupport {
+public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
 
     @Test
     public void enums() throws Exception {
@@ -55,6 +55,10 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         customResponseFields("custom-response", beneathPath("data.file_operation_type").withSubsectionId("file_operation_type"),
                                 attributes(key("title").value("FileOperationType")),
                                 enumConvertFieldDescriptor((enumDocs.getFileOperationType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.file_type").withSubsectionId("file_type"),
+                                attributes(key("title").value("FileOperationType")),
+                                enumConvertFieldDescriptor((enumDocs.getFileType()))
                         ),
                         customResponseFields("custom-response", beneathPath("data.sort_field").withSubsectionId("sort_field"),
                                 attributes(key("title").value("SortField")),
@@ -192,6 +196,11 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                                 attributes(key("title").value("PopupStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getPopupStatus()))
                         ),
+                        // Popup Notice
+                        customResponseFields("custom-response", beneathPath("data.popup_notice_link_type").withSubsectionId("popup_notice_link_type"),
+                                attributes(key("title").value("PopupNoticeLinkType")),
+                                enumConvertFieldDescriptor((enumDocs.getPopupNoticeLinkType()))
+                        ),
                         // TERM
                         customResponseFields("custom-response", beneathPath("data.term_type").withSubsectionId("term_type"),
                                 attributes(key("title").value("TermType")),
@@ -212,7 +221,16 @@ public class CommonDocControllerTest extends RestDocsTestSupport {
                         ),
                         customResponseFields("custom-response", beneathPath("data.operation_target_type").withSubsectionId("operation_target_type"),
                                 attributes(key("title").value("OperationTargetType")),
-                                enumConvertFieldDescriptor((enumDocs.getOperationTargetType())))
+                                enumConvertFieldDescriptor((enumDocs.getOperationTargetType()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.notice_status").withSubsectionId("notice_status"),
+                                attributes(key("title").value("NoticeStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getNoticeStatus()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.notice_sort").withSubsectionId("notice_sort"),
+                                attributes(key("title").value("NoticeSort")),
+                                enumConvertFieldDescriptor((enumDocs.getNoticeSort()))
+                        )
                 ));
     }
 

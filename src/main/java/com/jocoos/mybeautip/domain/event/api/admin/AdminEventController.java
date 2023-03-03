@@ -16,10 +16,8 @@ import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -74,13 +72,6 @@ public class AdminEventController {
     @GetMapping("/event/{eventId}")
     public ResponseEntity<AdminEventResponse> getEvent(@PathVariable Long eventId) {
         return ResponseEntity.ok(service.getEvent(eventId));
-    }
-
-    @PostMapping(value = "/event/files", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<List<String>> uploadFile(@RequestPart List<MultipartFile> files) {
-        List<String> urls = service.upload(files);
-
-        return ResponseEntity.ok(urls);
     }
 
     @PostMapping("/event")

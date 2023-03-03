@@ -2,7 +2,7 @@ spring:
   config:
     activate:
       on-profile: stage
-    import: classpath:application-oauth-prod.yml
+    import: classpath:application-oauth-stag.yml
   datasource:
     master:
       hikari:
@@ -22,7 +22,7 @@ spring:
 
 mybeautip:
   security:
-    access-token-validity-seconds: 15552000      # 180 days
+    access-token-validity-seconds: 2592000      # 30 days
     refresh-token-validity-seconds: 15552000     # 180 days
   aws:
     sns:
@@ -53,7 +53,10 @@ cloud:
       bucket: mybeautip-stag
 
 flipflop:
-  app-key: 9z27htVnKe
+  app-key: 40E9798BF7
+  url: https://api.flipflop.tv
+  access-token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZW1iZXJfaWQiOiIyNDAiLCJzY29wZSI6WyJndWVzdCJdLCJleHAiOjE5OTEwMzY0MDksImp0aSI6IlJ6OUhlbEJNU2dDMmVaTjZ3aDJvRFh5cDRXayIsImNsaWVudF9pZCI6Imd1ZXN0In0.K5N2uLrUcRQH5med6AwO2uQP2iULBZ20h-RtKy1NsrE
+  aws.s3.domain: https://static.flipflop.tv/40E9798BF7/videos/
   video:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 

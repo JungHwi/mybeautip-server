@@ -15,7 +15,6 @@ import com.jocoos.mybeautip.domain.event.service.dao.EventDao;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
-import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,14 +36,13 @@ public class AdminCommunityService {
     private final AdminCommunityConverter converter;
     private final CommunityCommentDeleteService commentDeleteService;
     private final CommunityFileService fileService;
-    private final LegacyMemberService legacyMemberService;
 
     @Transactional
-    public AdminCommunityResponse write(WriteCommunityRequest request) {
-        setMember(request);
-        setFileDto(request);
+    public AdminCommunityResponse write(WriteCommunityRequest request, Member member) {
+        request.setMember(member);
+        request.setFileOperationToUpload();
         Community community = communityDao.write(request);
-        fileService.write(request.getFiles(), community.getId());
+        fileService.writeWithTranscode(request.getFiles(), community.getId());
         return converter.convert(community);
     }
 
@@ -113,19 +111,10 @@ public class AdminCommunityService {
         return community.getId();
     }
 
-    private void setMember(WriteCommunityRequest request) {
-        Member member = legacyMemberService.currentMember();
-        request.setMember(member);
-    }
-
-    private void setFileDto(WriteCommunityRequest request) {
-        request.fileUrlsToFileDto();
-    }
-
     private void editFiles(PatchCommunityRequest request, Community community) {
         List<FileDto> editFiles = request.getFileDto(community.getCommunityFileList());
-        fileService.editFiles(community, editFiles);
-        request.getImageUrls().ifPresent(community::sortFilesByRequestIndex);
+        fileService.editFilesWithTranscode(community, editFiles);
+        community.sortFilesByRequestIndex(request.getImageUrls());
     }
 
     private CommunitySearchCondition getSearchCondition(CommunityStatus status,

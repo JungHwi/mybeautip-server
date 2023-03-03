@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.config;
 
 import com.jocoos.mybeautip.security.MybeautipUserDetailsService;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.security.Security;
 
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -52,6 +55,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // JwtTokenProvider getPrivateKey()에서 rsa private key token 이 pkcs#1 인코딩에 pem format 으로 전달되므로 BouncyCastleProvider 필요
+        Security.addProvider(new BouncyCastleProvider());
         http
                 .cors().and()
                 .sessionManagement()

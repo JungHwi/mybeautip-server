@@ -4,10 +4,7 @@ import com.jocoos.mybeautip.audit.CreatedDateAuditable;
 import com.jocoos.mybeautip.domain.placard.code.PlacardLinkType;
 import com.jocoos.mybeautip.domain.placard.code.PlacardStatus;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
@@ -20,12 +17,13 @@ import static com.jocoos.mybeautip.domain.placard.code.PlacardStatus.INACTIVE;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ONLY_ACTIVE_CAN_FIX;
 import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned;
 import static java.lang.Boolean.TRUE;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = PROTECTED)
 @Table(name = "placard")
 public class Placard extends CreatedDateAuditable {
 
@@ -122,13 +120,14 @@ public class Placard extends CreatedDateAuditable {
         this.color = color;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
-        fromOriginal.editImageUrl(imageUrl);
+        this.detailList = fromOriginal.editImageUrl(imageUrl);
     }
 
-    private void editImageUrl(String imageUrl) {
+    private List<PlacardDetail> editImageUrl(String imageUrl) {
         detailList.stream()
                 .findFirst()
                 .ifPresent(detail -> detail.replaceFile(imageUrl));
+        return detailList;
     }
 
     public Boolean isTopFixTrueOrNull() {

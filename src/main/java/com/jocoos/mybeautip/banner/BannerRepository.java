@@ -6,11 +6,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import java.util.Date;
 
-@RepositoryRestResource(collectionResourceRel = "headers", path = "headers")
 public interface BannerRepository extends JpaRepository<Banner, Long> {
 
     @Modifying

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.community.service;
 
+import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.converter.CommunityCommentConverter;
 import com.jocoos.mybeautip.domain.community.dto.*;
@@ -16,6 +17,7 @@ import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
+import com.jocoos.mybeautip.global.vo.Files;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +46,8 @@ public class CommunityCommentService {
     private final ActivityPointService activityPointService;
     private final CommunityCommentDeleteService deleteService;
     private final CommunityCommentConverter converter;
+    private final CommunityCommentCRUDService crudService;
+    private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
     public List<CommunityCommentResponse> getComments(SearchCommentRequest request) {
@@ -89,22 +94,12 @@ public class CommunityCommentService {
 
     @Transactional
     public CommunityCommentResponse write(WriteCommunityCommentRequest request) {
-        valid(request);
-        Member member = legacyMemberService.currentMember();
-        request.setMember(member);
-
-        Community community = communityDao.get(request.getCommunityId());
-        request.setCategoryId(community.getCategoryId());
-
-        CommunityComment communityComment = dao.write(request);
-
-        if (community.getCategory().getType() == CommunityCategoryType.BLIND) {
-            communityDao.updateSortedAt(community.getId());
-        }
+        Member member = request.getMember();
+        CommunityComment communityComment = crudService.write(request);
 
         CommunityCommentResponse response = converter.convert(communityComment);
         activityPointService.gainActivityPoint(WRITE_COMMUNITY_COMMENT,
-                                               validDomainAndReceiver(communityComment, communityComment.getId(), member));
+                validDomainAndReceiver(communityComment, communityComment.getId(), member));
         activityCountDao.updateAllCommunityCommentCount(member, 1);
         return relationService.setRelationInfo(member, response);
     }
@@ -126,21 +121,18 @@ public class CommunityCommentService {
 
     @Transactional
     public CommunityCommentResponse edit(EditCommunityCommentRequest request) {
-        Member member = legacyMemberService.currentMember();
+        Member requestMember = request.getMember();
         CommunityComment communityComment = dao.get(request.getCommunityId(), request.getCommentId());
+        Files editedFiles = request.fileDtoToFiles(communityComment.getFileUrl());
 
-        if (!communityComment.getMember().getId().equals(member.getId())) {
-            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED, "This is not yours.");
-        }
-
-        communityComment.setContents(request.getContents());
-
+        communityComment.edit(request.getContents(), editedFiles, requestMember);
         dao.save(communityComment);
 
-        return getComment(member, communityComment);
+        awsS3Handler.editFiles(request.getFiles(), COMMUNITY_COMMENT.getDirectory(communityComment.getId()));
+        return convertToResponse(requestMember, communityComment);
     }
 
-    private CommunityCommentResponse getComment(Member member, CommunityComment communityComment) {
+    private CommunityCommentResponse convertToResponse(Member member, CommunityComment communityComment) {
         CommunityCommentResponse response = converter.convert(communityComment);
         return relationService.setRelationInfo(member, response);
     }
@@ -176,7 +168,7 @@ public class CommunityCommentService {
     private void gainActivityPoint(boolean isLike, Member receiver, CommunityCommentLike like) {
         if (isLike) {
             activityPointService.gainActivityPoint(GET_LIKE_COMMUNITY_COMMENT,
-                                                   validDomainAndReceiver(like, like.getId(), receiver));
+                    validDomainAndReceiver(like, like.getId(), receiver));
         }
     }
 

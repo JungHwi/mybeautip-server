@@ -1,15 +1,15 @@
 package com.jocoos.mybeautip.domain.notice.code;
 
 import com.jocoos.mybeautip.global.code.CodeValue;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public enum NoticeStatus implements CodeValue {
 
-    ACTIVE("활성"),
-    INACTIVE("비활성");
+    NORMAL("일반 상태"),
+    DELETE("삭제 상태");
 
     private final String description;
 
@@ -17,5 +17,4 @@ public enum NoticeStatus implements CodeValue {
     public String getName() {
         return this.name();
     }
-
 }

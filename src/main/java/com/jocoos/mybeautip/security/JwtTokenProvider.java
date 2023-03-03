@@ -47,33 +47,34 @@ public class JwtTokenProvider {
         header.put(HEADER_TOKEN_ALG, "RS256");
         header.put(HEADER_TOKEN_TYPE, "JWT");
 
+
         long now = new Date().getTime();
-        Date accessTokenExpiresIn = new Date(now + (accessTokenValiditySeconds * 1000));
+        Date accessTokenExpiresIn = new Date(now + (accessTokenValiditySeconds * 1000L));
         Claims claims = Jwts.claims();
         String jti = UUID.randomUUID().toString();
         claims.put(PAYLOAD_USER_NAME, authentication.getPrincipal());
         claims.put(PAYLOAD_SCOPE, Arrays.asList("read", "write"));
         claims.put(PAYLOAD_JTI, jti);
-        claims.put(PAYLOAD_CLIENT_ID, "mybeautip-web");
+        claims.put(PAYLOAD_CLIENT_ID, "mybeautip-mobile");
 
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
         PrivateKey privateKey = getPrivateKey();
 
         String accessToken = Jwts.builder()
                 .setHeader(header)
+                .setClaims(claims)
                 .setExpiration(accessTokenExpiresIn)
                 .setSubject(String.valueOf(authentication.getPrincipal()))
-                .setClaims(claims)
                 .signWith(signatureAlgorithm, privateKey)
                 .compact();
 
-        Date refreshTokenExpiration = new Date(now + (refreshTokenValiditySeconds * 1000));
+        Date refreshTokenExpiration = new Date(now + (refreshTokenValiditySeconds * 1000L));
         claims.put(PAYLOAD_JTI, UUID.randomUUID());
         claims.put(PAYLOAD_ATI, jti);
         String refreshToken = Jwts.builder()
                 .setHeader(header)
-                .setSubject(String.valueOf(authentication.getPrincipal()))
                 .setClaims(claims)
+                .setSubject(String.valueOf(authentication.getPrincipal()))
                 .setExpiration(refreshTokenExpiration)
                 .signWith(signatureAlgorithm, privateKey)
                 .compact();
@@ -93,20 +94,17 @@ public class JwtTokenProvider {
         pkcs8Pem = pkcs8Pem.replace("-----BEGIN RSA PRIVATE KEY-----", "");
         pkcs8Pem = pkcs8Pem.replace("-----END RSA PRIVATE KEY-----", "");
         pkcs8Pem = pkcs8Pem.replaceAll("\\s+", "");
-        // Base64 decode the result
 
+        // Base64 decode the result
         byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(pkcs8Pem);
+
         // extract the private key
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
-        KeyFactory kf = null;
         try {
-            kf = KeyFactory.getInstance("RSA");
-            PrivateKey privateKey = kf.generatePrivate(keySpec);
-            return privateKey;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return kf.generatePrivate(keySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            log.debug("", e);
         }
 
         return null;

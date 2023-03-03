@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -17,30 +18,25 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 public class WriteCommunityRequest {
 
     private CommunityStatus status;
-
     private Long categoryId;
-
     private Long eventId;
-
     private String title;
-
     private String contents;
     private List<FileDto> files;
-    private List<String> imageUrls;
-
     private Member member;
-
     private CommunityCategory category;
 
-    public void fileUrlsToFileDto() {
-        if (!isEmpty(imageUrls)) {
-            this.files = imageUrls.stream()
-                    .map(this::toFileDto)
-                    .toList();
+    public void setFileOperationToUpload() {
+        if (!isEmpty(files)) {
+            files.forEach(file -> file.setOperation(UPLOAD));
         }
     }
 
-    private FileDto toFileDto(String url) {
-        return new FileDto(UPLOAD, url);
+    public boolean containTranscodeRequest() {
+        return Optional.ofNullable(files)
+                .orElse(List.of())
+                .stream()
+                .anyMatch(FileDto::isNeedTranscode);
     }
+
 }

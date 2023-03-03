@@ -17,6 +17,10 @@ public enum ErrorCode implements CodeValue {
     ALREADY_USED("이미 사용중"),
     BANNED_WORD("금칙어 포함"),
     NOT_A_WRITER("작성자가 아님"),
+    INVALID_SORT_FIELD("지원하는 정렬 필드가 아님"),
+    JSON_SERIALIZATION_EXCEPTION("JSON 직렬화 중 오류 발생"),
+    FILE_IO_EXCEPTION("파일 IO 오류"),
+
 
     // LOGIN
     INVALID_TOKEN("잘못된 토큰"),
@@ -60,6 +64,9 @@ public enum ErrorCode implements CodeValue {
     TOO_MANY_FILE("파일 수가 너무 많음"),
     CATEGORY_NO_WRITABLE("작성이 가능한 카테고리가 아님"),
     FILE_NOT_EDITABLE("파일 수정이 불가함"),
+    FILE_TOO_BIG("파일 크기가 너무 큼"),
+    FILE_CONTENT_TYPE_UNSUPPORTED("지원하는 파일 타입 아님"),
+
 
     // VIDEO
     VIDEO_NOT_FOUND("비디오 정보 없음"),
@@ -109,7 +116,7 @@ public enum ErrorCode implements CodeValue {
 
 
     // Placard
-    ONLY_ACTIVE_CAN_FIX("활성화된 플랜카드만 고정됨")
+    ONLY_ACTIVE_CAN_FIX("활성화된 플랜카드만 고정됨"),
     ;
 
     private final String description;
