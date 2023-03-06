@@ -205,7 +205,8 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 legacyMemberService,
                                 memberRepository,
                                 naverMemberRepository,
-                                signupEventService),
+                                signupEventService,
+                                jwtTokenProvider),
                         new KakaoTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),

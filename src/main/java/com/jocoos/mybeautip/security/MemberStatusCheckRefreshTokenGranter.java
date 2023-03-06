@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.jocoos.mybeautip.global.exception.ErrorCode.EXILED_MEMBER;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.SUSPENDED_MEMBER;
@@ -35,6 +36,7 @@ public class MemberStatusCheckRefreshTokenGranter extends RefreshTokenGranter {
     }
 
     @Override
+    @Transactional
     protected OAuth2AccessToken getAccessToken(ClientDetails client, TokenRequest tokenRequest) {
 
         // 기초적인 에러를 잡아주기 때문에 먼저 실행합니다
@@ -42,17 +44,18 @@ public class MemberStatusCheckRefreshTokenGranter extends RefreshTokenGranter {
 
         String refreshToken = tokenRequest.getRequestParameters().get("refresh_token");
         String requestId = tokenProvider.getMemberId(refreshToken);
-        checkMemberRefreshToken(requestId);
-
+        checkMemberRefreshToken(requestId, refreshToken);
+        tokenProvider.registerRefreshToken(requestId, response.getRefreshToken().getValue());
         return response;
     }
 
-    private void checkMemberRefreshToken(String requestId) {
+    private void checkMemberRefreshToken(String requestId, String refreshToken) {
         if (hasText(requestId) && !requestId.startsWith("guest")) {
             long memberId = parseLong(requestId);
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new MemberNotFoundException("Not found member info. id - " + memberId));
             checkMemberStatus(member);
+            tokenProvider.validRefreshToken(requestId, refreshToken);
         }
     }
 

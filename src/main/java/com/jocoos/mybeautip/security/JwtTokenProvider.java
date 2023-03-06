@@ -1,12 +1,16 @@
 package com.jocoos.mybeautip.security;
 
+import com.jocoos.mybeautip.domain.member.persistence.domain.Jwt;
+import com.jocoos.mybeautip.domain.member.service.dao.JwtDao;
 import com.jocoos.mybeautip.member.Member;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -34,6 +38,9 @@ public class JwtTokenProvider {
     private int accessTokenValiditySeconds;
     @Value("${mybeautip.security.refresh-token-validity-seconds}")
     private int refreshTokenValiditySeconds;
+
+    @Autowired
+    private JwtDao jwtDao;
 
     public AccessTokenResponse auth(Member member) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(String.valueOf(member.getId()), null, null);
@@ -79,6 +86,9 @@ public class JwtTokenProvider {
                 .signWith(signatureAlgorithm, privateKey)
                 .compact();
 
+        String username = getMemberId(refreshToken);
+        registerRefreshToken(username, refreshToken);
+
         return AccessTokenResponse.builder()
                 .tokenType(TYPE_BEARER)
                 .accessToken(accessToken)
@@ -88,6 +98,18 @@ public class JwtTokenProvider {
                 .scope(String.join(" ", scope))
                 .build();
     }
+
+    @Transactional()
+    public Jwt registerRefreshToken(String username, String refreshToken) {
+        return jwtDao.registerRefreshToken(username, refreshToken, refreshTokenValiditySeconds);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean validRefreshToken(String username, String refreshToken) {
+        Jwt jwt = jwtDao.get(username);
+        return jwt.valid(refreshToken);
+    }
+
 
     private PrivateKey getPrivateKey() {
         String pkcs8Pem = privateKey;
