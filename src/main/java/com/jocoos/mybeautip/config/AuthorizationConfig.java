@@ -197,7 +197,8 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 legacyMemberService,
                                 memberRepository,
                                 facebookMemberRepository,
-                                signupEventService),
+                                signupEventService,
+                                jwtTokenProvider),
                         new NaverTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
@@ -205,7 +206,8 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 legacyMemberService,
                                 memberRepository,
                                 naverMemberRepository,
-                                signupEventService),
+                                signupEventService,
+                                jwtTokenProvider),
                         new KakaoTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
@@ -213,7 +215,8 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 legacyMemberService,
                                 memberRepository,
                                 kakaoMemberRepository,
-                                signupEventService),
+                                signupEventService,
+                                jwtTokenProvider),
                         new AppleTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),
@@ -221,7 +224,8 @@ public class AuthorizationConfig extends AuthorizationServerConfigurerAdapter {
                                 legacyMemberService,
                                 memberRepository,
                                 appleMemberRepository,
-                                signupEventService),
+                                signupEventService,
+                                jwtTokenProvider),
                         new ClientTokenGranter(
                                 endpoints.getTokenServices(),
                                 endpoints.getClientDetailsService(),

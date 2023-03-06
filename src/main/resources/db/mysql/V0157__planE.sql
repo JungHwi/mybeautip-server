@@ -81,9 +81,16 @@ create table vod_report(
     modified_at datetime not null comment '수정시간'
 ) charset = utf8mb4 comment 'VOD 신고 정보';
 
+create table jwt(
+    id varchar(255) comment '아이디' primary key,
+    refresh_token varchar(500) not null comment 'refresh token',
+    expiry_at datetime not null comment '만료시간'
+) comment 'JWT 정보';
+
 # drop table influencer;
 # drop table system_option;
 # drop table broadcast_viewer;
 # drop table vod;
 # drop table vod_report;
 # drop table broadcast_category;
+# drop table jwt;
