@@ -11,6 +11,7 @@ import com.jocoos.mybeautip.member.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
@@ -25,6 +26,7 @@ public class AppleTokenGranter extends AbstractTokenGranter {
     private final MemberRepository memberRepository;
     private final AppleMemberRepository appleMemberRepository;
     private final SignupEventService signupEventService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public AppleTokenGranter(
             AuthorizationServerTokenServices tokenServices,
@@ -33,12 +35,23 @@ public class AppleTokenGranter extends AbstractTokenGranter {
             LegacyMemberService legacyMemberService,
             MemberRepository memberRepository,
             AppleMemberRepository appleMemberRepository,
-            SignupEventService signupEventService) {
+            SignupEventService signupEventService,
+            JwtTokenProvider jwtTokenProvider) {
         super(tokenServices, clientDetailsService, requestFactory, "apple");
         this.legacyMemberService = legacyMemberService;
         this.memberRepository = memberRepository;
         this.appleMemberRepository = appleMemberRepository;
         this.signupEventService = signupEventService;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    @Override
+    public OAuth2AccessToken getAccessToken(ClientDetails client, TokenRequest tokenRequest) {
+        OAuth2AccessToken token = super.getTokenServices().createAccessToken(getOAuth2Authentication(client, tokenRequest));
+        String refreshToken = token.getRefreshToken().getValue();
+        String username = jwtTokenProvider.getMemberId(refreshToken);
+        jwtTokenProvider.registerRefreshToken(username, refreshToken);
+        return token;
     }
 
     @Override

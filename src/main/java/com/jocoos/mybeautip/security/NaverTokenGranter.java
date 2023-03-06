@@ -79,8 +79,7 @@ public class NaverTokenGranter extends AbstractTokenGranter {
             case ACTIVE -> {
                 signupEventService.join(member);
                 memberRepository.updateLastLoggedAt(member.getId());
-                OAuth2Authentication authentication = generateToken(member, client, tokenRequest);
-                return authentication;
+                return generateToken(member, client, tokenRequest);
             }
             case DORMANT -> {
                 ExceptionMemberResponse response = ExceptionMemberResponse.builder()
@@ -101,8 +100,6 @@ public class NaverTokenGranter extends AbstractTokenGranter {
                     throw new AuthenticationMemberNotFoundException("No such member. member id - " + naverMember.getMemberId());
         }
     }
-
-
 
     private OAuth2Authentication generateToken(Member member, ClientDetails client, TokenRequest tokenRequest) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getId(), "");
