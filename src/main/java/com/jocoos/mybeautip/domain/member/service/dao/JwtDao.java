@@ -27,4 +27,9 @@ public class JwtDao {
         return repository.findById(username)
                 .orElseThrow(MemberNotFoundException::new);
     }
+
+    @Transactional
+    public int deleteExpiredJwt() {
+        return repository.deleteExpiredJwt();
+    }
 }

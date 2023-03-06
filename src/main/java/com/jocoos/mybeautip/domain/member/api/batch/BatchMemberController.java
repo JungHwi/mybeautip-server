@@ -7,10 +7,7 @@ import com.jocoos.mybeautip.global.dto.single.IntegerDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,4 +35,11 @@ public class BatchMemberController {
         int result = service.offSuspendedMember();
         return new ResponseEntity<>(new IntegerDto(result), HttpStatus.OK);
     }
+
+    @DeleteMapping("/refresh-token")
+    public ResponseEntity<IntegerDto> deleteExpiredRefreshToken() {
+        int result = service.deleteExpiredRefreshToken();
+        return new ResponseEntity<>(new IntegerDto(result), HttpStatus.OK);
+    }
+
 }
