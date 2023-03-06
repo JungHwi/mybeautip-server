@@ -60,6 +60,11 @@ flipflop:
   video:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
+ffl:
+  api-key: FIXME
+  api-secret: FIXME
+  domain: https://api-stag.lite.flipflop.tv
+
 #redis:
 #  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
 #  port: 6379
