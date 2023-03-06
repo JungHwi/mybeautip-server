@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.*;
 import com.jocoos.mybeautip.domain.member.persistence.domain.UsernameCombinationWord;
 import com.jocoos.mybeautip.domain.member.service.dao.DormantMemberDao;
+import com.jocoos.mybeautip.domain.member.service.dao.JwtDao;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.domain.member.service.dao.UsernameCombinationWordDao;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
@@ -46,6 +47,7 @@ public class AdminMemberService {
     private final MemberTermDao memberTermDao;
     private final MemberPointDao memberPointDao;
     private final ContentReportDao contentReportDao;
+    private final JwtDao jwtDao;
     private final AdminMemberConverter converter;
     private final OperationLogConverter operationLogConverter;
 
@@ -130,6 +132,11 @@ public class AdminMemberService {
         }
 
         return result;
+    }
+
+    @Transactional
+    public int deleteExpiredRefreshToken() {
+        return jwtDao.deleteExpiredJwt();
     }
 
     @Transactional
