@@ -15,9 +15,10 @@ public class BroadcastCategoryService {
     private final BroadcastCategoryDao categoryDao;
 
     @Transactional(readOnly = true)
-    public List<BroadcastCategoryResponse> getAll() {
+    public List<BroadcastCategoryResponse> getAll(boolean withGroup) {
         return categoryDao.getAll()
                 .stream()
+                .filter(category -> withGroup || !category.isGroup())
                 .map(BroadcastCategoryResponse::new)
                 .toList();
     }

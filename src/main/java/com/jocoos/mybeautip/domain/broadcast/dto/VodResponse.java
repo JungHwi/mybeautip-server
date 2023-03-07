@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
@@ -18,8 +19,8 @@ public class VodResponse implements CursorInterface {
     private final int viewCount;
     private final int heartCount;
     private final SimpleMemberInfo member;
+    private BroadcastCategoryResponse category;
 
-    @QueryProjection
     public VodResponse(Vod vod, Member member) {
         this.id = vod.getId();
         this.videoKey = vod.getVideoKey();
@@ -29,6 +30,12 @@ public class VodResponse implements CursorInterface {
         this.viewCount = vod.getViewCount();
         this.heartCount = vod.getTotalHeartCount();
         this.member = new SimpleMemberInfo(member);
+    }
+
+    @QueryProjection
+    public VodResponse(Vod vod, BroadcastCategory category, Member member) {
+        this(vod, member);
+        this.category = new BroadcastCategoryResponse(category);
     }
 
     @JsonIgnore

@@ -39,13 +39,19 @@ public class VodDao {
     }
 
     @Transactional(readOnly = true)
+    public Vod getByVideoKey(Long videoKey) {
+        return repository.findByVideoKey(videoKey)
+                .orElseThrow(() -> new NotFoundException("vod not found. video key - " + videoKey));
+    }
+
+    @Transactional(readOnly = true)
     public Vod getForUpdate(long vodId) {
         return repository.selectForUpdate(vodId).orElseThrow(vodNotFound(vodId));
     }
 
     @Transactional
     public void addReportCountAndFlush(long vodId, int count) {
-        repository.addReportCount2(vodId, count);
+        repository.addReportCount(vodId, count);
     }
 
     private Supplier<NotFoundException> vodNotFound(long vodId) {

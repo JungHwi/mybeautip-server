@@ -85,8 +85,14 @@ public class AwsS3Service {
 
     public String copy(String sourceKey, String destinationKey) {
         CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
+        copyWithKeepOriginal(copyObjectRequest);
+        delete(copyObjectRequest.getSourceKey());
+        return copyObjectRequest.getDestinationKey();
+    }
 
-        return copy(copyObjectRequest);
+    public String copyWithKeepOriginal(String sourceKey, String destinationKey) {
+        CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, sourceKey, bucketName, destinationKey);
+        return copyWithKeepOriginal(copyObjectRequest);
     }
 
     public void delete(String targetKey) {
@@ -98,7 +104,7 @@ public class AwsS3Service {
         }
     }
 
-    private String copy(CopyObjectRequest copyObjectRequest) {
+    private String copyWithKeepOriginal(CopyObjectRequest copyObjectRequest) {
         AmazonS3 s3Client = credentialService.getS3Client();
         try {
             CopyObjectResult result = s3Client.copyObject(copyObjectRequest);
@@ -107,11 +113,9 @@ public class AwsS3Service {
                 throw new RuntimeException("AWS S3 ERROR!! - COPY");
             }
 
-            delete(copyObjectRequest.getSourceKey());
         } catch (AmazonS3Exception ex) {
             throw new BadRequestException(ErrorCode.S3_ERROR, ex.getErrorMessage());
         }
-
         return copyObjectRequest.getDestinationKey();
     }
 

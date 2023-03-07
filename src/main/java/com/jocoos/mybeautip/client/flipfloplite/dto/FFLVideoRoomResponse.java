@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.client.flipfloplite.code.*;
 
 import java.time.ZonedDateTime;
 
-public record FFLVideoRoomResponse(long id,
+public record FFLVideoRoomResponse(Long id,
                                    FFLEntityState state,
                                    FFLVideoRoomState videoRoomState,
                                    FFLVideoRoomType type,

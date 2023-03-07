@@ -1,4 +1,9 @@
 package com.jocoos.mybeautip.client.flipfloplite.dto;
 
-public record ExternalBroadcastInfo(long videoKey) {
+import java.time.ZonedDateTime;
+
+public record ExternalBroadcastInfo(Long videoKey,
+                                    String liveUrl,
+                                    ZonedDateTime scheduledAt,
+                                    ZonedDateTime lastModifiedAt) {
 }

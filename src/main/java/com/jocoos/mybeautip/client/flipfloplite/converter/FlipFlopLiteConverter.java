@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.client.flipfloplite.dto.ExternalBroadcastInfo;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLMemberInfo;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomRequest;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCreateRequest;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.member.Member;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,12 +22,14 @@ public interface FlipFlopLiteConverter {
 
     @Mappings({
             @Mapping(target = "appUserId", source = "memberId"),
-            @Mapping(target = "title", source = "request.title"),
-            @Mapping(target = "scheduledAt", source = "request.startedAt"),
+            @Mapping(target = "scheduledAt", source = "startedAt"),
             @Mapping(target = "type", constant = "BROADCAST_RTMP"),
             @Mapping(target = "accessLevel", constant = "APP")
     })
-    FFLVideoRoomRequest converts(BroadcastCreateRequest request, long memberId);
+    FFLVideoRoomRequest converts(Broadcast broadcast);
 
+    @Mappings({
+            @Mapping(target = "videoKey", source = "id"),
+    })
     ExternalBroadcastInfo converts(FFLVideoRoomResponse response);
 }

@@ -5,8 +5,10 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -21,6 +23,15 @@ public enum BroadcastStatus implements CodeValue {
 
     private final String description;
 
+    private static final Map<BroadcastStatus, Set<BroadcastStatus>> CHANGE_CANDIDATE_MAP = new EnumMap<>(BroadcastStatus.class);
+    static {
+        CHANGE_CANDIDATE_MAP.put(SCHEDULED, Set.of(READY, LIVE, CANCEL));
+        CHANGE_CANDIDATE_MAP.put(READY, Set.of(LIVE, CANCEL));
+        CHANGE_CANDIDATE_MAP.put(LIVE, Set.of(END));
+        CHANGE_CANDIDATE_MAP.put(END, Set.of());
+        CHANGE_CANDIDATE_MAP.put(CANCEL, Set.of());
+    }
+
     public static final List<BroadcastStatus> DEFAULT_SEARCH_STATUSES = List.of(SCHEDULED, READY, LIVE);
     private static final Map<BroadcastStatus, List<BroadcastStatus>> singletonListCache = new ConcurrentHashMap<>();
 
@@ -28,11 +39,15 @@ public enum BroadcastStatus implements CodeValue {
         return singletonListCache.computeIfAbsent(status, List::of);
     }
 
-    public BroadcastStatus toEnd() {
-        if (this != LIVE) {
-            throw new BadRequestException("");
+    public BroadcastStatus changeTo(BroadcastStatus status) {
+        if (this == status) {
+            return this;
         }
-        return END;
+        Set<BroadcastStatus> candidate = CHANGE_CANDIDATE_MAP.get(this);
+        if (!candidate.contains(status)) {
+            throw new BadRequestException(this + " can only change status to " + candidate + " request status is " + status);
+        }
+        return status;
     }
 
     @Override

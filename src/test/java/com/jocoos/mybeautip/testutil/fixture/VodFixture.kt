@@ -14,8 +14,5 @@ fun makeVod(
     title: String = "title",
     thumbnail: String = "thumbnail"
 ) : Vod {
-    val vod = Vod(videoKey, title, thumbnail, category, memberId)
-    vod.changeVisibility(visibility)
-    vod.changeStatus(status)
-    return vod
+    return Vod(videoKey, title, thumbnail, category, status, visibility, memberId)
 }

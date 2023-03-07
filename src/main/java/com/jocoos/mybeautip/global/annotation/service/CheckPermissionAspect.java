@@ -36,7 +36,7 @@ public class CheckPermissionAspect {
     private final BroadcastViewerDao broadcastViewerDao;
 
     @Before("@annotation(com.jocoos.mybeautip.global.annotation.CheckPermission)")
-    public void checkPermission(JoinPoint joinPoint) throws Throwable {
+    public void checkPermission(JoinPoint joinPoint) {
         long broadcastId = getBroadcastId(joinPoint);
         long memberId = getCurrentMemberId();
         Set<PermissionType> availablePermission = getAvailablePermission(joinPoint);

@@ -17,6 +17,7 @@ import java.time.ZonedDateTime;
 import java.time.chrono.ChronoZonedDateTime;
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastCategory.broadcastCategory;
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QVod.vod;
 import static com.jocoos.mybeautip.member.QMember.member;
 
@@ -70,13 +71,14 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
                                                                    ComparablePath<T> comparablePath) {
         T cursorValue = getCursorValue(comparablePath, condition.cursor());
         return repository.query(query -> query
-                        .select(new QVodResponse(vod, member))
-                        .from(vod)
-                        .join(member).on(vod.memberId.eq(member.id))
-                        .where(cursor(comparablePath, cursorValue, condition.cursor()))
-                        .orderBy(getOrders(condition.getSort()))
-                        .limit(condition.getPageSize())
-                        .fetch());
+                .select(new QVodResponse(vod, broadcastCategory, member))
+                .from(vod)
+                .join(broadcastCategory).on(vod.category.eq(broadcastCategory))
+                .join(member).on(vod.memberId.eq(member.id))
+                .where(cursor(comparablePath, cursorValue, condition.cursor()))
+                .orderBy(getOrders(condition.getSort()))
+                .limit(condition.getPageSize())
+                .fetch());
     }
 
     private <T extends Comparable<T>> T getCursorValue(ComparablePath<T> comparablePath, Long cursor) {

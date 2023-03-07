@@ -1,13 +1,15 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
+import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.EditBroadcastRequest;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditCommand;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.search.dto.CountResponse;
@@ -21,10 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.CANCEL;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.BROADCAST;
 import static com.jocoos.mybeautip.global.dto.FileDto.getUploadAndDeleteFileDtoList;
-import static com.jocoos.mybeautip.global.util.JsonNullableUtils.getIfPresent;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +35,7 @@ public class AdminBroadcastService {
     private final BroadcastDao broadcastDao;
     private final BroadcastReportDao reportDao;
     private final BroadcastConverter converter;
+    private final FlipFlopLiteService flipFlopLiteService;
     private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
@@ -53,26 +56,22 @@ public class AdminBroadcastService {
     }
 
     @Transactional
-    public Long edit(long broadcastId, EditBroadcastRequest request) {
+    public Long edit(long broadcastId, BroadcastPatchRequest request) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        String editedTitle = getIfPresent(request.getTitle(), broadcast.getTitle());
-        String editedNotice = getIfPresent(request.getNotice(), broadcast.getNotice());
-
         String originalThumbnailUrl = broadcast.getThumbnailUrl();
-        String editedThumbnailUrl = getIfPresent(request.getThumbnailUrl(), originalThumbnailUrl);
-        broadcast.edit(editedTitle, editedNotice, editedThumbnailUrl);
 
-        editThumbnailFile(editedThumbnailUrl, originalThumbnailUrl, broadcast.getId());
+        BroadcastEditCommand patchCommand = BroadcastEditCommand.patch(broadcast, request);
+        broadcast.edit(patchCommand);
+
+        editThumbnailFile(patchCommand.getEditedThumbnail(), originalThumbnailUrl, broadcast.getId());
         return broadcast.getId();
     }
 
     @Transactional
     public void shutdown(long broadcastId) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        broadcast.shutdown();
-
-        // TODO FLIP FLOP LITE LOGIC NEEDED
-
+        ZonedDateTime endedAt = flipFlopLiteService.endVideoRoom(broadcast.getVideoKey());
+        broadcast.finish(CANCEL, endedAt);
     }
 
     @Transactional(readOnly = true)
