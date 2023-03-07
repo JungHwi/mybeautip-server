@@ -18,7 +18,7 @@
 |===
 
 [[overview-http-status-codes]]
-=== HTTP status codess
+=== HTTP status codes
 
 |===
 | 상태 코드 | 설명
@@ -26,7 +26,7 @@
 | `200 OK`
 | 성공
 
-| `201 CREAED`
+| `201 CREATED`
 | 생성 성공
 
 | `400 Bad Request`

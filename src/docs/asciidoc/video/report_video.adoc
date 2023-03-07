@@ -1,0 +1,3 @@
+== Report Video Like API
+
+operation::report_video[snippets='http-request,path-parameters,http-response']
