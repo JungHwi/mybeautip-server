@@ -6,7 +6,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
 
 @Getter
 @RequiredArgsConstructor
-public class EditBroadcastRequest {
+public class BroadcastPatchRequest {
 
     private final JsonNullable<String> title;
     private final JsonNullable<String> notice;

@@ -7,9 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.VodStatus.AVAILABLE;
-import static com.jocoos.mybeautip.domain.broadcast.code.VodStatus.CREATED;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.BROADCAST;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
@@ -75,16 +75,18 @@ public class Vod extends BaseEntity {
     @Builder
     public Vod(Long videoKey,
                String title,
-               String thumbnail,
+               String thumbnailUrl,
                BroadcastCategory category,
+               VodStatus status,
+               boolean isVisible,
                long memberId) {
         this.videoKey = videoKey;
-        this.thumbnail = getFileName(thumbnail);
-        this.category = category;
         this.memberId = memberId;
-        this.status = CREATED;
-        this.isVisible = false;
+        this.category = category;
+        this.status = status;
+        this.isVisible = isVisible;
         setTitle(title);
+        setThumbnail(thumbnailUrl);
     }
 
     public void changeStatus(VodStatus status) {
@@ -116,15 +118,19 @@ public class Vod extends BaseEntity {
     }
 
     public void edit(String title,
-                     String thumbnail,
+                     String thumbnailUrl,
                      Boolean isVisible) {
         if (title != null) setTitle(title);
-        if (thumbnail != null) this.thumbnail = thumbnail;
+        if (thumbnail != null) setThumbnail(thumbnailUrl);
         if (isVisible != null) this.isVisible = isVisible;
     }
 
     private void setTitle(String title) {
         validateMaxLengthWithoutWhiteSpace(title, 25, "title");
         this.title = title;
+    }
+
+    private void setThumbnail(@NotNull String thumbnailUrl) {
+        this.thumbnail = getFileName(thumbnailUrl);
     }
 }

@@ -23,4 +23,9 @@ public class BroadcastReportDao {
     public Long countReportedBroadcast(ZonedDateTime from) {
         return repository.countDistinctByCreatedAtAfter(from);
     }
+
+    @Transactional(readOnly = true)
+    public boolean exist(long broadcastId, long reporterId) {
+        return repository.existsByBroadcastIdAndReporterId(broadcastId, reporterId);
+    }
 }

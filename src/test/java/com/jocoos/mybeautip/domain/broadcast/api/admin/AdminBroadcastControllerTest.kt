@@ -1,16 +1,17 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin
 
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
-import com.jocoos.mybeautip.domain.broadcast.dto.EditBroadcastRequest
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
+import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastReportRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
-import com.jocoos.mybeautip.domain.broadcast.persistence.repository.VodRepository
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_STATUS
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
-import com.jocoos.mybeautip.testutil.fixture.makeVod
+import com.jocoos.mybeautip.testutil.fixture.makeBroadcastReport
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -19,23 +20,22 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.openapitools.jackson.nullable.JsonNullable
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
 import org.springframework.restdocs.payload.JsonFieldType.*
-import org.springframework.restdocs.payload.PayloadDocumentation
 import org.springframework.restdocs.payload.PayloadDocumentation.*
-import org.springframework.restdocs.request.RequestDocumentation
 import org.springframework.restdocs.request.RequestDocumentation.*
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.format.DateTimeFormatter
 
 @TestInstance(PER_CLASS)
 class AdminBroadcastControllerTest(
-    private val broadcastRepository: BroadcastRepository
+    private val broadcastRepository: BroadcastRepository,
+    private val broadcastReportRepository: BroadcastReportRepository
 ) : BroadcastTestSupport() {
 
     private lateinit var broadcast: Broadcast
@@ -151,7 +151,7 @@ class AdminBroadcastControllerTest(
         val newTitle = "new title"
         val newNotice = "new notice"
         val newThumbnailUrl = "newThumbnailUrl"
-        val request = EditBroadcastRequest(
+        val request = BroadcastPatchRequest(
             JsonNullable.of(newTitle),
             JsonNullable.of(newNotice),
             JsonNullable.of(newThumbnailUrl)
@@ -186,6 +186,35 @@ class AdminBroadcastControllerTest(
                     ),
                     responseFields(
                         fieldWithPath("id").type(NUMBER).description("방송 아이디")
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `Admin Broadcast 신고된 수 조회 API`() {
+
+        val report = broadcastReportRepository.save(makeBroadcastReport(broadcast, requestUser.id))
+        val startAt = report.createdAt.minusDays(1).format(DateTimeFormatter.ofPattern(ZONE_DATE_TIME_FORMAT))
+
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/admin/broadcast/report-count")
+                    .header(AUTHORIZATION, defaultAdminToken)
+                    .param("start_at", startAt)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result
+            .andDo(
+                document(
+                    "admin_get_report_count_broadcast",
+                    requestParameters(
+                        parameterWithName("start_at").description("검색 시작 시간").attributes(getZonedDateFormat())
+                    ),
+                    responseFields(
+                        fieldWithPath("count").type(NUMBER).description("검색 시작 시간 이후 신고된 방송수")
                     )
                 )
             )

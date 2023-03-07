@@ -7,4 +7,6 @@ import java.time.ZonedDateTime;
 
 public interface BroadcastReportRepository extends JpaRepository<BroadcastReport, Long> {
     long countDistinctByCreatedAtAfter(ZonedDateTime createdAt);
+
+    boolean existsByBroadcastIdAndReporterId(long broadcastId, long reporterId);
 }

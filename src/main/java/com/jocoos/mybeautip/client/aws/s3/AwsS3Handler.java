@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.S3UrlUploadException;
 import com.jocoos.mybeautip.support.RandomUtils;
-import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +18,7 @@ import static com.jocoos.mybeautip.global.code.UrlDirectory.TEMP_IMAGE;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.TEST_FILE;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.getUri;
+import static io.micrometer.core.instrument.util.StringUtils.isBlank;
 
 @Component
 @RequiredArgsConstructor
@@ -67,7 +67,7 @@ public class AwsS3Handler {
     }
 
     public String copy(String fileUrl, String destination) {
-        if (StringUtils.isBlank(fileUrl)) {
+        if (isBlank(fileUrl)) {
             return null;
         }
 
@@ -79,6 +79,20 @@ public class AwsS3Handler {
         }
 
         String path = service.copy(
+                TEMP_IMAGE.getDirectory() + filename,
+                destination + filename);
+
+        return cloudFront + path;
+    }
+
+    public String copyWithKeepOriginal(String fileUrl, String destination) {
+        if (isBlank(fileUrl)) {
+            return null;
+        }
+
+        String filename = getFileName(fileUrl);
+
+        String path = service.copyWithKeepOriginal(
                 TEMP_IMAGE.getDirectory() + filename,
                 destination + filename);
 
@@ -118,7 +132,7 @@ public class AwsS3Handler {
     }
 
     public void delete(String fileUrl) {
-        if (StringUtils.isBlank(fileUrl)) {
+        if (isBlank(fileUrl)) {
             return;
         }
         String filename = getUri(fileUrl);

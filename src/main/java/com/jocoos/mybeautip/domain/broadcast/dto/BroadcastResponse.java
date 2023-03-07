@@ -9,8 +9,12 @@ import java.time.ZonedDateTime;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 public record BroadcastResponse(long id,
+                                String streamKey,
+                                String chatToken,
                                 BroadcastStatus status,
+                                String url,
                                 String title,
+                                String thumbnailUrl,
                                 String notice,
                                 int viewerCount,
                                 int heartCount,

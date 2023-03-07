@@ -1,0 +1,3 @@
+== Admin Get Report Count Of Broadcast API
+
+operation::admin_get_report_count_broadcast[snippets='http-request,request-parameters,http-response,response-fields']

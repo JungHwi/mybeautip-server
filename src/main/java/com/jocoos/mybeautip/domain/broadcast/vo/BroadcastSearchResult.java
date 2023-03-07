@@ -56,5 +56,4 @@ public class BroadcastSearchResult {
         this.category = new BroadcastCategoryResponse(category);
         this.member = new SimpleMemberInfo(member);
     }
-
 }

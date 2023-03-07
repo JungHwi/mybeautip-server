@@ -3,7 +3,7 @@ package com.jocoos.mybeautip.domain.broadcast.api.admin;
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.EditBroadcastRequest;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.service.AdminBroadcastService;
 import com.jocoos.mybeautip.domain.search.dto.CountResponse;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
@@ -60,16 +60,18 @@ public class AdminBroadcastController {
         return service.get(broadcastId);
     }
 
+    // TODO start_at default 값 논의 필요
     @GetMapping("/broadcast/report-count")
-    public CountResponse countReportedBroadcast(@RequestParam(required = false) ZonedDateTime startAt) {
+    public CountResponse countReportedBroadcast(@RequestParam(required = false, name = "start_at") ZonedDateTime startAt) {
         return service.countReportedBroadcast(startAt);
     }
 
     @PatchMapping("/broadcast/{broadcastId}")
-    public IdDto edit(@PathVariable long broadcastId, @RequestBody EditBroadcastRequest request) {
+    public IdDto edit(@PathVariable long broadcastId, @RequestBody BroadcastPatchRequest request) {
         return new IdDto(service.edit(broadcastId, request));
     }
 
+    // TODO shutdown or change status api need to choose
     @PatchMapping("/broadcast/{broadcastId}/shutdown")
     public void shutdown(@PathVariable long broadcastId) {
         service.shutdown(broadcastId);

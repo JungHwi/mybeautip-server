@@ -9,8 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastCategoryType.GROUP;
-
 @RequiredArgsConstructor
 @Service
 public class BroadcastCategoryDao {
@@ -19,7 +17,7 @@ public class BroadcastCategoryDao {
     @Transactional(readOnly = true)
     public List<BroadcastCategory> getCategories(long categoryId) {
         BroadcastCategory category = getCategory(categoryId);
-        if (category.isType(GROUP)) {
+        if (category.isGroup()) {
             return getChildCategories(categoryId);
         }
         return List.of(category);

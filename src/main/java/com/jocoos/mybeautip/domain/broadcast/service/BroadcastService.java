@@ -2,25 +2,26 @@ package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
-import com.jocoos.mybeautip.client.flipfloplite.dto.ExternalBroadcastInfo;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.converter.VodConverter;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCreateRequest;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastListResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastStartedAtResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastReport;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
-import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastCategoryDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
-import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.VodDao;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
+import com.jocoos.mybeautip.domain.member.service.dao.InfluencerDao;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
+import com.jocoos.mybeautip.domain.system.service.dao.SystemOptionDao;
+import com.jocoos.mybeautip.global.dto.FileDto;
+import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.Day;
+import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,46 +32,31 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT_SEARCH_STATUSES;
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
+import static com.jocoos.mybeautip.domain.system.code.SystemOptionType.FREE_LIVE_PERMISSION;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.BROADCAST;
-import static com.jocoos.mybeautip.global.code.UrlDirectory.VOD;
-import static com.jocoos.mybeautip.global.validator.StringValidator.validateMaxLengthWithoutWhiteSpace;
 
 @RequiredArgsConstructor
 @Service
 public class BroadcastService {
 
     private final BroadcastDao broadcastDao;
-    private final BroadcastCategoryDao categoryDao;
-    private final BroadcastReportDao reportDao;
+    private final MemberDao memberDao;
+    private final VodDao vodDao;
+    private final InfluencerDao influencerDao;
+    private final SystemOptionDao systemOptionDao;
     private final BroadcastConverter converter;
     private final VodConverter vodConverter;
     private final AwsS3Handler awsS3Handler;
+    private final BroadcastDomainService domainService;
     private final FlipFlopLiteService flipFlopLiteService;
-    private final VodDao vodDao;
-
-    @Transactional
-    public BroadcastResponse createBroadcastAndVod(BroadcastCreateRequest request, long memberId) {
-        validCreateRequest(request);
-        BroadcastCategory category = categoryDao.getCategory(request.getCategoryId());
-        ExternalBroadcastInfo externalInfo = flipFlopLiteService.createVideoRoom(request, memberId);
-        Broadcast broadcast = converter.toEntity(request, externalInfo, category, memberId);
-        broadcastDao.save(broadcast);
-
-        Vod vod = vodConverter.toVod(broadcast);
-        vodDao.save(vod);
-
-        String thumbnailUrl = request.getThumbnailUrl();
-        awsS3Handler.copy(thumbnailUrl, BROADCAST.getDirectory(broadcast.getId()));
-        awsS3Handler.copy(thumbnailUrl, VOD.getDirectory(vod.getId()));
-        return null;
-    }
 
     @Transactional(readOnly = true)
-    public BroadcastResponse get(long broadcastId) {
+    public BroadcastResponse get(long broadcastId, long memberId) {
         BroadcastSearchResult searchResult = broadcastDao.getWithMemberAndCategory(broadcastId);
-        return converter.toResponse(searchResult);
+        String streamKey = getStreamKey(memberId, searchResult.getMember().getId());
+        // TODO 채팅 토큰 발급
+        return converter.toResponse(searchResult, streamKey);
     }
 
     @Transactional(readOnly = true)
@@ -85,24 +71,73 @@ public class BroadcastService {
         return converter.toListResponse(searchResults);
     }
 
-    @Transactional(readOnly = true)
-    public BroadcastStartedAtResponse getDateList() {
-        List<ZonedDateTime> results = broadcastDao.getStartedAtList(Pageable.ofSize(10)).getContent();
-        return new BroadcastStartedAtResponse(results);
-    }
-
-    // TODO 응답값 논의 필요
     @Transactional
-    public void report(long broadcastId, long reporterId, String description) {
-        Broadcast broadcast = broadcastDao.get(broadcastId);
-        BroadcastReport report = new BroadcastReport(broadcast, reporterId, description);
-        reportDao.save(report);
+    public BroadcastResponse createBroadcastAndVod(BroadcastCreateRequest request, long creatorId) {
+        validCanAccess(creatorId);
+        Member creator = memberDao.getMember(creatorId);
+        Broadcast broadcast = domainService.create(request, creatorId);
+        createVod(broadcast);
+        awsS3Handler.copy(request.getThumbnailUrl(), BROADCAST.getDirectory(broadcast.getId()));
+        return converter.toResponse(broadcast, creator);
     }
 
-    // 외부 API 호출 비용을 고려해 생성자 호출 전에 서비스 레이어에서 검증
-    private void validCreateRequest(BroadcastCreateRequest request) {
-        validateMaxLengthWithoutWhiteSpace(request.getTitle(), 25, "title");
-        validateMaxLengthWithoutWhiteSpace(request.getNotice(), 100, "notice");
+    @Transactional
+    public BroadcastResponse edit(long broadcastId, BroadcastEditRequest request) {
+        // FIXME Request get member query should replace by join
+        BroadcastEditResult editResult = domainService.edit(broadcastId, request);
+        Broadcast editedBroadcast = editResult.broadcast();
+        Member member = memberDao.getMember(editedBroadcast.getMemberId());
+        changeThumbnail(editedBroadcast, editResult.originalThumbnailUrl());
+        return converter.toResponse(editedBroadcast, member);
+    }
+
+    // Broadcast reservation date max is 2 weeks so result count wii be max 14 by this reason no paging
+    @Transactional(readOnly = true)
+    public BroadcastDateListResponse getBroadcastDateList() {
+        List<ZonedDateTime> results = broadcastDao.getStartedAtList().getContent();
+        return new BroadcastDateListResponse(results);
+    }
+
+    @Transactional
+    public BroadcastResponse changeStatus(long broadcastId, BroadcastStatus changeStatus, long memberId) {
+        if (changeStatus == SCHEDULED || changeStatus == READY) {
+            throw new BadRequestException(changeStatus + " can not change manually");
+        }
+        Broadcast broadcast = domainService.changeStatus(broadcastId, changeStatus);
+        Member member = memberDao.getMember(memberId);
+        return converter.toResponse(broadcast, member);
+    }
+
+    @Transactional
+    public ReportCountResponse report(long broadcastId, long reporterId, String description) {
+        Broadcast broadcast = domainService.report(broadcastId, reporterId, description);
+        return new ReportCountResponse(broadcast.getId(), broadcast.getReportCount());
+    }
+
+    private void createVod(Broadcast broadcast) {
+        Vod vod = vodConverter.init(broadcast);
+        vodDao.save(vod);
+    }
+
+    private void validCanAccess(long creatorId) {
+        if (!systemOptionDao.getSystemOption(FREE_LIVE_PERMISSION)
+                && !influencerDao.isInfluencer(creatorId)) {
+            throw new AccessDeniedException("Only influencer can request");
+        }
+    }
+
+    private String getStreamKey(long memberId, long creatorId) {
+        if (memberId == creatorId) {
+            return flipFlopLiteService.getStreamKey(memberId);
+        }
+        return null;
+    }
+
+    private void changeThumbnail(Broadcast broadcast, String originalThumbnailUrl) {
+        if (!broadcast.isThumbnailEq(originalThumbnailUrl)) {
+            List<FileDto> files = FileDto.getUploadAndDeleteFileDtoList(broadcast.getThumbnailUrl(), originalThumbnailUrl);
+            awsS3Handler.editFiles(files, broadcast.getThumbnailUrlPath());
+        }
     }
 
     private Day getDay(LocalDate localDate) {

@@ -2,8 +2,12 @@ package com.jocoos.mybeautip.domain.broadcast
 
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastCategoryRepository
+import com.jocoos.mybeautip.domain.system.code.SystemOptionType
+import com.jocoos.mybeautip.domain.system.code.SystemOptionType.FREE_LIVE_PERMISSION
+import com.jocoos.mybeautip.domain.system.persistence.repository.SystemOptionRepository
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcastCategory
+import com.jocoos.mybeautip.testutil.fixture.makeSystemOption
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance

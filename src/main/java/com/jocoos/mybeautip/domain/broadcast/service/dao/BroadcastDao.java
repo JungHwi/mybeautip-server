@@ -6,7 +6,6 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +46,12 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
-    public Slice<ZonedDateTime> getStartedAtList(Pageable pageable) {
-        return repository.findAllStartedAt(pageable);
+    public Slice<ZonedDateTime> getStartedAtList() {
+        return repository.findAllStartedAt();
+    }
+
+    @Transactional
+    public void addReportCountAndFlush(long broadcastId, int count) {
+        repository.addReportCountAndFlush(broadcastId, count);
     }
 }

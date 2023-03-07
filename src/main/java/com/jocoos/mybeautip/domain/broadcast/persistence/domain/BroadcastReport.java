@@ -23,7 +23,7 @@ public class BroadcastReport extends BaseEntity {
     private Long id;
 
     @Column
-    private long liveId;
+    private long broadcastId;
 
     @Column
     private long reportedId;
@@ -36,7 +36,7 @@ public class BroadcastReport extends BaseEntity {
 
     @Builder
     public BroadcastReport(Broadcast broadcast, long reporterId, String description) {
-        this.liveId = broadcast.getId();
+        this.broadcastId = broadcast.getId();
         this.reportedId = broadcast.getMemberId();
         this.reporterId = reporterId;
         this.description = description;

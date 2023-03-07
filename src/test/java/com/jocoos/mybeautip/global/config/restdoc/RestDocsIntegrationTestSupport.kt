@@ -2,26 +2,28 @@ package com.jocoos.mybeautip.global.config.restdoc
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastCategoryType
+import com.jocoos.mybeautip.client.flipflop.FlipFlopClient
+import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteClient
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomRequest
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastCategoryRepository
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.GROUP
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
 import com.jocoos.mybeautip.domain.file.service.FlipFlopService
+import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepository
 import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.security.JwtTokenProvider
 import com.jocoos.mybeautip.testutil.container.TestContainerConfig
-import com.jocoos.mybeautip.testutil.fixture.makeBroadcastCategory
-import com.jocoos.mybeautip.testutil.fixture.makeCommunityCategory
-import com.jocoos.mybeautip.testutil.fixture.makeInfluencer
-import com.jocoos.mybeautip.testutil.fixture.makeMember
+import com.jocoos.mybeautip.testutil.fixture.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.*
 import org.mockito.BDDMockito.given
+import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -68,6 +70,9 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     private lateinit var memberRepository: MemberRepository
 
     @Autowired
+    private lateinit var influencerRepository: InfluencerRepository
+
+    @Autowired
     private lateinit var communityCategoryRepository: CommunityCategoryRepository
 
     @Autowired
@@ -81,6 +86,12 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
 
     @MockBean
     protected lateinit var flipFlopService: FlipFlopService
+
+    @MockBean
+    protected lateinit var flipFlopClient: FlipFlopClient
+
+    @MockBean
+    protected lateinit var flipFlopLiteClient: FlipFlopLiteClient
 
     protected lateinit var requestUser: Member
     protected lateinit var requestUserToken: String
@@ -98,12 +109,12 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     private fun postConstruct() {
         communityCategoryRepository.save(makeCommunityCategory(id = 1, parentId = null, type = GROUP))
         groupBroadcastCategory =
-            broadcastCategoryRepository.save(makeBroadcastCategory(parentId = null, type = BroadcastCategoryType.GROUP, title = "전체"))
+            broadcastCategoryRepository.save(makeBroadcastCategory(parentId = null, title = "전체"))
 
         defaultAdmin = memberRepository.save(makeMember(link = 0))
         requestUser = memberRepository.save(makeMember(link = 2))
         defaultInfluencer = memberRepository.save(makeMember(link = 2))
-        makeInfluencer(id = defaultInfluencer.id)
+        influencerRepository.save(makeInfluencer(id = defaultInfluencer.id))
 
         defaultAdminToken = "Bearer " + jwtTokenProvider.auth(defaultAdmin).accessToken
         requestUserToken = "Bearer " + jwtTokenProvider.auth(requestUser).accessToken
@@ -137,6 +148,10 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
 
         given(awsS3Handler.copy(any(FileDto::class.java), any())).willReturn("{domain}/{file_directory}/filename")
         flipFlopService.transcode(anyList(), anyLong())
+        given(flipFlopLiteClient.createVideoRoom(any(FFLVideoRoomRequest::class.java)))
+            .willReturn(makeFFLVideoRoomResponse())
+        given(flipFlopLiteClient.startVideoRoom(anyLong())).willReturn(makeFFLVideoRoomResponse())
+        given(flipFlopLiteClient.endVideoRoom(anyLong())).willReturn(makeFFLVideoRoomResponse())
     }
 
 }
