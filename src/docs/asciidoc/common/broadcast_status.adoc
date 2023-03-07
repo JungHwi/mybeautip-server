@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[broadcast_status]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-broadcast_status.adoc[]

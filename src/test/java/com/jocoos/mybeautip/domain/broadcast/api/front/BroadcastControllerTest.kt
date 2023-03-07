@@ -284,7 +284,7 @@ class BroadcastControllerTest(
                     parameterWithName("broadcast_id").description("방송 ID")
                 ),
                 requestFields(
-                    fieldWithPath("status").type(STRING).description(generateLinkCode(BROADCAST_STATUS))
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(BROADCAST_STATUS) + " LIVE, CANCEL, END 요청 가능")
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("방송 아이디"),
