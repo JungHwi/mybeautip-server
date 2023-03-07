@@ -156,7 +156,11 @@ public class Broadcast extends CreatedAtBaseEntity {
         return "tempUrl";
     }
 
+    // FIXME 개발 위해서 디폴트 이미지 내림
     public String getThumbnailUrl() {
+        if (thumbnail.isBlank()) {
+            return "https://static-dev.mybeautip.com/common/default/share_square_image.jpg";
+        }
         return toUrl(thumbnail, BROADCAST, id);
     }
 
