@@ -83,7 +83,7 @@ create table vod_report(
 
 create table jwt(
     id varchar(255) comment '아이디' primary key,
-    refresh_token varchar(500) not null comment 'refresh token',
+    refresh_token varchar(1000) not null comment 'refresh token',
     expiry_at datetime not null comment '만료시간'
 ) comment 'JWT 정보';
 
