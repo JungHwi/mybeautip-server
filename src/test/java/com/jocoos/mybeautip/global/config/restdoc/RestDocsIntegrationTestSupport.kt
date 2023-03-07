@@ -12,6 +12,9 @@ import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.GROUP
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
 import com.jocoos.mybeautip.domain.file.service.FlipFlopService
 import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepository
+import com.jocoos.mybeautip.domain.system.code.SystemOptionType
+import com.jocoos.mybeautip.domain.system.code.SystemOptionType.FREE_LIVE_PERMISSION
+import com.jocoos.mybeautip.domain.system.persistence.repository.SystemOptionRepository
 import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
@@ -79,6 +82,9 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     private lateinit var broadcastCategoryRepository: BroadcastCategoryRepository
 
     @Autowired
+    private lateinit var systemOptionRepository: SystemOptionRepository
+
+    @Autowired
     private lateinit var jwtTokenProvider: JwtTokenProvider
 
     @MockBean
@@ -107,6 +113,8 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     // FIXME IS THIS METHOD REALLY CALLED ONCE? SHOULD CHECK
     @PostConstruct
     private fun postConstruct() {
+        systemOptionRepository.save(makeSystemOption(FREE_LIVE_PERMISSION, false))
+
         communityCategoryRepository.save(makeCommunityCategory(id = 1, parentId = null, type = GROUP))
         groupBroadcastCategory =
             broadcastCategoryRepository.save(makeBroadcastCategory(parentId = null, title = "전체"))
@@ -126,6 +134,7 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
         communityCategoryRepository.deleteAll()
         broadcastCategoryRepository.deleteAll()
         memberRepository.deleteAllInBatch(listOf(requestUser, defaultAdmin, defaultInfluencer))
+        systemOptionRepository.deleteAll()
     }
 
     @BeforeEach
