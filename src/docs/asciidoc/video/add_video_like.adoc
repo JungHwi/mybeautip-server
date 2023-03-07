@@ -1,0 +1,3 @@
+== Add Video Like API
+
+operation::add_video_like[snippets='http-request,path-parameters,http-response,response-fields']

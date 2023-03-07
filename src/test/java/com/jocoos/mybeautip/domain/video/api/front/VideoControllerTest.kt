@@ -11,7 +11,10 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.gen
 import com.jocoos.mybeautip.testutil.fixture.makeVideo
 import com.jocoos.mybeautip.testutil.fixture.makeVideoCategory
 import com.jocoos.mybeautip.video.Video
+import com.jocoos.mybeautip.video.VideoLikeRepository
 import com.jocoos.mybeautip.video.VideoRepository
+import org.hamcrest.CoreMatchers.notNullValue
+import org.json.JSONObject
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -20,20 +23,20 @@ import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.restdocs.request.RequestDocumentation.*
+import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @TestInstance(PER_CLASS)
 class VideoControllerTest(
     private val videoRepository: VideoRepository,
-    private val videoCategoryRepository: VideoCategoryRepository
+    private val videoCategoryRepository: VideoCategoryRepository,
 ) : RestDocsIntegrationTestSupport() {
 
     private lateinit var category: VideoCategory
@@ -353,6 +356,134 @@ class VideoControllerTest(
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("비디오 ID"),
                     fieldWithPath("view_count").type(NUMBER).description("비디오 조회수")
+                )
+            )
+        )
+    }
+
+    @Test
+    fun videoLike() {
+        // given
+        val video: Video = videoRepository.save(makeVideo(defaultAdmin, category))
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                post("/api/1/videos/{video_id}/likes", video.id)
+                    .header(AUTHORIZATION, requestUserToken)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "add_video_like",
+                pathParameters(
+                    parameterWithName("video_id").description("비디오 아이디")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("좋아요 ID"),
+                    fieldWithPath("created_at").type(NUMBER).description("생성 일자"),
+                    fieldWithPath("video.id").type(NUMBER).description("비디오 ID"),
+                    fieldWithPath("video.video_key").type(STRING).description("비디오 키"),
+                    fieldWithPath("video.live_key").type(STRING).description("라이브 키").optional(),
+                    fieldWithPath("video.output_type").type(STRING).description("").optional(),
+                    fieldWithPath("video.type").type(STRING).description("방송 타입. UPLOADED, BROADCASTED"),
+                    fieldWithPath("video.state").type(STRING).description("방송 상태. VOD 뿐."),
+                    fieldWithPath("video.locked").type(BOOLEAN).description("잠금 여부"),
+                    fieldWithPath("video.muted").type(BOOLEAN).description("음소거 여부"),
+                    fieldWithPath("video.visibility").type(STRING).description("노출 여부"),
+                    fieldWithPath("video.category_names").type(STRING).description("카테고리 타이틀 묶음 정보").optional(),
+                    fieldWithPath("video.category").type(ARRAY).description("카테고리 정보").optional(),
+                    fieldWithPath("video.category.[].id").type(NUMBER).description("카테고리 아이디"),
+                    fieldWithPath("video.category.[].type").type(STRING).description("카테고리 구분"),
+                    fieldWithPath("video.category.[].title").type(STRING).description("카테고리 타이틀"),
+                    fieldWithPath("video.category.[].shape_url").type(STRING).description("카테고리 쉐입 URL").optional(),
+                    fieldWithPath("video.category.[].mask_type").type(STRING)
+                        .description(generateLinkCode(VIDEO_MASK_TYPE)).optional(),
+                    fieldWithPath("video.title").type(STRING).description("제목").optional(),
+                    fieldWithPath("video.content").type(STRING).description("컨텐츠").optional(),
+                    fieldWithPath("video.url").type(STRING).description("비디오 파일 주소"),
+                    fieldWithPath("video.original_filename").type(STRING).description("비디오 파일명").optional(),
+                    fieldWithPath("video.thumbnail_path").type(STRING).description("썸네일 경로").optional(),
+                    fieldWithPath("video.thumbnail_url").type(STRING).description("썸네일 URL").optional(),
+                    fieldWithPath("video.chat_room_id").type(STRING).description("채팅방 아이디").optional(),
+                    fieldWithPath("video.duration").type(NUMBER).description("방송 길이. mm 초 단위"),
+                    fieldWithPath("video.total_watch_count").type(NUMBER).description("총 시청").optional(),
+                    fieldWithPath("video.real_watch_count").type(NUMBER).description("실시청자수").optional(),
+                    fieldWithPath("video.watch_count").type(NUMBER).description("실시간 시청자수"),
+                    fieldWithPath("video.view_count").type(NUMBER).description("조회수"),
+                    fieldWithPath("video.heart_count").type(NUMBER).description("하트수"),
+                    fieldWithPath("video.like_count").type(NUMBER).description("좋아요 수"),
+                    fieldWithPath("video.comment_count").type(NUMBER).description("댓글수"),
+                    fieldWithPath("video.order_count").type(NUMBER).description("주문수"),
+                    fieldWithPath("video.report_count").type(NUMBER).description("신고수"),
+                    fieldWithPath("video.data").type(STRING).description("상품 정보등").optional(),
+                    fieldWithPath("video.related_goods_count").type(NUMBER).description("관련 상품 갯수").optional(),
+                    fieldWithPath("video.related_goods_thumbnail_url").type(STRING).description("상품 대표 URL").optional(),
+                    fieldWithPath("video.like_id").type(NUMBER).description("좋아요 아이디").optional(),
+                    fieldWithPath("video.scrap_id").type(NUMBER).description("스크랩 아이디").optional(),
+                    fieldWithPath("video.blocked").type(BOOLEAN).description("차단 여부").optional(),
+                    fieldWithPath("video.owner").type(OBJECT).description("비디오 작성자 정보"),
+                    fieldWithPath("video.owner.id").type(NUMBER).description("아이디"),
+                    fieldWithPath("video.owner.tag").type(STRING).description("태그"),
+                    fieldWithPath("video.owner.status").type(STRING).description("상태"),
+                    fieldWithPath("video.owner.grant_type").type(STRING).description(generateLinkCode(GRANT_TYPE))
+                        .optional(),
+                    fieldWithPath("video.owner.username").type(STRING).description("유저명"),
+                    fieldWithPath("video.owner.email").type(STRING).description("이메일"),
+                    fieldWithPath("video.owner.phone_number").type(STRING).description("전화번호"),
+                    fieldWithPath("video.owner.avatar_url").type(STRING).description("아바타 URL"),
+                    fieldWithPath("video.owner.follower_count").type(NUMBER).description("팔로워 수"),
+                    fieldWithPath("video.owner.following_count").type(NUMBER).description("팔로잉 수"),
+                    fieldWithPath("video.owner.video_count").type(NUMBER).description("비디오 수"),
+                    fieldWithPath("video.owner.created_at").type(NUMBER).description("회원가입일"),
+                    fieldWithPath("video.owner.modified_at").type(NUMBER).description("정보수정일"),
+                    fieldWithPath("video.owner.permission").type(OBJECT).description("권한").optional(),
+                    fieldWithPath("video.owner.permission.chat_post").type(BOOLEAN).description("post 권한").optional(),
+                    fieldWithPath("video.owner.permission.comment_post").type(BOOLEAN).description("댓글 권한").optional(),
+                    fieldWithPath("video.owner.permission.live_post").type(BOOLEAN).description("라이브 권한").optional(),
+                    fieldWithPath("video.owner.permission.motd_post").type(BOOLEAN).description("motd 권한").optional(),
+                    fieldWithPath("video.owner.permission.revenue_return").type(BOOLEAN).description("수익배분 권한").optional(),
+                    fieldWithPath("video.created_at").type(NUMBER).description("생성 일자")
+                )
+            )
+        )
+    }
+
+
+    @Test
+    fun deleteVideoLike() {
+        // given
+        val video: Video = videoRepository.save(makeVideo(defaultAdmin, category))
+        val likeResult: MvcResult = mockMvc
+            .perform(
+                post("/api/1/videos/{video_id}/likes", video.id)
+                    .header(AUTHORIZATION, requestUserToken)
+            )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id", notNullValue()))
+            .andReturn();
+
+        println(likeResult.response.contentAsString);
+        val jsonObject = JSONObject(likeResult.response.contentAsString)
+        val likeId : Long = jsonObject.getLong("id");
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                delete("/api/1/videos/{video_id}/likes/{like_id}", video.id, likeId)
+                    .header(AUTHORIZATION, requestUserToken)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "delete_video_like",
+                pathParameters(
+                    parameterWithName("video_id").description("비디오 아이디"),
+                    parameterWithName("like_id").description("좋아요 아이디")
                 )
             )
         )
