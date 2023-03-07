@@ -6,12 +6,12 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
-    public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
+    public Page<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
         return repository.getList(condition);
     }
 

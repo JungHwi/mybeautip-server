@@ -67,7 +67,7 @@ public class BroadcastService {
                 .cursor(cursor)
                 .pageable(Pageable.ofSize(size))
                 .build();
-        List<BroadcastSearchResult> searchResults = broadcastDao.getList(condition);
+        List<BroadcastSearchResult> searchResults = broadcastDao.getList(condition).getContent();
         return converter.toListResponse(searchResults);
     }
 

@@ -12,6 +12,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
@@ -22,6 +24,7 @@ import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcas
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastCategory.broadcastCategory;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
+import static com.querydsl.sql.SQLExpressions.count;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Repository
@@ -40,25 +43,28 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     @Override
-    public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
-        return repository.query(query -> searchResultWithMemberAndCategory(query)
-                .where(
-                        startAtBetween(condition.startOfDay(), condition.endOfDay()),
-                        createdAtAfter(condition.startAt()),
-                        createdAtBefore(condition.endAt()),
-                        searchByKeyword(condition.searchOption()),
-                        inStatus(condition.statuses()),
-                        cursor(condition.cursor())
+    public Page<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
+        List<BroadcastSearchResult> contents = repository.query(query ->
+                searchResultWithMemberAndCategory(
+                        baseConditionQuery(query, condition)
                 )
-                .orderBy(
-                        broadcast.sortedStatus.asc(),
-                        broadcast.startedAt.desc(),
-                        broadcast.createdAt.desc(),
-                        broadcast.id.desc()
-                )
-                .offset(condition.offset())
-                .limit(condition.size())
-                .fetch());
+                        .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member))
+                        .orderBy(
+                                broadcast.sortedStatus.asc(),
+                                broadcast.startedAt.desc(),
+                                broadcast.createdAt.desc(),
+                                broadcast.id.desc()
+                        )
+                        .offset(condition.offset())
+                        .limit(condition.size())
+                        .fetch());
+
+        JPAQuery<Long> countQuery = repository.query(query ->
+                fromBroadcastWithMemberAndCategory(
+                        baseConditionQuery(query, condition))
+                        .select(count(broadcast)));
+
+        return PageableExecutionUtils.getPage(contents, condition.pageable(), countQuery::fetchOne);
     }
 
     @Override
@@ -69,11 +75,27 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     private JPAQuery<BroadcastSearchResult> searchResultWithMemberAndCategory(JPAQuery<?> query) {
+        return fromBroadcastWithMemberAndCategory(query)
+                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member));
+    }
+
+    private JPAQuery<?> fromBroadcastWithMemberAndCategory(JPAQuery<?> query) {
         return query
-                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member))
                 .from(broadcast)
                 .join(member).on(broadcast.memberId.eq(member.id))
                 .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory));
+    }
+
+    private JPAQuery<?> baseConditionQuery(JPAQuery<?> query, BroadcastSearchCondition condition) {
+        return query
+                .where(
+                        startAtBetween(condition.startOfDay(), condition.endOfDay()),
+                        createdAtAfter(condition.startAt()),
+                        createdAtBefore(condition.endAt()),
+                        searchByKeyword(condition.searchOption()),
+                        inStatus(condition.statuses()),
+                        cursor(condition.cursor())
+                );
     }
 
     // 커서 기반 페이지네이션과 유니크하지 않은 컬럼 정렬을 동시에 하기 위해 튜플 비교를 한다

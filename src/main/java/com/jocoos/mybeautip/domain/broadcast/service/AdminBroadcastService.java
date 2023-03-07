@@ -15,7 +15,9 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.search.dto.CountResponse;
 import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,14 +41,15 @@ public class AdminBroadcastService {
     private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
-    public List<AdminBroadcastResponse> getList(BroadcastStatus status, SearchOption searchOption, Pageable pageable) {
+    public PageResponse<AdminBroadcastResponse> getList(BroadcastStatus status, SearchOption searchOption, Pageable pageable) {
         BroadcastSearchCondition condition = BroadcastSearchCondition.builder()
                 .statuses(getStatuses(status))
                 .pageable(pageable)
                 .searchOption(searchOption)
                 .build();
-        List<BroadcastSearchResult> searchResults = broadcastDao.getList(condition);
-        return converter.toAdminResponse(searchResults);
+        Page<BroadcastSearchResult> searchResults = broadcastDao.getList(condition);
+        List<AdminBroadcastResponse> response = converter.toAdminResponse(searchResults.getContent());
+        return new PageResponse<>(searchResults.getTotalElements(), response);
     }
 
     @Transactional(readOnly = true)

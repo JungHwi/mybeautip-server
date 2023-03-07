@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.broadcast.service.AdminBroadcastService;
 import com.jocoos.mybeautip.domain.search.dto.CountResponse;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -34,14 +34,14 @@ public class AdminBroadcastController {
     }
 
     @GetMapping("/broadcast")
-    public List<AdminBroadcastResponse> getList(@RequestParam(required = false, defaultValue = "1") int page,
-                                                @RequestParam(required = false, defaultValue = "5") int size,
-                                                @RequestParam(required = false) BroadcastStatus status,
-                                                @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
-                                                @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
-                                                @RequestParam(required = false, name = "search_field") String searchField,
-                                                @RequestParam(required = false, name = "search_keyword") String searchKeyword,
-                                                @RequestParam(required = false, name = "is_reported") Boolean isReported) {
+    public PageResponse<AdminBroadcastResponse> getList(@RequestParam(required = false, defaultValue = "1") int page,
+                                                        @RequestParam(required = false, defaultValue = "5") int size,
+                                                        @RequestParam(required = false) BroadcastStatus status,
+                                                        @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
+                                                        @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
+                                                        @RequestParam(required = false, name = "search_field") String searchField,
+                                                        @RequestParam(required = false, name = "search_keyword") String searchKeyword,
+                                                        @RequestParam(required = false, name = "is_reported") Boolean isReported) {
 
         SearchOption searchOption = SearchOption.builder()
                 .startAt(startAt)
