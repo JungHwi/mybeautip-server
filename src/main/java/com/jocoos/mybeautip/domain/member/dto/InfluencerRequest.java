@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.domain.member.dto;
 
 import com.jocoos.mybeautip.domain.member.code.InfluencerStatus;
 
-public record InfluencerRequest(InfluencerStatus status) {
+import java.util.List;
+
+public record InfluencerRequest(List<Long> ids, InfluencerStatus status) {
 
 }

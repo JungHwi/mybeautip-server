@@ -1,13 +1,15 @@
 package com.jocoos.mybeautip.domain.member.service.dao;
 
 import com.jocoos.mybeautip.domain.member.code.InfluencerStatus;
-import com.jocoos.mybeautip.domain.member.dto.InfluencerRequest;
 import com.jocoos.mybeautip.domain.member.persistence.domain.Influencer;
 import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepository;
-import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.util.EntityMapUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -22,16 +24,19 @@ public class InfluencerDao {
     }
 
     @Transactional
-    public Influencer updateInfluencer(long id, InfluencerRequest request) {
-        if (!memberDao.existMember(id)) {
-            throw new MemberNotFoundException(id);
-        }
+    public List<Influencer> bulkUpdateInfluencer(List<Long> ids, InfluencerStatus status) {
+        // TODO Member Exist Check Needed?
 
-        Influencer influencer = repository.findById(id)
-                .orElse(new Influencer(id));
+        List<Influencer> existInfluencerList = repository.findAllByIdIn(ids);
+        Map<Long, Influencer> idInfluncerMap = EntityMapUtil.getIdEntityMap(existInfluencerList, Influencer::getId);
+        List<Influencer> influencerList = ids.stream()
+                .map(id -> {
+                    Influencer influencer = idInfluncerMap.getOrDefault(id, new Influencer(id));
+                    influencer.updateStatus(status);
+                    return influencer;
+                })
+                .toList();
 
-        influencer.updateStatus(request.status());
-
-        return repository.save(influencer);
+        return repository.saveAll(influencerList);
     }
 }

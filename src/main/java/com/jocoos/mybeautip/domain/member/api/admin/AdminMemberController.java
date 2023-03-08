@@ -102,13 +102,9 @@ public class AdminMemberController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @PatchMapping("/member/{memberId}/influencer")
-    public ResponseEntity<InfluencerResponse> updateInfluencer(@PathVariable Long memberId,
-                                                               @RequestBody InfluencerRequest request) {
-
-        InfluencerResponse response = influencerService.updateInfluencer(memberId, request);
-
-        return ResponseEntity.ok(response);
+    @PatchMapping("/member/influencer")
+    public ResponseEntity<List<InfluencerResponse>> bulkUpdateInfluencer(@RequestBody InfluencerRequest request) {
+        return ResponseEntity.ok(influencerService.bulkUpdateInfluencer(request));
     }
 
 }
