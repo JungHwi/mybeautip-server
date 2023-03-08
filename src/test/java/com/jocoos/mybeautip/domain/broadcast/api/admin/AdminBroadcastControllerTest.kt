@@ -83,7 +83,7 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("content.[].id").type(NUMBER).description("방송 아이디"),
                     fieldWithPath("content.[].video_key").type(NUMBER).description("플립플랍 라이트 비디오 키"),
                     fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("content.[].url").type(STRING).description("방송 URL"),
+                    fieldWithPath("content.[].url").type(STRING).description("방송 URL").optional(),
                     fieldWithPath("content.[].title").type(STRING).description("타이틀"),
                     fieldWithPath("content.[].notice").type(STRING).description("공지사항").optional(),
                     fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),
