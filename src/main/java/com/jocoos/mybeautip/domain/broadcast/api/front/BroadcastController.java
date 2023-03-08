@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,12 +49,12 @@ public class BroadcastController {
     public BroadcastResponse edit(@PathVariable long broadcastId,
                                   @RequestBody @Valid BroadcastEditRequest request,
                                   @CurrentMember MyBeautipUserDetails userDetails) {
-        return service.edit(broadcastId, request);
+        return service.edit(broadcastId, request, userDetails.getMember().getId());
     }
 
     @GetMapping("/1/broadcast/dates")
-    public BroadcastDateListResponse getDateList() {
-        return service.getBroadcastDateList();
+    public BroadcastDateListResponse getDateList(@RequestParam(required = false, defaultValue = "14") int size) {
+        return service.getBroadcastDateList(Pageable.ofSize(size));
     }
 
     @PatchMapping("/1/broadcast/{broadcastId}/status")
