@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
+import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -64,10 +65,9 @@ public class BroadcastController {
     }
 
     @PostMapping("/1/broadcast/{broadcastId}/report")
-    public void report(@PathVariable long broadcastId,
-                       @CurrentMember MyBeautipUserDetails userDetails,
-                       @RequestBody ReportRequest request) {
-        service.report(broadcastId, userDetails.getMember().getId(), request.getDescription());
+    public ReportCountResponse report(@PathVariable long broadcastId,
+                                                         @CurrentMember MyBeautipUserDetails userDetails,
+                                                         @RequestBody ReportRequest request) {
+        return service.report(broadcastId, userDetails.getMember().getId(), request.getDescription());
     }
-
 }
