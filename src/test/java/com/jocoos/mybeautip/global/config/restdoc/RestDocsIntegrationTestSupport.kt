@@ -118,6 +118,7 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
         communityCategoryRepository.save(makeCommunityCategory(id = 1, parentId = null, type = GROUP))
         groupBroadcastCategory =
             broadcastCategoryRepository.save(makeBroadcastCategory(parentId = null, title = "전체"))
+        systemOptionRepository.save(makeSystemOption(FREE_LIVE_PERMISSION, false))
 
         defaultAdmin = memberRepository.save(makeMember(link = 0))
         requestUser = memberRepository.save(makeMember(link = 2))
@@ -161,6 +162,8 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
             .willReturn(makeFFLVideoRoomResponse())
         given(flipFlopLiteClient.startVideoRoom(anyLong())).willReturn(makeFFLVideoRoomResponse())
         given(flipFlopLiteClient.endVideoRoom(anyLong())).willReturn(makeFFLVideoRoomResponse())
+        given(flipFlopLiteClient.getChatToken(anyLong())).willReturn(makeFFLChatTokenResponse())
+        given(flipFlopLiteClient.getStreamKey(anyLong())).willReturn(makeFFLStreamKeyResponse())
     }
 
 }
