@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -103,7 +104,7 @@ public class AdminMemberController {
     }
 
     @PatchMapping("/member/influencer")
-    public ResponseEntity<List<InfluencerResponse>> bulkUpdateInfluencer(@RequestBody InfluencerRequest request) {
+    public ResponseEntity<List<InfluencerResponse>> bulkUpdateInfluencer(@RequestBody @Valid InfluencerRequest request) {
         return ResponseEntity.ok(influencerService.bulkUpdateInfluencer(request));
     }
 

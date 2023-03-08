@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
@@ -135,4 +136,7 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
 
     @Query("SELECT m FROM Member m WHERE LENGTH(m.tag) < 1")
     List<Member> selectTagIsEmpty();
+
+    @Query("select count(m) from Member m where m.id in :ids")
+    long countByIdIn(@Param("ids") Set<Long> ids);
 }

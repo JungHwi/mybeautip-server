@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.member.service.dao;
 import com.jocoos.mybeautip.domain.member.code.InfluencerStatus;
 import com.jocoos.mybeautip.domain.member.persistence.domain.Influencer;
 import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepository;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.util.EntityMapUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +26,10 @@ public class InfluencerDao {
     }
 
     @Transactional
-    public List<Influencer> bulkUpdateInfluencer(List<Long> ids, InfluencerStatus status) {
-        // TODO Member Exist Check Needed?
+    public List<Influencer> bulkUpdateInfluencer(Set<Long> ids, InfluencerStatus status) {
+        if (ids.size() != memberDao.countByIdIn(ids)) {
+            throw new BadRequestException("member not exist id in " + ids);
+        }
 
         List<Influencer> existInfluencerList = repository.findAllByIdIn(ids);
         Map<Long, Influencer> idInfluncerMap = EntityMapUtil.getIdEntityMap(existInfluencerList, Influencer::getId);

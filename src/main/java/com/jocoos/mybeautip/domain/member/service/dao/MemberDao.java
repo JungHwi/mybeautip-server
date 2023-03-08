@@ -107,4 +107,9 @@ public class MemberDao {
     public List<Member> getMembers(Set<Long> ids) {
         return repository.findByIdIn(ids);
     }
+
+    @Transactional(readOnly = true)
+    public long countByIdIn(Set<Long> ids) {
+        return repository.countByIdIn(ids);
+    }
 }
