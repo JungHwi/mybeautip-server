@@ -19,6 +19,7 @@ create table broadcast
     status           varchar(20)                                                                                   not null comment '상태',
     sorted_status    int generated always as (field(status, 'LIVE', 'READY', 'SCHEDULED', 'END', 'CANCEL')) stored not null,
     video_key        varchar(10)                                                                                   not null comment '플립플랍 비디오 키',
+    chat_channel_key      varchar(30)                                                                                   not null comment '채팅룸 키',
     member_id        bigint                                                                                        not null comment '회원 아이디',
     title            varchar(25)                                                                                   not null comment '제목',
     url              varchar(200) comment '방송 URL',
