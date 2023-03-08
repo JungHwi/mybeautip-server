@@ -2,7 +2,8 @@ package com.jocoos.mybeautip.domain.member.service.dao;
 
 import com.jocoos.mybeautip.domain.member.persistence.domain.Jwt;
 import com.jocoos.mybeautip.domain.member.persistence.repository.JwtRepository;
-import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.AuthenticationException;
+import com.jocoos.mybeautip.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class JwtDao {
     @Transactional(readOnly = true)
     public Jwt get(String username) {
         return repository.findById(username)
-                .orElseThrow(MemberNotFoundException::new);
+                .orElseThrow(() -> new AuthenticationException(ErrorCode.INVALID_TOKEN));
     }
 
     @Transactional
