@@ -28,7 +28,7 @@ import java.util.List;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.CANCEL;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.BROADCAST;
-import static com.jocoos.mybeautip.global.dto.FileDto.getUploadAndDeleteFileDtoList;
+import static com.jocoos.mybeautip.global.dto.FileDto.uploadAndDeleteImages;
 
 @RequiredArgsConstructor
 @Service
@@ -84,7 +84,7 @@ public class AdminBroadcastService {
 
     private void editThumbnailFile(String editedThumbnailUrl, String originalThumbnailUrl, long broadcastId) {
         if (!originalThumbnailUrl.equals(editedThumbnailUrl)) {
-            List<FileDto> files = getUploadAndDeleteFileDtoList(editedThumbnailUrl, originalThumbnailUrl);
+            List<FileDto> files = uploadAndDeleteImages(editedThumbnailUrl, originalThumbnailUrl);
             awsS3Handler.editFiles(files, BROADCAST.getDirectory(broadcastId));
         }
     }

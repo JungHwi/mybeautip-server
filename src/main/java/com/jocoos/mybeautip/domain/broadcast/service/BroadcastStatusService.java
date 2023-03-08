@@ -47,7 +47,6 @@ public class BroadcastStatusService {
     private Broadcast toFinish(Broadcast broadcast, BroadcastStatus changeStatus) {
         ZonedDateTime endedAt = flipFlopLiteService.endVideoRoom(broadcast.getVideoKey());
         broadcast.finish(changeStatus, endedAt);
-        copyThumbnailToVod(broadcast);
         return broadcast;
     }
 

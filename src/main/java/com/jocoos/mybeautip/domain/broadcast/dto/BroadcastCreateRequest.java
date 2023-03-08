@@ -1,11 +1,11 @@
 package com.jocoos.mybeautip.domain.broadcast.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jocoos.mybeautip.global.dto.FileDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 
@@ -18,8 +18,8 @@ public class BroadcastCreateRequest {
     @NotNull
     private final String title;
 
-    @NotBlank
-    private final String thumbnailUrl;
+    @NotNull
+    private final FileDto thumbnail;
 
     @NotNull
     private final Long categoryId;
