@@ -77,6 +77,7 @@ public class BroadcastService {
         Member creator = memberDao.getMember(creatorId);
         Broadcast broadcast = domainService.create(request, creatorId);
         createVod(broadcast);
+        flipFlopLiteService.createChatRoom(broadcast.getVideoKey());
         awsS3Handler.copy(request.getThumbnailUrl(), BROADCAST.getDirectory(broadcast.getId()));
         return converter.toResponse(broadcast, creator);
     }
