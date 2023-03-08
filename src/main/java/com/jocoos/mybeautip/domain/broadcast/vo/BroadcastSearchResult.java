@@ -19,6 +19,7 @@ public class BroadcastSearchResult {
 
     private final long id;
     private final long videoKey;
+    private final String chatChannelKey;
     private final BroadcastStatus status;
     private final String url;
     private final String title;
@@ -35,7 +36,7 @@ public class BroadcastSearchResult {
     private final ZonedDateTime createdAt;
 
     private final BroadcastCategoryResponse category;
-    private final SimpleMemberInfo member;
+    private final SimpleMemberInfo createdBy;
 
     @QueryProjection
     public BroadcastSearchResult(Broadcast broadcast,
@@ -43,6 +44,7 @@ public class BroadcastSearchResult {
                                  Member member) {
         this.id = broadcast.getId();
         this.videoKey = broadcast.getVideoKey();
+        this.chatChannelKey = broadcast.getChatChannelKey();
         this.status = broadcast.getStatus();
         this.url = broadcast.getUrl();
         this.title = broadcast.getTitle();
@@ -54,6 +56,6 @@ public class BroadcastSearchResult {
         this.startedAt = broadcast.getStartedAt();
         this.createdAt = broadcast.getCreatedAt();
         this.category = new BroadcastCategoryResponse(category);
-        this.member = new SimpleMemberInfo(member);
+        this.createdBy = new SimpleMemberInfo(member);
     }
 }

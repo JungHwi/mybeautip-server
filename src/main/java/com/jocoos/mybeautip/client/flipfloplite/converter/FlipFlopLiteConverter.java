@@ -1,9 +1,6 @@
 package com.jocoos.mybeautip.client.flipfloplite.converter;
 
-import com.jocoos.mybeautip.client.flipfloplite.dto.ExternalBroadcastInfo;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLMemberInfo;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomRequest;
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse;
+import com.jocoos.mybeautip.client.flipfloplite.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.member.Member;
 import org.mapstruct.Mapper;
@@ -30,6 +27,9 @@ public interface FlipFlopLiteConverter {
 
     @Mappings({
             @Mapping(target = "videoKey", source = "id"),
+            @Mapping(target = "channelKey", source = "chat.channelKey")
     })
     ExternalBroadcastInfo converts(FFLVideoRoomResponse response);
+
+    ChatTokenAndAppId converts(FFLChatTokenResponse response);
 }

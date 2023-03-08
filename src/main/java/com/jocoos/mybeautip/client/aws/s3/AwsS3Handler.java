@@ -6,7 +6,6 @@ import com.jocoos.mybeautip.global.dto.FileDto;
 import com.jocoos.mybeautip.global.exception.S3UrlUploadException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +18,7 @@ import static com.jocoos.mybeautip.global.constant.MybeautipConstant.TEST_FILE;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.getUri;
 import static io.micrometer.core.instrument.util.StringUtils.isBlank;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Component
 @RequiredArgsConstructor
@@ -100,7 +100,7 @@ public class AwsS3Handler {
     }
 
     public List<String> copy(List<FileDto> fileDtoList, String destination) {
-        if (CollectionUtils.isEmpty(fileDtoList)) {
+        if (isEmpty(fileDtoList)) {
             return null;
         }
 
@@ -113,6 +113,9 @@ public class AwsS3Handler {
     }
 
     public List<String> editFiles(List<FileDto> fileDtoList, String destination) {
+        if (isEmpty(fileDtoList)) {
+            return List.of();
+        }
         List<String> result = new ArrayList<>();
         for (FileDto fileDto : fileDtoList) {
             if (fileDto.getOperation() == null) {

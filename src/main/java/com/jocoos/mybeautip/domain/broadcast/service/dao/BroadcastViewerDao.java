@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +22,13 @@ public class BroadcastViewerDao {
     private final BroadcastViewerRepository repository;
 
     @Transactional(readOnly = true)
+    public Optional<BroadcastViewer> findBroadcastViewer(Long broadcastId, Long memberId) {
+        return repository.findByBroadcastIdAndMemberId(broadcastId, memberId);
+    }
+
+    @Transactional(readOnly = true)
     public BroadcastViewer getBroadcastViewer(long broadcastId, long memberId) {
-        return repository.findByBroadcastIdAndMemberId(broadcastId, memberId)
+        return findBroadcastViewer(broadcastId, memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
     }
 

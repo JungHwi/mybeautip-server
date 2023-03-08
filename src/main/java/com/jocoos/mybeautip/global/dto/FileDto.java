@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityFile;
 import com.jocoos.mybeautip.domain.file.code.FileType;
 import com.jocoos.mybeautip.global.code.FileOperationType;
@@ -48,13 +49,15 @@ public class FileDto {
         return new FileDto(file.getType(), file.getFileUrl(), file.getDuration());
     }
 
-    public static List<FileDto> getUploadAndDeleteFileDtoList(@NonNull String uploadUrl, @NonNull String deleteUrl) {
+    public static List<FileDto> uploadAndDeleteImages(@NonNull String uploadUrl, @NonNull String deleteUrl) {
         FileDto uploadFile = FileDto.builder()
+                .type(IMAGE)
                 .url(uploadUrl)
                 .operation(UPLOAD)
                 .build();
 
         FileDto deleteFile = FileDto.builder()
+                .type(IMAGE)
                 .url(deleteUrl)
                 .operation(DELETE)
                 .build();
@@ -89,6 +92,11 @@ public class FileDto {
 
     private String thumbnailUrl() {
         return url + "_thumbnail.jpg";
+    }
+
+    @JsonIgnore
+    public boolean isUpload() {
+        return UPLOAD == operation;
     }
 
     @Override

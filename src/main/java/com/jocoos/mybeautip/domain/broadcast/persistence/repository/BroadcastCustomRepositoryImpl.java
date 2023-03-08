@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcast.broadcast;
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastCategory.broadcastCategory;
@@ -68,10 +69,12 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     @Override
-    public BroadcastSearchResult get(long broadcastId) {
-        return repository.query(query -> searchResultWithMemberAndCategory(query)
+    public Optional<BroadcastSearchResult> get(long broadcastId) {
+        BroadcastSearchResult result = repository.query(query -> searchResultWithMemberAndCategory(query)
                 .where(eqId(broadcastId))
                 .fetchOne());
+        // result is nullable ignore ide
+        return Optional.ofNullable(result);
     }
 
     private JPAQuery<BroadcastSearchResult> searchResultWithMemberAndCategory(JPAQuery<?> query) {

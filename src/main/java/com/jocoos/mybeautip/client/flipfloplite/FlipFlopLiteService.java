@@ -67,8 +67,9 @@ public class FlipFlopLiteService {
         return response.streamKey();
     }
 
-    public FFLChatTokenResponse getChatToken(long memberId) {
-        return client.getChatToken(memberId);
+    public ChatTokenAndAppId getChatToken(long memberId) {
+        FFLChatTokenResponse response = client.getChatToken(memberId);
+        return converter.converts(response);
     }
 
     public FFLChatRoomResponse createChatRoom(long videoRoomId) {

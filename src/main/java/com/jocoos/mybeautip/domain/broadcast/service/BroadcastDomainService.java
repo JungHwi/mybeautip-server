@@ -13,7 +13,6 @@ import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastCategoryDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditCommand;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,20 +37,18 @@ public class BroadcastDomainService {
         Broadcast broadcast = converter.toEntity(request, category, creatorId);
 
         ExternalBroadcastInfo externalInfo = flipFlopLiteService.createVideoRoom(broadcast);
-        broadcast.updateVideoKey(externalInfo.videoKey());
+        broadcast.updateVideoAndChannelKey(externalInfo.videoKey(), externalInfo.channelKey());
         return broadcastDao.save(broadcast);
     }
 
     @Transactional
-    public BroadcastEditResult edit(long broadcastId, BroadcastEditRequest request) {
+    public Broadcast edit(long broadcastId, BroadcastEditRequest request, Long requestMemberId) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        String originalThumbnailUrl = broadcast.getThumbnailUrl();
-
         BroadcastCategory editedCategory = getEditedCategory(broadcast, request.getCategoryId());
-        BroadcastEditCommand editCommand = BroadcastEditCommand.edit(request, editedCategory);
+        String editedThumbnailUrl = request.getUploadThumbnailUrl(broadcast.getThumbnailUrl());
+        BroadcastEditCommand editCommand = BroadcastEditCommand.edit(request, editedThumbnailUrl, editedCategory);
         broadcast.edit(editCommand);
-        Broadcast editedBroadcast = broadcastDao.save(broadcast);
-        return new BroadcastEditResult(editedBroadcast, originalThumbnailUrl);
+        return broadcastDao.save(broadcast);
     }
 
     @Transactional

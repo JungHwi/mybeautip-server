@@ -1,8 +1,10 @@
 package com.jocoos.mybeautip.domain.broadcast.converter;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchResult;
+import com.jocoos.mybeautip.member.Member;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -25,4 +27,14 @@ public interface BroadcastViewerConverter {
     ViewerResponse converts(ViewerSearchResult result);
 
     List<ViewerResponse> converts(List<ViewerSearchResult> results);
+
+    @Mappings({
+            @Mapping(target = "status", constant = "ACTIVE"),
+            @Mapping(target = "type", source = "type"),
+            @Mapping(target = "memberId", source = "member.id"),
+            @Mapping(target = "isSuspended", ignore = true),
+            @Mapping(target = "suspendedAt", ignore = true),
+            @Mapping(target = "joinedAt", ignore = true)
+    })
+    ViewerResponse converts(Member member, BroadcastViewerType type);
 }

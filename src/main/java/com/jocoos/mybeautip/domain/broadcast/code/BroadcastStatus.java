@@ -15,17 +15,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @AllArgsConstructor
 public enum BroadcastStatus implements CodeValue {
 
-    SCHEDULED("예정"),
-    READY("준비"),
-    LIVE("방송중"),
-    END("종료"),
-    CANCEL("취소");
+    SCHEDULED("예정", false),
+    READY("준비", false),
+    LIVE("방송중", true),
+    END("종료", true),
+    CANCEL("취소", true)
+    ;
 
     private final String description;
+    private final boolean canManuallyChange;
 
     private static final Map<BroadcastStatus, Set<BroadcastStatus>> CHANGE_CANDIDATE_MAP = new EnumMap<>(BroadcastStatus.class);
     static {
-        CHANGE_CANDIDATE_MAP.put(SCHEDULED, Set.of(READY, LIVE, CANCEL));
+        CHANGE_CANDIDATE_MAP.put(SCHEDULED, Set.of(READY, CANCEL));
         CHANGE_CANDIDATE_MAP.put(READY, Set.of(LIVE, CANCEL));
         CHANGE_CANDIDATE_MAP.put(LIVE, Set.of(END));
         CHANGE_CANDIDATE_MAP.put(END, Set.of());

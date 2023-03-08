@@ -83,7 +83,7 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("content.[].id").type(NUMBER).description("방송 아이디"),
                     fieldWithPath("content.[].video_key").type(NUMBER).description("플립플랍 라이트 비디오 키"),
                     fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("content.[].url").type(STRING).description("방송 URL"),
+                    fieldWithPath("content.[].url").type(STRING).description("방송 URL").optional(),
                     fieldWithPath("content.[].title").type(STRING).description("타이틀"),
                     fieldWithPath("content.[].notice").type(STRING).description("공지사항").optional(),
                     fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),
@@ -95,11 +95,11 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("content.[].category").type(OBJECT).description("카테고리 정보"),
                     fieldWithPath("content.[].category.id").type(NUMBER).description("카테고리 아이디"),
                     fieldWithPath("content.[].category.title").type(STRING).description("카테고리 타이틀"),
-                    fieldWithPath("content.[].member").type(OBJECT).description("회원 정보"),
-                    fieldWithPath("content.[].member.id").type(NUMBER).description("회원 아이디"),
-                    fieldWithPath("content.[].member.email").type(STRING).description("회원 이메일").optional(),
-                    fieldWithPath("content.[].member.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("content.[].member.avatar_url").type(STRING).description("회원 아바타 URL"),
+                    fieldWithPath("content.[].created_by").type(OBJECT).description("회원 정보"),
+                    fieldWithPath("content.[].created_by.id").type(NUMBER).description("회원 아이디"),
+                    fieldWithPath("content.[].created_by.email").type(STRING).description("회원 이메일").optional(),
+                    fieldWithPath("content.[].created_by.username").type(STRING).description("회원 닉네임"),
+                    fieldWithPath("content.[].created_by.avatar_url").type(STRING).description("회원 아바타 URL")
                 )
             )
         )
@@ -126,7 +126,7 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("id").type(NUMBER).description("방송 아이디"),
                     fieldWithPath("video_key").type(NUMBER).description("플립플랍 라이트 비디오 키"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("url").type(STRING).description("방송 URL"),
+                    fieldWithPath("url").type(STRING).description("방송 URL").optional(),
                     fieldWithPath("title").type(STRING).description("타이틀"),
                     fieldWithPath("notice").type(STRING).description("공지사항").optional(),
                     fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
@@ -138,11 +138,11 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("category").type(OBJECT).description("카테고리 정보"),
                     fieldWithPath("category.id").type(NUMBER).description("카테고리 아이디"),
                     fieldWithPath("category.title").type(STRING).description("카테고리 타이틀"),
-                    fieldWithPath("member").type(OBJECT).description("회원 정보"),
-                    fieldWithPath("member.id").type(NUMBER).description("회원 아이디"),
-                    fieldWithPath("member.email").type(STRING).description("회원 이메일").optional(),
-                    fieldWithPath("member.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("member.avatar_url").type(STRING).description("회원 아바타 URL")
+                    fieldWithPath("created_by").type(OBJECT).description("회원 정보"),
+                    fieldWithPath("created_by.id").type(NUMBER).description("회원 아이디"),
+                    fieldWithPath("created_by.email").type(STRING).description("회원 이메일").optional(),
+                    fieldWithPath("created_by.username").type(STRING).description("회원 닉네임"),
+                    fieldWithPath("created_by.avatar_url").type(STRING).description("회원 아바타 URL")
                 )
             )
         )

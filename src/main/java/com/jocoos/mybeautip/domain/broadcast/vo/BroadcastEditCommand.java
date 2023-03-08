@@ -25,14 +25,16 @@ public class BroadcastEditCommand {
     private final String editedNotice;
     private final String editedThumbnail;
 
-    public static BroadcastEditCommand edit(BroadcastEditRequest request, BroadcastCategory editedCategory) {
+    public static BroadcastEditCommand edit(BroadcastEditRequest request,
+                                            String editedThumbnailUrl,
+                                            BroadcastCategory editedCategory) {
         return BroadcastEditCommand.builder()
                 .isStartNow(request.getIsStartNow())
                 .editedStartedAt(request.getStartedAt())
-                .editedCategory(editedCategory)
                 .editedTitle(request.getTitle())
                 .editedNotice(request.getNotice())
-                .editedThumbnail(request.getThumbnailUrl())
+                .editedCategory(editedCategory)
+                .editedThumbnail(editedThumbnailUrl)
                 .build();
     }
 

@@ -1,7 +1,5 @@
 package com.jocoos.mybeautip.testutil.fixture
 
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.LIVE
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
@@ -20,13 +18,14 @@ fun makeBroadcast(
     memberId: Long = 1,
     isStartNow: Boolean = false,
     videoKey: Long = 1,
+    channelKey: String = "channelKey",
     title: String = "title",
     thumbnail: String = "thumbnail",
     notice: String = "notice",
     startedAt: ZonedDateTime = ZonedDateTime.now().plusDays(1)
 ): Broadcast {
     val broadcast = Broadcast(memberId, title, thumbnail, startedAt, category, notice, isStartNow)
-    broadcast.updateVideoKey(videoKey)
+    broadcast.updateVideoAndChannelKey(videoKey, channelKey)
     return broadcast
 }
 

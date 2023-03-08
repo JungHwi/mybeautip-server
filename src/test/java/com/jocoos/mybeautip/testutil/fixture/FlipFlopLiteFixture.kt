@@ -3,14 +3,19 @@ package com.jocoos.mybeautip.testutil.fixture
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLAccessLevel
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLCreatorType
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLEntityState
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoFormat
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomType
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLAppInfo
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLChatInfo
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLChatTokenResponse
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLError
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLMemberInfo
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLProfile
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLStreamKey
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLStreamKeyResponse
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLUserInfo
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomStatistics
@@ -35,7 +40,7 @@ fun makeFFLVideoRoomResponse(
     title: String? = null,
     description: String? = null,
     streamKey: FFLStreamKey? = null,
-    chat: FFLChatInfo? = null,
+    chat: FFLChatInfo? = FFLChatInfo("videoKey", "channelKey"),
     stats: FFLVideoRoomStatistics? = null,
     createdAt: ZonedDateTime? = null,
     createdBy: FFLUserInfo? = null,
@@ -63,5 +68,45 @@ fun makeFFLVideoRoomResponse(
         lastModifiedAt,
         createdBy,
         lastModifiedBy
+    )
+}
+
+fun makeFFLChatTokenResponse(
+    chatToken: String = "chatToken",
+    appId: String = "appId",
+    userId: String? = null,
+    userName: String? = null,
+    avatarProfileUrl: String? = null
+): FFLChatTokenResponse {
+    return FFLChatTokenResponse(chatToken, appId, userId, userName, avatarProfileUrl)
+}
+
+fun makeFFLStreamKeyResponse(
+    streamKey: String = "streamKey",
+    id: Long = 1,
+    state: FFLEntityState? = null,
+    streamKeyState: FFLStreamKeyState? = null,
+    app: FFLAppInfo? = null,
+    member: FFLMemberInfo? = null,
+    videoRoom: FFLVideoRoomResponse? = null,
+    liveUrl: String? = null,
+    profile: FFLProfile? = null,
+    error: FFLError? = null,
+    createdAt: ZonedDateTime? = null,
+    lastModifiedAt: ZonedDateTime? = null
+): FFLStreamKeyResponse {
+    return FFLStreamKeyResponse(
+        id,
+        state,
+        streamKeyState,
+        app,
+        member,
+        videoRoom,
+        streamKey,
+        liveUrl,
+        profile,
+        error,
+        createdAt,
+        lastModifiedAt
     )
 }

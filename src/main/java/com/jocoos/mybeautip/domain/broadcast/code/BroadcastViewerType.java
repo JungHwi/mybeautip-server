@@ -8,6 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BroadcastViewerType implements CodeValue {
 
+    OWNER("방송 진행자", false),
+    ADMIN("마이뷰팁 어드민", false),
     MANAGER("채팅 관리자", false),
     MEMBER("회원", true),
     GUEST("비회원", false);
