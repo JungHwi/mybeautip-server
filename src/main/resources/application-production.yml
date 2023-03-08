@@ -64,8 +64,8 @@ flipflop:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
 ffl:
-  api-key: FIXME
-  api-secret: FIXME
+  api-key: 2Mi6Qx9YJWG1LdUd4F3VQEFOo8B
+  api-secret: 2Mi6Qtwb2VsJ4lVFlMMetrjH3LW
   domain: https://api.lite.flipflop.tv
 
 #redis:
