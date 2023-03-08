@@ -305,13 +305,13 @@ class AdminMemberControllerTest(
     }
 
     @Test
-    fun updateInfluencer() {
+    fun bulkUpdateInfluencer() {
         val member: Member = memberRepository.save(makeMember(status = ACTIVE))
-        val request = InfluencerRequest(InfluencerStatus.ACTIVE)
+        val request = InfluencerRequest(setOf(member.id), InfluencerStatus.ACTIVE)
 
         val result: ResultActions = mockMvc
             .perform(
-                patch("/admin/member/{member_id}/influencer", member.id)
+                patch("/admin/member/influencer")
                     .header(AUTHORIZATION, defaultAdminToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
@@ -321,17 +321,15 @@ class AdminMemberControllerTest(
 
         result.andDo(
             document(
-                "admin_patch_influencer",
-                pathParameters(
-                    parameterWithName("member_id").description("회원 ID")
-                ),
+                "admin_bulk_update_to_influencer",
                 requestFields(
+                    fieldWithPath("ids").type(ARRAY).description("회원 ID 리스트"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(INFLUENCER_STATUS))
                 ),
                 responseFields(
-                    fieldWithPath("status").type(STRING).description(generateLinkCode(INFLUENCER_STATUS)),
-                    fieldWithPath("broadcast_count").type(NUMBER).description("방송 횟수"),
-                    fieldWithPath("earned_at").type(STRING).description("인플루언서 권한 획득 일시").attributes(getZonedDateFormat()).optional()
+                    fieldWithPath("[].status").type(STRING).description(generateLinkCode(INFLUENCER_STATUS)),
+                    fieldWithPath("[].broadcast_count").type(NUMBER).description("방송 횟수"),
+                    fieldWithPath("[].earned_at").type(STRING).description("인플루언서 권한 획득 일시").attributes(getZonedDateFormat()).optional()
                 )
             )
         )

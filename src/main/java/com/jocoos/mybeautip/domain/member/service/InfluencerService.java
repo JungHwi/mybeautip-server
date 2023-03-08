@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class InfluencerService {
@@ -17,8 +19,8 @@ public class InfluencerService {
     private final InfluencerConverter converter;
 
     @Transactional
-    public InfluencerResponse updateInfluencer(long id, InfluencerRequest request) {
-        Influencer influencer = dao.updateInfluencer(id, request);
-        return converter.converts(influencer);
+    public List<InfluencerResponse> bulkUpdateInfluencer(InfluencerRequest request) {
+        List<Influencer> influencerList = dao.bulkUpdateInfluencer(request.ids(), request.status());
+        return converter.converts(influencerList);
     }
 }
