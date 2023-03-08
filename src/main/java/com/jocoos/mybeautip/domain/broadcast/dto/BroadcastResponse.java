@@ -9,8 +9,6 @@ import java.time.ZonedDateTime;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT;
 
 public record BroadcastResponse(long id,
-                                String streamKey,
-                                String chatToken,
                                 BroadcastStatus status,
                                 String url,
                                 String title,
@@ -18,6 +16,8 @@ public record BroadcastResponse(long id,
                                 String notice,
                                 int viewerCount,
                                 int heartCount,
-                                SimpleMemberInfo member,
-                                @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt) {
+                                @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
+                                BroadcastCategoryResponse category,
+                                SimpleMemberInfo createdBy,
+                                BroadcastParticipantInfo participant) {
 }

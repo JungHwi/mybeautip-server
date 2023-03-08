@@ -17,7 +17,7 @@ public record BroadcastListResponse(long id,
                                     String title,
                                     String thumbnailUrl,
                                     int viewerCount,
-                                    SimpleMemberInfo member,
+                                    SimpleMemberInfo createdBy,
                                     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt)
         implements CursorInterface {
     @JsonIgnore

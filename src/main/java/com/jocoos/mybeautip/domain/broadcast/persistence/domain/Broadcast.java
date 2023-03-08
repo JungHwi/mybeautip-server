@@ -20,7 +20,6 @@ import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static com.jocoos.mybeautip.global.validator.StringValidator.validateMaxLengthWithoutWhiteSpace;
 import static java.time.ZonedDateTime.now;
-import static java.util.Objects.requireNonNull;
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.EnumType.STRING;
 import static javax.persistence.FetchType.LAZY;
@@ -38,6 +37,10 @@ public class Broadcast extends CreatedAtBaseEntity {
 
     @Column
     private Long videoKey;
+
+    // used for chat
+    @Column
+    private String chatChannelKey;
 
     @Enumerated(STRING)
     private BroadcastStatus status;
@@ -106,19 +109,19 @@ public class Broadcast extends CreatedAtBaseEntity {
         setNotice(notice);
     }
 
-    // video key will get from external service so updated later
-    public void updateVideoKey(@NotNull Long videoKey) {
+    // video and channel key will get from external service so updated later
+    public void updateVideoAndChannelKey(@NotNull Long videoKey, @NotNull String chatChannelKey) {
         this.videoKey = videoKey;
+        this.chatChannelKey = chatChannelKey;
     }
 
-    public void edit(BroadcastEditCommand command) {
-        if (!startedAt.isEqual(command.getEditedStartedAt()) &&
+    public void edit(@NotNull BroadcastEditCommand command) {
+        if ((command.isStartNow() || !startedAt.isEqual(command.getEditedStartedAt())) &&
                 Duration.between(startedAt, now()).toMinutes() > 30) {
             throw new BadRequestException("");
         }
 
         changeStatusAndStartedAt(command.isStartNow(), command.getEditedStartedAt());
-        setStartedAtByIsStartNow(command.isStartNow(), command.getEditedStartedAt());
         setCategory(command.getEditedCategory());
         setTitle(command.getEditedTitle());
         setThumbnail(command.getEditedThumbnail());
@@ -151,12 +154,6 @@ public class Broadcast extends CreatedAtBaseEntity {
         return getThumbnailUrl().equals(thumbnailUrl);
     }
 
-    // TODO Live Url Setting Not Yet Confirmed
-    public String getUrl() {
-        return "tempUrl";
-    }
-
-    // FIXME 개발 위해서 디폴트 이미지 내림
     public String getThumbnailUrl() {
         if (thumbnail.isBlank()) {
             return "https://static-dev.mybeautip.com/common/default/share_square_image.jpg";
@@ -190,29 +187,19 @@ public class Broadcast extends CreatedAtBaseEntity {
         setStartedAt(now().plusMinutes(5));
     }
 
-    private void setStartedAtByIsStartNow(boolean isStartNow, ZonedDateTime startedAt) {
-        if (isStartNow) {
-            setStartedAt(now().plusMinutes(5));
-        } else {
-            setStartedAt(startedAt);
-        }
-    }
-
-    private void setCategory(BroadcastCategory category) {
+    private void setCategory(@NotNull BroadcastCategory category) {
         if (category.isGroup()) {
             throw new BadRequestException(category + " isn't writable");
         }
         this.category = category;
     }
 
-    private void setTitle(String title) {
-        requireNonNull(title);
+    private void setTitle(@NotNull String title) {
         validateMaxLengthWithoutWhiteSpace(title, 25, "title");
         this.title = title;
     }
 
-    private void setThumbnail(String thumbnail) {
-        requireNonNull(thumbnail);
+    private void setThumbnail(@NotNull String thumbnail) {
         this.thumbnail = getFileName(thumbnail);
     }
 
@@ -223,7 +210,7 @@ public class Broadcast extends CreatedAtBaseEntity {
         this.notice = notice;
     }
 
-    private void setStartedAt(ZonedDateTime startedAt) {
+    private void setStartedAt(@NotNull ZonedDateTime startedAt) {
 //        if (startedAt.isBefore(now())) {
 //            throw new BadRequestException("Can't Start From Past. Request start_at is " + startedAt);
 //        }

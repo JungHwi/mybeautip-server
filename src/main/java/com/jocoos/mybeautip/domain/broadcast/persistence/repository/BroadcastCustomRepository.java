@@ -4,9 +4,11 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import org.springframework.data.domain.Page;
 
+import java.util.Optional;
+
 public interface BroadcastCustomRepository {
 
     Page<BroadcastSearchResult> getList(BroadcastSearchCondition condition);
 
-    BroadcastSearchResult get(long broadcastId);
+    Optional<BroadcastSearchResult> get(long broadcastId);
 }
