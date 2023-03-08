@@ -1,0 +1,3 @@
+== Report Video Comment API
+
+operation::report_video_comment[snippets='http-request,path-parameters,request-fields,http-response,response-fields']
