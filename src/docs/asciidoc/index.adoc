@@ -160,7 +160,7 @@ include::overview.adoc[]
 * link:member/get_member_point_history.html[멤버 포인트 내역 조회 API, window=_blank]
 * link:member/get_member_report_history.html[멤버 신고당한 내역 조회 API, window=_blank]
 * link:member/admin_member_status.html["멤버 상태 변경 API(정지, 추방)", window=_blank]
-* link:member/admin_patch_influencer.html["인플루언서 권한 부여/해제 API", window=_blank]
+* link:member/admin_patch_influencer.html["인플루언서 권한 부여/해제 벌크 API", window=_blank]
 
 === Member Memo API
 * link:member/admin_write_member_memo.html[관리자 회원 메모 작성 API, window=_blank]
