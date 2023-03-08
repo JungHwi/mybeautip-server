@@ -38,4 +38,8 @@ public record BroadcastSearchCondition(List<BroadcastStatus> statuses,
     public ZonedDateTime endOfDay() {
         return day == null ? null : day.getEndOfDay();
     }
+
+    public Boolean isReported() {
+        return searchOption == null ? null : searchOption.getIsReported();
+    }
 }

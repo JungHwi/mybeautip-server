@@ -11,6 +11,7 @@ import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,15 +35,17 @@ public class AdminBroadcastController {
     }
 
     @GetMapping("/broadcast")
-    public PageResponse<AdminBroadcastResponse> getList(@RequestParam(required = false, defaultValue = "1") int page,
-                                                        @RequestParam(required = false, defaultValue = "5") int size,
-                                                        @RequestParam(required = false) BroadcastStatus status,
-                                                        @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
-                                                        @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
-                                                        @RequestParam(required = false, name = "search_field") String searchField,
-                                                        @RequestParam(required = false, name = "search_keyword") String searchKeyword,
-                                                        @RequestParam(required = false, name = "is_reported") Boolean isReported) {
-
+    public PageResponse<AdminBroadcastResponse> getList(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "5") int size,
+            @RequestParam(required = false) BroadcastStatus status,
+            @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
+            @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
+            @RequestParam(required = false, defaultValue = "sortedStatus") String sort,
+            @RequestParam(required = false, defaultValue = "DESC") Direction order,
+            @RequestParam(required = false, name = "search_field") String searchField,
+            @RequestParam(required = false, name = "search_keyword") String searchKeyword,
+            @RequestParam(required = false, name = "is_reported") Boolean isReported) {
         SearchOption searchOption = SearchOption.builder()
                 .startAt(startAt)
                 .endAt(endAt)

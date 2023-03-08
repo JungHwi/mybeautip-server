@@ -97,6 +97,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                         createdAtBefore(condition.endAt()),
                         searchByKeyword(condition.searchOption()),
                         inStatus(condition.statuses()),
+                        isReported(condition.isReported()),
                         cursor(condition.cursor())
                 );
     }
@@ -136,6 +137,13 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
             return member.username.containsIgnoreCase(keyword);
         }
         return broadcast.title.containsIgnoreCase(keyword);
+    }
+
+    private BooleanExpression isReported(Boolean isReported) {
+        if (isReported == null) {
+            return null;
+        }
+        return isReported ? broadcast.reportCount.gt(0) : broadcast.reportCount.eq(0);
     }
 
     private BooleanExpression startAtBetween(ZonedDateTime from, ZonedDateTime to) {
