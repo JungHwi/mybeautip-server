@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[broadcast_sort_field]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-broadcast_sort_field.adoc[]
