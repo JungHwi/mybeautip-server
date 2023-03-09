@@ -107,9 +107,13 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("BroadcastViewerStatus")),
                                 enumConvertFieldDescriptor((enumDocs.getBroadcastViewerStatus()))
                         ),
-                        customResponseFields("custom-response", beneathPath("data.vod_sort_field").withSubsectionId("vod_sort_field"),
-                                attributes(key("title").value("VodSortField")),
-                                enumConvertFieldDescriptor((enumDocs.getVodSortField()))
+                        customResponseFields("custom-response", beneathPath("data.broadcast_status").withSubsectionId("broadcast_status"),
+                                attributes(key("title").value("BroadcastStatus")),
+                                enumConvertFieldDescriptor((enumDocs.getBroadcastStatus()))
+                        ),
+                        customResponseFields("custom-response", beneathPath("data.broadcast_sort_field").withSubsectionId("broadcast_sort_field"),
+                                attributes(key("title").value("BroadcastSortField")),
+                                enumConvertFieldDescriptor((enumDocs.getBroadcastSortField()))
                         ),
                         // Event
                         customResponseFields("custom-response", beneathPath("data.event_status").withSubsectionId("event_status"),
@@ -258,10 +262,10 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("NoticeSort")),
                                 enumConvertFieldDescriptor((enumDocs.getNoticeSort()))
                         ),
-                        // Broadcast
-                        customResponseFields("custom-response", beneathPath("data.broadcast_status").withSubsectionId("broadcast_status"),
-                                attributes(key("title").value("BroadcastStatus")),
-                                enumConvertFieldDescriptor((enumDocs.getBroadcastStatus()))
+                        // Vod
+                        customResponseFields("custom-response", beneathPath("data.vod_sort_field").withSubsectionId("vod_sort_field"),
+                                attributes(key("title").value("VodSortField")),
+                                enumConvertFieldDescriptor((enumDocs.getVodSortField()))
                         )
                 ));
     }

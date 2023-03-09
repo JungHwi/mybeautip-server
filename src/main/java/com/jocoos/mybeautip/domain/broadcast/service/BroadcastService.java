@@ -20,7 +20,9 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.Day;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +31,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT_SEARCH_STATUSES;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
 import static com.jocoos.mybeautip.domain.system.code.SystemOptionType.FREE_LIVE_PERMISSION;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @RequiredArgsConstructor
 @Service
@@ -67,14 +71,18 @@ public class BroadcastService {
     }
 
     @Transactional(readOnly = true)
-    public List<BroadcastListResponse> getList(BroadcastStatus status, LocalDate localDate, Long cursor, int size) {
+    public List<BroadcastListResponse> getList(BroadcastStatus status,
+                                               LocalDate localDate,
+                                               Long cursor,
+                                               int size) {
+        Sort defaultSort = SORTED_STATUS.getSort(DESC);
         BroadcastSearchCondition condition = BroadcastSearchCondition.builder()
                 .statuses(getStatuses(status))
                 .day(getDay(localDate))
                 .cursor(cursor)
-                .pageable(Pageable.ofSize(size))
+                .pageable(PageRequest.of(0, size, defaultSort))
                 .build();
-        List<BroadcastSearchResult> searchResults = broadcastDao.getList(condition).getContent();
+        List<BroadcastSearchResult> searchResults = broadcastDao.getList(condition);
         return converter.toListResponse(searchResults);
     }
 

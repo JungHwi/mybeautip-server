@@ -20,6 +20,7 @@ public class DocumentLinkGenerator {
         INFLUENCER_STATUS("influencer_status", "인플루언서 상태"),
         BROADCAST_VIEWER_TYPE("broadcast_viewer_type", "시청자 구분"),
         BROADCAST_VIEWER_STATUS("broadcast_viewer_status", "시청자 상태"),
+        BROADCAST_SORT_FIELD("broadcast_sort_field", "방송 정렬 필드"),
         GRANT_TYPE("grant_type", "소셜 로그인 서비스 구분"),
         EVENT_TYPE("event_type", "이벤트 구분"),
         EVENT_STATUS("event_status", "이벤트 상태"),

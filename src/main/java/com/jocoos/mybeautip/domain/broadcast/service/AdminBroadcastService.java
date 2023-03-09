@@ -47,7 +47,7 @@ public class AdminBroadcastService {
                 .pageable(pageable)
                 .searchOption(searchOption)
                 .build();
-        Page<BroadcastSearchResult> searchResults = broadcastDao.getList(condition);
+        Page<BroadcastSearchResult> searchResults = broadcastDao.getPageList(condition);
         List<AdminBroadcastResponse> response = converter.toAdminResponse(searchResults.getContent());
         return new PageResponse<>(searchResults.getTotalElements(), response);
     }

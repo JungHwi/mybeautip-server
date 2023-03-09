@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.global.vo.Day;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import lombok.Builder;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -37,5 +38,13 @@ public record BroadcastSearchCondition(List<BroadcastStatus> statuses,
 
     public ZonedDateTime endOfDay() {
         return day == null ? null : day.getEndOfDay();
+    }
+
+    public Boolean isReported() {
+        return searchOption == null ? null : searchOption.getIsReported();
+    }
+
+    public Sort sort() {
+        return pageable == null ? null : pageable().getSort();
     }
 }
