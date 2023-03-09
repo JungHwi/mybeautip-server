@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.code;
 
+import com.jocoos.mybeautip.global.code.CodeValue;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Getter
 @RequiredArgsConstructor
-public enum BroadcastSortField {
+public enum BroadcastSortField implements CodeValue {
     SORTED_STATUS("상태 순서", SORTED_STATUS_FIELD_NAME, SORTED_STATUS_ASC, SORTED_STATUS_DESC),
     CREATED_AT("생성 일자", ID_FIELD_NAME, Sort.by(ASC, ID_FIELD_NAME), Sort.by(DESC, ID_FIELD_NAME)),
     STARTED_AT("시작 일자", STARTED_AT_FIELD_NAME, STARTED_AT_ASC, STARTED_AT_DESC),
@@ -27,6 +28,11 @@ public enum BroadcastSortField {
     public Sort getSort(Direction direction) {
         if (direction.isAscending()) return asc;
         else return desc;
+    }
+
+    @Override
+    public String getName() {
+        return name();
     }
 
     @NoArgsConstructor(access = PRIVATE)

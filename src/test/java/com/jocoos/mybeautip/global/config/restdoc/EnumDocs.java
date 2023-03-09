@@ -36,7 +36,7 @@ public class EnumDocs {
     Map<String, String> broadcastViewerType;
     Map<String, String> broadcastViewerStatus;
     Map<String, String> broadcastStatus;
-    Map<String, String> vodSortField;
+    Map<String, String> broadcastSortField;
 
     // Event
     Map<String, String> eventStatus;
@@ -97,4 +97,7 @@ public class EnumDocs {
     // Notice
     Map<String, String> noticeStatus;
     Map<String, String> noticeSort;
+
+    // Vod
+    Map<String, String> vodSortField;
 }

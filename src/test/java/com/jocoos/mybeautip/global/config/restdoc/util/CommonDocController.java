@@ -1,9 +1,6 @@
 package com.jocoos.mybeautip.global.config.restdoc.util;
 
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
-import com.jocoos.mybeautip.domain.broadcast.code.VodSortField;
+import com.jocoos.mybeautip.domain.broadcast.code.*;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
 import com.jocoos.mybeautip.domain.event.code.*;
@@ -78,7 +75,7 @@ public class CommonDocController {
         Map<String, String> broadcastViewerType = getDocs(BroadcastViewerType.values());
         Map<String, String> broadcastViewerStatus = getDocs(BroadcastViewerStatus.values());
         Map<String, String> broadcastStatus = getDocs(BroadcastStatus.values());
-        Map<String, String> vodSortField = getDocs(VodSortField.values());
+        Map<String, String> broadcastSortField = getDocs(BroadcastSortField.values());
 
         // Event
         Map<String, String> eventStatus = getDocs(EventStatus.values());
@@ -140,6 +137,9 @@ public class CommonDocController {
         Map<String, String> noticeStatus = getDocs(NoticeStatus.values());
         Map<String, String> noticeSort = getDocs(NoticeSort.values());
 
+        // VOD
+        Map<String, String> vodSortField = getDocs(VodSortField.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .booleanType(booleanType)
@@ -163,7 +163,7 @@ public class CommonDocController {
                         .broadcastViewerType(broadcastViewerType)
                         .broadcastViewerStatus(broadcastViewerStatus)
                         .broadcastStatus(broadcastStatus)
-                        .vodSortField(vodSortField)
+                        .broadcastSortField(broadcastSortField)
                 // Event
                         .eventStatus(eventStatus)
                         .eventJoinStatus(eventJoinStatus)
@@ -211,6 +211,8 @@ public class CommonDocController {
                 // Notice
                         .noticeStatus(noticeStatus)
                         .noticeSort(noticeSort)
+                // VOD
+                        .vodSortField(vodSortField)
                 .build()
         );
     }

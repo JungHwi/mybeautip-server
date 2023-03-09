@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRep
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_SORT_FIELD
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_STATUS
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT
@@ -70,6 +71,8 @@ class AdminBroadcastControllerTest(
                 requestParameters(
                     parameterWithName("page").description("페이지 넘버").attributes(getDefault(1)).optional(),
                     parameterWithName("size").description("페이지 사이타이").attributes(getDefault(5)).optional(),
+                    parameterWithName("sort").description(generateLinkCode(BROADCAST_SORT_FIELD)).optional().attributes(getDefault("SORTED_STATUS")),
+                    parameterWithName("order").description("정렬 방향 ASC, DESC").optional().attributes(getDefault("ASC")),
                     parameterWithName("status").description(generateLinkCode(BROADCAST_STATUS)).optional(),
                     parameterWithName("start_at").description("검색 시작일자 YYYY-MM-DD").optional(),
                     parameterWithName("end_at").description("검색 종료일자 YYYY-MM-DD").optional(),
