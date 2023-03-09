@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin;
 
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
@@ -11,6 +12,7 @@ import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -41,11 +43,12 @@ public class AdminBroadcastController {
             @RequestParam(required = false) BroadcastStatus status,
             @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
             @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
-            @RequestParam(required = false, defaultValue = "sortedStatus") String sort,
-            @RequestParam(required = false, defaultValue = "DESC") Direction order,
+            @RequestParam(required = false, defaultValue = "SORTED_STATUS") BroadcastSortField sort,
+            @RequestParam(required = false, defaultValue = "ASC") Direction order,
             @RequestParam(required = false, name = "search_field") String searchField,
             @RequestParam(required = false, name = "search_keyword") String searchKeyword,
             @RequestParam(required = false, name = "is_reported") Boolean isReported) {
+
         SearchOption searchOption = SearchOption.builder()
                 .startAt(startAt)
                 .endAt(endAt)
@@ -55,7 +58,9 @@ public class AdminBroadcastController {
                 .isReported(isReported)
                 .build();
 
-        return service.getList(status, searchOption, PageRequest.of(page - 1, size));
+        Pageable pageable = PageRequest.of(page - 1, size, sort.getSort(order));
+
+        return service.getList(status, searchOption, pageable);
     }
 
     @GetMapping("/broadcast/{broadcastId}")

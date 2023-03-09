@@ -6,13 +6,16 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.QBroadcastSearchResult;
+import com.jocoos.mybeautip.global.util.QuerydslUtil;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
@@ -51,10 +54,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 )
                         .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member))
                         .orderBy(
-                                broadcast.sortedStatus.asc(),
-                                broadcast.startedAt.desc(),
-                                broadcast.createdAt.desc(),
-                                broadcast.id.desc()
+                                getOrders(condition.sort())
                         )
                         .offset(condition.offset())
                         .limit(condition.size())
@@ -103,6 +103,16 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                         isReported(condition.isReported()),
                         cursor(condition.cursor())
                 );
+    }
+
+    private OrderSpecifier<?>[] getOrders(Sort sort) {
+        OrderSpecifier<?>[] orderSpecifiers = QuerydslUtil.getOrders(sort, Broadcast.class, broadcast);
+        return orderSpecifiers.length == 0
+                ? new OrderSpecifier[]{
+                broadcast.sortedStatus.asc(),
+                broadcast.startedAt.desc(),
+                broadcast.id.desc()}
+                : orderSpecifiers;
     }
 
     // 커서 기반 페이지네이션과 유니크하지 않은 컬럼 정렬을 동시에 하기 위해 튜플 비교를 한다
