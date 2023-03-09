@@ -22,6 +22,7 @@ public class MemberMeInfo extends MemberInfo {
 
     private Date revenueModifiedAt;
     private Boolean pushable;
+    private Boolean availableBroadcast;
     private List<TermTypeResponse> optionTermAccepts = new ArrayList<>();
 
     public MemberMeInfo(Member member) {

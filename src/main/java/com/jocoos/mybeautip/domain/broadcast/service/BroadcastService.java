@@ -121,10 +121,18 @@ public class BroadcastService {
     }
 
     private void validCanAccess(long creatorId) {
-        if (!systemOptionDao.getSystemOption(FREE_LIVE_PERMISSION)
-                && !influencerDao.isInfluencer(creatorId)) {
+        if (!getPermission(creatorId)) {
             throw new AccessDeniedException("Only influencer can request");
         }
+    }
+
+    public boolean getPermission(long memberId) {
+        if (!systemOptionDao.getSystemOption(FREE_LIVE_PERMISSION)
+                && !influencerDao.isInfluencer(memberId)) {
+            return false;
+        }
+
+        return true;
     }
 
     private Day getDay(LocalDate localDate) {
