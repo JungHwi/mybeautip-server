@@ -1,15 +1,17 @@
 package com.jocoos.mybeautip.restapi
 
+import com.jocoos.mybeautip.domain.system.persistence.repository.SystemOptionRepository
 import com.jocoos.mybeautip.domain.term.code.TermType
 import com.jocoos.mybeautip.domain.term.persistence.repository.TermRepository
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
-import com.jocoos.mybeautip.testutil.fixture.makeMember
-import com.jocoos.mybeautip.testutil.fixture.makeTerm
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.security.JwtTokenProvider
+import com.jocoos.mybeautip.testutil.fixture.makeMember
+import com.jocoos.mybeautip.testutil.fixture.makeSystemOption
+import com.jocoos.mybeautip.testutil.fixture.makeTerm
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -25,7 +27,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 class LegacyMemberControllerTest(
     private val memberRepository: MemberRepository,
     private val jwtTokenProvider: JwtTokenProvider,
-    private val termRepository: TermRepository
+    private val termRepository: TermRepository,
+    private val systemOptionRepository: SystemOptionRepository,
 ) : RestDocsIntegrationTestSupport() {
 
     @DisplayName("GET /api/1/members/me - 내 정보 조회 성공")
@@ -34,6 +37,7 @@ class LegacyMemberControllerTest(
 
         // given
         termRepository.save(makeTerm(type = TermType.MARKETING_INFO))
+        systemOptionRepository.save(makeSystemOption())
         val member: Member = memberRepository.save(makeMember(link = 2))
         val accessToken: String = "Bearer " + jwtTokenProvider.auth(member).accessToken
 
@@ -76,6 +80,7 @@ class LegacyMemberControllerTest(
                     fieldWithPath("point_ratio").type(NUMBER).description(""),
                     fieldWithPath("revenue_ratio").type(NUMBER).description(""),
                     fieldWithPath("pushable").type(BOOLEAN).description("알람 동의 여부"),
+                    fieldWithPath("available_broadcast").type(BOOLEAN).description("방송 가능 여부"),
                     fieldWithPath("created_at").type(NUMBER).description("회원 생성일"),
                     fieldWithPath("modified_at").type(NUMBER).description("회원 수정일").optional(),
                     fieldWithPath("revenue_modified_at").type(NUMBER).description("Revenue 수정일").optional(),

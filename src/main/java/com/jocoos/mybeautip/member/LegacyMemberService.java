@@ -1,13 +1,12 @@
 package com.jocoos.mybeautip.member;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
-import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
+import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.SettingNotificationDto;
 import com.jocoos.mybeautip.domain.member.persistence.domain.MemberDetail;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
-import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
 import com.jocoos.mybeautip.domain.member.vo.ChangedTagInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
@@ -30,10 +29,7 @@ import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.LegacyMemberController;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import com.jocoos.mybeautip.support.AttachmentService;
-import com.jocoos.mybeautip.support.slack.SlackService;
-import com.jocoos.mybeautip.tag.TagService;
 import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.word.BannedWordService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,17 +56,10 @@ import static com.jocoos.mybeautip.global.exception.ErrorCode.S3_ERROR;
 @Service
 public class LegacyMemberService {
 
-    private static final String USERNAME_INVALID_LENGTH = "username.invalid_length";
-    private static final String USERNAME_INVALID_FORMAT = "username.invalid_format";
-    private static final String USERNAME_INVALID_CHAR = "username.invalid_char";
-    private static final String USERNAME_ALREADY_USED = "username.already_used";
-    private static final String EMAIL_INVALID_FORMAT = "email.invalid_format";
     private static final String MEMBER_NOT_FOUND = "member.not_found";
 
     private final BlockService blockService;
-    private final BannedWordService bannedWordService;
     private final MessageService messageService;
-    private final TagService tagService;
     private final MemberTermService memberTermService;
     private final MemberRepository memberRepository;
     private final MemberDetailRepository memberDetailRepository;
@@ -81,10 +70,8 @@ public class LegacyMemberService {
     private final NaverMemberRepository naverMemberRepository;
     private final AppleMemberRepository appleMemberRepository;
     private final MemberLeaveLogRepository memberLeaveLogRepository;
-    private final MemberConverter memberConverter;
     private final AttachmentService attachmentService;
-    private final SlackService slackService;
-    private final SocialMemberFactory socialMemberFactory;
+    private final BroadcastService broadcastService;
 
 
     private final ActivityPointService activityPointService;
@@ -97,9 +84,7 @@ public class LegacyMemberService {
     @Value("${mybeautip.aws.cf.domain}")
     private String cloudFront;
 
-    public LegacyMemberService(BannedWordService bannedWordService,
-                               MessageService messageService,
-                               TagService tagService,
+    public LegacyMemberService(MessageService messageService,
                                MemberTermService memberTermService,
                                MemberRepository memberRepository,
                                MemberDetailRepository memberDetailRepository,
@@ -111,15 +96,12 @@ public class LegacyMemberService {
                                NaverMemberRepository naverMemberRepository,
                                AppleMemberRepository appleMemberRepository,
                                MemberLeaveLogRepository memberLeaveLogRepository,
-                               MemberConverter memberConverter,
                                AttachmentService attachmentService,
-                               SlackService slackService,
-                               SocialMemberFactory socialMemberFactory,
                                ActivityPointService activityPointService,
-                               AwsS3Handler awsS3Handler) {
-        this.bannedWordService = bannedWordService;
+                               AwsS3Handler awsS3Handler,
+                               BroadcastService broadcastService) {
+
         this.messageService = messageService;
-        this.tagService = tagService;
         this.memberTermService = memberTermService;
         this.memberRepository = memberRepository;
         this.memberDetailRepository = memberDetailRepository;
@@ -131,12 +113,10 @@ public class LegacyMemberService {
         this.naverMemberRepository = naverMemberRepository;
         this.appleMemberRepository = appleMemberRepository;
         this.memberLeaveLogRepository = memberLeaveLogRepository;
-        this.memberConverter = memberConverter;
         this.attachmentService = attachmentService;
-        this.slackService = slackService;
-        this.socialMemberFactory = socialMemberFactory;
         this.activityPointService = activityPointService;
         this.awsS3Handler = awsS3Handler;
+        this.broadcastService = broadcastService;
     }
 
     public Long currentMemberId() {
@@ -174,9 +154,13 @@ public class LegacyMemberService {
         List<TermTypeResponse> termTypeResponses =
                 memberTermService.getOptionalTermAcceptStatus(memberId);
 
-        return memberRepository.findByIdAndDeletedAtIsNull(memberId)
+        MemberMeInfo memberMeInfo = memberRepository.findByIdAndDeletedAtIsNull(memberId)
                 .map(m -> new MemberMeInfo(m, termTypeResponses))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
+
+        Boolean availableBroadcast = broadcastService.getPermission(memberId);
+        memberMeInfo.setAvailableBroadcast(availableBroadcast);
+        return memberMeInfo;
 
     }
 
