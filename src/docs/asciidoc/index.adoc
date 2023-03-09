@@ -128,6 +128,7 @@ include::overview.adoc[]
 * link:video/add_video_like.html[비디오 좋아요 API, window=_blank]
 * link:video/delete_video_like.html[비디오 좋아요 취소 API, window=_blank]
 * link:video/report_video.html[비디오 신고 API, window=_blank]
+* link:video/report_video_comment.html[비디오 댓글 신고 API, window=_blank]
 
 === VIDEO COMMENT API
 * link:video/write_video_comment.html[비디오 댓글 작성 API, window=_blank]

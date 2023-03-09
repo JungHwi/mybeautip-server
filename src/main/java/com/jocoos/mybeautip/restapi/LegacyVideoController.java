@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.restapi;
 
 import com.jocoos.mybeautip.comment.CommentReportInfo;
+import com.jocoos.mybeautip.comment.SimpleCommentReportInfo;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
@@ -29,6 +30,7 @@ import com.jocoos.mybeautip.video.view.VideoViewRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -54,9 +56,10 @@ import java.util.Optional;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DEFAULT;
 
+@RequiredArgsConstructor
 @Slf4j
 @RestController
-@RequestMapping(value = "/api/1/videos", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 public class LegacyVideoController {
     private static final String VIDEO_NOT_FOUND = "video.not_found";
     private static final String COMMENT_NOT_FOUND = "comment.not_found";
@@ -95,49 +98,7 @@ public class LegacyVideoController {
     @Value("${mybeautip.video.watch-duration}")
     private long watchDuration;
 
-    public LegacyVideoController(LegacyMemberService legacyMemberService,
-                                 LegacyVideoService legacyVideoService,
-                                 MessageService messageService,
-                                 GoodsService goodsService,
-                                 VideoGoodsRepository videoGoodsRepository,
-                                 VideoRepository videoRepository,
-                                 VideoLikeRepository videoLikeRepository,
-                                 CommentRepository commentRepository,
-                                 CommentLikeRepository commentLikeRepository,
-                                 VideoReportRepository videoReportRepository,
-                                 VideoViewRepository videoViewRepository,
-                                 CommentService commentService,
-                                 MentionService mentionService,
-                                 RevenueService revenueService,
-                                 KeywordService keywordService,
-                                 RevenueRepository revenueRepository,
-                                 LegacyVideoScrapService legacyVideoScrapService,
-                                 CommentReportRepository commentReportRepository,
-                                 BlockService blockService,
-                                 ActivityPointService activityPointService) {
-        this.legacyMemberService = legacyMemberService;
-        this.legacyVideoService = legacyVideoService;
-        this.messageService = messageService;
-        this.videoGoodsRepository = videoGoodsRepository;
-        this.goodsService = goodsService;
-        this.videoRepository = videoRepository;
-        this.commentRepository = commentRepository;
-        this.videoLikeRepository = videoLikeRepository;
-        this.commentLikeRepository = commentLikeRepository;
-        this.videoReportRepository = videoReportRepository;
-        this.videoViewRepository = videoViewRepository;
-        this.commentService = commentService;
-        this.mentionService = mentionService;
-        this.revenueService = revenueService;
-        this.keywordService = keywordService;
-        this.revenueRepository = revenueRepository;
-        this.legacyVideoScrapService = legacyVideoScrapService;
-        this.commentReportRepository = commentReportRepository;
-        this.blockService = blockService;
-        this.activityPointService = activityPointService;
-    }
-
-    @PostMapping
+    @PostMapping("/1/videos")
     public VideoInfo createVideo(@Valid @RequestBody CreateVideoRequest request) {
         log.info("createVideo: {}", request.toString());
         Video createdVideo = legacyVideoService.create(request);
@@ -145,7 +106,7 @@ public class LegacyVideoController {
         return videoInfo;
     }
 
-    @GetMapping("/search")
+    @GetMapping("/1/videos/search")
     public CursorResponse searchVideos(@RequestParam(defaultValue = "50") int count,
                                        @RequestParam(required = false) String cursor,
                                        @RequestParam String keyword) {
@@ -182,7 +143,7 @@ public class LegacyVideoController {
                 .withCursor(nextCursor).toBuild();
     }
 
-    @GetMapping("/{id}/goods")
+    @GetMapping("/1/videos/{id}/goods")
     public List<GoodsInfo> getRelatedGoods(@PathVariable("id") Long id,
                                            @RequestParam(name = "broker", required = false) Long broker) {
         List<VideoGoods> list = videoGoodsRepository.findAllByVideoId(id);
@@ -194,7 +155,7 @@ public class LegacyVideoController {
         return relatedGoods;
     }
 
-    @GetMapping("/{id}/comments")
+    @GetMapping("/1/videos/{id}/comments")
     public CursorResponse getComments(@PathVariable Long id,
                                       @RequestParam(defaultValue = "20") int count,
                                       @RequestParam(required = false) Long cursor,
@@ -239,7 +200,7 @@ public class LegacyVideoController {
                 .withTotalCount(totalCount).toBuild();
     }
 
-    @PostMapping("/{id:.+}/comments")
+    @PostMapping("/1/videos/{id:.+}/comments")
     public ResponseEntity addComment(@PathVariable Long id,
                                      @RequestBody CreateCommentRequest request,
                                      BindingResult bindingResult,
@@ -276,7 +237,7 @@ public class LegacyVideoController {
         return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
     }
 
-    @PatchMapping("/{videoId:.+}/comments/{id:.+}")
+    @PatchMapping("/1/videos/{videoId:.+}/comments/{id:.+}")
     public ResponseEntity updateComment(@PathVariable Long videoId,
                                         @PathVariable Long id,
                                         @RequestBody UpdateCommentRequest request,
@@ -303,7 +264,7 @@ public class LegacyVideoController {
                 .orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND, "invalid video key id or comment id"));
     }
 
-    @DeleteMapping("/{videoId:.+}/comments/{id:.+}")
+    @DeleteMapping("/1/videos/{videoId:.+}/comments/{id:.+}")
     public ResponseEntity<?> removeComment(@PathVariable Long videoId,
                                            @PathVariable Long id,
                                            @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
@@ -322,7 +283,7 @@ public class LegacyVideoController {
     /**
      * Likes
      */
-    @PostMapping("/{videoId:.+}/likes")
+    @PostMapping("/1/videos/{videoId:.+}/likes")
     public ResponseEntity<VideoLikeInfo> addVideoLike(@PathVariable Long videoId,
                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
@@ -339,7 +300,7 @@ public class LegacyVideoController {
         }
     }
 
-    @PatchMapping("/{videoId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/1/videos/{videoId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeVideoLike(@PathVariable Long videoId,
                                              @PathVariable Long likeId,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
@@ -355,7 +316,7 @@ public class LegacyVideoController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @DeleteMapping("/{videoId:.+}/likes/{likeId:.+}")
+    @DeleteMapping("/1/videos/{videoId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeVideoLikeLegacy(@PathVariable Long videoId,
                                              @PathVariable Long likeId,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
@@ -371,7 +332,7 @@ public class LegacyVideoController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @GetMapping("/{id:.+}/likes")
+    @GetMapping("/1/videos/{id:.+}/likes")
     public CursorResponse getLikedMemberList(@PathVariable Long id,
                                              @RequestParam(defaultValue = "100") int count,
                                              @RequestParam(required = false) String cursor) {
@@ -394,7 +355,7 @@ public class LegacyVideoController {
     /**
      * Comment Likes
      */
-    @PostMapping("/{videoId:.+}/comments/{commentId:.+}/likes")
+    @PostMapping("/1/videos/{videoId:.+}/comments/{commentId:.+}/likes")
     public ResponseEntity<CommentLikeInfo> addCommentLike(@PathVariable Long videoId,
                                                           @PathVariable Long commentId,
                                                           @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
@@ -407,7 +368,7 @@ public class LegacyVideoController {
         }
 }
 
-    @PatchMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+    @PatchMapping("/1/videos/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeCommentLike(@PathVariable Long videoId,
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,
@@ -426,7 +387,7 @@ public class LegacyVideoController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @DeleteMapping("/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
+    @DeleteMapping("/1/videos/{videoId:.+}/comments/{commentId:.+}/likes/{likeId:.+}")
     public ResponseEntity<?> removeCommentLikeLegacy(@PathVariable Long videoId,
                                                @PathVariable Long commentId,
                                                @PathVariable Long likeId,
@@ -448,7 +409,7 @@ public class LegacyVideoController {
     /**
      * Watches
      */
-    @PostMapping(value = "/{id:.+}/watches")
+    @PostMapping("/1/videos/{id:.+}/watches")
     public ResponseEntity<VideoInfo> joinWatch(@PathVariable Long id,
                                                @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
@@ -470,7 +431,7 @@ public class LegacyVideoController {
         return new ResponseEntity<>(legacyVideoService.generateVideoInfo(video), HttpStatus.OK);
     }
 
-    @PatchMapping(value = "/{id:.+}/watches")
+    @PatchMapping("/1/videos/{id:.+}/watches")
     public ResponseEntity<VideoInfo> keepWatch(@PathVariable Long id,
                                                @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
 
@@ -493,7 +454,7 @@ public class LegacyVideoController {
         return new ResponseEntity<>(legacyVideoService.generateVideoInfo(video), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id:.+}/watches")
+    @DeleteMapping("/1/videos/{id:.+}/watches")
     public ResponseEntity<?> leaveWatch(@PathVariable Long id,
                                         @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
@@ -514,7 +475,7 @@ public class LegacyVideoController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/{id:.+}/watches")
+    @GetMapping("/1/videos/{id:.+}/watches")
     public CursorResponse getWatcherList(@PathVariable Long id,
                                          @RequestParam(defaultValue = "100") int count,
                                          @RequestParam(required = false) String cursor,
@@ -525,7 +486,7 @@ public class LegacyVideoController {
     /**
      * Using owner of the Video
      */
-    @GetMapping("/{id:.+}/sales")
+    @GetMapping("/1/videos/{id:.+}/sales")
     public ResponseEntity<RevenueOverview> getRevenueOverview(@PathVariable Long id) {
         Member member = legacyMemberService.currentMember();
         RevenueOverview overview = revenueService.getOverview(id, member);
@@ -536,7 +497,7 @@ public class LegacyVideoController {
     /**
      * Using owner of the Video
      */
-    @GetMapping("/{id:.+}/revenues")
+    @GetMapping("/1/videos/{id:.+}/revenues")
     public CursorResponse getRevenues(@PathVariable Long id,
                                       @RequestParam(defaultValue = "20") int count,
                                       @RequestParam(required = false) String cursor,
@@ -577,7 +538,7 @@ public class LegacyVideoController {
     /**
      * Report
      */
-    @PostMapping(value = "/{id:.+}/report")
+    @PostMapping("/1/videos/{id:.+}/report")
     public ResponseEntity<VideoInfo> reportVideo(@PathVariable Long id,
                                                  @Valid @RequestBody LegacyVideoController.VideoReportRequest request,
                                                  @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
@@ -598,7 +559,7 @@ public class LegacyVideoController {
     /**
      * Add Heart
      */
-    @PostMapping(value = "/{id:.+}/hearts")
+    @PostMapping("/1/videos/{id:.+}/hearts")
     public ResponseEntity<VideoInfo> heartVideo(@PathVariable Long id,
                                                 @Valid @RequestBody(required = false) VideoHeartRequest request,
                                                 BindingResult bindingResult,
@@ -627,7 +588,7 @@ public class LegacyVideoController {
     /**
      * Views
      */
-    @PostMapping("/{id:.+}/view_count")
+    @PostMapping("/1/videos/{id:.+}/view_count")
     public ResponseEntity<VideoInfo> addView(@PathVariable Long id,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Video video = videoRepository.findByIdAndDeletedAtIsNull(id)
@@ -642,7 +603,7 @@ public class LegacyVideoController {
         return new ResponseEntity<>(legacyVideoService.generateVideoInfo(video), HttpStatus.OK);
     }
 
-    @GetMapping("/{id:.+}/views")
+    @GetMapping("/1/videos/{id:.+}/views")
     public CursorResponse getViewerList(@PathVariable Long id,
                                         @RequestParam(defaultValue = "100") int count,
                                         @RequestParam(required = false) String cursor,
@@ -653,7 +614,7 @@ public class LegacyVideoController {
     /**
      * Scraps
      */
-    @PostMapping("/{videoId:.+}/scraps")
+    @PostMapping("/1/videos/{videoId:.+}/scraps")
     public ResponseEntity<VideoScrapInfo> addVideoScrap(@PathVariable Long videoId,
                                                        @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
@@ -669,7 +630,7 @@ public class LegacyVideoController {
         }
     }
 
-    @PatchMapping("/{videoId:.+}/scraps")
+    @PatchMapping("/1/videos/{videoId:.+}/scraps")
     public ResponseEntity<?> removeVideoScrap(@PathVariable Long videoId,
                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
@@ -685,7 +646,7 @@ public class LegacyVideoController {
         }
     }
 
-    @DeleteMapping("/{videoId:.+}/scraps")
+    @DeleteMapping("/1/videos/{videoId:.+}/scraps")
     public ResponseEntity<?> removeVideoScrapLegacy(@PathVariable Long videoId,
                                               @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
@@ -704,7 +665,7 @@ public class LegacyVideoController {
     /**
      * Comment Report
      */
-    @PostMapping(value = "/{videoId:.+}/comments/{id:.+}/report")
+    @PostMapping("/1/videos/{videoId:.+}/comments/{id:.+}/report")
     public ResponseEntity<CommentReportInfo> reportVideoComment(@PathVariable Long videoId,
                                                                 @PathVariable Long id,
                                                                 @Valid @RequestBody LegacyVideoController.CommentReportRequest request,
@@ -722,6 +683,26 @@ public class LegacyVideoController {
 
         CommentReport report = commentService.reportComment(comment, me, reasonCode, request.getReason());
         return new ResponseEntity<>(new CommentReportInfo(report), HttpStatus.OK);
+    }
+
+    @PostMapping("/2/videos/{videoId:.+}/comments/{id:.+}/report")
+    public ResponseEntity<SimpleCommentReportInfo> reportVideoComment2(@PathVariable Long videoId,
+                                                                       @PathVariable Long id,
+                                                                       @Valid @RequestBody LegacyVideoController.CommentReportRequest request,
+                                                                       @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        int reasonCode = (request.getReasonCode() == null ? 0 : request.getReasonCode());
+        Member me = legacyMemberService.currentMember();
+
+        Comment comment = commentRepository.findByIdAndVideoId(id, videoId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND, messageService.getMessage(COMMENT_NOT_FOUND, lang)));
+
+        Optional<CommentReport> alreadyCommentReport = commentReportRepository.findByCommentIdAndCreatedById(id, me.getId());
+        if (alreadyCommentReport.isPresent()) {
+            throw new ConflictException(messageService.getMessage(COMMENT_ALREADY_REPORTED, lang));
+        }
+
+        CommentReport report = commentService.reportComment(comment, me, reasonCode, request.getReason());
+        return new ResponseEntity<>(new SimpleCommentReportInfo(report), HttpStatus.OK);
     }
 
     private CursorResponse createViewerList(Long id, int count, String cursor, String lang) {

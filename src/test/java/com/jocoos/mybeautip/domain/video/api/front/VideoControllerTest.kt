@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.video.api.front
 
+import com.jocoos.mybeautip.comment.CreateCommentRequest
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory
 import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
@@ -8,6 +9,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerato
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.GRANT_TYPE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.VIDEO_MASK_TYPE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.member.comment.CommentRepository
 import com.jocoos.mybeautip.testutil.fixture.makeVideo
 import com.jocoos.mybeautip.testutil.fixture.makeVideoCategory
 import com.jocoos.mybeautip.video.Video
@@ -37,6 +39,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 class VideoControllerTest(
     private val videoRepository: VideoRepository,
     private val videoCategoryRepository: VideoCategoryRepository,
+    private val commentRepository: CommentRepository
 ) : RestDocsIntegrationTestSupport() {
 
     private lateinit var category: VideoCategory
@@ -585,4 +588,62 @@ class VideoControllerTest(
             )
         )
     }
+
+    @Test
+    fun reportVideoComment() {
+        // given
+        val video: Video = videoRepository.save(makeVideo(defaultAdmin, category))
+        val commentReq = CreateCommentRequest.builder().comment("댓글").build()
+
+        val commentResult: MvcResult = mockMvc
+            .perform(
+                post("/api/1/videos/{video_id}/comments", video.id)
+                    .header(AUTHORIZATION, requestUserToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(commentReq))
+            )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id", notNullValue()))
+            .andReturn();
+
+        val jsonObject = JSONObject(commentResult.response.contentAsString)
+        val commentId : Long = jsonObject.getLong("id");
+        val reportReq = VideoReportRequest("혐오", 0)
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                post("/api/2/videos/{video_id}/comments/{comment_id}/report", video.id, commentId)
+                    .header(AUTHORIZATION, requestUserToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(reportReq))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "report_video_comment",
+                pathParameters(
+                    parameterWithName("video_id").description("비디오 아이디"),
+                    parameterWithName("comment_id").description("댓글 아이디")
+                ),
+                PayloadDocumentation.requestFields(
+                    fieldWithPath("reason").type(STRING).description("신고 사유"),
+                    fieldWithPath("reason_code").type(NUMBER).description("신고 코드").optional()
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("신고 ID"),
+                    fieldWithPath("comment_id").type(NUMBER).description("댓글 ID"),
+                    fieldWithPath("reason_code").type(NUMBER).description("신고 코드"),
+                    fieldWithPath("reason").type(STRING).description("신고 사유"),
+                    fieldWithPath("created_by").type(OBJECT).description("신고자 정보"),
+                    fieldWithPath("created_by.id").type(NUMBER).description("신고자 ID"),
+                    fieldWithPath("created_by.username").type(STRING).description("신고자 닉네임"),
+                    fieldWithPath("created_by.created_at").type(NUMBER).description("신고자 등록일자").ignored()
+                )
+            )
+        )
+    }
+
 }
