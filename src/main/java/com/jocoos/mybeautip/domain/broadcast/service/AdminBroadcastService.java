@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastParticipantInfo;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
@@ -38,6 +39,7 @@ public class AdminBroadcastService {
     private final BroadcastReportDao reportDao;
     private final BroadcastConverter converter;
     private final FlipFlopLiteService flipFlopLiteService;
+    private final BroadcastParticipantInfoService participantInfoService;
     private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
@@ -53,9 +55,10 @@ public class AdminBroadcastService {
     }
 
     @Transactional(readOnly = true)
-    public AdminBroadcastResponse get(long broadcastId) {
+    public AdminBroadcastResponse get(Long broadcastId, Long requestAdminId) {
         BroadcastSearchResult searchResult = broadcastDao.getWithMemberAndCategory(broadcastId);
-        return converter.toAdminResponse(searchResult);
+        BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestAdminId, searchResult);
+        return converter.toAdminResponse(searchResult, participantInfo);
     }
 
     @Transactional

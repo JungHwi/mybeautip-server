@@ -10,9 +10,11 @@ import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.service.AdminBroadcastService;
 import com.jocoos.mybeautip.domain.search.dto.CountResponse;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -77,8 +79,9 @@ public class AdminBroadcastController {
     }
 
     @GetMapping("/broadcast/{broadcastId}")
-    public AdminBroadcastResponse get(@PathVariable long broadcastId) {
-        return service.get(broadcastId);
+    public AdminBroadcastResponse get(@PathVariable Long broadcastId,
+                                      @CurrentMember MyBeautipUserDetails userDetails) {
+        return service.get(broadcastId, userDetails.getMember().getId());
     }
 
     // TODO start_at default 값 논의 필요

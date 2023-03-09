@@ -32,8 +32,9 @@ public interface BroadcastConverter {
     })
     BroadcastResponse toResponse(BroadcastSearchResult result, Member createdBy, BroadcastParticipantInfo participant);
 
-    AdminBroadcastResponse toAdminResponse(BroadcastSearchResult result);
+    AdminBroadcastResponse toAdminResponse(BroadcastSearchResult result, BroadcastParticipantInfo participant);
 
+    @Mapping(target = "participant", ignore = true)
     List<AdminBroadcastResponse> toAdminResponse(List<BroadcastSearchResult> results);
 
     @Mapping(target = "title", source = "request.title")

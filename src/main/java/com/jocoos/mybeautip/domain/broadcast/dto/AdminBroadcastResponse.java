@@ -21,5 +21,6 @@ public record AdminBroadcastResponse(long id,
                                      @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
                                      @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime createdAt,
                                      BroadcastCategoryResponse category,
-                                     SimpleMemberInfo createdBy) {
+                                     SimpleMemberInfo createdBy,
+                                     BroadcastParticipantInfo participant) {
 }
