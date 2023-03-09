@@ -44,8 +44,8 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     @Override
-    public Page<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
-        List<BroadcastSearchResult> contents = repository.query(query ->
+    public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
+        return repository.query(query ->
                 searchResultWithMemberAndCategory(
                         baseConditionQuery(query, condition)
                 )
@@ -59,12 +59,15 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                         .offset(condition.offset())
                         .limit(condition.size())
                         .fetch());
+    }
 
+    @Override
+    public Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition) {
+        List<BroadcastSearchResult> contents = getList(condition);
         JPAQuery<Long> countQuery = repository.query(query ->
                 fromBroadcastWithMemberAndCategory(
                         baseConditionQuery(query, condition))
                         .select(count(broadcast)));
-
         return PageableExecutionUtils.getPage(contents, condition.pageable(), countQuery::fetchOne);
     }
 

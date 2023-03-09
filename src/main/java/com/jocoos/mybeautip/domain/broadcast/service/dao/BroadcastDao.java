@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.function.Supplier;
 
 @Service
@@ -44,8 +45,13 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
-    public Page<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
+    public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
         return repository.getList(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition) {
+        return repository.getPageList(condition);
     }
 
     @Transactional(readOnly = true)
