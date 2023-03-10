@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.placard.persistence.repository.PlacardReposit
 import com.jocoos.mybeautip.domain.placard.vo.PlacardSearchCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -22,6 +23,7 @@ public class PlacardService {
 
     private final PlacardConverter placardConverter;
 
+    @Transactional(readOnly = true)
     public List<PlacardResponse> getActivePlacards() {
         PlacardSearchCondition condition = PlacardSearchCondition.builder()
                 .status(ACTIVE)

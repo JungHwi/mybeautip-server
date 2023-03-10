@@ -37,8 +37,17 @@ spring:
     baselineOnMigrate: false
     locations: classpath:db/mysql
   graphql:
+    graphiql:
+      enabled: true
+      path: /docs/graphiql
     schema:
       printer.enabled: true
+    cors:
+      allow-credentials: true
+      allowed-origin-patterns: '*'
+      allowed-headers: '*'
+      allowed-methods: '*'
+    path: /graphql
   jpa:
     properties:
       hibernate:
