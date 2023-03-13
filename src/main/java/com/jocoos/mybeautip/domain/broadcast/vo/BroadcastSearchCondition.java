@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.vo;
 
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
-import com.jocoos.mybeautip.global.vo.Day;
+import com.jocoos.mybeautip.global.vo.Between;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import lombok.Builder;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +14,7 @@ import java.util.List;
 public record BroadcastSearchCondition(List<BroadcastStatus> statuses,
                                        Pageable pageable,
                                        SearchOption searchOption,
-                                       Day day,
+                                       Between day,
                                        Long cursor) {
     public ZonedDateTime startAt() {
         return searchOption == null ? null : searchOption.getStartAt();
@@ -33,11 +33,11 @@ public record BroadcastSearchCondition(List<BroadcastStatus> statuses,
     }
 
     public ZonedDateTime startOfDay() {
-        return day == null ? null : day.getStartOfDay();
+        return day == null ? null : day.start();
     }
 
     public ZonedDateTime endOfDay() {
-        return day == null ? null : day.getEndOfDay();
+        return day == null ? null : day.end();
     }
 
     public Boolean isReported() {

@@ -17,7 +17,7 @@ import com.jocoos.mybeautip.domain.system.service.dao.SystemOptionDao;
 import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.vo.Day;
+import com.jocoos.mybeautip.global.vo.Between;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -135,8 +135,8 @@ public class BroadcastService {
         return true;
     }
 
-    private Day getDay(LocalDate localDate) {
-        return localDate == null ? null : new Day(localDate, ZoneId.of("Asia/Seoul"));
+    private Between getDay(LocalDate localDate) {
+        return localDate == null ? null : Between.day(localDate, ZoneId.of("Asia/Seoul"));
     }
 
     private List<BroadcastStatus> getStatuses(BroadcastStatus status) {

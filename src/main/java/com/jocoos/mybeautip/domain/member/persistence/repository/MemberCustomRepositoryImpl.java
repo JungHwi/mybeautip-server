@@ -8,7 +8,7 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.dto.MemoResponse;
 import com.jocoos.mybeautip.domain.member.dto.QMemoResponse;
 import com.jocoos.mybeautip.domain.member.vo.*;
-import com.jocoos.mybeautip.global.vo.Day;
+import com.jocoos.mybeautip.global.vo.Between;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.QMember;
@@ -89,7 +89,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     }
 
     @Override
-    public List<Member> getMemberLastLoggedAtSameDayIn(List<Day> lastLoggedAt) {
+    public List<Member> getMemberLastLoggedAtSameDayIn(List<Between> lastLoggedAt) {
         return repository.query(query -> query
                 .select(member)
                 .from(member)
@@ -139,7 +139,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .where(block.status.eq(BLOCK));
     }
 
-    private BooleanBuilder lastLoggedAtSameDayIn(List<Day> days) {
+    private BooleanBuilder lastLoggedAtSameDayIn(List<Between> days) {
         Predicate[] isSameDays = days.stream()
                 .map(this::lastLoggedAtBetween)
                 .toArray(Predicate[]::new);
@@ -201,8 +201,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         return new QMemberResponse(member.id, member.username);
     }
 
-    private BooleanExpression lastLoggedAtBetween(Day day) {
-        return member.lastLoggedAt.between(day.getStartOfDay(), day.getEndOfDay());
+    private BooleanExpression lastLoggedAtBetween(Between day) {
+        return member.lastLoggedAt.between(day.start(), day.end());
     }
 
     private static BooleanExpression eqId(Long memberId) {

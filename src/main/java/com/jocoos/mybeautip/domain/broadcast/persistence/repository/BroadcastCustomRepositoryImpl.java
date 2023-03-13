@@ -3,9 +3,7 @@ package com.jocoos.mybeautip.domain.broadcast.persistence.repository;
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
-import com.jocoos.mybeautip.domain.broadcast.vo.QBroadcastSearchResult;
+import com.jocoos.mybeautip.domain.broadcast.vo.*;
 import com.jocoos.mybeautip.global.util.QuerydslUtil;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.querydsl.core.Tuple;
@@ -80,6 +78,44 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
         return Optional.ofNullable(result);
     }
 
+    @Override
+    public BroadcastUpdateResult bulkUpdateStatusAndEndedAt(BroadcastUpdateStatusCondition condition) {
+
+        List<Long> videoKeys = repository.query(query -> query
+                .select(broadcast.videoKey)
+                .from(broadcast)
+                .where(
+                        eqStatus(condition.currentStatus()),
+                        startedAtBetween(condition.betweenStart(), condition.betweenEnd()),
+                        startedAtLt(condition.startedAtLt()),
+                        pausedAtLt(condition.pausedAtLt())
+                )
+                .fetch());
+
+        if (!isEmpty(videoKeys)) {
+            repository.update(query -> query
+                    .set(broadcast.status, condition.updateStatus())
+                    .set(broadcast.endedAt, condition.updateEndedAt())
+                    .where(
+                            inVideoKey(videoKeys)
+                    )
+                    .execute());
+        }
+
+        return new BroadcastUpdateResult(videoKeys.size(), videoKeys);
+    }
+
+    @Override
+    public long bulkUpdateStatus(BroadcastUpdateStatusCondition condition) {
+        return repository.update(query -> query
+                .set(broadcast.status, condition.updateStatus())
+                .where(
+                        eqStatus(condition.currentStatus()),
+                        startedAtBetween(condition.betweenStart(), condition.betweenEnd())
+                )
+                .execute());
+    }
+
     private JPAQuery<BroadcastSearchResult> searchResultWithMemberAndCategory(JPAQuery<?> query) {
         return fromBroadcastWithMemberAndCategory(query)
                 .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member));
@@ -95,7 +131,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     private JPAQuery<?> baseConditionQuery(JPAQuery<?> query, BroadcastSearchCondition condition) {
         return query
                 .where(
-                        startAtBetween(condition.startOfDay(), condition.endOfDay()),
+                        startedAtBetween(condition.startOfDay(), condition.endOfDay()),
                         createdAtAfter(condition.startAt()),
                         createdAtBefore(condition.endAt()),
                         searchByKeyword(condition.searchOption()),
@@ -159,8 +195,16 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
         return isReported ? broadcast.reportCount.gt(0) : broadcast.reportCount.eq(0);
     }
 
-    private BooleanExpression startAtBetween(ZonedDateTime from, ZonedDateTime to) {
-        return from == null || to == null ? null : broadcast.startedAt.between(from, to);
+    private BooleanExpression pausedAtLt(ZonedDateTime zonedDateTime) {
+        return zonedDateTime == null ? null : broadcast.pausedAt.lt(zonedDateTime);
+    }
+
+    private BooleanExpression startedAtBetween(ZonedDateTime start, ZonedDateTime end) {
+        return start == null || end == null ? null : broadcast.startedAt.between(start, end);
+    }
+
+    private BooleanExpression startedAtLt(ZonedDateTime zonedDateTime) {
+        return zonedDateTime == null ? null : broadcast.startedAt.lt(zonedDateTime);
     }
 
     private BooleanExpression createdAtAfter(ZonedDateTime dateTime) {
@@ -173,6 +217,14 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     private BooleanExpression inStatus(List<BroadcastStatus> statuses) {
         return isEmpty(statuses) ? null : broadcast.status.in(statuses);
+    }
+
+    private BooleanExpression eqStatus(BroadcastStatus status) {
+        return status == null ? null : broadcast.status.eq(status);
+    }
+
+    private BooleanExpression inVideoKey(List<Long> videoKeys) {
+        return isEmpty(videoKeys) ? null : broadcast.videoKey.in(videoKeys);
     }
 
     private BooleanExpression eqId(Long id) {

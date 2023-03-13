@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.domain.member.code.InfluencerStatus;
 import com.jocoos.mybeautip.domain.member.persistence.domain.Influencer;
 import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepository;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.util.EntityMapUtil;
+import com.jocoos.mybeautip.global.util.EntityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,7 @@ public class InfluencerDao {
         }
 
         List<Influencer> existInfluencerList = repository.findAllByIdIn(ids);
-        Map<Long, Influencer> idInfluncerMap = EntityMapUtil.getIdEntityMap(existInfluencerList, Influencer::getId);
+        Map<Long, Influencer> idInfluncerMap = EntityUtil.getIdEntityMap(existInfluencerList, Influencer::getId);
         List<Influencer> influencerList = ids.stream()
                 .map(id -> {
                     Influencer influencer = idInfluncerMap.getOrDefault(id, new Influencer(id));

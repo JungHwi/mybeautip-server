@@ -2,8 +2,10 @@ package com.jocoos.mybeautip.domain.broadcast.service.dao;
 
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateStatusCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -71,5 +73,15 @@ public class BroadcastDao {
     @Transactional
     public void updatePausedAt(Long broadcastId, ZonedDateTime pausedAt) {
         repository.updatePausedAt(broadcastId, pausedAt);
+    }
+
+    @Transactional
+    public BroadcastUpdateResult bulkUpdateToFinish(BroadcastUpdateStatusCondition condition) {
+        return repository.bulkUpdateStatusAndEndedAt(condition);
+    }
+
+    @Transactional
+    public long bulkUpdateToReady(BroadcastUpdateStatusCondition condition) {
+        return repository.bulkUpdateStatus(condition);
     }
 }

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
-public class EntityMapUtil {
+public class EntityUtil {
 
     public static <T>  Map<Long, T> getIdEntityMap(List<T> entities, ToLongFunction<T> getIdFunc) {
         return entities.stream()

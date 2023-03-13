@@ -137,10 +137,6 @@ public class Broadcast extends CreatedAtBaseEntity {
         this.url = url;
     }
 
-    public void ready() {
-        changeStatus(READY);
-    }
-
     public void finish(@NotNull BroadcastStatus status, @NotNull ZonedDateTime endedAt) {
         if (status != END && status != CANCEL) {
             throw new BadRequestException(status + " is not a finish status");
