@@ -176,6 +176,9 @@ mybeautip:
     max-error-count: 18
   image-file-limit-mb: 5
   video-file-count-limit: 1
+  internal:
+    access-token: MzdiNjU1NDItNzNlZS00Nzc1LTg2YzMtNDM2MzNkYzM3OWQ0
+    debug: true
 
 cloud:
   aws:
