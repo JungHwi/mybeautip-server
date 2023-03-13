@@ -67,4 +67,9 @@ public class BroadcastDao {
     private Supplier<NotFoundException> broadcastNotFoundException(long broadcastId) {
         return () -> new NotFoundException("Not found broadcast. id - " + broadcastId);
     }
+
+    @Transactional
+    public void updatePausedAt(Long broadcastId, ZonedDateTime pausedAt) {
+        repository.updatePausedAt(broadcastId, pausedAt);
+    }
 }

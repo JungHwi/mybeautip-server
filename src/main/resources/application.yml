@@ -205,6 +205,8 @@ ffl:
   api-key: 2Md55V7zWNBU4blXVZZ2AF2k4a5
   api-secret: 2Md55VPQ9Qd6z5Bw7EzMHzLAo0f
   domain: https://api-sandbox.lite.flipflop.tv
+  callback:
+    basic-auth: Basic ZmZsLWNhbGxiYWNrOmZmbC1zZWNyZXQ=
 
 #redis:
 #  host: localhost

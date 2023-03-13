@@ -80,6 +80,9 @@ public class Broadcast extends CreatedAtBaseEntity {
     private int reportCount;
 
     @Column
+    private ZonedDateTime pausedAt;
+
+    @Column
     private ZonedDateTime startedAt;
 
     @Column
