@@ -6,12 +6,17 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum FFLChatRoomDirectMessageCustomType {
-    MSG("일반 알림"),
-    CLOSE("채팅방 종료 알림"),
-    DISCONNECT("채팅방 강제 닫음 알림"),
-    UPDATE("라이브 관련 내용 업데이트 알림"),
-    ACTIVE("라이브 시작 알림"),
-    INACTIVE("라이브 일시 중단 알림");
+    DM("일반 알림"),
+    BLOCK("채팅방 종료 알림"),
+    ALERT("채팅방 강제 닫음 알림"),
+
+    // CUSTOM
+    MANAGER("매니저 설정"),
+    MANAGER_OUT("매니저 퇴장"),
+    NO_MANAGER("매니저 설정"),
+    CHAT("채팅 가능"),
+    NO_CHAT("채팅 불가능"),
+    EXILE("퇴장");
 
     private final String description;
 }

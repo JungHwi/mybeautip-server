@@ -92,12 +92,14 @@ public class FlipFlopLiteService {
         return client.unhideMessage(videoRoomId, messageId);
     }
 
-    public EmptyResult broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
-        return client.broadcastMessage(videoRoomId, request);
+    public Long broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
+        FFLMessageInfo messageInfo = client.broadcastMessage(videoRoomId, request);
+        return messageInfo.messageId();
     }
 
-    public EmptyResult directMessage(long videoRoomId, FFLDirectMessageRequest request) {
-        return client.directMessage(videoRoomId, request);
+    public Long directMessage(long videoRoomId, FFLDirectMessageRequest request) {
+        FFLMessageInfo messageInfo =  client.directMessage(videoRoomId, request);
+        return messageInfo.messageId();
     }
 
     public int migration() {

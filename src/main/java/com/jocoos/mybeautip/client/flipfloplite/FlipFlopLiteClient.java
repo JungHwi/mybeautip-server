@@ -52,9 +52,9 @@ public interface FlipFlopLiteClient {
     EmptyResult unhideMessage(@PathVariable long videoRoomId, @PathVariable long messageId);
 
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/admin/messages/broadcast")
-    EmptyResult broadcastMessage(@PathVariable long videoRoomId, FFLBroadcastMessageRequest request);
+    FFLMessageInfo broadcastMessage(@PathVariable long videoRoomId, FFLBroadcastMessageRequest request);
 
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/admin/messages/direct")
-    EmptyResult directMessage(@PathVariable long videoRoomId, FFLDirectMessageRequest request);
+    FFLMessageInfo directMessage(@PathVariable long videoRoomId, FFLDirectMessageRequest request);
 
 }

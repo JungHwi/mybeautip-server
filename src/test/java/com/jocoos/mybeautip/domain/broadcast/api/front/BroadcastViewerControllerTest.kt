@@ -1,11 +1,11 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front
 
+import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastViewerRepository
-import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_STATUS
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_TYPE
@@ -15,8 +15,8 @@ import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import com.jocoos.mybeautip.testutil.fixture.makeMember
+import com.jocoos.mybeautip.testutil.fixture.makeMessage
 import com.jocoos.mybeautip.testutil.fixture.makeViewer
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 class BroadcastViewerControllerTest(
+    private val flipFlopLiteService: FlipFlopLiteService,
     private val broadcastRepository: BroadcastRepository,
     private val broadcastViewerRepository: BroadcastViewerRepository,
     private val memberRepository: MemberRepository
@@ -171,6 +172,36 @@ class BroadcastViewerControllerTest(
         )
     }
 
+    @Test
+    fun visibleMessage() {
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        val viewer = saveViewer(broadcast = broadcast)
+        val messageId = sendMessage(broadcast)
+
+        val result: ResultActions = mockMvc.perform(
+            patch("/1/broadcast/{broadcast_id}/message/{message_id}/visible", broadcast.id, messageId)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "visible_message",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID"),
+                    parameterWithName("message_id").description("메세지 ID"),
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                ),
+            )
+        )
+    }
+
 
     fun saveViewer(
         broadcast: Broadcast,
@@ -187,5 +218,10 @@ class BroadcastViewerControllerTest(
 
     fun saveMember(): Member {
         return memberRepository.save(makeMember())
+    }
+
+    fun sendMessage(broadcast: Broadcast): Long {
+        val externalBroadcastInfo = flipFlopLiteService.createVideoRoom(broadcast)
+        return flipFlopLiteService.broadcastMessage(externalBroadcastInfo.videoKey, makeMessage())
     }
 }

@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
+import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastViewerService;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.global.annotation.CheckPermission;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -84,5 +86,16 @@ public class BroadcastViewerController {
         ViewerResponse response = viewerService.exile(broadcastId, memberId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/1/broadcast/{broadcast_id}/message/{message_id}/visible")
+    public ResponseEntity visibleMessage(@PathVariable("broadcast_id") long broadcastId,
+                                      @PathVariable("message_id") long messageId,
+                                      @RequestBody BooleanDto isVisible) {
+
+        VisibleMessageRequest request = new VisibleMessageRequest(broadcastId, messageId, isVisible.isBool());
+        viewerService.visibleMessage(request);
+
+        return new ResponseEntity(HttpStatus.OK);
     }
 }
