@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.client.flipfloplite;
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.global.vo.EmptyResult;
 import com.jocoos.mybeautip.member.Member;
@@ -80,8 +81,26 @@ public class FlipFlopLiteService {
         return client.closeChatRoom(videoRoomId);
     }
 
-    public FFLCursorResponse<FFLChatMemberInfo> getChatMembers(long videoRoomId) {
-        return client.getChatMembers(videoRoomId);
+    public List<BroadcastViewerVo> getAllChatMembers(long videoRoomId) {
+        long cursor = 0;
+        long size = 500;
+        // FIXME 우선 500 명 한번에 불러옴. 시청자 수가 900 보다 많아 지기 전에 Loop 돌면서 모든 시청자 목록 불러오도록 수정.
+
+        FFLCursorResponse<FFLChatMemberInfo> response = client.getChatMembers(videoRoomId, cursor, size);
+
+        FFLChatMemberInfo memberInfo1 = new FFLChatMemberInfo("8", "8회원", null, ZonedDateTime.now());
+        FFLChatMemberInfo memberInfo2 = new FFLChatMemberInfo("9", "9회원", null, ZonedDateTime.now());
+        FFLChatMemberInfo memberInfo3 = new FFLChatMemberInfo("3", "A회원", null, ZonedDateTime.now());
+        FFLChatMemberInfo memberInfo4 = new FFLChatMemberInfo("4", "0회원", null, ZonedDateTime.now());
+        FFLChatMemberInfo memberInfo5 = new FFLChatMemberInfo("5", "_회원", null, ZonedDateTime.now());
+        FFLChatMemberInfo memberInfo6 = new FFLChatMemberInfo("6", "C회원", null, ZonedDateTime.now());
+        FFLChatMemberInfo memberInfo7 = new FFLChatMemberInfo("7", "회원", null, ZonedDateTime.now());
+        FFLChatMemberInfo memberInfoGuest = new FFLChatMemberInfo("guest:123", "Guest", null, ZonedDateTime.now());
+
+        List<FFLChatMemberInfo> list = List.of(memberInfo1, memberInfo2, memberInfo3, memberInfo4, memberInfo5, memberInfo6, memberInfo7, memberInfoGuest);
+
+//        return converter.convertToViewerVo(response.content());
+        return converter.convertToViewerVo(list);
     }
 
     public EmptyResult hideMessage(long videoRoomId, long messageId) {

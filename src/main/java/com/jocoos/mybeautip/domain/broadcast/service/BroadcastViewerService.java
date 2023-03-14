@@ -1,10 +1,13 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastViewerConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerCursorCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
@@ -19,6 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BroadcastViewerService {
 
+    private final BroadcastBatchService broadcastBatchService;
+    private final BroadcastDao broadcastDao;
     private final BroadcastViewerDao dao;
     private final BroadcastViewerConverter converter;
 
@@ -54,5 +59,14 @@ public class BroadcastViewerService {
         BroadcastViewer viewer = dao.exile(broadcastId, memberId);
 
         return converter.converts(viewer);
+    }
+
+    @Transactional
+    public void syncViewer() {
+        List<Broadcast> broadcastList = broadcastDao.findByStatusIn(BroadcastStatus.NEED_SYNC_MEMBER_STATUS);
+
+        for (Broadcast broadcast : broadcastList) {
+            broadcastBatchService.syncViewer(broadcast);
+        }
     }
 }

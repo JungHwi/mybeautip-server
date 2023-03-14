@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.broadcast.service.dao;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastViewerRepository;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
@@ -42,6 +43,11 @@ public class BroadcastViewerDao {
         return repository.search(condition);
     }
 
+    @Transactional(readOnly = true)
+    public List<BroadcastViewer> getViewer(Broadcast broadcast) {
+        return repository.findByBroadcast(broadcast);
+    }
+
     @Transactional
     public BroadcastViewer grantManager(GrantManagerRequest request) {
         BroadcastViewer viewer = getBroadcastViewer(request.broadcastId(), request.memberId());
@@ -61,5 +67,10 @@ public class BroadcastViewerDao {
         BroadcastViewer viewer = getBroadcastViewer(broadcastId, memberId);
 
         return viewer.exile();
+    }
+
+    @Transactional
+    public List<BroadcastViewer> saveAll(List<BroadcastViewer> viewerList) {
+        return repository.saveAll(viewerList);
     }
 }

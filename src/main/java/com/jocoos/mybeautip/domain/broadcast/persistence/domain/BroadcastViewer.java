@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.domain.broadcast.persistence.domain;
 
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
+import com.jocoos.mybeautip.domain.broadcast.service.util.ViewerUsernameUtil;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,6 +46,15 @@ public class BroadcastViewer {
     @Column(nullable = false)
     private ZonedDateTime joinedAt;
 
+    public BroadcastViewer(Broadcast broadcast, BroadcastViewerVo vo) {
+        this.broadcast = broadcast;
+        this.memberId = vo.memberId();
+        this.type = vo.type();
+        this.sortedUsername = ViewerUsernameUtil.generateSortedUsername(vo.username());
+        this.status = BroadcastViewerStatus.ACTIVE;
+        this.joinedAt = vo.joinedAt();
+    }
+
     public BroadcastViewer grantManager(boolean isManager) {
         if (isManager && type.isAvailableManager()) {
             type = BroadcastViewerType.MANAGER;
@@ -52,6 +63,10 @@ public class BroadcastViewer {
         }
 
         return this;
+    }
+
+    public void inactive() {
+        this.status = BroadcastViewerStatus.INACTIVE;
     }
 
     public BroadcastViewer suspend(boolean isSuspended) {
@@ -71,4 +86,9 @@ public class BroadcastViewer {
         return this;
     }
 
+    public void reJoin(BroadcastViewerVo vo) {
+        this.type = vo.type();
+        this.joinedAt = vo.joinedAt();
+        this.isSuspended = false;
+    }
 }
