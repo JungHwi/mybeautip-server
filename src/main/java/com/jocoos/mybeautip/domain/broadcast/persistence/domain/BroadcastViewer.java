@@ -55,6 +55,10 @@ public class BroadcastViewer {
         this.joinedAt = vo.joinedAt();
     }
 
+    public String getUsername() {
+        return ViewerUsernameUtil.generateUsername(this.sortedUsername);
+    }
+
     public BroadcastViewer grantManager(boolean isManager) {
         if (isManager && type.isAvailableManager()) {
             type = BroadcastViewerType.MANAGER;

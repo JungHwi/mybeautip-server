@@ -14,33 +14,38 @@ import static com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMes
 
 public record FFLDirectMessageRequest(FFLChatRoomDirectMessageType messageType,
                                       FFLChatRoomDirectMessageCustomType customType,
+                                      List<String> appUserIds,
                                       String message,
-                                      List<String> appUserIds) {
+                                      String data) {
 
     public static FFLDirectMessageRequest of(GrantManagerRequest request, List<Long> memberIds) {
         Map<String, Object> contents = new HashMap<>();
         contents.put("managerId", request.memberId());
 
         if (request.isManager()) {
-            return new FFLDirectMessageRequest(MANAGER, memberIds, StringConvertUtil.convertToJson(contents));
+            return new FFLDirectMessageRequest(MANAGER, memberIds, null, StringConvertUtil.convertToJson(contents));
         } else {
-            return new FFLDirectMessageRequest(NO_MANAGER, memberIds, StringConvertUtil.convertToJson(contents));
+            return new FFLDirectMessageRequest(NO_MANAGER, memberIds, null, StringConvertUtil.convertToJson(contents));
         }
     }
 
     public static FFLDirectMessageRequest of(ViewerSuspendRequest request) {
         if (request.isSuspended()) {
-            return new FFLDirectMessageRequest(NO_CHAT, List.of(request.memberId()), null);
+            return new FFLDirectMessageRequest(NO_VIEWER_CHAT, List.of(request.memberId()), null, null);
         } else {
-            return new FFLDirectMessageRequest(CHAT, List.of(request.memberId()), null);
+            return new FFLDirectMessageRequest(VIEWER_CHAT, List.of(request.memberId()), null, null);
         }
     }
 
-    public static FFLDirectMessageRequest ofExile(long memberId) {
-        return new FFLDirectMessageRequest(EXILE, List.of(memberId), null);
+    public static FFLDirectMessageRequest ofExile(List<Long> memberIds, String username) {
+        return new FFLDirectMessageRequest(EXILE, memberIds, String.format("[%s]님을 추방했습니다.", username), null);
     }
 
-    private FFLDirectMessageRequest(FFLChatRoomDirectMessageCustomType customType, List<Long> memberIds, String message) {
-        this(FFLChatRoomDirectMessageType.COMMAND, customType, message, memberIds.stream().map(String::valueOf).toList());
+    public static FFLDirectMessageRequest ofManagerOut(long memberId) {
+        return new FFLDirectMessageRequest(MANAGER_OUT, List.of(memberId), null, null);
+    }
+
+    private FFLDirectMessageRequest(FFLChatRoomDirectMessageCustomType customType, List<Long> memberIds, String message, String data) {
+        this(FFLChatRoomDirectMessageType.COMMAND, customType, memberIds.stream().map(String::valueOf).toList(), message, data);
     }
 }

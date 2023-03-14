@@ -16,6 +16,8 @@ public enum FFLChatRoomDirectMessageCustomType {
     NO_MANAGER("매니저 설정"),
     CHAT("채팅 가능"),
     NO_CHAT("채팅 불가능"),
+    VIEWER_CHAT("시청자 채팅 가능"),
+    NO_VIEWER_CHAT("시청자 채팅 가능"),
     EXILE("퇴장");
 
     private final String description;

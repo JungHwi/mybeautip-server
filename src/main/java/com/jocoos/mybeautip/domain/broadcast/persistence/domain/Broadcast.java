@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.domain.broadcast.persistence.domain;
 
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadCastViewerList;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditCommand;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerList;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.global.config.jpa.CreatedAtBaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -91,7 +91,7 @@ public class Broadcast extends CreatedAtBaseEntity {
     private BroadcastCategory category;
 
     @Embedded
-    public BroadCastViewerList viewerList;
+    public BroadcastViewerList viewerList;
 
     @Builder
     public Broadcast(@NotNull Long memberId,

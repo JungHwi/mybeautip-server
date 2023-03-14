@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastViewerConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
@@ -18,12 +19,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class BroadcastViewerService {
 
+    private final BroadcastBatchService broadcastBatchService;
     private final BroadcastViewerDao dao;
     private final BroadcastDao broadcastDao;
     private final FlipFlopLiteService flipFlopLiteService;
@@ -69,7 +72,9 @@ public class BroadcastViewerService {
         BroadcastViewer viewer = dao.exile(broadcastId, memberId);
 
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        FFLDirectMessageRequest messageRequest = FFLDirectMessageRequest.ofExile(memberId);
+        List<Long> managerIds = new ArrayList<>(broadcast.viewerList.getManagerId());
+        managerIds.add(broadcast.getMemberId());
+        FFLDirectMessageRequest messageRequest = FFLDirectMessageRequest.ofExile(managerIds, viewer.getUsername());
         flipFlopLiteService.directMessage(broadcast.getVideoKey(), messageRequest);
 
         return converter.converts(viewer);

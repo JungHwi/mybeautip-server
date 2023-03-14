@@ -27,8 +27,8 @@ public class BroadcastBatchService {
         List<Long> outMangerIds = broadcast.syncViewer(newViewers);
 
         if (!outMangerIds.isEmpty()) {
-            FFLDirectMessageRequest request = new FFLDirectMessageRequest();
-            flipFlopLiteService.directMessage(broadcast.getVideoKey(), )
+            FFLDirectMessageRequest request = FFLDirectMessageRequest.ofManagerOut(broadcast.getMemberId());
+            flipFlopLiteService.directMessage(broadcast.getVideoKey(), request);
         }
     }
 }
