@@ -176,10 +176,10 @@ class BroadcastViewerControllerTest(
     fun visibleMessage() {
         val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
         val viewer = saveViewer(broadcast = broadcast)
-        val message = sendMessage(broadcast)
+        val messageId = sendMessage(broadcast)
 
         val result: ResultActions = mockMvc.perform(
-            patch("/1/broadcast/{broadcast_id}/message/{message_id}/visible", broadcast.id, message.id)
+            patch("/1/broadcast/{broadcast_id}/message/{message_id}/visible", broadcast.id, messageId)
                 .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
         ).andExpect(status().isOk)
             .andDo(print())
@@ -220,8 +220,8 @@ class BroadcastViewerControllerTest(
         return memberRepository.save(makeMember())
     }
 
-    fun sendMessage(broadcast: Broadcast) {
+    fun sendMessage(broadcast: Broadcast): Long {
         val externalBroadcastInfo = flipFlopLiteService.createVideoRoom(broadcast)
-        flipFlopLiteService.broadcastMessage(externalBroadcastInfo.videoKey, makeMessage())
+        return flipFlopLiteService.broadcastMessage(externalBroadcastInfo.videoKey, makeMessage())
     }
 }
