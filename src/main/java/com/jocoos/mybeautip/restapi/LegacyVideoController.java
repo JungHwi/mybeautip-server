@@ -815,7 +815,7 @@ public static class VideoLikeInfo {
     private Date createdAt;
     private VideoInfo video;
 
-    VideoLikeInfo(VideoLike videoLike, VideoInfo video) {
+    public VideoLikeInfo(VideoLike videoLike, VideoInfo video) {
         BeanUtils.copyProperties(videoLike, this);
         this.video = video;
     }
@@ -857,7 +857,7 @@ public static class VideoScrapInfo {
     private Date createdAt;
     private VideoResponse video;
 
-    VideoScrapInfo(VideoScrap VideoScrap, VideoInfo video) {
+    public VideoScrapInfo(VideoScrap VideoScrap, VideoInfo video) {
         BeanUtils.copyProperties(VideoScrap, this);
         this.video = VideoInfo.toVideoResponse(video);
         this.video.setCreatedAt(ZonedDateTimeUtil.toUTCZoned(video.getCreatedAt()));
