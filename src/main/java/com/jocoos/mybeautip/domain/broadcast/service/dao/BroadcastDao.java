@@ -2,7 +2,7 @@ package com.jocoos.mybeautip.domain.broadcast.service.dao;
 
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateStatusCondition;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastBulkUpdateStatusCommand;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateResult;
@@ -76,12 +76,12 @@ public class BroadcastDao {
     }
 
     @Transactional
-    public BroadcastUpdateResult bulkUpdateToFinish(BroadcastUpdateStatusCondition condition) {
+    public BroadcastUpdateResult bulkUpdateToFinish(BroadcastBulkUpdateStatusCommand condition) {
         return repository.bulkUpdateStatusAndEndedAt(condition);
     }
 
     @Transactional
-    public long bulkUpdateToReady(BroadcastUpdateStatusCondition condition) {
+    public long bulkUpdateToReady(BroadcastBulkUpdateStatusCommand condition) {
         return repository.bulkUpdateStatus(condition);
     }
 }

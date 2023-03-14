@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastBatchUpdateStatusResponse;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateStatusCondition;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastBulkUpdateStatusCommand;
 import com.jocoos.mybeautip.global.vo.Between;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,16 +24,16 @@ public class BatchBroadcastService {
         return new BroadcastBatchUpdateStatusResponse(toReadyCount, toCancelCount, toEndCount);
     }
 
-    private BroadcastUpdateStatusCondition updateScheduledNearToReady() {
+    private BroadcastBulkUpdateStatusCommand updateScheduledNearToReady() {
         Between between5MinutesFromNow = new Between(ZonedDateTime.now(), ZonedDateTime.now().plusMinutes(5));
-        return BroadcastUpdateStatusCondition.updateScheduledNearToReady(between5MinutesFromNow);
+        return BroadcastBulkUpdateStatusCommand.updateScheduledNearToReady(between5MinutesFromNow);
     }
 
-    private BroadcastUpdateStatusCondition updateNotYetStartToCancel() {
-        return BroadcastUpdateStatusCondition.updateNotYetStartToCancel(ZonedDateTime.now().minusMinutes(5));
+    private BroadcastBulkUpdateStatusCommand updateNotYetStartToCancel() {
+        return BroadcastBulkUpdateStatusCommand.updateNotYetStartToCancel(ZonedDateTime.now().minusMinutes(5));
     }
 
-    private BroadcastUpdateStatusCondition updatePausedLiveToEnd() {
-        return BroadcastUpdateStatusCondition.updatePausedLiveToEnd(ZonedDateTime.now().minusMinutes(1));
+    private BroadcastBulkUpdateStatusCommand updatePausedLiveToEnd() {
+        return BroadcastBulkUpdateStatusCommand.updatePausedLiveToEnd(ZonedDateTime.now().minusMinutes(1));
     }
 }

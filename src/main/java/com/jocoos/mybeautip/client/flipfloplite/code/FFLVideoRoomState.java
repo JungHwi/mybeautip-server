@@ -6,5 +6,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum FFLVideoRoomState {
-    SCHEDULED, LIVE, LIVE_INACTIVE, ENDED, ARCHIVED
+    SCHEDULED, LIVE, LIVE_INACTIVE, ENDED, ARCHIVED, CANCELLED
 }

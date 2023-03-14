@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.ENDED;
-import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE;
+import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.*;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +56,14 @@ public class FlipFlopLiteService {
     public ZonedDateTime endVideoRoom(long videoRoomId) {
         FFLVideoRoomResponse response = client.endVideoRoom(videoRoomId);
         if (response.videoRoomState() != ENDED) {
+
+        }
+        return response.lastModifiedAt();
+    }
+
+    public ZonedDateTime cancelVideoRoom(long videoRoomId) {
+        FFLVideoRoomResponse response = client.cancelVideoRoom(videoRoomId);
+        if (response.videoRoomState() != CANCELLED) {
 
         }
         return response.lastModifiedAt();

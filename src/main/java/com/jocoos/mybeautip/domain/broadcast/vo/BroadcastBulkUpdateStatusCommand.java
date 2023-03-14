@@ -9,31 +9,31 @@ import java.time.ZonedDateTime;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 
 @Builder
-public record BroadcastUpdateStatusCondition(BroadcastStatus currentStatus,
-                                             BroadcastStatus updateStatus,
-                                             Between startedAtBetween,
-                                             ZonedDateTime updateEndedAt,
-                                             ZonedDateTime startedAtLt,
-                                             ZonedDateTime pausedAtLt) {
+public record BroadcastBulkUpdateStatusCommand(BroadcastStatus currentStatus,
+                                               BroadcastStatus updateStatus,
+                                               Between startedAtBetween,
+                                               ZonedDateTime updateEndedAt,
+                                               ZonedDateTime startedAtLt,
+                                               ZonedDateTime pausedAtLt) {
 
-    public static BroadcastUpdateStatusCondition updateScheduledNearToReady(Between between) {
-        return BroadcastUpdateStatusCondition.builder()
+    public static BroadcastBulkUpdateStatusCommand updateScheduledNearToReady(Between between) {
+        return BroadcastBulkUpdateStatusCommand.builder()
                 .currentStatus(SCHEDULED)
                 .updateStatus(READY)
                 .startedAtBetween(between)
                 .build();
     }
 
-    public static BroadcastUpdateStatusCondition updateNotYetStartToCancel(ZonedDateTime startedAtLt) {
-        return BroadcastUpdateStatusCondition.builder()
+    public static BroadcastBulkUpdateStatusCommand updateNotYetStartToCancel(ZonedDateTime startedAtLt) {
+        return BroadcastBulkUpdateStatusCommand.builder()
                 .currentStatus(READY)
                 .updateStatus(CANCEL)
                 .startedAtLt(startedAtLt)
                 .build();
     }
 
-    public static BroadcastUpdateStatusCondition updatePausedLiveToEnd(ZonedDateTime pausedAtLt) {
-        return BroadcastUpdateStatusCondition.builder()
+    public static BroadcastBulkUpdateStatusCommand updatePausedLiveToEnd(ZonedDateTime pausedAtLt) {
+        return BroadcastBulkUpdateStatusCommand.builder()
                 .currentStatus(LIVE)
                 .updateStatus(END)
                 .pausedAtLt(pausedAtLt)

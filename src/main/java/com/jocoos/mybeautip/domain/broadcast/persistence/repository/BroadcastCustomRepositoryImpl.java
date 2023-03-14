@@ -79,7 +79,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     @Override
-    public BroadcastUpdateResult bulkUpdateStatusAndEndedAt(BroadcastUpdateStatusCondition condition) {
+    public BroadcastUpdateResult bulkUpdateStatusAndEndedAt(BroadcastBulkUpdateStatusCommand condition) {
 
         List<Long> videoKeys = repository.query(query -> query
                 .select(broadcast.videoKey)
@@ -106,7 +106,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     @Override
-    public long bulkUpdateStatus(BroadcastUpdateStatusCondition condition) {
+    public long bulkUpdateStatus(BroadcastBulkUpdateStatusCommand condition) {
         return repository.update(query -> query
                 .set(broadcast.status, condition.updateStatus())
                 .where(
