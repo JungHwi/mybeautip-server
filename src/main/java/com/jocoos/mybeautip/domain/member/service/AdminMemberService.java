@@ -1,5 +1,14 @@
 package com.jocoos.mybeautip.domain.member.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+
+import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.*;
@@ -25,14 +34,8 @@ import com.jocoos.mybeautip.domain.term.service.dao.MemberTermDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.point.MemberPoint;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
@@ -148,5 +151,11 @@ public class AdminMemberService {
         OperationLogRequest logRequest = operationLogConverter.converts(request);
         operationLogDao.logging(logRequest);
         return memberDao.updateStatus(member, request.getAfterStatus());
+    }
+
+    @Transactional
+    public MemberResponse saveOrUpdate(MemberRegistrationRequest request) {
+        Member member = memberDao.saveOrUpdate(request);
+        return converter.convert(member);
     }
 }

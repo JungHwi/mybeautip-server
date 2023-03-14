@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.domain.member.service.dao;
 
 import com.jocoos.mybeautip.domain.member.code.MemberStatus;
+import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
+import com.jocoos.mybeautip.domain.member.dto.MemberRegistrationRequest;
 import com.jocoos.mybeautip.domain.member.persistence.repository.MemberDetailRepository;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
@@ -9,18 +11,18 @@ import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.support.DateUtils;
+import com.jocoos.mybeautip.support.RandomUtils;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Log4j2
 @Service
@@ -29,6 +31,7 @@ public class MemberDao {
 
     private final MemberRepository repository;
     private final MemberDetailRepository memberDetailRepository;
+    private final MemberConverter memberConverter;
 
     @Transactional(readOnly = true)
     public List<Member> getAll() {
@@ -112,4 +115,25 @@ public class MemberDao {
     public long countByIdIn(Set<Long> ids) {
         return repository.countByIdIn(ids);
     }
+
+    @Transactional
+    public Member saveOrUpdate(MemberRegistrationRequest request) {
+        Optional<Member> exist = repository.findById(request.getId());
+        if (exist.isPresent()) {
+            Member member = exist.get();
+            log.debug("{}", member);
+
+            if (StringUtils.hasText(request.getUsername())) {
+                member.setUsername(request.getUsername());
+            }
+            if (StringUtils.hasText(request.getAvatarUrl())) {
+                member.setAvatarFilename(request.getAvatarUrl());
+            }
+            return repository.save(member);
+        }
+
+        repository.insert(request.getId(), request.getUsername(), request.getAvatarUrl(), RandomUtils.generateTag());
+        return getMember(request.getId());
+    }
+
 }

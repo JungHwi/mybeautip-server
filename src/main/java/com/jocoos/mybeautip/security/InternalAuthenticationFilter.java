@@ -5,7 +5,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,6 +28,7 @@ import org.apache.http.HttpStatus;
 @Component
 public class InternalAuthenticationFilter extends OncePerRequestFilter {
   private static final String KEY_MEMBER_ID = "MEMBER-ID";
+  private static final String PATH_MEMBER_REGISTRATION = "/internal/1/member";
 
   @Autowired
   private InternalConfig internalConfig;
@@ -51,17 +51,21 @@ public class InternalAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    if (!StringUtils.hasText(memberId)) {
-      responseBody(response, "Member ID is required.");
-      return;
-    }
+    log.debug("request uri: {} {}", request.getMethod(), request.getRequestURI());
 
-    try {
-      setPrincipal(memberId);
-    } catch (AuthenticationMemberNotFoundException e) {
-      log.error("{}", e.getMessage());
-      responseBody(response, "Member is not registered.");
-      return;
+    if (!PATH_MEMBER_REGISTRATION.equals(request.getRequestURI())) {
+      if (!StringUtils.hasText(memberId)) {
+        responseBody(response, "Member ID is required.");
+        return;
+      }
+
+      try {
+        setPrincipal(memberId);
+      } catch (AuthenticationMemberNotFoundException e) {
+        log.error("{}", e.getMessage());
+        responseBody(response, "Member is not registered.");
+        return;
+      }
     }
 
     filterChain.doFilter(request, response);
