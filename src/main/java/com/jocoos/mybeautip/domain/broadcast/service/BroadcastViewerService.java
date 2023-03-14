@@ -84,4 +84,13 @@ public class BroadcastViewerService {
             flipFlopLiteService.hideMessage(broadcast.getVideoKey(), request.messageId());
         }
     }
+
+    @Transactional
+    public void syncViewer() {
+        List<Broadcast> broadcastList = broadcastDao.findByStatusIn(BroadcastStatus.NEED_SYNC_MEMBER_STATUS);
+
+        for (Broadcast broadcast : broadcastList) {
+            broadcastBatchService.syncViewer(broadcast);
+        }
+    }
 }

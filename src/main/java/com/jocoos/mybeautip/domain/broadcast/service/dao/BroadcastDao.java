@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.service.dao;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
@@ -47,6 +48,11 @@ public class BroadcastDao {
     @Transactional(readOnly = true)
     public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
         return repository.getList(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Broadcast> findByStatusIn(List<BroadcastStatus> statusList) {
+        return repository.findByStatusIn(statusList);
     }
 
     @Transactional(readOnly = true)

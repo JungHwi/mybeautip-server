@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -10,10 +11,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broadcast, Long>, BroadcastCustomRepository {
+
+    List<Broadcast> findByStatusIn(List<BroadcastStatus> broadcastStatusList);
 
     @Query("select b from Broadcast b join fetch b.category where b.id = :id")
     Optional<Broadcast> findByIdWithCategory(@Param("id") Long broadcastId);
