@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -16,8 +18,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.jocoos.mybeautip.config.InternalConfig;
+import com.jocoos.mybeautip.global.exception.AuthenticationMemberNotFoundException;
+import com.jocoos.mybeautip.global.exception.ErrorResponse;
+import com.jocoos.mybeautip.global.util.StringConvertUtil;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
 
 @Slf4j
 @Component
@@ -26,6 +32,9 @@ public class InternalAuthenticationFilter extends OncePerRequestFilter {
 
   @Autowired
   private InternalConfig internalConfig;
+
+  @Autowired
+  private MybeautipUserDetailsService userDetailsService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -37,18 +46,41 @@ public class InternalAuthenticationFilter extends OncePerRequestFilter {
     String memberId = request.getHeader(KEY_MEMBER_ID);
     log.debug("token: {}, {}", token, memberId);
 
-    if (StringUtils.hasText(memberId)) {
-      setPrincipal(memberId);
+    if (!internalConfig.getAccessToken().equals(token)) {
+      responseBody(response, "The access token is not valid.");
+      return;
     }
 
-    if (!internalConfig.getAccessToken().equals(token)) {
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The token is not valid.");
-    } else {
-      filterChain.doFilter(request, response);
+    if (!StringUtils.hasText(memberId)) {
+      responseBody(response, "Member ID is required.");
+      return;
     }
+
+    try {
+      setPrincipal(memberId);
+    } catch (AuthenticationMemberNotFoundException e) {
+      log.error("{}", e.getMessage());
+      responseBody(response, "Member is not registered.");
+      return;
+    }
+
+    filterChain.doFilter(request, response);
   }
 
-  public void printHeaders(HttpServletRequest request, HttpServletResponse response) {
+  private void responseBody(HttpServletResponse response, String desc) throws IOException {
+    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+    response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+        .error("Unauthorized")
+        .errorDescription(desc)
+        .build();
+
+    response.getOutputStream().print(StringConvertUtil.convertToJson(errorResponse));
+    response.flushBuffer();
+  }
+
+  private void printHeaders(HttpServletRequest request, HttpServletResponse response) {
     Enumeration names = request.getHeaderNames();
     while (names.hasMoreElements()) {
       String headerName = (String) names.nextElement();
@@ -62,8 +94,8 @@ public class InternalAuthenticationFilter extends OncePerRequestFilter {
   }
 
   private void setPrincipal(String memberId) {
-    MyBeautipUserDetails internalUser = new MyBeautipUserDetails(memberId, "ROLE_INTERNAL");
-    UsernamePasswordAuthenticationToken internalToken = new UsernamePasswordAuthenticationToken(internalUser, null, null);
+    UserDetails userDetails = userDetailsService.loadUserByUsername(memberId);
+    UsernamePasswordAuthenticationToken internalToken = new UsernamePasswordAuthenticationToken(userDetails, null, null);
     SecurityContextHolder.getContext().setAuthentication(internalToken);
   }
 }
