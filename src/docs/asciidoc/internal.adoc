@@ -13,6 +13,9 @@ include::internal_overview.adoc[]
 
 [[API-LIST]]
 == APIs
+=== MEMBER API
+* link:video/internal_add_member.html[Add Member API, window=_blank]
+
 
 === VIDEO API
 * link:video/internal_get_videos.html[Get Video List API, window=_blank]
