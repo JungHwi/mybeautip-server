@@ -1,5 +1,8 @@
 package com.jocoos.mybeautip.testutil.fixture
 
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageCustomType
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageType
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLBroadcastMessageRequest
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
@@ -79,5 +82,19 @@ fun makeViewer(
         isSuspended,
         suspendedAt,
         joinedAt
+    )
+}
+
+fun makeMessage(
+    messageType: FFLChatRoomBroadcastMessageType? = FFLChatRoomBroadcastMessageType.MESSAGE,
+    customType: FFLChatRoomBroadcastMessageCustomType? = FFLChatRoomBroadcastMessageCustomType.MSG,
+    message: String? = "test message",
+    appUserIds: List<String>? = null
+): FFLBroadcastMessageRequest {
+    return FFLBroadcastMessageRequest(
+        messageType,
+        customType,
+        message,
+        appUserIds
     )
 }
