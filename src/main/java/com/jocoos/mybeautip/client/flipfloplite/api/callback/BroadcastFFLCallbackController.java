@@ -20,6 +20,7 @@ public class BroadcastFFLCallbackController {
     // check flipflop lite api VideoRoom-상태-변경-App-Callback-API-알림
     @PostMapping("/change-status")
     public void callbackChangeStatus(@RequestBody FFLBroadcastChangeStatusRequest request) {
+        log.debug("Change Status Callback : {}", request);
         service.changeStatus(request.data());
     }
 }
