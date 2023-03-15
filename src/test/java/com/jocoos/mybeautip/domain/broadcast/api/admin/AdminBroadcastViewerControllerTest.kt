@@ -17,6 +17,7 @@ import com.jocoos.mybeautip.testutil.fixture.makeViewer
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
@@ -169,6 +170,30 @@ class AdminBroadcastViewerControllerTest(
                     fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
                     fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
                 ),
+            )
+        )
+    }
+
+    @Test
+    fun visibleMessage() {
+        val broadcast = saveBroadcast()
+        val request = BooleanDto(true)
+
+        val result: ResultActions = mockMvc.perform(
+            patch("/api/1/broadcast/{broadcast_id}/message/{message_id}/visible", broadcast.id, 123)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_visible_message",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID"),
+                    parameterWithName("message_id").description("메세지 ID"),
+                )
             )
         )
     }

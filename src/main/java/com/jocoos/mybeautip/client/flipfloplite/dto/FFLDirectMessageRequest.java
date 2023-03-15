@@ -4,11 +4,8 @@ import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMessageCus
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMessageType;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
-import com.jocoos.mybeautip.global.util.StringConvertUtil;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMessageCustomType.*;
 
@@ -19,13 +16,10 @@ public record FFLDirectMessageRequest(FFLChatRoomDirectMessageType messageType,
                                       String data) {
 
     public static FFLDirectMessageRequest of(GrantManagerRequest request, List<Long> memberIds) {
-        Map<String, Object> contents = new HashMap<>();
-        contents.put("managerId", request.memberId());
-
         if (request.isManager()) {
-            return new FFLDirectMessageRequest(MANAGER, memberIds, null, StringConvertUtil.convertToJson(contents));
+            return new FFLDirectMessageRequest(MANAGER, memberIds, null, null);
         } else {
-            return new FFLDirectMessageRequest(NO_MANAGER, memberIds, null, StringConvertUtil.convertToJson(contents));
+            return new FFLDirectMessageRequest(NO_MANAGER, memberIds, null, null);
         }
     }
 

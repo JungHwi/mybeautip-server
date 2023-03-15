@@ -15,7 +15,6 @@ import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import com.jocoos.mybeautip.testutil.fixture.makeMember
-import com.jocoos.mybeautip.testutil.fixture.makeMessage
 import com.jocoos.mybeautip.testutil.fixture.makeViewer
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
@@ -172,36 +171,29 @@ class BroadcastViewerControllerTest(
         )
     }
 
-//    @Test
-//    fun visibleMessage() {
-//        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
-//        val viewer = saveViewer(broadcast = broadcast)
-//        val messageId = sendMessage(broadcast)
-//
-//        val result: ResultActions = mockMvc.perform(
-//            patch("/api/1/broadcast/{broadcast_id}/message/{message_id}/visible", broadcast.id, messageId)
-//                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
-//        ).andExpect(status().isOk)
-//            .andDo(print())
-//
-//        result.andDo(
-//            document(
-//                "visible_message",
-//                pathParameters(
-//                    parameterWithName("broadcast_id").description("방송 ID"),
-//                    parameterWithName("message_id").description("메세지 ID"),
-//                ),
-//                responseFields(
-//                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
-//                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
-//                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
-//                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
-//                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
-//                ),
-//            )
-//        )
-//    }
+    @Test
+    fun visibleMessage() {
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        val request = BooleanDto(true)
 
+        val result: ResultActions = mockMvc.perform(
+            patch("/api/1/broadcast/{broadcast_id}/message/{message_id}/visible", broadcast.id, 123)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "visible_message",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID"),
+                    parameterWithName("message_id").description("메세지 ID"),
+                )
+            )
+        )
+    }
 
     fun saveViewer(
         broadcast: Broadcast,
@@ -218,10 +210,5 @@ class BroadcastViewerControllerTest(
 
     fun saveMember(): Member {
         return memberRepository.save(makeMember())
-    }
-
-    fun sendMessage(broadcast: Broadcast): Long {
-        val externalBroadcastInfo = flipFlopLiteService.createVideoRoom(broadcast)
-        return flipFlopLiteService.broadcastMessage(externalBroadcastInfo.videoKey, makeMessage())
     }
 }

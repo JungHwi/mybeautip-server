@@ -50,10 +50,10 @@ public interface FlipFlopLiteClient {
 
     // Chat Message
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/messages/{messageId}/hide")
-    EmptyResult hideMessage(@PathVariable long videoRoomId, @PathVariable long messageId);
+    EmptyResult invisibleMessage(@PathVariable long videoRoomId, @PathVariable long messageId);
 
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/messages/{messageId}/unhide")
-    EmptyResult unhideMessage(@PathVariable long videoRoomId, @PathVariable long messageId);
+    EmptyResult visibleMessage(@PathVariable long videoRoomId, @PathVariable long messageId);
 
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/admin/messages/broadcast")
     FFLMessageInfo broadcastMessage(@PathVariable long videoRoomId, FFLBroadcastMessageRequest request);

@@ -166,6 +166,8 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
         given(flipFlopLiteClient.cancelVideoRoom(anyLong())).willReturn(makeFFLVideoRoomResponse())
         given(flipFlopLiteClient.broadcastMessage(anyLong(), any(FFLBroadcastMessageRequest::class.java))).willReturn(makeFFLMessageInfo())
         given(flipFlopLiteClient.directMessage(anyLong(), any(FFLDirectMessageRequest::class.java))).willReturn(makeFFLMessageInfo())
+        given(flipFlopLiteClient.visibleMessage(anyLong(), anyLong())).willReturn(null)
+        given(flipFlopLiteClient.invisibleMessage(anyLong(), anyLong())).willReturn(null)
     }
 
 }

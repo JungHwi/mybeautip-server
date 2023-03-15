@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.client.flipfloplite;
 
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
+import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
@@ -96,12 +97,12 @@ public class FlipFlopLiteService {
         return converter.convertToViewerVo(response.content());
     }
 
-    public EmptyResult hideMessage(long videoRoomId, long messageId) {
-        return client.hideMessage(videoRoomId, messageId);
-    }
-
-    public EmptyResult unhideMessage(long videoRoomId, long messageId) {
-        return client.unhideMessage(videoRoomId, messageId);
+    public EmptyResult visibleMessage(long videoRoomId, VisibleMessageRequest request) {
+        if (request.isVisible()) {
+            return client.visibleMessage(videoRoomId, request.messageId());
+        } else {
+            return client.invisibleMessage(videoRoomId, request.messageId());
+        }
     }
 
     public Long broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
