@@ -46,6 +46,8 @@ class InternalVideoControllerTest(
 
     private lateinit var category: VideoCategory
 
+    private var memberId: Long = 100;
+
     @BeforeAll
     fun beforeAll() {
         category = videoCategoryRepository.save(makeVideoCategory())
@@ -67,7 +69,8 @@ class InternalVideoControllerTest(
             .perform(
                 get("/internal/1/videos")
                     .param("category_id", category.id.toString())
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header("MEMBER-ID", memberId)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -173,7 +176,8 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 get("/internal/1/videos/{video_id}", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header("MEMBER-ID", memberId)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -260,7 +264,9 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 patch("/internal/1/video/{video_id}/view-count", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header("MEMBER-ID", memberId)
+                    .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
             .andDo(print())
@@ -288,7 +294,7 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/likes", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
             )
             .andExpect(status().isOk)
             .andDo(print())
@@ -376,7 +382,7 @@ class InternalVideoControllerTest(
         val likeResult: MvcResult = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/likes", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
             )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id", notNullValue()))
@@ -390,7 +396,7 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 delete("/internal/1/videos/{video_id}/likes/{like_id}", video.id, likeId)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
             )
             .andExpect(status().isOk)
             .andDo(print())
@@ -418,7 +424,7 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/report", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(req))
             )
@@ -512,7 +518,7 @@ class InternalVideoControllerTest(
         val commentResult: MvcResult = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(commentReq))
             )
@@ -528,7 +534,7 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/2/videos/{video_id}/comments/{comment_id}/report", video.id, commentId)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(reportReq))
             )
@@ -571,7 +577,7 @@ class InternalVideoControllerTest(
         mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -581,7 +587,7 @@ class InternalVideoControllerTest(
         mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -592,7 +598,7 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 get("/api/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -671,7 +677,7 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -713,7 +719,7 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 patch("/internal/1/videos/{video_id}/comments/{comment_id}", video.id, commentId)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -745,7 +751,7 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/api/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(createCommentRequest()))
             )
