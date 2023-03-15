@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType.MANAGER;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -61,7 +63,7 @@ public class BroadcastViewer {
 
     public BroadcastViewer grantManager(boolean isManager) {
         if (isManager && type.isAvailableManager()) {
-            type = BroadcastViewerType.MANAGER;
+            type = MANAGER;
         } else if(!isManager) {
             type = BroadcastViewerType.MEMBER;
         }
@@ -95,4 +97,8 @@ public class BroadcastViewer {
         this.joinedAt = vo.joinedAt();
         this.isSuspended = false;
     }
+    public boolean isManager() {
+        return type == MANAGER;
+    }
+
 }

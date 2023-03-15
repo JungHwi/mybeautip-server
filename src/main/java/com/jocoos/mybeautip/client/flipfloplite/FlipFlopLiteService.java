@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.client.flipfloplite;
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE;
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.*;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,30 @@ public class FlipFlopLiteService {
         return converter.converts(response);
     }
 
+    private ExternalBroadcastInfo startVideoRoom(long videoRoomId) {
+        FFLVideoRoomResponse response = client.startVideoRoom(videoRoomId);
+        if (response.videoRoomState() != LIVE) {
+
+        }
+        return converter.converts(response);
+    }
+
+    private ZonedDateTime endVideoRoom(long videoRoomId) {
+        FFLVideoRoomResponse response = client.endVideoRoom(videoRoomId);
+        if (response.videoRoomState() != ENDED) {
+
+        }
+        return response.lastModifiedAt();
+    }
+
+    private ZonedDateTime cancelVideoRoom(long videoRoomId) {
+        FFLVideoRoomResponse response = client.cancelVideoRoom(videoRoomId);
+        if (response.videoRoomState() != CANCELLED) {
+
+        }
+        return response.lastModifiedAt();
+    }
+
     public FFLTokenResponse loginGuest() {
         FFLTokenResponse response = client.loginGuest();
         return response;
@@ -45,30 +72,6 @@ public class FlipFlopLiteService {
     public FFLTokenResponse login(long memberId) {
         Member member = memberDao.getMember(memberId);
         return this.login(member);
-    }
-
-    public ExternalBroadcastInfo startVideoRoom(long videoRoomId) {
-        FFLVideoRoomResponse response = client.startVideoRoom(videoRoomId);
-        if (response.videoRoomState() != LIVE) {
-
-        }
-        return converter.converts(response);
-    }
-
-    public ZonedDateTime endVideoRoom(long videoRoomId) {
-        FFLVideoRoomResponse response = client.endVideoRoom(videoRoomId);
-        if (response.videoRoomState() != ENDED) {
-
-        }
-        return response.lastModifiedAt();
-    }
-
-    public ZonedDateTime cancelVideoRoom(long videoRoomId) {
-        FFLVideoRoomResponse response = client.cancelVideoRoom(videoRoomId);
-        if (response.videoRoomState() != CANCELLED) {
-
-        }
-        return response.lastModifiedAt();
     }
 
     public String getStreamKey(long memberId) {
