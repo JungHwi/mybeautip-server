@@ -1,0 +1,4 @@
+== Admin Visible Message API
+
+operation::admin_visible_message[snippets='http-request,path-parameters,http-response']
+

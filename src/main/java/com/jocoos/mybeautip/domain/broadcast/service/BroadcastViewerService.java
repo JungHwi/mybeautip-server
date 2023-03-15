@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLBroadcastMessageRequest;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastViewerConverter;
@@ -79,12 +80,8 @@ public class BroadcastViewerService {
 
     public void visibleMessage(VisibleMessageRequest request) {
         Broadcast broadcast = broadcastDao.get(request.broadcastId());
-
-        if (request.isVisible()) {
-            flipFlopLiteService.unhideMessage(broadcast.getVideoKey(), request.messageId());
-        } else {
-            flipFlopLiteService.hideMessage(broadcast.getVideoKey(), request.messageId());
-        }
+        flipFlopLiteService.visibleMessage(broadcast.getVideoKey(), request);
+        flipFlopLiteService.broadcastMessage(broadcast.getVideoKey(), FFLBroadcastMessageRequest.ofVisibleMessage(request));
     }
 
     @Transactional

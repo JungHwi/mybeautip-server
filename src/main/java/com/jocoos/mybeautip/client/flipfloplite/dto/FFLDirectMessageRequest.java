@@ -19,9 +19,6 @@ public record FFLDirectMessageRequest(FFLChatRoomDirectMessageType messageType,
                                       String data) {
 
     public static FFLDirectMessageRequest of(GrantManagerRequest request, List<Long> memberIds) {
-        Map<String, Object> contents = new HashMap<>();
-        contents.put("managerId", request.memberId());
-
         if (request.isManager()) {
             return new FFLDirectMessageRequest(MANAGER, memberIds, null, StringConvertUtil.convertToJson(contents));
         } else {

@@ -87,7 +87,6 @@ public class BroadcastService {
     }
 
     @Transactional
-
     public BroadcastResponse edit(long broadcastId, BroadcastEditRequest request, Long requestMemberId) {
         Broadcast editedBroadcast = domainService.edit(broadcastId, request, requestMemberId);
         awsS3Handler.editFiles(request.getThumbnails(), editedBroadcast.getThumbnailUrlPath());

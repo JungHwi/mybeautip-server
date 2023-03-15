@@ -1,0 +1,4 @@
+== Visible Message API
+
+operation::visible_message[snippets='http-request,path-parameters,http-response']
+

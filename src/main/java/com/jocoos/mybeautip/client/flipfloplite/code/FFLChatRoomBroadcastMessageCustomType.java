@@ -11,7 +11,12 @@ public enum FFLChatRoomBroadcastMessageCustomType {
     DISCONNECT("채팅방 강제 닫음 알림"),
     UPDATE("라이브 관련 내용 업데이트 알림"),
     ACTIVE("라이브 시작 알림"),
-    INACTIVE("라이브 일시 중단 알림");
+    INACTIVE("라이브 일시 중단 알림"),
+
+    // CUSTOM
+    VISIBLE_MESSAGE("메세지 보여지게"),
+    INVISIBLE_MESSAGE("메세지 안 보여지게")
+    ;
 
     private final String description;
 }

@@ -89,12 +89,12 @@ fun makeMessage(
     messageType: FFLChatRoomBroadcastMessageType? = FFLChatRoomBroadcastMessageType.MESSAGE,
     customType: FFLChatRoomBroadcastMessageCustomType? = FFLChatRoomBroadcastMessageCustomType.MSG,
     message: String? = "test message",
-    appUserIds: List<String>? = null
+    data: String? = null
 ): FFLBroadcastMessageRequest {
     return FFLBroadcastMessageRequest(
         messageType,
         customType,
         message,
-        appUserIds
+        data
     )
 }
