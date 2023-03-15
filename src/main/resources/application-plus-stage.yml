@@ -1,0 +1,69 @@
+spring:
+  config:
+    activate:
+      on-profile: plus-stage
+    import: classpath:application-oauth-stag.yml
+  datasource:
+    master:
+      hikari:
+        username: mybeautipstagsrv
+        password: mybeautipstagsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-stag.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:13305/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautipstagsrv
+        password: mybeautipstagsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-stag.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:13305/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+  jpa:
+    show-sql: false
+  flyway:
+    baselineOnMigrate: false
+    locations: classpath:db/mysql
+
+mybeautip:
+  security:
+    access-token-validity-seconds: 2592000      # 30 days
+    refresh-token-validity-seconds: 15552000     # 180 days
+  aws:
+    sns:
+      application:
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip-stag"
+    s3:
+      domain: 'https://mybeautip-stag.s3.ap-northeast-2.amazonaws.com/'
+      bucket: 'mybeautip-stag'
+      region: 'ap-northeast-2'
+    cf:
+      domain: "https://static-stag.mybeautip.com/"
+  store:
+    image-path:
+      domain: https://static-stag.mybeautip.com/common/
+  slack:
+    key: T03FMJ9ANNR/B041VSPMK5F/AsOp07FFcGNKvldDFAh85z4D
+    channel: "#mybeautip-stage"
+    order-key: T03FMJ9ANNR/B041VSPMK5F/AsOp07FFcGNKvldDFAh85z4D
+    order-channel: "#mybeautip-stage"
+  iamport:
+    api: https://api.iamport.kr
+    key: 3621612290867148
+    secret: Z4CYi1YGDdOfk2ti4mYQtpEJiJPfxzlxEXvWZtCCGqR1skjxHinaI1U1LJgijBPXzlTyOwavW2xpmRW4
+
+cloud:
+  aws:
+    s3:
+      bucket: mybeautip-stag
+
+flipflop:
+  app-key: 40E9798BF7
+  url: https://api.flipflop.tv
+  access-token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZW1iZXJfaWQiOiIyNDAiLCJzY29wZSI6WyJndWVzdCJdLCJleHAiOjE5OTEwMzY0MDksImp0aSI6IlJ6OUhlbEJNU2dDMmVaTjZ3aDJvRFh5cDRXayIsImNsaWVudF9pZCI6Imd1ZXN0In0.K5N2uLrUcRQH5med6AwO2uQP2iULBZ20h-RtKy1NsrE
+  aws.s3.domain: https://static.flipflop.tv/40E9798BF7/videos/
+  video:
+    thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
+
+
+#redis:
+#  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
+#  port: 6379
+
+logging:
+  config: classpath:log/log4j2-console-stage.yml

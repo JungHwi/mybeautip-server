@@ -1,0 +1,37 @@
+spring:
+  config:
+    activate:
+      on-profile: plus-dev
+    import: classpath:application-oauth-dev.yml
+  datasource:
+    master:
+      hikari:
+        username: mybeautipthdevsrv
+        password: mybeautipthdevsrvpass44
+        jdbc-url: jdbc:mysql://rds-mybeautip-plus-dev.cluster-conkqmswrjiq.ap-southeast-1.rds.amazonaws.com:13306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautipthdevsrv
+        password: mybeautipthdevsrvpass44
+        jdbc-url: jdbc:mysql://rds-mybeautip-plus-dev.cluster-ro-conkqmswrjiq.ap-southeast-1.rds.amazonaws.com:13306/mybeautip?allowPublicKeyRetrieval=true&zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+mybeautip:
+  store:
+    image-path:
+      domain: https://static.mybeautip.com/common/
+  security:
+    access-token-validity-seconds: 2592000     # 30 days
+    refresh-token-validity-seconds: 1814400    # 21 days
+  slack:
+    key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
+    channel: "#mybeautip-dev"
+    order-key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
+    order-channel: "#mybeautip-dev"
+
+#redis:
+#  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
+#  port: 6379
+
+logging:
+  config: classpath:log/log4j2-console.yml
+
+

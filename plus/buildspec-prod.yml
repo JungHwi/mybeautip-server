@@ -1,0 +1,35 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+  pre_build:
+    commands:
+      - echo start gradle build
+      - ./gradlew build -x test
+      - echo end of gradle build
+      - aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 776875668468.dkr.ecr.ap-northeast-2.amazonaws.com
+      - REPOSITORY_URI=904235351504.dkr.ecr.ap-southeast-1.amazonaws.com/mybeautip-api
+      - IMAGE_TAG=prod
+  build:
+    commands:
+      - echo start docker build
+      - docker build -f plus/Dockerfile_prod -t $REPOSITORY_URI:$IMAGE_TAG .
+      - echo end of docker build
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definitions file...
+      - printf '[{"name":"ecs-container-mybeautip-api-prod","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
+      
+artifacts:
+  files:
+    - imagedefinitions.json
+
+cache:
+  paths:
+    - '/root/.gradle/caches/**/*'

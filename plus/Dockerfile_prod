@@ -1,0 +1,13 @@
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:17
+
+WORKDIR /mybeautip-server
+
+ADD build/libs/mybeautip-server.jar app.jar
+
+ENV SERVER_PROFILE plus-production
+
+ENV PORT 8080
+
+EXPOSE 8080
+
+CMD java -jar app.jar --spring.profiles.active=$SERVER_PROFILE --port=$PORT

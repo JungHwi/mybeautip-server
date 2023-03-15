@@ -1,0 +1,76 @@
+spring:
+  config:
+    activate:
+      on-profile: plus-production
+    import: classpath:application-oauth-prod.yml
+  datasource:
+    master:
+      hikari:
+        username: mybeautipsrv
+        password: mybeautipsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-prod.cluster-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:33306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    slave:
+      hikari:
+        username: mybeautipsrv
+        password: mybeautipsrvpass77
+        jdbc-url: jdbc:mysql://rds-mybeautip-prod.cluster-ro-cznmmhv51m5v.ap-northeast-2.rds.amazonaws.com:33306/mybeautip?zeroDateTimeBehavior=convertToNull&useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+  jpa:
+    show-sql: false
+  flyway:
+    baselineOnMigrate: false
+    locations: classpath:db/mysql
+
+mybeautip:
+  service:
+    member:
+      rejoin-available-second: 7776000  # 90 days
+  security:
+    access-token-validity-seconds: 2592000  # 30 days
+    refresh-token-validity-seconds: 15552000 # 180 days
+  aws:
+    sns:
+      application:
+        gcm-arn: "arn:aws:sns:ap-northeast-2:776875668468:app/GCM/mybeautip"
+    s3:
+      domain: 'https://mybeautip-prod.s3.ap-northeast-2.amazonaws.com/'
+      bucket: 'mybeautip-prod'
+      region: 'ap-northeast-2'
+    cf:
+      domain: "https://static.mybeautip.com/"
+  store:
+    image-path:
+      domain: https://static.mybeautip.com/common/
+  slack:
+    key: T03FMJ9ANNR/B03FT8YFXC5/GFY50VQh98iRpEs4XbmxmrYP
+    channel: "#mybeautip-prod"
+    order-key: T02GN94AU/BKB98G20Z/mula9sD6NE9rpxIhuRWUePwH
+    order-channel: "#z-mybeautip-order"
+  iamport:
+    api: https://api.iamport.kr
+    key: 3621612290867148
+    secret: Z4CYi1YGDdOfk2ti4mYQtpEJiJPfxzlxEXvWZtCCGqR1skjxHinaI1U1LJgijBPXzlTyOwavW2xpmRW4
+
+cloud:
+  aws:
+    s3:
+      bucket: mybeautip-prod
+
+flipflop:
+  app-key: 8E88F34E90
+  url: https://api.flipflop.tv
+  access-token: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZW1iZXJfaWQiOiIyNDAiLCJzY29wZSI6WyJndWVzdCJdLCJleHAiOjE5NzcyOTA2NDMsImp0aSI6InE0NVlsTWNaUDZJNk5rNTk5N1NaYjdzN09xVSIsImNsaWVudF9pZCI6Imd1ZXN0In0.LJ6CbyJSyLuu3MDIPr2zlnPumx8iQZcic4GsqYAaSs4
+  aws.s3.domain: https://static.flipflop.tv/8E88F34E90/videos/
+  video:
+    thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
+
+ffl:
+  api-key: 2Mi6Qx9YJWG1LdUd4F3VQEFOo8B
+  api-secret: 2Mi6Qtwb2VsJ4lVFlMMetrjH3LW
+  domain: https://api.lite.flipflop.tv
+
+#redis:
+#  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
+#  port: 6379
+
+logging:
+  config: classpath:log/log4j2-console-prod.yml
