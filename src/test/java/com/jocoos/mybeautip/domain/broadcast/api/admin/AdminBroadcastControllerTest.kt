@@ -7,8 +7,8 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRep
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_SORT_FIELD
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_STATUS
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
@@ -90,6 +90,9 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("content.[].title").type(STRING).description("타이틀"),
                     fieldWithPath("content.[].notice").type(STRING).description("공지사항").optional(),
                     fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),
+                    fieldWithPath("content.[].can_chat").type(BOOLEAN).description("채팅 가능 여부"),
+                    fieldWithPath("content.[].is_sound_on").type(BOOLEAN).description("사운드 여부"),
+                    fieldWithPath("content.[].is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("content.[].viewer_count").type(NUMBER).description("시청자수"),
                     fieldWithPath("content.[].max_viewer_count").type(NUMBER).description("최대 시청자수"),
                     fieldWithPath("content.[].heart_count").type(NUMBER).description("하트수"),
@@ -133,6 +136,9 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("title").type(STRING).description("타이틀"),
                     fieldWithPath("notice").type(STRING).description("공지사항").optional(),
                     fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
+                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
+                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
+                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
                     fieldWithPath("max_viewer_count").type(NUMBER).description("최대 시청자수"),
                     fieldWithPath("heart_count").type(NUMBER).description("하트수"),
@@ -145,7 +151,19 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("created_by.id").type(NUMBER).description("회원 아이디"),
                     fieldWithPath("created_by.email").type(STRING).description("회원 이메일").optional(),
                     fieldWithPath("created_by.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("created_by.avatar_url").type(STRING).description("회원 아바타 URL")
+                    fieldWithPath("created_by.avatar_url").type(STRING).description("회원 아바타 URL"),
+                    fieldWithPath("participant").type(OBJECT).description("참여자 정보"),
+                    fieldWithPath("participant.member_id").type(NUMBER).description("참여자 아이디"),
+                    fieldWithPath("participant.username").type(STRING).description("참여자 닉네임"),
+                    fieldWithPath("participant.avatar_url").type(STRING).description("참여자 아바타 URL"),
+                    fieldWithPath("participant.type").type(STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("participant.status").type(STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("participant.is_suspended").type(BOOLEAN).description("참여자 추방 여부"),
+                    fieldWithPath("participant.broadcast_key").type(OBJECT).description("참여자 방송 관련 키 및 토큰 정보"),
+                    fieldWithPath("participant.broadcast_key.stream_key").type(STRING).description("참여자 Stream Key, 방송 진행자일 경우에만 존재").optional(),
+                    fieldWithPath("participant.broadcast_key.gossip_token").type(STRING).description("참여자 채팅 토큰"),
+                    fieldWithPath("participant.broadcast_key.app_id").type(STRING).description("참여자 채팅 앱 ID"),
+                    fieldWithPath("participant.broadcast_key.channel_key").type(STRING).description("참여자 채팅 채널 키")
                 )
             )
         )
@@ -159,7 +177,7 @@ class AdminBroadcastControllerTest(
         val request = BroadcastPatchRequest(
             JsonNullable.of(newTitle),
             JsonNullable.of(newNotice),
-            JsonNullable.of(newThumbnailUrl)
+            JsonNullable.of(newThumbnailUrl),
         )
 
         val result: ResultActions = mockMvc
