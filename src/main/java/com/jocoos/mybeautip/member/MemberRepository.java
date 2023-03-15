@@ -142,6 +142,6 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
 
     @Transactional
     @Modifying
-    @Query(value = "insert into members (id, username, avatar_url, tag, created_at) VALUES (?1, ?2, ?3, ?4, now())", nativeQuery = true)
+    @Query(value = "insert into members (id, username, avatar_url, tag, permission, created_at) VALUES (?1, ?2, ?3, ?4, 19, now())", nativeQuery = true)
     void insert(Long id, String username, String avatarUrl, String tag);
 }

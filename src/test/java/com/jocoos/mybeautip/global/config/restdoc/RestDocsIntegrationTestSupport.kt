@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteClient
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLBroadcastMessageRequest
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomRequest
+import com.jocoos.mybeautip.config.InternalConfig
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastCategoryRepository
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.GROUP
@@ -19,6 +20,7 @@ import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.security.JwtTokenProvider
+import com.jocoos.mybeautip.support.RandomUtils
 import com.jocoos.mybeautip.testutil.container.TestContainerConfig
 import com.jocoos.mybeautip.testutil.fixture.*
 import org.junit.jupiter.api.BeforeEach
@@ -46,6 +48,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextS
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.filter.CharacterEncodingFilter
+import java.util.Base64
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
@@ -86,6 +89,9 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
     @Autowired
     private lateinit var jwtTokenProvider: JwtTokenProvider
 
+    @Autowired
+    private lateinit var internalConfig: InternalConfig
+
     @MockBean
     protected lateinit var awsS3Handler: AwsS3Handler
 
@@ -100,6 +106,7 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
 
     protected lateinit var requestUser: Member
     protected lateinit var requestUserToken: String
+    protected lateinit var requestInternalToken: String
 
     protected lateinit var defaultAdmin: Member
     protected lateinit var defaultAdminToken: String
@@ -127,6 +134,7 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
         defaultAdminToken = "Bearer " + jwtTokenProvider.auth(defaultAdmin).accessToken
         requestUserToken = "Bearer " + jwtTokenProvider.auth(requestUser).accessToken
         defaultInfluencerToken = "Bearer " + jwtTokenProvider.auth(defaultInfluencer).accessToken
+        requestInternalToken = "Basic " + internalConfig.accessToken
     }
 
     @PreDestroy

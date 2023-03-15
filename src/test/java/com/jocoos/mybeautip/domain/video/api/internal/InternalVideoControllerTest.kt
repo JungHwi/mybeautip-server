@@ -11,18 +11,21 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.GRANT_TYPE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.VIDEO_MASK_TYPE
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
-import com.jocoos.mybeautip.member.comment.CommentRepository
+import com.jocoos.mybeautip.member.LegacyMemberService
+import com.jocoos.mybeautip.member.Member
+import com.jocoos.mybeautip.member.MemberRepository
+import com.jocoos.mybeautip.security.MybeautipUserDetailsService
+import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.testutil.fixture.makeVideo
 import com.jocoos.mybeautip.testutil.fixture.makeVideoCategory
 import com.jocoos.mybeautip.video.Video
 import com.jocoos.mybeautip.video.VideoRepository
 import org.hamcrest.CoreMatchers.notNullValue
 import org.json.JSONObject
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import org.mockito.BDDMockito
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
@@ -33,32 +36,50 @@ import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.restdocs.payload.ResponseFieldsSnippet
 import org.springframework.restdocs.request.RequestDocumentation.*
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
+
 @TestInstance(PER_CLASS)
 class InternalVideoControllerTest(
     private val videoRepository: VideoRepository,
-    private val videoCategoryRepository: VideoCategoryRepository
+    private val videoCategoryRepository: VideoCategoryRepository,
+    private val memberRepository: MemberRepository
 ) : RestDocsIntegrationTestSupport() {
 
     private lateinit var category: VideoCategory
+    private lateinit var member: Member
+
+    companion object {
+        const val MEMBER_ID = "MEMBER-ID"
+    }
+
+    @MockBean
+    private val legacyMemberService: LegacyMemberService? = null
 
     @BeforeAll
     fun beforeAll() {
+        member = memberRepository.save(makeMember())
         category = videoCategoryRepository.save(makeVideoCategory())
     }
 
     @AfterAll
     fun afterAll() {
         videoCategoryRepository.delete(category)
+        memberRepository.delete(member)
+    }
+
+    @BeforeEach
+    fun setUp() {
+        BDDMockito.given(legacyMemberService!!.currentMember()).willReturn(member)
+        BDDMockito.given(legacyMemberService!!.hasCommentPostPermission(member)).willReturn(true)
     }
 
     @Test
     fun getVideos() {
-
         // given
         videoRepository.save(makeVideo(defaultAdmin, category))
 
@@ -67,7 +88,8 @@ class InternalVideoControllerTest(
             .perform(
                 get("/internal/1/videos")
                     .param("category_id", category.id.toString())
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -173,7 +195,8 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 get("/internal/1/videos/{video_id}", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -224,26 +247,6 @@ class InternalVideoControllerTest(
                     fieldWithPath("like_id").type(NUMBER).description("좋아요 아이디").optional(),
                     fieldWithPath("scrap_id").type(NUMBER).description("스크랩 아이디").optional(),
                     fieldWithPath("blocked").type(BOOLEAN).description("차단 여부").optional(),
-                    fieldWithPath("owner").type(OBJECT).description("비디오 작성자 정보"),
-                    fieldWithPath("owner.id").type(NUMBER).description("아이디"),
-                    fieldWithPath("owner.tag").type(STRING).description("태그"),
-                    fieldWithPath("owner.status").type(STRING).description("상태"),
-                    fieldWithPath("owner.grant_type").type(STRING).description(generateLinkCode(GRANT_TYPE)).optional(),
-                    fieldWithPath("owner.username").type(STRING).description("유저명"),
-                    fieldWithPath("owner.email").type(STRING).description("이메일"),
-                    fieldWithPath("owner.phone_number").type(STRING).description("전화번호"),
-                    fieldWithPath("owner.avatar_url").type(STRING).description("아바타 URL"),
-                    fieldWithPath("owner.follower_count").type(NUMBER).description("팔로워 수"),
-                    fieldWithPath("owner.following_count").type(NUMBER).description("팔로잉 수"),
-                    fieldWithPath("owner.video_count").type(NUMBER).description("비디오 수"),
-                    fieldWithPath("owner.created_at").type(NUMBER).description("회원가입일"),
-                    fieldWithPath("owner.modified_at").type(NUMBER).description("정보수정일"),
-                    fieldWithPath("owner.permission").type(OBJECT).description("권한"),
-                    fieldWithPath("owner.permission.chat_post").type(BOOLEAN).description("post 권한"),
-                    fieldWithPath("owner.permission.comment_post").type(BOOLEAN).description("댓글 권한"),
-                    fieldWithPath("owner.permission.live_post").type(BOOLEAN).description("라이브 권한"),
-                    fieldWithPath("owner.permission.motd_post").type(BOOLEAN).description("motd 권한"),
-                    fieldWithPath("owner.permission.revenue_return").type(BOOLEAN).description("수익배분 권한"),
                     fieldWithPath("created_at").type(STRING).description("생성 일자").attributes(getZonedDateMilliFormat())
                 )
             )
@@ -260,7 +263,9 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 patch("/internal/1/video/{video_id}/view-count", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
+                    .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
             .andDo(print())
@@ -288,7 +293,9 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/likes", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
+                    .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
             .andDo(print())
@@ -342,27 +349,6 @@ class InternalVideoControllerTest(
                     fieldWithPath("video.like_id").type(NUMBER).description("좋아요 아이디").optional(),
                     fieldWithPath("video.scrap_id").type(NUMBER).description("스크랩 아이디").optional(),
                     fieldWithPath("video.blocked").type(BOOLEAN).description("차단 여부").optional(),
-                    fieldWithPath("video.owner").type(OBJECT).description("비디오 작성자 정보"),
-                    fieldWithPath("video.owner.id").type(NUMBER).description("아이디"),
-                    fieldWithPath("video.owner.tag").type(STRING).description("태그"),
-                    fieldWithPath("video.owner.status").type(STRING).description("상태"),
-                    fieldWithPath("video.owner.grant_type").type(STRING).description(generateLinkCode(GRANT_TYPE))
-                        .optional(),
-                    fieldWithPath("video.owner.username").type(STRING).description("유저명"),
-                    fieldWithPath("video.owner.email").type(STRING).description("이메일"),
-                    fieldWithPath("video.owner.phone_number").type(STRING).description("전화번호"),
-                    fieldWithPath("video.owner.avatar_url").type(STRING).description("아바타 URL"),
-                    fieldWithPath("video.owner.follower_count").type(NUMBER).description("팔로워 수"),
-                    fieldWithPath("video.owner.following_count").type(NUMBER).description("팔로잉 수"),
-                    fieldWithPath("video.owner.video_count").type(NUMBER).description("비디오 수"),
-                    fieldWithPath("video.owner.created_at").type(NUMBER).description("회원가입일"),
-                    fieldWithPath("video.owner.modified_at").type(NUMBER).description("정보수정일"),
-                    fieldWithPath("video.owner.permission").type(OBJECT).description("권한").optional(),
-                    fieldWithPath("video.owner.permission.chat_post").type(BOOLEAN).description("post 권한").optional(),
-                    fieldWithPath("video.owner.permission.comment_post").type(BOOLEAN).description("댓글 권한").optional(),
-                    fieldWithPath("video.owner.permission.live_post").type(BOOLEAN).description("라이브 권한").optional(),
-                    fieldWithPath("video.owner.permission.motd_post").type(BOOLEAN).description("motd 권한").optional(),
-                    fieldWithPath("video.owner.permission.revenue_return").type(BOOLEAN).description("수익배분 권한").optional(),
                     fieldWithPath("video.created_at").type(NUMBER).description("생성 일자")
                 )
             )
@@ -376,7 +362,9 @@ class InternalVideoControllerTest(
         val likeResult: MvcResult = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/likes", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
+                    .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id", notNullValue()))
@@ -390,7 +378,9 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 delete("/internal/1/videos/{video_id}/likes/{like_id}", video.id, likeId)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
+                    .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
             .andDo(print())
@@ -418,7 +408,8 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/report", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(req))
             )
@@ -476,27 +467,6 @@ class InternalVideoControllerTest(
                     fieldWithPath("like_id").type(NUMBER).description("좋아요 아이디").optional(),
                     fieldWithPath("scrap_id").type(NUMBER).description("스크랩 아이디").optional(),
                     fieldWithPath("blocked").type(BOOLEAN).description("차단 여부").optional(),
-                    fieldWithPath("owner").type(OBJECT).description("비디오 작성자 정보"),
-                    fieldWithPath("owner.id").type(NUMBER).description("아이디"),
-                    fieldWithPath("owner.tag").type(STRING).description("태그"),
-                    fieldWithPath("owner.status").type(STRING).description("상태"),
-                    fieldWithPath("owner.grant_type").type(STRING).description(generateLinkCode(GRANT_TYPE))
-                        .optional(),
-                    fieldWithPath("owner.username").type(STRING).description("유저명"),
-                    fieldWithPath("owner.email").type(STRING).description("이메일"),
-                    fieldWithPath("owner.phone_number").type(STRING).description("전화번호"),
-                    fieldWithPath("owner.avatar_url").type(STRING).description("아바타 URL"),
-                    fieldWithPath("owner.follower_count").type(NUMBER).description("팔로워 수"),
-                    fieldWithPath("owner.following_count").type(NUMBER).description("팔로잉 수"),
-                    fieldWithPath("owner.video_count").type(NUMBER).description("비디오 수"),
-                    fieldWithPath("owner.created_at").type(NUMBER).description("회원가입일"),
-                    fieldWithPath("owner.modified_at").type(NUMBER).description("정보수정일"),
-                    fieldWithPath("owner.permission").type(OBJECT).description("권한").optional(),
-                    fieldWithPath("owner.permission.chat_post").type(BOOLEAN).description("post 권한").optional(),
-                    fieldWithPath("owner.permission.comment_post").type(BOOLEAN).description("댓글 권한").optional(),
-                    fieldWithPath("owner.permission.live_post").type(BOOLEAN).description("라이브 권한").optional(),
-                    fieldWithPath("owner.permission.motd_post").type(BOOLEAN).description("motd 권한").optional(),
-                    fieldWithPath("owner.permission.revenue_return").type(BOOLEAN).description("수익배분 권한").optional(),
                     fieldWithPath("created_at").type(NUMBER).description("생성 일자")
                 )
             )
@@ -512,7 +482,8 @@ class InternalVideoControllerTest(
         val commentResult: MvcResult = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(commentReq))
             )
@@ -528,7 +499,8 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/2/videos/{video_id}/comments/{comment_id}/report", video.id, commentId)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(reportReq))
             )
@@ -562,7 +534,6 @@ class InternalVideoControllerTest(
 
     @Test
     fun getVideoComment() {
-
         // given
         val request = createCommentRequest()
         val video: Video = videoRepository.save(makeVideo(defaultAdmin, category))
@@ -571,7 +542,8 @@ class InternalVideoControllerTest(
         mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -581,7 +553,8 @@ class InternalVideoControllerTest(
         mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -591,8 +564,9 @@ class InternalVideoControllerTest(
         // when & then
         val result: ResultActions = mockMvc
             .perform(
-                get("/api/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                get("/internal/1/videos/{video_id}/comments", video.id)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -613,37 +587,6 @@ class InternalVideoControllerTest(
                     fieldWithPath("content.[].file_url").type(STRING).description("댓글 파일 URL").optional(),
                     fieldWithPath("content.[].parent_id").type(NUMBER).description("부모 댓글 ID").optional(),
                     fieldWithPath("content.[].comment_count").type(NUMBER).description("대댓글수"),
-                    fieldWithPath("content.[].created_by").type(OBJECT).description("댓글 작성자 정보"),
-                    fieldWithPath("content.[].created_by.id").type(NUMBER).description("댓글 작성자 아이디"),
-                    fieldWithPath("content.[].created_by.tag").type(STRING).description("댓글 작성자 태그"),
-                    fieldWithPath("content.[].created_by.status").type(STRING).description("댓글 작성자 상태"),
-                    fieldWithPath("content.[].created_by.grant_type").type(STRING).description("댓글 작성자 가입 경로").optional(),
-                    fieldWithPath("content.[].created_by.username").type(STRING).description("댓글 작성자 닉네임"),
-                    fieldWithPath("content.[].created_by.email").type(STRING).description("댓글 작성자 이메일"),
-                    fieldWithPath("content.[].created_by.phone_number").type(STRING).description("댓글 작성자 전화번호"),
-                    fieldWithPath("content.[].created_by.avatar_url").type(STRING).description("댓글 작성자 프로필 이미지 URL"),
-                    fieldWithPath("content.[].created_by.permission").type(OBJECT).description("댓글 작성자 권한 정보"),
-                    fieldWithPath("content.[].created_by.permission.chat_post").type(BOOLEAN).description("댓글 작성자 채팅 권한"),
-                    fieldWithPath("content.[].created_by.permission.comment_post").type(BOOLEAN).description("댓글 작성자 댓글 작성 권한"),
-                    fieldWithPath("content.[].created_by.permission.live_post").type(BOOLEAN).description("댓글 작성자 라이브 권한"),
-                    fieldWithPath("content.[].created_by.permission.motd_post").type(BOOLEAN).description("댓글 작성자 motd 권한"),
-                    fieldWithPath("content.[].created_by.permission.revenue_return").type(BOOLEAN).description("댓글 작성자 매출 권한"),
-                    fieldWithPath("content.[].created_by.follower_count").type(NUMBER).description("댓글 작성자 팔로워 수"),
-                    fieldWithPath("content.[].created_by.following_count").type(NUMBER).description("댓글 작성자 팔로잉 수"),
-                    fieldWithPath("content.[].created_by.following_id").type(NUMBER).description("댓글 작성자 팔로잉 아이디").optional(),
-                    fieldWithPath("content.[].created_by.reported_id").type(NUMBER).description("댓글 작성자 신고자 아이디").optional(),
-                    fieldWithPath("content.[].created_by.blocked_id").type(NUMBER).description("댓글 작성자 차단 아이디").optional(),
-                    fieldWithPath("content.[].created_by.point").type(NUMBER).description("댓글 작성자 포인트").optional(),
-                    fieldWithPath("content.[].created_by.revenue").type(NUMBER).description("댓글 작성자 매출").optional(),
-                    fieldWithPath("content.[].created_by.point_ratio").type(NUMBER).description("댓글 작성자 포인트 비율").optional(),
-                    fieldWithPath("content.[].created_by.revenue_ratio").type(NUMBER).description("댓글 작성자 매출 비율").optional(),
-                    fieldWithPath("content.[].created_by.video_count").type(NUMBER).description("댓글 작성자 비디오 수"),
-                    fieldWithPath("content.[].created_by.revenue_modified_at").type(STRING).description("댓글 작성자 매출 수정일자").optional(),
-                    fieldWithPath("content.[].created_by.pushable").type(BOOLEAN).description("댓글 작성자 푸쉬알람 여부").optional(),
-                    fieldWithPath("content.[].created_by.option_term_accepts").type(ARRAY).description("댓글 작성자 선택 약관 정보").optional(),
-                    fieldWithPath("content.[].created_by.created_at").type(NUMBER).description("댓글 작성자 생성일자"),
-                    fieldWithPath("content.[].created_by.modified_at").type(NUMBER).description("댓글 작성자 수정일자"),
-                    fieldWithPath("content.[].created_by.deleted_at").type(NUMBER).description("댓글 작성자 삭제일자").optional(),
                     fieldWithPath("content.[].created_at").type(NUMBER).description("댓글 생성일"),
                     fieldWithPath("content.[].comment_ref").type(STRING).description("댓글 ref").optional(),
                     fieldWithPath("content.[].like_count").type(NUMBER).description("댓글 좋아요 수"),
@@ -671,7 +614,8 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -713,7 +657,8 @@ class InternalVideoControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 patch("/internal/1/videos/{video_id}/comments/{comment_id}", video.id, commentId)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -744,8 +689,9 @@ class InternalVideoControllerTest(
         // given
         val result: ResultActions = mockMvc
             .perform(
-                post("/api/1/videos/{video_id}/comments", video.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                post("/internal/1/videos/{video_id}/comments", video.id)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(createCommentRequest()))
             )

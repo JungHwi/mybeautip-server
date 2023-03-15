@@ -1,8 +1,6 @@
 package com.jocoos.mybeautip.domain.video.api.internal;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
@@ -21,33 +17,23 @@ import javax.validation.constraints.Size;
 import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.SimpleCommentReportInfo;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
-import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.*;
-import com.jocoos.mybeautip.goods.GoodsService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.member.block.BlockService;
 import com.jocoos.mybeautip.member.comment.*;
-import com.jocoos.mybeautip.member.mention.MentionService;
-import com.jocoos.mybeautip.member.revenue.RevenueRepository;
-import com.jocoos.mybeautip.member.revenue.RevenueService;
 import com.jocoos.mybeautip.notification.MessageService;
+import com.jocoos.mybeautip.restapi.CommentSearchCondition;
 import com.jocoos.mybeautip.restapi.CursorResponse;
 import com.jocoos.mybeautip.restapi.LegacyVideoController;
-import com.jocoos.mybeautip.search.KeywordService;
 import com.jocoos.mybeautip.video.*;
 import com.jocoos.mybeautip.video.report.VideoReportRepository;
-import com.jocoos.mybeautip.video.scrap.LegacyVideoScrapService;
-import com.jocoos.mybeautip.video.view.VideoViewRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
+import static com.jocoos.mybeautip.member.comment.Comment.CommentState.DEFAULT;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -97,9 +83,9 @@ public class InternalLegacyVideoController {
     public ResponseEntity<?> removeVideoLikeLegacy(@PathVariable Long videoId,
                                              @PathVariable Long likeId,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
-        Long memberId = legacyMemberService.currentMemberId();
+        Member member = legacyMemberService.currentMember();
 
-        videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
+        videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, member.getId())
                 .map(liked -> {
                     legacyVideoService.unLikeVideo(liked);
                     return Optional.empty();
@@ -194,6 +180,7 @@ public class InternalLegacyVideoController {
         }
 
         Member member = legacyMemberService.currentMember();
+
         if (!legacyMemberService.hasCommentPostPermission(member)) {
             throw new AccessDeniedException(messageService.getMessage(COMMENT_WRITE_NOT_ALLOWED, lang));
         }
@@ -219,6 +206,51 @@ public class InternalLegacyVideoController {
 
         Comment comment = commentService.addComment(request, CommentService.COMMENT_TYPE_VIDEO, id, member);
         return new ResponseEntity<>(new CommentInfo(comment), HttpStatus.OK);
+    }
+
+    @GetMapping("/1/videos/{id}/comments")
+    public CursorResponse getComments(@PathVariable Long id,
+                                      @RequestParam(defaultValue = "20") int count,
+                                      @RequestParam(required = false) Long cursor,
+                                      @RequestParam(required = false) String direction,
+                                      @RequestParam(name = "parent_id", required = false) Long parentId,
+                                      @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
+        PageRequest page;
+        if ("next".equals(direction)) {
+            page = PageRequest.of(0, count, Sort.by(Sort.Direction.ASC, "id"));
+        } else {
+            page = PageRequest.of(0, count, Sort.by(Sort.Direction.DESC, "id")); // default
+        }
+
+        Long memberId = legacyMemberService.currentMemberId();
+        CommentSearchCondition condition = CommentSearchCondition.builder()
+            .videoId(id)
+            .state(DEFAULT)
+            .cursor(cursor)
+            .parentId(parentId)
+            .memberId(memberId)
+            .lang(lang)
+            .build();
+
+        List<CommentInfo> result = commentService.getComments(condition, page);
+
+        String nextCursor = null;
+        if (result.size() > 0) {
+            if ("next".equals(direction)) {
+                nextCursor = String.valueOf(result.get(result.size() - 1).getId() + 1);
+            } else {
+                nextCursor = String.valueOf(result.get(result.size() - 1).getId() - 1);
+            }
+        }
+
+        int totalCount = videoRepository.findById(id)
+            .map(v -> v.getCommentCount()).orElse(0);
+
+        return new CursorResponse
+            .Builder<>("/internal/1/videos/" + id + "/comments", result)
+            .withCount(count)
+            .withCursor(nextCursor)
+            .withTotalCount(totalCount).toBuild();
     }
 
     @PostMapping("/2/videos/{id:.+}/comments")
