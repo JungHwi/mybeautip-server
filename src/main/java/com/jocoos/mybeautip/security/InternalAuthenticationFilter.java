@@ -23,6 +23,7 @@ import com.jocoos.mybeautip.global.util.StringConvertUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import static org.springframework.security.web.authentication.www.BasicAuthenticationConverter.AUTHENTICATION_SCHEME_BASIC;
 
 @Slf4j
 @Component
@@ -42,12 +43,19 @@ public class InternalAuthenticationFilter extends OncePerRequestFilter {
       printHeaders(request, response);
     }
 
-    String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+    String header = request.getHeader(HttpHeaders.AUTHORIZATION);
     String memberId = request.getHeader(KEY_MEMBER_ID);
+
+    if (!StringUtils.startsWithIgnoreCase(header, AUTHENTICATION_SCHEME_BASIC)) {
+      responseBody(response, "Authentication scheme is required.");
+      return;
+    }
+
+    String token = header.substring(6);
     log.debug("token: {}, {}", token, memberId);
 
     if (!internalConfig.getAccessToken().equals(token)) {
-      responseBody(response, "The access token is not valid.");
+      responseBody(response, "The authentication token is not valid.");
       return;
     }
 
