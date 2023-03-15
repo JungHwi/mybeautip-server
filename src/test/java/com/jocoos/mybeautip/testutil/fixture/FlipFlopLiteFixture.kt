@@ -1,25 +1,8 @@
 package com.jocoos.mybeautip.testutil.fixture
 
-import com.jocoos.mybeautip.client.flipfloplite.code.FFLAccessLevel
-import com.jocoos.mybeautip.client.flipfloplite.code.FFLCreatorType
-import com.jocoos.mybeautip.client.flipfloplite.code.FFLEntityState
-import com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState
-import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoFormat
-import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState
+import com.jocoos.mybeautip.client.flipfloplite.code.*
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE
-import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomType
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLAppInfo
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLChatInfo
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLChatTokenResponse
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLError
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLMemberInfo
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLProfile
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLStreamKey
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLStreamKeyResponse
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLUserInfo
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomStatistics
-import org.springframework.data.annotation.LastModifiedBy
+import com.jocoos.mybeautip.client.flipfloplite.dto.*
 import java.time.ZonedDateTime
 import java.time.ZonedDateTime.now
 
@@ -108,5 +91,17 @@ fun makeFFLStreamKeyResponse(
         error,
         createdAt,
         lastModifiedAt
+    )
+}
+
+fun makeFFLMessageInfo(
+    videoKey: String = "vidioKey",
+    channelKey: String = "channelKey",
+    messageId: Long = 123
+): FFLMessageInfo {
+    return FFLMessageInfo(
+        videoKey,
+        channelKey,
+        messageId
     )
 }

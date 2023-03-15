@@ -19,14 +19,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class BroadcastViewerService {
 
-    private final BroadcastBatchService broadcastBatchService;
+    private final BatchBroadcastService batchBroadcastService;
     private final BroadcastViewerDao dao;
     private final BroadcastDao broadcastDao;
     private final FlipFlopLiteService flipFlopLiteService;
@@ -72,9 +71,7 @@ public class BroadcastViewerService {
         BroadcastViewer viewer = dao.exile(broadcastId, memberId);
 
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        List<Long> managerIds = new ArrayList<>(broadcast.viewerList.getManagerId());
-        managerIds.add(broadcast.getMemberId());
-        FFLDirectMessageRequest messageRequest = FFLDirectMessageRequest.ofExile(managerIds, viewer.getUsername());
+        FFLDirectMessageRequest messageRequest = FFLDirectMessageRequest.ofExile(memberId, viewer.getUsername());
         flipFlopLiteService.directMessage(broadcast.getVideoKey(), messageRequest);
 
         return converter.converts(viewer);
@@ -95,7 +92,7 @@ public class BroadcastViewerService {
         List<Broadcast> broadcastList = broadcastDao.findByStatusIn(BroadcastStatus.NEED_SYNC_MEMBER_STATUS);
 
         for (Broadcast broadcast : broadcastList) {
-            broadcastBatchService.syncViewer(broadcast);
+            batchBroadcastService.syncViewer(broadcast);
         }
     }
 }

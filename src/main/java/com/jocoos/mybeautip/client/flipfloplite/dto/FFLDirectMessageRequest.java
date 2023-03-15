@@ -37,8 +37,8 @@ public record FFLDirectMessageRequest(FFLChatRoomDirectMessageType messageType,
         }
     }
 
-    public static FFLDirectMessageRequest ofExile(List<Long> memberIds, String username) {
-        return new FFLDirectMessageRequest(EXILE, memberIds, String.format("[%s]님을 추방했습니다.", username), null);
+    public static FFLDirectMessageRequest ofExile(Long memberId, String username) {
+        return new FFLDirectMessageRequest(EXILE, List.of(memberId), String.format("[%s]님을 추방했습니다.", username), null);
     }
 
     public static FFLDirectMessageRequest ofManagerOut(long memberId) {

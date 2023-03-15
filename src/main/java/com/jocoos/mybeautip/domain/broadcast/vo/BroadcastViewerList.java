@@ -25,7 +25,7 @@ public class BroadcastViewerList {
 
     @OrderBy("sorted_username")
     @OneToMany(mappedBy = "broadcast", fetch = LAZY, cascade = ALL, orphanRemoval = true)
-    private List<BroadcastViewer> viewerList;
+    private List<BroadcastViewer> viewerList = new ArrayList<>();
 
     @Transient
     private Map<Long, BroadcastViewer> viewerMap;

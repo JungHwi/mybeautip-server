@@ -1,6 +1,12 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin;
 
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageCustomType;
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageType;
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMessageCustomType;
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMessageType;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLBroadcastMessageRequest;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
@@ -15,12 +21,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -34,6 +42,15 @@ public class AdminBroadcastController {
     public ResponseEntity<Integer> migration() {
         int response = flipFlopLiteService.migration();
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity test() {
+        FFLBroadcastMessageRequest request = new FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType.COMMAND, FFLChatRoomBroadcastMessageCustomType.UPDATE, "a", List.of("1", "2"));
+        FFLDirectMessageRequest directRequest = new FFLDirectMessageRequest(FFLChatRoomDirectMessageType.COMMAND, FFLChatRoomDirectMessageCustomType.NO_CHAT,  List.of("1", "2"), "a", null);
+        flipFlopLiteService.directMessage(8, directRequest);
+
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/broadcast")

@@ -4,15 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler
 import com.jocoos.mybeautip.client.flipflop.FlipFlopClient
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteClient
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLBroadcastMessageRequest
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomRequest
-import com.jocoos.mybeautip.client.flipfloplite.dto.FFLVideoRoomResponse
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastCategoryRepository
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.GROUP
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
 import com.jocoos.mybeautip.domain.file.service.FlipFlopService
 import com.jocoos.mybeautip.domain.member.persistence.repository.InfluencerRepository
-import com.jocoos.mybeautip.domain.system.code.SystemOptionType
 import com.jocoos.mybeautip.domain.system.code.SystemOptionType.FREE_LIVE_PERMISSION
 import com.jocoos.mybeautip.domain.system.persistence.repository.SystemOptionRepository
 import com.jocoos.mybeautip.global.dto.FileDto
@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.*
 import org.mockito.BDDMockito.given
-import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -165,6 +164,8 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
         given(flipFlopLiteClient.getChatToken(anyLong())).willReturn(makeFFLChatTokenResponse())
         given(flipFlopLiteClient.getStreamKey(anyLong())).willReturn(makeFFLStreamKeyResponse())
         given(flipFlopLiteClient.cancelVideoRoom(anyLong())).willReturn(makeFFLVideoRoomResponse())
+        given(flipFlopLiteClient.broadcastMessage(anyLong(), any(FFLBroadcastMessageRequest::class.java))).willReturn(makeFFLMessageInfo())
+        given(flipFlopLiteClient.directMessage(anyLong(), any(FFLDirectMessageRequest::class.java))).willReturn(makeFFLMessageInfo())
     }
 
 }
