@@ -1,0 +1,30 @@
+= Mybeautip Internal API DOCS
+Mybeautip API
+:hardbreaks:
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+:docinfo: shared-head
+
+include::internal_overview.adoc[]
+
+[[API-LIST]]
+== APIs
+
+=== VIDEO API
+* link:video/internal_get_videos.html[Get Video List API, window=_blank]
+* link:video/internal_get_video.html[Get a Video API, window=_blank]
+* link:video/internal_add_view_count_video.html[Add Video view count API, window=_blank]
+* link:video/internal_add_video_like.html[Video Like API, window=_blank]
+* link:video/internal_delete_video_like.html[Video Unlike API, window=_blank]
+* link:video/internal_report_video.html[Video Reporting API, window=_blank]
+
+=== VIDEO COMMENT API
+* link:video/internal_get_video_comment.html[Get Video Comment List API, window=_blank]
+* link:video/internal_write_video_comment.html[Write Video Comment API, window=_blank]
+* link:video/internal_edit_video_comment.html[Edit Video Comment API, window=_blank]
+* link:video/internal_report_video_comment.html[Video Comment Reporting API, window=_blank]
+

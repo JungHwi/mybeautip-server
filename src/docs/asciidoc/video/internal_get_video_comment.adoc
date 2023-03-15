@@ -1,0 +1,3 @@
+== Get Video API
+
+operation::internal_get_video_comment[snippets='http-request,path-parameters,http-response,response-fields']

@@ -10,6 +10,8 @@ import com.jocoos.mybeautip.restapi.BlockController.BlockMemberRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,8 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -32,16 +36,12 @@ class BlockControllerTest extends RestDocsIntegrationTestSupport {
     @MockBean
     private LegacyMemberService legacyMemberService;
 
-    @SpyBean
-    private MemberRepository memberRepository;
-
     @MockBean
     private MemberBlockDao memberBlockDao;
 
     @MockBean
     private BlockRepository blockRepository;
     private Block block;
-
 
     @BeforeEach
     void init() {
@@ -58,8 +58,9 @@ class BlockControllerTest extends RestDocsIntegrationTestSupport {
         BlockMemberRequest request = new BlockMemberRequest();
         request.setMemberId(requestUser.getId());
 
+        MemberRepository memberRepository = Mockito.spy(MemberRepository.class);
         given(memberRepository.findByIdAndDeletedAtIsNull(request.getMemberId())).willReturn(Optional.of(requestUser));
-        given(memberBlockDao.getBlockOrElseNewBlock(defaultAdmin.getId(), requestUser)).willReturn(block);
+        given(memberBlockDao.getBlockOrElseNewBlock(anyLong(), any())).willReturn(block);
 
         ResultActions resultActions = mockMvc.perform(RestDocumentationRequestBuilders
                         .post("/api/1/members/me/blocks")

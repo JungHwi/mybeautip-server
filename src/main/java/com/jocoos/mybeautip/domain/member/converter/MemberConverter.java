@@ -2,7 +2,10 @@ package com.jocoos.mybeautip.domain.member.converter;
 
 import com.jocoos.mybeautip.domain.community.dto.MemberResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
+import com.jocoos.mybeautip.domain.member.dto.MemberRegistrationRequest;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
+import com.jocoos.mybeautip.domain.notice.dto.WriteNoticeRequest;
+import com.jocoos.mybeautip.domain.notice.persistence.domain.Notice;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberInfo;
 import com.jocoos.mybeautip.restapi.dto.SignupRequest;
@@ -73,11 +76,12 @@ public interface MemberConverter {
     })
     MemberInfo convertToInfo(Member member);
 
+    Member convert(MemberRegistrationRequest request);
+
     @AfterMapping
     default void convertToInfo(@MappingTarget MemberInfo memberInfo, Member member) {
         memberInfo.setPermission(new MemberInfo.PermissionInfo(member.getPermission()));
     }
-
 
     MemberResponse convertToCommunityMember(Member member);
 
