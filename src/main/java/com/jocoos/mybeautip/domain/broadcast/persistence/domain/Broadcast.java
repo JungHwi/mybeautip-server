@@ -2,6 +2,8 @@ package com.jocoos.mybeautip.domain.broadcast.persistence.domain;
 
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditCommand;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerList;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.global.config.jpa.CreatedAtBaseEntity;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.Builder;
@@ -20,7 +22,6 @@ import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 import static com.jocoos.mybeautip.global.validator.StringValidator.validateMaxLengthWithoutWhiteSpace;
 import static java.time.ZonedDateTime.now;
-import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.EnumType.STRING;
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
@@ -92,9 +93,8 @@ public class Broadcast extends CreatedAtBaseEntity {
     @JoinColumn(name = "category_id")
     private BroadcastCategory category;
 
-    @OrderBy("sorted_username")
-    @OneToMany(mappedBy = "broadcast", fetch = LAZY, cascade = ALL, orphanRemoval = true)
-    public List<BroadcastViewer> viewerList;
+    @Embedded
+    public BroadcastViewerList viewerList;
 
     @Builder
     public Broadcast(@NotNull Long memberId,
@@ -110,6 +110,10 @@ public class Broadcast extends CreatedAtBaseEntity {
         setTitle(title);
         setThumbnail(thumbnailUrl);
         setNotice(notice);
+    }
+
+    public List<Long> syncViewer(List<BroadcastViewerVo> newViewers) {
+        return this.viewerList.sync(this, newViewers);
     }
 
     // video and channel key will get from external service so updated later

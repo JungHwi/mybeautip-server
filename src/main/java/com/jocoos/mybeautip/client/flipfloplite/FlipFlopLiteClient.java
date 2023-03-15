@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "fflClient", url = "${ffl.domain}", configuration = {FlipFlopLiteClientConfig.class})
 public interface FlipFlopLiteClient {
@@ -45,7 +46,7 @@ public interface FlipFlopLiteClient {
     FFLChatRoomResponse closeChatRoom(@PathVariable long videoRoomId);
 
     @GetMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/members")
-    FFLCursorResponse<FFLChatMemberInfo> getChatMembers(@PathVariable long videoRoomId);
+    FFLCursorResponse<FFLChatMemberInfo> getChatMembers(@PathVariable long videoRoomId, @RequestParam long cursor, @RequestParam long count);
 
     // Chat Message
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/messages/{messageId}/hide")
@@ -55,9 +56,9 @@ public interface FlipFlopLiteClient {
     EmptyResult unhideMessage(@PathVariable long videoRoomId, @PathVariable long messageId);
 
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/admin/messages/broadcast")
-    EmptyResult broadcastMessage(@PathVariable long videoRoomId, FFLBroadcastMessageRequest request);
+    FFLMessageInfo broadcastMessage(@PathVariable long videoRoomId, FFLBroadcastMessageRequest request);
 
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/admin/messages/direct")
-    EmptyResult directMessage(@PathVariable long videoRoomId, FFLDirectMessageRequest request);
+    FFLMessageInfo directMessage(@PathVariable long videoRoomId, FFLDirectMessageRequest request);
 
 }

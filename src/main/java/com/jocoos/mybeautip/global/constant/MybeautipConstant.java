@@ -6,6 +6,8 @@ import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
 public class MybeautipConstant {
     // Service
     public static final String DISABLE_USERNAME = "집나간파우치";
+    public static final String GUEST_TOKEN_PREFIX = "guest:";
+    public static final String GUEST_USERNAME_PREFIX = "Guest_";
 //    public static final int DORMANT_WAKEUP_POINT = 1000;
 
     // Image

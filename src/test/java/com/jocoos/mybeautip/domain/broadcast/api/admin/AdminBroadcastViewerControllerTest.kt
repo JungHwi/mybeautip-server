@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastViewerRepository
-import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
@@ -15,19 +14,14 @@ import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.testutil.fixture.makeViewer
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.payload.JsonFieldType
-import org.springframework.restdocs.payload.PayloadDocumentation
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
 import org.springframework.test.web.servlet.ResultActions
@@ -121,7 +115,7 @@ class AdminBroadcastViewerControllerTest(
         val request = BooleanDto(true)
 
         val result: ResultActions = mockMvc.perform(
-            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, viewer.memberId)
+            patch("/admin/broadcast/{broadcast_id}/viewer/{member_id}/suspend", broadcast.id, viewer.memberId)
                 .header(AUTHORIZATION, defaultAdminToken)
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
