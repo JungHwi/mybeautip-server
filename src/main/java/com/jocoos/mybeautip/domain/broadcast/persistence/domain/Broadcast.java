@@ -80,6 +80,9 @@ public class Broadcast extends CreatedAtBaseEntity {
     private int reportCount;
 
     @Column
+    private ZonedDateTime pausedAt;
+
+    @Column
     private ZonedDateTime startedAt;
 
     @Column
@@ -132,10 +135,6 @@ public class Broadcast extends CreatedAtBaseEntity {
         changeStatus(LIVE);
         setStartedAt(startedAt);
         this.url = url;
-    }
-
-    public void ready() {
-        changeStatus(READY);
     }
 
     public void finish(@NotNull BroadcastStatus status, @NotNull ZonedDateTime endedAt) {

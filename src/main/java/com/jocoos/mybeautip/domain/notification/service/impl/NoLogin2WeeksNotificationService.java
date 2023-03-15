@@ -16,7 +16,7 @@ import com.jocoos.mybeautip.domain.notification.service.MemberNotificationServic
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
-import com.jocoos.mybeautip.global.vo.Day;
+import com.jocoos.mybeautip.global.vo.Between;
 import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.member.MemberRepository;
 import com.jocoos.mybeautip.support.RandomUtils;
@@ -49,7 +49,7 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
 
     @Transactional
     public int occurs() {
-        List<Day> noLoginNotificationDays = getNoLoginNotificationDays();
+        List<Between> noLoginNotificationDays = getNoLoginNotificationDays();
         List<Member> noLoginMembers = memberRepository.getMemberLastLoggedAtSameDayIn(noLoginNotificationDays);
         send(noLoginMembers);
         return noLoginMembers.size();
@@ -71,13 +71,13 @@ public class NoLogin2WeeksNotificationService implements NotificationService<Lis
         }
     }
 
-    private List<Day> getNoLoginNotificationDays() {
+    private List<Between> getNoLoginNotificationDays() {
         LocalDate before2Weeks = LocalDate.now().minusWeeks(2);
         LocalDate before4Weeks = LocalDate.now().minusWeeks(4);
         LocalDate before6Weeks = LocalDate.now().minusWeeks(6);
 
         return Stream.of(before2Weeks, before4Weeks, before6Weeks)
-                .map(localDate -> new Day(localDate, ZoneId.systemDefault()))
+                .map(localDate -> Between.day(localDate, ZoneId.systemDefault()))
                 .toList();
     }
 

@@ -5,8 +5,10 @@ import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.client.flipfloplite.dto.ExternalBroadcastInfo;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.VodDao;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastBulkUpdateStatusCommand;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 
-import static com.jocoos.mybeautip.global.code.UrlDirectory.VOD;
-
 @RequiredArgsConstructor
 @Service
 public class BroadcastStatusService {
 
+    private final BroadcastDao broadcastDao;
     private final FlipFlopLiteService flipFlopLiteService;
     private final VodDao vodDao;
     private final AwsS3Handler awsS3Handler;
@@ -28,14 +29,20 @@ public class BroadcastStatusService {
     public void changeStatus(Broadcast broadcast, BroadcastStatus changeStatus) {
         switch (changeStatus) {
             case LIVE -> toLive(broadcast);
-            case END, CANCEL -> toFinish(broadcast, changeStatus);
-            case READY -> toReady(broadcast);
+            case END -> toEnd(broadcast, changeStatus);
+            case CANCEL -> toCancel(broadcast, changeStatus);
             default -> throw new BadRequestException("");
         }
     }
 
-    private void toReady(Broadcast broadcast) {
-        broadcast.ready();
+    @Transactional
+    public long bulkChangeStatus(BroadcastBulkUpdateStatusCommand condition) {
+        return switch (condition.updateStatus()) {
+            case READY -> broadcastDao.bulkUpdateToReady(condition);
+            case END -> bulkUpdateToEnd(condition);
+            case CANCEL -> bulkUpdateToCancel(condition);
+            default -> throw new BadRequestException("");
+        };
     }
 
     private Broadcast toLive(Broadcast broadcast) {
@@ -44,14 +51,31 @@ public class BroadcastStatusService {
         return broadcast;
     }
 
-    private Broadcast toFinish(Broadcast broadcast, BroadcastStatus changeStatus) {
+    private long bulkUpdateToEnd(BroadcastBulkUpdateStatusCommand condition) {
+        BroadcastUpdateResult result = broadcastDao.bulkUpdateToFinish(condition);
+        for (Long videoKey : result.videoKeys()) {
+            flipFlopLiteService.endVideoRoom(videoKey);
+        }
+        return result.count();
+    }
+
+    private Broadcast toEnd(Broadcast broadcast, BroadcastStatus changeStatus) {
         ZonedDateTime endedAt = flipFlopLiteService.endVideoRoom(broadcast.getVideoKey());
         broadcast.finish(changeStatus, endedAt);
         return broadcast;
     }
 
-    private void copyThumbnailToVod(Broadcast broadcast) {
-        Vod vod = vodDao.getByVideoKey(broadcast.getVideoKey());
-        awsS3Handler.copyWithKeepOriginal(broadcast.getThumbnailUrl(), VOD.getDirectory(vod.getId()));
+    private long bulkUpdateToCancel(BroadcastBulkUpdateStatusCommand condition) {
+        BroadcastUpdateResult result = broadcastDao.bulkUpdateToFinish(condition);
+        for (Long videoKey : result.videoKeys()) {
+            flipFlopLiteService.cancelVideoRoom(videoKey);
+        }
+        return result.count();
+    }
+
+    private Broadcast toCancel(Broadcast broadcast, BroadcastStatus changeStatus) {
+        ZonedDateTime endedAt = flipFlopLiteService.cancelVideoRoom(broadcast.getVideoKey());
+        broadcast.finish(changeStatus, endedAt);
+        return broadcast;
     }
 }

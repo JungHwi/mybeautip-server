@@ -25,5 +25,9 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update Broadcast b set b.reportCount = b.reportCount + :count where b.id = :id")
-    void addReportCountAndFlush(@Param("id") long broadcastId, @Param("count") int count);
+    void addReportCountAndFlush(@Param("id") Long broadcastId, @Param("count") int count);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Broadcast b set b.pausedAt = :pausedAt where b.id = :id")
+    void updatePausedAt(@Param("id") Long broadcastId, @Param("pausedAt") ZonedDateTime pausedAt);
 }

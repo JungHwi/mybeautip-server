@@ -30,6 +30,7 @@ create table broadcast
     heart_count      int                                                                                           not null comment '하트 수',
     viewer_count     int                                                                                           not null comment '시청자 수',
     max_viewer_count int                                                                                           not null comment '최대 시청자 수',
+    paused_at        datetime                                                                                      comment '일시정지 일시',
     started_at       datetime                                                                                      not null comment '방송 시작 일시',
     ended_at         datetime comment '방송 종료 일시',
     created_at       datetime                                                                                      not null comment '생성 일시'

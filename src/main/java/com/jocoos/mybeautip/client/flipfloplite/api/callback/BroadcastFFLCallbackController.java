@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.client.flipfloplite.api.callback;
 
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLBroadcastChangeStatusRequest;
+import com.jocoos.mybeautip.client.flipfloplite.service.FFLCallbackService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BroadcastFFLCallbackController {
 
+    private final FFLCallbackService service;
+
+    // check flipflop lite api VideoRoom-상태-변경-App-Callback-API-알림
     @PostMapping("/change-status")
     public void callbackChangeStatus(@RequestBody FFLBroadcastChangeStatusRequest request) {
-        log.debug("ffl change status callback {}", request);
+        service.changeStatus(request.data());
     }
 }
