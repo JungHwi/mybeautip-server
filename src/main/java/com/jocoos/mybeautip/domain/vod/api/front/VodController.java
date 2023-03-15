@@ -1,9 +1,9 @@
-package com.jocoos.mybeautip.domain.broadcast.api.front;
+package com.jocoos.mybeautip.domain.vod.api.front;
 
-import com.jocoos.mybeautip.domain.broadcast.code.VodSortField;
+import com.jocoos.mybeautip.domain.vod.code.VodSortField;
 import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.VodResponse;
-import com.jocoos.mybeautip.domain.broadcast.service.VodService;
+import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
+import com.jocoos.mybeautip.domain.vod.service.VodService;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.ReportCountResponse;

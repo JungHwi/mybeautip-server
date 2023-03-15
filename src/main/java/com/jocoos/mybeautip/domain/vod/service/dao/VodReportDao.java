@@ -1,7 +1,7 @@
-package com.jocoos.mybeautip.domain.broadcast.service.dao;
+package com.jocoos.mybeautip.domain.vod.service.dao;
 
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.VodReport;
-import com.jocoos.mybeautip.domain.broadcast.persistence.repository.VodReportRepository;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.VodReport;
+import com.jocoos.mybeautip.domain.vod.persistence.repository.VodReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

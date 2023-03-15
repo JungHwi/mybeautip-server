@@ -1,21 +1,13 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front
 
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
-import com.jocoos.mybeautip.domain.broadcast.code.VodStatus
-import com.jocoos.mybeautip.domain.broadcast.code.VodStatus.AVAILABLE
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod
-import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastCategoryRepository
-import com.jocoos.mybeautip.domain.broadcast.persistence.repository.VodRepository
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod
+import com.jocoos.mybeautip.domain.vod.persistence.repository.VodRepository
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest
-import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.VOD_SORT_FIELD
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
-import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.global.dto.single.IntegerDto
-import com.jocoos.mybeautip.testutil.fixture.makeBroadcastCategory
 import com.jocoos.mybeautip.testutil.fixture.makeVod
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -23,7 +15,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*

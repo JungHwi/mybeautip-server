@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.broadcast.dto;
+package com.jocoos.mybeautip.domain.vod.dto;
 
 import com.jocoos.mybeautip.global.vo.SearchOption;
 

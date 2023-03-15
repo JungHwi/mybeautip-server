@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.broadcast.persistence.domain;
+package com.jocoos.mybeautip.domain.vod.persistence.domain;
 
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import lombok.Builder;

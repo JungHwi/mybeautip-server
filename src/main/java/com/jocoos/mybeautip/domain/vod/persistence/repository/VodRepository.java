@@ -1,7 +1,7 @@
-package com.jocoos.mybeautip.domain.broadcast.persistence.repository;
+package com.jocoos.mybeautip.domain.vod.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

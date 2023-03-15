@@ -1,8 +1,9 @@
-package com.jocoos.mybeautip.domain.broadcast.dto;
+package com.jocoos.mybeautip.domain.vod.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCategoryResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.Member;

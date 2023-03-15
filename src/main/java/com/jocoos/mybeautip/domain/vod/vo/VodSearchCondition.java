@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.broadcast.vo;
+package com.jocoos.mybeautip.domain.vod.vo;
 
 import com.jocoos.mybeautip.domain.event.code.SortField;
 import com.jocoos.mybeautip.global.vo.CursorPaging;

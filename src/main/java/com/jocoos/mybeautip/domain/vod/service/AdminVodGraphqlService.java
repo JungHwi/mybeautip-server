@@ -1,11 +1,11 @@
-package com.jocoos.mybeautip.domain.broadcast.service;
+package com.jocoos.mybeautip.domain.vod.service;
 
-import com.jocoos.mybeautip.domain.broadcast.dto.VodInput;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.VodReport;
-import com.jocoos.mybeautip.domain.broadcast.service.dao.VodDao;
-import com.jocoos.mybeautip.domain.broadcast.service.dao.VodReportDao;
-import com.jocoos.mybeautip.domain.broadcast.vo.VodSearchCondition;
+import com.jocoos.mybeautip.domain.vod.dto.VodInput;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.VodReport;
+import com.jocoos.mybeautip.domain.vod.service.dao.VodDao;
+import com.jocoos.mybeautip.domain.vod.service.dao.VodReportDao;
+import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;

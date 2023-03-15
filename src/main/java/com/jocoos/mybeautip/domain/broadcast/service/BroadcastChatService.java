@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
+import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastFFLService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
-import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
-import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastPermissionDao;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +15,8 @@ import static com.jocoos.mybeautip.global.exception.ErrorCode.ACCESS_DENIED;
 @Service
 public class BroadcastChatService {
 
-    private final MemberDao memberDao;
+    private final BroadcastPermissionDao permissionDao;
     private final BroadcastDao broadcastDao;
-    private final BroadcastViewerDao viewerDao;
     private final BroadcastFFLService fflService;
 
     @Transactional
@@ -30,8 +29,7 @@ public class BroadcastChatService {
 
     private void validAuthorization(Broadcast broadcast, Long requestMemberId) {
         if (!broadcast.isCreatedByEq(requestMemberId)
-                && !viewerDao.isManager(broadcast.getId(), requestMemberId)
-                && !memberDao.isAdmin(requestMemberId)) {
+                && !permissionDao.isManagerOrAdmin(broadcast.getId(), requestMemberId)) {
             throw new BadRequestException(ACCESS_DENIED, "not a admin or owner or manager of this broadcast");
         }
     }

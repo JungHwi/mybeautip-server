@@ -1,6 +1,7 @@
-package com.jocoos.mybeautip.domain.broadcast.persistence.domain;
+package com.jocoos.mybeautip.domain.vod.persistence.domain;
 
-import com.jocoos.mybeautip.domain.broadcast.code.VodStatus;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
+import com.jocoos.mybeautip.domain.vod.code.VodStatus;
 import com.jocoos.mybeautip.global.config.jpa.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import static com.jocoos.mybeautip.domain.broadcast.code.VodStatus.AVAILABLE;
+import static com.jocoos.mybeautip.domain.vod.code.VodStatus.AVAILABLE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.BROADCAST;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;

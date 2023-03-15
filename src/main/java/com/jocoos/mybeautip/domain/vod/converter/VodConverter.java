@@ -1,7 +1,7 @@
-package com.jocoos.mybeautip.domain.broadcast.converter;
+package com.jocoos.mybeautip.domain.vod.converter;
 
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

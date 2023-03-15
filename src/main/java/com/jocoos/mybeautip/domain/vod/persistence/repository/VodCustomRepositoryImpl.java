@@ -1,10 +1,10 @@
-package com.jocoos.mybeautip.domain.broadcast.persistence.repository;
+package com.jocoos.mybeautip.domain.vod.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.broadcast.dto.QVodResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.VodResponse;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
-import com.jocoos.mybeautip.domain.broadcast.vo.VodSearchCondition;
+import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
+import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.domain.event.code.SortField;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;

@@ -1,12 +1,12 @@
-package com.jocoos.mybeautip.domain.broadcast.api.admin;
+package com.jocoos.mybeautip.domain.vod.api.admin;
 
-import com.jocoos.mybeautip.domain.broadcast.dto.VodInput;
-import com.jocoos.mybeautip.domain.broadcast.dto.PagingFilter;
-import com.jocoos.mybeautip.domain.broadcast.dto.VodFilter;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.VodReport;
-import com.jocoos.mybeautip.domain.broadcast.service.AdminVodGraphqlService;
-import com.jocoos.mybeautip.domain.broadcast.vo.VodSearchCondition;
+import com.jocoos.mybeautip.domain.vod.dto.VodInput;
+import com.jocoos.mybeautip.domain.vod.dto.PagingFilter;
+import com.jocoos.mybeautip.domain.vod.dto.VodFilter;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.VodReport;
+import com.jocoos.mybeautip.domain.vod.service.AdminVodGraphqlService;
+import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;

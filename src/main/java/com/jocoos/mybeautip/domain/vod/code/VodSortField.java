@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.broadcast.code;
+package com.jocoos.mybeautip.domain.vod.code;
 
 import com.jocoos.mybeautip.domain.event.code.SortField;
 import com.jocoos.mybeautip.global.code.CodeValue;

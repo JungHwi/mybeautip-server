@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.broadcast.service;
+package com.jocoos.mybeautip.domain.broadcast.service.child;
 
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastViewerConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastKey;

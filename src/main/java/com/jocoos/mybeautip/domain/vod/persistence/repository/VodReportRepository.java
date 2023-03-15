@@ -1,6 +1,6 @@
-package com.jocoos.mybeautip.domain.broadcast.persistence.repository;
+package com.jocoos.mybeautip.domain.vod.persistence.repository;
 
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.VodReport;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.VodReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

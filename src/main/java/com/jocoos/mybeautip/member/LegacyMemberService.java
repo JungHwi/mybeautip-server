@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.member;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
-import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastPermissionDao;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailRequest;
 import com.jocoos.mybeautip.domain.member.dto.MemberDetailResponse;
 import com.jocoos.mybeautip.domain.member.dto.SettingNotificationDto;
@@ -71,7 +71,7 @@ public class LegacyMemberService {
     private final AppleMemberRepository appleMemberRepository;
     private final MemberLeaveLogRepository memberLeaveLogRepository;
     private final AttachmentService attachmentService;
-    private final BroadcastService broadcastService;
+    private final BroadcastPermissionDao broadcastPermissionDao;
 
 
     private final ActivityPointService activityPointService;
@@ -99,7 +99,7 @@ public class LegacyMemberService {
                                AttachmentService attachmentService,
                                ActivityPointService activityPointService,
                                AwsS3Handler awsS3Handler,
-                               BroadcastService broadcastService) {
+                               BroadcastPermissionDao broadcastPermissionDao) {
 
         this.messageService = messageService;
         this.memberTermService = memberTermService;
@@ -116,7 +116,7 @@ public class LegacyMemberService {
         this.attachmentService = attachmentService;
         this.activityPointService = activityPointService;
         this.awsS3Handler = awsS3Handler;
-        this.broadcastService = broadcastService;
+        this.broadcastPermissionDao = broadcastPermissionDao;
     }
 
     public Long currentMemberId() {
@@ -158,7 +158,7 @@ public class LegacyMemberService {
                 .map(m -> new MemberMeInfo(m, termTypeResponses))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
-        Boolean availableBroadcast = broadcastService.getPermission(memberId);
+        Boolean availableBroadcast = broadcastPermissionDao.canBroadcast(memberId);
         memberMeInfo.setAvailableBroadcast(availableBroadcast);
         return memberMeInfo;
 
