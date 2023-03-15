@@ -24,10 +24,14 @@ public class BroadcastEditCommand {
     private final String editedTitle;
     private final String editedNotice;
     private final String editedThumbnail;
+    private final boolean isSoundOn;
+    private final boolean isScreenShow;
+    private final Long editorId;
 
     public static BroadcastEditCommand edit(BroadcastEditRequest request,
                                             String editedThumbnailUrl,
-                                            BroadcastCategory editedCategory) {
+                                            BroadcastCategory editedCategory,
+                                            Long editorId) {
         return BroadcastEditCommand.builder()
                 .isStartNow(request.getIsStartNow())
                 .editedStartedAt(request.getStartedAt())
@@ -35,10 +39,15 @@ public class BroadcastEditCommand {
                 .editedNotice(request.getNotice())
                 .editedCategory(editedCategory)
                 .editedThumbnail(editedThumbnailUrl)
+                .isScreenShow(request.getIsScreenShow())
+                .isSoundOn(request.getIsSoundOn())
+                .editorId(editorId)
                 .build();
     }
 
-    public static BroadcastEditCommand patch(Broadcast original, BroadcastPatchRequest request) {
+    public static BroadcastEditCommand patch(Broadcast original,
+                                             BroadcastPatchRequest request,
+                                             Long editorId) {
         String editedTitle = getIfPresent(request.getTitle(), original.getTitle());
         String editedNotice = getIfPresent(request.getNotice(), original.getNotice());
         String editedThumbnailUrl = getIfPresent(request.getThumbnailUrl(), original.getThumbnailUrl());
@@ -49,6 +58,9 @@ public class BroadcastEditCommand {
                 .editedTitle(editedTitle)
                 .editedNotice(editedNotice)
                 .editedThumbnail(editedThumbnailUrl)
+                .isSoundOn(original.getIsSoundOn())
+                .isScreenShow(original.getIsScreenShow())
+                .editorId(editorId)
                 .build();
     }
 }

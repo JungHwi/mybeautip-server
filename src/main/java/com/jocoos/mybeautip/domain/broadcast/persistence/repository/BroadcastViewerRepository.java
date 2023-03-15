@@ -15,6 +15,8 @@ public interface BroadcastViewerRepository extends ExtendedQuerydslJpaRepository
 
     Optional<BroadcastViewer> findByBroadcastIdAndMemberId(long broadcastId, long memberId);
 
+    Optional<BroadcastViewer> findByBroadcastIdAndMemberIdAndType(Long broadcastId, Long memberId, BroadcastViewerType type);
+
     boolean existsByBroadcastIdAndMemberIdAndType(long broadcastId, long memberId, BroadcastViewerType type);
 
     List<BroadcastViewer> findByBroadcast(Broadcast broadcast);

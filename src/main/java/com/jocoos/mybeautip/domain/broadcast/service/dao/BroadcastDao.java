@@ -19,6 +19,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.LIVE;
+
 @Service
 @RequiredArgsConstructor
 public class BroadcastDao {
@@ -37,6 +39,12 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
+    public Broadcast getByVideoKey(Long videoKey) {
+        return repository.findByVideoKey(videoKey)
+                .orElseThrow(() -> new NotFoundException("not found broadcast. video key - "));
+    }
+
+    @Transactional(readOnly = true)
     public BroadcastSearchResult getWithMemberAndCategory(long broadcastId) {
         return repository.get(broadcastId)
                 .orElseThrow(broadcastNotFoundException(broadcastId));
@@ -45,6 +53,11 @@ public class BroadcastDao {
     @Transactional(readOnly = true)
     public boolean isCreator(long broadcastId, long memberId) {
         return repository.existsByIdAndMemberId(broadcastId, memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isCreatorLiveNow(Long memberId) {
+        return repository.existsByStatusAndMemberId(LIVE, memberId);
     }
 
     @Transactional(readOnly = true)
@@ -87,7 +100,7 @@ public class BroadcastDao {
     }
 
     @Transactional
-    public long bulkUpdateToReady(BroadcastBulkUpdateStatusCommand condition) {
+    public BroadcastUpdateResult bulkUpdateToReady(BroadcastBulkUpdateStatusCommand condition) {
         return repository.bulkUpdateStatus(condition);
     }
 }

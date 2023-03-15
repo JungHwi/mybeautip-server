@@ -19,7 +19,7 @@ public class ClientTokenGranter extends AbstractTokenGranter {
     @Override
     protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
         UsernamePasswordAuthenticationToken authenticationToken
-                = new UsernamePasswordAuthenticationToken("guest:" + System.currentTimeMillis(), "");
+                = new UsernamePasswordAuthenticationToken("guest:" + System.nanoTime(), "");
         return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
     }
 }

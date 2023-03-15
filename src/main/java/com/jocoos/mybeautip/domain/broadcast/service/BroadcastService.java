@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.VodDao;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.member.service.dao.InfluencerDao;
@@ -63,11 +64,10 @@ public class BroadcastService {
     }
 
     @Transactional(readOnly = true)
-    public BroadcastResponse get(long broadcastId, long requestMemberId) {
+    public BroadcastResponse get(long broadcastId, String requestUsername) {
         BroadcastSearchResult searchResult = broadcastDao.getWithMemberAndCategory(broadcastId);
-        Member owner = memberDao.getMember(searchResult.getCreatedBy().getId());
-        BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestMemberId, searchResult);
-        return converter.toResponse(searchResult, owner, participantInfo);
+        BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestUsername, searchResult);
+        return converter.toResponse(searchResult, participantInfo);
     }
 
     @Transactional(readOnly = true)
@@ -87,9 +87,12 @@ public class BroadcastService {
     }
 
     @Transactional
-    public BroadcastResponse edit(long broadcastId, BroadcastEditRequest request, Long requestMemberId) {
-        Broadcast editedBroadcast = domainService.edit(broadcastId, request, requestMemberId);
-        awsS3Handler.editFiles(request.getThumbnails(), editedBroadcast.getThumbnailUrlPath());
+    public BroadcastResponse edit(Long broadcastId, BroadcastEditRequest request, Long requestMemberId) {
+        BroadcastEditResult editResult = domainService.overwriteEdit(broadcastId, request, requestMemberId);
+        Broadcast editedBroadcast = editResult.broadcast();
+        if (editResult.isThumbnailChanged()) {
+            awsS3Handler.editFiles(request.getThumbnails(), editedBroadcast.getThumbnailUrlPath());
+        }
         return converter.toResponse(editedBroadcast);
     }
 

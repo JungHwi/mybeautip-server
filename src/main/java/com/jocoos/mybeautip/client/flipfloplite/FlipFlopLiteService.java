@@ -3,8 +3,6 @@ package com.jocoos.mybeautip.client.flipfloplite;
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.global.vo.EmptyResult;
@@ -16,9 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE;
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.*;
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,13 +25,12 @@ public class FlipFlopLiteService {
     private final FlipFlopLiteClient client;
     private final FlipFlopLiteConverter converter;
 
-    public ExternalBroadcastInfo createVideoRoom(Broadcast broadcast) {
-        FFLVideoRoomRequest fflRequest = converter.converts(broadcast);
-        FFLVideoRoomResponse response = client.createVideoRoom(fflRequest);
+    public ExternalBroadcastInfo createVideoRoom(FFLVideoRoomRequest request) {
+        FFLVideoRoomResponse response = client.createVideoRoom(request);
         return converter.converts(response);
     }
 
-    private ExternalBroadcastInfo startVideoRoom(long videoRoomId) {
+    public ExternalBroadcastInfo startVideoRoom(long videoRoomId) {
         FFLVideoRoomResponse response = client.startVideoRoom(videoRoomId);
         if (response.videoRoomState() != LIVE) {
 
@@ -43,7 +38,7 @@ public class FlipFlopLiteService {
         return converter.converts(response);
     }
 
-    private ZonedDateTime endVideoRoom(long videoRoomId) {
+    public ZonedDateTime endVideoRoom(long videoRoomId) {
         FFLVideoRoomResponse response = client.endVideoRoom(videoRoomId);
         if (response.videoRoomState() != ENDED) {
 
@@ -51,7 +46,7 @@ public class FlipFlopLiteService {
         return response.lastModifiedAt();
     }
 
-    private ZonedDateTime cancelVideoRoom(long videoRoomId) {
+    public ZonedDateTime cancelVideoRoom(long videoRoomId) {
         FFLVideoRoomResponse response = client.cancelVideoRoom(videoRoomId);
         if (response.videoRoomState() != CANCELLED) {
 
@@ -84,6 +79,12 @@ public class FlipFlopLiteService {
         return converter.converts(response);
     }
 
+    public ChatTokenAndAppId getGuestChatToken(String guestUsername) {
+        FFLGuestChatTokenRequest request = FFLGuestChatTokenRequest.from(guestUsername);
+        FFLChatTokenResponse response = client.getGuestChatToken(request);
+        return converter.converts(response);
+    }
+
     public FFLChatRoomResponse createChatRoom(long videoRoomId) {
         return client.createChatRoom(videoRoomId);
     }
@@ -108,13 +109,14 @@ public class FlipFlopLiteService {
         }
     }
 
-    public Long broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
-        FFLMessageInfo messageInfo = client.broadcastMessage(videoRoomId, request);
+    public Long directMessage(long videoRoomId, FFLDirectMessageRequest request) {
+        FFLMessageInfo messageInfo =  client.directMessage(videoRoomId, request);
         return messageInfo.messageId();
     }
 
-    public Long directMessage(long videoRoomId, FFLDirectMessageRequest request) {
-        FFLMessageInfo messageInfo =  client.directMessage(videoRoomId, request);
+
+    public Long broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
+        FFLMessageInfo messageInfo = client.broadcastMessage(videoRoomId, request);
         return messageInfo.messageId();
     }
 

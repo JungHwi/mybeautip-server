@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType.GUEST;
+
 @Service
 @RequiredArgsConstructor
 public class BroadcastViewerDao {
@@ -25,6 +27,11 @@ public class BroadcastViewerDao {
     @Transactional(readOnly = true)
     public Optional<BroadcastViewer> findBroadcastViewer(Long broadcastId, Long memberId) {
         return repository.findByBroadcastIdAndMemberId(broadcastId, memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<BroadcastViewer> findGuestViewer(Long broadcastId, Long memberId) {
+        return repository.findByBroadcastIdAndMemberIdAndType(broadcastId, memberId, GUEST);
     }
 
     @Transactional(readOnly = true)

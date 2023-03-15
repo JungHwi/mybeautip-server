@@ -44,6 +44,7 @@ import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned
 @Table(name = "members")
 public class Member {
 
+    public static final int LINK_ADMIN = 0;
     public static final int LINK_FACEBOOK = 1;
     public static final int LINK_NAVER = 2;
     public static final int LINK_KAKAO = 4;

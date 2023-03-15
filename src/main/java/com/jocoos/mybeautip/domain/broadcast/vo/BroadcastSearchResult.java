@@ -25,6 +25,9 @@ public class BroadcastSearchResult {
     private final String title;
     private final String notice;
     private final String thumbnailUrl;
+    private final Boolean canChat;
+    private final Boolean isSoundOn;
+    private final Boolean isScreenShow;
     private final int viewerCount;
     private final int maxViewerCount;
     private final int heartCount;
@@ -50,6 +53,9 @@ public class BroadcastSearchResult {
         this.title = broadcast.getTitle();
         this.notice = broadcast.getNotice();
         this.thumbnailUrl = broadcast.getThumbnailUrl();
+        this.canChat = broadcast.getCanChat();
+        this.isSoundOn = broadcast.getIsSoundOn();
+        this.isScreenShow = broadcast.getIsScreenShow();
         this.viewerCount = broadcast.getViewerCount();
         this.maxViewerCount = broadcast.getMaxViewerCount();
         this.heartCount = broadcast.getHeartCount();

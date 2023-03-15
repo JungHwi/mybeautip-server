@@ -81,7 +81,7 @@ public class AdminBroadcastController {
     @GetMapping("/broadcast/{broadcastId}")
     public AdminBroadcastResponse get(@PathVariable Long broadcastId,
                                       @CurrentMember MyBeautipUserDetails userDetails) {
-        return service.get(broadcastId, userDetails.getMember().getId());
+        return service.get(broadcastId, userDetails.getUsername());
     }
 
     // TODO start_at default 값 논의 필요
@@ -91,11 +91,12 @@ public class AdminBroadcastController {
     }
 
     @PatchMapping("/broadcast/{broadcastId}")
-    public IdDto edit(@PathVariable long broadcastId, @RequestBody BroadcastPatchRequest request) {
-        return new IdDto(service.edit(broadcastId, request));
+    public IdDto edit(@PathVariable long broadcastId,
+                      @RequestBody BroadcastPatchRequest request,
+                      @CurrentMember MyBeautipUserDetails userDetails) {
+        return new IdDto(service.edit(broadcastId, request, userDetails.getMember().getId()));
     }
 
-    // TODO shutdown or change status api need to choose
     @PatchMapping("/broadcast/{broadcastId}/shutdown")
     public void shutdown(@PathVariable long broadcastId) {
         service.shutdown(broadcastId);

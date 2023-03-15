@@ -10,8 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class FlipFlopLiteCallbackSecurityConfig {
 
     @Bean
-    public FilterRegistrationBean<FFLCallbackFilter> fflCallbackFilterFilterRegistrationBean(
-            @Autowired FFLCallbackFilter fflCallbackFilter) {
+    public FilterRegistrationBean<FFLCallbackFilter> fflCallbackFilterFilterRegistrationBean(@Autowired FFLCallbackFilter fflCallbackFilter) {
         FilterRegistrationBean<FFLCallbackFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(fflCallbackFilter);
         registrationBean.addUrlPatterns("/callback/ffl/*");

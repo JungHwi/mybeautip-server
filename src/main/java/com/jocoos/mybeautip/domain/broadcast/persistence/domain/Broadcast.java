@@ -10,8 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -69,6 +69,15 @@ public class Broadcast extends CreatedAtBaseEntity {
     private String pin;
 
     @Column
+    private Boolean canChat;
+
+    @Column
+    private Boolean isSoundOn;
+
+    @Column
+    private Boolean isScreenShow;
+
+    @Column
     private int viewerCount;
 
     @Column
@@ -89,22 +98,25 @@ public class Broadcast extends CreatedAtBaseEntity {
     @Column
     private ZonedDateTime endedAt;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "category_id")
     private BroadcastCategory category;
 
     @Embedded
-    public BroadcastViewerList viewerList;
+    public BroadcastViewerList viewerList = new BroadcastViewerList();
 
     @Builder
-    public Broadcast(@NotNull Long memberId,
-                     @NotNull String title,
-                     @NotNull String thumbnailUrl,
-                     @NotNull ZonedDateTime startedAt,
-                     @NotNull BroadcastCategory category,
-                     String notice,
+    public Broadcast(Long memberId,
+                     String title,
+                     String thumbnailUrl,
+                     ZonedDateTime startedAt,
+                     BroadcastCategory category,
+                     @Nullable String notice,
                      boolean isStartNow) {
         this.memberId = memberId;
+        this.canChat = true;
+        this.isSoundOn = true;
+        this.isScreenShow = true;
         initStatusAndStartedAt(isStartNow, startedAt);
         setCategory(category);
         setTitle(title);
@@ -117,17 +129,19 @@ public class Broadcast extends CreatedAtBaseEntity {
     }
 
     // video and channel key will get from external service so updated later
-    public void updateVideoAndChannelKey(@NotNull Long videoKey, @NotNull String chatChannelKey) {
+    public void updateVideoAndChannelKey(Long videoKey, String chatChannelKey) {
         this.videoKey = videoKey;
         this.chatChannelKey = chatChannelKey;
     }
 
-    public void edit(@NotNull BroadcastEditCommand command) {
+    public void edit(BroadcastEditCommand command) {
         if ((command.isStartNow() || !startedAt.isEqual(command.getEditedStartedAt())) &&
                 Duration.between(startedAt, now()).toMinutes() > 30) {
             throw new BadRequestException("");
         }
 
+        this.isSoundOn = command.isSoundOn();
+        this.isScreenShow = command.isScreenShow();
         changeStatusAndStartedAt(command.isStartNow(), command.getEditedStartedAt());
         setCategory(command.getEditedCategory());
         setTitle(command.getEditedTitle());
@@ -135,13 +149,13 @@ public class Broadcast extends CreatedAtBaseEntity {
         setNotice(command.getEditedNotice());
     }
 
-    public void start(@NotNull String url, @NotNull ZonedDateTime startedAt) {
+    public void start(String url, ZonedDateTime startedAt) {
         changeStatus(LIVE);
         setStartedAt(startedAt);
         this.url = url;
     }
 
-    public void finish(@NotNull BroadcastStatus status, @NotNull ZonedDateTime endedAt) {
+    public void finish(BroadcastStatus status, ZonedDateTime endedAt) {
         if (status != END && status != CANCEL) {
             throw new BadRequestException(status + " is not a finish status");
         }
@@ -149,15 +163,24 @@ public class Broadcast extends CreatedAtBaseEntity {
         this.endedAt = endedAt;
     }
 
+    public void changeChatStatus(boolean canChat) {
+        this.canChat = canChat;
+    }
+
+    public boolean isCreatedByEq(Long memberId) {
+        return this.memberId.equals(memberId);
+    }
+
     public boolean isCategoryEq(Long categoryId) {
         return category.getId().equals(categoryId);
     }
 
-    public boolean isThumbnailEq(String thumbnailUrl) {
+    public boolean isThumbnailUrlEq(String thumbnailUrl) {
         return getThumbnailUrl().equals(thumbnailUrl);
     }
 
     public String getThumbnailUrl() {
+        // FIXME Delete This If After Test
         if (thumbnail.isBlank()) {
             return "https://static-dev.mybeautip.com/common/default/share_square_image.jpg";
         }
@@ -190,19 +213,19 @@ public class Broadcast extends CreatedAtBaseEntity {
         setStartedAt(now().plusMinutes(5));
     }
 
-    private void setCategory(@NotNull BroadcastCategory category) {
+    private void setCategory(BroadcastCategory category) {
         if (category.isGroup()) {
             throw new BadRequestException(category + " isn't writable");
         }
         this.category = category;
     }
 
-    private void setTitle(@NotNull String title) {
+    private void setTitle(String title) {
         validateMaxLengthWithoutWhiteSpace(title, 25, "title");
         this.title = title;
     }
 
-    private void setThumbnail(@NotNull String thumbnail) {
+    private void setThumbnail(String thumbnail) {
         this.thumbnail = getFileName(thumbnail);
     }
 
@@ -213,12 +236,9 @@ public class Broadcast extends CreatedAtBaseEntity {
         this.notice = notice;
     }
 
-    private void setStartedAt(@NotNull ZonedDateTime startedAt) {
-//        if (startedAt.isBefore(now())) {
-//            throw new BadRequestException("Can't Start From Past. Request start_at is " + startedAt);
-//        }
+    private void setStartedAt(ZonedDateTime startedAt) {
         if (Duration.between(now(), startedAt).toDays() > 14) {
-            throw new BadRequestException("max duration of startedAt is 14 days");
+            throw new BadRequestException("Max duration of startedAt is 14 days");
         }
         this.startedAt = startedAt;
     }
