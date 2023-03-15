@@ -164,6 +164,7 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
         given(flipFlopLiteClient.endVideoRoom(anyLong())).willReturn(makeFFLVideoRoomResponse())
         given(flipFlopLiteClient.getChatToken(anyLong())).willReturn(makeFFLChatTokenResponse())
         given(flipFlopLiteClient.getStreamKey(anyLong())).willReturn(makeFFLStreamKeyResponse())
+        given(flipFlopLiteClient.cancelVideoRoom(anyLong())).willReturn(makeFFLVideoRoomResponse())
     }
 
 }
