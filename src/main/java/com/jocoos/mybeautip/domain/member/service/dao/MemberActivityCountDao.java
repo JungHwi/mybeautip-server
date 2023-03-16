@@ -49,4 +49,9 @@ public class MemberActivityCountDao {
     public void updateNormalVideoCommentCount(List<Long> ids, int count) {
         repository.updateNormalVideoCommentCount(ids, count);
     }
+
+    @Transactional(readOnly = true)
+    public boolean existsById(Long id) {
+        return repository.existsById(id);
+    }
 }

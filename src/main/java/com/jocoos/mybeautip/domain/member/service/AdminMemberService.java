@@ -13,10 +13,7 @@ import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.converter.AdminMemberConverter;
 import com.jocoos.mybeautip.domain.member.dto.*;
 import com.jocoos.mybeautip.domain.member.persistence.domain.UsernameCombinationWord;
-import com.jocoos.mybeautip.domain.member.service.dao.DormantMemberDao;
-import com.jocoos.mybeautip.domain.member.service.dao.JwtDao;
-import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
-import com.jocoos.mybeautip.domain.member.service.dao.UsernameCombinationWordDao;
+import com.jocoos.mybeautip.domain.member.service.dao.*;
 import com.jocoos.mybeautip.domain.member.vo.MemberBasicSearchResult;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchCondition;
 import com.jocoos.mybeautip.domain.member.vo.MemberSearchResult;
@@ -53,7 +50,7 @@ public class AdminMemberService {
     private final JwtDao jwtDao;
     private final AdminMemberConverter converter;
     private final OperationLogConverter operationLogConverter;
-
+    private final MemberActivityCountDao memberActivityCountDao;
 
     @Transactional(readOnly = true)
     public List<MemberStatusResponse> getStatusesWithCount() {
@@ -156,6 +153,11 @@ public class AdminMemberService {
     @Transactional
     public MemberResponse saveOrUpdate(MemberRegistrationRequest request) {
         Member member = memberDao.saveOrUpdate(request);
+
+        if (!memberActivityCountDao.existsById(member.getId())) {
+            memberActivityCountDao.init(member);
+        }
+
         return converter.convert(member);
     }
 }
