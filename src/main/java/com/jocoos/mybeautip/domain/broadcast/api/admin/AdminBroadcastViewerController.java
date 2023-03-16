@@ -50,6 +50,15 @@ public class AdminBroadcastViewerController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/broadcast/{broadcastId}/viewer/{memberId}")
+    public ViewerResponse getViewer(@PathVariable long broadcastId,
+                                    @PathVariable long memberId) {
+
+
+        return viewerService.get(broadcastId, memberId);
+    }
+
+
     @PatchMapping("/broadcast/{broadcast_id}/viewer/{member_id}/manager")
     public ResponseEntity<ViewerResponse> grantManger(@PathVariable("broadcast_id") long broadcastId,
                                                       @PathVariable("member_id") long memberId,

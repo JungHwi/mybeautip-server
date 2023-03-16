@@ -18,4 +18,5 @@ public class ViewerSearchCondition {
     private ViewerCursorCondition cursorCondition;
     private Pageable pageable;
     private Long cursor;
+    private Long memberId;
 }

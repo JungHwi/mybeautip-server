@@ -5,6 +5,7 @@ public class SignConstant {
     public static final String EMPTY_STRING = "";
 
     // NUMBER
+    public static final int ZERO = 0;
     public static final int ONE = 1;
     public static final int TWENTY = 20;
 

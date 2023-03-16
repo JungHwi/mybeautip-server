@@ -51,6 +51,11 @@ public class BroadcastViewerDao {
     }
 
     @Transactional(readOnly = true)
+    public ViewerSearchResult get(long broadcastId, long memberId) {
+        return repository.get(broadcastId, memberId);
+    }
+
+    @Transactional(readOnly = true)
     public List<BroadcastViewer> getViewer(Broadcast broadcast) {
         return repository.findByBroadcast(broadcast);
     }
