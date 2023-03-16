@@ -10,7 +10,7 @@ phases:
       - ./gradlew build -Dprofile=dev
       - echo end of gradle build
       - ls -al build/libs/
-      - aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 904235351504.dkr.ecr.ap-southeast-1.amazonaws.com
+      - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 904235351504.dkr.ecr.ap-southeast-1.amazonaws.com
       - REPOSITORY_URI=904235351504.dkr.ecr.ap-southeast-1.amazonaws.com/mybeautip-api
       - IMAGE_TAG=dev
   build:
