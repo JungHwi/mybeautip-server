@@ -41,10 +41,10 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
     public ViewerSearchResult get(long broadcastId, long memberId) {
         List<ViewerSearchResult> result = baseGetQuery(broadcastId, memberId).fetch();
 
-        if (!CollectionUtils.isEmpty(result)) {
-            return result.get(ZERO);
-        } else {
+        if (CollectionUtils.isEmpty(result)) {
             throw new MemberNotFoundException(memberId);
+        } else {
+            return result.get(ZERO);
         }
     }
 
