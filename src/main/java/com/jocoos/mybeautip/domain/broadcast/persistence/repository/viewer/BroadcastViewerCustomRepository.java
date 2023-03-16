@@ -8,4 +8,6 @@ import java.util.List;
 public interface BroadcastViewerCustomRepository {
 
     List<ViewerSearchResult> search(ViewerSearchCondition condition);
+
+    ViewerSearchResult get(long broadcastId, long memberId);
 }

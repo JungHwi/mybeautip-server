@@ -72,6 +72,39 @@ class BroadcastViewerControllerTest(
     }
 
     @Test
+    fun get() {
+
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        val viewer = saveViewer(broadcast = broadcast);
+
+        val result: ResultActions = mockMvc.perform(
+            get("/api/1/broadcast/{broadcast_id}/viewer/{member_id}", broadcast.id, viewer.memberId)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "get_viewer",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID"),
+                    parameterWithName("member_id").description("회원 ID"),
+                ),
+                responseFields(
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 아이디").optional(),
+                    fieldWithPath("username").type(JsonFieldType.STRING).description("회원명"),
+                    fieldWithPath("avatar_url").type(JsonFieldType.STRING).description("회원 아바타 URL"),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("suspended_at").type(JsonFieldType.STRING).description("정지 시간").attributes(getZonedDateFormat()).optional(),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("채팅방 입장 시간").attributes(getZonedDateFormat())
+                )
+            )
+        )
+    }
+
+    @Test
     fun grantManager() {
         val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
         val viewer = saveViewer(broadcast = broadcast)

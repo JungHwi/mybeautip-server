@@ -8,16 +8,19 @@ import com.jocoos.mybeautip.domain.broadcast.vo.QViewerSearchResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerCursorCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchResult;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastViewer.broadcastViewer;
+import static com.jocoos.mybeautip.global.constant.SignConstant.ZERO;
 import static com.jocoos.mybeautip.member.QMember.member;
 
 @Repository
@@ -32,6 +35,27 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
     @Override
     public List<ViewerSearchResult> search(ViewerSearchCondition condition) {
         return baseSearchQuery(condition).fetch();
+    }
+
+    @Override
+    public ViewerSearchResult get(long broadcastId, long memberId) {
+        List<ViewerSearchResult> result = baseGetQuery(broadcastId, memberId).fetch();
+
+        if (CollectionUtils.isEmpty(result)) {
+            throw new MemberNotFoundException(memberId);
+        } else {
+            return result.get(ZERO);
+        }
+    }
+
+    private JPAQuery<ViewerSearchResult> baseGetQuery(long broadcastId, long memberId) {
+        return repository.query(query -> query
+                .select(new QViewerSearchResult(member, broadcastViewer))
+                .from(broadcastViewer).leftJoin(member).on(broadcastViewer.memberId.eq(member.id))
+                .where(
+                        broadcastViewer.broadcast.id.eq(broadcastId),
+                        broadcastViewer.memberId.eq(memberId))
+                );
     }
 
     private JPAQuery<ViewerSearchResult> baseSearchQuery(ViewerSearchCondition condition) {

@@ -52,6 +52,15 @@ public class BroadcastViewerController {
         return ResponseEntity.ok(responses);
     }
 
+    @CheckPermission({INFLUENCER, MANAGER})
+    @GetMapping("/1/broadcast/{broadcastId}/viewer/{memberId}")
+    public ViewerResponse getViewer(@PathVariable long broadcastId,
+                                    @PathVariable long memberId) {
+
+
+        return viewerService.get(broadcastId, memberId);
+    }
+
     @CheckPermission({INFLUENCER})
     @PatchMapping("/1/broadcast/{broadcast_id}/viewer/{member_id}/manager")
     public ResponseEntity<ViewerResponse> grantManger(@PathVariable("broadcast_id") long broadcastId,

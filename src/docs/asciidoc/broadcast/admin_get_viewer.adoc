@@ -1,0 +1,3 @@
+== Admin Get Viewer API
+
+operation::admin_get_viewer[snippets='http-request,path-parameters,http-response,response-fields']

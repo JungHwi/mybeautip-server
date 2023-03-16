@@ -45,6 +45,13 @@ public class BroadcastViewerService {
         return converter.converts(searchList);
     }
 
+    @Transactional(readOnly = true)
+    public ViewerResponse get(long broadcastId, long memberId) {
+        ViewerSearchResult viewer = dao.get(broadcastId, memberId);
+
+        return converter.converts(viewer);
+    }
+
     @Transactional
     public ViewerResponse grantManager(GrantManagerRequest request) {
         BroadcastViewer viewer = dao.grantManager(request);
