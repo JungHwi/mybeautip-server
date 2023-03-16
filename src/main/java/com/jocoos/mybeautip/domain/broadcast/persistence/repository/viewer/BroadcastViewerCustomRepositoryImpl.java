@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.broadcast.vo.QViewerSearchResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerCursorCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchResult;
+import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
@@ -39,7 +40,12 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
     @Override
     public ViewerSearchResult get(long broadcastId, long memberId) {
         List<ViewerSearchResult> result = baseGetQuery(broadcastId, memberId).fetch();
-        return CollectionUtils.isEmpty(result) ? null : result.get(ZERO);
+
+        if (!CollectionUtils.isEmpty(result)) {
+            return result.get(ZERO);
+        } else {
+            throw new MemberNotFoundException(memberId);
+        }
     }
 
     private JPAQuery<ViewerSearchResult> baseGetQuery(long broadcastId, long memberId) {

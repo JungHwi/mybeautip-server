@@ -1,5 +1,5 @@
 1. Install package
-    $ pip install --target ./package requests
+    $ pip3 install --target ./package requests
     package 하위에 필요한 라이브러리들이 포함된 것을 볼 수 있습니다.
 
 2. Package zip
