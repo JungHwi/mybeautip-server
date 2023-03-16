@@ -1,6 +1,8 @@
 package com.jocoos.mybeautip.security;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.provider.*;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
@@ -19,7 +21,7 @@ public class ClientTokenGranter extends AbstractTokenGranter {
     @Override
     protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
         UsernamePasswordAuthenticationToken authenticationToken
-                = new UsernamePasswordAuthenticationToken("guest:" + System.nanoTime(), "");
+                = new UsernamePasswordAuthenticationToken("guest:" + RandomUtils.nextInt(1, 9) + RandomStringUtils.randomNumeric(9),"");
         return new OAuth2Authentication(tokenRequest.createOAuth2Request(client), authenticationToken);
     }
 }

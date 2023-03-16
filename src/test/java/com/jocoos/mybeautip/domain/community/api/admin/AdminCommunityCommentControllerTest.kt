@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCommentRepository
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository
+import com.jocoos.mybeautip.domain.file.code.FileType
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
@@ -69,7 +70,14 @@ class AdminCommunityCommentControllerTest(
                 ),
                 requestFields(
                     fieldWithPath("parent_id").type(NUMBER).description("부모 댓글 아이디").optional(),
-                    fieldWithPath("contents").type(STRING).description("내용")
+                    fieldWithPath("contents").type(STRING).description("내용 (contents 나 file 둘 중에 하나는 있어야 합니다)")
+                        .optional(),
+                    fieldWithPath("file").type(OBJECT).description("이미지").optional(),
+                    fieldWithPath("file.type").type(ARRAY).attributes(getDefault(FileType.IMAGE)).description(FILE_TYPE)
+                        .ignored(),
+                    fieldWithPath("file.operation").type(STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
+                    fieldWithPath("file.url").type(STRING).description("이미지 URL"),
+                    fieldWithPath("file.need_transcode").type(BOOLEAN).ignored()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 아이디"),
@@ -100,7 +108,11 @@ class AdminCommunityCommentControllerTest(
         // when & then
         val result = mockMvc
             .perform(
-                patch("/admin/community/{community_id}/comment/{comment_id}", communityComment.communityId, communityComment.id)
+                patch(
+                    "/admin/community/{community_id}/comment/{comment_id}",
+                    communityComment.communityId,
+                    communityComment.id
+                )
                     .header(AUTHORIZATION, defaultAdminToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
@@ -116,7 +128,15 @@ class AdminCommunityCommentControllerTest(
                     parameterWithName("comment_id").description("댓글 ID")
                 ),
                 requestFields(
-                    fieldWithPath("contents").type(STRING).description("내용")
+                    fieldWithPath("contents").type(STRING).description("내용 (contents 나 file 둘 중에 하나는 존재하도록 해야합니다)")
+                        .optional(),
+                    fieldWithPath("files").type(ARRAY).description("이미지 파일 List").optional(),
+                    fieldWithPath("files.[].type").type(ARRAY).attributes(getDefault(FileType.IMAGE))
+                        .description(FILE_TYPE)
+                        .ignored(),
+                    fieldWithPath("files.[].operation").type(STRING).description(generateLinkCode(FILE_OPERATION_TYPE)),
+                    fieldWithPath("files.[].url").type(STRING).description("이미지 URL"),
+                    fieldWithPath("files.[].need_transcode").type(BOOLEAN).ignored()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("댓글 ID")
@@ -239,7 +259,7 @@ class AdminCommunityCommentControllerTest(
         )
     }
 
-    fun saveCommunityComment() : CommunityComment {
+    fun saveCommunityComment(): CommunityComment {
         val admin: Member = memberRepository.save(makeMember(link = 0))
         val communityCategory: CommunityCategory = communityCategoryRepository.save(makeCommunityCategory(type = DRIP))
         val community: Community = communityRepository.save(makeCommunity(category = communityCategory));

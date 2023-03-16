@@ -81,7 +81,7 @@ public class AdminBroadcastService {
     private void editThumbnailFile(BroadcastEditResult editResult) {
         if (editResult.isThumbnailChanged()) {
             Broadcast broadcast = editResult.broadcast();
-            String originalThumbnailUrl = editResult.originalThumbnailUrl();
+            String originalThumbnailUrl = editResult.originalInfo().thumbnailUrl();
             String editedThumbnailUrl = broadcast.getThumbnailUrl();
             List<FileDto> files = uploadAndDeleteImages(editedThumbnailUrl, originalThumbnailUrl);
             awsS3Handler.editFiles(files, broadcast.getThumbnailUrlPath());

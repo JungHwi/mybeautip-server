@@ -21,6 +21,7 @@ import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.BROADCAST;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
 import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.toUrl;
+import static com.jocoos.mybeautip.global.validator.ObjectValidator.requireNonNull;
 import static com.jocoos.mybeautip.global.validator.StringValidator.validateMaxLengthWithoutWhiteSpace;
 import static java.time.ZonedDateTime.now;
 import static javax.persistence.EnumType.STRING;
@@ -112,6 +113,7 @@ public class Broadcast extends CreatedAtBaseEntity {
                      BroadcastCategory category,
                      @Nullable String notice,
                      boolean isStartNow) {
+        requireNonNull(memberId, "memberId");
         this.memberId = memberId;
         this.canChat = true;
         this.isSoundOn = true;
@@ -124,16 +126,20 @@ public class Broadcast extends CreatedAtBaseEntity {
     }
 
     public List<Long> syncViewer(List<BroadcastViewerVo> newViewers) {
+        requireNonNull(newViewers, "newViewers");
         return this.viewerList.sync(this, newViewers);
     }
 
     // video and channel key will get from external service so updated later
     public void updateVideoAndChannelKey(Long videoKey, String chatChannelKey) {
+        requireNonNull(videoKey, "videoKey");
+        requireNonNull(chatChannelKey, "chatChannelKey");
         this.videoKey = videoKey;
         this.chatChannelKey = chatChannelKey;
     }
 
     public void edit(BroadcastEditCommand command) {
+        requireNonNull(command, "edit command");
         if ((command.isStartNow() || !startedAt.isEqual(command.getEditedStartedAt())) &&
                 Duration.between(startedAt, now()).toMinutes() > 30) {
             throw new BadRequestException("Started at modification can only be made 31 minutes or more before to start");
@@ -149,12 +155,14 @@ public class Broadcast extends CreatedAtBaseEntity {
     }
 
     public void start(String url, ZonedDateTime startedAt) {
+        requireNonNull(url, "url");
         changeStatus(LIVE);
         this.startedAt = startedAt;
         this.url = url;
     }
 
     public void finish(BroadcastStatus status, ZonedDateTime endedAt) {
+        requireNonNull(endedAt, "endedAt");
         if (status != END && status != CANCEL) {
             throw new BadRequestException(status + " is not a finish status");
         }
@@ -166,15 +174,19 @@ public class Broadcast extends CreatedAtBaseEntity {
         this.canChat = canChat;
     }
 
-    public boolean isCreatedByEq(Long memberId) {
+    public boolean isStatusEq(@Nullable BroadcastStatus status) {
+        return this.status.equals(status);
+    }
+
+    public boolean isCreatedByEq(@Nullable Long memberId) {
         return this.memberId.equals(memberId);
     }
 
-    public boolean isCategoryEq(Long categoryId) {
+    public boolean isCategoryEq(@Nullable Long categoryId) {
         return category.getId().equals(categoryId);
     }
 
-    public boolean isThumbnailUrlEq(String thumbnailUrl) {
+    public boolean isThumbnailUrlEq(@Nullable String thumbnailUrl) {
         return getThumbnailUrl().equals(thumbnailUrl);
     }
 
@@ -191,6 +203,7 @@ public class Broadcast extends CreatedAtBaseEntity {
     }
 
     private void initStatusAndStartedAt(boolean isStartNow, ZonedDateTime startedAt) {
+        requireNonNull(startedAt, "startedAt");
         if (isStartNow) readyNow();
         else {
             changeStatus(SCHEDULED);
@@ -203,16 +216,18 @@ public class Broadcast extends CreatedAtBaseEntity {
         else setStartedAtBeforeStart(editedStartedAt);
     }
 
-    private void changeStatus(BroadcastStatus changeStatus) {
-        status = status == null ? changeStatus : status.changeTo(changeStatus);
-    }
-
     private void readyNow() {
         changeStatus(READY);
         setStartedAtBeforeStart(now().plusMinutes(5));
     }
 
+    private void changeStatus(BroadcastStatus changeStatus) {
+        requireNonNull(changeStatus, "changeStatus");
+        status = status == null ? changeStatus : status.changeTo(changeStatus);
+    }
+
     private void setCategory(BroadcastCategory category) {
+        requireNonNull(category, "category");
         if (category.isGroup()) {
             throw new BadRequestException(category + " isn't writable");
         }
@@ -220,11 +235,13 @@ public class Broadcast extends CreatedAtBaseEntity {
     }
 
     private void setTitle(String title) {
+        requireNonNull(title, "title");
         validateMaxLengthWithoutWhiteSpace(title, 25, "title");
         this.title = title;
     }
 
     private void setThumbnail(String thumbnail) {
+        requireNonNull(thumbnail, "thumbnail");
         this.thumbnail = getFileName(thumbnail);
     }
 
@@ -235,7 +252,9 @@ public class Broadcast extends CreatedAtBaseEntity {
         this.notice = notice;
     }
 
-    public void setStartedAtBeforeStart(ZonedDateTime startedAt) {
+    // start() will fix startedAt
+    private void setStartedAtBeforeStart(ZonedDateTime startedAt) {
+        requireNonNull(startedAt, "startedAt");
         if (startedAt.isBefore(now()) || Duration.between(now(), startedAt).toDays() > 14) {
             throw new BadRequestException("Started At cannot be earlier than the current time or later than 14 days");
         }
