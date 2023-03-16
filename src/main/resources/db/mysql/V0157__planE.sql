@@ -25,7 +25,6 @@ create table broadcast
     url              varchar(200) comment '방송 URL',
     thumbnail        varchar(16)                                                                                   not null comment '방송 썸네일 파일',
     notice           varchar(100) comment '공지사항',
-    pin              varchar(1000) comment '핀 채팅',
     can_chat         boolean not null comment '채팅 가능 여부',
     is_screen_show   boolean not null comment '화면 표시 여부',
     is_sound_on      boolean not null comment '사운드 여부',

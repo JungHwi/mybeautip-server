@@ -43,11 +43,11 @@ public class BroadcastService {
     private final BroadcastDao broadcastDao;
     private final MemberDao memberDao;
     private final BroadcastPermissionDao permissionDao;
-    private final BroadcastConverter converter;
-    private final AwsS3Handler awsS3Handler;
     private final BroadcastDomainService domainService;
     private final BroadcastVodService broadcastVodService;
     private final BroadcastParticipantInfoService participantInfoService;
+    private final BroadcastConverter converter;
+    private final AwsS3Handler awsS3Handler;
 
     @Transactional
     public BroadcastResponse createBroadcastAndVod(BroadcastCreateRequest request, long creatorId) {

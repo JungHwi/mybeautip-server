@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.persistence.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -29,6 +30,7 @@ import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED)
+@ParametersAreNonnullByDefault
 @Entity
 public class Broadcast extends CreatedAtBaseEntity {
 
@@ -64,9 +66,6 @@ public class Broadcast extends CreatedAtBaseEntity {
 
     @Column
     private String notice;
-
-    @Column
-    private String pin;
 
     @Column
     private Boolean canChat;
@@ -137,7 +136,7 @@ public class Broadcast extends CreatedAtBaseEntity {
     public void edit(BroadcastEditCommand command) {
         if ((command.isStartNow() || !startedAt.isEqual(command.getEditedStartedAt())) &&
                 Duration.between(startedAt, now()).toMinutes() > 30) {
-            throw new BadRequestException("");
+            throw new BadRequestException("Started at modification can only be made 31 minutes or more before to start");
         }
 
         this.isSoundOn = command.isSoundOn();
@@ -151,7 +150,7 @@ public class Broadcast extends CreatedAtBaseEntity {
 
     public void start(String url, ZonedDateTime startedAt) {
         changeStatus(LIVE);
-        setStartedAt(startedAt);
+        this.startedAt = startedAt;
         this.url = url;
     }
 
@@ -163,7 +162,7 @@ public class Broadcast extends CreatedAtBaseEntity {
         this.endedAt = endedAt;
     }
 
-    public void changeChatStatus(boolean canChat) {
+    public void changeMessageRoomStatus(boolean canChat) {
         this.canChat = canChat;
     }
 
@@ -195,13 +194,13 @@ public class Broadcast extends CreatedAtBaseEntity {
         if (isStartNow) readyNow();
         else {
             changeStatus(SCHEDULED);
-            setStartedAt(startedAt);
+            setStartedAtBeforeStart(startedAt);
         }
     }
 
     private void changeStatusAndStartedAt(boolean isStartNow, ZonedDateTime editedStartedAt) {
         if (isStartNow) readyNow();
-        else setStartedAt(editedStartedAt);
+        else setStartedAtBeforeStart(editedStartedAt);
     }
 
     private void changeStatus(BroadcastStatus changeStatus) {
@@ -210,7 +209,7 @@ public class Broadcast extends CreatedAtBaseEntity {
 
     private void readyNow() {
         changeStatus(READY);
-        setStartedAt(now().plusMinutes(5));
+        setStartedAtBeforeStart(now().plusMinutes(5));
     }
 
     private void setCategory(BroadcastCategory category) {
@@ -229,16 +228,19 @@ public class Broadcast extends CreatedAtBaseEntity {
         this.thumbnail = getFileName(thumbnail);
     }
 
-    private void setNotice(String notice) {
+    private void setNotice(@Nullable String notice) {
         if (notice != null) {
             validateMaxLengthWithoutWhiteSpace(notice, 100, "notice");
         }
         this.notice = notice;
     }
 
-    private void setStartedAt(ZonedDateTime startedAt) {
-        if (Duration.between(now(), startedAt).toDays() > 14) {
-            throw new BadRequestException("Max duration of startedAt is 14 days");
+    public void setStartedAtBeforeStart(ZonedDateTime startedAt) {
+        if (startedAt.isBefore(now()) || Duration.between(now(), startedAt).toDays() > 14) {
+            throw new BadRequestException("Started At cannot be earlier than the current time or later than 14 days");
+        }
+        if (READY != status && SCHEDULED != status) {
+            throw new BadRequestException("Started at can not be edit in status " + status);
         }
         this.startedAt = startedAt;
     }

@@ -31,7 +31,7 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .build();
     }
 
-    public static FFLBroadcastMessageRequest changeChatStatus(boolean canChat) {
+    public static FFLBroadcastMessageRequest ofChangeChatStatus(boolean canChat) {
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(canChat ? CHAT : NO_CHAT)
@@ -39,7 +39,7 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .build();
     }
 
-    public static FFLBroadcastMessageRequest broadcastEdited(String editedBroadcastInfoJson) {
+    public static FFLBroadcastMessageRequest ofBroadcastEdited(String editedBroadcastInfoJson) {
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(UPDATE_BROADCAST)
@@ -47,7 +47,7 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .build();
     }
 
-    public static FFLBroadcastMessageRequest changeBroadcastStatus(String statusChangeJson) {
+    public static FFLBroadcastMessageRequest ofChangeBroadcastStatus(String statusChangeJson) {
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(UPDATE_STATUS)

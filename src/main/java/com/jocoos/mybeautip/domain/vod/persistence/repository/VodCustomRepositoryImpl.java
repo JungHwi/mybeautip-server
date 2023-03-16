@@ -1,11 +1,11 @@
 package com.jocoos.mybeautip.domain.vod.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
-import com.jocoos.mybeautip.domain.broadcast.dto.QVodResponse;
+import com.jocoos.mybeautip.domain.event.code.SortField;
+import com.jocoos.mybeautip.domain.vod.dto.QVodResponse;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
-import com.jocoos.mybeautip.domain.event.code.SortField;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.*;
@@ -18,7 +18,7 @@ import java.time.chrono.ChronoZonedDateTime;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastCategory.broadcastCategory;
-import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QVod.vod;
+import static com.jocoos.mybeautip.domain.vod.persistence.domain.QVod.vod;
 import static com.jocoos.mybeautip.member.QMember.member;
 
 @Repository

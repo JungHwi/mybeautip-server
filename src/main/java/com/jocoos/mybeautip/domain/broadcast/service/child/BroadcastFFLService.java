@@ -60,20 +60,20 @@ public class BroadcastFFLService {
         return canceledAt;
     }
 
-    public void sendChangeChatStatusMessage(Long videoRoomId, boolean canChat) {
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.changeChatStatus(canChat);
+    public void sendChangeMessageRoomStatusMessage(Long videoRoomId, boolean canChat) {
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeChatStatus(canChat);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
 
     public void sendBroadcastEditedMessage(Broadcast broadcast) {
         ChatData chatData = ChatData.editBroadcast(broadcast);
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.broadcastEdited(chatData.toJson());
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofBroadcastEdited(chatData.toJson());
         flipFlopLiteService.broadcastMessage(broadcast.getVideoKey(), request);
     }
 
     public void sendChangeBroadcastStatusMessage(Long videoRoomId, BroadcastStatus status) {
         ChatData chatData = ChatData.changeStatus(status);
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.changeBroadcastStatus(chatData.toJson());
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(chatData.toJson());
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
 }
