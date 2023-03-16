@@ -76,8 +76,7 @@ class AdminBroadcastControllerTest(
                     parameterWithName("status").description(generateLinkCode(BROADCAST_STATUS)).optional(),
                     parameterWithName("start_at").description("검색 시작일자 YYYY-MM-DD").optional(),
                     parameterWithName("end_at").description("검색 종료일자 YYYY-MM-DD").optional(),
-                    parameterWithName("search_field").description("검색 필드 title, username").optional(),
-                    parameterWithName("search_keyword").description("검색 키워드").optional(),
+                    parameterWithName("search").description("검색 필드 (title, username) (검색필드,검색어)").optional(),
                     parameterWithName("is_reported").description("신고 여부 Boolean").optional()
                 ),
                 responseFields(

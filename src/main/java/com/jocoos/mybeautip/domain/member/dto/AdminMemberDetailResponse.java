@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.member.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jocoos.mybeautip.domain.member.code.GrantType;
+import com.jocoos.mybeautip.domain.member.code.MemberStatus;
 import com.jocoos.mybeautip.domain.member.code.Role;
 import com.jocoos.mybeautip.member.code.SkinType;
 import com.jocoos.mybeautip.member.code.SkinWorry;
@@ -19,6 +20,7 @@ import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DA
 public class AdminMemberDetailResponse {
     private final Long id;
     private final Role role;
+    private final MemberStatus status;
     private final GrantType grantType;
     private final String avatarUrl;
     private final String username;

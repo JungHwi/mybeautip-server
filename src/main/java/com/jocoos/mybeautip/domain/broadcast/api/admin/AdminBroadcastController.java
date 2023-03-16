@@ -60,16 +60,14 @@ public class AdminBroadcastController {
             @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
             @RequestParam(required = false, defaultValue = "SORTED_STATUS") BroadcastSortField sort,
             @RequestParam(required = false, defaultValue = "ASC") Direction order,
-            @RequestParam(required = false, name = "search_field") String searchField,
-            @RequestParam(required = false, name = "search_keyword") String searchKeyword,
+            @RequestParam(required = false) String search,
             @RequestParam(required = false, name = "is_reported") Boolean isReported) {
 
         SearchOption searchOption = SearchOption.builder()
                 .startAt(startAt)
                 .endAt(endAt)
                 .zoneId(ZoneId.of("Asia/Seoul"))
-                .searchField(searchField)
-                .keyword(searchKeyword)
+                .searchQueryString(search)
                 .isReported(isReported)
                 .build();
 

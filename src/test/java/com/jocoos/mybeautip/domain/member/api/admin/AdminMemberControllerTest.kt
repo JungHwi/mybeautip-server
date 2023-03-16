@@ -95,6 +95,7 @@ class AdminMemberControllerTest(
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("회원 ID"),
                     fieldWithPath("role").type(STRING).description(generateLinkCode(ROLE)),
+                    fieldWithPath("status").type(STRING).description(generateLinkCode(MEMBER_STATUS)),
                     fieldWithPath("avatar_url").type(STRING).description("아바타 이미지 URL"),
                     fieldWithPath("username").type(STRING).description("닉네임"),
                     fieldWithPath("name").type(STRING).description("이름").optional(),
