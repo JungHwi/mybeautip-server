@@ -15,6 +15,7 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
+import com.jocoos.mybeautip.domain.system.service.dao.SystemOptionDao;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.Between;
@@ -108,9 +109,11 @@ public class BroadcastService {
     }
 
     @Transactional
-    public ReportCountResponse report(long broadcastId, long reporterId, String description) {
-        Broadcast broadcast = domainService.report(broadcastId, reporterId, description);
-        return new ReportCountResponse(broadcast.getId(), broadcast.getReportCount());
+    public int report(long broadcastId, long reporterId, BroadcastReportRequest request) {
+        return switch (request.type()) {
+            case BROADCAST -> domainService.broadcastReport(broadcastId, reporterId, request.reason());
+            case MESSAGE -> domainService.messageReport(broadcastId, reporterId, request.reportedId(), request.reason(), request.description());
+        };
     }
 
     private void validCanAccess(long creatorId) {
