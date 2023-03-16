@@ -43,8 +43,9 @@ public class BroadcastController {
 
     @GetMapping("/1/broadcast/{broadcastId}")
     public BroadcastResponse get(@PathVariable long broadcastId, @CurrentMember MyBeautipUserDetails userDetails) {
-        return service.get(broadcastId, userDetails.getMember().getId());
+        return service.get(broadcastId, userDetails.getUsername());
     }
+
     @PatchMapping("/1/broadcast/{broadcastId}")
     public BroadcastResponse edit(@PathVariable long broadcastId,
                                   @RequestBody @Valid BroadcastEditRequest request,
@@ -67,8 +68,8 @@ public class BroadcastController {
 
     @PostMapping("/1/broadcast/{broadcastId}/report")
     public ReportCountResponse report(@PathVariable long broadcastId,
-                                                         @CurrentMember MyBeautipUserDetails userDetails,
-                                                         @RequestBody ReportRequest request) {
+                                      @CurrentMember MyBeautipUserDetails userDetails,
+                                      @RequestBody ReportRequest request) {
         return service.report(broadcastId, userDetails.getMember().getId(), request.getDescription());
     }
 }

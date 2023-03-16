@@ -97,6 +97,9 @@ class BroadcastControllerTest(
                     fieldWithPath("title").type(STRING).description("타이틀"),
                     fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
                     fieldWithPath("notice").type(STRING).description("공지사항").optional(),
+                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
+                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
+                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
                     fieldWithPath("heart_count").type(NUMBER).description("하트수"),
                     fieldWithPath("started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),
@@ -184,6 +187,9 @@ class BroadcastControllerTest(
                     fieldWithPath("notice").type(STRING).description("공지사항").optional(),
                     fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
                     fieldWithPath("heart_count").type(NUMBER).description("하트수"),
+                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
+                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
+                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),
                     fieldWithPath("category").type(OBJECT).description("카테고리 정보"),
                     fieldWithPath("category.id").type(NUMBER).description("카테고리 아이디"),
@@ -243,6 +249,8 @@ class BroadcastControllerTest(
             broadcast.category.id,
             false,
             "new notice",
+            true,
+            true,
             now().plusDays(3)
         )
 
@@ -275,9 +283,11 @@ class BroadcastControllerTest(
                     fieldWithPath("thumbnails.[].need_transcode").type(BOOLEAN).ignored(),
                     fieldWithPath("category_id").type(NUMBER).description("카테고리 ID"),
                     fieldWithPath("is_start_now").type(BOOLEAN).description("바로 시작 여부").optional(),
+                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
+                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("started_at").type(STRING).description("예약 시간").attributes(getZonedDateFormat())
                         .optional(),
-                    fieldWithPath("notice").type(STRING).description("공지사항").optional(),
+                    fieldWithPath("notice").type(STRING).description("공지사항").optional()
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("방송 아이디"),
@@ -286,6 +296,9 @@ class BroadcastControllerTest(
                     fieldWithPath("title").type(STRING).description("타이틀"),
                     fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
                     fieldWithPath("notice").type(STRING).description("공지사항").optional(),
+                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
+                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
+                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
                     fieldWithPath("heart_count").type(NUMBER).description("하트수"),
                     fieldWithPath("started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),
@@ -328,6 +341,9 @@ class BroadcastControllerTest(
                     fieldWithPath("title").type(STRING).description("타이틀"),
                     fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
                     fieldWithPath("notice").type(STRING).description("공지사항").optional(),
+                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
+                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
+                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
                     fieldWithPath("heart_count").type(NUMBER).description("하트수"),
                     fieldWithPath("started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),

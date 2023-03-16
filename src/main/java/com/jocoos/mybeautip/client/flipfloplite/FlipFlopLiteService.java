@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.client.flipfloplite;
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.global.vo.EmptyResult;
@@ -26,25 +25,9 @@ public class FlipFlopLiteService {
     private final FlipFlopLiteClient client;
     private final FlipFlopLiteConverter converter;
 
-    public ExternalBroadcastInfo createVideoRoom(Broadcast broadcast) {
-        FFLVideoRoomRequest fflRequest = converter.converts(broadcast);
-        FFLVideoRoomResponse response = client.createVideoRoom(fflRequest);
+    public ExternalBroadcastInfo createVideoRoom(FFLVideoRoomRequest request) {
+        FFLVideoRoomResponse response = client.createVideoRoom(request);
         return converter.converts(response);
-    }
-
-    public FFLTokenResponse loginGuest() {
-        FFLTokenResponse response = client.loginGuest();
-        return response;
-    }
-
-    public FFLTokenResponse login(Member member) {
-        FFLMemberInfo fflMemberInfo = converter.converts(member);
-        return client.login(fflMemberInfo);
-    }
-
-    public FFLTokenResponse login(long memberId) {
-        Member member = memberDao.getMember(memberId);
-        return this.login(member);
     }
 
     public ExternalBroadcastInfo startVideoRoom(long videoRoomId) {
@@ -71,6 +54,21 @@ public class FlipFlopLiteService {
         return response.lastModifiedAt();
     }
 
+    public FFLTokenResponse loginGuest() {
+        FFLTokenResponse response = client.loginGuest();
+        return response;
+    }
+
+    public FFLTokenResponse login(Member member) {
+        FFLMemberInfo fflMemberInfo = converter.converts(member);
+        return client.login(fflMemberInfo);
+    }
+
+    public FFLTokenResponse login(long memberId) {
+        Member member = memberDao.getMember(memberId);
+        return this.login(member);
+    }
+
     public String getStreamKey(long memberId) {
         FFLStreamKeyResponse response = client.getStreamKey(memberId);
         return response.streamKey();
@@ -78,6 +76,12 @@ public class FlipFlopLiteService {
 
     public ChatTokenAndAppId getChatToken(long memberId) {
         FFLChatTokenResponse response = client.getChatToken(memberId);
+        return converter.converts(response);
+    }
+
+    public ChatTokenAndAppId getGuestChatToken(String guestUsername) {
+        FFLGuestChatTokenRequest request = FFLGuestChatTokenRequest.from(guestUsername);
+        FFLChatTokenResponse response = client.getGuestChatToken(request);
         return converter.converts(response);
     }
 
@@ -105,13 +109,14 @@ public class FlipFlopLiteService {
         }
     }
 
-    public Long broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
-        FFLMessageInfo messageInfo = client.broadcastMessage(videoRoomId, request);
+    public Long directMessage(long videoRoomId, FFLDirectMessageRequest request) {
+        FFLMessageInfo messageInfo =  client.directMessage(videoRoomId, request);
         return messageInfo.messageId();
     }
 
-    public Long directMessage(long videoRoomId, FFLDirectMessageRequest request) {
-        FFLMessageInfo messageInfo =  client.directMessage(videoRoomId, request);
+
+    public Long broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
+        FFLMessageInfo messageInfo = client.broadcastMessage(videoRoomId, request);
         return messageInfo.messageId();
     }
 

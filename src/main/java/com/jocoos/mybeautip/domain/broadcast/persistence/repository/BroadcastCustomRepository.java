@@ -17,5 +17,5 @@ public interface BroadcastCustomRepository {
 
     BroadcastUpdateResult bulkUpdateStatusAndEndedAt(BroadcastBulkUpdateStatusCommand condition);
 
-    long bulkUpdateStatus(BroadcastBulkUpdateStatusCommand condition);
+    BroadcastUpdateResult bulkUpdateStatus(BroadcastBulkUpdateStatusCommand condition);
 }

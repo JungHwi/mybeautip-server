@@ -1,0 +1,4 @@
+== Admin Change Broadcast Message Room API
+
+operation::admin_change_broadcast_message_room_status[snippets='http-request,path-parameters,request-fields,http-response,response-fields']
+

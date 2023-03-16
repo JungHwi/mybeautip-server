@@ -32,6 +32,12 @@ public class BroadcastEditRequest {
 
     private final String notice;
 
+    @NotNull
+    private final Boolean isSoundOn;
+
+    @NotNull
+    private final Boolean isScreenShow;
+
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime startedAt;
 

@@ -3,17 +3,17 @@ package com.jocoos.mybeautip.domain.broadcast.service;
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
-import com.jocoos.mybeautip.domain.broadcast.converter.VodConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod;
+import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
+import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastParticipantInfoService;
+import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastVodService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
-import com.jocoos.mybeautip.domain.broadcast.service.dao.VodDao;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastPermissionDao;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
-import com.jocoos.mybeautip.domain.member.service.dao.InfluencerDao;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
-import com.jocoos.mybeautip.domain.system.service.dao.SystemOptionDao;
 import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -34,7 +34,6 @@ import java.util.List;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT_SEARCH_STATUSES;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
-import static com.jocoos.mybeautip.domain.system.code.SystemOptionType.FREE_LIVE_PERMISSION;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @RequiredArgsConstructor
@@ -43,31 +42,28 @@ public class BroadcastService {
 
     private final BroadcastDao broadcastDao;
     private final MemberDao memberDao;
-    private final VodDao vodDao;
-    private final InfluencerDao influencerDao;
-    private final SystemOptionDao systemOptionDao;
-    private final BroadcastConverter converter;
-    private final VodConverter vodConverter;
-    private final AwsS3Handler awsS3Handler;
+    private final BroadcastPermissionDao permissionDao;
     private final BroadcastDomainService domainService;
+    private final BroadcastVodService broadcastVodService;
     private final BroadcastParticipantInfoService participantInfoService;
+    private final BroadcastConverter converter;
+    private final AwsS3Handler awsS3Handler;
 
     @Transactional
     public BroadcastResponse createBroadcastAndVod(BroadcastCreateRequest request, long creatorId) {
         validCanAccess(creatorId);
         Member member = memberDao.getMember(creatorId);
         Broadcast broadcast = domainService.create(request, creatorId);
-        createVod(broadcast);
+        broadcastVodService.createVod(broadcast);
         awsS3Handler.copy(request.getThumbnail(), broadcast.getThumbnailUrlPath());
         return converter.toResponse(broadcast, member);
     }
 
     @Transactional(readOnly = true)
-    public BroadcastResponse get(long broadcastId, long requestMemberId) {
+    public BroadcastResponse get(long broadcastId, String requestUsername) {
         BroadcastSearchResult searchResult = broadcastDao.getWithMemberAndCategory(broadcastId);
-        Member owner = memberDao.getMember(searchResult.getCreatedBy().getId());
-        BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestMemberId, searchResult);
-        return converter.toResponse(searchResult, owner, participantInfo);
+        BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestUsername, searchResult);
+        return converter.toResponse(searchResult, participantInfo);
     }
 
     @Transactional(readOnly = true)
@@ -87,9 +83,12 @@ public class BroadcastService {
     }
 
     @Transactional
-    public BroadcastResponse edit(long broadcastId, BroadcastEditRequest request, Long requestMemberId) {
-        Broadcast editedBroadcast = domainService.edit(broadcastId, request, requestMemberId);
-        awsS3Handler.editFiles(request.getThumbnails(), editedBroadcast.getThumbnailUrlPath());
+    public BroadcastResponse edit(Long broadcastId, BroadcastEditRequest request, Long requestMemberId) {
+        BroadcastEditResult editResult = domainService.overwriteEdit(broadcastId, request, requestMemberId);
+        Broadcast editedBroadcast = editResult.broadcast();
+        if (editResult.isThumbnailChanged()) {
+            awsS3Handler.editFiles(request.getThumbnails(), editedBroadcast.getThumbnailUrlPath());
+        }
         return converter.toResponse(editedBroadcast);
     }
 
@@ -114,24 +113,10 @@ public class BroadcastService {
         return new ReportCountResponse(broadcast.getId(), broadcast.getReportCount());
     }
 
-    private void createVod(Broadcast broadcast) {
-        Vod vod = vodConverter.init(broadcast);
-        vodDao.save(vod);
-    }
-
     private void validCanAccess(long creatorId) {
-        if (!getPermission(creatorId)) {
+        if (!permissionDao.canBroadcast(creatorId)) {
             throw new AccessDeniedException("Only influencer can request");
         }
-    }
-
-    public boolean getPermission(long memberId) {
-        if (!systemOptionDao.getSystemOption(FREE_LIVE_PERMISSION)
-                && !influencerDao.isInfluencer(memberId)) {
-            return false;
-        }
-
-        return true;
     }
 
     private Between getDay(LocalDate localDate) {

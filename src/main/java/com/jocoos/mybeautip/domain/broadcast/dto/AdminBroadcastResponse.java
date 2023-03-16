@@ -15,11 +15,15 @@ public record AdminBroadcastResponse(long id,
                                      String title,
                                      String notice,
                                      String thumbnailUrl,
+                                     Boolean canChat,
+                                     Boolean isSoundOn,
+                                     Boolean isScreenShow,
                                      int viewerCount,
                                      int maxViewerCount,
                                      int heartCount,
                                      @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
                                      @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime createdAt,
                                      BroadcastCategoryResponse category,
-                                     SimpleMemberInfo createdBy) {
+                                     SimpleMemberInfo createdBy,
+                                     BroadcastParticipantInfo participant) {
 }

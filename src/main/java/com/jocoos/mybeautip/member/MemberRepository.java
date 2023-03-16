@@ -26,6 +26,8 @@ public interface MemberRepository extends ExtendedQuerydslJpaRepository<Member, 
 
     boolean existsByUsername(String username);
 
+    boolean existsByIdAndLink(Long id, int link);
+
     List<Member> findByUsername(String username);
 
     List<Member> findByStatusAndLastLoggedAtLessThan(MemberStatus status, ZonedDateTime date);

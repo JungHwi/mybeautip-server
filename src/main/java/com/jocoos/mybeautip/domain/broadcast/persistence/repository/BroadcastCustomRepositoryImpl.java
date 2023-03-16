@@ -80,18 +80,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     @Override
     public BroadcastUpdateResult bulkUpdateStatusAndEndedAt(BroadcastBulkUpdateStatusCommand condition) {
-
-        List<Long> videoKeys = repository.query(query -> query
-                .select(broadcast.videoKey)
-                .from(broadcast)
-                .where(
-                        eqStatus(condition.currentStatus()),
-                        startedAtBetween(condition.betweenStart(), condition.betweenEnd()),
-                        startedAtLt(condition.startedAtLt()),
-                        pausedAtLt(condition.pausedAtLt())
-                )
-                .fetch());
-
+        List<Long> videoKeys = getUpdateCandidateVideoKeys(condition);
         if (!isEmpty(videoKeys)) {
             repository.update(query -> query
                     .set(broadcast.status, condition.updateStatus())
@@ -101,19 +90,34 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                     )
                     .execute());
         }
-
         return new BroadcastUpdateResult(videoKeys.size(), videoKeys);
     }
 
     @Override
-    public long bulkUpdateStatus(BroadcastBulkUpdateStatusCommand condition) {
-        return repository.update(query -> query
-                .set(broadcast.status, condition.updateStatus())
+    public BroadcastUpdateResult bulkUpdateStatus(BroadcastBulkUpdateStatusCommand command) {
+        List<Long> videoKeys = getUpdateCandidateVideoKeys(command);
+        if (!isEmpty(videoKeys)) {
+            repository.update(query -> query
+                    .set(broadcast.status, command.updateStatus())
+                    .where(
+                            inVideoKey(videoKeys)
+                    )
+                    .execute());
+        }
+        return new BroadcastUpdateResult(videoKeys.size(), videoKeys);
+    }
+
+    private List<Long> getUpdateCandidateVideoKeys(BroadcastBulkUpdateStatusCommand condition) {
+        return repository.query(query -> query
+                .select(broadcast.videoKey)
+                .from(broadcast)
                 .where(
                         eqStatus(condition.currentStatus()),
-                        startedAtBetween(condition.betweenStart(), condition.betweenEnd())
+                        startedAtBetween(condition.betweenStart(), condition.betweenEnd()),
+                        startedAtLt(condition.startedAtLt()),
+                        pausedAtLt(condition.pausedAtLt())
                 )
-                .execute());
+                .fetch());
     }
 
     private JPAQuery<BroadcastSearchResult> searchResultWithMemberAndCategory(JPAQuery<?> query) {

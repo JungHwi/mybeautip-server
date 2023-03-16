@@ -22,7 +22,11 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
     @Query("select b from Broadcast b join fetch b.category where b.id = :id")
     Optional<Broadcast> findByIdWithCategory(@Param("id") Long broadcastId);
 
+    Optional<Broadcast> findByVideoKey(Long videoKey);
+
     boolean existsByIdAndMemberId(long broadcastId, long memberId);
+
+    boolean existsByStatusAndMemberId(BroadcastStatus status, Long memberId);
 
     @Query("select distinct b.startedAt from Broadcast b where b.startedAt > now() order by b.startedAt asc")
     Slice<ZonedDateTime> findAllStartedAt(Pageable pageable);

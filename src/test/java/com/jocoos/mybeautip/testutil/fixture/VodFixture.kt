@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.testutil.fixture
 
-import com.jocoos.mybeautip.domain.broadcast.code.VodStatus
-import com.jocoos.mybeautip.domain.broadcast.code.VodStatus.AVAILABLE
+import com.jocoos.mybeautip.domain.vod.code.VodStatus
+import com.jocoos.mybeautip.domain.vod.code.VodStatus.AVAILABLE
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Vod
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod
 
 fun makeVod(
     category: BroadcastCategory,
@@ -14,5 +14,13 @@ fun makeVod(
     title: String = "title",
     thumbnail: String = "thumbnail"
 ) : Vod {
-    return Vod(videoKey, title, thumbnail, category, status, visibility, memberId)
+    return Vod(
+        videoKey,
+        title,
+        thumbnail,
+        category,
+        status,
+        visibility,
+        memberId
+    )
 }

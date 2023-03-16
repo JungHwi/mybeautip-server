@@ -30,6 +30,7 @@ import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.code.VideoMaskType;
 import com.jocoos.mybeautip.domain.video.code.VideoStatus;
+import com.jocoos.mybeautip.domain.vod.code.VodSortField;
 import com.jocoos.mybeautip.global.code.*;
 import com.jocoos.mybeautip.global.config.restdoc.EnumDocs;
 import com.jocoos.mybeautip.member.code.SkinType;

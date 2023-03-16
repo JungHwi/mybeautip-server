@@ -48,6 +48,11 @@ public class MemberDao {
     public boolean existMember(long memberId) {
         return repository.existsById(memberId);
     }
+
+    @Transactional(readOnly = true)
+    public boolean isAdmin(Long memberId) {
+        return repository.existsByIdAndLink(memberId, Member.LINK_ADMIN);
+    }
     
     @Transactional(readOnly = true)
     public Map<MemberStatus, Long> getStatusesWithCount() {

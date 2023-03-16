@@ -25,6 +25,9 @@ public interface FlipFlopLiteClient {
     @PostMapping("/v2/apps/me/members/{appUserId}/chat-tokens")
     FFLChatTokenResponse getChatToken(@PathVariable long appUserId);
 
+    @PostMapping("/v2/apps/me/members/guest-chat-tokens")
+    FFLChatTokenResponse getGuestChatToken(FFLGuestChatTokenRequest appUserId);
+
     // Video Room
     @PostMapping("/v2/apps/me/video-rooms")
     FFLVideoRoomResponse createVideoRoom(FFLVideoRoomRequest request);
@@ -60,5 +63,4 @@ public interface FlipFlopLiteClient {
 
     @PostMapping("/v2/apps/me/video-rooms/{videoRoomId}/chat-room/admin/messages/direct")
     FFLMessageInfo directMessage(@PathVariable long videoRoomId, FFLDirectMessageRequest request);
-
 }
