@@ -757,7 +757,7 @@ class InternalVideoControllerTest(
 
 
     @Test
-    fun getVideosWithGuest() {
+    fun getVideosAsGuest() {
         // given
         videoRepository.save(makeVideo(defaultAdmin, category))
 
