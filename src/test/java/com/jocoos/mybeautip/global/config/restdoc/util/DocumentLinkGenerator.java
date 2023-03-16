@@ -52,6 +52,7 @@ public class DocumentLinkGenerator {
         NOTICE_SORT("notice_sort","공지 정렬 기준"),
         ROLE("role", "멤버 권한"),
         BROADCAST_STATUS("broadcast_status", "방송 상태"),
+        BROADCAST_REPORT_TYPE("broadcast_report_type", "방송 신고 구분"),
         VOD_SORT_FIELD("vod_sort_field", "VOD 정렬 기준")
         ;
 
