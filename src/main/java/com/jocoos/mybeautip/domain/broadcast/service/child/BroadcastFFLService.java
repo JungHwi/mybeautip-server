@@ -6,13 +6,13 @@ import com.jocoos.mybeautip.client.flipfloplite.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastKey;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
 
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.CANCEL;
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.END;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 
 @RequiredArgsConstructor
 @Service
@@ -60,20 +60,24 @@ public class BroadcastFFLService {
         return canceledAt;
     }
 
-    public void sendChangeMessageRoomStatusMessage(Long videoRoomId, boolean canChat) {
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeChatStatus(canChat);
-        flipFlopLiteService.broadcastMessage(videoRoomId, request);
-    }
-
-    public void sendBroadcastEditedMessage(Broadcast broadcast) {
+    public void sendBroadcastEditedMessage(BroadcastEditResult editResult) {
+        Broadcast broadcast = editResult.broadcast();
         ChatData chatData = ChatData.editBroadcast(broadcast);
         FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofBroadcastEdited(chatData.toJson());
         flipFlopLiteService.broadcastMessage(broadcast.getVideoKey(), request);
+        if (editResult.isStatusChangedToReady()) {
+            sendChangeBroadcastStatusMessage(broadcast.getVideoKey(), READY);
+        }
     }
 
     public void sendChangeBroadcastStatusMessage(Long videoRoomId, BroadcastStatus status) {
         ChatData chatData = ChatData.changeStatus(status);
         FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(chatData.toJson());
+        flipFlopLiteService.broadcastMessage(videoRoomId, request);
+    }
+
+    public void sendChangeMessageRoomStatusMessage(Long videoRoomId, boolean canChat) {
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeChatStatus(canChat);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
 }

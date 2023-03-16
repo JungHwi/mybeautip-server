@@ -49,7 +49,6 @@ public class VideoController {
     @PatchMapping("/1/video/{videoId}/view-count")
     public ResponseEntity<VideoViewResponse> addVideoViewCount(@CurrentMember MyBeautipUserDetails userDetails,
                                                                @PathVariable Long videoId) {
-        String username = userDetails == null ? null : userDetails.getUsername();
-        return ResponseEntity.ok(service.addViewCount(videoId, username));
+        return ResponseEntity.ok(service.addViewCount(videoId, userDetails.getUsername()));
     }
 }

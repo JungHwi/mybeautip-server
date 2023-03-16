@@ -15,6 +15,7 @@ import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditCommand;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult.OriginalInfo;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -98,18 +99,13 @@ public class BroadcastDomainService {
         return broadcastDao.get(broadcastId).getReportCount();
     }
 
-    private void validIsFirstReport(long broadcastId, BroadcastReportType type, long reporterId) {
-        if (reportDao.exist(broadcastId, type, reporterId)) {
-            throw new BadRequestException(ALREADY_REPORT);
-        }
-    }
-
     private BroadcastEditResult edit(Broadcast broadcast, BroadcastEditCommand command) {
-        String originalThumbnailUrl = broadcast.getThumbnailUrl();
+        OriginalInfo originalInfo = new OriginalInfo(broadcast);
         broadcast.edit(command);
         Broadcast editedBroadcast = broadcastDao.save(broadcast);
-        fflService.sendBroadcastEditedMessage(editedBroadcast);
-        return new BroadcastEditResult(editedBroadcast, originalThumbnailUrl);
+        BroadcastEditResult editResult = new BroadcastEditResult(editedBroadcast, originalInfo);
+        fflService.sendBroadcastEditedMessage(editResult);
+        return editResult;
     }
 
     private BroadcastCategory getEditedCategory(Broadcast broadcast, Long categoryId) {
@@ -122,6 +118,12 @@ public class BroadcastDomainService {
     private void validIsMemberNotLive(long creatorId) {
         if (broadcastDao.isCreatorLiveNow(creatorId)) {
             throw new BadRequestException("Already Live, Member Id :" + creatorId);
+        }
+    }
+
+    private void validIsFirstReport(long broadcastId, BroadcastReportType type, long reporterId) {
+        if (reportDao.exist(broadcastId, type, reporterId)) {
+            throw new BadRequestException(ALREADY_REPORT);
         }
     }
 
