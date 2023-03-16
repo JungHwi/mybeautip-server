@@ -1,0 +1,3 @@
+== (GUEST) Get Video API
+
+operation::internal_get_video_as_guest[snippets='http-request,path-parameters,http-response,response-fields']

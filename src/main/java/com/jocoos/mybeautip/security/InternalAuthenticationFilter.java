@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,8 +29,10 @@ import static org.springframework.security.web.authentication.www.BasicAuthentic
 @Slf4j
 @Component
 public class InternalAuthenticationFilter extends OncePerRequestFilter {
+  private static final String GUEST = "guest";
   private static final String KEY_MEMBER_ID = "MEMBER-ID";
   private static final String PATH_MEMBER_REGISTRATION = "/internal/1/member";
+  private static final String PATH_VIDEOS = "/internal/1/video";
 
   @Autowired
   private InternalConfig internalConfig;
@@ -61,22 +64,48 @@ public class InternalAuthenticationFilter extends OncePerRequestFilter {
 
     log.debug("request uri: {} {}", request.getMethod(), request.getRequestURI());
 
-    if (!PATH_MEMBER_REGISTRATION.equals(request.getRequestURI())) {
-      if (!StringUtils.hasText(memberId)) {
-        responseBody(response, "Member ID is required.");
+    if (isGuest(memberId) && allowGuestAccess(request.getMethod(), request.getRequestURI())) {
+      log.debug("{}, {}", memberId, memberId.length());
+
+      if (memberId.length() > 19) {
+        responseBody(response, "Guest ID is too long.");
         return;
       }
+      setGuestPrincipal(memberId);
+    } else {
+      if (!PATH_MEMBER_REGISTRATION.equals(request.getRequestURI())) {
+        if (!StringUtils.hasText(memberId)) {
+          responseBody(response, "Member ID is required.");
+          return;
+        }
 
-      try {
-        setPrincipal(memberId);
-      } catch (AuthenticationMemberNotFoundException e) {
-        log.error("{}", e.getMessage());
-        responseBody(response, "Member is not registered.");
-        return;
+        try {
+          setMemberPrincipal(memberId);
+        } catch (AuthenticationMemberNotFoundException e) {
+          log.error("{}", e.getMessage());
+          responseBody(response, "Member is not registered.");
+          return;
+        }
       }
     }
 
     filterChain.doFilter(request, response);
+  }
+
+  private boolean isGuest(String memberId) {
+    return StringUtils.hasText(memberId) && memberId.startsWith(GUEST);
+  }
+
+  private boolean allowGuestAccess(String method, String requestUri) {
+    if (HttpMethod.GET.matches(method)) {
+      return true;
+    }
+
+    if (requestUri.startsWith(PATH_VIDEOS) && requestUri.endsWith("view-count")) {
+      return true;
+    }
+
+    return false;
   }
 
   private void responseBody(HttpServletResponse response, String desc) throws IOException {
@@ -105,9 +134,18 @@ public class InternalAuthenticationFilter extends OncePerRequestFilter {
     log.info("Request URL path : {}, Request content type: {}", path, contentType);
   }
 
-  private void setPrincipal(String memberId) {
+  private void setMemberPrincipal(String memberId) {
     UserDetails userDetails = userDetailsService.loadUserByUsername(memberId);
     UsernamePasswordAuthenticationToken internalToken = new UsernamePasswordAuthenticationToken(userDetails, null, null);
     SecurityContextHolder.getContext().setAuthentication(internalToken);
+  }
+
+  private void setGuestPrincipal(String guestName) {
+//    String guestName = "guest:" + System.nanoTime();
+    log.debug("{}", guestName);
+
+    UsernamePasswordAuthenticationToken guestToken
+        = new UsernamePasswordAuthenticationToken(guestName, "", null);
+    SecurityContextHolder.getContext().setAuthentication(guestToken);
   }
 }
