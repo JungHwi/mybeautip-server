@@ -63,6 +63,10 @@ include::overview.adoc[]
 * link:broadcast/edit_broadcast.html[방송 수정 API, window=_blank]
 * link:broadcast/report_broadcast.html[방송 신고 API, window=_blank]
 * link:broadcast/change_status_broadcast.html[방송 상태 변경(시작 종료 취소) API, window=_blank]
+* link:broadcast/change_broadcast_message_room_status.html[방송 채팅 활성화/비활성화 API, window=_blank]
+
+
+=== VOD API
 * link:broadcast/get_vod_list.html[VOD 목록 조회 API, window=_blank]
 * link:broadcast/get_vod.html[VOD 상세 조회 API, window=_blank]
 * link:broadcast/report_vod.html[VOD 신고 API, window=_blank]
@@ -179,6 +183,7 @@ include::overview.adoc[]
 * link:broadcast/admin_get_broadcast.html[방송 상세 조회 API, window=_blank]
 * link:broadcast/admin_get_report_count_broadcast.html[방송 신고수 조회 API, window=_blank]
 * link:broadcast/admin_edit_broadcast.html[방송 수정 API, window=_blank]
+* link:broadcast/admin_change_broadcast_message_room_status.html[방송 채팅 활성화/비활성화 API, window=_blank]
 
 === Community API
 * link:community/admin_get_community.html[커뮤니티 상세 조회 API, window=_blank]
