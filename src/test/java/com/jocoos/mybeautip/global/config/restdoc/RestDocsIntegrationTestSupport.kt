@@ -100,6 +100,7 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
 
     protected lateinit var requestUser: Member
     protected lateinit var requestUserToken: String
+    protected lateinit var targetUser: Member
 
     protected lateinit var defaultAdmin: Member
     protected lateinit var defaultAdminToken: String
@@ -121,6 +122,8 @@ class RestDocsIntegrationTestSupport : TestContainerConfig() {
 
         defaultAdmin = memberRepository.save(makeMember(link = 0))
         requestUser = memberRepository.save(makeMember(link = 2))
+        targetUser = memberRepository.save(makeMember(link = 2))
+
         defaultInfluencer = memberRepository.save(makeMember(link = 2))
         influencerRepository.save(makeInfluencer(id = defaultInfluencer.id))
 

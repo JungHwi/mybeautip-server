@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.domain.broadcast.api.front;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
-import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
@@ -66,9 +65,11 @@ public class BroadcastController {
     }
 
     @PostMapping("/1/broadcast/{broadcastId}/report")
-    public ReportCountResponse report(@PathVariable long broadcastId,
-                                                         @CurrentMember MyBeautipUserDetails userDetails,
-                                                         @RequestBody ReportRequest request) {
-        return service.report(broadcastId, userDetails.getMember().getId(), request.getDescription());
+    public ReportCountResponse broadcastReport(@PathVariable long broadcastId,
+                                               @CurrentMember MyBeautipUserDetails userDetails,
+                                               @RequestBody BroadcastReportRequest request) {
+        int reportCount = service.report(broadcastId, userDetails.getMember().getId(), request);
+
+        return new ReportCountResponse(broadcastId, reportCount);
     }
 }

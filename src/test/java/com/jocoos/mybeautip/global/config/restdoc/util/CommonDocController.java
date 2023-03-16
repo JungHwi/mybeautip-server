@@ -74,6 +74,7 @@ public class CommonDocController {
         // Broadcast
         Map<String, String> broadcastViewerType = getDocs(BroadcastViewerType.values());
         Map<String, String> broadcastViewerStatus = getDocs(BroadcastViewerStatus.values());
+        Map<String, String> broadcastReportType = getDocs(BroadcastReportType.values());
         Map<String, String> broadcastStatus = getDocs(BroadcastStatus.values());
         Map<String, String> broadcastSortField = getDocs(BroadcastSortField.values());
 
@@ -162,6 +163,7 @@ public class CommonDocController {
                 // Broadcast
                         .broadcastViewerType(broadcastViewerType)
                         .broadcastViewerStatus(broadcastViewerStatus)
+                        .broadcastReportType(broadcastReportType)
                         .broadcastStatus(broadcastStatus)
                         .broadcastSortField(broadcastSortField)
                 // Event

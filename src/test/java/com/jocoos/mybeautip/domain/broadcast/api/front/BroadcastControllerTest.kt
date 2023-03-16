@@ -1,13 +1,14 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front
 
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.CANCEL
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCreateRequest
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastEditRequest
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastReportRequest
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastStatusRequest
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
-import com.jocoos.mybeautip.domain.community.dto.ReportRequest
 import com.jocoos.mybeautip.domain.file.code.FileType.IMAGE
 import com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*
@@ -342,8 +343,11 @@ class BroadcastControllerTest(
     @Test
     fun `Broadcast 신고 API`() {
 
-        val request = ReportRequest.builder()
-            .description("신고사유")
+        val request = BroadcastReportRequest.builder()
+            .type(BroadcastReportType.MESSAGE)
+            .reportedId(targetUser.id)
+            .reason("신고 사유")
+            .description("신고된 대화 내용")
             .build()
 
         val result: ResultActions = mockMvc
@@ -363,7 +367,10 @@ class BroadcastControllerTest(
                     parameterWithName("broadcast_id").description("방송 ID")
                 ),
                 requestFields(
-                    fieldWithPath("description").type(STRING).description("신고 사유")
+                    fieldWithPath("type").type(STRING).description(generateLinkCode(BROADCAST_REPORT_TYPE)),
+                    fieldWithPath("reason").type(STRING).description("신고 사유"),
+                    fieldWithPath("reported_id").type(NUMBER).description("메세지 신고시, 대상 회원 아이디").optional(),
+                    fieldWithPath("description").type(STRING).description("메세지 신고시, 대화내용").optional(),
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("방송 아이디"),

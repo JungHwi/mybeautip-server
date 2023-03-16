@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.service.dao;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastReport;
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastReportRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class BroadcastReportDao {
     }
 
     @Transactional(readOnly = true)
-    public boolean exist(long broadcastId, long reporterId) {
-        return repository.existsByBroadcastIdAndReporterId(broadcastId, reporterId);
+    public boolean exist(long broadcastId, BroadcastReportType type, long reporterId) {
+        return repository.existsByBroadcastIdAndTypeAndReporterId(broadcastId, type, reporterId);
     }
 }

@@ -98,10 +98,12 @@ create table jwt(
 create table broadcast_report
 (
     id           bigint auto_increment comment '방송 신고 아이디' primary key,
+    type         varchar(20) not null comment '신고 구분',
     reporter_id  bigint   not null comment '신고자 아이디',
     reported_id  bigint   not null comment '피신고자 아이디',
     broadcast_id bigint   not null comment '방송 아이디',
-    description  varchar(100) comment '신고 사유',
+    reason varchar(100) comment '신고 사유',
+    description  text comment '신고된 메세지 내용',
     created_at   datetime not null comment '생성시간',
     modified_at  datetime not null comment '수정시간'
 ) charset = utf8mb4 comment '방송 신고 정보';

@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.testutil.fixture
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageCustomType
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageType
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLBroadcastMessageRequest
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
@@ -43,9 +44,19 @@ fun makeBroadcastCategory(
 fun makeBroadcastReport(
     broadcast: Broadcast,
     reporterId: Long,
-    description: String = "신고 사유"
+    reason: String = "신고 사유"
 ) : BroadcastReport {
-    return BroadcastReport(broadcast, reporterId, description)
+    return BroadcastReport(BroadcastReportType.BROADCAST, broadcast.id, reporterId, broadcast.memberId, reason, "")
+}
+
+fun makeMessageReport(
+    broadcast: Broadcast,
+    reporterId: Long,
+    reportedId: Long,
+    reason: String = "신고 사유",
+    description: String = "대화 내용"
+) : BroadcastReport {
+    return BroadcastReport(BroadcastReportType.MESSAGE, broadcast.id, reporterId, reportedId, reason, description)
 }
 
 fun makeInfluencer(

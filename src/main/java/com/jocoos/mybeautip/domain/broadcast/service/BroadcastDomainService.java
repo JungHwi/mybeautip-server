@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.client.flipfloplite.dto.ExternalBroadcastInfo;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCreateRequest;
@@ -59,17 +60,38 @@ public class BroadcastDomainService {
     }
 
     @Transactional
-    public Broadcast report(long broadcastId, long reporterId, String description) {
-        validIsFirstReport(broadcastId, reporterId);
+    public int broadcastReport(long broadcastId, long reporterId, String reason) {
+        validIsFirstReport(broadcastId, BroadcastReportType.BROADCAST, reporterId);
         broadcastDao.addReportCountAndFlush(broadcastId, 1);
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        BroadcastReport report = new BroadcastReport(broadcast, reporterId, description);
+        BroadcastReport report = BroadcastReport.builder()
+                .type(BroadcastReportType.BROADCAST)
+                .broadcastId(broadcastId)
+                .reporterId(reporterId)
+                .reportedId(broadcast.getMemberId())
+                .reason(reason)
+                .build();
         reportDao.save(report);
-        return broadcast;
+        return broadcast.getReportCount();
     }
 
-    private void validIsFirstReport(long broadcastId, long reporterId) {
-        if (reportDao.exist(broadcastId, reporterId)) {
+    @Transactional
+    public int messageReport(long broadcastId, long reporterId, long reportedId, String reason, String description) {
+        validIsFirstReport(broadcastId, BroadcastReportType.MESSAGE, reporterId);
+        BroadcastReport report = BroadcastReport.builder()
+                .type(BroadcastReportType.MESSAGE)
+                .broadcastId(broadcastId)
+                .reporterId(reporterId)
+                .reportedId(reportedId)
+                .reason(reason)
+                .description(description)
+                .build();
+        reportDao.save(report);
+        return broadcastDao.get(broadcastId).getReportCount();
+    }
+
+    private void validIsFirstReport(long broadcastId, BroadcastReportType type, long reporterId) {
+        if (reportDao.exist(broadcastId, type, reporterId)) {
             throw new BadRequestException(ALREADY_REPORT);
         }
     }
