@@ -14,7 +14,6 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.gen
 import com.jocoos.mybeautip.member.LegacyMemberService
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
-import com.jocoos.mybeautip.security.MybeautipUserDetailsService
 import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.testutil.fixture.makeVideo
 import com.jocoos.mybeautip.testutil.fixture.makeVideoCategory
@@ -36,7 +35,6 @@ import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.restdocs.payload.ResponseFieldsSnippet
 import org.springframework.restdocs.request.RequestDocumentation.*
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
@@ -75,7 +73,7 @@ class InternalVideoControllerTest(
     @BeforeEach
     fun setUp() {
         BDDMockito.given(legacyMemberService!!.currentMember()).willReturn(member)
-        BDDMockito.given(legacyMemberService!!.hasCommentPostPermission(member)).willReturn(true)
+        BDDMockito.given(legacyMemberService.hasCommentPostPermission(member)).willReturn(true)
     }
 
     @Test
