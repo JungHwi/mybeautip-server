@@ -42,12 +42,6 @@ spring:
       path: /docs/graphiql
     schema:
       printer.enabled: true
-    cors:
-      allow-credentials: true
-      allowed-origin-patterns: '*'
-      allowed-headers: '*'
-      allowed-methods: '*'
-    path: /graphql
   jpa:
     properties:
       hibernate:
