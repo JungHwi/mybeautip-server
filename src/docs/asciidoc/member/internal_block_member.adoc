@@ -1,0 +1,3 @@
+== Block Member API
+
+operation::internal_block_member[snippets='http-request,http-response,response-fields']

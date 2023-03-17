@@ -1,37 +1,36 @@
 package com.jocoos.mybeautip.domain.member.api.internal
 
-import com.jocoos.mybeautip.domain.member.code.MemberStatus.DORMANT
-import com.jocoos.mybeautip.domain.member.converter.DormantMemberConverter
+import com.jocoos.mybeautip.domain.member.dto.MemberBlockRequest
 import com.jocoos.mybeautip.domain.member.dto.MemberRegistrationRequest
-import com.jocoos.mybeautip.domain.member.persistence.domain.DormantMember
-import com.jocoos.mybeautip.domain.member.persistence.repository.DormantMemberRepository
-import com.jocoos.mybeautip.domain.member.persistence.repository.UsernameCombinationWordRepository
-import com.jocoos.mybeautip.domain.popup.code.PopupType.WAKEUP
-import com.jocoos.mybeautip.domain.popup.persistence.repository.PopupRepository
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
-import com.jocoos.mybeautip.global.dto.single.LongDto
-import com.jocoos.mybeautip.testutil.fixture.makeMember
-import com.jocoos.mybeautip.testutil.fixture.makePopup
-import com.jocoos.mybeautip.testutil.fixture.makeUsernameCombinationWord
-import com.jocoos.mybeautip.member.Member
-import com.jocoos.mybeautip.member.MemberRepository
-import com.jocoos.mybeautip.security.JwtTokenProvider
+import com.jocoos.mybeautip.member.LegacyMemberService
+import com.jocoos.mybeautip.member.block.Block
+import com.jocoos.mybeautip.member.block.BlockService
+import com.jocoos.mybeautip.member.block.BlockStatus
 import org.junit.jupiter.api.Test
+import org.mockito.BDDMockito
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 class InternalMemberControllerTest(
 ) : RestDocsIntegrationTestSupport() {
+
+    @MockBean
+    private val legacyMemberService: LegacyMemberService? = null
+
+    @MockBean
+    private val blockService: BlockService? = null
 
     fun requestMember() : MemberRegistrationRequest {
         var request = MemberRegistrationRequest()
@@ -67,6 +66,50 @@ class InternalMemberControllerTest(
                     fieldWithPath("username").type(STRING).description("멤버 닉네임"),
                     fieldWithPath("avatar_url").type(STRING).description("아바타 이미지 URL"),
                     fieldWithPath("status").type(STRING).description(generateLinkCode(MEMBER_STATUS))
+                )
+            )
+        )
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun memberBlockSuccess() {
+        val block = Block(defaultAdmin.id, requestUser)
+        val request = MemberBlockRequest(requestUser.id, true)
+        block.changeStatus(BlockStatus.BLOCK)
+        BDDMockito.given<Long>(legacyMemberService!!.currentMemberId()).willReturn(defaultAdmin.id)
+        BDDMockito.given<Block>(
+            blockService!!.changeTargetBlockStatus(defaultAdmin.id, request.targetId, request.isBlock)
+        )
+            .willReturn(block)
+        val resultActions = mockMvc.perform(
+            patch("/internal/1/member/block/")
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, defaultAdminToken)
+                .contentType(APPLICATION_JSON)
+                .characterEncoding("utf-8")
+        )
+            .andExpect(status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.member_id").value(defaultAdmin.id))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.target_id").value(requestUser.id))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.blocked").value(BlockStatus.BLOCK == block.status))
+        restdocs(resultActions)
+    }
+
+    @Throws(java.lang.Exception::class)
+    private fun restdocs(resultActions: ResultActions) {
+        resultActions.andDo(
+            document(
+                "internal_block_member",
+                requestFields(
+                    fieldWithPath("target_id").type(NUMBER).description("블락 타겟 멤버 아이디"),
+                    fieldWithPath("is_block").type(BOOLEAN).description("타겟 블락 여부")
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(NUMBER).description("요청 멤버 아이디"),
+                    fieldWithPath("target_id").type(NUMBER).description("블락한 멤버 아이디"),
+                    fieldWithPath("blocked").type(BOOLEAN).description("블락 여부")
                 )
             )
         )

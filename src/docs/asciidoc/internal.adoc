@@ -14,7 +14,9 @@ include::internal_overview.adoc[]
 [[API-LIST]]
 == APIs
 === MEMBER API
-* link:video/internal_add_member.html[Add Member API, window=_blank]
+* link:member/internal_add_member.html[Add Member API, window=_blank]
+
+* link:member/internal_block_member.html[Block Member API, window=_blank]
 
 == AVAILABLE API AS A MEMBER
 === VIDEO API
