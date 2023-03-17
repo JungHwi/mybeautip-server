@@ -31,7 +31,7 @@ include::internal_overview.adoc[]
 * link:video/internal_get_video_comment.html[Get Video Comment List API, window=_blank]
 * link:video/internal_write_video_comment.html[Write Video Comment API, window=_blank]
 * link:video/internal_edit_video_comment.html[Edit Video Comment API, window=_blank]
-* link:video/internal_delete_video_comment.adoc[Delete Video Comment API, window=_blank]
+* link:video/internal_delete_video_comment.html[Delete Video Comment API, window=_blank]
 * link:video/internal_report_video_comment.html[Video Comment Reporting API, window=_blank]
 
 

@@ -75,7 +75,7 @@ class InternalVideoControllerTest(
     @BeforeEach
     fun setUp() {
         BDDMockito.given(legacyMemberService!!.currentMember()).willReturn(member)
-        BDDMockito.given(legacyMemberService!!.currentMemberId()).willReturn(member.id)
+        BDDMockito.given(legacyMemberService.currentMemberId()).willReturn(member.id)
         BDDMockito.given(legacyMemberService.hasCommentPostPermission(member)).willReturn(true)
     }
 
