@@ -75,6 +75,7 @@ class InternalVideoControllerTest(
     @BeforeEach
     fun setUp() {
         BDDMockito.given(legacyMemberService!!.currentMember()).willReturn(member)
+        BDDMockito.given(legacyMemberService!!.currentMemberId()).willReturn(member.id)
         BDDMockito.given(legacyMemberService.hasCommentPostPermission(member)).willReturn(true)
     }
 
@@ -681,6 +682,38 @@ class InternalVideoControllerTest(
                     fieldWithPath("files.[].url").type(STRING).description("파일 URL"),
                 ),
                 commentInfoResponse()
+            )
+        )
+    }
+
+    @Test
+    fun deleteVideoComment() {
+
+        // given
+        val video: Video = videoRepository.save(makeVideo(defaultAdmin, category))
+        val commentId = makeVideoComment(video)
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                delete("/internal/1/videos/{video_id}/comments/{comment_id}", video.id, commentId)
+                    .header(AUTHORIZATION, requestInternalToken)
+                    .header(MEMBER_ID, member.id)
+                    .contentType(APPLICATION_JSON)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "internal_delete_video_comment",
+                pathParameters(
+                    parameterWithName("video_id").description("비디오 ID"),
+                    parameterWithName("comment_id").description("댓글 ID"),
+                ),
+                responseFields(
+                    fieldWithPath("state").type(NUMBER).description("댓글 상태 (0: FAILED, 1: DELETED)")
+                )
             )
         )
     }
