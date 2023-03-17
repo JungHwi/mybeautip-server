@@ -67,21 +67,22 @@ public class BroadcastViewerList {
 
     private Long syncJoin(Broadcast broadcast, BroadcastViewerVo newViewer) {
         BroadcastViewer originalViewer = viewerMap.get(newViewer.memberId());
-
-        BroadcastViewerType originalType = originalViewer.getType();
-        BroadcastViewerStatus originalStatus = originalViewer.getStatus();
-        boolean keepJoin = true;
+        Long outManagerId = null;
 
         if (originalViewer != null) {
+            BroadcastViewerType originalType = originalViewer.getType();
+            BroadcastViewerStatus originalStatus = originalViewer.getStatus();
+            boolean keepJoin = true;
             if (!originalViewer.getJoinedAt().isEqual(newViewer.joinedAt())) {
                 originalViewer.reJoin(newViewer);
                 keepJoin = false;
             }
+            outManagerId = originalType == BroadcastViewerType.MANAGER && originalStatus == BroadcastViewerStatus.ACTIVE && !keepJoin ? originalViewer.getMemberId() : null;
         } else {
             originalViewer = new BroadcastViewer(broadcast, newViewer);
             viewerList.add(originalViewer);
         }
 
-        return originalType == BroadcastViewerType.MANAGER && originalStatus == BroadcastViewerStatus.ACTIVE && !keepJoin ? originalViewer.getMemberId() : null;
+        return outManagerId;
     }
 }

@@ -45,7 +45,7 @@ public abstract class FlipFlopLiteConverter {
         BroadcastViewerType type = BroadcastViewerType.MEMBER;
         Long memberId = 0L;
         String username = "";
-        if (response.appUserId().contains(GUEST_TOKEN_PREFIX)) {
+        if (response.appUserName().startsWith(GUEST_TOKEN_PREFIX)) {
             String guestId = response.appUserId().replace(GUEST_TOKEN_PREFIX, EMPTY_STRING);
             type = BroadcastViewerType.GUEST;
             memberId = Long.parseLong(guestId);

@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.client.flipfloplite;
 
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
+import com.jocoos.mybeautip.client.flipfloplite.exception.FFLException;
 import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
@@ -109,15 +110,20 @@ public class FlipFlopLiteService {
         }
     }
 
-    public Long directMessage(long videoRoomId, FFLDirectMessageRequest request) {
-        FFLMessageInfo messageInfo =  client.directMessage(videoRoomId, request);
-        return messageInfo.messageId();
+    public void broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
+        try {
+            client.broadcastMessage(videoRoomId, request);
+        } catch (FFLException e) {
+            log.warn("FFLException Broadcast Message Exception - [{}] {}, Video Room : {}, request : {}", e.getErrorCode(), e.getErrorMessage(), videoRoomId, request.toString());
+        }
     }
 
-
-    public Long broadcastMessage(long videoRoomId, FFLBroadcastMessageRequest request) {
-        FFLMessageInfo messageInfo = client.broadcastMessage(videoRoomId, request);
-        return messageInfo.messageId();
+    public void directMessage(long videoRoomId, FFLDirectMessageRequest request) {
+        try {
+            client.directMessage(videoRoomId, request);
+        } catch (FFLException e) {
+            log.warn("FFLException Direct Message Exception - [{}] {}, Video Room : {}, request : {}", e.getErrorCode(), e.getErrorMessage(), videoRoomId, request.toString());
+        }
     }
 
     public int migration() {
