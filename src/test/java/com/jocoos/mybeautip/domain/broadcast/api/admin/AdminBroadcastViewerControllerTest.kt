@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
 import org.springframework.restdocs.payload.JsonFieldType
@@ -214,8 +215,8 @@ class AdminBroadcastViewerControllerTest(
         val request = BooleanDto(true)
 
         val result: ResultActions = mockMvc.perform(
-            patch("/api/1/broadcast/{broadcast_id}/message/{message_id}/visible", broadcast.id, 123)
-                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+            patch("/admin/broadcast/{broadcast_id}/message/{message_id}/visible", broadcast.id, 123)
+                .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         ).andExpect(status().isOk)
@@ -227,6 +228,33 @@ class AdminBroadcastViewerControllerTest(
                 pathParameters(
                     parameterWithName("broadcast_id").description("방송 ID"),
                     parameterWithName("message_id").description("메세지 ID"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun join() {
+        val broadcast = saveBroadcast()
+
+        val result: ResultActions = mockMvc.perform(
+            RestDocumentationRequestBuilders.post("/admin/broadcast/{broadcast_id}/viewer", broadcast.id)
+                .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_broadcast_join",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
                 )
             )
         )

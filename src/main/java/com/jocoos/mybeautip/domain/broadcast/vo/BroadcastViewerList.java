@@ -1,8 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.vo;
 
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import lombok.NoArgsConstructor;
 
@@ -37,17 +35,10 @@ public class BroadcastViewerList {
                 .toList();
     }
 
-    public List<Long> sync(Broadcast broadcast, List<BroadcastViewerVo> newViewers) {
+    public List<Long> outSync(List<BroadcastViewerVo> newViewers) {
         viewerMap = viewerList.stream()
                 .collect(Collectors.toMap(BroadcastViewer::getMemberId, Function.identity()));
         List<Long> outManagerIds = new ArrayList<>();
-
-        for (BroadcastViewerVo newViewer : newViewers) {
-            Long outManagerId = syncJoin(broadcast, newViewer);
-            if (outManagerId != null) {
-                outManagerIds.add(outManagerId);
-            }
-        }
 
         Map<Long, BroadcastViewerVo> voMap = newViewers.stream()
                 .collect(Collectors.toMap(BroadcastViewerVo::memberId, Function.identity()));
@@ -63,26 +54,5 @@ public class BroadcastViewerList {
         }
 
         return outManagerIds;
-    }
-
-    private Long syncJoin(Broadcast broadcast, BroadcastViewerVo newViewer) {
-        BroadcastViewer originalViewer = viewerMap.get(newViewer.memberId());
-        Long outManagerId = null;
-
-        if (originalViewer != null) {
-            BroadcastViewerType originalType = originalViewer.getType();
-            BroadcastViewerStatus originalStatus = originalViewer.getStatus();
-            boolean keepJoin = true;
-            if (!originalViewer.getJoinedAt().isEqual(newViewer.joinedAt())) {
-                originalViewer.reJoin(newViewer);
-                keepJoin = false;
-            }
-            outManagerId = originalType == BroadcastViewerType.MANAGER && originalStatus == BroadcastViewerStatus.ACTIVE && !keepJoin ? originalViewer.getMemberId() : null;
-        } else {
-            originalViewer = new BroadcastViewer(broadcast, newViewer);
-            viewerList.add(originalViewer);
-        }
-
-        return outManagerId;
     }
 }

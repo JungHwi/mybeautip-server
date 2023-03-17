@@ -38,6 +38,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers(PATCH, "/api/*/member/wakeup").hasAnyRole("GUEST")
                 .antMatchers(GET, "/api/*/words").hasAnyRole("USER", "ADMIN")
                 .antMatchers("/api/**/notification").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/api/**/broadcast/**").hasAnyRole("GUEST", "USER", "ADMIN")
                 .antMatchers("/api/admin/**").hasAnyRole("STORE", "ADMIN")
                 .antMatchers(GET, "/api/*/notices").permitAll()
                 .antMatchers(GET, "/api/*/healthcheck").permitAll()

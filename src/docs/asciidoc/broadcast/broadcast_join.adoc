@@ -1,0 +1,3 @@
+== Broadcast Join API
+
+operation::broadcast_join[snippets='http-request,path-parameters,http-response,response-fields']
