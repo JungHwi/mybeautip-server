@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.broadcast.service.BroadcastViewerService;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.global.annotation.CheckPermission;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
+import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,7 @@ public class BroadcastViewerController {
 
     @CheckPermission({INFLUENCER})
     @GetMapping("/1/broadcast/{broadcast_id}/viewer")
-    public ResponseEntity<List<ViewerResponse>> search(@PathVariable("broadcast_id") long broadcastId,
+    public CursorResultResponse<ViewerResponse> search(@PathVariable("broadcast_id") long broadcastId,
                                                        @RequestParam(name = "type", required = false) BroadcastViewerType type,
                                                        @RequestParam(name = "cursor", required = false) Long cursor,
                                                        @RequestParam(required = false, defaultValue = "20") int size) {
@@ -47,9 +48,8 @@ public class BroadcastViewerController {
                 .pageable(pageable)
                 .build();
 
-        List<ViewerResponse> responses = viewerService.search(condition);
-
-        return ResponseEntity.ok(responses);
+        List<ViewerResponse> results = viewerService.search(condition);
+        return new CursorResultResponse<>(results);
     }
 
     @CheckPermission({INFLUENCER, MANAGER})

@@ -61,14 +61,15 @@ class AdminBroadcastViewerControllerTest(
                     parameterWithName("size").description("페이지 사이즈").optional()
                 ),
                 responseFields(
-                    fieldWithPath("[].type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
-                    fieldWithPath("[].status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
-                    fieldWithPath("[].member_id").type(JsonFieldType.NUMBER).description("회원 아이디").optional(),
-                    fieldWithPath("[].username").type(JsonFieldType.STRING).description("회원명"),
-                    fieldWithPath("[].avatar_url").type(JsonFieldType.STRING).description("회원 아바타 URL"),
-                    fieldWithPath("[].is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
-                    fieldWithPath("[].suspended_at").type(JsonFieldType.STRING).description("정지 시간").attributes(getZonedDateFormat()).optional(),
-                    fieldWithPath("[].joined_at").type(JsonFieldType.STRING).description("채팅방 입장 시간").attributes(getZonedDateFormat())
+                    fieldWithPath("next_cursor").type(JsonFieldType.STRING).description("커서 정보"),
+                    fieldWithPath("content").type(JsonFieldType.ARRAY).description("시청자 목록"),
+                    fieldWithPath("content.[].type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("content.[].status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("content.[].member_id").type(JsonFieldType.NUMBER).description("회원 아이디"),
+                    fieldWithPath("content.[].username").type(JsonFieldType.STRING).description("회원명"),
+                    fieldWithPath("content.[].avatar_url").type(JsonFieldType.STRING).description("회원 아바타 URL"),
+                    fieldWithPath("content.[].is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("content.[].joined_at").type(JsonFieldType.STRING).description("채팅방 입장 시간").attributes(getZonedDateFormat())
                 )
             )
         )

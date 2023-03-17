@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastViewerService;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
+import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public class AdminBroadcastViewerController {
     private final BroadcastViewerService viewerService;
 
     @GetMapping("/broadcast/{broadcast_id}/viewer")
-    public ResponseEntity<List<ViewerResponse>> search(@PathVariable("broadcast_id") long broadcastId,
+    public CursorResultResponse<ViewerResponse> search(@PathVariable("broadcast_id") long broadcastId,
                                                        @RequestParam(name = "type", required = false) BroadcastViewerType type,
                                                        @RequestParam(name = "status", required = false) BroadcastViewerStatus status,
                                                        @RequestParam(name = "suspended", required = false) Boolean isSuspended,
@@ -45,9 +46,9 @@ public class AdminBroadcastViewerController {
                 .pageable(pageable)
                 .build();
 
-        List<ViewerResponse> responses = viewerService.search(condition);
+        List<ViewerResponse> results = viewerService.search(condition);
 
-        return ResponseEntity.ok(responses);
+        return new CursorResultResponse<>(results);
     }
 
     @GetMapping("/broadcast/{broadcastId}/viewer/{memberId}")
