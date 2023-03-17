@@ -201,7 +201,7 @@ class BroadcastControllerTest(
                     fieldWithPath("created_by.username").type(STRING).description("진행자 닉네임"),
                     fieldWithPath("created_by.avatar_url").type(STRING).description("진행자 아바타 URL"),
                     fieldWithPath("participant").type(OBJECT).description("참여자 정보"),
-                    fieldWithPath("participant.member_id").type(NUMBER).description("참여자 아이디"),
+                    fieldWithPath("participant.member_id").type(NUMBER).description("참여자 아이디, 게스트일 경우 0"),
                     fieldWithPath("participant.username").type(STRING).description("참여자 닉네임"),
                     fieldWithPath("participant.avatar_url").type(STRING).description("참여자 아바타 URL"),
                     fieldWithPath("participant.type").type(STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
