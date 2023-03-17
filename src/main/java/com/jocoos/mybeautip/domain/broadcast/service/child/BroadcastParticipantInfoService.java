@@ -36,10 +36,10 @@ public class BroadcastParticipantInfoService {
     private ViewerResponse getViewerResponse(String requestUsername, Long broadcastOwnerId, Long broadcastId) {
 
         if (isGuest(requestUsername)) {
-            Long guestNameWithoutPrefix = MemberUtil.getGuestId(requestUsername);
-            return viewerDao.findGuestViewer(broadcastId, guestNameWithoutPrefix)
+            Long guestId = MemberUtil.getGuestId(requestUsername);
+            return viewerDao.findGuestViewer(broadcastId, guestId)
                     .map(converter::converts)
-                    .orElse(converter.toGuest(requestUsername));
+                    .orElse(converter.toGuest(guestId, requestUsername));
         }
 
         long requestMemberId = Long.parseLong(requestUsername);
