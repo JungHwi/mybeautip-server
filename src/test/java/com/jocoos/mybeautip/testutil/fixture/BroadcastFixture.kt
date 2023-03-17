@@ -100,7 +100,7 @@ fun makeMessage(
     messageType: FFLChatRoomBroadcastMessageType? = FFLChatRoomBroadcastMessageType.MESSAGE,
     customType: FFLChatRoomBroadcastMessageCustomType? = FFLChatRoomBroadcastMessageCustomType.MSG,
     message: String? = "test message",
-    data: String? = "data",
+    data: Map<String, Any>? = mapOf("test" to "test"),
     appUserIds: List<String>? = null
 ): FFLBroadcastMessageRequest {
     return FFLBroadcastMessageRequest(

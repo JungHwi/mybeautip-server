@@ -1,9 +1,7 @@
 package com.jocoos.mybeautip.client.flipfloplite.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
-import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import lombok.Builder;
 
 import java.time.ZonedDateTime;
@@ -16,8 +14,7 @@ public record ChatData(String title,
                        String thumbnailUrl,
                        @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
                        Boolean isSoundOn,
-                       Boolean isScreenShow,
-                       BroadcastStatus status) {
+                       Boolean isScreenShow) {
 
     public static ChatData editBroadcast(Broadcast broadcast) {
         return ChatData.builder()
@@ -28,15 +25,5 @@ public record ChatData(String title,
                 .isSoundOn(broadcast.getIsSoundOn())
                 .isScreenShow(broadcast.getIsScreenShow())
                 .build();
-    }
-
-    public static ChatData changeStatus(BroadcastStatus status) {
-        return ChatData.builder()
-                .status(status)
-                .build();
-    }
-
-    public String toJson() {
-        return StringConvertUtil.convertToJson(this);
     }
 }

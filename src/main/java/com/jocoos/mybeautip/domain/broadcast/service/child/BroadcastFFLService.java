@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.service.child;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
@@ -20,6 +21,7 @@ public class BroadcastFFLService {
 
     private final FlipFlopLiteService flipFlopLiteService;
     private final FlipFlopLiteConverter converter;
+    private final ObjectMapper objectMapper;
 
     public BroadcastKey getBroadcastKey(Long requestMemberId, String channelKey) {
         ChatTokenAndAppId chatTokenAndAppId = flipFlopLiteService.getChatToken(requestMemberId);
@@ -63,7 +65,7 @@ public class BroadcastFFLService {
     public void sendBroadcastEditedMessage(BroadcastEditResult editResult) {
         Broadcast broadcast = editResult.broadcast();
         ChatData chatData = ChatData.editBroadcast(broadcast);
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofBroadcastEdited(chatData.toJson());
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofBroadcastEdited(chatData, objectMapper);
         flipFlopLiteService.broadcastMessage(broadcast.getVideoKey(), request);
         if (editResult.isStatusChangedToReady()) {
             sendChangeBroadcastStatusMessage(broadcast.getVideoKey(), READY);
@@ -71,8 +73,7 @@ public class BroadcastFFLService {
     }
 
     public void sendChangeBroadcastStatusMessage(Long videoRoomId, BroadcastStatus status) {
-        ChatData chatData = ChatData.changeStatus(status);
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(chatData.toJson());
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(status);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
 
