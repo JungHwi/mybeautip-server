@@ -203,7 +203,6 @@ public class Broadcast extends CreatedAtBaseEntity {
     }
 
     private void initStatusAndStartedAt(boolean isStartNow, ZonedDateTime startedAt) {
-        requireNonNull(startedAt, "startedAt");
         if (isStartNow) readyNow();
         else {
             changeStatus(SCHEDULED);
