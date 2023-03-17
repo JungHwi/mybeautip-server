@@ -9,8 +9,10 @@ import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastViewerService;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.global.annotation.CheckPermission;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -107,4 +109,11 @@ public class BroadcastViewerController {
 
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @PostMapping("/1/broadcast/{broadcastId}/viewer")
+    public ViewerResponse join(@CurrentMember MyBeautipUserDetails userDetails,
+                               @PathVariable long broadcastId) {
+        return viewerService.join(broadcastId, userDetails.getUsername());
+    }
+
 }

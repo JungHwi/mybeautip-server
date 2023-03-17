@@ -127,7 +127,7 @@ public class Broadcast extends CreatedAtBaseEntity {
 
     public List<Long> syncViewer(List<BroadcastViewerVo> newViewers) {
         requireNonNull(newViewers, "newViewers");
-        return this.viewerList.sync(this, newViewers);
+        return this.viewerList.outSync(newViewers);
     }
 
     // video and channel key will get from external service so updated later

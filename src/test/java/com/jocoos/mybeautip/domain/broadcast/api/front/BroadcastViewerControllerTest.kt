@@ -20,8 +20,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
@@ -225,6 +224,33 @@ class BroadcastViewerControllerTest(
                 pathParameters(
                     parameterWithName("broadcast_id").description("방송 ID"),
                     parameterWithName("message_id").description("메세지 ID"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun join() {
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+
+        val result: ResultActions = mockMvc.perform(
+            post("/api/1/broadcast/{broadcast_id}/viewer", broadcast.id)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "broadcast_join",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
                 )
             )
         )

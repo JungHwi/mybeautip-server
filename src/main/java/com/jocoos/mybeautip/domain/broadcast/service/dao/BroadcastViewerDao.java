@@ -46,6 +46,11 @@ public class BroadcastViewerDao {
     }
 
     @Transactional(readOnly = true)
+    public boolean exist(long broadcastId, long memberId) {
+        return repository.existsByBroadcastIdAndMemberId(broadcastId, memberId);
+    }
+
+    @Transactional(readOnly = true)
     public List<ViewerSearchResult> search(ViewerSearchCondition condition) {
         return repository.search(condition);
     }
@@ -58,6 +63,11 @@ public class BroadcastViewerDao {
     @Transactional(readOnly = true)
     public List<BroadcastViewer> getViewer(Broadcast broadcast) {
         return repository.findByBroadcast(broadcast);
+    }
+
+    @Transactional
+    public BroadcastViewer save(BroadcastViewer viewer) {
+        return repository.save(viewer);
     }
 
     @Transactional

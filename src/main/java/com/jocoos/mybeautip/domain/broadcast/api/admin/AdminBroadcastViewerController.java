@@ -8,8 +8,10 @@ import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastViewerService;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
+import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -93,7 +95,7 @@ public class AdminBroadcastViewerController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/1/broadcast/{broadcast_id}/message/{message_id}/visible")
+    @PatchMapping("/broadcast/{broadcast_id}/message/{message_id}/visible")
     public ResponseEntity visibleMessage(@PathVariable("broadcast_id") long broadcastId,
                                          @PathVariable("message_id") long messageId,
                                          @RequestBody BooleanDto isVisible) {
@@ -102,5 +104,11 @@ public class AdminBroadcastViewerController {
         viewerService.visibleMessage(request);
 
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/broadcast/{broadcastId}/viewer")
+    public ViewerResponse join(@CurrentMember MyBeautipUserDetails userDetails,
+                               @PathVariable long broadcastId) {
+        return viewerService.join(broadcastId, userDetails.getUsername());
     }
 }

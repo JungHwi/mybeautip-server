@@ -48,6 +48,15 @@ public class BroadcastViewer {
     @Column(nullable = false)
     private ZonedDateTime joinedAt;
 
+    public BroadcastViewer(Broadcast broadcast, BroadcastViewerType type, long memberId, String username) {
+        this.broadcast = broadcast;
+        this.type = type;
+        this.memberId = memberId;
+        this.sortedUsername = ViewerUsernameUtil.generateSortedUsername(username);
+        this.status = BroadcastViewerStatus.ACTIVE;
+        this.joinedAt = ZonedDateTime.now();
+    }
+
     public BroadcastViewer(Broadcast broadcast, BroadcastViewerVo vo) {
         this.broadcast = broadcast;
         this.memberId = vo.memberId();
@@ -92,11 +101,14 @@ public class BroadcastViewer {
         return this;
     }
 
-    public void reJoin(BroadcastViewerVo vo) {
-        this.type = vo.type();
-        this.joinedAt = vo.joinedAt();
+    public void reJoin(BroadcastViewerType type, String username) {
+        this.type = type;
+        this.sortedUsername = ViewerUsernameUtil.generateSortedUsername(username);
+        this.joinedAt = ZonedDateTime.now();
         this.isSuspended = false;
+        this.suspendedAt = null;
     }
+
     public boolean isManager() {
         return type == MANAGER;
     }
