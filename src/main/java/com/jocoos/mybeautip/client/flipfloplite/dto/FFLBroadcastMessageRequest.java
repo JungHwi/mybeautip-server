@@ -1,9 +1,11 @@
 package com.jocoos.mybeautip.client.flipfloplite.dto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageCustomType;
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageType;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
-import com.jocoos.mybeautip.global.util.StringConvertUtil;
+import com.jocoos.mybeautip.global.util.ObjectMapperUtil;
 import lombok.Builder;
 
 import java.util.HashMap;
@@ -17,7 +19,7 @@ import static com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcast
 public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType messageType,
                                          FFLChatRoomBroadcastMessageCustomType customType,
                                          String message,
-                                         String data,
+                                         Map<String, Object> data,
                                          List<String> appUserIds) {
 
     public static FFLBroadcastMessageRequest ofVisibleMessage(VisibleMessageRequest request) {
@@ -27,7 +29,7 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(type)
-                .data(StringConvertUtil.convertToJson(dataMap))
+                .data(dataMap)
                 .build();
     }
 
@@ -39,19 +41,19 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .build();
     }
 
-    public static FFLBroadcastMessageRequest ofBroadcastEdited(String editedBroadcastInfoJson) {
+    public static FFLBroadcastMessageRequest ofBroadcastEdited(ChatData chatData, ObjectMapper objectMapper) {
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(UPDATE_BROADCAST)
-                .data(editedBroadcastInfoJson)
+                .data(ObjectMapperUtil.converToMap(chatData, objectMapper))
                 .build();
     }
 
-    public static FFLBroadcastMessageRequest ofChangeBroadcastStatus(String statusChangeJson) {
+    public static FFLBroadcastMessageRequest ofChangeBroadcastStatus(BroadcastStatus status) {
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(UPDATE_STATUS)
-                .data(statusChangeJson)
+                .data(Map.of("status", status))
                 .build();
     }
 }
