@@ -2,14 +2,22 @@ package com.jocoos.mybeautip.domain.member.api.internal
 
 import com.jocoos.mybeautip.domain.member.dto.MemberBlockRequest
 import com.jocoos.mybeautip.domain.member.dto.MemberRegistrationRequest
+import com.jocoos.mybeautip.domain.video.api.internal.InternalVideoControllerTest
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.member.LegacyMemberService
+import com.jocoos.mybeautip.member.Member
+import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.member.block.Block
 import com.jocoos.mybeautip.member.block.BlockService
 import com.jocoos.mybeautip.member.block.BlockStatus
+import com.jocoos.mybeautip.testutil.fixture.makeMember
+import com.jocoos.mybeautip.testutil.fixture.makeVideoCategory
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.mockito.BDDMockito
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -23,7 +31,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InternalMemberControllerTest(
+    private val memberRepository: MemberRepository
 ) : RestDocsIntegrationTestSupport() {
 
     @MockBean
@@ -32,11 +42,27 @@ class InternalMemberControllerTest(
     @MockBean
     private val blockService: BlockService? = null
 
+    private lateinit var member: Member
+
+    companion object {
+        const val MEMBER_ID = "MEMBER-ID"
+    }
+
     fun requestMember() : MemberRegistrationRequest {
         var request = MemberRegistrationRequest()
         request.id = 100
         request.username = "plus-member"
         return request
+    }
+
+    @BeforeAll
+    fun beforeAll() {
+        member = memberRepository.save(makeMember())
+    }
+
+    @AfterAll
+    fun afterAll() {
+        memberRepository.delete(member)
     }
 
     @Test
@@ -86,6 +112,7 @@ class InternalMemberControllerTest(
             patch("/internal/1/member/block/")
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, defaultAdminToken)
+                .header(MEMBER_ID, member.id)
                 .contentType(APPLICATION_JSON)
                 .characterEncoding("utf-8")
         )
