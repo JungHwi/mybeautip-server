@@ -41,11 +41,12 @@ public interface BroadcastViewerConverter {
     @Mappings({
             @Mapping(target = "status", constant = "ACTIVE"),
             @Mapping(target = "type", constant = "GUEST"),
-            @Mapping(target = "memberId", source = "guestId"),
+            @Mapping(target = "username", source = "username"),
+            @Mapping(target = "memberId", ignore = true),
             @Mapping(target = "avatarUrl", ignore = true),
             @Mapping(target = "isSuspended", ignore = true),
             @Mapping(target = "suspendedAt", ignore = true),
             @Mapping(target = "joinedAt", ignore = true)
     })
-    ViewerResponse toGuest(Long guestId, String username);
+    ViewerResponse toGuest(String username);
 }
