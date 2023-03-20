@@ -54,7 +54,7 @@ public class BroadcastParticipantInfoService {
         }
 
         return viewerDao.findBroadcastViewer(broadcastId, member.getId())
-                .map(converter::converts)
+                .map(viewer -> converter.converts(viewer, member.getUsername(), member.getAvatarUrl()))
                 .orElse(converter.converts(member, MEMBER));
     }
 
