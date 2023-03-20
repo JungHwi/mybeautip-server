@@ -25,7 +25,7 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
     public static FFLBroadcastMessageRequest ofVisibleMessage(VisibleMessageRequest request) {
         FFLChatRoomBroadcastMessageCustomType type = request.isVisible() ? VISIBLE_MESSAGE : INVISIBLE_MESSAGE;
         Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("messageId", request.messageId());
+        dataMap.put("message_id", request.messageId());
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(type)
