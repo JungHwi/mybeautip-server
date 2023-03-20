@@ -42,7 +42,7 @@ create table broadcast_viewer
 (
     id              bigint auto_increment primary key comment '시청자 아이디',
     broadcast_id    bigint      not null comment '방송 아이디',
-    member_id       bigint comment '회원 아이디',
+    member_id       bigint not null comment '회원 아이디',
     sorted_username varchar(20) not null comment '정렬된 회원명',
     type            varchar(20) not null comment '회원 구분',
     status          varchar(20) not null comment '상태',

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.devices;
 
 import com.jocoos.mybeautip.audit.MemberAuditable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.Date;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
 public class HealthCheck extends MemberAuditable {

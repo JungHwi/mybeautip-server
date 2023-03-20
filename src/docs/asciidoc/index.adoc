@@ -144,6 +144,9 @@ include::overview.adoc[]
 * link:notice/get_notices.html[공지사항 목록 조회 API, window=_blank]
 * link:notice/get_notice.html[공지사항 상세 조회 API, window=_blank]
 
+=== Health Check API
+* link:healthcheck/health_check.html[Health Check API, window=_blank]
+
 
 [[ADMIN-API-LIST]]
 == ADMIN API
