@@ -1,15 +1,12 @@
 package com.jocoos.mybeautip.restapi;
 
-import com.jocoos.mybeautip.app.AppInfoRepository;
 import com.jocoos.mybeautip.devices.HealthCheckService;
-import com.jocoos.mybeautip.domain.popup.service.PopupService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.notification.MessageService;
 import com.jocoos.mybeautip.restapi.dto.HealthCheckResponse;
 import com.jocoos.mybeautip.restapi.dto.NoticeInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +24,6 @@ public class HealthCheckController {
     private final LegacyMemberService legacyMemberService;
     private final HealthCheckService healthCheckService;
     private final MessageService messageService;
-    private final AppInfoRepository appInfoRepository;
-    private final PopupService popupService;
-    @Value("${mybeautip.revenue.revenue-ratio-live}")
-    private int revenueRatioForLive;
-    @Value("${mybeautip.revenue.revenue-ratio-vod}")
-    private int revenueRatioForVod;
 
     @Deprecated
     @GetMapping("/1/notices")
