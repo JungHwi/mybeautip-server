@@ -120,7 +120,7 @@ include::overview.adoc[]
 * link:broadcast/report_vod.html[VOD 신고 API, window=_blank]
 * link:broadcast/heart_vod.html[VOD 하트 API, window=_blank]
 
-=== 이벤트 API
+=== Event API
 * link:event/get_events.html[이벤트 목록 조회 API, window=_blank]
 * link:event/get_event.html[이벤트 상세 조회 API, window=_blank]
 * link:event/event_join.html[이벤트 참여하기 API, window=_blank]
