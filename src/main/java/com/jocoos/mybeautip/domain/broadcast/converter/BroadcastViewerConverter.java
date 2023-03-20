@@ -27,6 +27,13 @@ public interface BroadcastViewerConverter {
     ViewerResponse converts(BroadcastViewer entity, String username, String avatarUrl);
 
     @Mappings({
+            @Mapping(target = "memberId", ignore = true),
+            @Mapping(target = "isSuspended", source = "entity.suspended")
+    })
+    ViewerResponse toGuest(BroadcastViewer entity);
+
+
+    @Mappings({
             @Mapping(target = "isSuspended", source = "suspended")
     })
     ViewerResponse converts(ViewerSearchResult result);
