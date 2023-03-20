@@ -140,4 +140,16 @@ public class BroadcastViewerService {
 
         return converter.converts(broadcastViewer);
     }
+
+    @Transactional
+    public ViewerResponse out(long broadcastId, String userInfo) {
+        Long memberId = Long.parseLong(userInfo.replace(GUEST_TOKEN_PREFIX, EMPTY_STRING));
+
+        BroadcastViewer broadcastViewer = dao.findBroadcastViewer(broadcastId, memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+
+        broadcastViewer.inactive();
+
+        return converter.converts(broadcastViewer);
+    }
 }

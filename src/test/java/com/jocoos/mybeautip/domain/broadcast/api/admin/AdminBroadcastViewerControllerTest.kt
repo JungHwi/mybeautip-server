@@ -260,6 +260,34 @@ class AdminBroadcastViewerControllerTest(
         )
     }
 
+    @Test
+    fun out() {
+        val broadcast = saveBroadcast()
+        saveViewer(broadcast, defaultAdmin)
+
+        val result: ResultActions = mockMvc.perform(
+            RestDocumentationRequestBuilders.post("/admin/broadcast/{broadcast_id}/viewer", broadcast.id)
+                .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_broadcast_out",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                )
+            )
+        )
+    }
+
 
     fun saveViewer(
         broadcast: Broadcast,
@@ -275,5 +303,4 @@ class AdminBroadcastViewerControllerTest(
     fun saveMember(): Member {
         return memberRepository.save(makeMember())
     }
-
 }
