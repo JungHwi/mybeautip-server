@@ -44,7 +44,7 @@ public class BroadcastEditRequest {
     @JsonIgnore
     @AssertTrue(message = "Broadcast request requires is_start_now is true or started_at is not null")
     public boolean isStartNowTrueOrStartedAtNotNull() {
-        return isStartNow || startedAt != null;
+        return Boolean.TRUE.equals(isStartNow) || startedAt != null;
     }
 
     @JsonIgnore

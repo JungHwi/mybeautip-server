@@ -147,7 +147,9 @@ public class Broadcast extends CreatedAtBaseEntity {
 
         this.isSoundOn = command.isSoundOn();
         this.isScreenShow = command.isScreenShow();
-        changeStatusAndStartedAt(command.isStartNow(), command.getEditedStartedAt());
+        if (isStatusEq(SCHEDULED)) {
+            changeStatusAndStartedAt(command.isStartNow(), command.getEditedStartedAt());
+        }
         setCategory(command.getEditedCategory());
         setTitle(command.getEditedTitle());
         setThumbnail(command.getEditedThumbnail());
