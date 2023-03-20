@@ -1,0 +1,3 @@
+== Get Internal Members API
+
+operation::internal_get_members[snippets='http-request,request-parameters,http-response,response-fields']

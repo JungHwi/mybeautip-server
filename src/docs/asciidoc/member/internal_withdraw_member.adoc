@@ -1,0 +1,4 @@
+== Withdraw Member API
+
+operation::internal_withdraw_member[snippets='http-request,
+,request-fields,http-response']
