@@ -1,0 +1,3 @@
+== Broadcast Out API
+
+operation::broadcast_out[snippets='http-request,path-parameters,http-response,response-fields']

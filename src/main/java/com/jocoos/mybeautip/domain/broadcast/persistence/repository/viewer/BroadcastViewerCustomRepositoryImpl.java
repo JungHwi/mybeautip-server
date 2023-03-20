@@ -96,7 +96,7 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
     }
 
     private BooleanExpression eqViewerType(BroadcastViewerType type) {
-        return type == null ? null : broadcastViewer.type.eq(type);
+        return type == null ? broadcastViewer.type.in(BroadcastViewerType.defaultSearchType) : broadcastViewer.type.eq(type);
     }
 
     private BooleanExpression cursor(ViewerCursorCondition cursor) {

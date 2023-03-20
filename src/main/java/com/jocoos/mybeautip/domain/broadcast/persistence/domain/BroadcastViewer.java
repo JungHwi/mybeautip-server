@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.service.util.ViewerUsernameUtil;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
+import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -102,7 +103,11 @@ public class BroadcastViewer {
     }
 
     public void reJoin(BroadcastViewerType type, String username) {
+        if (this.status == BroadcastViewerStatus.EXILE) {
+            throw new AccessDeniedException("You have been banned and will not be allowed to re-enter.");
+        }
         this.type = type;
+        this.status = BroadcastViewerStatus.ACTIVE;
         this.sortedUsername = ViewerUsernameUtil.generateSortedUsername(username);
         this.joinedAt = ZonedDateTime.now();
         this.isSuspended = false;

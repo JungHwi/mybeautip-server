@@ -101,8 +101,8 @@ public class BroadcastViewerController {
 
     @PatchMapping("/1/broadcast/{broadcast_id}/message/{message_id}/visible")
     public ResponseEntity visibleMessage(@PathVariable("broadcast_id") long broadcastId,
-                                      @PathVariable("message_id") long messageId,
-                                      @RequestBody BooleanDto isVisible) {
+                                         @PathVariable("message_id") long messageId,
+                                         @RequestBody BooleanDto isVisible) {
 
         VisibleMessageRequest request = new VisibleMessageRequest(broadcastId, messageId, isVisible.isBool());
         viewerService.visibleMessage(request);
@@ -116,4 +116,9 @@ public class BroadcastViewerController {
         return viewerService.join(broadcastId, userDetails.getUsername());
     }
 
+    @DeleteMapping("/1/broadcast/{broadcastId}/viewer")
+    public ViewerResponse out(@CurrentMember MyBeautipUserDetails userDetails,
+                               @PathVariable long broadcastId) {
+        return viewerService.out(broadcastId, userDetails.getUsername());
+    }
 }

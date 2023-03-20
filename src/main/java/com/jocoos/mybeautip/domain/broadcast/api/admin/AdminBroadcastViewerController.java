@@ -111,4 +111,10 @@ public class AdminBroadcastViewerController {
                                @PathVariable long broadcastId) {
         return viewerService.join(broadcastId, userDetails.getUsername());
     }
+
+    @DeleteMapping("/broadcast/{broadcastId}/viewer")
+    public ViewerResponse out(@CurrentMember MyBeautipUserDetails userDetails,
+                              @PathVariable long broadcastId) {
+        return viewerService.out(broadcastId, userDetails.getUsername());
+    }
 }

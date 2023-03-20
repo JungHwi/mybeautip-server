@@ -256,6 +256,34 @@ class BroadcastViewerControllerTest(
         )
     }
 
+    @Test
+    fun out() {
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        saveViewer(broadcast, requestUser)
+
+        val result: ResultActions = mockMvc.perform(
+            delete("/api/1/broadcast/{broadcast_id}/viewer", broadcast.id)
+                .header(HttpHeaders.AUTHORIZATION, requestUserToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "broadcast_out",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                responseFields(
+                    fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
+                    fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
+                    fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                )
+            )
+        )
+    }
+
     fun saveViewer(
         broadcast: Broadcast,
         member: Member = saveMember()
