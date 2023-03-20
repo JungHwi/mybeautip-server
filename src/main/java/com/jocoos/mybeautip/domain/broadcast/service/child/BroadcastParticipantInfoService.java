@@ -38,7 +38,7 @@ public class BroadcastParticipantInfoService {
         if (isGuest(requestUsername)) {
             Long guestNameWithoutPrefix = MemberUtil.getGuestId(requestUsername);
             return viewerDao.findGuestViewer(broadcastId, guestNameWithoutPrefix)
-                    .map(converter::converts)
+                    .map(converter::toGuest)
                     .orElse(converter.toGuest(requestUsername));
         }
 
