@@ -284,8 +284,7 @@ class BroadcastControllerTest(
                     fieldWithPath("thumbnails.[].need_transcode").type(BOOLEAN).ignored(),
                     fieldWithPath("category_id").type(NUMBER).description("카테고리 ID"),
                     fieldWithPath("is_start_now").type(BOOLEAN).description("바로 시작 여부, false 일 경우 started_at 값이 필수입니다").optional(),
-                    fieldWithPath("started_at").type(STRING).description("예약 시간, is_start_now true일 경우만 값이 없어도 됩니다").attributes(getZonedDateFormat())
-                        .optional(),
+                    fieldWithPath("started_at").type(STRING).description("예약 시간, is_start_now false 일 경우 필수입니다").attributes(getZonedDateFormat()),
                     fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
                     fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("notice").type(STRING).description("공지사항").optional()
