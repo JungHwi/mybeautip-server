@@ -10,6 +10,8 @@ import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.VideoCategoryMapping;
 import com.jocoos.mybeautip.video.VideoLike;
 import com.jocoos.mybeautip.video.VideoLikeRepository;
+import com.jocoos.mybeautip.video.report.VideoReport;
+import com.jocoos.mybeautip.video.report.VideoReportRepository;
 import com.jocoos.mybeautip.video.scrap.VideoScrap;
 import com.jocoos.mybeautip.video.scrap.VideoScrapRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class VideoConvertService {
     private final VideoCategoryService videoCategoryService;
     private final VideoLikeRepository videoLikeRepository;
     private final VideoScrapRepository videoScrapRepository;
+    private final VideoReportRepository videoReportRepository;
     private final BlockRepository blockRepository;
     private final VideoConverter converter;
 
@@ -52,6 +55,7 @@ public class VideoConvertService {
         Map<Long, Long> likeMap = new HashMap<>();
         Map<Long, Long> scrapMap = new HashMap<>();
         Map<Long, Block> blockMap = new HashMap<>();
+        Map<Long, Long> reportMap = new HashMap<>();
 
         Long me = memberService.currentMemberId();
 
@@ -73,6 +77,8 @@ public class VideoConvertService {
             List<Block> blockList = blockRepository.findAllByMeAndMemberYouIdInAndStatus(me, ownerIds, BLOCK);
             blockMap = blockList.stream()
                     .collect(Collectors.toMap(Block::getYouId, Function.identity()));
+            List<VideoReport> reportList = videoReportRepository.findByVideoIdInAndCreatedById(videoIds, me);
+            reportMap = reportList.stream().collect(Collectors.toMap(videoReport -> videoReport.getVideo().getId(), VideoReport::getId));
         }
 
         for (Video video : videoList) {
@@ -81,6 +87,7 @@ public class VideoConvertService {
             response.setRealWatchCount(video.getWatchCount());
             response.setLikeId(likeMap.getOrDefault(video.getId(), null));
             response.setScrapId(scrapMap.getOrDefault(video.getId(), null));
+            response.setReportId(reportMap.getOrDefault(video.getId(), null));
             response.setBlocked(blockMap.containsKey(video.getId()));
 
             List<VideoCategoryResponse> categoryResponses = new ArrayList<>();

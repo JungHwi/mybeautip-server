@@ -1,19 +1,20 @@
 package com.jocoos.mybeautip.domain.video.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
-import com.jocoos.mybeautip.global.wrapper.CursorInterface;
-import com.jocoos.mybeautip.member.MemberInfo;
-import com.jocoos.mybeautip.video.Video;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
+import com.jocoos.mybeautip.global.wrapper.CursorInterface;
+import com.jocoos.mybeautip.member.MemberInfo;
+import com.jocoos.mybeautip.video.Video;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMAT;
 
 @Data
@@ -50,6 +51,7 @@ public class VideoResponse implements CursorInterface {
     private String relatedGoodsThumbnailUrl;
     private Long likeId;
     private Long scrapId;
+    private Long reportId;
     private MemberInfo owner;
     private Boolean blocked;
 
