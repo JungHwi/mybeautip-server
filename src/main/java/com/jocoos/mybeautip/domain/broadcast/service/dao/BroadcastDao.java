@@ -45,6 +45,11 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
+    public List<Broadcast> getAllByVideoKeys(List<Long> ids) {
+        return repository.findAllByVideoKeyIn(ids);
+    }
+
+    @Transactional(readOnly = true)
     public boolean isCreator(long broadcastId, long memberId) {
         return repository.existsByIdAndMemberId(broadcastId, memberId);
     }
