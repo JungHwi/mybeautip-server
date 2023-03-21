@@ -1,0 +1,5 @@
+== Admin Shutdown Broadcast API (방송 강제종료 API)
+
+Stream Key 로 해당 방송 FFL Ingest 끊고 요청하셔야 합니다
+
+operation::admin_shutdown_broadcast[snippets='http-request,path-parameters,http-response']

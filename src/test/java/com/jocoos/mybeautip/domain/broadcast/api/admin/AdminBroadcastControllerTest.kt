@@ -31,6 +31,7 @@ import org.springframework.restdocs.request.RequestDocumentation.*
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @TestInstance(PER_CLASS)
@@ -237,6 +238,30 @@ class AdminBroadcastControllerTest(
                     ),
                     responseFields(
                         fieldWithPath("count").type(NUMBER).description("검색 시작 시간 이후 신고된 방송수")
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `Admin Broadcast Shutdown API`() {
+        val readyBroadcast = broadcastRepository.save(makeBroadcast(defaultBroadcastCategory, isStartNow = true))
+        readyBroadcast.start("url", ZonedDateTime.now())
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/admin/broadcast/{broadcast_id}/shutdown", readyBroadcast.id)
+                    .header(AUTHORIZATION, defaultAdminToken)
+            )
+            .andExpect(status().isNoContent)
+            .andDo(print())
+
+        result
+            .andDo(
+                document(
+                    "admin_shutdown_broadcast",
+                    pathParameters(
+                        parameterWithName("broadcast_id").description("방송 아이디")
                     )
                 )
             )
