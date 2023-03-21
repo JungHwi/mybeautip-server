@@ -39,12 +39,6 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
-    public Broadcast getByVideoKey(Long videoKey) {
-        return repository.findByVideoKey(videoKey)
-                .orElseThrow(() -> new NotFoundException("not found broadcast. video key - "));
-    }
-
-    @Transactional(readOnly = true)
     public BroadcastSearchResult getWithMemberAndCategory(long broadcastId) {
         return repository.get(broadcastId)
                 .orElseThrow(broadcastNotFoundException(broadcastId));

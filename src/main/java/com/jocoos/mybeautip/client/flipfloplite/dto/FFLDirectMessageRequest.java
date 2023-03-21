@@ -2,10 +2,12 @@ package com.jocoos.mybeautip.client.flipfloplite.dto;
 
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMessageCustomType;
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMessageType;
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomDirectMessageCustomType.*;
 
@@ -13,7 +15,7 @@ public record FFLDirectMessageRequest(FFLChatRoomDirectMessageType messageType,
                                       FFLChatRoomDirectMessageCustomType customType,
                                       List<String> appUserIds,
                                       String message,
-                                      String data) {
+                                      Map<String, Object> data) {
 
     public static FFLDirectMessageRequest of(GrantManagerRequest request, List<Long> memberIds) {
         if (request.isManager()) {
@@ -39,7 +41,12 @@ public record FFLDirectMessageRequest(FFLChatRoomDirectMessageType messageType,
         return new FFLDirectMessageRequest(MANAGER_OUT, List.of(memberId), null, null);
     }
 
-    private FFLDirectMessageRequest(FFLChatRoomDirectMessageCustomType customType, List<Long> memberIds, String message, String data) {
+    public static FFLDirectMessageRequest ofStreamKeyStateChanged(Long memberId, FFLStreamKeyState state) {
+        Map<String, Object> data = Map.of("state", state);
+        return new FFLDirectMessageRequest(STREAM_KEY_STATUS_CHANGED, List.of(memberId), null, data);
+    }
+
+    private FFLDirectMessageRequest(FFLChatRoomDirectMessageCustomType customType, List<Long> memberIds, String message, Map<String, Object> data) {
         this(FFLChatRoomDirectMessageType.COMMAND, customType, memberIds.stream().map(String::valueOf).toList(), message, data);
     }
 }

@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus.ACTIVE;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType.GUEST;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType.OWNER;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,12 @@ public class BroadcastViewerDao {
     @Transactional(readOnly = true)
     public BroadcastViewer getBroadcastViewer(long broadcastId, long memberId) {
         return findBroadcastViewer(broadcastId, memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+    }
+
+    @Transactional(readOnly = true)
+    public BroadcastViewer getActiveOwner(Long memberId) {
+        return repository.findByMemberIdAndTypeAndStatus(memberId, OWNER, ACTIVE)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
     }
 

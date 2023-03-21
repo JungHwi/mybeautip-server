@@ -22,6 +22,9 @@ public interface FlipFlopLiteClient {
     @GetMapping("/v2/apps/me/members/{appUserId}/stream-key")
     FFLStreamKeyResponse getStreamKey(@PathVariable long appUserId);
 
+    @GetMapping("/v2/apps/me/stream-keys/{streamKeyId}")
+    FFLStreamKeyResponse getStreamKeyById(@PathVariable long streamKeyId);
+
     @PostMapping("/v2/apps/me/members/{appUserId}/chat-tokens")
     FFLChatTokenResponse getChatToken(@PathVariable long appUserId);
 
