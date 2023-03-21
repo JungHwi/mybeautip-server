@@ -34,6 +34,13 @@ public class MemberNotificationService {
     }
 
     @Transactional(readOnly = true)
+    public NotificationTargetInfo getMemberForceNotificationInfo(long userId) {
+        Member member = getMember(userId);
+        List<Device> devices = deviceRepository.findByCreatedByIdAndValidIsTrue(userId);
+        return converter.convert(member, devices);
+    }
+
+    @Transactional(readOnly = true)
     public List<NotificationTargetInfo> getMemberNotificationInfo(List<Long> userIds) {
         List<Member> members = getMemberList(userIds);
         List<Device> devices = deviceRepository.findByCreatedByIdInAndPushableAndValidAndCreatedByPushable(userIds, true, true, true);

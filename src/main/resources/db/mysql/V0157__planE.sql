@@ -110,6 +110,14 @@ create table broadcast_report
     modified_at  datetime not null comment '수정시간'
 ) charset = utf8mb4 comment '방송 신고 정보';
 
+create table broadcast_notification
+(
+    id bigint auto_increment comment '방송 알림 아이디' primary key ,
+    broadcast_id bigint not null comment '방송 아이디',
+    member_id bigint not null comment '알림 설정자 아이디',
+    is_notify_needed boolean not null comment '알림 설정 여부'
+) charset = utf8mb4 comment '방송 알림 정보';
+
 # drop table influencer;
 # drop table system_option;
 # drop table broadcast_viewer;
