@@ -22,10 +22,10 @@ mybeautip:
     access-token-validity-seconds: 2592000     # 30 days
     refresh-token-validity-seconds: 1814400    # 21 days
   slack:
-    key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
-    channel: "#mybeautip-dev"
-    order-key: T03FMJ9ANNR/B03GKUDN78Q/OG75R443el0aPxJ2sQdZl8Xd
-    order-channel: "#mybeautip-dev"
+    key: T03FMJ9ANNR/B0505822V9N/fTaHxHs2bs39lo3Yxpv7xR3g
+    channel: "#mybeautip-plus-dev"
+    order-key: T03FMJ9ANNR/B0505822V9N/fTaHxHs2bs39lo3Yxpv7xR3g
+    order-channel: "#mybeautip-plus-dev"
 
 #redis:
 #  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
