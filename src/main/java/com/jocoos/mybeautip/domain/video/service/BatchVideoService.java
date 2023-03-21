@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.video.service;
 
-import com.jocoos.mybeautip.domain.notification.aspect.service.impl.VideoUploadNotificationService;
+import com.jocoos.mybeautip.domain.notification.aspect.service.AspectNotificationService;
 import com.jocoos.mybeautip.domain.video.dto.VideoOpenBatchResult;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
 import com.jocoos.mybeautip.support.slack.SlackService;
@@ -17,7 +17,7 @@ public class BatchVideoService {
 
     private final VideoDao videoDao;
     private final SlackService slackService;
-    private final VideoUploadNotificationService notificationService;
+    private final AspectNotificationService<Video> videoUploadNotificationService;
 
     @Transactional
     public VideoOpenBatchResult openVideos() {
@@ -38,7 +38,7 @@ public class BatchVideoService {
     private void sendMessages(List<Video> videos) {
         for (Video video : videos) {
             slackService.makeVideoPublic(video);
-            notificationService.send(video);
+            videoUploadNotificationService.send(video);
         }
     }
 }

@@ -16,4 +16,8 @@ public class EntityUtil {
         return entities.stream()
                 .collect(Collectors.toMap(getIdFunc::applyAsLong, x -> x));
     }
+
+    public static <T>  List<Long> extractLongList(List<T> entities, ToLongFunction<T> getIdFunc) {
+        return entities.stream().map(getIdFunc::applyAsLong).toList();
+    }
 }

@@ -18,6 +18,7 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult.OriginalInfo;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class BroadcastDomainService {
     private final BroadcastConverter converter;
     private final BroadcastStatusService statusService;
     private final BroadcastFFLService fflService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Broadcast create(BroadcastCreateRequest request, long creatorId) {
@@ -65,10 +67,9 @@ public class BroadcastDomainService {
     }
 
     @Transactional
-    public Broadcast changeStatus(long broadcastId, BroadcastStatus changeStatus) {
+    public BroadcastEditResult changeStatus(long broadcastId, BroadcastStatus changeStatus) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        statusService.changeStatus(broadcast, changeStatus);
-        return broadcast;
+        return statusService.changeStatus(broadcast, changeStatus);
     }
 
     // if Status change to Live paused_at will be null

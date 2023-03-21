@@ -4,29 +4,15 @@ import com.jocoos.mybeautip.domain.community.dto.CommunityCommentResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityComment;
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentDao;
 import com.jocoos.mybeautip.domain.notification.aspect.service.AspectNotificationService;
-import com.jocoos.mybeautip.domain.notification.client.AppPushService;
-import com.jocoos.mybeautip.domain.notification.client.vo.AppPushMessage;
+import com.jocoos.mybeautip.domain.notification.service.NotificationSendService;
 import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
-import com.jocoos.mybeautip.domain.notification.code.NotificationStatus;
 import com.jocoos.mybeautip.domain.notification.code.TemplateType;
-import com.jocoos.mybeautip.domain.notification.converter.NotificationMessagePushConverter;
-import com.jocoos.mybeautip.domain.notification.persistence.domain.NotificationCenterEntity;
-import com.jocoos.mybeautip.domain.notification.persistence.domain.NotificationMessageCenterEntity;
-import com.jocoos.mybeautip.domain.notification.persistence.domain.NotificationMessagePushEntity;
-import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationCenterRepository;
-import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationMessageCenterRepository;
-import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationMessagePushRepository;
-import com.jocoos.mybeautip.domain.notification.service.MemberNotificationService;
-import com.jocoos.mybeautip.domain.notification.vo.NotificationTargetInfo;
-import com.jocoos.mybeautip.global.util.StringConvertUtil;
-import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -37,12 +23,7 @@ public class CommunityCommentReplyNotificationService implements AspectNotificat
 
     private static final TemplateType TEMPLATE_TYPE = TemplateType.COMMUNITY_COMMENT_REPLY;
     private final CommunityCommentDao commentDao;
-    private final MemberNotificationService memberNotificationService;
-    private final NotificationCenterRepository notificationCenterRepository;
-    private final NotificationMessageCenterRepository messageCenterRepository;
-    private final NotificationMessagePushRepository messagePushRepository;
-    private final NotificationMessagePushConverter pushConverter;
-    private final AppPushService pushService;
+    private final NotificationSendService sendService;
 
     @Override
     public TemplateType getTemplateType() {
@@ -62,13 +43,9 @@ public class CommunityCommentReplyNotificationService implements AspectNotificat
 
     @Override
     public void send(CommunityCommentResponse comment) {
-        int messageIndex = getMessageRandomIndex();
         CommunityComment parentComment = commentDao.get(comment.getParentId());
-        NotificationTargetInfo targetInfo = getTargetInfo(parentComment.getMemberId());
-
-        Map<String, String> arguments = getArgument(targetInfo.getNickname(), comment);
-        NotificationCenterEntity notificationCenterEntity = sendCenter(messageIndex, targetInfo, arguments);
-        sendAppPush(messageIndex, notificationCenterEntity.getId(), targetInfo, arguments);
+        Map<String, String> arguments = getArgument(comment);
+        sendService.send(TEMPLATE_TYPE, parentComment.getMemberId(), null, arguments);
     }
 
     private boolean verify(CommunityCommentResponse comment) {
@@ -78,51 +55,11 @@ public class CommunityCommentReplyNotificationService implements AspectNotificat
                 comment.getParentId() > 0;
     }
 
-    private NotificationCenterEntity sendCenter(int messageIndex, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
-        NotificationMessageCenterEntity messageInfo = getCenterMessage(messageIndex);
-        NotificationCenterEntity entity = NotificationCenterEntity.builder()
-                .userId(targetInfo.getMemberId())
-                .status(NotificationStatus.NOT_READ)
-                .arguments(StringConvertUtil.convertMapToJson(arguments))
-                .messageId(messageInfo.getId())
-                .build();
-
-        return notificationCenterRepository.save(entity);
-    }
-
-    private void sendAppPush(int messageIndex, Long notificationId, NotificationTargetInfo targetInfo, Map<String, String> arguments) {
-        AppPushMessage pushMessage = getAppPushMessage(messageIndex, notificationId, arguments);
-        pushService.send(targetInfo, pushMessage);
-    }
-
-    private int getMessageRandomIndex() {
-        int count = messageCenterRepository.countByTemplateIdAndLastVersionIsTrue(TEMPLATE_TYPE);
-        return RandomUtils.getRandomIndex(count);
-    }
-
-    private NotificationMessageCenterEntity getCenterMessage(int index) {
-        List<NotificationMessageCenterEntity> entities = messageCenterRepository.findByTemplateIdAndLastVersionIsTrue(TEMPLATE_TYPE);
-        return entities.get(index);
-    }
-
-    private AppPushMessage getAppPushMessage(int index, long notificationId, Map<String, String> arguments) {
-        List<NotificationMessagePushEntity> entities = messagePushRepository.findByTemplateIdAndLastVersionIsTrue(TEMPLATE_TYPE);
-        NotificationMessagePushEntity entity = entities.get(index);
-        AppPushMessage message = pushConverter.convert(entity, notificationId);
-        return message.setArguments(arguments);
-    }
-
-    private NotificationTargetInfo getTargetInfo(long memberId) {
-        return memberNotificationService.getMemberNotificationInfo(memberId);
-    }
-
-    private Map<String, String> getArgument(String nickname, CommunityCommentResponse comment) {
+    private Map<String, String> getArgument(CommunityCommentResponse comment) {
         Map<String, String> arguments = new HashMap<>();
-        arguments.put(NotificationArgument.USER_NICKNAME.name(), nickname);
         arguments.put(NotificationArgument.COMMUNITY_ID.name(), String.valueOf(comment.getCommunityId()));
         arguments.put(NotificationArgument.COMMENT_ID.name(), String.valueOf(comment.getParentId()));
         arguments.put(NotificationArgument.REPLY_ID.name(), String.valueOf(comment.getId()));
-
         return arguments;
     }
 }

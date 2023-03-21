@@ -29,21 +29,16 @@ public class VideoUploadMessageConverter implements MessageConverter {
     @Override
     public Optional<String> toMessage(Object object) {
         if (object instanceof Video video) {
-            String header;
             boolean isPrivateVideo = "PRIVATE".equals(video.getVisibility());
-            if ("BROADCASTED".equals(video.getType())) {
-                header = "라이브(" + video.getId() + ") 시작";
-            } else {
-                header = isPrivateVideo ?
-                        String.format("#비공개 컨텐츠(%d) 업로드 완료", video.getId()) :
-                        String.format("컨텐츠(%d) 업로드 완료", video.getId());
-            }
+            String header = isPrivateVideo ?
+                    String.format("#비공개 컨텐츠(%d) 업로드 완료", video.getId()) :
+                    String.format("컨텐츠(%d) 업로드 완료", video.getId());
 
             String message =
                     String.format("*%s*", header) +
-                    String.format("```사용자: %s / %d%n", video.getMember().getUsername(), video.getMember().getId()) +
-                    String.format("영상제목: [%s] %s, 비디오 키: %s, 공개일: %s%n", video.getCategoryNames(), video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())) +
-                    String.format("%s```", generateRelatedGoodsInfo(video));
+                            String.format("```사용자: %s / %d%n", video.getMember().getUsername(), video.getMember().getId()) +
+                            String.format("영상제목: [%s] %s, 비디오 키: %s, 공개일: %s%n", video.getCategoryNames(), video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())) +
+                            String.format("%s```", generateRelatedGoodsInfo(video));
             return Optional.of(message);
         }
         return Optional.empty();
