@@ -165,6 +165,7 @@ class InternalVideoControllerTest(
                         .optional(),
                     fieldWithPath("content.[].like_id").type(NUMBER).description("좋아요 아이디").optional(),
                     fieldWithPath("content.[].scrap_id").type(NUMBER).description("스크랩 아이디").optional(),
+                    fieldWithPath("content.[].report_id").type(BOOLEAN).description("신고 아이디").optional(),
                     fieldWithPath("content.[].blocked").type(BOOLEAN).description("차단 여부").optional(),
                     fieldWithPath("content.[].owner").type(OBJECT).description("비디오 작성자 정보"),
                     fieldWithPath("content.[].owner.id").type(NUMBER).description("아이디"),
@@ -261,6 +262,7 @@ class InternalVideoControllerTest(
                     fieldWithPath("related_goods_thumbnail_url").type(STRING).description("상품 대표 URL").optional(),
                     fieldWithPath("like_id").type(NUMBER).description("좋아요 아이디").optional(),
                     fieldWithPath("scrap_id").type(NUMBER).description("스크랩 아이디").optional(),
+                    fieldWithPath("report_id").type(BOOLEAN).description("신고 아이디").optional(),
                     fieldWithPath("blocked").type(BOOLEAN).description("차단 여부").optional(),
                     fieldWithPath("created_at").type(STRING).description("생성 일자").attributes(getZonedDateMilliFormat())
                 )
@@ -417,7 +419,7 @@ class InternalVideoControllerTest(
     fun reportVideo() {
         // given
         val video: Video = videoRepository.save(makeVideo(defaultAdmin, category))
-        val req = VideoReportRequest("혐오", 0)
+        val req = VideoReportRequest("Obscene or inappropriate content", 1)
 
         // when & then
         val result: ResultActions = mockMvc
@@ -508,7 +510,7 @@ class InternalVideoControllerTest(
 
         val jsonObject = JSONObject(commentResult.response.contentAsString)
         val commentId : Long = jsonObject.getLong("id");
-        val reportReq = VideoReportRequest("혐오", 0)
+        val reportReq = VideoReportRequest("Obscene or inappropriate content", 1)
 
         // when & then
         val result: ResultActions = mockMvc
@@ -877,6 +879,7 @@ class InternalVideoControllerTest(
                         .optional(),
                     fieldWithPath("content.[].like_id").type(NUMBER).description("좋아요 아이디").optional(),
                     fieldWithPath("content.[].scrap_id").type(NUMBER).description("스크랩 아이디").optional(),
+                    fieldWithPath("content.[].report_id").type(BOOLEAN).description("신고 아이디").optional(),
                     fieldWithPath("content.[].blocked").type(BOOLEAN).description("차단 여부").optional(),
                     fieldWithPath("content.[].owner").type(OBJECT).description("비디오 작성자 정보"),
                     fieldWithPath("content.[].owner.id").type(NUMBER).description("아이디"),
@@ -973,6 +976,7 @@ class InternalVideoControllerTest(
                     fieldWithPath("related_goods_thumbnail_url").type(STRING).description("상품 대표 URL").optional(),
                     fieldWithPath("like_id").type(NUMBER).description("좋아요 아이디").optional(),
                     fieldWithPath("scrap_id").type(NUMBER).description("스크랩 아이디").optional(),
+                    fieldWithPath("report_id").type(BOOLEAN).description("신고 아이디").optional(),
                     fieldWithPath("blocked").type(BOOLEAN).description("차단 여부").optional(),
                     fieldWithPath("created_at").type(STRING).description("생성 일자").attributes(getZonedDateMilliFormat())
                 )
