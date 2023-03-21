@@ -8,9 +8,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum MessageType implements CodeValue {
 
+    BROADCAST("방송"),
     COMMUNITY("커뮤니티"),
     CONTENT("컨텐츠"),
-    LOGIN("로그인");
+    LOGIN("로그인")
+    ;
 
     private final String description;
 

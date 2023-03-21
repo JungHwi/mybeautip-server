@@ -39,7 +39,7 @@ public class Broadcast extends CreatedAtBaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Column
+    @Column(unique = true)
     private Long videoKey;
 
     // used for chat
@@ -190,6 +190,10 @@ public class Broadcast extends CreatedAtBaseEntity {
 
     public boolean isThumbnailUrlEq(@Nullable String thumbnailUrl) {
         return getThumbnailUrl().equals(thumbnailUrl);
+    }
+
+    public boolean isStartedAtEq(ZonedDateTime startedAt) {
+        return this.startedAt.isEqual(startedAt);
     }
 
     public String getThumbnailUrl() {

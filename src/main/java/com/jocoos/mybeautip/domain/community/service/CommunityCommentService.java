@@ -13,6 +13,8 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityCommentReportD
 import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.member.dto.MyCommunityCommentResponse;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
+import com.jocoos.mybeautip.domain.notification.aspect.annotation.SendNotification;
+import com.jocoos.mybeautip.domain.notification.code.TemplateType;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.jocoos.mybeautip.domain.notification.code.TemplateType.*;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.*;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.COMMUNITY_COMMENT;
@@ -92,6 +95,7 @@ public class CommunityCommentService {
         return relationService.setRelationInfo(member, response);
     }
 
+    @SendNotification(templateTypes = {TemplateType.COMMUNITY_COMMENT, COMMUNITY_COMMENT_REPLY})
     @Transactional
     public CommunityCommentResponse write(WriteCommunityCommentRequest request) {
         Member member = request.getMember();

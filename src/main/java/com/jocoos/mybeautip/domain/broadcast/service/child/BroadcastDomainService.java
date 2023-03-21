@@ -9,9 +9,11 @@ import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastEditRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastNotification;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastReport;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastCategoryDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastNotificationDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditCommand;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
@@ -33,6 +35,7 @@ public class BroadcastDomainService {
     private final BroadcastDao broadcastDao;
     private final BroadcastCategoryDao categoryDao;
     private final BroadcastReportDao reportDao;
+    private final BroadcastNotificationDao notificationDao;
     private final BroadcastConverter converter;
     private final BroadcastStatusService statusService;
     private final BroadcastFFLService fflService;
@@ -65,16 +68,24 @@ public class BroadcastDomainService {
     }
 
     @Transactional
-    public Broadcast changeStatus(long broadcastId, BroadcastStatus changeStatus) {
+    public BroadcastEditResult changeStatus(long broadcastId, BroadcastStatus changeStatus) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        statusService.changeStatus(broadcast, changeStatus);
-        return broadcast;
+        return statusService.changeStatus(broadcast, changeStatus);
     }
 
     // if Status change to Live paused_at will be null
     @Transactional
     public void updatePausedAt(Long videoRoomId, @Nullable ZonedDateTime pausedAt) {
         broadcastDao.updatePausedAt(videoRoomId, pausedAt);
+    }
+
+    @Transactional
+    public BroadcastNotification setNotify(Long broadcastId, boolean isNotifyNeeded, Long memberId) {
+        Broadcast broadcast = broadcastDao.get(broadcastId);
+        BroadcastNotification notification = notificationDao.findNotification(broadcast, memberId)
+                .orElse(new BroadcastNotification(memberId, broadcast));
+        notification.changeNotifyNeeded(isNotifyNeeded);
+        return notificationDao.save(notification);
     }
 
     @Transactional

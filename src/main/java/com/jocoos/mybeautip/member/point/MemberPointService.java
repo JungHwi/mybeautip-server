@@ -7,6 +7,8 @@ import com.jocoos.mybeautip.domain.event.persistence.domain.EventJoin;
 import com.jocoos.mybeautip.domain.event.persistence.domain.EventProduct;
 import com.jocoos.mybeautip.domain.point.code.ActivityPointType;
 import com.jocoos.mybeautip.domain.point.service.MemberPointDetailService;
+import com.jocoos.mybeautip.domain.slack.aspect.annotation.SendSlack;
+import com.jocoos.mybeautip.domain.slack.aspect.code.MessageType;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.jocoos.mybeautip.domain.slack.aspect.code.MessageType.POINT_EXPIRED;
 import static com.jocoos.mybeautip.global.constant.PointConstant.DEFAULT_POINT_EXPIRATION_DAY;
 import static com.jocoos.mybeautip.global.constant.PointConstant.EVENT_POINT_EXPIRATION_DAY;
 import static com.jocoos.mybeautip.member.point.MemberPoint.*;
@@ -299,6 +302,7 @@ public class MemberPointService {
         return new MemberPoint(member, null, point, MemberPoint.STATE_REFUNDED_POINT, expiryAt, remind);
     }
 
+    @SendSlack(messageType = POINT_EXPIRED)
     @Transactional
     public MemberPoint expiredPoint(MemberPoint memberPoint, Date expiredAt) {
         if (memberPoint == null) {

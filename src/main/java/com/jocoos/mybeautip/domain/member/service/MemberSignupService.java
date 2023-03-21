@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.member.dto.ExceptionMemberResponse;
 import com.jocoos.mybeautip.domain.member.dto.MemberEntireInfo;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.member.service.social.SocialMemberFactory;
+import com.jocoos.mybeautip.domain.slack.aspect.annotation.SendSlack;
 import com.jocoos.mybeautip.domain.term.code.TermType;
 import com.jocoos.mybeautip.domain.term.service.MemberTermService;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
@@ -36,6 +37,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Set;
 
+import static com.jocoos.mybeautip.domain.slack.aspect.code.MessageType.MEMBER_WITHDRAWAL;
 import static com.jocoos.mybeautip.domain.term.code.TermTypeGroup.isAllRequiredContains;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 
@@ -81,8 +83,9 @@ public class MemberSignupService {
         return memberEntireInfo;
     }
 
+    @SendSlack(messageType = MEMBER_WITHDRAWAL)
     @Transactional
-    public void withdrawal(String reason) {
+    public MemberLeaveLog withdrawal(String reason) {
         Member member = legacyMemberService.currentMember();
         member.setStatus(MemberStatus.WITHDRAWAL);
         member.setVisible(false);
@@ -98,7 +101,7 @@ public class MemberSignupService {
         if (member.getLink() == Member.LINK_APPLE) {
             appleLoginService.revoke(member.getId());
         }
-        memberLeaveLogRepository.save(new MemberLeaveLog(member, reason));
+        return memberLeaveLogRepository.save(new MemberLeaveLog(member, reason));
     }
 
     private void validSignup(SignupRequest signupRequest) {

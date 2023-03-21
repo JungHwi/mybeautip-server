@@ -83,7 +83,8 @@ public class AdminBroadcastController {
     }
 
     @PatchMapping("/broadcast/{broadcastId}/shutdown")
-    public void shutdown(@PathVariable long broadcastId) {
+    public ResponseEntity<Void> shutdown(@PathVariable long broadcastId) {
         service.shutdown(broadcastId);
+        return ResponseEntity.noContent().build();
     }
 }

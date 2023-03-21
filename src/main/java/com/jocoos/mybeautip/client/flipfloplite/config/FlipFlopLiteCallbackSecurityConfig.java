@@ -13,7 +13,7 @@ public class FlipFlopLiteCallbackSecurityConfig {
     public FilterRegistrationBean<FFLCallbackFilter> fflCallbackFilterFilterRegistrationBean(@Autowired FFLCallbackFilter fflCallbackFilter) {
         FilterRegistrationBean<FFLCallbackFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(fflCallbackFilter);
-        registrationBean.addUrlPatterns("/api/callback/ffl");
+        registrationBean.addUrlPatterns("/callback/ffl");
         return registrationBean;
     }
 

@@ -1,24 +1,14 @@
 package com.jocoos.mybeautip.support.slack;
 
 import com.jocoos.mybeautip.admin.Dates;
-import com.jocoos.mybeautip.log.MemberLeaveLog;
-import com.jocoos.mybeautip.member.block.Block;
-import com.jocoos.mybeautip.member.comment.CommentReport;
 import com.jocoos.mybeautip.member.coupon.MemberCoupon;
 import com.jocoos.mybeautip.member.order.Order;
 import com.jocoos.mybeautip.member.order.OrderInquiry;
 import com.jocoos.mybeautip.member.order.Purchase;
 import com.jocoos.mybeautip.member.point.MemberPoint;
-import com.jocoos.mybeautip.member.report.Report;
 import com.jocoos.mybeautip.restapi.ScheduleController;
 import com.jocoos.mybeautip.schedules.Schedule;
-import com.jocoos.mybeautip.support.DateUtils;
 import com.jocoos.mybeautip.video.Video;
-import com.jocoos.mybeautip.video.VideoCategoryMapping;
-import com.jocoos.mybeautip.video.VideoGoods;
-import com.jocoos.mybeautip.video.VideoGoodsRepository;
-import com.jocoos.mybeautip.video.report.VideoReport;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,71 +25,20 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
 @Service
 public class SlackService {
 
-    private final VideoGoodsRepository videoGoodsRepository;
     private final RestTemplate restTemplate;
     @Value("${mybeautip.slack.key}")
     private String slackKey;
-    @Value("${mybeautip.slack.channel}")
-    private String slackChannel;
     @Value("${mybeautip.slack.order-key}")
     private String orderSlackKey;
-    @Value("${mybeautip.slack.order-channel}")
-    private String orderSlackChannel;
-
-    public void sendForVideo(Video video) {
-        String header;
-        boolean isPrivateVideo = "PRIVATE".equals(video.getVisibility());
-        if ("BROADCASTED".equals(video.getType())) {
-            header = "라이브(" + video.getId() + ") 시작";
-        } else {
-            header = isPrivateVideo ?
-                    String.format("#비공개 컨텐츠(%d) 업로드 완료", video.getId()) :
-                    String.format("컨텐츠(%d) 업로드 완료", video.getId());
-        }
-
-        StringBuilder sb = new StringBuilder(String.format("*%s*", header));
-        sb.append(String.format("```사용자: %s / %d\n", video.getMember().getUsername(), video.getMember().getId()));
-        if (isPrivateVideo) {
-            sb.append(String.format("영상제목: [%s] %s, 비디오 키: %s, 공개일: %s\n", video.getCategoryNames(), video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())));
-        } else {
-            sb.append(String.format("영상제목: [%s] %s, 비디오 키: %s, 공개일: %s\n", video.getCategoryNames(), video.getTitle(), video.getVideoKey(), DateUtils.toFormat(video.getStartedAt())));
-        }
-        sb.append(String.format("%s```", generateRelatedGoodsInfo(video)));
-        send(sb.toString());
-    }
-
-    private String getCategorxy(Video v) {
-        List<VideoCategoryMapping> mapping = v.getCategoryMapping();
-        return mapping != null ? mapping.stream().map(m -> m.getVideoCategory().getTitle()).collect(Collectors.joining(", ")) : "없음";
-    }
-
-    private String generateRelatedGoodsInfo(Video video) {
-        if (video.getRelatedGoodsCount() == null || video.getRelatedGoodsCount() == 0) {
-            return "관련상품: 없음";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("관련상품: ").append(video.getRelatedGoodsCount()).append("개");
-        List<VideoGoods> goodsList = videoGoodsRepository.findAllByVideoId(video.getId());
-        for (VideoGoods vGoods : goodsList) {
-            sb.append("\n - ").append(StringUtils.substring(vGoods.getGoods().getGoodsNm(), 0, 40));
-        }
-        return sb.toString();
-    }
 
     public void sendForOrder(Order order) {
-        String message = String.format("*주문(%d)*" +
-                        "```주문자: %s/%d\n" +
-                        "관련영상: %s\n" +
-                        "결제금액: %d, 결제방식: %s" +
-                        "%s```",
+        String message = String.format("*주문(%d)*```주문자: %s/%d%n관련영상: %s%n결제금액: %d, 결제방식: %s%s```",
                 order.getId(),
                 order.getCreatedBy().getUsername(), order.getCreatedBy().getId(),
                 order.getVideoId() == null ? "없음" : order.getVideoId().toString(),
@@ -154,93 +93,6 @@ public class SlackService {
                 orderInquiry.getReason(),
                 orderInquiry.getOrder().getStatus());
         sendToOrderChannel(message);
-    }
-
-    public void sendForDeleteMember(MemberLeaveLog memberLeaveLog) {
-        String message = String.format("*회원탈퇴*" +
-                        "```사용자: %s/%d\n" +
-                        "Link:%d (1:facebook 2:naver 4:kakao 8:apple)\n" +
-                        "탈퇴이유: %s```",
-                memberLeaveLog.getMember().getUsername(),
-                memberLeaveLog.getMember().getId(),
-                memberLeaveLog.getMember().getLink(),
-                memberLeaveLog.getReason());
-        send(message);
-    }
-
-    public void sendForReportVideo(VideoReport report) {
-        String message = String.format("*영상신고*" +
-                        "```%s/%d (이)가 %s/%d 영상을 신고함\n" +
-                        "신고이유: %s```",
-                report.getCreatedBy().getUsername(),
-                report.getCreatedBy().getId(),
-                report.getVideo().getTitle(),
-                report.getVideo().getId(),
-                report.getReason());
-        send(message);
-    }
-
-    public void sendForReportMember(Report report) {
-        String message = String.format("*회원신고*" +
-                        "```%s/%d (이)가 %s/%d 회원을 신고함\n" +
-                        "신고이유: %s```",
-                report.getMe().getUsername(),
-                report.getMe().getId(),
-                report.getYou().getUsername(),
-                report.getYou().getId(),
-                report.getReason());
-        send(message);
-    }
-
-    public void sendForReportComment(CommentReport report) {
-        String message = String.format("*댓글신고*" +
-                        "```%s/%d (이)가 %d 영상의 %s 댓글을 신고함\n" +
-                        "신고이유: %s```",
-                report.getCreatedBy().getUsername(),
-                report.getCreatedBy().getId(),
-                report.getComment().getVideoId(),
-                report.getComment().getComment(),
-                toReason(report.getReasonCode()));
-        send(message);
-    }
-
-    private String toReason(int reasonCode) {
-        String reason;
-        switch (reasonCode) {
-            case 1:
-                reason = "홍보 또는 상업적인 내용";
-                break;
-            case 2:
-                reason = "음란성 혹은 부적절한 내용";
-                break;
-            case 3:
-                reason = "명예훼손 및 저작권 침해등";
-                break;
-            case 4:
-                reason = "정치적 성향 및 갈등 조장";
-                break;
-            case 5:
-                reason = "허위사실 유포 등";
-                break;
-            default:
-                reason = "";
-        }
-        return reason;
-    }
-
-    public void sendForBlockMember(Block block) {
-        String message = String.format("*회원차단*" +
-                        "```%d (이)가 %s/%d 회원을 차단함```",
-                block.getMe(),
-                block.getMemberYou().getUsername(),
-                block.getMemberYou().getId());
-        send(message);
-    }
-
-    public void sendForBillingInfo(String merchantUid, String impUid) {
-        String message = String.format("*아임포트 billing info 추가됨*" +
-                "```merchant_uid: %s, imp_uid: %s```", merchantUid, impUid);
-        send(message);
     }
 
     public void sendForImportRequestBillingException(String merchantId, String response) {
@@ -306,16 +158,6 @@ public class SlackService {
         send(message);
     }
 
-    public void sendDeductPoint(MemberPoint memberPoint) {
-        String details = String.format("%s/%d - 포인트: -%s, 유효기간: %s", memberPoint.getMember().getUsername(), memberPoint.getMember().getId(),
-                memberPoint.getFormattedPoint(), Dates.toString(memberPoint.getExpiryAt(), ZoneId.of("Asia/Seoul")));
-        String message = String.format("*포인트(%d) 차감*" +
-                "```%s```", memberPoint.getPoint(), details);
-
-        log.debug("{}", message);
-        send(message);
-    }
-
     public void sendUsedCouponUse(MemberCoupon memberCoupon) {
         String details = String.format("%s/%d - 쿠폰: -%s, 유효기간: %s", memberCoupon.getMember().getUsername(), memberCoupon.getMember().getId(),
                 memberCoupon.getCoupon().getDescription(), Dates.toString(memberCoupon.getExpiryAt(), ZoneId.of("Asia/Seoul")));
@@ -334,19 +176,6 @@ public class SlackService {
                 schedule.getCreatedBy().getId(),
                 schedule.getTitle(),
                 Dates.toString(schedule.getStartedAt(), ZoneId.of("Asia/Seoul")));
-        send(message);
-    }
-
-    public void duplicateTag(Long id) {
-        String message = String.format("*TAG 중복 발생*" +
-                        "```Member Id: %d```",
-                id);
-        send(message);
-    }
-
-    public void duplicateUsername(String username) {
-        String message = String.format("*Username 중복 발생*" +
-                        "```Member Id: %s```",  username);
         send(message);
     }
 

@@ -15,6 +15,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerato
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.dto.FileDto
+import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -350,6 +351,37 @@ class BroadcastControllerTest(
                     fieldWithPath("category").type(OBJECT).description("카테고리 정보"),
                     fieldWithPath("category.id").type(NUMBER).description("카테고리 아이디"),
                     fieldWithPath("category.title").type(STRING).description("카테고리 타이틀")
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Broadcast Set Notify API`() {
+        val request = BooleanDto(false)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/api/1/broadcast/{broadcast_id}/notification", broadcast.id)
+                    .header(AUTHORIZATION, requestUserToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "set_notify_broadcast",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                requestFields(
+                    fieldWithPath("bool").type(BOOLEAN).description("알림 설정 여부")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("방송 아이디"),
+                    fieldWithPath("is_notify_needed").type(BOOLEAN).description("알림 설정 여부")
                 )
             )
         )

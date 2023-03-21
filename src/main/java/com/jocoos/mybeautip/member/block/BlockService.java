@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.member.block;
 
 import com.jocoos.mybeautip.domain.member.service.dao.MemberBlockDao;
+import com.jocoos.mybeautip.domain.slack.aspect.annotation.SendSlack;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.jocoos.mybeautip.member.Member;
@@ -10,13 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
+import static com.jocoos.mybeautip.domain.slack.aspect.code.MessageType.MEMBER_BLOCK;
 import static com.jocoos.mybeautip.member.block.BlockStatus.BLOCK;
 import static com.jocoos.mybeautip.member.block.BlockStatus.UNBLOCK;
 
@@ -45,6 +40,7 @@ public class BlockService {
         return blockMember(userId, targetMember);
     }
 
+    @SendSlack(messageType = MEMBER_BLOCK)
     @Transactional
     public Block blockMember(long memberId, Member targetMember) {
         Block block = memberBlockDao.getBlockOrElseNewBlock(memberId, targetMember);
@@ -65,36 +61,6 @@ public class BlockService {
     public void unblock(Block block) {
         block.changeStatus(UNBLOCK);
         memberBlockDao.save(block);
-    }
-
-    public Map<Long, Block> getBlackListByMe(Long me) {
-        List<Block> blocks = memberBlockDao.findAllMyBlock(me);
-        Map<Long, Block> map = blocks != null ?
-                blocks.stream().collect(Collectors.toMap(Block::getYouId, Function.identity())) :
-                new HashMap<>();
-        new HashMap<>();
-
-        if (map.keySet().size() > 0) {
-            log.debug("{} blocked by {}", new ArrayList<>(map.keySet()), me);
-        }
-        return map;
-    }
-
-    @Transactional
-    public boolean isBlocked(long memberId, long targetId) {
-        Member targetMember = memberRepository.findById(targetId)
-                .orElseGet(null);
-
-        if (targetMember == null) {
-            return false;
-        }
-
-        return memberBlockDao.isBlock(memberId, targetMember);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isBlocked(long memberId, Member targetMember) {
-        return memberBlockDao.isBlock(memberId, targetMember);
     }
 
     private void validAlreadyBlocked(Block block) {

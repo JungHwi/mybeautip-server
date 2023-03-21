@@ -1,11 +1,9 @@
 package com.jocoos.mybeautip.domain.video.service;
 
-import com.jocoos.mybeautip.domain.notification.service.impl.VideoUploadNotificationService;
 import com.jocoos.mybeautip.domain.video.dto.AdminVideoResponse;
 import com.jocoos.mybeautip.domain.video.service.dao.VideoDao;
 import com.jocoos.mybeautip.domain.video.vo.AdminVideoSearchCondition;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
-import com.jocoos.mybeautip.support.slack.SlackService;
 import com.jocoos.mybeautip.video.Video;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,8 +18,6 @@ public class AdminVideoService {
 
     private final VideoDao videoDao;
     private final VideoCommentDeleteService commentDeleteService;
-    private final SlackService slackService;
-    private final VideoUploadNotificationService notificationService;
 
     @Transactional(readOnly = true)
     public PageResponse<AdminVideoResponse> getVideos(AdminVideoSearchCondition condition) {

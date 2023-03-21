@@ -4,7 +4,9 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
+import com.jocoos.mybeautip.global.dto.IdAndBooleanResponse.NotificationResponse;
 import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +65,13 @@ public class BroadcastController {
             @RequestBody BroadcastStatusRequest request,
             @CurrentMember MyBeautipUserDetails userDetails) {
         return service.changeStatus(broadcastId, request.getStatus(), userDetails.getMember().getId());
+    }
+
+    @PatchMapping("/1/broadcast/{broadcastId}/notification")
+    public NotificationResponse setNotify(@PathVariable Long broadcastId,
+                                          @RequestBody BooleanDto isNotifyNeeded,
+                                          @CurrentMember MyBeautipUserDetails userDetails) {
+        return service.setNotify(broadcastId, isNotifyNeeded.isBool(), userDetails.getMember().getId());
     }
 
     @PostMapping("/1/broadcast/{broadcastId}/report")

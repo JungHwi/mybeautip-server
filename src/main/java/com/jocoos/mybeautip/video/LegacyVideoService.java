@@ -2,11 +2,11 @@ package com.jocoos.mybeautip.video;
 
 import com.jocoos.mybeautip.admin.MotdDetailInfo;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.video.dao.VideoReportDao;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory;
 import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository;
 import com.jocoos.mybeautip.domain.video.service.VideoCategoryService;
-import com.jocoos.mybeautip.feed.FeedService;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
@@ -66,10 +66,8 @@ import static com.jocoos.mybeautip.video.scrap.ScrapStatus.SCRAP;
 @Service
 public class LegacyVideoService {
 
-    private static final String VIDEO_NOT_FOUND = "video.not_found";
     private final LegacyMemberService legacyMemberService;
     private final TagService tagService;
-    private final FeedService feedService;
     private final SlackService slackService;
     private final VideoRepository videoRepository;
     private final CommentRepository commentRepository;
@@ -84,13 +82,12 @@ public class LegacyVideoService {
     private final VideoReportRepository videoReportRepository;
     private final ViewRecodingRepository viewRecodingRepository;
     private final OrderRepository orderRepository;
-    private final VideoDataService videoDataService;
-    private final VideoCategoryMappingRepository videoCategoryMappingRepository;
     private final VideoScrapRepository videoScrapRepository;
     private final ActivityPointService activityPointService;
     private final VideoCategoryService videoCategoryService;
     private final VideoCategoryRepository videoCategoryRepository;
     private final MotdRecommendationRepository motdRecommendationRepository;
+    private final VideoReportDao videoReportDao;
 
 
     @Value("${mybeautip.video.watch-duration}")
@@ -706,7 +703,7 @@ public class LegacyVideoService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Video reportVideo(Video video, Member me, int reasonCode, String reason) {
-        videoReportRepository.save(new VideoReport(video, me, reasonCode, reason));
+        videoReportDao.save(new VideoReport(video, me, reasonCode, reason));
         video.setReportCount(video.getReportCount() + 1);
         return videoRepository.save(video);
     }

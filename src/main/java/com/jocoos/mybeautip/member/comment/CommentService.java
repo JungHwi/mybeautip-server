@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.comment.CreateCommentRequest;
 import com.jocoos.mybeautip.comment.UpdateCommentRequest;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberActivityCountDao;
 import com.jocoos.mybeautip.domain.point.service.ActivityPointService;
+import com.jocoos.mybeautip.domain.slack.aspect.annotation.SendSlack;
 import com.jocoos.mybeautip.domain.video.service.VideoCommentDeleteService;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
@@ -32,9 +33,10 @@ import java.util.Locale;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.DELETE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.code.ActivityPointType.WRITE_VIDEO_COMMENT;
 import static com.jocoos.mybeautip.domain.point.service.activity.ValidObject.validDomainAndReceiver;
+import static com.jocoos.mybeautip.domain.slack.aspect.code.MessageType.VIDEO_COMMENT_REPORT;
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.VIDEO_COMMENT;
-import static org.springframework.util.StringUtils.*;
+import static org.springframework.util.StringUtils.hasText;
 
 @Slf4j
 @Service
@@ -155,6 +157,7 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
+    @SendSlack(messageType = VIDEO_COMMENT_REPORT)
     @Transactional
     public CommentReport reportComment(Comment comment, Member me, int reasonCode, String reason) {
         CommentReport report = commentReportRepository.save(new CommentReport(comment, me, reasonCode, reason));

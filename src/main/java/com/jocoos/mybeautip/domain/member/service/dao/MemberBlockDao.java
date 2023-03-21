@@ -38,16 +38,6 @@ public class MemberBlockDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Block> findAllMyBlock(Long me) {
-        return repository.findByMeAndStatus(me, BLOCK);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isBlock(Long memberId, Member targetMember) {
-        return repository.countByMeAndMemberYouAndStatus(memberId, targetMember, BLOCK) > 0;
-    }
-
-    @Transactional(readOnly = true)
     public boolean isBlock(Long memberId, Long targetMemberId) {
         return repository.existsByMeAndMemberYouIdAndStatus(memberId, targetMemberId, BLOCK);
     }

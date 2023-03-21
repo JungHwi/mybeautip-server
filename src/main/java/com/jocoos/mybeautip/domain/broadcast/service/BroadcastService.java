@@ -4,7 +4,9 @@ import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
+import com.jocoos.mybeautip.domain.broadcast.event.BroadcastNotificationEvent.BroadcastEditNotificationEvent;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastNotification;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastParticipantInfoService;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastVodService;
@@ -14,13 +16,14 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
-import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
-import com.jocoos.mybeautip.domain.system.service.dao.SystemOptionDao;
+import com.jocoos.mybeautip.global.dto.IdAndBooleanResponse.NotificationResponse;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.Between;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -37,6 +40,7 @@ import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class BroadcastService {
@@ -49,6 +53,7 @@ public class BroadcastService {
     private final BroadcastParticipantInfoService participantInfoService;
     private final BroadcastConverter converter;
     private final AwsS3Handler awsS3Handler;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public BroadcastResponse createBroadcastAndVod(BroadcastCreateRequest request, long creatorId) {
@@ -90,6 +95,7 @@ public class BroadcastService {
         if (editResult.isThumbnailChanged()) {
             awsS3Handler.editFiles(request.getThumbnails(), editedBroadcast.getThumbnailUrlPath());
         }
+        eventPublisher.publishEvent(new BroadcastEditNotificationEvent(editResult));
         return converter.toResponse(editedBroadcast);
     }
 
@@ -104,15 +110,23 @@ public class BroadcastService {
         if (!changeStatus.isCanManuallyChange()) {
             throw new BadRequestException(changeStatus + " can not change manually");
         }
-        Broadcast broadcast = domainService.changeStatus(broadcastId, changeStatus);
-        return converter.toResponse(broadcast);
+        BroadcastEditResult editResult = domainService.changeStatus(broadcastId, changeStatus);
+        eventPublisher.publishEvent(new BroadcastEditNotificationEvent(editResult));
+        return converter.toResponse(editResult.broadcast());
+    }
+
+    @Transactional
+    public NotificationResponse setNotify(Long broadcastId, boolean isNotifyNeeded, Long memberId) {
+        BroadcastNotification notification = domainService.setNotify(broadcastId, isNotifyNeeded, memberId);
+        return new NotificationResponse(notification.getBroadcast().getId(), notification.getIsNotifyNeeded());
     }
 
     @Transactional
     public int report(long broadcastId, long reporterId, BroadcastReportRequest request) {
         return switch (request.type()) {
             case BROADCAST -> domainService.broadcastReport(broadcastId, reporterId, request.reason());
-            case MESSAGE -> domainService.messageReport(broadcastId, reporterId, request.reportedId(), request.reason(), request.description());
+            case MESSAGE ->
+                    domainService.messageReport(broadcastId, reporterId, request.reportedId(), request.reason(), request.description());
         };
     }
 
