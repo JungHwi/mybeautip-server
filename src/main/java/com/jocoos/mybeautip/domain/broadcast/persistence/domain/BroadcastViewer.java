@@ -64,7 +64,7 @@ public class BroadcastViewer {
         this.type = vo.type();
         this.sortedUsername = ViewerUsernameUtil.generateSortedUsername(vo.username());
         this.status = BroadcastViewerStatus.ACTIVE;
-        this.joinedAt = vo.joinedAt();
+        this.joinedAt = ZonedDateTime.now();
     }
 
     public String getUsername() {

@@ -59,7 +59,6 @@ public abstract class FlipFlopLiteConverter {
                 .type(type)
                 .memberId(memberId)
                 .username(username)
-                .joinedAt(response.joinedAt())
                 .build();
     }
 

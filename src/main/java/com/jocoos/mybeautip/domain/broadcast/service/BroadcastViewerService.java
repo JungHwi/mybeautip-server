@@ -14,21 +14,17 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerCursorCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchResult;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
-
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.GUEST_TOKEN_PREFIX;
-import static com.jocoos.mybeautip.global.constant.SignConstant.EMPTY_STRING;
 
 @Service
 @RequiredArgsConstructor
@@ -110,43 +106,25 @@ public class BroadcastViewerService {
     }
 
     @Transactional
-    public ViewerResponse join(long broadcastId, String userInfo) {
+    public ViewerResponse join(long broadcastId, BroadcastViewerVo viewer) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        BroadcastViewerType type = BroadcastViewerType.MEMBER;
-        Long memberId = Long.parseLong(userInfo.replace(GUEST_TOKEN_PREFIX, EMPTY_STRING));
-        String username = userInfo;
-
-        if (userInfo.startsWith(GUEST_TOKEN_PREFIX)) {
-            type = BroadcastViewerType.GUEST;
-        } else if (Objects.equals(broadcast.getMemberId(), memberId)){
-            type = BroadcastViewerType.OWNER;
-        } else if (memberDao.isAdmin(memberId)) {
-            type = BroadcastViewerType.ADMIN;
-        }
-
-        if (type != BroadcastViewerType.GUEST) {
-            Member member = memberDao.getMember(memberId);
-            username = member.getUsername();
-        }
 
         BroadcastViewer broadcastViewer = null;
-        if (dao.exist(broadcastId, memberId)) {
-            broadcastViewer = dao.findBroadcastViewer(broadcastId, memberId)
-                    .orElseThrow(() -> new MemberNotFoundException(memberId));
-            broadcastViewer.reJoin(type, username);
+        if (dao.exist(broadcastId, viewer.memberId())) {
+            broadcastViewer = dao.findBroadcastViewer(broadcastId, viewer.memberId())
+                    .orElseThrow(() -> new MemberNotFoundException(viewer.memberId()));
+            broadcastViewer.reJoin(viewer.type(), viewer.username());
         } else {
-            broadcastViewer = dao.save(new BroadcastViewer(broadcast, type, memberId, username));
+            broadcastViewer = dao.save(new BroadcastViewer(broadcast, viewer));
         }
 
         return converter.converts(broadcastViewer);
     }
 
     @Transactional
-    public ViewerResponse out(long broadcastId, String userInfo) {
-        Long memberId = Long.parseLong(userInfo.replace(GUEST_TOKEN_PREFIX, EMPTY_STRING));
-
-        BroadcastViewer broadcastViewer = dao.findBroadcastViewer(broadcastId, memberId)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
+    public ViewerResponse out(long broadcastId, BroadcastViewerVo viewer) {
+        BroadcastViewer broadcastViewer = dao.findBroadcastViewer(broadcastId, viewer.memberId())
+                .orElseThrow(() -> new MemberNotFoundException(viewer.memberId()));
 
         broadcastViewer.inactive();
 
