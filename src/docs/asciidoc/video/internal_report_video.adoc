@@ -1,3 +1,3 @@
 == Report Video API
 
-operation::internal_report_video[snippets='http-request,path-parameters,http-response']
+operation::internal_report_video[snippets='http-request,path-parameters,request-fields,http-response']
