@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
@@ -14,7 +15,7 @@ import java.util.Optional;
 public interface BroadcastViewerRepository extends ExtendedQuerydslJpaRepository<BroadcastViewer, Long>, BroadcastViewerCustomRepository {
 
     Optional<BroadcastViewer> findByBroadcastIdAndMemberId(long broadcastId, long memberId);
-
+    Optional<BroadcastViewer> findByMemberIdAndTypeAndStatus(Long memberId, BroadcastViewerType type, BroadcastViewerStatus status);
     Optional<BroadcastViewer> findByBroadcastIdAndMemberIdAndType(Long broadcastId, Long memberId, BroadcastViewerType type);
 
     boolean existsByBroadcastIdAndMemberId(long broadcastId, long memberId);

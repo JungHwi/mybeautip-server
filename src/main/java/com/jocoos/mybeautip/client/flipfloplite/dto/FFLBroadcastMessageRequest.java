@@ -41,11 +41,11 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .build();
     }
 
-    public static FFLBroadcastMessageRequest ofBroadcastEdited(ChatData chatData, ObjectMapper objectMapper) {
+    public static FFLBroadcastMessageRequest ofBroadcastEdited(EditBroadcastChatData editBroadcastChatData, ObjectMapper objectMapper) {
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(UPDATE_BROADCAST)
-                .data(ObjectMapperUtil.converToMap(chatData, objectMapper))
+                .data(ObjectMapperUtil.converToMap(editBroadcastChatData, objectMapper))
                 .build();
     }
 

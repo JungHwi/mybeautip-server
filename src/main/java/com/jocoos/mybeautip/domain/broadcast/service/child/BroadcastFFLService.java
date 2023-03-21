@@ -64,8 +64,8 @@ public class BroadcastFFLService {
 
     public void sendBroadcastEditedMessage(BroadcastEditResult editResult) {
         Broadcast broadcast = editResult.broadcast();
-        ChatData chatData = ChatData.editBroadcast(broadcast);
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofBroadcastEdited(chatData, objectMapper);
+        EditBroadcastChatData editBroadcastChatData = EditBroadcastChatData.editBroadcast(broadcast);
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofBroadcastEdited(editBroadcastChatData, objectMapper);
         flipFlopLiteService.broadcastMessage(broadcast.getVideoKey(), request);
         if (editResult.isStatusChangedToReady()) {
             sendChangeBroadcastStatusMessage(broadcast.getVideoKey(), READY);

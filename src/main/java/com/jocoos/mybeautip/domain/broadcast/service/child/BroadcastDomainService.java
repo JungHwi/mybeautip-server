@@ -21,6 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
+import java.time.ZonedDateTime;
+
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ALREADY_REPORT;
 
 @RequiredArgsConstructor
@@ -66,6 +69,12 @@ public class BroadcastDomainService {
         Broadcast broadcast = broadcastDao.get(broadcastId);
         statusService.changeStatus(broadcast, changeStatus);
         return broadcast;
+    }
+
+    // if Status change to Live paused_at will be null
+    @Transactional
+    public void updatePausedAt(Long videoRoomId, @Nullable ZonedDateTime pausedAt) {
+        broadcastDao.updatePausedAt(videoRoomId, pausedAt);
     }
 
     @Transactional
