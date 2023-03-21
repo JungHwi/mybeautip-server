@@ -17,7 +17,9 @@ import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.makeMember
 import com.jocoos.mybeautip.testutil.fixture.makeVideo
 import com.jocoos.mybeautip.testutil.fixture.makeVideoCategory
+import com.jocoos.mybeautip.testutil.fixture.makeVideoWithData
 import com.jocoos.mybeautip.video.Video
+import com.jocoos.mybeautip.video.VideoExtraData
 import com.jocoos.mybeautip.video.VideoRepository
 import org.hamcrest.CoreMatchers.notNullValue
 import org.json.JSONObject
@@ -39,6 +41,7 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import java.util.*
 
 
 @TestInstance(PER_CLASS)
@@ -54,7 +57,6 @@ class InternalVideoControllerTest(
 
     companion object {
         const val MEMBER_ID = "MEMBER-ID"
-
     }
 
     @MockBean
@@ -79,10 +81,21 @@ class InternalVideoControllerTest(
         BDDMockito.given(legacyMemberService.hasCommentPostPermission(member)).willReturn(true)
     }
 
+
+    fun makeVideoData(): VideoExtraData {
+        var data = VideoExtraData()
+        data.category = "1"
+        data.startedAt = "20230320 110000"
+        data.products = listOf("CeraVe Skin Renewing Night Cream", "WISHFORMULA_003")
+
+        return data
+    }
+
     @Test
     fun getVideos() {
         // given
-        videoRepository.save(makeVideo(defaultAdmin, category))
+        val data = objectMapper.writeValueAsString(makeVideoData());
+        videoRepository.save(makeVideoWithData(defaultAdmin, category, data))
 
         // when & then
         val result: ResultActions = mockMvc
@@ -190,7 +203,8 @@ class InternalVideoControllerTest(
     fun getVideo() {
 
         // given
-        val video: Video = videoRepository.save(makeVideo(defaultAdmin, category))
+        val data = objectMapper.writeValueAsString(makeVideoData());
+        val video: Video = videoRepository.save(makeVideoWithData(defaultAdmin, category, data))
 
         // when & then
         val result: ResultActions = mockMvc
@@ -792,7 +806,8 @@ class InternalVideoControllerTest(
     @Test
     fun getVideosAsGuest() {
         // given
-        videoRepository.save(makeVideo(defaultAdmin, category))
+        val data = objectMapper.writeValueAsString(makeVideoData());
+        videoRepository.save(makeVideoWithData(defaultAdmin, category, data))
 
         // when & then
         val result: ResultActions = mockMvc
@@ -900,7 +915,8 @@ class InternalVideoControllerTest(
     fun getVideoAsGuest() {
 
         // given
-        val video: Video = videoRepository.save(makeVideo(defaultAdmin, category))
+        val data = objectMapper.writeValueAsString(makeVideoData());
+        val video: Video = videoRepository.save(makeVideoWithData(defaultAdmin, category, data))
 
         // when & then
         val result: ResultActions = mockMvc
