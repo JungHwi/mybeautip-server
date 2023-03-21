@@ -4,7 +4,6 @@ import com.jocoos.mybeautip.devices.HealthCheckRepository
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.testutil.fixture.makeHealthCheck
-import com.jocoos.mybeautip.testutil.fixture.makeMember
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
@@ -24,7 +23,7 @@ class HealthCheckControllerTest(
 
     @Test
     fun healthCheck() {
-        healthCheckRepository.save(makeHealthCheck(makeMember()))
+        healthCheckRepository.save(makeHealthCheck())
 
         val result: ResultActions = mockMvc
             .perform(

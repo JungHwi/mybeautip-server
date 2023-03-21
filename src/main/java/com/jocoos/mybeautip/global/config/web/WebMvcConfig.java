@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.config.web;
 
+import com.jocoos.mybeautip.domain.broadcast.annotation.service.CurrentViewerArgumentResolver;
 import com.jocoos.mybeautip.global.config.web.formatter.StringToZonedDatedTime;
 import com.jocoos.mybeautip.global.resolver.AuthenticationArgumentResolver;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final AuthenticationArgumentResolver authenticationArgumentResolver;
+    private final CurrentViewerArgumentResolver currentViewerArgumentResolver;
 
     @Override
     public void addFormatters(FormatterRegistry formatterRegistry) {
@@ -24,5 +26,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(authenticationArgumentResolver);
+        resolvers.add(currentViewerArgumentResolver);
     }
 }

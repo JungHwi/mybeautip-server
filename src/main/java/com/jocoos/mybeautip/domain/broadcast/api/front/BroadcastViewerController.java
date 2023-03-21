@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front;
 
+import com.jocoos.mybeautip.domain.broadcast.annotation.CheckPermission;
+import com.jocoos.mybeautip.domain.broadcast.annotation.CurrentViewer;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
@@ -7,12 +9,10 @@ import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastViewerService;
+import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
-import com.jocoos.mybeautip.global.annotation.CheckPermission;
-import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
-import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -111,14 +111,14 @@ public class BroadcastViewerController {
     }
 
     @PostMapping("/1/broadcast/{broadcastId}/viewer")
-    public ViewerResponse join(@CurrentMember MyBeautipUserDetails userDetails,
+    public ViewerResponse join(@CurrentViewer BroadcastViewerVo viewer,
                                @PathVariable long broadcastId) {
-        return viewerService.join(broadcastId, userDetails.getUsername());
+        return viewerService.join(broadcastId, viewer);
     }
 
     @DeleteMapping("/1/broadcast/{broadcastId}/viewer")
-    public ViewerResponse out(@CurrentMember MyBeautipUserDetails userDetails,
-                               @PathVariable long broadcastId) {
-        return viewerService.out(broadcastId, userDetails.getUsername());
+    public ViewerResponse out(@CurrentViewer BroadcastViewerVo viewer,
+                              @PathVariable long broadcastId) {
+        return viewerService.out(broadcastId, viewer);
     }
 }

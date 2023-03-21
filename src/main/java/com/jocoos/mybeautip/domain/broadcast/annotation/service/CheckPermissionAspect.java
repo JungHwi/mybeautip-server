@@ -1,8 +1,8 @@
-package com.jocoos.mybeautip.global.annotation.service;
+package com.jocoos.mybeautip.domain.broadcast.annotation.service;
 
+import com.jocoos.mybeautip.domain.broadcast.annotation.CheckPermission;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
-import com.jocoos.mybeautip.global.annotation.CheckPermission;
 import com.jocoos.mybeautip.global.code.PermissionType;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
@@ -35,7 +35,7 @@ public class CheckPermissionAspect {
     private final BroadcastDao broadcastDao;
     private final BroadcastViewerDao broadcastViewerDao;
 
-    @Before("@annotation(com.jocoos.mybeautip.global.annotation.CheckPermission)")
+    @Before("@annotation(com.jocoos.mybeautip.domain.broadcast.annotation.CheckPermission)")
     public void checkPermission(JoinPoint joinPoint) {
         long broadcastId = getBroadcastId(joinPoint);
         long memberId = getCurrentMemberId();

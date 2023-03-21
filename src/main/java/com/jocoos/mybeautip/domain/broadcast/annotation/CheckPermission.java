@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.global.annotation;
+package com.jocoos.mybeautip.domain.broadcast.annotation;
 
 import com.jocoos.mybeautip.global.code.PermissionType;
 
