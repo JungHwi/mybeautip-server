@@ -41,10 +41,10 @@ mybeautip:
     image-path:
       domain: https://static.mybeautip.com/common/
   slack:
-    key: T03FMJ9ANNR/B03FT8YFXC5/GFY50VQh98iRpEs4XbmxmrYP
-    channel: "#mybeautip-prod"
-    order-key: T02GN94AU/BKB98G20Z/mula9sD6NE9rpxIhuRWUePwH
-    order-channel: "#z-mybeautip-order"
+    key: T03FMJ9ANNR/B04UY2326Q4/dNXNIlNT2ULobx05Z8BwWOsX
+    channel: "#mybeautip-plus-prod"
+    order-key: T03FMJ9ANNR/B04UY2326Q4/dNXNIlNT2ULobx05Z8BwWOsX
+    order-channel: "#z-mybeautip-plus-prod"
   iamport:
     api: https://api.iamport.kr
     key: 3621612290867148

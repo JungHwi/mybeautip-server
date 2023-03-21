@@ -38,10 +38,10 @@ mybeautip:
     image-path:
       domain: https://static-stag.mybeautip.com/common/
   slack:
-    key: T03FMJ9ANNR/B041VSPMK5F/AsOp07FFcGNKvldDFAh85z4D
-    channel: "#mybeautip-stage"
-    order-key: T03FMJ9ANNR/B041VSPMK5F/AsOp07FFcGNKvldDFAh85z4D
-    order-channel: "#mybeautip-stage"
+    key: T03FMJ9ANNR/B04UVDUB6BD/G8L6xEnR5a06jSI2MBSYAOiO
+    channel: "#mybeautip-plus-stage"
+    order-key: T03FMJ9ANNR/B04UVDUB6BD/G8L6xEnR5a06jSI2MBSYAOiO
+    order-channel: "#mybeautip-plus-stage"
   iamport:
     api: https://api.iamport.kr
     key: 3621612290867148
