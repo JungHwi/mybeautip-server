@@ -9,16 +9,17 @@ import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastEditRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastNotification;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastReport;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastCategoryDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastNotificationDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditCommand;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult.OriginalInfo;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,10 +35,10 @@ public class BroadcastDomainService {
     private final BroadcastDao broadcastDao;
     private final BroadcastCategoryDao categoryDao;
     private final BroadcastReportDao reportDao;
+    private final BroadcastNotificationDao notificationDao;
     private final BroadcastConverter converter;
     private final BroadcastStatusService statusService;
     private final BroadcastFFLService fflService;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Broadcast create(BroadcastCreateRequest request, long creatorId) {
@@ -76,6 +77,15 @@ public class BroadcastDomainService {
     @Transactional
     public void updatePausedAt(Long videoRoomId, @Nullable ZonedDateTime pausedAt) {
         broadcastDao.updatePausedAt(videoRoomId, pausedAt);
+    }
+
+    @Transactional
+    public BroadcastNotification setNotify(Long broadcastId, boolean isNotifyNeeded, Long memberId) {
+        Broadcast broadcast = broadcastDao.get(broadcastId);
+        BroadcastNotification notification = notificationDao.findNotification(broadcast, memberId)
+                .orElse(new BroadcastNotification(memberId, broadcast));
+        notification.changeNotifyNeeded(isNotifyNeeded);
+        return notificationDao.save(notification);
     }
 
     @Transactional

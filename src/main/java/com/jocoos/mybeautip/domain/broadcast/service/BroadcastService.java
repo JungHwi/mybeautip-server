@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.event.BroadcastNotificationEvent.BroadcastEditNotificationEvent;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastNotification;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastParticipantInfoService;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastVodService;
@@ -15,6 +16,7 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
+import com.jocoos.mybeautip.global.dto.IdAndBooleanResponse.NotificationResponse;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.Between;
@@ -111,6 +113,12 @@ public class BroadcastService {
         BroadcastEditResult editResult = domainService.changeStatus(broadcastId, changeStatus);
         eventPublisher.publishEvent(new BroadcastEditNotificationEvent(editResult));
         return converter.toResponse(editResult.broadcast());
+    }
+
+    @Transactional
+    public NotificationResponse setNotify(Long broadcastId, boolean isNotifyNeeded, Long memberId) {
+        BroadcastNotification notification = domainService.setNotify(broadcastId, isNotifyNeeded, memberId);
+        return new NotificationResponse(notification.getBroadcast().getId(), notification.getIsNotifyNeeded());
     }
 
     @Transactional

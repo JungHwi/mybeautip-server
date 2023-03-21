@@ -24,4 +24,14 @@ public class BroadcastNotification {
     private Broadcast broadcast;
 
     private Boolean isNotifyNeeded;
+
+    public BroadcastNotification(Long memberId, Broadcast broadcast) {
+        this.memberId = memberId;
+        this.broadcast = broadcast;
+        this.isNotifyNeeded = true;
+    }
+
+    public void changeNotifyNeeded(Boolean isNotifyNeeded) {
+        this.isNotifyNeeded = isNotifyNeeded;
+    }
 }
