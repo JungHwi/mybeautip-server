@@ -29,7 +29,6 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/api/callback/ffl").permitAll()
                 .antMatchers("/test/**").permitAll()
                 .antMatchers("/internal/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
