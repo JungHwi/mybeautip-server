@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.IdAndBooleanResponse.NotificationResponse;
 import com.jocoos.mybeautip.global.dto.IdAndCountResponse.ReportCountResponse;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
+import com.jocoos.mybeautip.global.dto.single.IntegerDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -82,4 +83,15 @@ public class BroadcastController {
 
         return new ReportCountResponse(broadcastId, reportCount);
     }
+
+    @PostMapping("/1/broadcast/{broadcastId}/heart")
+    public HeartCountResponse addHeartCount(@PathVariable Long broadcastId, @RequestBody IntegerDto count) {
+        return service.addHeartCount(broadcastId, count.getNumber());
+    }
+
+    @GetMapping("/1/broadcast/{broadcastId}/heart")
+    public HeartCountResponse getHeartCount(@PathVariable Long broadcastId) {
+        return service.getHeartCount(broadcastId);
+    }
+
 }

@@ -5,10 +5,12 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
+import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.broadcast.service.AdminBroadcastService;
 import com.jocoos.mybeautip.domain.search.dto.CountResponse;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.IdDto;
+import com.jocoos.mybeautip.global.dto.single.IntegerDto;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
@@ -86,5 +88,15 @@ public class AdminBroadcastController {
     public ResponseEntity<Void> shutdown(@PathVariable long broadcastId) {
         service.shutdown(broadcastId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/broadcast/{broadcastId}/heart")
+    public HeartCountResponse addHeartCount(@PathVariable Long broadcastId, @RequestBody IntegerDto count) {
+        return service.addHeartCount(broadcastId, count.getNumber());
+    }
+
+    @GetMapping("/broadcast/{broadcastId}/heart")
+    public HeartCountResponse getHeartCount(@PathVariable Long broadcastId) {
+        return service.getHeartCount(broadcastId);
     }
 }

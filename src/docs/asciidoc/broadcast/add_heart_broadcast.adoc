@@ -1,0 +1,3 @@
+== Add Heart Broadcast API
+
+operation::add_heart_broadcast[snippets='http-request,path-parameters,request-fields,http-response,response-fields']
