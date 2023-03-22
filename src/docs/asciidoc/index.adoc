@@ -192,6 +192,7 @@ include::overview.adoc[]
 * link:broadcast/admin_get_report_count_broadcast.html[방송 신고수 조회 API, window=_blank]
 * link:broadcast/admin_edit_broadcast.html[방송 수정 API, window=_blank]
 * link:broadcast/admin_shutdown_broadcast.html[방송 강제 종료 API, window=_blank]
+* link:broadcast/admin_get_broadcast_report_list.html[방송 신고 내역 조회 API, window=_blank]
 
 === Admin Broadcast Viewer & Chatting API
 * link:broadcast/admin_get_viewers.html[방송 시청자 목록 조회 API, window=_blank]
