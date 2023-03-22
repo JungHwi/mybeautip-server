@@ -304,6 +304,7 @@ class AdminBroadcastControllerTest(
         )
     }
 
+    @Test
     fun `Admin Broadcast Get Reports API`() {
 
         broadcastReportRepository.saveAll(listOf(
