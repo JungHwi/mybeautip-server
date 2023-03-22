@@ -85,8 +85,7 @@ public class BroadcastStatusService {
     }
 
     private Broadcast toCancel(Broadcast broadcast, BroadcastStatus changeStatus) {
-//        ZonedDateTime endedAt = fflService.cancelVideoRoomAndSendChatMessage(broadcast.getVideoKey());
-        ZonedDateTime endedAt = ZonedDateTime.now();
+        ZonedDateTime endedAt = fflService.cancelVideoRoomAndSendChatMessage(broadcast.getVideoKey());
         broadcast.finish(changeStatus, endedAt);
         return broadcast;
     }
