@@ -60,7 +60,7 @@ public class FFLCallbackService {
         for (BroadcastViewer owner : activeOwners) {
             Broadcast ownerActiveBroadcast = owner.getBroadcast();
             log.debug("broadcast will be live : {}, {}", ownerActiveBroadcast.getId(), ownerActiveBroadcast.getStatus());
-            flipFlopLiteService.directMessage(ownerActiveBroadcast.getId(), request);
+            flipFlopLiteService.directMessage(ownerActiveBroadcast.getVideoKey(), request);
         }
     }
 
