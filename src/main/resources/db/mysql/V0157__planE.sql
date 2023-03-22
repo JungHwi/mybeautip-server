@@ -118,6 +118,18 @@ create table broadcast_notification
     is_notify_needed boolean not null comment '알림 설정 여부'
 ) charset = utf8mb4 comment '방송 알림 정보';
 
+create table broadcast_pin_message
+(
+    broadcast_id bigint comment '방송 고정 메세지' primary key ,
+    message_id bigint comment '메세지 아이디',
+    member_id bigint comment '작성자 아이디',
+    username varchar(20) comment '작성자 닉네임',
+    avatar_url varchar(200) comment '작성자 아바타 URL',
+    message varchar(255) comment '메세지 내용',
+    created_at   datetime comment '생성시간',
+    modified_at  datetime comment '수정시간'
+)charset = utf8mb4 comment '방송 고정 메세지 정보';
+
 # drop table influencer;
 # drop table system_option;
 # drop table broadcast_viewer;

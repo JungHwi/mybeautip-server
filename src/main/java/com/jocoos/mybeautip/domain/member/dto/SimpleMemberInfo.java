@@ -20,4 +20,10 @@ public class SimpleMemberInfo {
         this.username = member.getUsername();
         this.avatarUrl = member.getAvatarUrl();
     }
+
+    public SimpleMemberInfo(Long id, String username, String avatarUrl) {
+        this.id = id;
+        this.username = username;
+        this.avatarUrl = avatarUrl;
+    }
 }

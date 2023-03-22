@@ -1,10 +1,12 @@
 package com.jocoos.mybeautip.domain.broadcast.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jocoos.mybeautip.client.flipfloplite.dto.PinMessageInfo;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCategoryResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastPinMessage;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.member.Member;
 import com.querydsl.core.annotations.QueryProjection;
@@ -40,11 +42,13 @@ public class BroadcastSearchResult {
 
     private final BroadcastCategoryResponse category;
     private final SimpleMemberInfo createdBy;
+    private final PinMessageInfo pinMessage;
 
     @QueryProjection
     public BroadcastSearchResult(Broadcast broadcast,
                                  BroadcastCategory category,
-                                 Member member) {
+                                 Member member,
+                                 BroadcastPinMessage pinMessage) {
         this.id = broadcast.getId();
         this.videoKey = broadcast.getVideoKey();
         this.chatChannelKey = broadcast.getChatChannelKey();
@@ -63,5 +67,6 @@ public class BroadcastSearchResult {
         this.createdAt = broadcast.getCreatedAt();
         this.category = new BroadcastCategoryResponse(category);
         this.createdBy = new SimpleMemberInfo(member);
+        this.pinMessage = pinMessage == null ? null : PinMessageInfo.pin(pinMessage);
     }
 }

@@ -67,7 +67,7 @@ public class BroadcastService {
 
     @Transactional(readOnly = true)
     public BroadcastResponse get(long broadcastId, String requestUsername) {
-        BroadcastSearchResult searchResult = broadcastDao.getWithMemberAndCategory(broadcastId);
+        BroadcastSearchResult searchResult = broadcastDao.getSearchResult(broadcastId);
         BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestUsername, searchResult);
         return converter.toResponse(searchResult, participantInfo);
     }

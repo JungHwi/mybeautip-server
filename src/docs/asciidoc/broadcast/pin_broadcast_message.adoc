@@ -1,0 +1,10 @@
+== Pin/NoPin Broadcast Message API
+같은 url 을 쓰지만 요청 방식이 달라서 둘 다 한 문서에 담았습니다. +
+No Pin -> is_pin false , 나머지 파라미터는 없어도 됩니다.
+
+== Pin Broadcast Message API
+operation::pin_broadcast_message[snippets='http-request,path-parameters,request-fields,http-response,response-fields']
+
+
+== No Pin Broadcast Message API
+operation::no_pin_broadcast_message[snippets='http-request,path-parameters,request-fields,http-response,response-fields']

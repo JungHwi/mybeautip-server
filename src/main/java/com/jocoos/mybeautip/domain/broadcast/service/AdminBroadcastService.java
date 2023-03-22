@@ -59,7 +59,7 @@ public class AdminBroadcastService {
 
     @Transactional(readOnly = true)
     public AdminBroadcastResponse get(Long broadcastId, String requestUsername) {
-        BroadcastSearchResult searchResult = broadcastDao.getWithMemberAndCategory(broadcastId);
+        BroadcastSearchResult searchResult = broadcastDao.getSearchResult(broadcastId);
         BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestUsername, searchResult);
         return converter.toAdminResponse(searchResult, participantInfo);
     }

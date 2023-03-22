@@ -81,4 +81,14 @@ public class BroadcastFFLService {
         FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeChatStatus(canChat);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
+
+    public void sendPinMessage(Long videoRoomId, PinMessageInfo pinChat) {
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofPin(pinChat, objectMapper);
+        flipFlopLiteService.broadcastMessage(videoRoomId, request);
+    }
+
+    public void sendNoPinMessage(Long videoRoomId) {
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofNoPin();
+        flipFlopLiteService.broadcastMessage(videoRoomId, request);
+    }
 }
