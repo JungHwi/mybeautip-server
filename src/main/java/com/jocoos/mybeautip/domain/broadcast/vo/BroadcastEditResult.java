@@ -24,7 +24,7 @@ public record BroadcastEditResult(Broadcast broadcast, OriginalInfo originalInfo
     }
 
     public boolean isStatusChangedToReady() {
-        return !isStatusChanged() && broadcast.isStatusEq(READY);
+        return isStatusChanged() && broadcast.isStatusEq(READY);
     }
 
     public boolean isScheduleChanged() {

@@ -320,7 +320,11 @@ class AdminBroadcastControllerTest(
             .andDo(print())
 
         result.andDo(
-            document("admin_get_broadcast_report_list",
+            document(
+                "admin_get_broadcast_report_list",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 아이디")
+                ),
                 requestParameters(
                     parameterWithName("page").description("페이지 넘버").attributes(getDefault(1)).optional(),
                     parameterWithName("size").description("페이지 사이타이").attributes(getDefault(3)).optional(),

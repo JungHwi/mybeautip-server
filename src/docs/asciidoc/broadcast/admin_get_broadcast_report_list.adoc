@@ -1,0 +1,3 @@
+== Get Broadcast Report List API
+
+operation::admin_get_broadcast_report_list[snippets='http-request,path-parameters,request-parameters,http-response,response-fields']
