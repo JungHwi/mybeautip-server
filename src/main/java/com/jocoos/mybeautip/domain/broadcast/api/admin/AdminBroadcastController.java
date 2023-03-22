@@ -1,11 +1,13 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin;
 
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastReportResponse;
 import com.jocoos.mybeautip.domain.broadcast.service.AdminBroadcastService;
 import com.jocoos.mybeautip.domain.search.dto.CountResponse;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
@@ -98,5 +100,13 @@ public class AdminBroadcastController {
     @GetMapping("/broadcast/{broadcastId}/heart")
     public HeartCountResponse getHeartCount(@PathVariable Long broadcastId) {
         return service.getHeartCount(broadcastId);
+    }
+
+    @GetMapping("/broadcast/{broadcastId}/report")
+    public PageResponse<BroadcastReportResponse> getReports(@PathVariable Long broadcastId,
+                                                            @RequestParam(required = false, defaultValue = "BROADCAST") BroadcastReportType type,
+                                                            @RequestParam(required = false, defaultValue = "1") int page,
+                                                            @RequestParam(required = false, defaultValue = "3") int size) {
+        return service.getReports(broadcastId, type, PageRequest.of(page - 1, size));
     }
 }

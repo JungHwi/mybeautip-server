@@ -1,13 +1,17 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin
 
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType.BROADCAST
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastReport
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastReportRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT
@@ -25,8 +29,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
@@ -276,7 +279,7 @@ class AdminBroadcastControllerTest(
 
         val result: ResultActions = mockMvc
             .perform(
-                RestDocumentationRequestBuilders.post("/admin/broadcast/{broadcast_id}/heart", broadcast.id)
+                post("/admin/broadcast/{broadcast_id}/heart", broadcast.id)
                     .header(AUTHORIZATION, defaultAdminToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
@@ -301,6 +304,48 @@ class AdminBroadcastControllerTest(
         )
     }
 
+    fun `Admin Broadcast Get Reports API`() {
+
+        broadcastReportRepository.saveAll(listOf(
+            makeBroadcastReport(broadcast, requestUser.id),
+            makeBroadcastReport(broadcast, defaultAdmin.id)
+        ))
+
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/admin/broadcast/{broadcast_id}/report", broadcast.id)
+                    .header(AUTHORIZATION, defaultAdminToken)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "admin_get_broadcast_report_list",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 아이디")
+                ),
+                requestParameters(
+                    parameterWithName("page").description("페이지 넘버").attributes(getDefault(1)).optional(),
+                    parameterWithName("size").description("페이지 사이타이").attributes(getDefault(3)).optional(),
+                    parameterWithName("type").description(generateLinkCode(BROADCAST_REPORT_TYPE)).attributes(getDefault(BROADCAST)).optional(),
+                ),
+                responseFields(
+                    fieldWithPath("total").type(NUMBER).description("방송 총 개수"),
+                    fieldWithPath("content").type(ARRAY).description("방송 목록"),
+                    fieldWithPath("content.[].id").type(NUMBER).description("방송 신고 아이디"),
+                    fieldWithPath("content.[].reporter").type(OBJECT).description("신고자 정보"),
+                    fieldWithPath("content.[].reporter.id").type(NUMBER).description("신고자 아이디"),
+                    fieldWithPath("content.[].reporter.username").type(STRING).description("신고자 닉네임"),
+                    fieldWithPath("content.[].reported").type(OBJECT).description("신고당한 회원 정보"),
+                    fieldWithPath("content.[].reported.id").type(NUMBER).description("신고당한 회원 아이디"),
+                    fieldWithPath("content.[].reported.username").type(STRING).description("신고당한 회원 닉네임"),
+                    fieldWithPath("content.[].description").type(STRING).description("신고 내용 (신고당한 댓글 내용 등)"),
+                    fieldWithPath("content.[].reason").type(STRING).description("신고 사유"),
+                    fieldWithPath("content.[].created_at").type(STRING).description("생성일시").attributes(getZonedDateFormat())
+                )))
+    }
+
     @Test
     fun `Admin Broadcast Get Heart Count API`() {
 
@@ -320,7 +365,7 @@ class AdminBroadcastControllerTest(
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("방송 아이디"),
-                    fieldWithPath("heart_count").type(NUMBER).description("하트수"),
+                    fieldWithPath("heart_count").type(NUMBER).description("하트수")
                 )
             )
         )

@@ -1,12 +1,14 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastParticipantInfo;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastReportResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastParticipantInfoService;
@@ -88,6 +90,13 @@ public class AdminBroadcastService {
     public HeartCountResponse getHeartCount(Long broadcastId) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
         return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<BroadcastReportResponse> getReports(Long broadcastId,
+                                                    BroadcastReportType type,
+                                                    Pageable pageable) {
+        return new PageResponse<>(reportDao.getList(broadcastId, type, pageable));
     }
 
     private void editThumbnailFile(BroadcastEditResult editResult) {
