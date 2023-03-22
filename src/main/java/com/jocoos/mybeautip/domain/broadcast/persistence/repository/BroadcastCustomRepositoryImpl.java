@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcast.broadcast;
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastCategory.broadcastCategory;
+import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastPinMessage.broadcastPinMessage;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 import static com.querydsl.sql.SQLExpressions.count;
@@ -47,10 +48,9 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     @Override
     public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
         return repository.query(query ->
-                searchResultWithMemberAndCategory(
+                getSearchResult(
                         baseConditionQuery(query, condition)
                 )
-                        .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member))
                         .orderBy(
                                 getOrders(condition.sort())
                         )
@@ -63,7 +63,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     public Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition) {
         List<BroadcastSearchResult> contents = getList(condition);
         JPAQuery<Long> countQuery = repository.query(query ->
-                fromBroadcastWithMemberAndCategory(
+                withMemberAndCategoryAndPinMessage(
                         baseConditionQuery(query, condition))
                         .select(count(broadcast)));
         return PageableExecutionUtils.getPage(contents, condition.pageable(), countQuery::fetchOne);
@@ -71,7 +71,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     @Override
     public Optional<BroadcastSearchResult> get(long broadcastId) {
-        BroadcastSearchResult result = repository.query(query -> searchResultWithMemberAndCategory(query)
+        BroadcastSearchResult result = repository.query(query -> getSearchResult(query)
                 .where(eqId(broadcastId))
                 .fetchOne());
         // result is nullable ignore ide
@@ -120,16 +120,17 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 .fetch());
     }
 
-    private JPAQuery<BroadcastSearchResult> searchResultWithMemberAndCategory(JPAQuery<?> query) {
-        return fromBroadcastWithMemberAndCategory(query)
-                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member));
+    private JPAQuery<BroadcastSearchResult> getSearchResult(JPAQuery<?> query) {
+        return withMemberAndCategoryAndPinMessage(query)
+                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member, broadcastPinMessage));
     }
 
-    private JPAQuery<?> fromBroadcastWithMemberAndCategory(JPAQuery<?> query) {
+    private JPAQuery<?> withMemberAndCategoryAndPinMessage(JPAQuery<?> query) {
         return query
                 .from(broadcast)
                 .join(member).on(broadcast.memberId.eq(member.id))
-                .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory));
+                .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory))
+                .leftJoin(broadcastPinMessage).on(broadcast.id.eq(broadcastPinMessage.broadcastId));
     }
 
     private JPAQuery<?> baseConditionQuery(JPAQuery<?> query, BroadcastSearchCondition condition) {

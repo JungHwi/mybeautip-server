@@ -41,7 +41,8 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .build();
     }
 
-    public static FFLBroadcastMessageRequest ofBroadcastEdited(EditBroadcastChatData editBroadcastChatData, ObjectMapper objectMapper) {
+    public static FFLBroadcastMessageRequest ofBroadcastEdited(EditBroadcastChatData editBroadcastChatData,
+                                                               ObjectMapper objectMapper) {
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(UPDATE_BROADCAST)
@@ -54,6 +55,22 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .messageType(COMMAND)
                 .customType(UPDATE_STATUS)
                 .data(Map.of("status", status))
+                .build();
+    }
+
+    public static FFLBroadcastMessageRequest ofPin(PinMessageInfo pinChat,
+                                                   ObjectMapper objectMapper) {
+        return FFLBroadcastMessageRequest.builder()
+                .messageType(COMMAND)
+                .customType(PIN)
+                .data(ObjectMapperUtil.converToMap(pinChat, objectMapper))
+                .build();
+    }
+
+    public static FFLBroadcastMessageRequest ofNoPin() {
+        return FFLBroadcastMessageRequest.builder()
+                .messageType(COMMAND)
+                .customType(NO_PIN)
                 .build();
     }
 }

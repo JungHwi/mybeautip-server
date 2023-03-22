@@ -10,7 +10,6 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult.OriginalInfo
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,7 @@ public class BroadcastStatusService {
 
     private final BroadcastDao broadcastDao;
     private final BroadcastFFLService fflService;
-    private final ApplicationEventPublisher eventPublisher;
+
 
     @Transactional
     public BroadcastEditResult changeStatus(Broadcast broadcast, BroadcastStatus changeStatus) {

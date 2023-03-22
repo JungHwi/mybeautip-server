@@ -39,7 +39,7 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
-    public BroadcastSearchResult getWithMemberAndCategory(long broadcastId) {
+    public BroadcastSearchResult getSearchResult(long broadcastId) {
         return repository.get(broadcastId)
                 .orElseThrow(broadcastNotFoundException(broadcastId));
     }

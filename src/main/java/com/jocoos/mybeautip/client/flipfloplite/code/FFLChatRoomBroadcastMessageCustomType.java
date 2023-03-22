@@ -20,7 +20,9 @@ public enum FFLChatRoomBroadcastMessageCustomType {
     CHAT("채팅방 활성화", "채팅창이 활성화되었습니다."),
     NO_CHAT("채팅방 정지", "라이브 운영자에 의해 채팅창이 정지되었습니다."),
     UPDATE_BROADCAST("방송 정보 변경", null),
-    UPDATE_STATUS("방송 상태 변경", null)
+    UPDATE_STATUS("방송 상태 변경", null),
+    PIN("채팅 고정", null),
+    NO_PIN("채팅 고정 해제", null)
     ;
 
     private final String description;

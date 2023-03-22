@@ -4,8 +4,10 @@ import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.CANCEL
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCreateRequest
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastEditRequest
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPinMessageRequest
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastStatusRequest
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
+import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastPinMessageRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest
 import com.jocoos.mybeautip.domain.file.code.FileType.IMAGE
@@ -16,6 +18,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.gen
 import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
+import com.jocoos.mybeautip.testutil.fixture.makePinMessage
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -36,7 +39,8 @@ import java.time.ZonedDateTime.now
 
 @TestInstance(PER_CLASS)
 class BroadcastMessageControllerTest(
-    private val broadcastRepository: BroadcastRepository
+    private val broadcastRepository: BroadcastRepository,
+    private val broadcastPinMessageRepository: BroadcastPinMessageRepository
 ) : BroadcastTestSupport() {
 
     private lateinit var broadcast: Broadcast
@@ -77,6 +81,80 @@ class BroadcastMessageControllerTest(
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("방송 아이디"),
                     fieldWithPath("can_chat").type(BOOLEAN).description("채팅룸 채팅 가능 여부")
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Broadcast Pin Message API`() {
+        val request = BroadcastPinMessageRequest(1L,3L, "message", "avatarUrl", "username", true)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/api/1/broadcast/{broadcast_id}/pin-message", broadcast.id)
+                    .header(AUTHORIZATION, defaultInfluencerToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "pin_broadcast_message",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                requestFields(
+                    fieldWithPath("message_id").type(NUMBER).description("메세지 ID"),
+                    fieldWithPath("message").type(STRING).description("메세지 내용"),
+                    fieldWithPath("member_id").type(NUMBER).description("회원 ID"),
+                    fieldWithPath("username").type(STRING).description("회원 닉네임"),
+                    fieldWithPath("avatar_url").type(STRING).description("회원 아바타 URL"),
+                    fieldWithPath("is_pin").type(BOOLEAN).description("메세지 고정 여부, false 일 경우 위 파라미터 전부 옵셔널"),
+                ),
+                responseFields(
+                    fieldWithPath("message_id").type(NUMBER).description("메세지 ID"),
+                    fieldWithPath("message").type(STRING).description("메세지 내용"),
+                    fieldWithPath("created_by").type(OBJECT).description("작성자 정보"),
+                    fieldWithPath("created_by.id").type(NUMBER).description("작성자 ID"),
+                    fieldWithPath("created_by.username").type(STRING).description("작성자 닉네임"),
+                    fieldWithPath("created_by.avatar_url").type(STRING).description("작성자 아바타 URL"),
+                    fieldWithPath("is_pin").type(BOOLEAN).description("메세지 고정 여부")
+                    )
+            )
+        )
+    }
+
+    @Test
+    fun `Broadcast No Pin Message API`() {
+
+        val broadcastEntity = broadcastRepository.save(makeBroadcast(defaultBroadcastCategory))
+        broadcastPinMessageRepository.save(makePinMessage(broadcastEntity))
+        val request = BroadcastPinMessageRequest(null, null, null, null, null, false)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/api/1/broadcast/{broadcast_id}/pin-message", broadcastEntity.id)
+                    .header(AUTHORIZATION, defaultInfluencerToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "no_pin_broadcast_message",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                requestFields(
+                    fieldWithPath("is_pin").type(BOOLEAN).description("메세지 고정 여부, false"),
+                ),
+                responseFields(
+                    fieldWithPath("is_pin").type(BOOLEAN).description("메세지 고정 여부, false")
                 )
             )
         )

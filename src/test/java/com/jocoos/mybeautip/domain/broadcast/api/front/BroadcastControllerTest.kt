@@ -213,7 +213,14 @@ class BroadcastControllerTest(
                     fieldWithPath("participant.broadcast_key.stream_key").type(STRING).description("참여자 Stream Key, 방송 진행자일 경우에만 존재").optional(),
                     fieldWithPath("participant.broadcast_key.gossip_token").type(STRING).description("참여자 채팅 토큰"),
                     fieldWithPath("participant.broadcast_key.app_id").type(STRING).description("참여자 채팅 앱 ID"),
-                    fieldWithPath("participant.broadcast_key.channel_key").type(STRING).description("참여자 채팅 채널 키")
+                    fieldWithPath("participant.broadcast_key.channel_key").type(STRING).description("참여자 채팅 채널 키"),
+                    fieldWithPath("pin_message").type(OBJECT).description("고정 메세지 정보").optional(),
+                    fieldWithPath("pin_message.message_id").type(NUMBER).description("고정 메세지 ID"),
+                    fieldWithPath("pin_message.message").type(STRING).description("고정 메세지 내용"),
+                    fieldWithPath("pin_message.created_by").type(OBJECT).description("고정 메세지 작성자 정보"),
+                    fieldWithPath("pin_message.created_by.id").type(NUMBER).description("고정 메세지 작성자 ID"),
+                    fieldWithPath("pin_message.created_by.username").type(STRING).description("고정 메세지 작성자 닉네임"),
+                    fieldWithPath("pin_message.created_by.avatar_url").type(STRING).description("고정 메세지 작성자 아바타 URL"),
                 )
             )
         )

@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jocoos.mybeautip.client.flipfloplite.dto.PinMessageInfo;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 
@@ -22,5 +23,6 @@ public record BroadcastResponse(long id,
                                 @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
                                 BroadcastCategoryResponse category,
                                 SimpleMemberInfo createdBy,
+                                PinMessageInfo pinMessage,
                                 BroadcastParticipantInfo participant) {
 }

@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastPinMessage
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastReport
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.service.util.ViewerUsernameUtil
@@ -110,4 +111,15 @@ fun makeMessage(
         data,
         appUserIds
     )
+}
+
+fun makePinMessage(
+    broadcast: Broadcast,
+    memberId: Long = 3,
+    username: String = "username",
+    avatarUrl: String = "avatarUrl",
+    messageId: Long = 1,
+    message: String = "message"
+) : BroadcastPinMessage {
+    return BroadcastPinMessage(broadcast, memberId, username, avatarUrl, messageId, message)
 }
