@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 @Getter
@@ -23,6 +24,14 @@ public enum FFLCallbackType {
     STREAM_KEY_INACTIVE
     ;
 
+
+    public FFLVideoRoomState toVideoRoomState() {
+        return switch (this) {
+            case VIDEO_ROOM_LIVE -> FFLVideoRoomState.LIVE;
+            case VIDEO_ROOM_LIVE_INACTIVE -> FFLVideoRoomState.LIVE_INACTIVE;
+            default -> throw new BadRequestException("Invalid video room state");
+        };
+    }
 
     @RequiredArgsConstructor
     public enum FFLCallbackRequestType {

@@ -43,9 +43,8 @@ public class BroadcastViewerDao {
     }
 
     @Transactional(readOnly = true)
-    public BroadcastViewer getActiveOwner(Long memberId) {
-        return repository.findByMemberIdAndTypeAndStatus(memberId, OWNER, ACTIVE)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
+    public List<BroadcastViewer> getActiveOwner(Long memberId) {
+        return repository.findALlByMemberIdAndTypeAndStatus(memberId, OWNER, ACTIVE);
     }
 
     @Transactional(readOnly = true)

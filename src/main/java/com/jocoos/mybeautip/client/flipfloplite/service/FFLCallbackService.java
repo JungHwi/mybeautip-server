@@ -19,9 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState.ACTIVE;
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.READY;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,13 +35,14 @@ public class FFLCallbackService {
     @Transactional
     public void callback(FFLCallbackType type, FFLCallbackData data) {
         switch (FFLCallbackRequestType.getRequestType(type)) {
-            case VIDEO_ROOM_STATUS_CHANGE -> updatePausedAt(data);
+            case VIDEO_ROOM_STATUS_CHANGE -> updatePausedAt(type, data);
             case STREAM_KEY_STATUS_CHANGE -> sendStreamKeyStateChangedMessage(data);
         }
     }
 
-    private void updatePausedAt(FFLCallbackData data) {
-        broadcastDomainService.updatePausedAt(data.videoRoomId(), getPausedAt(data.videoRoomVideoRoomState()));
+    private void updatePausedAt(FFLCallbackType type, FFLCallbackData data) {
+        FFLVideoRoomState fflVideoRoomState = getVideoRoomState(type, data);
+        broadcastDomainService.updatePausedAt(data.videoRoomId(), getPausedAt(fflVideoRoomState));
     }
 
     private void sendStreamKeyStateChangedMessage(FFLCallbackData data) {
@@ -55,9 +56,10 @@ public class FFLCallbackService {
         Long memberId = flipFlopLiteService.getMemberIdFrom(data.streamKeyId());
         FFLDirectMessageRequest request =
                 FFLDirectMessageRequest.ofStreamKeyStateChanged(memberId, currentStreamKeyState);
-        BroadcastViewer activeOwner = viewerDao.getActiveOwner(memberId);
-        Broadcast ownerActiveBroadcast = activeOwner.getBroadcast();
-        if (ownerActiveBroadcast.isStatusEq(READY)) {
+        List<BroadcastViewer> activeOwners = viewerDao.getActiveOwner(memberId);
+        for (BroadcastViewer owner : activeOwners) {
+            Broadcast ownerActiveBroadcast = owner.getBroadcast();
+            log.debug("broadcast will be live : {}, {}", ownerActiveBroadcast.getId(), ownerActiveBroadcast.getStatus());
             flipFlopLiteService.directMessage(ownerActiveBroadcast.getId(), request);
         }
     }
@@ -69,5 +71,10 @@ public class FFLCallbackService {
             case LIVE_INACTIVE -> ZonedDateTime.now();
             default -> throw new BadRequestException("Invalid video room state");
         };
+    }
+
+    private FFLVideoRoomState getVideoRoomState(FFLCallbackType type, FFLCallbackData data) {
+        FFLVideoRoomState fflVideoRoomState = data.videoRoomVideoRoomState();
+        return fflVideoRoomState == null ? type.toVideoRoomState() : fflVideoRoomState;
     }
 }
