@@ -1,0 +1,3 @@
+== Get Heart Count Broadcast API
+
+operation::admin_get_heart_count_broadcast[snippets='http-request,path-parameters,http-response,response-fields']

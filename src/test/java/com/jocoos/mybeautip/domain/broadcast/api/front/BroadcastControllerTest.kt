@@ -16,6 +16,7 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.Doc
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
+import com.jocoos.mybeautip.global.dto.single.IntegerDto
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -422,6 +423,63 @@ class BroadcastControllerTest(
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("방송 아이디"),
                     fieldWithPath("report_count").type(NUMBER).description("신고수"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Broadcast Add Heart Count API`() {
+
+        val request = IntegerDto(10)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                post("/api/1/broadcast/{broadcast_id}/heart", broadcast.id)
+                    .header(AUTHORIZATION, requestUserToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "add_heart_broadcast",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                requestFields(
+                    fieldWithPath("number").type(NUMBER).description("유저가 누른 하트수")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("방송 아이디"),
+                    fieldWithPath("heart_count").type(NUMBER).description("하트수"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `Broadcast Get Heart Count API`() {
+
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/api/1/broadcast/{broadcast_id}/heart", broadcast.id)
+                    .header(AUTHORIZATION, requestUserToken)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "get_heart_count_broadcast",
+                pathParameters(
+                    parameterWithName("broadcast_id").description("방송 ID")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("방송 아이디"),
+                    fieldWithPath("heart_count").type(NUMBER).description("하트수"),
                 )
             )
         )

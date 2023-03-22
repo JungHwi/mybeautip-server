@@ -84,6 +84,11 @@ public class BroadcastDao {
         repository.addReportCountAndFlush(broadcastId, count);
     }
 
+    @Transactional
+    public void addHeartCountAndFlush(Long broadcastId, int count) {
+        repository.addHeartCountAndFlush(broadcastId, count);
+    }
+
     private Supplier<NotFoundException> broadcastNotFoundException(long broadcastId) {
         return () -> new NotFoundException("Not found broadcast. id - " + broadcastId);
     }

@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastParticipantInfo;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
+import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastParticipantInfoService;
@@ -76,6 +77,17 @@ public class AdminBroadcastService {
     @Transactional(readOnly = true)
     public CountResponse countReportedBroadcast(ZonedDateTime startAt) {
         return new CountResponse(reportDao.countReportedBroadcast(startAt));
+    }
+
+    public HeartCountResponse addHeartCount(Long broadcastId, int heartCount) {
+        Broadcast broadcast = domainService.addHeartCount(broadcastId, heartCount);
+        return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
+    }
+
+    @Transactional(readOnly = true)
+    public HeartCountResponse getHeartCount(Long broadcastId) {
+        Broadcast broadcast = broadcastDao.get(broadcastId);
+        return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
     }
 
     private void editThumbnailFile(BroadcastEditResult editResult) {

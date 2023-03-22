@@ -119,6 +119,13 @@ public class BroadcastDomainService {
         return broadcastDao.get(broadcastId).getReportCount();
     }
 
+    // TODO CHANGE TO REDIS
+    @Transactional
+    public Broadcast addHeartCount(Long broadcastId, int heartCount) {
+        broadcastDao.addHeartCountAndFlush(broadcastId, heartCount);
+        return broadcastDao.get(broadcastId);
+    }
+
     private BroadcastEditResult edit(Broadcast broadcast, BroadcastEditCommand command) {
         OriginalInfo originalInfo = new OriginalInfo(broadcast);
         broadcast.edit(command);
