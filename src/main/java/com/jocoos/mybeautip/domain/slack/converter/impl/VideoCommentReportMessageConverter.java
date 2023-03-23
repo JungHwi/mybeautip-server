@@ -31,7 +31,7 @@ public class VideoCommentReportMessageConverter implements MessageConverter {
                             report.getCreatedBy().getId(),
                             report.getComment().getVideoId(),
                             report.getComment().getComment(),
-                            toReason(report.getReasonCode())));
+                            report.getReason()));
         }
         return Optional.empty();
     }
