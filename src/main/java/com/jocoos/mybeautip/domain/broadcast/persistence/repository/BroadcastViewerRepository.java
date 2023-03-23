@@ -23,4 +23,6 @@ public interface BroadcastViewerRepository extends ExtendedQuerydslJpaRepository
 
     List<BroadcastViewer> findByBroadcast(Broadcast broadcast);
 
+    int countByBroadcastIdAndTypeInAndStatus(long broadcastId, List<BroadcastViewerType> types, BroadcastViewerStatus status);
+
 }

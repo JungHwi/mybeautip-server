@@ -101,7 +101,7 @@ public class BroadcastDomainService {
                 .reason(reason)
                 .build();
         reportDao.save(report);
-        return broadcast.getReportCount();
+        return broadcast.getStatistics().getReportCount();
     }
 
     @Transactional
@@ -116,7 +116,7 @@ public class BroadcastDomainService {
                 .description(description)
                 .build();
         reportDao.save(report);
-        return broadcastDao.get(broadcastId).getReportCount();
+        return broadcastDao.get(broadcastId).getStatistics().getReportCount();
     }
 
     private BroadcastEditResult edit(Broadcast broadcast, BroadcastEditCommand command) {

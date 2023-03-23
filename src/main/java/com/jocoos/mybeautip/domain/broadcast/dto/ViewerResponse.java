@@ -18,7 +18,8 @@ public record ViewerResponse(
         String avatarUrl,
         boolean isSuspended,
         @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime suspendedAt,
-        @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime joinedAt) implements CursorInterface {
+        @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime joinedAt,
+        BroadcastKey broadcastKey) implements CursorInterface {
 
     @Override
     @JsonIgnore

@@ -21,8 +21,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
@@ -254,7 +253,12 @@ class AdminBroadcastViewerControllerTest(
                     fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
                     fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
-                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                    fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat()),
+                    fieldWithPath("broadcast_key").type(JsonFieldType.OBJECT).description("참여자 방송 관련 키 및 토큰 정보"),
+                    fieldWithPath("broadcast_key.stream_key").type(JsonFieldType.STRING).description("참여자 Stream Key, 방송 진행자일 경우에만 존재").optional(),
+                    fieldWithPath("broadcast_key.gossip_token").type(JsonFieldType.STRING).description("참여자 채팅 토큰"),
+                    fieldWithPath("broadcast_key.app_id").type(JsonFieldType.STRING).description("참여자 채팅 앱 ID"),
+                    fieldWithPath("broadcast_key.channel_key").type(JsonFieldType.STRING).description("참여자 채팅 채널 키")
                 )
             )
         )
@@ -266,7 +270,7 @@ class AdminBroadcastViewerControllerTest(
         saveViewer(broadcast, defaultAdmin)
 
         val result: ResultActions = mockMvc.perform(
-            RestDocumentationRequestBuilders.post("/admin/broadcast/{broadcast_id}/viewer", broadcast.id)
+            delete("/admin/broadcast/{broadcast_id}/viewer", broadcast.id)
                 .header(HttpHeaders.AUTHORIZATION, defaultAdminToken)
         ).andExpect(status().isOk)
             .andDo(print())

@@ -4,11 +4,9 @@ import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastParticipantInfo;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
-import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastParticipantInfoService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
@@ -39,7 +37,6 @@ public class AdminBroadcastService {
     private final BroadcastReportDao reportDao;
     private final BroadcastConverter converter;
     private final BroadcastDomainService domainService;
-    private final BroadcastParticipantInfoService participantInfoService;
     private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
@@ -55,10 +52,9 @@ public class AdminBroadcastService {
     }
 
     @Transactional(readOnly = true)
-    public AdminBroadcastResponse get(Long broadcastId, String requestUsername) {
+    public AdminBroadcastResponse get(Long broadcastId) {
         BroadcastSearchResult searchResult = broadcastDao.getWithMemberAndCategory(broadcastId);
-        BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestUsername, searchResult);
-        return converter.toAdminResponse(searchResult, participantInfo);
+        return converter.toAdminResponse(searchResult);
     }
 
     @Transactional

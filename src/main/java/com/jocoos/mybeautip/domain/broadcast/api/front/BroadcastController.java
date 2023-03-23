@@ -43,8 +43,8 @@ public class BroadcastController {
     }
 
     @GetMapping("/1/broadcast/{broadcastId}")
-    public BroadcastResponse get(@PathVariable long broadcastId, @CurrentMember MyBeautipUserDetails userDetails) {
-        return service.get(broadcastId, userDetails.getUsername());
+    public BroadcastResponse get(@PathVariable long broadcastId) {
+        return service.get(broadcastId);
     }
 
     @PatchMapping("/1/broadcast/{broadcastId}")

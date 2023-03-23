@@ -22,17 +22,13 @@ public interface BroadcastConverter {
     @Mappings({
             @Mapping(target = "id", source = "broadcast.id"),
             @Mapping(target = "status", source = "broadcast.status"),
-            @Mapping(target = "participant", ignore = true),
+            @Mapping(target = "viewerCount", source = "broadcast.statistics.viewerCount")
     })
     BroadcastResponse toResponse(Broadcast broadcast, Member createdBy);
 
-    @Mappings({
-            @Mapping(target = "id", source = "result.id"),
-            @Mapping(target = "status", source = "result.status")
-    })
-    BroadcastResponse toResponse(BroadcastSearchResult result, BroadcastParticipantInfo participant);
+    BroadcastResponse toResponse(BroadcastSearchResult result);
 
-    AdminBroadcastResponse toAdminResponse(BroadcastSearchResult result, BroadcastParticipantInfo participant);
+    AdminBroadcastResponse toAdminResponse(BroadcastSearchResult result);
 
     @Mapping(target = "participant", ignore = true)
     List<AdminBroadcastResponse> toAdminResponse(List<BroadcastSearchResult> results);

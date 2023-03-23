@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCategoryResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastStatistics;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.member.Member;
 import com.querydsl.core.annotations.QueryProjection;
@@ -28,9 +29,9 @@ public class BroadcastSearchResult {
     private final Boolean canChat;
     private final Boolean isSoundOn;
     private final Boolean isScreenShow;
-    private final int viewerCount;
-    private final int maxViewerCount;
-    private final int heartCount;
+    private final long viewerCount;
+    private final long maxViewerCount;
+    private final long heartCount;
 
     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT)
     private final ZonedDateTime startedAt;
@@ -43,6 +44,7 @@ public class BroadcastSearchResult {
 
     @QueryProjection
     public BroadcastSearchResult(Broadcast broadcast,
+                                 BroadcastStatistics statistics,
                                  BroadcastCategory category,
                                  Member member) {
         this.id = broadcast.getId();
@@ -56,9 +58,9 @@ public class BroadcastSearchResult {
         this.canChat = broadcast.getCanChat();
         this.isSoundOn = broadcast.getIsSoundOn();
         this.isScreenShow = broadcast.getIsScreenShow();
-        this.viewerCount = broadcast.getViewerCount();
-        this.maxViewerCount = broadcast.getMaxViewerCount();
-        this.heartCount = broadcast.getHeartCount();
+        this.viewerCount = statistics.getViewerCount();
+        this.maxViewerCount = statistics.getMaxViewerCount();
+        this.heartCount = statistics.getHeartCount();
         this.startedAt = broadcast.getStartedAt();
         this.createdAt = broadcast.getCreatedAt();
         this.category = new BroadcastCategoryResponse(category);

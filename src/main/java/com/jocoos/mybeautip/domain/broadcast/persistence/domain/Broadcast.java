@@ -78,18 +78,6 @@ public class Broadcast extends CreatedAtBaseEntity {
     private Boolean isScreenShow;
 
     @Column
-    private int viewerCount;
-
-    @Column
-    private int maxViewerCount;
-
-    @Column
-    private int heartCount;
-
-    @Column
-    private int reportCount;
-
-    @Column
     private ZonedDateTime pausedAt;
 
     @Column
@@ -101,6 +89,10 @@ public class Broadcast extends CreatedAtBaseEntity {
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "category_id")
     private BroadcastCategory category;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id")
+    private BroadcastStatistics statistics;
 
     @Embedded
     public BroadcastViewerList viewerList = new BroadcastViewerList();
@@ -123,6 +115,13 @@ public class Broadcast extends CreatedAtBaseEntity {
         setTitle(title);
         setThumbnail(thumbnailUrl);
         setNotice(notice);
+    }
+
+    @PostPersist
+    public void postPersist() {
+        if (statistics == null) {
+            statistics = new BroadcastStatistics(this.id);
+        }
     }
 
     public List<Long> syncViewer(List<BroadcastViewerVo> newViewers) {

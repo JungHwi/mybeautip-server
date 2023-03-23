@@ -50,7 +50,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 searchResultWithMemberAndCategory(
                         baseConditionQuery(query, condition)
                 )
-                        .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member))
+                        .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member))
                         .orderBy(
                                 getOrders(condition.sort())
                         )
@@ -122,12 +122,13 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     private JPAQuery<BroadcastSearchResult> searchResultWithMemberAndCategory(JPAQuery<?> query) {
         return fromBroadcastWithMemberAndCategory(query)
-                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member));
+                .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member));
     }
 
     private JPAQuery<?> fromBroadcastWithMemberAndCategory(JPAQuery<?> query) {
         return query
                 .from(broadcast)
+                .innerJoin(broadcast.statistics).on(broadcast.id.eq(broadcast.statistics.id))
                 .join(member).on(broadcast.memberId.eq(member.id))
                 .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory));
     }
@@ -196,7 +197,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
         if (isReported == null) {
             return null;
         }
-        return isReported ? broadcast.reportCount.gt(0) : broadcast.reportCount.eq(0);
+        return isReported ? broadcast.statistics.reportCount.gt(0) : broadcast.statistics.reportCount.eq(0);
     }
 
     private BooleanExpression pausedAtLt(ZonedDateTime zonedDateTime) {

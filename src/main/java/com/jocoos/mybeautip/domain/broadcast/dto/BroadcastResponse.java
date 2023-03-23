@@ -21,6 +21,5 @@ public record BroadcastResponse(long id,
                                 int heartCount,
                                 @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
                                 BroadcastCategoryResponse category,
-                                SimpleMemberInfo createdBy,
-                                BroadcastParticipantInfo participant) {
+                                SimpleMemberInfo createdBy) {
 }

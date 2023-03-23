@@ -6,12 +6,12 @@ import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastViewerConverter;
-import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
-import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
-import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
+import com.jocoos.mybeautip.domain.broadcast.dto.*;
+import com.jocoos.mybeautip.domain.broadcast.event.BroadcastViewerStatisticsEvent;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
+import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastFFLService;
+import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastStatisticsService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
@@ -21,6 +21,7 @@ import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchResult;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +32,14 @@ import java.util.List;
 public class BroadcastViewerService {
 
     private final BatchBroadcastService batchBroadcastService;
+    private final BroadcastStatisticsService statisticsService;
     private final BroadcastViewerDao dao;
     private final BroadcastDao broadcastDao;
     private final MemberDao memberDao;
     private final FlipFlopLiteService flipFlopLiteService;
+    private final BroadcastFFLService fflService;
     private final BroadcastViewerConverter converter;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<ViewerResponse> search(ViewerSearchCondition condition) {
@@ -62,7 +66,7 @@ public class BroadcastViewerService {
         BroadcastViewer viewer = dao.grantManager(request);
         Broadcast broadcast = broadcastDao.get(request.broadcastId());
 
-        FFLDirectMessageRequest messageRequest = FFLDirectMessageRequest.of(request, List.of(broadcast.getMemberId(), request.memberId()));
+        FFLDirectMessageRequest messageRequest = FFLDirectMessageRequest.of(request, List.of(request.memberId()));
         flipFlopLiteService.directMessage(broadcast.getVideoKey(), messageRequest);
 
         return converter.converts(viewer);
@@ -118,7 +122,11 @@ public class BroadcastViewerService {
             broadcastViewer = dao.save(new BroadcastViewer(broadcast, viewer));
         }
 
-        return converter.converts(broadcastViewer);
+        BroadcastKey broadcastKey = getBroadcastKey(viewer, broadcast.getMemberId(), broadcast.getChatChannelKey());
+
+        eventPublisher.publishEvent(new BroadcastViewerStatisticsEvent(broadcastId));
+
+        return converter.converts(broadcastViewer, broadcastKey);
     }
 
     @Transactional
@@ -134,6 +142,23 @@ public class BroadcastViewerService {
             flipFlopLiteService.directMessage(broadcast.getVideoKey(), request);
         }
 
+        eventPublisher.publishEvent(new BroadcastViewerStatisticsEvent(broadcastId));
+
         return converter.converts(broadcastViewer);
+    }
+
+    private BroadcastKey getBroadcastKey(BroadcastViewerVo viewer, Long ownerId, String channelKey) {
+        if (viewer.type() == BroadcastViewerType.GUEST) {
+            return fflService.getGuestBroadcastKey(viewer.username(), channelKey);
+        }
+
+        if (isStreamKeyNeeded(viewer.memberId(), ownerId)) {
+            return fflService.getBroadcastKeyWithStreamKey(viewer.memberId(), channelKey, ownerId);
+        }
+        return fflService.getBroadcastKey(viewer.memberId(), channelKey);
+    }
+
+    private boolean isStreamKeyNeeded(Long requestMemberId, Long broadcastOwnerId) {
+        return broadcastOwnerId.equals(requestMemberId) || memberDao.isAdmin(requestMemberId);
     }
 }

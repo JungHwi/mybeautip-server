@@ -64,9 +64,8 @@ public class AdminBroadcastController {
     }
 
     @GetMapping("/broadcast/{broadcastId}")
-    public AdminBroadcastResponse get(@PathVariable Long broadcastId,
-                                      @CurrentMember MyBeautipUserDetails userDetails) {
-        return service.get(broadcastId, userDetails.getUsername());
+    public AdminBroadcastResponse get(@PathVariable Long broadcastId) {
+        return service.get(broadcastId);
     }
 
     // TODO start_at default 값 논의 필요
