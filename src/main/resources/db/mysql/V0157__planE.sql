@@ -116,6 +116,17 @@ create table broadcast_notification
     is_notify_needed boolean not null comment '알림 설정 여부'
 ) charset = utf8mb4 comment '방송 알림 정보';
 
+create table broadcast_statistics (
+    id                  bigint not null comment '방송 아이디' primary key,
+    total_viewer_count  int    not null comment '총 시청자 수',
+    max_viewer_count    int    not null comment '최대 시청자 수',
+    viewer_count        int    not null comment '현재 회원 시청자 수',
+    member_viewer_count int    not null comment '현재 회원 시청자 수',
+    guest_viewer_count  int    not null comment '현재 게스트 시청자 수',
+    report_count        int    not null comment '신고 수',
+    heart_count         int    not null comment '하트 수'
+) comment '방송 통계';
+
 create table broadcast_pin_message
 (
     broadcast_id bigint comment '방송 고정 메세지' primary key ,
