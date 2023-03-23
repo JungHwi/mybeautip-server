@@ -5,13 +5,11 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastParticipantInfo;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
-import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastReportResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
-import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastParticipantInfoService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastReportDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
@@ -42,7 +40,6 @@ public class AdminBroadcastService {
     private final BroadcastReportDao reportDao;
     private final BroadcastConverter converter;
     private final BroadcastDomainService domainService;
-    private final BroadcastParticipantInfoService participantInfoService;
     private final AwsS3Handler awsS3Handler;
 
     @Transactional(readOnly = true)
@@ -82,13 +79,13 @@ public class AdminBroadcastService {
 
     public HeartCountResponse addHeartCount(Long broadcastId, int heartCount) {
         Broadcast broadcast = domainService.addHeartCount(broadcastId, heartCount);
-        return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
+        return new HeartCountResponse(broadcast.getId(), broadcast.getStatistics().getHeartCount());
     }
 
     @Transactional(readOnly = true)
     public HeartCountResponse getHeartCount(Long broadcastId) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
+        return new HeartCountResponse(broadcast.getId(), broadcast.getStatistics().getHeartCount());
     }
 
     @Transactional(readOnly = true)

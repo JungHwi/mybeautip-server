@@ -36,7 +36,7 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
     void addReportCountAndFlush(@Param("id") Long broadcastId, @Param("count") int count);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("update Broadcast b set b.heartCount = b.heartCount + :count where b.id = :id")
+    @Query("update BroadcastStatistics b set b.heartCount = b.heartCount + :count where b.id = :id")
     void addHeartCountAndFlush(@Param("id") Long broadcastId, @Param("count") int count);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)

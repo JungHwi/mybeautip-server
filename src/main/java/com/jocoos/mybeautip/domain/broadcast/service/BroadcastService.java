@@ -130,13 +130,13 @@ public class BroadcastService {
 
     public HeartCountResponse addHeartCount(Long broadcastId, int heartCount) {
         Broadcast broadcast = domainService.addHeartCount(broadcastId, heartCount);
-        return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
+        return new HeartCountResponse(broadcast.getId(), broadcast.getStatistics().getHeartCount());
     }
 
     @Transactional(readOnly = true)
     public HeartCountResponse getHeartCount(Long broadcastId) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
+        return new HeartCountResponse(broadcast.getId(), broadcast.getStatistics().getHeartCount());
     }
 
     private void validCanAccess(long creatorId) {

@@ -51,7 +51,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 getSearchResult(
                         baseConditionQuery(query, condition)
                 )
-                        .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member))
+                        .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member, broadcastPinMessage))
                         .orderBy(
                                 getOrders(condition.sort())
                         )
@@ -123,7 +123,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     private JPAQuery<BroadcastSearchResult> getSearchResult(JPAQuery<?> query) {
         return withMemberAndCategoryAndPinMessage(query)
-                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member, broadcastPinMessage));
+                .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member, broadcastPinMessage));
     }
 
     private JPAQuery<?> withMemberAndCategoryAndPinMessage(JPAQuery<?> query) {

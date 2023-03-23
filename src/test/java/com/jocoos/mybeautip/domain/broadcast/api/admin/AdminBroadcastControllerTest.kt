@@ -1,16 +1,17 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin
 
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastReportRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT
+import com.jocoos.mybeautip.global.dto.single.IntegerDto
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcastReport
 import org.assertj.core.api.Assertions.assertThat
@@ -23,8 +24,7 @@ import org.openapitools.jackson.nullable.JsonNullable
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
@@ -312,7 +312,7 @@ class AdminBroadcastControllerTest(
                 requestParameters(
                     parameterWithName("page").description("페이지 넘버").attributes(getDefault(1)).optional(),
                     parameterWithName("size").description("페이지 사이타이").attributes(getDefault(3)).optional(),
-                    parameterWithName("type").description(generateLinkCode(BROADCAST_REPORT_TYPE)).attributes(getDefault(BROADCAST)).optional(),
+                    parameterWithName("type").description(generateLinkCode(BROADCAST_REPORT_TYPE)).attributes(getDefault(BroadcastReportType.BROADCAST)).optional(),
                 ),
                 responseFields(
                     fieldWithPath("total").type(NUMBER).description("방송 총 개수"),

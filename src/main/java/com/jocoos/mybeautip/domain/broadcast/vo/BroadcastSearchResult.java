@@ -69,5 +69,6 @@ public class BroadcastSearchResult {
         this.createdAt = broadcast.getCreatedAt();
         this.category = new BroadcastCategoryResponse(category);
         this.createdBy = new SimpleMemberInfo(member);
+        this.pinMessage = PinMessageInfo.pin(pinMessage);
     }
 }
