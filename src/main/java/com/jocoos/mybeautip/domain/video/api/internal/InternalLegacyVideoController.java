@@ -84,15 +84,13 @@ public class InternalLegacyVideoController {
                                              @PathVariable Long likeId,
                                              @RequestHeader(value = "Accept-Language", defaultValue = "ko") String lang) {
         Member member = legacyMemberService.currentMember();
-
-        videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, member.getId())
-                .map(liked -> {
-                    legacyVideoService.unLikeVideo(liked);
-                    return Optional.empty();
-                })
-                .orElseThrow(() -> new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang)));
-
-        return new ResponseEntity(HttpStatus.OK);
+        try {
+            Video video = legacyVideoService.unLikeVideo(likeId, videoId, member.getId());
+            LegacyVideoController.VideoInfo info = legacyVideoService.generateVideoInfo(video);
+            return new ResponseEntity<>(info, HttpStatus.OK);
+        } catch (NotFoundException e) {
+            throw new NotFoundException(messageService.getMessage(LIKE_NOT_FOUND, lang));
+        }
     }
 
     /**

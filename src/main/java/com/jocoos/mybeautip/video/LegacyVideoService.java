@@ -728,6 +728,23 @@ public class LegacyVideoService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Video unLikeVideo(Long likeId, Long videoId, Long memberId) {
+        VideoLike liked = videoLikeRepository.findByIdAndVideoIdAndCreatedById(likeId, videoId, memberId)
+            .orElseThrow(() -> new NotFoundException("not_found"));
+        Video video = liked.getVideo();
+
+        liked.unlike();
+
+        if (liked.getVideo().getLikeCount() > 0) {
+            videoRepository.updateLikeCount(liked.getVideo().getId(), -1);
+        }
+        video.setLikeCount(video.getLikeCount() - 1);
+
+        activityPointService.retrieveActivityPoint(CANCEL_VIDEO_LIKE, liked.getId(), liked.getCreatedBy());
+        return video;
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unLikeVideo(VideoLike liked) {
         liked.unlike();
         if (liked.getVideo().getLikeCount() > 0) {
