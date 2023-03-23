@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.converter;
 
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastKey;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchResult;
@@ -15,11 +16,20 @@ import java.util.List;
 public interface BroadcastViewerConverter {
 
     @Mappings({
-            @Mapping(target = "isSuspended", source = "suspended"),
+            @Mapping(target = "isSuspended", source = "viewer.suspended"),
+            @Mapping(target = "broadcastKey", source = "broadcastKey"),
             @Mapping(target = "username", ignore = true),
             @Mapping(target = "avatarUrl", ignore = true),
     })
-    ViewerResponse converts(BroadcastViewer entity);
+    ViewerResponse converts(BroadcastViewer viewer, BroadcastKey broadcastKey);
+
+    @Mappings({
+            @Mapping(target = "isSuspended", source = "suspended"),
+            @Mapping(target = "broadcastKey", ignore = true),
+            @Mapping(target = "username", ignore = true),
+            @Mapping(target = "avatarUrl", ignore = true),
+    })
+    ViewerResponse converts(BroadcastViewer viewer);
 
     @Mappings({
             @Mapping(target = "isSuspended", source = "entity.suspended")

@@ -8,7 +8,6 @@ import com.jocoos.mybeautip.domain.broadcast.event.BroadcastNotificationEvent.Br
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastNotification;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
-import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastParticipantInfoService;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastVodService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastPermissionDao;
@@ -50,7 +49,6 @@ public class BroadcastService {
     private final BroadcastPermissionDao permissionDao;
     private final BroadcastDomainService domainService;
     private final BroadcastVodService broadcastVodService;
-    private final BroadcastParticipantInfoService participantInfoService;
     private final BroadcastConverter converter;
     private final AwsS3Handler awsS3Handler;
     private final ApplicationEventPublisher eventPublisher;
@@ -66,10 +64,10 @@ public class BroadcastService {
     }
 
     @Transactional(readOnly = true)
-    public BroadcastResponse get(long broadcastId, String requestUsername) {
+    public BroadcastResponse get(long broadcastId) {
         BroadcastSearchResult searchResult = broadcastDao.getSearchResult(broadcastId);
-        BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestUsername, searchResult);
-        return converter.toResponse(searchResult, participantInfo);
+
+        return converter.toResponse(searchResult);
     }
 
     @Transactional(readOnly = true)

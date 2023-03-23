@@ -28,10 +28,6 @@ create table broadcast
     can_chat         boolean not null comment '채팅 가능 여부',
     is_screen_show   boolean not null comment '화면 표시 여부',
     is_sound_on      boolean not null comment '사운드 여부',
-    report_count     int                                                                                           not null comment '신고 수',
-    heart_count      int                                                                                           not null comment '하트 수',
-    viewer_count     int                                                                                           not null comment '시청자 수',
-    max_viewer_count int                                                                                           not null comment '최대 시청자 수',
     paused_at        datetime                                                                                      comment '일시정지 일시',
     started_at       datetime                                                                                      not null comment '방송 시작 일시',
     ended_at         datetime comment '방송 종료 일시',
@@ -50,6 +46,8 @@ create table broadcast_viewer
     suspended_at    datetime comment '정지 일시',
     joined_at       datetime    not null comment '참여 일시'
 ) comment '시청자 정보';
+
+create index idx_broadcast_id_type_status_username on broadcast_viewer (broadcast_id, type, status, sorted_username);
 
 create table vod
 (
@@ -138,5 +136,8 @@ create table broadcast_pin_message
 # drop table broadcast_category;
 # drop table jwt;
 # drop table vod_report;
+# drop table broadcast_notification;
+# drop table broadcast_statistics;
+# drop table broadcast_pin_message;
 # delete from flyway_schema_history where version = '0157';
 

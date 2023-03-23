@@ -1,11 +1,13 @@
 package com.jocoos.mybeautip.domain.broadcast.service.dao;
 
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.dto.GrantManagerRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.ViewerSuspendRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastViewerRepository;
+import com.jocoos.mybeautip.domain.broadcast.vo.ViewerCountResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
 import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchResult;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
@@ -70,6 +72,16 @@ public class BroadcastViewerDao {
     @Transactional(readOnly = true)
     public List<BroadcastViewer> getViewer(Broadcast broadcast) {
         return repository.findByBroadcast(broadcast);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ViewerCountResult> getViewerCount(long broadcastId) {
+        return repository.getViewerCount(broadcastId);
+    }
+
+    @Transactional(readOnly = true)
+    public int countByBroadcastIdAndTypeInAndStatus(long broadcastId, List<BroadcastViewerType> types, BroadcastViewerStatus status) {
+        return repository.countByBroadcastIdAndTypeInAndStatus(broadcastId, types, status);
     }
 
     @Transactional

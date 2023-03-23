@@ -58,10 +58,9 @@ public class AdminBroadcastService {
     }
 
     @Transactional(readOnly = true)
-    public AdminBroadcastResponse get(Long broadcastId, String requestUsername) {
+    public AdminBroadcastResponse get(Long broadcastId) {
         BroadcastSearchResult searchResult = broadcastDao.getSearchResult(broadcastId);
-        BroadcastParticipantInfo participantInfo = participantInfoService.getParticipantInfo(requestUsername, searchResult);
-        return converter.toAdminResponse(searchResult, participantInfo);
+        return converter.toAdminResponse(searchResult);
     }
 
     @Transactional
