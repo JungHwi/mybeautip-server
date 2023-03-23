@@ -230,7 +230,7 @@ class InternalMemberControllerTest(
         // when & then
         val result: ResultActions = mockMvc
             .perform(
-                delete("/internal/1/member")
+                patch("/internal/1/member/withdrawal")
                     .header(AUTHORIZATION, defaultAdminToken)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))

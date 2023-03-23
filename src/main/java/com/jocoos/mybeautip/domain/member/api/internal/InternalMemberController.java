@@ -90,7 +90,7 @@ public class InternalMemberController {
         return ResponseEntity.ok(BlockResponseDto.from(block));
     }
 
-    @DeleteMapping("/1/member")
+    @PatchMapping("/1/member/withdrawal")
     public ResponseEntity withdrawal(@RequestBody String reason) {
         memberSignupService.withdrawal(reason);
 
