@@ -23,6 +23,5 @@ public record BroadcastResponse(long id,
                                 @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
                                 BroadcastCategoryResponse category,
                                 SimpleMemberInfo createdBy,
-                                PinMessageInfo pinMessage,
-                                BroadcastParticipantInfo participant) {
+                                PinMessageInfo pinMessage) {
 }

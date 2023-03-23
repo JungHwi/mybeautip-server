@@ -36,8 +36,6 @@ public class BroadcastViewerList {
     }
 
     public List<Long> outSync(List<BroadcastViewerVo> newViewers) {
-        viewerMap = viewerList.stream()
-                .collect(Collectors.toMap(BroadcastViewer::getMemberId, Function.identity()));
         List<Long> outManagerIds = new ArrayList<>();
 
         Map<Long, BroadcastViewerVo> voMap = newViewers.stream()

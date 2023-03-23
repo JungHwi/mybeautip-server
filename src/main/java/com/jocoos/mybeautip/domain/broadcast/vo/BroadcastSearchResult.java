@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCategoryResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastPinMessage;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastStatistics;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.member.Member;
 import com.querydsl.core.annotations.QueryProjection;
@@ -46,6 +47,7 @@ public class BroadcastSearchResult {
 
     @QueryProjection
     public BroadcastSearchResult(Broadcast broadcast,
+                                 BroadcastStatistics statistics,
                                  BroadcastCategory category,
                                  Member member,
                                  BroadcastPinMessage pinMessage) {
@@ -60,13 +62,13 @@ public class BroadcastSearchResult {
         this.canChat = broadcast.getCanChat();
         this.isSoundOn = broadcast.getIsSoundOn();
         this.isScreenShow = broadcast.getIsScreenShow();
-        this.viewerCount = broadcast.getViewerCount();
-        this.maxViewerCount = broadcast.getMaxViewerCount();
-        this.heartCount = broadcast.getHeartCount();
+        this.viewerCount = statistics.getViewerCount();
+        this.maxViewerCount = statistics.getMaxViewerCount();
+        this.heartCount = statistics.getHeartCount();
         this.startedAt = broadcast.getStartedAt();
         this.createdAt = broadcast.getCreatedAt();
         this.category = new BroadcastCategoryResponse(category);
         this.createdBy = new SimpleMemberInfo(member);
-        this.pinMessage = pinMessage == null ? null : PinMessageInfo.pin(pinMessage);
+        this.pinMessage = PinMessageInfo.pin(pinMessage);
     }
 }

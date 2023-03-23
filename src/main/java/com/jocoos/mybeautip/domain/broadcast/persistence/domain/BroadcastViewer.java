@@ -13,6 +13,7 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType.MANAGER;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType.MEMBER;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -83,6 +84,9 @@ public class BroadcastViewer {
 
     public void inactive() {
         this.status = BroadcastViewerStatus.INACTIVE;
+        this.type = this.type == MANAGER ? MEMBER : this.type;
+        this.isSuspended = false;
+        this.suspendedAt = null;
     }
 
     public BroadcastViewer suspend(boolean isSuspended) {
@@ -110,8 +114,6 @@ public class BroadcastViewer {
         this.status = BroadcastViewerStatus.ACTIVE;
         this.sortedUsername = ViewerUsernameUtil.generateSortedUsername(username);
         this.joinedAt = ZonedDateTime.now();
-        this.isSuspended = false;
-        this.suspendedAt = null;
     }
 
     public boolean isManager() {

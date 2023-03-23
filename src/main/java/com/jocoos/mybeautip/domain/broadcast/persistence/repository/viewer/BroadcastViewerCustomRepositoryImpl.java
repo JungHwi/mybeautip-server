@@ -4,10 +4,7 @@ import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
-import com.jocoos.mybeautip.domain.broadcast.vo.QViewerSearchResult;
-import com.jocoos.mybeautip.domain.broadcast.vo.ViewerCursorCondition;
-import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchCondition;
-import com.jocoos.mybeautip.domain.broadcast.vo.ViewerSearchResult;
+import com.jocoos.mybeautip.domain.broadcast.vo.*;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -46,6 +43,23 @@ public class BroadcastViewerCustomRepositoryImpl implements BroadcastViewerCusto
         } else {
             return result.get(ZERO);
         }
+    }
+
+    @Override
+    public List<ViewerCountResult> getViewerCount(long broadcastId) {
+        return repository.query(query -> query
+                .select(new QViewerCountResult(
+                        broadcastViewer.type,
+                        broadcastViewer.status,
+                        broadcastViewer.id.count().castToNum(Integer.class)
+                ))
+                .from(broadcastViewer)
+                .where(broadcastViewer.broadcast.id.eq(broadcastId)
+                        .and(broadcastViewer.type.in(BroadcastViewerType.defaultSearchType))
+                )
+                .groupBy(broadcastViewer.type, broadcastViewer.status)
+                .fetch()
+        );
     }
 
     private JPAQuery<ViewerSearchResult> baseGetQuery(long broadcastId, long memberId) {

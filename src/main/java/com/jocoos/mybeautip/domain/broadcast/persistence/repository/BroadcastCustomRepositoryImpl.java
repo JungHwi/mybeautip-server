@@ -51,6 +51,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 getSearchResult(
                         baseConditionQuery(query, condition)
                 )
+                        .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member, broadcastPinMessage))
                         .orderBy(
                                 getOrders(condition.sort())
                         )
@@ -122,12 +123,13 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     private JPAQuery<BroadcastSearchResult> getSearchResult(JPAQuery<?> query) {
         return withMemberAndCategoryAndPinMessage(query)
-                .select(new QBroadcastSearchResult(broadcast, broadcastCategory, member, broadcastPinMessage));
+                .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member, broadcastPinMessage));
     }
 
     private JPAQuery<?> withMemberAndCategoryAndPinMessage(JPAQuery<?> query) {
         return query
                 .from(broadcast)
+                .innerJoin(broadcast.statistics).on(broadcast.id.eq(broadcast.statistics.id))
                 .join(member).on(broadcast.memberId.eq(member.id))
                 .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory))
                 .leftJoin(broadcastPinMessage).on(broadcast.id.eq(broadcastPinMessage.broadcastId));
@@ -197,7 +199,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
         if (isReported == null) {
             return null;
         }
-        return isReported ? broadcast.reportCount.gt(0) : broadcast.reportCount.eq(0);
+        return isReported ? broadcast.statistics.reportCount.gt(0) : broadcast.statistics.reportCount.eq(0);
     }
 
     private BooleanExpression pausedAtLt(ZonedDateTime zonedDateTime) {

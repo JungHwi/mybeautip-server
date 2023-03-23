@@ -10,6 +10,10 @@ public record PinMessageInfo(Long messageId,
                              SimpleMemberInfo createdBy) {
 
     public static PinMessageInfo pin(BroadcastPinMessage pinChat) {
+        if (pinChat == null) {
+            return null;
+        }
+
         SimpleMemberInfo createdBy = new SimpleMemberInfo(pinChat.getMemberId(), pinChat.getUsername(), pinChat.getAvatarUrl());
         return PinMessageInfo.builder()
                 .messageId(pinChat.getMessageId())

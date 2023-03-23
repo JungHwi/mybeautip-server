@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastBatchUpdateStatusResponse;
 import com.jocoos.mybeautip.domain.broadcast.event.BroadcastNotificationEvent.BroadcastBulkEditNotificationEvent;
+import com.jocoos.mybeautip.domain.broadcast.event.BroadcastViewerStatisticsEvent;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastStatusService;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastBulkUpdateStatusCommand;
@@ -46,6 +47,7 @@ public class BatchBroadcastService {
             FFLDirectMessageRequest request = FFLDirectMessageRequest.ofManagerOut(broadcast.getMemberId());
             flipFlopLiteService.directMessage(broadcast.getVideoKey(), request);
         }
+        eventPublisher.publishEvent(new BroadcastViewerStatisticsEvent(broadcast.getId()));
     }
 
     private BroadcastBulkUpdateStatusCommand updateScheduledNearToReady() {

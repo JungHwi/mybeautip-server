@@ -2,16 +2,12 @@ package com.jocoos.mybeautip.domain.broadcast.api.admin
 
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType.BROADCAST
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastReport
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastReportRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_FORMAT
@@ -28,7 +24,6 @@ import org.openapitools.jackson.nullable.JsonNullable
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
@@ -156,19 +151,7 @@ class AdminBroadcastControllerTest(
                     fieldWithPath("created_by.id").type(NUMBER).description("회원 아이디"),
                     fieldWithPath("created_by.email").type(STRING).description("회원 이메일").optional(),
                     fieldWithPath("created_by.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("created_by.avatar_url").type(STRING).description("회원 아바타 URL"),
-                    fieldWithPath("participant").type(OBJECT).description("참여자 정보"),
-                    fieldWithPath("participant.member_id").type(NUMBER).description("참여자 아이디"),
-                    fieldWithPath("participant.username").type(STRING).description("참여자 닉네임"),
-                    fieldWithPath("participant.avatar_url").type(STRING).description("참여자 아바타 URL"),
-                    fieldWithPath("participant.type").type(STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
-                    fieldWithPath("participant.status").type(STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
-                    fieldWithPath("participant.is_suspended").type(BOOLEAN).description("참여자 추방 여부"),
-                    fieldWithPath("participant.broadcast_key").type(OBJECT).description("참여자 방송 관련 키 및 토큰 정보"),
-                    fieldWithPath("participant.broadcast_key.stream_key").type(STRING).description("참여자 Stream Key, 방송 진행자일 경우에만 존재").optional(),
-                    fieldWithPath("participant.broadcast_key.gossip_token").type(STRING).description("참여자 채팅 토큰"),
-                    fieldWithPath("participant.broadcast_key.app_id").type(STRING).description("참여자 채팅 앱 ID"),
-                    fieldWithPath("participant.broadcast_key.channel_key").type(STRING).description("참여자 채팅 채널 키")
+                    fieldWithPath("created_by.avatar_url").type(STRING).description("회원 아바타 URL")
                 )
             )
         )
@@ -329,7 +312,7 @@ class AdminBroadcastControllerTest(
                 requestParameters(
                     parameterWithName("page").description("페이지 넘버").attributes(getDefault(1)).optional(),
                     parameterWithName("size").description("페이지 사이타이").attributes(getDefault(3)).optional(),
-                    parameterWithName("type").description(generateLinkCode(BROADCAST_REPORT_TYPE)).attributes(getDefault(BROADCAST)).optional(),
+                    parameterWithName("type").description(generateLinkCode(BROADCAST_REPORT_TYPE)).attributes(getDefault(BroadcastReportType.BROADCAST)).optional(),
                 ),
                 responseFields(
                     fieldWithPath("total").type(NUMBER).description("방송 총 개수"),
