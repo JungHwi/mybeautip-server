@@ -58,6 +58,17 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .build();
     }
 
+
+    public static FFLBroadcastMessageRequest ofChangeBroadcastStatus(BroadcastStatus status, Map<String, Object> data) {
+        data.put("status", status);
+
+        return FFLBroadcastMessageRequest.builder()
+                .messageType(COMMAND)
+                .customType(UPDATE_STATUS)
+                .data(data)
+                .build();
+    }
+
     public static FFLBroadcastMessageRequest ofPin(PinMessageInfo pinChat,
                                                    ObjectMapper objectMapper) {
         return FFLBroadcastMessageRequest.builder()

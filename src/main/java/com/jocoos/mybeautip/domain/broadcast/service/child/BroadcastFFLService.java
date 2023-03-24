@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 
@@ -46,7 +47,11 @@ public class BroadcastFFLService {
 
     public ExternalBroadcastInfo startFFLVideoRoomAndSendChatMessage(Broadcast broadcast) {
         ExternalBroadcastInfo externalInfo = flipFlopLiteService.startVideoRoom(broadcast.getVideoKey());
-        sendChangeBroadcastStatusMessage(broadcast.getVideoKey(), BroadcastStatus.LIVE);
+        Map<String, Object> data = Map.of(
+                "url", externalInfo.liveUrl(),
+                "started_at", externalInfo.lastModifiedAt());
+
+        sendChangeBroadcastStatusMessage(broadcast.getVideoKey(), BroadcastStatus.LIVE, data);
         return externalInfo;
     }
 
@@ -74,6 +79,10 @@ public class BroadcastFFLService {
 
     public void sendChangeBroadcastStatusMessage(Long videoRoomId, BroadcastStatus status) {
         FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(status);
+        flipFlopLiteService.broadcastMessage(videoRoomId, request);
+    }
+    public void sendChangeBroadcastStatusMessage(Long videoRoomId, BroadcastStatus status, Map<String, Object> data) {
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(status, data);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
 
