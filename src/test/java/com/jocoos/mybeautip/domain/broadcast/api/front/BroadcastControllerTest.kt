@@ -237,7 +237,8 @@ class BroadcastControllerTest(
                     fieldWithPath("member_viewer_count").type(NUMBER).description("현재 회원 시청자 수"),
                     fieldWithPath("guest_viewer_count").type(NUMBER).description("현재 비회원 시청자 수"),
                     fieldWithPath("report_count").type(NUMBER).description("방송 신고수"),
-                    fieldWithPath("heart_count").type(NUMBER).description("방송 하트수")
+                    fieldWithPath("heart_count").type(NUMBER).description("방송 하트수"),
+                    fieldWithPath("duration").type(NUMBER).description("방송 진행 시간(초). 음수이면 방송 시작 전"),
                 )
             )
         )

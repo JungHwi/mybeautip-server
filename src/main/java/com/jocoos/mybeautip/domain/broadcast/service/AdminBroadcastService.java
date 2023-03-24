@@ -60,7 +60,8 @@ public class AdminBroadcastService {
     @Transactional(readOnly = true)
     public BroadcastStatisticsResponse getStatistics(long broadcastId) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        return converter.converts(broadcast.getStatistics());
+
+        return converter.converts(broadcast);
     }
 
     @Transactional

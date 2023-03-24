@@ -29,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -89,7 +90,11 @@ public class BroadcastService {
     @Transactional(readOnly = true)
     public BroadcastStatisticsResponse getStatistics(long broadcastId) {
         Broadcast broadcast = broadcastDao.get(broadcastId);
-        return converter.converts(broadcast.getStatistics());
+
+        ZonedDateTime endedAt = broadcast.getEndedAt() == null? ZonedDateTime.now() : broadcast.getEndedAt();
+        Duration duration = Duration.between(broadcast.getStartedAt(), endedAt);
+
+        return converter.converts(broadcast);
     }
 
     @Transactional
