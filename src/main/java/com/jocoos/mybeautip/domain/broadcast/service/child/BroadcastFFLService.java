@@ -47,11 +47,11 @@ public class BroadcastFFLService {
 
     public ExternalBroadcastInfo startFFLVideoRoomAndSendChatMessage(Broadcast broadcast) {
         ExternalBroadcastInfo externalInfo = flipFlopLiteService.startVideoRoom(broadcast.getVideoKey());
-        Map<String, Object> data = Map.of(
+        Map<String, Object> data = Map.of("status", LIVE,
                 "url", externalInfo.liveUrl(),
                 "started_at", externalInfo.lastModifiedAt());
 
-        sendChangeBroadcastStatusMessage(broadcast.getVideoKey(), BroadcastStatus.LIVE, data);
+        sendChangeBroadcastStatusMessage(broadcast.getVideoKey(), data);
         return externalInfo;
     }
 
@@ -78,11 +78,10 @@ public class BroadcastFFLService {
     }
 
     public void sendChangeBroadcastStatusMessage(Long videoRoomId, BroadcastStatus status) {
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(status);
-        flipFlopLiteService.broadcastMessage(videoRoomId, request);
+        sendChangeBroadcastStatusMessage(videoRoomId, Map.of("status", status));
     }
-    public void sendChangeBroadcastStatusMessage(Long videoRoomId, BroadcastStatus status, Map<String, Object> data) {
-        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(status, data);
+    public void sendChangeBroadcastStatusMessage(Long videoRoomId, Map<String, Object> data) {
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(data);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
 

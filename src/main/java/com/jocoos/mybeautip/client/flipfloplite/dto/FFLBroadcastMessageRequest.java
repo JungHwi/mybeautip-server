@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.client.flipfloplite.dto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageCustomType;
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLChatRoomBroadcastMessageType;
-import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.VisibleMessageRequest;
 import com.jocoos.mybeautip.global.util.ObjectMapperUtil;
 import lombok.Builder;
@@ -50,18 +49,7 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .build();
     }
 
-    public static FFLBroadcastMessageRequest ofChangeBroadcastStatus(BroadcastStatus status) {
-        return FFLBroadcastMessageRequest.builder()
-                .messageType(COMMAND)
-                .customType(UPDATE_STATUS)
-                .data(Map.of("status", status))
-                .build();
-    }
-
-
-    public static FFLBroadcastMessageRequest ofChangeBroadcastStatus(BroadcastStatus status, Map<String, Object> data) {
-        data.put("status", status);
-
+    public static FFLBroadcastMessageRequest ofChangeBroadcastStatus(Map<String, Object> data) {
         return FFLBroadcastMessageRequest.builder()
                 .messageType(COMMAND)
                 .customType(UPDATE_STATUS)
