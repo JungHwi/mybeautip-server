@@ -4,10 +4,7 @@ import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
-import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
-import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastReportResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.service.AdminBroadcastService;
 import com.jocoos.mybeautip.domain.search.dto.CountResponse;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
@@ -70,6 +67,11 @@ public class AdminBroadcastController {
     @GetMapping("/broadcast/{broadcastId}")
     public AdminBroadcastResponse get(@PathVariable Long broadcastId) {
         return service.get(broadcastId);
+    }
+
+    @GetMapping("/broadcast/{broadcastId}/statistics")
+    public BroadcastStatisticsResponse getStatistics(@PathVariable long broadcastId) {
+        return service.getStatistics(broadcastId);
     }
 
     // TODO start_at default 값 논의 필요

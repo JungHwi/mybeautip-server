@@ -251,6 +251,7 @@ class AdminBroadcastViewerControllerTest(
                 responseFields(
                     fieldWithPath("member_id").type(JsonFieldType.NUMBER).description("회원 ID"),
                     fieldWithPath("type").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_TYPE)),
+                    fieldWithPath("username").type(JsonFieldType.STRING).description("회원명"),
                     fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
                     fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat()),

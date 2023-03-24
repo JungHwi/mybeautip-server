@@ -1,0 +1,3 @@
+== Admin Get Broadcast Statistics API
+
+operation::admin_get_broadcast_statistics[snippets='http-request,path-parameters,http-response,response-fields']

@@ -86,6 +86,12 @@ public class BroadcastService {
         return converter.toListResponse(searchResults);
     }
 
+    @Transactional(readOnly = true)
+    public BroadcastStatisticsResponse getStatistics(long broadcastId) {
+        Broadcast broadcast = broadcastDao.get(broadcastId);
+        return converter.converts(broadcast.getStatistics());
+    }
+
     @Transactional
     public BroadcastResponse edit(Long broadcastId, BroadcastEditRequest request, Long requestMemberId) {
         BroadcastEditResult editResult = domainService.overwriteEdit(broadcastId, request, requestMemberId);

@@ -11,7 +11,6 @@ import com.jocoos.mybeautip.domain.broadcast.event.BroadcastViewerStatisticsEven
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastFFLService;
-import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastStatisticsService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
@@ -32,7 +31,6 @@ import java.util.List;
 public class BroadcastViewerService {
 
     private final BatchBroadcastService batchBroadcastService;
-    private final BroadcastStatisticsService statisticsService;
     private final BroadcastViewerDao dao;
     private final BroadcastDao broadcastDao;
     private final MemberDao memberDao;

@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front;
 
+import com.jocoos.mybeautip.domain.broadcast.annotation.CheckPermission;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastService;
@@ -19,6 +20,7 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.jocoos.mybeautip.global.code.PermissionType.INFLUENCER;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.LOCAL_DATE_FORMAT;
 
 @RequiredArgsConstructor
@@ -46,6 +48,12 @@ public class BroadcastController {
     @GetMapping("/1/broadcast/{broadcastId}")
     public BroadcastResponse get(@PathVariable long broadcastId) {
         return service.get(broadcastId);
+    }
+
+    @CheckPermission({INFLUENCER})
+    @GetMapping("/1/broadcast/{broadcastId}/statistics")
+    public BroadcastStatisticsResponse getStatistics(@PathVariable long broadcastId) {
+        return service.getStatistics(broadcastId);
     }
 
     @PatchMapping("/1/broadcast/{broadcastId}")
