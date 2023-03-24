@@ -5,16 +5,19 @@
 === Host
 
 |===
-| 환경 | Host
+| 환경 | Host | Admin
 
 | Dev
 | `https://api-dev.mybeautip.me`
+| `https://admin-dev.mybeautip.me`
 
 | Stage
-| `TBD`
+| `https://api-dev.mybeautip.me`
+| `https://admin-stag.mybeautip.me`
 
 | Production
-| `TBD`
+| `https://api.mybeautip.me`
+| `https://admin.mybeautip.me`
 |===
 
 [[overview-http-status-codes]]
