@@ -4,10 +4,7 @@ import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
-import com.jocoos.mybeautip.domain.broadcast.dto.AdminBroadcastResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPatchRequest;
-import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastReportResponse;
-import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
@@ -58,6 +55,12 @@ public class AdminBroadcastService {
     public AdminBroadcastResponse get(Long broadcastId) {
         BroadcastSearchResult searchResult = broadcastDao.getSearchResult(broadcastId);
         return converter.toAdminResponse(searchResult);
+    }
+
+    @Transactional(readOnly = true)
+    public BroadcastStatisticsResponse getStatistics(long broadcastId) {
+        Broadcast broadcast = broadcastDao.get(broadcastId);
+        return converter.converts(broadcast.getStatistics());
     }
 
     @Transactional

@@ -215,6 +215,35 @@ class BroadcastControllerTest(
     }
 
     @Test
+    fun getBroadcastStatistics() {
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/api/1/broadcast/{broadcastId}/statistics", broadcast.id)
+                    .header(AUTHORIZATION, defaultInfluencerToken)
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "get_broadcast_statistics",
+                pathParameters(
+                    parameterWithName("broadcastId").description("방송 ID")
+                ),
+                responseFields(
+                    fieldWithPath("total_viewer_count").type(NUMBER).description("총 시청자 수"),
+                    fieldWithPath("max_viewer_count").type(NUMBER).description("동시 접속 최대 시청자 수"),
+                    fieldWithPath("viewer_count").type(NUMBER).description("현재 시청자 수"),
+                    fieldWithPath("member_viewer_count").type(NUMBER).description("현재 회원 시청자 수"),
+                    fieldWithPath("guest_viewer_count").type(NUMBER).description("현재 비회원 시청자 수"),
+                    fieldWithPath("report_count").type(NUMBER).description("방송 신고수"),
+                    fieldWithPath("heart_count").type(NUMBER).description("방송 하트수")
+                )
+            )
+        )
+    }
+
+    @Test
     fun `Broadcast 방송 날짜 목록 조회 API`() {
         saveTwoBroadcast()
 

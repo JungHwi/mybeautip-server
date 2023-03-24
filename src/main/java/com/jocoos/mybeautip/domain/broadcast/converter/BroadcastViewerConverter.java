@@ -18,7 +18,7 @@ public interface BroadcastViewerConverter {
     @Mappings({
             @Mapping(target = "isSuspended", source = "viewer.suspended"),
             @Mapping(target = "broadcastKey", source = "broadcastKey"),
-            @Mapping(target = "username", ignore = true),
+            @Mapping(target = "username", source = "viewer.username"),
             @Mapping(target = "avatarUrl", ignore = true),
     })
     ViewerResponse converts(BroadcastViewer viewer, BroadcastKey broadcastKey);
@@ -32,19 +32,23 @@ public interface BroadcastViewerConverter {
     ViewerResponse converts(BroadcastViewer viewer);
 
     @Mappings({
-            @Mapping(target = "isSuspended", source = "entity.suspended")
+            @Mapping(target = "isSuspended", source = "entity.suspended"),
+            @Mapping(target = "broadcastKey", ignore = true)
     })
     ViewerResponse converts(BroadcastViewer entity, String username, String avatarUrl);
 
     @Mappings({
+            @Mapping(target = "isSuspended", source = "entity.suspended"),
             @Mapping(target = "memberId", ignore = true),
-            @Mapping(target = "isSuspended", source = "entity.suspended")
+            @Mapping(target = "avatarUrl", ignore = true),
+            @Mapping(target = "broadcastKey", ignore = true)
     })
     ViewerResponse toGuest(BroadcastViewer entity);
 
 
     @Mappings({
-            @Mapping(target = "isSuspended", source = "suspended")
+            @Mapping(target = "isSuspended", source = "suspended"),
+            @Mapping(target = "broadcastKey", ignore = true)
     })
     ViewerResponse converts(ViewerSearchResult result);
 
@@ -56,7 +60,8 @@ public interface BroadcastViewerConverter {
             @Mapping(target = "memberId", source = "member.id"),
             @Mapping(target = "isSuspended", ignore = true),
             @Mapping(target = "suspendedAt", ignore = true),
-            @Mapping(target = "joinedAt", ignore = true)
+            @Mapping(target = "joinedAt", ignore = true),
+            @Mapping(target = "broadcastKey", ignore = true)
     })
     ViewerResponse converts(Member member, BroadcastViewerType type);
 
@@ -68,7 +73,8 @@ public interface BroadcastViewerConverter {
             @Mapping(target = "avatarUrl", ignore = true),
             @Mapping(target = "isSuspended", ignore = true),
             @Mapping(target = "suspendedAt", ignore = true),
-            @Mapping(target = "joinedAt", ignore = true)
+            @Mapping(target = "joinedAt", ignore = true),
+            @Mapping(target = "broadcastKey", ignore = true)
     })
     ViewerResponse toGuest(String username);
 }

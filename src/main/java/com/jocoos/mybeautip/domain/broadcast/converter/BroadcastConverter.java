@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.broadcast.converter;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastStatistics;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.member.Member;
@@ -38,4 +39,7 @@ public interface BroadcastConverter {
     Broadcast toEntity(BroadcastCreateRequest request,
                        BroadcastCategory category,
                        long memberId);
+
+
+    BroadcastStatisticsResponse converts(BroadcastStatistics entity);
 }
