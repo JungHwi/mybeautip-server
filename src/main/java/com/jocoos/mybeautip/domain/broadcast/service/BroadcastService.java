@@ -37,7 +37,7 @@ import java.util.List;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT_SEARCH_STATUSES;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
-import static org.springframework.data.domain.Sort.Direction.DESC;
+import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -75,7 +75,7 @@ public class BroadcastService {
                                                LocalDate localDate,
                                                Long cursor,
                                                int size) {
-        Sort defaultSort = SORTED_STATUS.getSort(DESC);
+        Sort defaultSort = SORTED_STATUS.getSort(ASC);
         BroadcastSearchCondition condition = BroadcastSearchCondition.builder()
                 .statuses(getStatuses(status))
                 .day(getDay(localDate))
