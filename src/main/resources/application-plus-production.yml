@@ -49,6 +49,8 @@ mybeautip:
     api: https://api.iamport.kr
     key: 3621612290867148
     secret: Z4CYi1YGDdOfk2ti4mYQtpEJiJPfxzlxEXvWZtCCGqR1skjxHinaI1U1LJgijBPXzlTyOwavW2xpmRW4
+  internal:
+    access-token: NmFmMGQwNmUtNGJiNy00YTM1LWE5OWQtODY4YzgxNDhjZDhh
 
 cloud:
   aws:
