@@ -40,8 +40,9 @@ public class BroadcastController {
     public CursorResultResponse<BroadcastListResponse> getList(@RequestParam(required = false) BroadcastStatus status,
                                                                @RequestParam(required = false, name = "start_date") @DateTimeFormat(pattern = LOCAL_DATE_FORMAT) LocalDate startDate,
                                                                @RequestParam(required = false) Long cursor,
-                                                               @RequestParam(required = false, defaultValue = "10") int size) {
-        List<BroadcastListResponse> responses = service.getList(status, startDate, cursor, size);
+                                                               @RequestParam(required = false, defaultValue = "10") int size,
+                                                               @CurrentMember MyBeautipUserDetails userDetails) {
+        List<BroadcastListResponse> responses = service.getList(status, startDate, cursor, size, userDetails.getUsername());
         return new CursorResultResponse<>(responses);
     }
 

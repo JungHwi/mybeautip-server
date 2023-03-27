@@ -15,13 +15,12 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 @Getter
 @RequiredArgsConstructor
 public enum BroadcastSortField implements CodeValue {
-    SORTED_STATUS("상태 순서", SORTED_STATUS_FIELD_NAME, SORTED_STATUS_ASC, SORTED_STATUS_DESC),
-    CREATED_AT("생성 일자", ID_FIELD_NAME, Sort.by(ASC, ID_FIELD_NAME), Sort.by(DESC, ID_FIELD_NAME)),
-    STARTED_AT("시작 일자", STARTED_AT_FIELD_NAME, STARTED_AT_ASC, STARTED_AT_DESC),
+    SORTED_STATUS("상태 순서", SORTED_STATUS_ASC, SORTED_STATUS_DESC),
+    CREATED_AT("생성 일자", Sort.by(ASC, ID_FIELD_NAME), Sort.by(DESC, ID_FIELD_NAME)),
+    STARTED_AT("시작 일자", STARTED_AT_ASC, STARTED_AT_DESC),
     ;
 
     private final String description;
-    private final String fieldName;
     private final Sort asc;
     private final Sort desc;
 

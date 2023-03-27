@@ -83,7 +83,7 @@ public class AdminBroadcastService {
 
     public HeartCountResponse addHeartCount(Long broadcastId, int heartCount) {
         Broadcast broadcast = domainService.addHeartCount(broadcastId, heartCount);
-        return new HeartCountResponse(broadcast.getId(), broadcast.getStatistics().getHeartCount());
+        return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
     }
 
     @Transactional(readOnly = true)

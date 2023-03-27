@@ -22,7 +22,8 @@ public enum FFLChatRoomBroadcastMessageCustomType {
     UPDATE_BROADCAST("방송 정보 변경", null),
     UPDATE_STATUS("방송 상태 변경", null),
     PIN("채팅 고정", null),
-    NO_PIN("채팅 고정 해제", null)
+    NO_PIN("채팅 고정 해제", null),
+    HEART_COUNT("좋아요수", null)
     ;
 
     private final String description;

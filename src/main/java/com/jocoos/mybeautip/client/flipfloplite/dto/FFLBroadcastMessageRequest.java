@@ -72,4 +72,12 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .customType(NO_PIN)
                 .build();
     }
+
+    public static FFLBroadcastMessageRequest ofHeartCount(int heartCount) {
+        return FFLBroadcastMessageRequest.builder()
+                .messageType(COMMAND)
+                .customType(HEART_COUNT)
+                .data(Map.of("heart_count", heartCount))
+                .build();
+    }
 }

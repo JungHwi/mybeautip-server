@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -24,6 +25,11 @@ public class BroadcastNotificationDao {
     @Transactional(readOnly = true)
     public List<BroadcastNotification> getNotifications(Broadcast broadcast) {
         return repository.findByBroadcastAndIsNotifyNeeded(broadcast, true);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BroadcastNotification> getNotificationsIn(Set<Long> ids, Long memberId) {
+        return repository.findAllByMemberIdAndBroadcastIdInAndIsNotifyNeeded(memberId, ids, true);
     }
 
     @Transactional(readOnly = true)

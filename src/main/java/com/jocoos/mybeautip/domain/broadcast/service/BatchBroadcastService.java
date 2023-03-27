@@ -64,8 +64,7 @@ public class BatchBroadcastService {
     }
 
     private void sendStatusChangedNotification(BroadcastUpdateResult toReady, BroadcastUpdateResult toCancel) {
-        List<Long> notificationBroadcastIds = Stream.concat(toReady.videoKeys().stream(), toCancel.videoKeys().stream())
-                .toList();
+        List<Long> notificationBroadcastIds = Stream.concat(toReady.videoKeys().stream(), toCancel.videoKeys().stream()).toList();
         eventPublisher.publishEvent(new BroadcastBulkEditNotificationEvent(notificationBroadcastIds));
     }
 }

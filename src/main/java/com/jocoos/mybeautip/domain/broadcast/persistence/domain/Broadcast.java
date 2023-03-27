@@ -90,7 +90,7 @@ public class Broadcast extends CreatedAtBaseEntity {
     @JoinColumn(name = "category_id")
     private BroadcastCategory category;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "id")
     private BroadcastStatistics statistics;
 
@@ -205,6 +205,10 @@ public class Broadcast extends CreatedAtBaseEntity {
 
     public String getThumbnailUrlPath() {
         return BROADCAST.getDirectory(id);
+    }
+
+    public int getHeartCount() {
+        return statistics.getHeartCount();
     }
 
     private void initStatusAndStartedAt(boolean isStartNow, ZonedDateTime startedAt) {

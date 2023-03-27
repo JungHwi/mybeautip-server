@@ -19,7 +19,7 @@ public class BroadcastNotification {
     @Column
     private Long memberId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "broadcast_id")
     private Broadcast broadcast;
 
@@ -33,5 +33,9 @@ public class BroadcastNotification {
 
     public void changeNotifyNeeded(Boolean isNotifyNeeded) {
         this.isNotifyNeeded = isNotifyNeeded;
+    }
+
+    public Long getBroadcastId() {
+        return broadcast.getId();
     }
 }

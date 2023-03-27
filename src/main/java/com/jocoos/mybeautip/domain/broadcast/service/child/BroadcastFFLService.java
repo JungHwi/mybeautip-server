@@ -80,6 +80,7 @@ public class BroadcastFFLService {
     public void sendChangeBroadcastStatusMessage(Long videoRoomId, BroadcastStatus status) {
         sendChangeBroadcastStatusMessage(videoRoomId, Map.of("status", status));
     }
+
     public void sendChangeBroadcastStatusMessage(Long videoRoomId, Map<String, Object> data) {
         FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofChangeBroadcastStatus(data);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
@@ -97,6 +98,11 @@ public class BroadcastFFLService {
 
     public void sendNoPinMessage(Long videoRoomId) {
         FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofNoPin();
+        flipFlopLiteService.broadcastMessage(videoRoomId, request);
+    }
+
+    public void sendHeartCountMessage(Long videoRoomId, int heartCount) {
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofHeartCount(heartCount);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
 }

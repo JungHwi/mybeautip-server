@@ -51,7 +51,6 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 getSearchResult(
                         baseConditionQuery(query, condition)
                 )
-                        .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member, broadcastPinMessage))
                         .orderBy(
                                 getOrders(condition.sort())
                         )
