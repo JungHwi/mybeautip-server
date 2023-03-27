@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.InternalServerException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +15,6 @@ import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
-@Log4j2
 @RequiredArgsConstructor
 @Service
 public class FileContentTypeService {
@@ -24,13 +22,11 @@ public class FileContentTypeService {
     private final Tika tika;
 
     public String getContentType(MultipartFile file) {
-        log.debug("File Upload - Content Type Start");
         String contentType = file.getContentType();
         if (contentType == null || contentType.contains(APPLICATION_OCTET_STREAM_VALUE)) {
             contentType = getExtension(file).orElse(getContentTypeByTika(file));
         }
         validSupportedContentType(contentType);
-        log.debug("File Upload - Content Type End");
         return contentType;
     }
 

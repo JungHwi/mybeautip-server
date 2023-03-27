@@ -12,7 +12,6 @@ import com.jocoos.mybeautip.global.dto.single.IntegerDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +23,6 @@ import java.util.List;
 import static com.jocoos.mybeautip.global.code.PermissionType.INFLUENCER;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.LOCAL_DATE_FORMAT;
 
-@Log4j2
 @RequiredArgsConstructor
 @RequestMapping("/api/")
 @RestController
@@ -35,7 +33,6 @@ public class BroadcastController {
     @PostMapping("/1/broadcast")
     public BroadcastResponse create(@RequestBody @Valid BroadcastCreateRequest request,
                                     @CurrentMember MyBeautipUserDetails userDetails) {
-        log.debug("Broadcast Create");
         return service.createBroadcastAndVod(request, userDetails.getMember().getId());
     }
 

@@ -3,7 +3,6 @@ package com.jocoos.mybeautip.domain.file.api.front;
 import com.jocoos.mybeautip.domain.file.service.FileService;
 import com.jocoos.mybeautip.domain.file.validator.annotation.ValidFile;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +14,6 @@ import java.util.List;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
-@Log4j2
 @RequiredArgsConstructor
 @Validated
 @RestController
@@ -25,10 +23,7 @@ public class FileController {
 
     @PostMapping(value = "/api/1/file", consumes = {MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<List<String>> upload(@RequestPart @ValidFile List<MultipartFile> files) {
-        log.debug("File Upload Start");
-        List<String> response = service.upload(files);
-        log.debug("File Upload End");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(service.upload(files));
     }
 
     @Deprecated(since = "PlanD")

@@ -22,12 +22,10 @@ public class FileService {
 
     public List<String> upload(List<MultipartFile> files) {
         List<String> fileUrls = new ArrayList<>();
-        log.debug("File Upload - Service Start");
         for (MultipartFile file : files) {
             String contentType = contentTypeService.getContentType(file);
             fileUrls.add(upload(file, contentType));
         }
-        log.debug("File Upload - Service End");
         return fileUrls;
     }
 
