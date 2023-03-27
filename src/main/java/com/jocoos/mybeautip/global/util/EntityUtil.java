@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,11 @@ public class EntityUtil {
                 .collect(Collectors.toMap(getIdFunc::applyAsLong, x -> x));
     }
 
-    public static <T>  List<Long> extractLongList(List<T> entities, ToLongFunction<T> getIdFunc) {
-        return entities.stream().map(getIdFunc::applyAsLong).toList();
+    public static <T>  List<Long> extractLongList(List<T> entities, ToLongFunction<T> getLongFunc) {
+        return entities.stream().map(getLongFunc::applyAsLong).toList();
+    }
+
+    public static <T> Set<Long> extractLongSet(List<T> entities, ToLongFunction<T> getLongFunc) {
+        return entities.stream().map(getLongFunc::applyAsLong).collect(Collectors.toSet());
     }
 }

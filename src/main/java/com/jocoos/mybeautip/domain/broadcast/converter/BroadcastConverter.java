@@ -13,10 +13,19 @@ import org.mapstruct.Mappings;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper(componentModel = "spring", uses = {MemberConverter.class})
 public abstract class BroadcastConverter {
-    public abstract List<BroadcastListResponse> toListResponse(List<BroadcastSearchResult> results);
+
+    public List<BroadcastListResponse> toListResponse(List<BroadcastSearchResult> results,
+                                                      Map<Long, BroadcastRelationInfo> relationInfoMap) {
+        return results.stream()
+                .map(result -> toListResponse(result, relationInfoMap.get(result.getId())))
+                .toList();
+    }
+
+    public abstract BroadcastListResponse toListResponse(BroadcastSearchResult result, BroadcastRelationInfo relationInfo);
 
     public abstract BroadcastCategoryResponse toResponse(BroadcastCategory category);
 
@@ -45,8 +54,8 @@ public abstract class BroadcastConverter {
     @Mapping(target = "title", source = "request.title")
     @Mapping(target = "thumbnailUrl", source = "request.thumbnail.url")
     public abstract Broadcast toEntity(BroadcastCreateRequest request,
-                       BroadcastCategory category,
-                       long memberId);
+                                       BroadcastCategory category,
+                                       long memberId);
 
     public BroadcastStatisticsResponse converts(Broadcast broadcast) {
         ZonedDateTime endedAt = broadcast.getEndedAt() != null ? broadcast.getEndedAt() : ZonedDateTime.now();

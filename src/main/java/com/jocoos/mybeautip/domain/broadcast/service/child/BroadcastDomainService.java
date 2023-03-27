@@ -123,7 +123,9 @@ public class BroadcastDomainService {
     @Transactional
     public Broadcast addHeartCount(Long broadcastId, int heartCount) {
         broadcastDao.addHeartCountAndFlush(broadcastId, heartCount);
-        return broadcastDao.get(broadcastId);
+        Broadcast broadcast = broadcastDao.get(broadcastId);
+        fflService.sendHeartCountMessage(broadcast.getVideoKey(), broadcast.getHeartCount());
+        return broadcast;
     }
 
     private BroadcastEditResult edit(Broadcast broadcast, BroadcastEditCommand command) {

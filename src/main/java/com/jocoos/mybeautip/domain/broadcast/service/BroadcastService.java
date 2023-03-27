@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.broadcast.event.BroadcastNotificationEvent.Br
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastNotification;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
+import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastRelationService;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastVodService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastPermissionDao;
@@ -34,6 +35,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT_SEARCH_STATUSES;
@@ -50,6 +52,7 @@ public class BroadcastService {
     private final BroadcastPermissionDao permissionDao;
     private final BroadcastDomainService domainService;
     private final BroadcastVodService broadcastVodService;
+    private final BroadcastRelationService relationService;
     private final BroadcastConverter converter;
     private final AwsS3Handler awsS3Handler;
     private final ApplicationEventPublisher eventPublisher;
@@ -69,7 +72,6 @@ public class BroadcastService {
     @Transactional(readOnly = true)
     public BroadcastResponse get(long broadcastId) {
         BroadcastSearchResult searchResult = broadcastDao.getSearchResult(broadcastId);
-
         return converter.toResponse(searchResult);
     }
 
@@ -77,7 +79,8 @@ public class BroadcastService {
     public List<BroadcastListResponse> getList(BroadcastStatus status,
                                                LocalDate localDate,
                                                Long cursor,
-                                               int size) {
+                                               int size,
+                                               String tokenUsername) {
         Sort defaultSort = SORTED_STATUS.getSort(ASC);
         BroadcastSearchCondition condition = BroadcastSearchCondition.builder()
                 .statuses(getStatuses(status))
@@ -86,7 +89,8 @@ public class BroadcastService {
                 .pageable(PageRequest.of(0, size, defaultSort))
                 .build();
         List<BroadcastSearchResult> searchResults = broadcastDao.getList(condition);
-        return converter.toListResponse(searchResults);
+        Map<Long, BroadcastRelationInfo> relationInfoMap = relationService.getRelationInfoMap(tokenUsername, searchResults);
+        return converter.toListResponse(searchResults, relationInfoMap);
     }
 
     @Transactional(readOnly = true)
@@ -143,7 +147,7 @@ public class BroadcastService {
 
     public HeartCountResponse addHeartCount(Long broadcastId, int heartCount) {
         Broadcast broadcast = domainService.addHeartCount(broadcastId, heartCount);
-        return new HeartCountResponse(broadcast.getId(), broadcast.getStatistics().getHeartCount());
+        return new HeartCountResponse(broadcast.getId(), broadcast.getHeartCount());
     }
 
     @Transactional(readOnly = true)
