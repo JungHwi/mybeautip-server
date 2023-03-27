@@ -1,0 +1,3 @@
+== Get Internal Community Categories API
+
+operation::internal_get_community_categories[snippets='http-request,request-parameters,http-response,response-fields']

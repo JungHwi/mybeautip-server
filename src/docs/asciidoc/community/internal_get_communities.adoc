@@ -1,0 +1,3 @@
+== Get Internal Communities API
+
+operation::internal_get_communities[snippets='http-request,request-parameters,http-response,response-fields']
