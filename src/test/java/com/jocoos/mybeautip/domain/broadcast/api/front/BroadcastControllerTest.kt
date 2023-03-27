@@ -160,6 +160,8 @@ class BroadcastControllerTest(
                     fieldWithPath("content.[].created_by.email").type(STRING).description("진행자 이메일").optional(),
                     fieldWithPath("content.[].created_by.username").type(STRING).description("진행자 닉네임"),
                     fieldWithPath("content.[].created_by.avatar_url").type(STRING).description("진행자 아바타 URL"),
+                    fieldWithPath("content.[].relation_info").type(OBJECT).description("요청자 연관 정보"),
+                    fieldWithPath("content.[].relation_info.is_notify_needed").type(BOOLEAN).description("요청자 연관 정보 - 알림 필요 여부"),
                 )
             )
         )
