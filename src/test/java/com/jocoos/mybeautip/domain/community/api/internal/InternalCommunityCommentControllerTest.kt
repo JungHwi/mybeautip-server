@@ -55,6 +55,10 @@ class InternalCommunityCommentControllerTest(
     private lateinit var category: CommunityCategory
     private lateinit var writer: Member
 
+    companion object {
+        const val MEMBER_ID = "MEMBER-ID"
+    }
+
     @BeforeAll
     fun beforeAll() {
         category = saveCategory()
@@ -78,8 +82,9 @@ class InternalCommunityCommentControllerTest(
         // when & then
         val result: ResultActions = mockMvc
             .perform(
-                get("/api/1/community/{community_id}/comment", communityComment.communityId)
+                get("/internal/1/community/{community_id}/comment", communityComment.communityId)
                     .header(AUTHORIZATION, requestUserToken)
+                    .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -87,7 +92,7 @@ class InternalCommunityCommentControllerTest(
 
         result.andDo(
             document(
-                "get_community_comments",
+                "internal_get_community_comments",
                 pathParameters(
                     parameterWithName("community_id").description("글 ID")
                 ),
@@ -136,11 +141,12 @@ class InternalCommunityCommentControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 get(
-                    "/api/1/community/{community_id}/comment/{comment_id}",
+                    "/internal/1/community/{community_id}/comment/{comment_id}",
                     communityComment.communityId,
                     communityComment.id
                 )
                     .header(AUTHORIZATION, requestUserToken)
+                    .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -148,7 +154,7 @@ class InternalCommunityCommentControllerTest(
 
         result.andDo(
             document(
-                "get_community_comment",
+                "internal_get_community_comment",
                 pathParameters(
                     parameterWithName("community_id").description("글 ID"),
                     parameterWithName("comment_id").description("댓글 ID")
@@ -199,8 +205,9 @@ class InternalCommunityCommentControllerTest(
         // when & then
         val result: ResultActions = mockMvc
             .perform(
-                post("/api/1/community/{community_id}/comment", community.id)
+                post("/internal/1/community/{community_id}/comment", community.id)
                     .header(AUTHORIZATION, requestUserToken)
+                    .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -209,7 +216,7 @@ class InternalCommunityCommentControllerTest(
 
         result.andDo(
             document(
-                "write_community_comment",
+                "internal_write_community_comment",
                 pathParameters(
                     parameterWithName("community_id").description("글 ID")
                 ),
@@ -271,11 +278,12 @@ class InternalCommunityCommentControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 put(
-                    "/api/1/community/{community_id}/comment/{comment_id}",
+                    "/internal/1/community/{community_id}/comment/{comment_id}",
                     communityComment.communityId,
                     communityComment.id
                 )
                     .header(AUTHORIZATION, requestUserToken)
+                    .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
             )
@@ -284,7 +292,7 @@ class InternalCommunityCommentControllerTest(
 
         result.andDo(
             document(
-                "edit_community_comment",
+                "internal_edit_community_comment",
                 pathParameters(
                     parameterWithName("community_id").description("글 ID"),
                     parameterWithName("comment_id").description("댓글 ID")
@@ -335,11 +343,12 @@ class InternalCommunityCommentControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 delete(
-                    "/api/1/community/{community_id}/comment/{comment_id}",
+                    "/internal/1/community/{community_id}/comment/{comment_id}",
                     communityComment.communityId,
                     communityComment.id
                 )
                     .header(AUTHORIZATION, requestUserToken)
+                    .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isOk)
@@ -347,7 +356,7 @@ class InternalCommunityCommentControllerTest(
 
         result.andDo(
             document(
-                "delete_community_comment",
+                "internal_delete_community_comment",
                 pathParameters(
                     parameterWithName("community_id").description("글 ID"),
                     parameterWithName("comment_id").description("댓글 ID")
@@ -367,11 +376,12 @@ class InternalCommunityCommentControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 patch(
-                    "/api/1/community/{community_id}/comment/{comment_id}/like",
+                    "/internal/1/community/{community_id}/comment/{comment_id}/like",
                     communityComment.communityId,
                     communityComment.id
                 )
                     .header(AUTHORIZATION, requestUserToken)
+                    .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(bool))
             )
@@ -380,7 +390,7 @@ class InternalCommunityCommentControllerTest(
 
         result.andDo(
             document(
-                "like_community_comment",
+                "internal_like_community_comment",
                 pathParameters(
                     parameterWithName("community_id").description("글 ID"),
                     parameterWithName("comment_id").description("댓글 ID")
@@ -410,11 +420,12 @@ class InternalCommunityCommentControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 patch(
-                    "/api/1/community/{community_id}/comment/{comment_id}/report",
+                    "/internal/1/community/{community_id}/comment/{comment_id}/report",
                     communityComment.communityId,
                     communityComment.id
                 )
                     .header(AUTHORIZATION, requestUserToken)
+                    .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(report))
             )
@@ -423,7 +434,7 @@ class InternalCommunityCommentControllerTest(
 
         result.andDo(
             document(
-                "report_community_comment",
+                "internal_report_community_comment",
                 pathParameters(
                     parameterWithName("community_id").description("글 ID"),
                     parameterWithName("comment_id").description("댓글 ID")
@@ -431,41 +442,6 @@ class InternalCommunityCommentControllerTest(
                 requestFields(
                     fieldWithPath("is_report").type(BOOLEAN).description("신고 여부"),
                     fieldWithPath("description").type(STRING).description("신고 사유. 신고여부가 true 일때만 필수").optional()
-                ),
-                responseFields(
-                    fieldWithPath("is_report").type(BOOLEAN).description("신고 여부"),
-                    fieldWithPath("report_count").type(NUMBER).description("신고수")
-                )
-            )
-        )
-    }
-
-    @Test
-    fun isReportComment() {
-
-        // given
-        val communityComment: CommunityComment = saveCommunityComment()
-
-        // when & then
-        val result: ResultActions = mockMvc
-            .perform(
-                get(
-                    "/api/1/community/{community_id}/comment/{comment_id}/report",
-                    communityComment.communityId,
-                    communityComment.id
-                )
-                    .header(AUTHORIZATION, requestUserToken)
-                    .contentType(APPLICATION_JSON)
-            )
-            .andExpect(status().isOk)
-            .andDo(print())
-
-        result.andDo(
-            document(
-                "check_report_community_comment",
-                pathParameters(
-                    parameterWithName("community_id").description("글 ID"),
-                    parameterWithName("comment_id").description("댓글 ID")
                 ),
                 responseFields(
                     fieldWithPath("is_report").type(BOOLEAN).description("신고 여부"),
