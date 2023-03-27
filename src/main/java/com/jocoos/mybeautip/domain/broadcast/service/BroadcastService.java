@@ -60,7 +60,9 @@ public class BroadcastService {
         Member member = memberDao.getMember(creatorId);
         Broadcast broadcast = domainService.create(request, creatorId);
         broadcastVodService.createVod(broadcast);
+        log.debug("Broadcast Thumbnail Upload Start");
         awsS3Handler.copy(request.getThumbnail(), broadcast.getThumbnailUrlPath());
+        log.debug("Broadcast Thumbnail Upload End");
         return converter.toResponse(broadcast, member);
     }
 
