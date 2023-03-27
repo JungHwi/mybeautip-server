@@ -4,11 +4,13 @@ import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastBatchUpdateStatusRespo
 import com.jocoos.mybeautip.domain.broadcast.service.BatchBroadcastService;
 import com.jocoos.mybeautip.domain.broadcast.service.BroadcastViewerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Log4j2
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/batch")
@@ -25,6 +27,8 @@ public class BatchBroadcastController {
 
     @PatchMapping("/broadcast/status")
     public BroadcastBatchUpdateStatusResponse bulkChangeStatus() {
-        return service.bulkChangeStatus();
+        BroadcastBatchUpdateStatusResponse response = service.bulkChangeStatus();
+        log.debug("bulk change status result : {}", response);
+        return response;
     }
 }
