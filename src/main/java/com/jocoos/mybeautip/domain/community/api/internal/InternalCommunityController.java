@@ -1,106 +1,131 @@
 package com.jocoos.mybeautip.domain.community.api.internal;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.List;
 
-import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
-import com.jocoos.mybeautip.domain.community.dto.AdminCommunityResponse;
-import com.jocoos.mybeautip.domain.community.dto.PatchCommunityRequest;
-import com.jocoos.mybeautip.domain.community.dto.WriteCommunityRequest;
-import com.jocoos.mybeautip.domain.community.service.AdminCommunityService;
-import com.jocoos.mybeautip.global.annotation.CurrentMember;
+import com.jocoos.mybeautip.domain.community.dto.*;
+import com.jocoos.mybeautip.domain.community.service.CommunityService;
+import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
+import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
+import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
+import com.jocoos.mybeautip.domain.scrap.service.ScrapService;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
-import com.jocoos.mybeautip.global.dto.single.IdDto;
-import com.jocoos.mybeautip.global.vo.SearchOption;
-import com.jocoos.mybeautip.global.wrapper.PageResponse;
-import com.jocoos.mybeautip.security.MyBeautipUserDetails;
+import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
-@RequiredArgsConstructor
-@RequestMapping("/internal/")
+@Log4j2
 @RestController
+@RequestMapping("/internal")
+@RequiredArgsConstructor
 public class InternalCommunityController {
 
-    private final AdminCommunityService service;
+    private final CommunityService service;
+    private final ScrapService scrapService;
+    private final LegacyMemberService legacyMemberService;
 
-    @PostMapping("/1/community")
-    public ResponseEntity<AdminCommunityResponse> write(@CurrentMember MyBeautipUserDetails userDetails,
-                                                        @RequestHeader("MEMBER-ID") String memberId,
-                                                        @RequestBody WriteCommunityRequest request) {
-        AdminCommunityResponse response = service.write(request, userDetails.getMember());
-        URI location = ServletUriComponentsBuilder.fromCurrentRequestUri()
-                .path("/{id}")
-                .buildAndExpand(response.getId())
-                .toUri();
-        return ResponseEntity.created(location).body(response);
+    @PostMapping(value = "/2/community")
+    public ResponseEntity<CommunityResponse> writeCommunity(@RequestBody WriteCommunityRequest request) {
+        CommunityResponse response = service.write(request);
+
+        return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/1/community/{communityId}")
-    public ResponseEntity<IdDto> edit(@PathVariable Long communityId, @RequestBody PatchCommunityRequest request) {
-        return ResponseEntity.ok(new IdDto(service.edit(communityId, request)));
-    }
-
-    @DeleteMapping("/1/community/{communityId}")
-    public ResponseEntity<IdDto> deleteAdminWrite(@PathVariable Long communityId) {
-        return ResponseEntity.ok(new IdDto(service.delete(communityId)));
-    }
-
-    @GetMapping("/1/community")
-    public ResponseEntity<PageResponse<AdminCommunityResponse>> getCommunities(
-            @RequestParam(required = false, name = "category_id") Long categoryId,
-            @RequestParam(required = false, name = "event_id") Long eventId,
-            @RequestParam(required = false) CommunityStatus status,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "sortedAt") String sort,
-            @RequestParam(required = false, defaultValue = "DESC") String order,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false, name = "start_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startAt,
-            @RequestParam(required = false, name = "end_at") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endAt,
-            @RequestParam(required = false, name = "is_reported") Boolean isReported,
-            @CurrentMember MyBeautipUserDetails userDetails) {
-
-        log.debug("{}", userDetails);
-        PageRequest pageRequest = PageRequest.of(page - 1, size, Direction.fromString(order), sort);
-        SearchOption searchOption = SearchOption.builder()
-                .searchQueryString(search)
-                .startAt(startAt)
-                .endAt(endAt)
-                .zoneId(ZoneId.of("Asia/Seoul"))
-                .isReported(isReported)
+    @GetMapping(value = "/2/community")
+    public ResponseEntity<CursorResultResponse<CommunityResponse>> getCommunities(@RequestParam(required = false, defaultValue = "1", name = "category_id") Long categoryId,
+                                                                                  @RequestParam(required = false, name = "event_id") Long eventId,
+                                                                                  @RequestParam(required = false) ZonedDateTime cursor,
+                                                                                  @RequestParam(required = false, defaultValue = "20") int size) {
+        
+        SearchCommunityRequest request = SearchCommunityRequest.builder()
+                .categoryId(categoryId)
+                .eventId(eventId)
+                .cursor(cursor)
                 .build();
 
-        return ResponseEntity.ok(service.getCommunities(status, categoryId, eventId, pageRequest, searchOption));
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "sortedAt"));
+
+        List<CommunityResponse> response = service.getCommunities(request, pageable);
+
+        CursorResultResponse<CommunityResponse> result = new CursorResultResponse<>(response);
+
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/1/community/{communityId}")
-    public ResponseEntity<AdminCommunityResponse> getCommunity(@PathVariable Long communityId) {
-        return ResponseEntity.ok(service.getCommunity(communityId));
+    @GetMapping(value = "/2/community/{community_id}")
+    public ResponseEntity<CommunityResponse> getCommunity(@PathVariable(name = "community_id") long communityId) {
+
+        CommunityResponse response = service.getCommunity(communityId);
+
+        return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/1/community/{communityId}/win")
-    public ResponseEntity<IdDto> winCommunity(@PathVariable Long communityId, @RequestBody BooleanDto request) {
-        return ResponseEntity.ok(new IdDto(service.winCommunity(communityId, request.isBool())));
+    @PutMapping(value = "/2/community/{community_id}")
+    public ResponseEntity<CommunityResponse> editCommunity(@PathVariable(name = "community_id") long communityId,
+                                                           @RequestBody EditCommunityRequest request) {
+        request.setCommunityId(communityId);
+
+        CommunityResponse response = service.edit(request);
+
+        return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/1/community/{communityId}/fix")
-    public ResponseEntity<IdDto> fixCommunity(@PathVariable Long communityId, @RequestBody BooleanDto request) {
-        return ResponseEntity.ok(new IdDto(service.fixCommunity(communityId, request.isBool())));
+    @DeleteMapping(value = "/1/community/{community_id}")
+    public ResponseEntity deleteCommunity(@PathVariable(name = "community_id") long communityId) {
+
+        service.delete(communityId);
+
+        return new ResponseEntity(HttpStatus.OK);
     }
 
-    @PatchMapping("/1/community/{communityId}/hide")
-    public ResponseEntity<IdDto> hideCommunity(@PathVariable Long communityId, @RequestBody BooleanDto request) {
-        return ResponseEntity.ok(new IdDto(service.hideCommunity(communityId, request.isBool())));
+    @PatchMapping(value = "/1/community/{community_id}/like")
+    public ResponseEntity<LikeResponse> likeCommunity(@PathVariable(name = "community_id") long communityId,
+                                                      @RequestBody BooleanDto isLike) {
+        long memberId = legacyMemberService.currentMemberId();
+
+        LikeResponse result = service.like(memberId, communityId, isLike.isBool());
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping(value = "/1/community/{community_id}/report")
+    public ResponseEntity<ReportResponse> reportCommunity(@PathVariable(name = "community_id") long communityId,
+                                          @RequestBody ReportRequest report) {
+        long memberId = legacyMemberService.currentMemberId();
+
+        ReportResponse result = service.report(memberId, communityId, report);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = "/1/community/{community_id}/report")
+    public ResponseEntity<ReportResponse> isReportCommunity(@PathVariable(name = "community_id") long communityId) {
+        long memberId = legacyMemberService.currentMemberId();
+
+        ReportResponse result = service.isReport(memberId, communityId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("/1/community/{community_id}/scrap")
+    public ResponseEntity<ScrapResponse> scrap(@PathVariable(name = "community_id") long communityId,
+                                               @RequestBody BooleanDto isScrap) {
+        ScrapRequest request = ScrapRequest.builder()
+                .type(ScrapType.COMMUNITY)
+                .relationId(communityId)
+                .isScrap(isScrap.isBool())
+                .build();
+
+        ScrapResponse response = scrapService.scrap(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -12,7 +12,7 @@
 | `https://admin-dev.mybeautip.me`
 
 | Stage
-| `https://api-dev.mybeautip.me`
+| `https://api-stag.mybeautip.me`
 | `https://admin-stag.mybeautip.me`
 
 | Production

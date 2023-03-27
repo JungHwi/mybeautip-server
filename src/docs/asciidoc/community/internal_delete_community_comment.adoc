@@ -1,0 +1,3 @@
+== Delete Internal Community Comment API
+
+operation::internal_delete_community_comment[snippets='http-request,path-parameters,http-response']
