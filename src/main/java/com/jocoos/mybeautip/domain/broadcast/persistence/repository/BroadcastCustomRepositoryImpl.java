@@ -50,9 +50,8 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 getSearchResult(
                         baseConditionQuery(query, condition)
                 )
-                        .orderBy(
-                                getOrders(condition.sort())
-                        )
+                        .where(cursor(condition.cursor()))
+                        .orderBy(getOrders(condition.sort()))
                         .offset(condition.offset())
                         .limit(condition.size())
                         .fetch());
@@ -132,13 +131,6 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member, broadcastPinMessage));
     }
 
-    private JPAQuery<Long> getCountQuery(BroadcastSearchCondition condition) {
-        return repository.query(query ->
-                withMemberAndCategoryAndPinMessage(
-                        baseConditionQuery(query, condition))
-                        .select(broadcast.count()));
-    }
-
     private JPAQuery<?> withMemberAndCategoryAndPinMessage(JPAQuery<?> query) {
         return query
                 .from(broadcast)
@@ -156,8 +148,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                         createdAtBefore(condition.endAt()),
                         searchByKeyword(condition.searchOption()),
                         inStatus(condition.statuses()),
-                        isReported(condition.isReported()),
-                        cursor(condition.cursor())
+                        isReported(condition.isReported())
                 );
     }
 

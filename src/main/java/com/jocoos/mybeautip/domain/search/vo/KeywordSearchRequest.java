@@ -1,10 +1,12 @@
 package com.jocoos.mybeautip.domain.search.vo;
 
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.member.Member;
 import lombok.Builder;
 
 import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.ZONE_DATE_TIME_MILLI_FORMATTER;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -29,11 +31,27 @@ public record KeywordSearchRequest(String keyword,
 
     @Nullable
     public Long idCursor() {
-        return isBlank(cursor) ? null : Long.parseLong(cursor);
+        if (isBlank(cursor)) {
+            return null;
+        }
+
+        try {
+            return Long.parseLong(cursor);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Wrong Cursor Format. Need To Be Number. Request Cursor : " + cursor);
+        }
     }
 
     @Nullable
     public ZonedDateTime dateCursor() {
-        return isBlank(cursor) ? null : ZonedDateTime.parse(cursor, ZONE_DATE_TIME_MILLI_FORMATTER);
+        if (isBlank(cursor)) {
+            return null;
+        }
+
+        try {
+            return ZonedDateTime.parse(cursor, ZONE_DATE_TIME_MILLI_FORMATTER);
+        } catch (DateTimeParseException e) {
+            throw new BadRequestException("Wrong Cursor Format. Need To Be Date Time. Request Cursor : " + cursor);
+        }
     }
 }
