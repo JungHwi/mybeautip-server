@@ -1,9 +1,9 @@
 package com.jocoos.mybeautip.global.vo;
 
-import com.jocoos.mybeautip.domain.event.code.SortField;
+import com.jocoos.mybeautip.global.code.SortField;
 import lombok.Getter;
 
-import static com.jocoos.mybeautip.domain.event.code.SortField.JOIN_COUNT;
+import static com.jocoos.mybeautip.global.code.SortField.JOIN_COUNT;
 
 @Getter
 public class Sort {

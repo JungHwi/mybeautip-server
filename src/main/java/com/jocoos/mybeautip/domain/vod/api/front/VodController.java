@@ -1,10 +1,10 @@
 package com.jocoos.mybeautip.domain.vod.api.front;
 
-import com.jocoos.mybeautip.domain.vod.code.VodSortField;
 import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
+import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
+import com.jocoos.mybeautip.domain.vod.code.VodSortField;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.vod.service.VodService;
-import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.ReportCountResponse;
 import com.jocoos.mybeautip.global.dto.single.IntegerDto;
@@ -12,6 +12,9 @@ import com.jocoos.mybeautip.global.vo.CursorPaging;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,10 +30,11 @@ public class VodController {
     public CursorResultResponse<VodResponse> getList(@RequestParam(required = false, defaultValue = "1") Long categoryId,
                                                      @RequestParam(required = false) Long cursor,
                                                      @RequestParam(required = false, defaultValue = "CREATED_AT") VodSortField sort,
-                                                     @RequestParam(required = false, defaultValue = "DESC") String order,
+                                                     @RequestParam(required = false, defaultValue = "DESC") Direction order,
                                                      @RequestParam(required = false, defaultValue = "5") int size) {
-        CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(cursor, sort.getSortField(), order, size);
-        List<VodResponse> responses = service.getList(categoryId, cursorPaging);
+        CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(cursor, sort.getSortField());
+        Pageable pageable = PageRequest.of(0, size, sort.getSort(order));
+        List<VodResponse> responses = service.getList(categoryId, cursorPaging, pageable);
         return new CursorResultResponse<>(responses);
     }
 

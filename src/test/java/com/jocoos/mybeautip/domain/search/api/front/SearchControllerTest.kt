@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRep
 import com.jocoos.mybeautip.domain.search.code.SearchType.COMMUNITY
 import com.jocoos.mybeautip.domain.video.persistence.domain.VideoCategory
 import com.jocoos.mybeautip.domain.video.persistence.repository.VideoCategoryRepository
+import com.jocoos.mybeautip.domain.vod.persistence.repository.VodRepository
 import com.jocoos.mybeautip.testutil.fixture.*
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.*
@@ -39,7 +40,8 @@ class SearchControllerTest(
     private val videoCategoryRepository: VideoCategoryRepository,
     private val videoCategoryMappingRepository: VideoCategoryMappingRepository,
     private val broadcastCategoryRepository: BroadcastCategoryRepository,
-    private val broadcastRepository: BroadcastRepository
+    private val broadcastRepository: BroadcastRepository,
+    private val vodRepository: VodRepository
 ) : RestDocsIntegrationTestSupport() {
 
     @Test
@@ -290,6 +292,60 @@ class SearchControllerTest(
                     fieldWithPath("broadcast.[].created_by.avatar_url").type(STRING).description("진행자 아바타 URL"),
                     fieldWithPath("broadcast.[].relation_info").type(OBJECT).description("요청자 연관 정보"),
                     fieldWithPath("broadcast.[].relation_info.is_notify_needed").type(BOOLEAN).description("요청자 연관 정보 - 알림 필요 여부"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun searchVodTest() {
+
+        // given
+        val keyword = "1"
+        val category: BroadcastCategory = broadcastCategoryRepository.save(makeBroadcastCategory(parentId = groupBroadcastCategory.id))
+        vodRepository.save(makeVod(category = category, memberId = defaultInfluencer.id, title = keyword))
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/api/2/search")
+                    .header(AUTHORIZATION, requestUserToken)
+                    .param("type", "VOD")
+                    .param("keyword", "1")
+                    .param("size", "20")
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "search_vod",
+                requestParameters(
+                    parameterWithName("type").description("검색 타입").optional()
+                        .description(generateLinkCode(SEARCH_TYPE)),
+                    parameterWithName("keyword").description("검색어"),
+                    parameterWithName("cursor").description("커서 (VOD 아이디)").optional(),
+                    parameterWithName("size").description("조회 개수").optional().attributes(getDefault(20))
+                ),
+                responseFields(
+                    fieldWithPath("next_cursor").type(STRING).description("커서 정보 (VOD 아이디)"),
+                    fieldWithPath("count").type(NUMBER).description("검색 결과 수"),
+                    fieldWithPath("vod").type(ARRAY).description("VOD 목록"),
+                    fieldWithPath("vod.[].id").type(NUMBER).description("VOD 아이디"),
+                    fieldWithPath("vod.[].video_key").type(NUMBER).description("Flip Flop Lite 비디오 아이디"),
+                    fieldWithPath("vod.[].url").type(STRING).description("VOD URL"),
+                    fieldWithPath("vod.[].title").type(STRING).description("타이틀"),
+                    fieldWithPath("vod.[].thumbnail_url").type(STRING).description("썸네일 URL"),
+                    fieldWithPath("vod.[].view_count").type(NUMBER).description("조회수"),
+                    fieldWithPath("vod.[].heart_count").type(NUMBER).description("하트수"),
+                    fieldWithPath("vod.[].category").type(OBJECT).description("카테고리 정보"),
+                    fieldWithPath("vod.[].category.id").type(NUMBER).description("카테고리 아이디"),
+                    fieldWithPath("vod.[].category.title").type(STRING).description("카테고리 타이틀"),
+                    fieldWithPath("vod.[].member").type(OBJECT).description("회원 정보"),
+                    fieldWithPath("vod.[].member.id").type(NUMBER).description("회원 아이디"),
+                    fieldWithPath("vod.[].member.email").type(STRING).description("회원 이메일").optional(),
+                    fieldWithPath("vod.[].member.username").type(STRING).description("회원 닉네임"),
+                    fieldWithPath("vod.[].member.avatar_url").type(STRING).description("회원 아바타 URL")
                 )
             )
         )

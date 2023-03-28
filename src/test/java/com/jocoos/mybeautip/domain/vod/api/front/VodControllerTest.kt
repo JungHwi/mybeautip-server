@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.broadcast.api.front
+package com.jocoos.mybeautip.domain.vod.api.front
 
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod

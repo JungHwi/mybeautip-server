@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.vod.service;
 
 import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
+import com.jocoos.mybeautip.domain.vod.code.VodStatus;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
@@ -15,6 +16,7 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,10 +35,12 @@ public class VodService {
     private final BroadcastCategoryDao categoryDao;
 
     @Transactional(readOnly = true)
-    public List<VodResponse> getList(long categoryId, CursorPaging<Long> cursorPaging) {
+    public List<VodResponse> getList(long categoryId, CursorPaging<Long> cursorPaging, Pageable pageable) {
         VodSearchCondition condition = VodSearchCondition.builder()
                 .categoryIds(getCategories(categoryId))
+                .status(VodStatus.AVAILABLE)
                 .cursorPaging(cursorPaging)
+                .pageable(pageable)
                 .isVisible(true)
                 .build();
         return vodDao.getListWithMember(condition);

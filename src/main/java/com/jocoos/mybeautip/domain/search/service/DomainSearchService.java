@@ -11,6 +11,6 @@ import javax.annotation.Nullable;
 
 public interface DomainSearchService<T extends CursorInterface > {
     SearchType getType();
-    SearchResponse<T> search(KeywordSearchRequest condition);
+    SearchResponse<T> search(KeywordSearchRequest request);
     long count(String keyword, @Nullable Member member);
 }
