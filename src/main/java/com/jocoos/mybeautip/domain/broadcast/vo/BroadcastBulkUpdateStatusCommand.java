@@ -5,11 +5,12 @@ import com.jocoos.mybeautip.global.vo.Between;
 import lombok.Builder;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 
 @Builder
-public record BroadcastBulkUpdateStatusCommand(BroadcastStatus currentStatus,
+public record BroadcastBulkUpdateStatusCommand(List<BroadcastStatus> currentStatuses,
                                                BroadcastStatus updateStatus,
                                                Between startedAtBetween,
                                                ZonedDateTime updateEndedAt,
@@ -18,7 +19,7 @@ public record BroadcastBulkUpdateStatusCommand(BroadcastStatus currentStatus,
 
     public static BroadcastBulkUpdateStatusCommand updateScheduledNearToReady(Between between) {
         return BroadcastBulkUpdateStatusCommand.builder()
-                .currentStatus(SCHEDULED)
+                .currentStatuses(List.of(SCHEDULED))
                 .updateStatus(READY)
                 .startedAtBetween(between)
                 .build();
@@ -26,7 +27,7 @@ public record BroadcastBulkUpdateStatusCommand(BroadcastStatus currentStatus,
 
     public static BroadcastBulkUpdateStatusCommand updateNotYetStartToCancel(ZonedDateTime startedAtLt) {
         return BroadcastBulkUpdateStatusCommand.builder()
-                .currentStatus(READY)
+                .currentStatuses(List.of(SCHEDULED, READY))
                 .updateStatus(CANCEL)
                 .startedAtLt(startedAtLt)
                 .build();
@@ -34,7 +35,7 @@ public record BroadcastBulkUpdateStatusCommand(BroadcastStatus currentStatus,
 
     public static BroadcastBulkUpdateStatusCommand updatePausedLiveToEnd(ZonedDateTime pausedAtLt) {
         return BroadcastBulkUpdateStatusCommand.builder()
-                .currentStatus(LIVE)
+                .currentStatuses(List.of(LIVE))
                 .updateStatus(END)
                 .pausedAtLt(pausedAtLt)
                 .build();
