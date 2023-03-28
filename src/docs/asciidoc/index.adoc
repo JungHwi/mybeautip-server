@@ -145,6 +145,7 @@ include::overview.adoc[]
 * link:search/search_community_v2.html[커뮤니티 검색 API V2, window=_blank]
 * link:search/search_video.html[비디오 검색 API, window=_blank]
 * link:search/search_broadcast.html[방송 검색 API, window=_blank]
+* link:search/search_vod.html[VOD 검색 API, window=_blank]
 * link:search/count.html[검색 결과 개수 조회 API, window=_blank]
 
 === Notice API

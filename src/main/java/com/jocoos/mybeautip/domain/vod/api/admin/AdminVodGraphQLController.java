@@ -1,8 +1,8 @@
 package com.jocoos.mybeautip.domain.vod.api.admin;
 
-import com.jocoos.mybeautip.domain.vod.dto.VodInput;
 import com.jocoos.mybeautip.domain.vod.dto.PagingFilter;
 import com.jocoos.mybeautip.domain.vod.dto.VodFilter;
+import com.jocoos.mybeautip.domain.vod.dto.VodInput;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.VodReport;
 import com.jocoos.mybeautip.domain.vod.service.AdminVodGraphqlService;
@@ -18,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import java.util.List;
 import java.util.Map;
 
+import static com.jocoos.mybeautip.domain.vod.code.VodStatus.AVAILABLE;
+
 @RequiredArgsConstructor
 @Controller
 public class AdminVodGraphQLController {
@@ -29,6 +31,7 @@ public class AdminVodGraphQLController {
                              @Argument("filter") VodFilter vodFilter) {
         VodSearchCondition condition = VodSearchCondition.builder()
                 .pageable(pagingFilter.pageable())
+                .status(AVAILABLE)
                 .searchOption(vodFilter == null ? null : vodFilter.searchOption())
                 .isVisible(vodFilter == null ? null : vodFilter.isVisible())
                 .build();

@@ -5,7 +5,7 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCat
 import com.jocoos.mybeautip.domain.event.code.EventProductType
 import com.jocoos.mybeautip.domain.event.code.EventStatus.*
 import com.jocoos.mybeautip.domain.event.code.EventType
-import com.jocoos.mybeautip.domain.event.code.SortField.CREATED_AT
+import com.jocoos.mybeautip.global.code.SortField.CREATED_AT
 import com.jocoos.mybeautip.domain.event.dto.EditEventRequest
 import com.jocoos.mybeautip.domain.event.dto.EventProductRequest
 import com.jocoos.mybeautip.domain.event.dto.EventRequest
@@ -29,7 +29,6 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
-import org.springframework.security.test.context.support.WithUserDetails
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status

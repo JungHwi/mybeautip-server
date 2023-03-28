@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.vod.persistence.repository.VodRepository;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +25,13 @@ public class VodDao {
     }
 
     @Transactional(readOnly = true)
+    public Page<VodResponse> getPageList(VodSearchCondition condition) {
+        return repository.getPageList(condition);
+    }
+
+    @Transactional(readOnly = true)
     public List<VodResponse> getListWithMember(VodSearchCondition condition) {
-        return repository.getVodListWithMember(condition);
+        return repository.getVodResponses(condition);
     }
 
     @Transactional(readOnly = true)
@@ -39,14 +45,13 @@ public class VodDao {
     }
 
     @Transactional(readOnly = true)
-    public Vod getByVideoKey(Long videoKey) {
-        return repository.findByVideoKey(videoKey)
-                .orElseThrow(() -> new NotFoundException("vod not found. video key - " + videoKey));
+    public Vod getForUpdate(long vodId) {
+        return repository.selectForUpdate(vodId).orElseThrow(vodNotFound(vodId));
     }
 
     @Transactional(readOnly = true)
-    public Vod getForUpdate(long vodId) {
-        return repository.selectForUpdate(vodId).orElseThrow(vodNotFound(vodId));
+    public long count(VodSearchCondition condition) {
+        return repository.count(condition);
     }
 
     @Transactional

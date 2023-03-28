@@ -17,6 +17,8 @@ import static com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil.toUTCZoned
 @Getter
 public class SearchOption {
 
+    public static final SearchOption NO_OPTION = SearchOption.builder().build();
+
     private final SearchDomain domain;
     private final String searchField;
     private final String keyword;

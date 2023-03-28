@@ -1,0 +1,3 @@
+== Search VOD API
+
+operation::search_vod[snippets='http-request,request-parameters,http-response,response-fields']

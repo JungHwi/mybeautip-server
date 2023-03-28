@@ -1,7 +1,8 @@
 package com.jocoos.mybeautip.domain.vod.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
-import com.jocoos.mybeautip.domain.event.code.SortField;
+import com.jocoos.mybeautip.global.code.SortField;
+import com.jocoos.mybeautip.domain.vod.code.VodStatus;
 import com.jocoos.mybeautip.domain.vod.dto.QVodResponse;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
@@ -9,7 +10,10 @@ import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.*;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
@@ -32,25 +36,20 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
 
     @Override
     public List<Vod> getVodList(VodSearchCondition condition) {
-        return repository.query(query -> query
+        return withBaseConditionAndSort(condition)
                 .select(vod)
-                .from(vod)
-                .where(
-                        searchTitle(condition.searchOption().getKeyword()),
-                        createdAtAfter(condition.searchOption().getStartAt()),
-                        createdAtBefore(condition.searchOption().getEndAt()),
-                        isReported(condition.searchOption().getIsReported()),
-                        isVisible(condition.isVisible())
-                )
-                .orderBy(getOrders(condition.pageable().getSort()))
-                .offset(condition.pageable().getOffset())
-                .limit(condition.pageable().getPageSize())
-                .fetch());
+                .fetch();
+    }
+
+    @Override
+    public Page<VodResponse> getPageList(VodSearchCondition condition) {
+        List<VodResponse> contents = getVodResponses(condition);
+        return new PageImpl<>(contents, condition.pageable(), count(condition));
     }
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public List<VodResponse> getVodListWithMember(VodSearchCondition condition) {
+    public List<VodResponse> getVodResponses(VodSearchCondition condition) {
         PathBuilder<Vod> path = new PathBuilder<>(Vod.class, "vod");
         SortField nonUniqueSortField = condition.nonUniqueCursor();
         switch (nonUniqueSortField) {
@@ -67,18 +66,45 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
         }
     }
 
+    @Override
+    public long count(VodSearchCondition condition) {
+        Long count = withBaseCondition(condition)
+                .select(vod.count())
+                .fetchOne();
+        return count == null ? 0 : count;
+    }
+
     private <T extends Comparable<T>> List<VodResponse> getVodList(VodSearchCondition condition,
                                                                    ComparablePath<T> comparablePath) {
         T cursorValue = getCursorValue(comparablePath, condition.cursor());
-        return repository.query(query -> query
+        return withBaseConditionAndSort(condition)
                 .select(new QVodResponse(vod, broadcastCategory, member))
-                .from(vod)
                 .join(broadcastCategory).on(vod.category.eq(broadcastCategory))
                 .join(member).on(vod.memberId.eq(member.id))
-                .where(cursor(comparablePath, cursorValue, condition.cursor()))
+                .where(
+                        cursor(comparablePath, cursorValue, condition.cursor())
+                )
+                .fetch();
+    }
+
+    private JPAQuery<?> withBaseConditionAndSort(VodSearchCondition condition) {
+        return withBaseCondition(condition)
                 .orderBy(getOrders(condition.getSort()))
-                .limit(condition.getPageSize())
-                .fetch());
+                .offset(condition.offset())
+                .limit(condition.pageSize());
+    }
+
+    private JPAQuery<?> withBaseCondition(VodSearchCondition condition) {
+        return repository.query(query -> query
+                .from(vod)
+                .where(
+                        searchTitle(condition.keyword()),
+                        createdAtAfter(condition.startAt()),
+                        createdAtBefore(condition.endAt()),
+                        isReported(condition.isReported()),
+                        isVisible(condition.isVisible()),
+                        eqStatus(condition.status())
+                ));
     }
 
     private <T extends Comparable<T>> T getCursorValue(ComparablePath<T> comparablePath, Long cursor) {
@@ -139,6 +165,10 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
 
     private BooleanExpression createdAtBefore(ZonedDateTime dateTime) {
         return dateTime == null ? null : vod.createdAt.loe(dateTime);
+    }
+
+    private BooleanExpression eqStatus(VodStatus status) {
+        return status == null ? null : vod.status.eq(status);
     }
 
     private static BooleanExpression eqId(Long vodId) {
