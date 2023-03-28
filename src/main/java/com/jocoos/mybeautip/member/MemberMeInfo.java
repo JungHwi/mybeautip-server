@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.member;
 
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPermission;
 import com.jocoos.mybeautip.domain.term.dto.TermTypeResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,7 +23,7 @@ public class MemberMeInfo extends MemberInfo {
 
     private Date revenueModifiedAt;
     private Boolean pushable;
-    private Boolean availableBroadcast;
+    private BroadcastPermission broadcastPermission;
     private List<TermTypeResponse> optionTermAccepts = new ArrayList<>();
 
     public MemberMeInfo(Member member) {

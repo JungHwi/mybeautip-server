@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.service.dao;
 
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPermission;
 import com.jocoos.mybeautip.domain.member.service.dao.InfluencerDao;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.domain.system.service.dao.SystemOptionDao;
@@ -13,6 +14,7 @@ import static com.jocoos.mybeautip.domain.system.code.SystemOptionType.FREE_LIVE
 @Service
 public class BroadcastPermissionDao {
 
+    private final BroadcastDao broadcastDao;
     private final InfluencerDao influencerDao;
     private final SystemOptionDao systemOptionDao;
     private final BroadcastViewerDao viewerDao;
@@ -22,6 +24,13 @@ public class BroadcastPermissionDao {
     public boolean canBroadcast(Long memberId) {
         return systemOptionDao.getSystemOption(FREE_LIVE_PERMISSION)
                 || influencerDao.isInfluencer(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public BroadcastPermission getBroadcastPermission(Long memberId) {
+        boolean availableBroadcast = canBroadcast(memberId);
+        boolean viewableLiveMenu = availableBroadcast || broadcastDao.countByMemberId(memberId) > 0;
+        return new BroadcastPermission(availableBroadcast, viewableLiveMenu);
     }
 
     @Transactional(readOnly = true)
