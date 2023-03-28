@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.broadcast.service;
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLBroadcastMessageRequest;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
+import com.jocoos.mybeautip.client.flipfloplite.dto.FFLStreamKeyResponse;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastViewerType;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastViewerConverter;
@@ -90,6 +91,20 @@ public class BroadcastViewerService {
         flipFlopLiteService.directMessage(broadcast.getVideoKey(), messageRequest);
 
         return converter.converts(viewer);
+    }
+
+    public StreamKeyResponse getStreamKey(long memberId) {
+        FFLStreamKeyResponse response = flipFlopLiteService.getStreamKey(memberId);
+
+        Long broadcastId = null;
+        if (response.videoRoom() != null && response.videoRoom().id() != null) {
+            Broadcast broadcast = broadcastDao.getByVideoKey(response.videoRoom().id());
+            broadcastId = broadcast.getId();
+        }
+
+        return new StreamKeyResponse(response.streamKey(),
+                response.streamKeyState(),
+                broadcastId);
     }
 
     public void visibleMessage(VisibleMessageRequest request) {

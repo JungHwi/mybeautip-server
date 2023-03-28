@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.global.config.restdoc.util;
 
+import com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState;
 import com.jocoos.mybeautip.domain.broadcast.code.*;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
@@ -142,6 +143,9 @@ public class CommonDocController {
         // VOD
         Map<String, String> vodSortField = getDocs(VodSortField.values());
 
+        // FFL
+        Map<String, String> fflStreamKeyState = getDocs(FFLStreamKeyState.values());
+
         return ApiResponseDto.of(EnumDocs.builder()
                 // Global
                         .booleanType(booleanType)
@@ -216,6 +220,8 @@ public class CommonDocController {
                         .noticeSort(noticeSort)
                 // VOD
                         .vodSortField(vodSortField)
+                // FFL
+                        .fflStreamKeyState(fflStreamKeyState)
                 .build()
         );
     }

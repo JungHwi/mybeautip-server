@@ -1,0 +1,3 @@
+== Get Stream Key API
+
+operation::get_stream_key[snippets='http-request,http-response,response-fields']

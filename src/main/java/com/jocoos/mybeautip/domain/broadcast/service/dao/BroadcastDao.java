@@ -79,6 +79,12 @@ public class BroadcastDao {
         return repository.findAllStartedAt(pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Broadcast getByVideoKey(long videoKey) {
+        return repository.findByVideoKey(videoKey)
+                .orElseThrow(() -> new NotFoundException("VideoKey Not Found. videoKey - " + videoKey));
+    }
+
     @Transactional
     public void addReportCountAndFlush(long broadcastId, int count) {
         repository.addReportCountAndFlush(broadcastId, count);

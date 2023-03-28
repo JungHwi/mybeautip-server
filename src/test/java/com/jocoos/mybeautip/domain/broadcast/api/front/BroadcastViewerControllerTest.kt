@@ -7,8 +7,7 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastViewerRepository
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_STATUS
-import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.BROADCAST_VIEWER_TYPE
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.member.Member
@@ -285,6 +284,26 @@ class BroadcastViewerControllerTest(
                     fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("is_suspended").type(JsonFieldType.BOOLEAN).description("정지 여부"),
                     fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
+                )
+            )
+        )
+    }
+
+    @Test
+    fun getStreamKeyInfo() {
+        val result: ResultActions = mockMvc.perform(
+            get("/api/1/broadcast/viewer/stream-key")
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+        ).andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "get_stream_key",
+                responseFields(
+                    fieldWithPath("stream_key").type(JsonFieldType.STRING).description("Stream Key."),
+                    fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(FFL_STREAM_KEY_STATE)),
+                    fieldWithPath("broadcast_id").type(JsonFieldType.NUMBER).description("현재 방송 중이면 방송 ID.").optional(),
                 )
             )
         )

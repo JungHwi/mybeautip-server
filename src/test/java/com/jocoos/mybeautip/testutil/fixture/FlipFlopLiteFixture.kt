@@ -68,7 +68,7 @@ fun makeFFLStreamKeyResponse(
     streamKey: String = "streamKey",
     id: Long = 1,
     state: FFLEntityState? = null,
-    streamKeyState: FFLStreamKeyState? = null,
+    streamKeyState: FFLStreamKeyState? = FFLStreamKeyState.INACTIVE,
     app: FFLAppInfo? = null,
     member: FFLMemberInfo? = null,
     videoRoom: FFLVideoRoomResponse? = null,
