@@ -112,7 +112,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 .select(broadcast.videoKey)
                 .from(broadcast)
                 .where(
-                        eqStatus(condition.currentStatus()),
+                        inStatus(condition.currentStatuses()),
                         startedAtBetween(condition.betweenStart(), condition.betweenEnd()),
                         startedAtLt(condition.startedAtLt()),
                         pausedAtLt(condition.pausedAtLt())
@@ -223,10 +223,6 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     private BooleanExpression inStatus(List<BroadcastStatus> statuses) {
         return isEmpty(statuses) ? null : broadcast.status.in(statuses);
-    }
-
-    private BooleanExpression eqStatus(BroadcastStatus status) {
-        return status == null ? null : broadcast.status.eq(status);
     }
 
     private BooleanExpression inVideoKey(List<Long> videoKeys) {

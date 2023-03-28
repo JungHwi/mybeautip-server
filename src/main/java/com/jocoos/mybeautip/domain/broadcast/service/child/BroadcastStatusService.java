@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.service.child;
 
 import com.jocoos.mybeautip.client.flipfloplite.dto.ExternalBroadcastInfo;
+import com.jocoos.mybeautip.client.flipfloplite.exception.FFLException;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
@@ -10,6 +11,7 @@ import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult.OriginalInfo
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.time.ZonedDateTime;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.READY;
 
+@Log4j2
 @RequiredArgsConstructor
 @Service
 public class BroadcastStatusService {
@@ -64,7 +67,11 @@ public class BroadcastStatusService {
     private BroadcastUpdateResult bulkUpdateToEnd(BroadcastBulkUpdateStatusCommand command) {
         BroadcastUpdateResult result = broadcastDao.bulkUpdateToFinish(command);
         for (Long videoKey : result.videoKeys()) {
-            fflService.endVideoRoomAndSendChatMessage(videoKey);
+            try {
+                fflService.endVideoRoomAndSendChatMessage(videoKey);
+            } catch (FFLException e) {
+                log.error("Fail To Change Status To End. Video Key : {}", videoKey, e);
+            }
         }
         return result;
     }
@@ -78,7 +85,11 @@ public class BroadcastStatusService {
     private BroadcastUpdateResult bulkUpdateToCancel(BroadcastBulkUpdateStatusCommand condition) {
         BroadcastUpdateResult result = broadcastDao.bulkUpdateToFinish(condition);
         for (Long videoKey : result.videoKeys()) {
-            fflService.cancelVideoRoomAndSendChatMessage(videoKey);
+            try {
+                fflService.cancelVideoRoomAndSendChatMessage(videoKey);
+            } catch (FFLException e) {
+                log.error("Fail To Change Status To Cancel. Video Key : {}", videoKey, e);
+            }
         }
         return result;
     }
