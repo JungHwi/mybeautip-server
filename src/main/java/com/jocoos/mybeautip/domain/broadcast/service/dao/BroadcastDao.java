@@ -27,6 +27,11 @@ public class BroadcastDao {
 
     private final BroadcastRepository repository;
 
+    @Transactional(readOnly = true)
+    public int countByMemberId(long memberId) {
+        return repository.countByMemberId(memberId);
+    }
+
     @Transactional
     public Broadcast save(Broadcast broadcast) {
         return repository.save(broadcast);

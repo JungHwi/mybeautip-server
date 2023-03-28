@@ -17,6 +17,8 @@ import java.util.Optional;
 @Repository
 public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broadcast, Long>, BroadcastCustomRepository {
 
+    int countByMemberId(long memberId);
+
     List<Broadcast> findByStatusIn(List<BroadcastStatus> broadcastStatusList);
 
     @Query("select b from Broadcast b join fetch b.category join fetch b.statistics where b.id = :id")

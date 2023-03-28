@@ -127,8 +127,8 @@ public class LegacyMemberService {
                 .map(m -> new MemberMeInfo(m, termTypeResponses))
                 .orElseThrow(() -> new MemberNotFoundException(messageService.getMessage(MEMBER_NOT_FOUND, lang)));
 
-        Boolean availableBroadcast = broadcastPermissionDao.canBroadcast(memberId);
-        memberMeInfo.setAvailableBroadcast(availableBroadcast);
+        memberMeInfo.setBroadcastPermission(broadcastPermissionDao.getBroadcastPermission(memberId));
+
         return memberMeInfo;
 
     }
