@@ -22,6 +22,8 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
     @Query("select b from Broadcast b join fetch b.category join fetch b.statistics where b.id = :id")
     Optional<Broadcast> findByIdWithFetch(@Param("id") Long broadcastId);
 
+    Optional<Broadcast> findByVideoKey(Long videoKey);
+
     List<Broadcast> findAllByVideoKeyIn(List<Long> videoKeys);
 
     boolean existsByIdAndMemberId(long broadcastId, long memberId);

@@ -70,9 +70,8 @@ public class FlipFlopLiteService {
         return this.login(member);
     }
 
-    public String getStreamKey(long memberId) {
-        FFLStreamKeyResponse response = client.getStreamKey(memberId);
-        return response.streamKey();
+    public FFLStreamKeyResponse getStreamKey(long memberId) {
+        return client.getStreamKey(memberId);
     }
 
     public Long getMemberIdFrom(long streamKeyId) {

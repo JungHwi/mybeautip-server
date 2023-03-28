@@ -101,4 +101,7 @@ public class EnumDocs {
 
     // Vod
     Map<String, String> vodSortField;
+
+    // FFL
+    Map<String, String> fflStreamKeyState;
 }

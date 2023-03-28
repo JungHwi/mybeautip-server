@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[ffl_stream_key_state]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-ffl_stream_key_state.adoc[]

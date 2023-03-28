@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastKey;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastEditResult;
+import com.jocoos.mybeautip.global.util.date.ZonedDateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class BroadcastFFLService {
 
     public BroadcastKey getBroadcastKeyWithStreamKey(Long requestMemberId, String channelKey, Long streamKeyMemberId) {
         ChatTokenAndAppId chatTokenAndAppId = flipFlopLiteService.getChatToken(requestMemberId);
-        String streamKey = flipFlopLiteService.getStreamKey(streamKeyMemberId);
+        String streamKey = flipFlopLiteService.getStreamKey(streamKeyMemberId).streamKey();
         return BroadcastKey.withStreamKey(channelKey, chatTokenAndAppId, streamKey);
     }
 
@@ -49,7 +50,7 @@ public class BroadcastFFLService {
         ExternalBroadcastInfo externalInfo = flipFlopLiteService.startVideoRoom(broadcast.getVideoKey());
         Map<String, Object> data = Map.of("status", LIVE,
                 "url", externalInfo.liveUrl(),
-                "started_at", externalInfo.lastModifiedAt());
+                "started_at", ZonedDateTimeUtil.toString(externalInfo.lastModifiedAt()));
 
         sendChangeBroadcastStatusMessage(broadcast.getVideoKey(), data);
         return externalInfo;
