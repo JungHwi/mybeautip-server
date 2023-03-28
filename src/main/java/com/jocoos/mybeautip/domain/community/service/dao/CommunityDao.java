@@ -10,7 +10,7 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRep
 import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
-import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.KeywordSearchRequest;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +23,6 @@ import javax.persistence.EntityManager;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static com.jocoos.mybeautip.domain.community.code.CommunityStatus.NORMAL;
 
 @Service
 @RequiredArgsConstructor
@@ -116,7 +114,7 @@ public class CommunityDao {
     }
 
     @Transactional(readOnly = true)
-    public SearchResult<Community> search(KeywordSearchCondition condition) {
+    public SearchResult<Community> search(KeywordSearchRequest condition) {
         return repository.search(condition);
     }
 

@@ -26,6 +26,12 @@ public class SearchOption {
     private final Boolean isTopFix;
     private final Boolean isInfluencer;
 
+    public static SearchOption onlyKeyword(String keyword) {
+        return SearchOption.builder()
+                .keyword(keyword)
+                .build();
+    }
+
     @Builder
     private SearchOption(SearchDomain domain,
                          String searchField,

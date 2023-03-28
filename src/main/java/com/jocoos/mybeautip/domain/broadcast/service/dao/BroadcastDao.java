@@ -90,6 +90,11 @@ public class BroadcastDao {
                 .orElseThrow(() -> new NotFoundException("VideoKey Not Found. videoKey - " + videoKey));
     }
 
+    @Transactional(readOnly = true)
+    public long count(BroadcastSearchCondition condition) {
+        return repository.count(condition);
+    }
+
     @Transactional
     public void addReportCountAndFlush(long broadcastId, int count) {
         repository.addReportCountAndFlush(broadcastId, count);

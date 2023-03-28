@@ -1,5 +1,9 @@
 package com.jocoos.mybeautip.domain.search.api.front
 
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
+import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
+import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastCategoryRepository
+import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
 import com.jocoos.mybeautip.domain.community.persistence.domain.CommunityCategory
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityCategoryRepository
 import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRepository
@@ -33,7 +37,9 @@ class SearchControllerTest(
     private val communityRepository: CommunityRepository,
     private val videoRepository: VideoRepository,
     private val videoCategoryRepository: VideoCategoryRepository,
-    private val videoCategoryMappingRepository: VideoCategoryMappingRepository
+    private val videoCategoryMappingRepository: VideoCategoryMappingRepository,
+    private val broadcastCategoryRepository: BroadcastCategoryRepository,
+    private val broadcastRepository: BroadcastRepository
 ) : RestDocsIntegrationTestSupport() {
 
     @Test
@@ -227,6 +233,63 @@ class SearchControllerTest(
                         .optional(),
                     fieldWithPath("video.[].created_at").type(STRING).description("생성 일자")
                         .attributes(getZonedDateMilliFormat())
+                )
+            )
+        )
+    }
+
+    @Test
+    fun searchBroadcastTest() {
+
+        // given
+        val keyword = "1"
+        val category: BroadcastCategory = broadcastCategoryRepository.save(makeBroadcastCategory(parentId = groupBroadcastCategory.id))
+        broadcastRepository.save(makeBroadcast(category = category, title = keyword))
+
+        // when & then
+        val result: ResultActions = mockMvc
+            .perform(
+                get("/api/2/search")
+                    .header(AUTHORIZATION, requestUserToken)
+                    .param("type", "BROADCAST")
+                    .param("keyword", "1")
+                    .param("size", "20")
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "search_broadcast",
+                requestParameters(
+                    parameterWithName("type").description("검색 타입").optional()
+                        .description(generateLinkCode(SEARCH_TYPE)),
+                    parameterWithName("keyword").description("검색어"),
+                    parameterWithName("cursor").description("커서 (방송 아이디)").optional(),
+                    parameterWithName("size").description("조회 개수").optional().attributes(getDefault(20))
+                ),
+                responseFields(
+                    fieldWithPath("next_cursor").type(STRING).description("커서 정보 (방송 아이디)"),
+                    fieldWithPath("count").type(NUMBER).description("검색 결과 수"),
+                    fieldWithPath("broadcast").type(ARRAY).description("방송 목록"),
+                    fieldWithPath("broadcast.[].id").type(NUMBER).description("방송 아이디"),
+                    fieldWithPath("broadcast.[].status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
+                    fieldWithPath("broadcast.[].url").type(STRING).description("방송 URL").optional(),
+                    fieldWithPath("broadcast.[].title").type(STRING).description("타이틀"),
+                    fieldWithPath("broadcast.[].thumbnail_url").type(STRING).description("썸네일 URL"),
+                    fieldWithPath("broadcast.[].viewer_count").type(NUMBER).description("시청자수"),
+                    fieldWithPath("broadcast.[].started_at").type(STRING).description("시작 시간")
+                        .attributes(getZonedDateFormat()),
+                    fieldWithPath("broadcast.[].category").type(OBJECT).description("카테고리 정보"),
+                    fieldWithPath("broadcast.[].category.id").type(NUMBER).description("카테고리 ID"),
+                    fieldWithPath("broadcast.[].category.title").type(STRING).description("카테고리 타이틀"),
+                    fieldWithPath("broadcast.[].created_by").type(OBJECT).description("진행자 정보"),
+                    fieldWithPath("broadcast.[].created_by.id").type(NUMBER).description("진행자 아이디"),
+                    fieldWithPath("broadcast.[].created_by.email").type(STRING).description("진행자 이메일").optional(),
+                    fieldWithPath("broadcast.[].created_by.username").type(STRING).description("진행자 닉네임"),
+                    fieldWithPath("broadcast.[].created_by.avatar_url").type(STRING).description("진행자 아바타 URL"),
+                    fieldWithPath("broadcast.[].relation_info").type(OBJECT).description("요청자 연관 정보"),
+                    fieldWithPath("broadcast.[].relation_info.is_notify_needed").type(BOOLEAN).description("요청자 연관 정보 - 알림 필요 여부"),
                 )
             )
         )

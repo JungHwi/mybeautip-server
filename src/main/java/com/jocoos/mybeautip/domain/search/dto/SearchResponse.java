@@ -3,6 +3,7 @@ package com.jocoos.mybeautip.domain.search.dto;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
+import com.jocoos.mybeautip.domain.search.code.SearchType;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
 import lombok.Getter;
@@ -11,8 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.jocoos.mybeautip.domain.search.code.SearchType.COMMUNITY;
-import static com.jocoos.mybeautip.domain.search.code.SearchType.VIDEO;
+import static com.jocoos.mybeautip.domain.search.code.SearchType.*;
 
 @Getter
 public class SearchResponse<T extends CursorInterface> extends CursorResultResponse<T> {
@@ -31,19 +31,13 @@ public class SearchResponse<T extends CursorInterface> extends CursorResultRespo
         return new HashMap<>(maps);
     }
 
-    public SearchResponse<T> contentJsonNameCommunity() {
-        maps.put(COMMUNITY.name().toLowerCase(), super.getContent());
+    public SearchResponse<T> contentJsonNameTo(SearchType type) {
+        maps.put(type.name().toLowerCase(), super.getContent());
         super.contentToNull();
         return this;
     }
 
-    public SearchResponse<T> contentJsonNameVideo() {
-        maps.put(VIDEO.name().toLowerCase(), super.getContent());
-        super.contentToNull();
-        return this;
-    }
-
-    public void toV1() {
+    public SearchResponse<T> toV1() {
         Object o = maps.get(COMMUNITY.name().toLowerCase());
         if (o instanceof List<?> list) {
             List<CommunityResponse> communityResponses = (List<CommunityResponse>) list;
@@ -51,5 +45,6 @@ public class SearchResponse<T extends CursorInterface> extends CursorResultRespo
                 communityResponse.toV1();
             }
         }
+        return this;
     }
 }

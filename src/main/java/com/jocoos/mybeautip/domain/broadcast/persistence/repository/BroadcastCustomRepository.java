@@ -11,6 +11,8 @@ import java.util.Optional;
 
 public interface BroadcastCustomRepository {
 
+    long count(BroadcastSearchCondition condition);
+
     Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition);
     List<BroadcastSearchResult> getList(BroadcastSearchCondition condition);
     Optional<BroadcastSearchResult> get(long broadcastId);
