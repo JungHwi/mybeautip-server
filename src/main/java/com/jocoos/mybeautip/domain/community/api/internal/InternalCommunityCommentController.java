@@ -14,9 +14,11 @@ import com.jocoos.mybeautip.domain.community.service.CommunityCommentService;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
+import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/internal")
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class InternalCommunityCommentController {
 
     private final CommunityCommentService communityCommentService;
+    private final LegacyMemberService legacyMemberService;
 
     @GetMapping("/1/community/{community_id}/comment")
     public ResponseEntity<CursorResultResponse<CommunityCommentResponse>> getComments(@PathVariable("community_id") long communityId,
@@ -59,20 +62,18 @@ public class InternalCommunityCommentController {
     }
 
     @PostMapping("/1/community/{community_id}/comment")
-    public ResponseEntity<CommunityCommentResponse> writeComment(@CurrentMember MyBeautipUserDetails userDetails,
-                                                                 @PathVariable("community_id") long communityId,
+    public ResponseEntity<CommunityCommentResponse> writeComment(@PathVariable("community_id") long communityId,
                                                                  @RequestBody WriteCommunityCommentRequest request) {
         request.setCommunityId(communityId);
-        request.setMember(userDetails.getMember());
+        request.setMember(legacyMemberService.currentMember());
         return ResponseEntity.ok(communityCommentService.write(request));
     }
 
     @PutMapping("/1/community/{community_id}/comment/{comment_id}")
-    public ResponseEntity<CommunityCommentResponse> editComment(@CurrentMember MyBeautipUserDetails userDetails,
-                                                                @PathVariable("community_id") long communityId,
+    public ResponseEntity<CommunityCommentResponse> editComment(@PathVariable("community_id") long communityId,
                                                                 @PathVariable("comment_id") long commentId,
                                                                 @RequestBody @Valid EditCommunityCommentRequest request) {
-        request.setMember(userDetails.getMember());
+        request.setMember(legacyMemberService.currentMember());
         request.setCommunityId(communityId);
         request.setCommentId(commentId);
         return ResponseEntity.ok(communityCommentService.edit(request));

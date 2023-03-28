@@ -14,7 +14,6 @@ import com.jocoos.mybeautip.domain.community.persistence.repository.CommunityRep
 import com.jocoos.mybeautip.domain.file.code.FileType.IMAGE
 import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationMessageCenterRepository
 import com.jocoos.mybeautip.domain.notification.persistence.repository.NotificationMessagePushRepository
-import com.jocoos.mybeautip.testutil.fixture.*
 import com.jocoos.mybeautip.global.code.FileOperationType.DELETE
 import com.jocoos.mybeautip.global.code.FileOperationType.UPLOAD
 import com.jocoos.mybeautip.global.config.restdoc.RestDocsIntegrationTestSupport
@@ -24,12 +23,13 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.Doc
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.dto.FileDto
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
+import com.jocoos.mybeautip.member.LegacyMemberService
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import com.jocoos.mybeautip.testutil.fixture.*
+import org.junit.jupiter.api.*
+import org.mockito.BDDMockito
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
@@ -59,6 +59,9 @@ class InternalCommunityCommentControllerTest(
         const val MEMBER_ID = "MEMBER-ID"
     }
 
+    @MockBean
+    private val legacyMemberService: LegacyMemberService? = null
+
     @BeforeAll
     fun beforeAll() {
         category = saveCategory()
@@ -73,6 +76,13 @@ class InternalCommunityCommentControllerTest(
         memberRepository.delete(writer)
     }
 
+    @BeforeEach
+    fun setUp() {
+        BDDMockito.given(legacyMemberService!!.currentMember()).willReturn(writer)
+        BDDMockito.given(legacyMemberService.currentMemberId()).willReturn(writer.id)
+        BDDMockito.given(legacyMemberService.hasCommentPostPermission(writer)).willReturn(true)
+    }
+
     @Test
     fun getComments() {
 
@@ -83,7 +93,7 @@ class InternalCommunityCommentControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 get("/internal/1/community/{community_id}/comment", communityComment.communityId)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
             )
@@ -145,7 +155,7 @@ class InternalCommunityCommentControllerTest(
                     communityComment.communityId,
                     communityComment.id
                 )
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
             )
@@ -206,7 +216,7 @@ class InternalCommunityCommentControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/1/community/{community_id}/comment", community.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
@@ -262,7 +272,7 @@ class InternalCommunityCommentControllerTest(
     fun editComment() {
 
         // given
-        val communityComment: CommunityComment = saveCommunityComment(member = requestUser)
+        val communityComment: CommunityComment = saveCommunityComment(member = writer)
 
         val request = EditCommunityCommentRequest.builder()
             .contents("content")
@@ -282,7 +292,7 @@ class InternalCommunityCommentControllerTest(
                     communityComment.communityId,
                     communityComment.id
                 )
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
@@ -337,7 +347,7 @@ class InternalCommunityCommentControllerTest(
     fun deleteComment() {
 
         // given
-        val communityComment: CommunityComment = saveCommunityComment(member = requestUser)
+        val communityComment: CommunityComment = saveCommunityComment(member = writer)
 
         // when & then
         val result: ResultActions = mockMvc
@@ -347,7 +357,7 @@ class InternalCommunityCommentControllerTest(
                     communityComment.communityId,
                     communityComment.id
                 )
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
             )
@@ -380,7 +390,7 @@ class InternalCommunityCommentControllerTest(
                     communityComment.communityId,
                     communityComment.id
                 )
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(bool))
@@ -410,7 +420,7 @@ class InternalCommunityCommentControllerTest(
     fun reportComment() {
 
         // given
-        val communityComment: CommunityComment = saveCommunityComment()
+        val communityComment: CommunityComment = saveCommunityComment(requestUser)
         val report = ReportRequest.builder()
             .isReport(true)
             .description("신고사유")
@@ -424,7 +434,7 @@ class InternalCommunityCommentControllerTest(
                     communityComment.communityId,
                     communityComment.id
                 )
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(report))

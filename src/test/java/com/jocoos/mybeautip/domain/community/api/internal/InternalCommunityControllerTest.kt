@@ -17,14 +17,14 @@ import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerato
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
+import com.jocoos.mybeautip.member.LegacyMemberService
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.*
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+import org.mockito.BDDMockito
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
@@ -57,6 +57,9 @@ class InternalCommunityControllerTest(
         const val MEMBER_ID = "MEMBER-ID"
     }
 
+    @MockBean
+    private val legacyMemberService: LegacyMemberService? = null
+
     @BeforeAll
     fun beforeAll() {
         writer = memberRepository.save(makeMember(link = 2))
@@ -69,9 +72,15 @@ class InternalCommunityControllerTest(
         communityCategoryRepository.delete(communityCategory)
     }
 
+    @BeforeEach
+    fun setUp() {
+        BDDMockito.given(legacyMemberService!!.currentMember()).willReturn(writer)
+        BDDMockito.given(legacyMemberService.currentMemberId()).willReturn(writer.id)
+        BDDMockito.given(legacyMemberService.hasCommentPostPermission(writer)).willReturn(true)
+    }
+
     @Test
     fun writeCommunity() {
-
         val request = WriteCommunityRequest.builder()
             .categoryId(communityCategory.id)
             .title("Mock Title")
@@ -81,7 +90,7 @@ class InternalCommunityControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 post("/internal/2/community")
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .contentType(APPLICATION_JSON)
                     .header(MEMBER_ID, writer.id)
                     .content(objectMapper.writeValueAsString(request))
@@ -163,7 +172,7 @@ class InternalCommunityControllerTest(
             .perform(
                 get("/internal/2/community")
                     .param("category_id", communityCategory.id.toString())
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
             )
@@ -237,7 +246,7 @@ class InternalCommunityControllerTest(
         // when & then
         val result: ResultActions = mockMvc.perform(
             get("/internal/2/community/{community_id}", community.id)
-                .header(AUTHORIZATION, requestUserToken)
+                .header(AUTHORIZATION, requestInternalToken)
                 .header(MEMBER_ID, writer.id)
                 .contentType(APPLICATION_JSON)
         )
@@ -298,14 +307,14 @@ class InternalCommunityControllerTest(
     fun editCommunity() {
 
         // given
-        val community: Community = saveCommunity(member = requestUser)
+        val community: Community = saveCommunity(member = writer)
         val request = mapOf("title" to "Test Title", "contents" to "Test Contents", "files" to null)
 
         // when & then
         val result: ResultActions = mockMvc
             .perform(
                 put("/internal/2/community/{community_id}", community.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(request))
@@ -381,13 +390,13 @@ class InternalCommunityControllerTest(
     fun deleteCommunity() {
 
         // given
-        val community: Community = saveCommunity(member = requestUser)
+        val community: Community = saveCommunity(member = writer)
 
         // when & then
         val result: ResultActions = mockMvc
             .perform(
                 delete("/internal/1/community/{community_id}", community.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
             )
@@ -417,7 +426,7 @@ class InternalCommunityControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 patch("/internal/1/community/{community_id}/like", community.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(bool))
@@ -446,7 +455,8 @@ class InternalCommunityControllerTest(
     fun reportCommunity() {
 
         // given
-        val community: Community = saveCommunity(member = writer)
+        val community: Community = saveCommunity(member = requestUser)
+
         val report = ReportRequest.builder()
             .isReport(true)
             .description("신고사유")
@@ -456,7 +466,7 @@ class InternalCommunityControllerTest(
         val result: ResultActions = mockMvc
             .perform(
                 patch("/internal/1/community/{community_id}/report", community.id)
-                    .header(AUTHORIZATION, requestUserToken)
+                    .header(AUTHORIZATION, requestInternalToken)
                     .header(MEMBER_ID, writer.id)
                     .contentType(APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(report))
