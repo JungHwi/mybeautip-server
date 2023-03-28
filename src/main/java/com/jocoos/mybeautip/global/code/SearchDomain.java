@@ -12,7 +12,10 @@ import static com.jocoos.mybeautip.global.code.SearchField.TITLE;
 @RequiredArgsConstructor
 public enum SearchDomain {
 
-    VIDEO(Set.of(TITLE), Set.of(COMMENT));
+    VIDEO(Set.of(TITLE), Set.of(COMMENT)),
+    BROADCAST(Set.of(TITLE), Set.of()),
+    VOD(Set.of(TITLE), Set.of())
+    ;
 
     private final Set<SearchField> innerFields;
     private final Set<SearchField> outerFields;

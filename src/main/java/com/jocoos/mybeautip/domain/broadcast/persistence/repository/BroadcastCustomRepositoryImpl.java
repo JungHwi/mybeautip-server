@@ -13,8 +13,8 @@ import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
@@ -27,7 +27,6 @@ import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcas
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastPinMessage.broadcastPinMessage;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
-import static com.querydsl.sql.SQLExpressions.count;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Repository
@@ -60,13 +59,21 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     @Override
-    public Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition) {
-        List<BroadcastSearchResult> contents = getList(condition);
-        JPAQuery<Long> countQuery = repository.query(query ->
+    public long count(BroadcastSearchCondition condition) {
+        Long count = repository.query(query ->
                 withMemberAndCategoryAndPinMessage(
                         baseConditionQuery(query, condition))
-                        .select(count(broadcast)));
-        return PageableExecutionUtils.getPage(contents, condition.pageable(), countQuery::fetchOne);
+                        .select(broadcast.count())
+                        .fetchOne());
+        // count can be null ignore ide
+        return count == null ? 0 : count;
+    }
+
+    @Override
+    public Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition) {
+        List<BroadcastSearchResult> contents = getList(condition);
+        long count = count(condition);
+        return new PageImpl<>(contents, condition.pageable(), count);
     }
 
     @Override
@@ -123,6 +130,13 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     private JPAQuery<BroadcastSearchResult> getSearchResult(JPAQuery<?> query) {
         return withMemberAndCategoryAndPinMessage(query)
                 .select(new QBroadcastSearchResult(broadcast, broadcast.statistics, broadcastCategory, member, broadcastPinMessage));
+    }
+
+    private JPAQuery<Long> getCountQuery(BroadcastSearchCondition condition) {
+        return repository.query(query ->
+                withMemberAndCategoryAndPinMessage(
+                        baseConditionQuery(query, condition))
+                        .select(broadcast.count()));
     }
 
     private JPAQuery<?> withMemberAndCategoryAndPinMessage(JPAQuery<?> query) {

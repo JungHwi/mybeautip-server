@@ -13,7 +13,7 @@ import com.jocoos.mybeautip.domain.community.vo.CommunitySearchCondition;
 import com.jocoos.mybeautip.domain.home.vo.QSummaryCommunityResult;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityCondition;
 import com.jocoos.mybeautip.domain.home.vo.SummaryCommunityResult;
-import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.KeywordSearchRequest;
 import com.jocoos.mybeautip.domain.search.vo.SearchResult;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.vo.SearchOption;
@@ -193,24 +193,24 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     @Override
-    public SearchResult<Community> search(KeywordSearchCondition condition) {
+    public SearchResult<Community> search(KeywordSearchRequest condition) {
         JPAQuery<Community> baseQuery = repository.query(query -> query
                 .select(community)
                 .from(community)
                 .join(community.member, member).fetchJoin()
                 .join(communityCategory).on(community.category.eq(communityCategory))
                 .where(
-                        searchCondition(condition.getKeyword()),
-                        lessThanSortedAt(condition.getCursor()),
+                        searchCondition(condition.keyword()),
+                        lessThanSortedAt(condition.dateCursor()),
                         eqStatus(NORMAL),
                         ltReportCount(3)
                 )
                 .orderBy(sortedAt())
-                .limit(condition.getSize()));
-        dynamicQueryForLogin(baseQuery, condition.getMemberId());
+                .limit(condition.size()));
+        dynamicQueryForLogin(baseQuery, condition.memberId());
         List<Community> communities = baseQuery.fetch();
 
-        return new SearchResult<>(communities, countBy(condition.getKeyword(), condition.getMemberId()));
+        return new SearchResult<>(communities, countBy(condition.keyword(), condition.memberId()));
     }
 
     @Override

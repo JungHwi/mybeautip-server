@@ -1,0 +1,3 @@
+== Search Broadcast API
+
+operation::search_broadcast[snippets='http-request,request-parameters,http-response,response-fields']

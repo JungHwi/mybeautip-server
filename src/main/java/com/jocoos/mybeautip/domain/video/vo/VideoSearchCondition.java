@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.video.vo;
 
-import com.jocoos.mybeautip.domain.search.vo.KeywordSearchCondition;
+import com.jocoos.mybeautip.domain.search.vo.KeywordSearchRequest;
 import com.jocoos.mybeautip.domain.video.code.VideoCategoryType;
 import com.jocoos.mybeautip.domain.video.dto.VideoCategoryResponse;
 import lombok.Builder;
@@ -31,11 +31,11 @@ public class VideoSearchCondition {
         this.cursor = setDateCursor(cursor);
     }
 
-    public static VideoSearchCondition from(KeywordSearchCondition condition) {
+    public static VideoSearchCondition from(KeywordSearchRequest condition) {
         return VideoSearchCondition.builder()
-                .keyword(condition.getKeyword())
-                .cursor(condition.getCursor())
-                .size(condition.getSize())
+                .keyword(condition.keyword())
+                .cursor(condition.dateCursor())
+                .size(condition.size())
                 .build();
     }
 
