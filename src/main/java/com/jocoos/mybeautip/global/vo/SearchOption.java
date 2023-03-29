@@ -28,8 +28,9 @@ public class SearchOption {
     private final Boolean isTopFix;
     private final Boolean isInfluencer;
 
-    public static SearchOption onlyKeyword(String keyword) {
+    public static SearchOption onlyKeyword(SearchField field, String keyword) {
         return SearchOption.builder()
+                .searchField(field.getFieldName())
                 .keyword(keyword)
                 .build();
     }

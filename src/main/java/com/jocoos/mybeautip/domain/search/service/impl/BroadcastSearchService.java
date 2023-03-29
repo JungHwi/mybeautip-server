@@ -23,6 +23,7 @@ import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT_SEARCH_STATUSES;
+import static com.jocoos.mybeautip.global.code.SearchField.TITLE;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @RequiredArgsConstructor
@@ -45,7 +46,7 @@ public class BroadcastSearchService implements DomainSearchService<BroadcastList
     public SearchResponse<BroadcastListResponse> search(KeywordSearchRequest request) {
 
         BroadcastSearchCondition condition = BroadcastSearchCondition.builder()
-                .searchOption(SearchOption.onlyKeyword(request.keyword()))
+                .searchOption(SearchOption.onlyKeyword(TITLE, request.keyword()))
                 .statuses(DEFAULT_SEARCH_STATUSES)
                 .cursor(request.idCursor())
                 .pageable(PageRequest.of(0, request.size(), SORTED_STATUS.getSort(ASC)))
@@ -64,7 +65,7 @@ public class BroadcastSearchService implements DomainSearchService<BroadcastList
     @Override
     public long count(String keyword, Member member) {
         BroadcastSearchCondition condition = BroadcastSearchCondition.builder()
-                .searchOption(SearchOption.onlyKeyword(keyword))
+                .searchOption(SearchOption.onlyKeyword(TITLE, keyword))
                 .statuses(DEFAULT_SEARCH_STATUSES)
                 .build();
         return broadcastDao.count(condition);

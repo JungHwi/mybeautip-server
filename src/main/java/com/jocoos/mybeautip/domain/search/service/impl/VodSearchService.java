@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import static com.jocoos.mybeautip.domain.vod.code.VodStatus.AVAILABLE;
+import static com.jocoos.mybeautip.global.code.SearchField.TITLE;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @RequiredArgsConstructor
@@ -38,7 +39,7 @@ public class VodSearchService implements DomainSearchService<VodResponse> {
         CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(request.idCursor(), defaultSort.getSortField());
         Pageable pageable = PageRequest.of(0, request.size(), defaultSort.getSort(DESC));
         VodSearchCondition condition = VodSearchCondition.builder()
-                .searchOption(SearchOption.onlyKeyword(request.keyword()))
+                .searchOption(SearchOption.onlyKeyword(TITLE, request.keyword()))
                 .isVisible(true)
                 .status(AVAILABLE)
                 .cursorPaging(cursorPaging)
@@ -51,7 +52,7 @@ public class VodSearchService implements DomainSearchService<VodResponse> {
     @Override
     public long count(String keyword, @Nullable Member member) {
         VodSearchCondition condition = VodSearchCondition.builder()
-                .searchOption(SearchOption.onlyKeyword(keyword))
+                .searchOption(SearchOption.onlyKeyword(TITLE, keyword))
                 .isVisible(true)
                 .status(AVAILABLE)
                 .build();
