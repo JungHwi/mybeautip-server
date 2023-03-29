@@ -52,6 +52,8 @@ public class VodSearchService implements DomainSearchService<VodResponse> {
     public long count(String keyword, @Nullable Member member) {
         VodSearchCondition condition = VodSearchCondition.builder()
                 .searchOption(SearchOption.onlyKeyword(keyword))
+                .isVisible(true)
+                .status(AVAILABLE)
                 .build();
         return vodDao.count(condition);
     }

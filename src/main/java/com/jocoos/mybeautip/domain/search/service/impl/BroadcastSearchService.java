@@ -65,6 +65,7 @@ public class BroadcastSearchService implements DomainSearchService<BroadcastList
     public long count(String keyword, Member member) {
         BroadcastSearchCondition condition = BroadcastSearchCondition.builder()
                 .searchOption(SearchOption.onlyKeyword(keyword))
+                .statuses(DEFAULT_SEARCH_STATUSES)
                 .build();
         return broadcastDao.count(condition);
     }
