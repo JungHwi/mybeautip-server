@@ -16,7 +16,6 @@ import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.ErrorCode;
 import com.jocoos.mybeautip.global.exception.MemberNotFoundException;
-import com.jocoos.mybeautip.global.exception.MybeautipException;
 import com.jocoos.mybeautip.global.util.StringConvertUtil;
 import com.jocoos.mybeautip.log.MemberLeaveLog;
 import com.jocoos.mybeautip.log.MemberLeaveLogRepository;
@@ -40,9 +39,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -54,7 +51,6 @@ import static com.jocoos.mybeautip.domain.slack.aspect.code.MessageType.MEMBER_R
 import static com.jocoos.mybeautip.domain.slack.aspect.code.MessageType.MEMBER_WITHDRAWAL;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_FILE_NAME;
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.DEFAULT_AVATAR_URL;
-import static com.jocoos.mybeautip.global.exception.ErrorCode.S3_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -250,7 +246,8 @@ public class LegacyMemberService {
             member.setUsername(request.getUsername());
         }
 
-        member.setAvatarFilenameFromUrl(avatarUrlFromRequest(request));
+        String avatarUrl = uploadAvatarAndGet(request.getAvatarUrl());
+        member.setAvatarFilenameFromUrl(avatarUrl);
 
         member.setVisible(true);
         Member finalMember = memberRepository.save(member);
@@ -275,16 +272,16 @@ public class LegacyMemberService {
         }
     }
 
-    private String avatarUrlFromRequest(LegacyMemberController.UpdateMemberRequest request) {
-        if (isUrlFromOuter(request)) {
-            return awsS3Handler.upload(request.getAvatarUrl(), UrlDirectory.AVATAR.getDirectory(), DEFAULT_AVATAR_FILE_NAME);
+    private String uploadAvatarAndGet(String avatarUrl) {
+        if (isUrlFromOuter(avatarUrl)) {
+            return awsS3Handler.upload(avatarUrl, UrlDirectory.AVATAR.getDirectory(), DEFAULT_AVATAR_FILE_NAME);
         } else {
-            return request.getAvatarUrl();
+            return awsS3Handler.copy(avatarUrl, UrlDirectory.AVATAR.getDirectory(), DEFAULT_AVATAR_FILE_NAME);
         }
     }
 
-    private boolean isUrlFromOuter(LegacyMemberController.UpdateMemberRequest request) {
-        return !StringUtils.isBlank(request.getAvatarUrl()) && !request.getAvatarUrl().startsWith(cloudFront);
+    private boolean isUrlFromOuter(String avatarUrl) {
+        return !StringUtils.isBlank(avatarUrl) && !avatarUrl.startsWith(cloudFront);
     }
 
     @SendSlack(messageType = MEMBER_WITHDRAWAL)
@@ -415,22 +412,6 @@ public class LegacyMemberService {
                 .inviterTag(request.getInviterTag())
                 .changedTagInfo(changedTagInfo)
                 .build();
-    }
-
-    public String uploadAvatar(MultipartFile avatar) {
-        String path = "";
-        try {
-            if (avatar != null) {
-                path = attachmentService.upload(avatar, PATH_AVATAR);
-            } else {
-                path = DEFAULT_AVATAR_URL;
-            }
-
-        } catch (IOException ex) {
-            throw new MybeautipException(S3_ERROR, "Member avatar upload Error.");
-        }
-
-        return path;
     }
 
     public void deleteAvatar(String avatar) {
