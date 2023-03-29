@@ -189,7 +189,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     private BooleanExpression searchByKeyword(SearchOption searchOption) {
-        if (searchOption == null || searchOption.isNoKeywordSearch()) {
+        if (searchOption == null) {
             return null;
         }
         String keyword = searchOption.getKeyword();
