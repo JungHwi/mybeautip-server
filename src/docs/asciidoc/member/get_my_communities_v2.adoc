@@ -1,3 +1,6 @@
-== Get My Communities API V2
+== Get My Communities API V2(deprecated)
+deprecated ::
+- Since PlanE
+- Instead use - link:get_my_activity_communities.html[내 활동 API - 커뮤니티 ,window=_blank]
 
 operation::get_my_communities[snippets='http-request,request-parameters,http-response,response-fields']

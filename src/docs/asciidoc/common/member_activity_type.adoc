@@ -1,0 +1,6 @@
+:doctype: book
+:icons: font
+
+=== Member Activity Type
+[[member_activity_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-member_activity_type.adoc[]

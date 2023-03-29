@@ -12,7 +12,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Builder
-public record VodSearchCondition(List<Long> categoryIds,
+public record VodSearchCondition(Long memberId,
+                                 List<Long> categoryIds,
                                  SearchOption searchOption,
                                  Boolean isVisible,
                                  VodStatus status,

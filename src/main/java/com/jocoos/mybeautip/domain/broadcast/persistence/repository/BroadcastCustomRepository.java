@@ -13,7 +13,7 @@ public interface BroadcastCustomRepository {
 
     long count(BroadcastSearchCondition condition);
 
-    Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition);
+    Page<BroadcastSearchResult> getPage(BroadcastSearchCondition condition);
     List<BroadcastSearchResult> getList(BroadcastSearchCondition condition);
     Optional<BroadcastSearchResult> get(long broadcastId);
 

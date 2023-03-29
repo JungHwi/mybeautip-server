@@ -1,0 +1,3 @@
+== Get My Activity API - Broadcast
+
+operation::get_my_activity_broadcasts[snippets='http-request,request-parameters,http-response,response-fields']

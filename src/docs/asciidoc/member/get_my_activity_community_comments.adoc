@@ -1,0 +1,3 @@
+== Get My Activity API - Community Comments
+
+operation::get_my_activity_community_comments[snippets='http-request,request-parameters,http-response,response-fields']

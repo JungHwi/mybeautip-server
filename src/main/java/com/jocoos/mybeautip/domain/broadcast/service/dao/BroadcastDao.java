@@ -76,7 +76,7 @@ public class BroadcastDao {
 
     @Transactional(readOnly = true)
     public Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition) {
-        return repository.getPageList(condition);
+        return repository.getPage(condition);
     }
 
     @Transactional(readOnly = true)

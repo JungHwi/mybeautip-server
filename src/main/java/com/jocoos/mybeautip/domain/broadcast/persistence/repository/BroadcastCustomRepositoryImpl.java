@@ -38,6 +38,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
             broadcast.startedAt,
             broadcast.createdAt,
             broadcast.id);
+
     private final ExtendedQuerydslJpaRepository<Broadcast, Long> repository;
 
     public BroadcastCustomRepositoryImpl(@Lazy ExtendedQuerydslJpaRepository<Broadcast, Long> repository) {
@@ -47,9 +48,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     @Override
     public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
         return repository.query(query ->
-                getSearchResult(
-                        baseConditionQuery(query, condition)
-                )
+                getSearchResult(baseConditionQuery(query, condition))
                         .where(cursor(condition.cursor()))
                         .orderBy(getOrders(condition.sort()))
                         .offset(condition.offset())
@@ -69,7 +68,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     @Override
-    public Page<BroadcastSearchResult> getPageList(BroadcastSearchCondition condition) {
+    public Page<BroadcastSearchResult> getPage(BroadcastSearchCondition condition) {
         List<BroadcastSearchResult> contents = getList(condition);
         long count = count(condition);
         return new PageImpl<>(contents, condition.pageable(), count);
@@ -135,8 +134,8 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
         return query
                 .from(broadcast)
                 .innerJoin(broadcast.statistics).on(broadcast.id.eq(broadcast.statistics.id))
-                .join(member).on(broadcast.memberId.eq(member.id))
                 .join(broadcastCategory).on(broadcast.category.eq(broadcastCategory))
+                .join(member).on(broadcast.memberId.eq(member.id))
                 .leftJoin(broadcastPinMessage).on(broadcast.id.eq(broadcastPinMessage.broadcastId));
     }
 
@@ -148,7 +147,9 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                         createdAtBefore(condition.endAt()),
                         searchByKeyword(condition.searchOption()),
                         inStatus(condition.statuses()),
-                        isReported(condition.isReported())
+                        isReported(condition.isReported()),
+                        eqMemberId(condition.memberId()),
+                        cursor(condition.cursor())
                 );
     }
 
@@ -232,6 +233,10 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     private BooleanExpression inVideoKey(List<Long> videoKeys) {
         return isEmpty(videoKeys) ? null : broadcast.videoKey.in(videoKeys);
+    }
+
+    private BooleanExpression eqMemberId(Long memberId) {
+        return memberId == null ? null : broadcast.memberId.eq(memberId);
     }
 
     private BooleanExpression eqId(Long id) {
