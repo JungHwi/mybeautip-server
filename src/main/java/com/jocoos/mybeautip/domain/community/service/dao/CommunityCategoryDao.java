@@ -42,7 +42,7 @@ public class CommunityCategoryDao {
 
     @Transactional(readOnly = true)
     public List<CommunityCategory> topSummaryCategories() {
-        return repository.findAllByIsInSummaryIsTrue();
+        return repository.findAllByIsInSummaryIsTrueOrderBySortAsc();
     }
 
     @Transactional(readOnly = true)
