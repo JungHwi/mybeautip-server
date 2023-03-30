@@ -68,6 +68,9 @@ public class BroadcastStatusService {
     }
 
     private Broadcast toLive(Broadcast broadcast) {
+        if (broadcast.isStatusEq(LIVE)) {
+            throw new BadRequestException("Already Live. Broadcast Id " + broadcast.getId());
+        }
         ExternalBroadcastInfo info = fflService.startFFLVideoRoomAndSendChatMessage(broadcast);
         broadcast.start(info.liveUrl(), info.lastModifiedAt());
         return broadcast;
