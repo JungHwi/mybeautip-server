@@ -3,9 +3,11 @@ package com.jocoos.mybeautip.client.aws.s3;
 import com.jocoos.mybeautip.global.code.FileOperationType;
 import com.jocoos.mybeautip.global.code.UrlDirectory;
 import com.jocoos.mybeautip.global.dto.FileDto;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.S3UrlUploadException;
 import com.jocoos.mybeautip.support.RandomUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +22,7 @@ import static com.jocoos.mybeautip.global.util.ImageUrlConvertUtil.getUri;
 import static io.micrometer.core.instrument.util.StringUtils.isBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+@Log4j2
 @Component
 @RequiredArgsConstructor
 public class AwsS3Handler {
@@ -43,6 +46,15 @@ public class AwsS3Handler {
             String path = service.upload(url, directory + filename);
             return cloudFront + path;
         } catch (S3UrlUploadException e) {
+            return cloudFront + defaultFilename;
+        }
+    }
+
+    public String copy(String fileUrl, String directory, String defaultFilename) {
+        try {
+            return copy(fileUrl, directory);
+        } catch (BadRequestException e) {
+            log.warn("Failed to copy. Default Filename Will Use. Fail Url : {}", fileUrl);
             return cloudFront + defaultFilename;
         }
     }

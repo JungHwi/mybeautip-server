@@ -23,10 +23,23 @@ public class FileService {
     public List<String> upload(List<MultipartFile> files) {
         List<String> fileUrls = new ArrayList<>();
         for (MultipartFile file : files) {
-            String contentType = contentTypeService.getContentType(file);
-            fileUrls.add(upload(file, contentType));
+            fileUrls.add(upload(file));
         }
         return fileUrls;
+    }
+
+    public String uploadWithDefault(MultipartFile file, String defaultUrl) {
+        try {
+            return upload(file);
+        } catch (Exception e) {
+            log.warn("Fail to upload file. Default Url will return.", e);
+            return defaultUrl;
+        }
+    }
+
+    public String upload(MultipartFile file) {
+        String contentType = contentTypeService.getContentType(file);
+        return upload(file, contentType);
     }
 
     private String upload(MultipartFile file, String contentType) {

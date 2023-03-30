@@ -38,14 +38,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 import static com.jocoos.mybeautip.global.code.LikeStatus.LIKE;
 
@@ -165,15 +167,6 @@ public class LegacyMemberController {
         member = legacyMemberService.updateMember(updateMemberRequest, member);
         return new ResponseEntity<>(legacyMemberService.getMemberInfo(member), HttpStatus.OK);
     }
-
-    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, String>> uploadAvatar(@RequestBody MultipartFile avatar) {
-        String avatarUrl = legacyMemberService.uploadAvatar(avatar);
-        Map<String, String> result = new HashMap<>();
-        result.put("avatar_url", avatarUrl);
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
 
     @PutMapping(value = "/detail")
     public ResponseEntity updateDetailInfo(@RequestBody MemberDetailRequest request) {
