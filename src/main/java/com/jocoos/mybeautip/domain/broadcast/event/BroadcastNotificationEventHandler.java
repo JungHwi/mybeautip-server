@@ -12,8 +12,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @RequiredArgsConstructor
 @Component
@@ -37,7 +40,7 @@ public class BroadcastNotificationEventHandler {
     @TransactionalEventListener(fallbackExecution = true)
     public void send(BroadcastBulkEditNotificationEvent event) {
         List<Long> ids = event.ids();
-        if (!ids.isEmpty()) {
+        if (!isEmpty(ids)) {
             List<Broadcast> broadcasts = broadcastDao.getAllByIdIn(ids);
             broadcasts.forEach(statusChangeNotificationService::send);
         }
