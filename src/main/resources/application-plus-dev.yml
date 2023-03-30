@@ -34,6 +34,13 @@ mybeautip:
     cf:
       domain: "https://static-dev.mybeautip.me/"
 
+cloud:
+  aws:
+    region:
+      static: ap-southeast-1
+    s3:
+      bucket: mybeautip-plus-dev
+
 #redis:
 #  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
 #  port: 6379
