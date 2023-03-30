@@ -35,7 +35,6 @@ public class FileContentTypeService {
         if (contentType == null || contentType.contains(APPLICATION_OCTET_STREAM_VALUE)) {
             contentType = getExtension(file).orElse(getContentTypeByTika(file));
         }
-        validSupportedContentType(contentType);
         return contentType;
     }
 
