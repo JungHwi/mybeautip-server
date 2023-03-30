@@ -3,10 +3,7 @@ package com.jocoos.mybeautip.domain.broadcast.service.dao;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastBulkUpdateStatusCommand;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchResult;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateResult;
+import com.jocoos.mybeautip.domain.broadcast.vo.*;
 import com.jocoos.mybeautip.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,9 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.LIVE;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,8 +48,8 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Broadcast> getAllByVideoKeys(List<Long> ids) {
-        return repository.findAllByVideoKeyIn(ids);
+    public List<Broadcast> getAllByIdIn(List<Long> ids) {
+        return repository.findAllByIdIn(ids);
     }
 
     @Transactional(readOnly = true)
@@ -115,12 +113,27 @@ public class BroadcastDao {
     }
 
     @Transactional
-    public BroadcastUpdateResult bulkUpdateToFinish(BroadcastBulkUpdateStatusCommand condition) {
-        return repository.bulkUpdateStatusAndEndedAt(condition);
+    public void bulkUpdateToEnd(List<Long> ids) {
+        repository.bulkUpdateStatusAndEndedAt(ids, END, ZonedDateTime.now());
     }
 
     @Transactional
-    public BroadcastUpdateResult bulkUpdateToReady(BroadcastBulkUpdateStatusCommand condition) {
-        return repository.bulkUpdateStatus(condition);
+    public void bulkUpdateToCancel(List<Long> ids) {
+        repository.bulkUpdateStatusAndEndedAt(ids, CANCEL, ZonedDateTime.now());
+    }
+
+    @Transactional
+    public void bulkUpdateToReady(List<Long> ids) {
+        repository.bulkUpdateStatus(ids, READY);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BroadcastUpdateCandidate> getCandidates(BroadcastUpdateCandidateCondition condition) {
+        return repository.getUpdateCandidates(condition);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Long> getCreatorIdsLiveNowIn(Set<Long> memberIds) {
+        return repository.getCreatorIdInAndStatus(memberIds, LIVE);
     }
 }

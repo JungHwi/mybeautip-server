@@ -42,7 +42,7 @@ public class BroadcastDomainService {
 
     @Transactional
     public Broadcast create(BroadcastCreateRequest request, long creatorId) {
-        validIsMemberNotLive(creatorId);
+        validIsMemberStartAnotherLiveBroadcast(creatorId, request.getIsStartNow());
         BroadcastCategory category = categoryDao.getCategory(request.getCategoryId());
         Broadcast broadcast = converter.toEntity(request, category, creatorId);
 
@@ -144,9 +144,9 @@ public class BroadcastDomainService {
         return categoryDao.getCategory(categoryId);
     }
 
-    private void validIsMemberNotLive(long creatorId) {
-        if (broadcastDao.isCreatorLiveNow(creatorId)) {
-            throw new BadRequestException("Already Live, Member Id :" + creatorId);
+    private void validIsMemberStartAnotherLiveBroadcast(long creatorId, boolean isStartNow) {
+        if (isStartNow && broadcastDao.isCreatorLiveNow(creatorId)) {
+            throw new BadRequestException("Can't Start Now If Already Live, Member Id :" + creatorId);
         }
     }
 
