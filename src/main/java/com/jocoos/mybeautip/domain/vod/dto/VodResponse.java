@@ -3,12 +3,13 @@ package com.jocoos.mybeautip.domain.vod.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCategoryResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
-import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
+import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.Member;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class VodResponse implements CursorInterface {
@@ -21,6 +22,9 @@ public class VodResponse implements CursorInterface {
     private final int heartCount;
     private final SimpleMemberInfo member;
     private BroadcastCategoryResponse category;
+
+    @Setter
+    private VodRelationInfo relationInfo;
 
     public VodResponse(Vod vod, Member member) {
         this.id = vod.getId();

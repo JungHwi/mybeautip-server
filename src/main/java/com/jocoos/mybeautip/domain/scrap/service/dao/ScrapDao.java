@@ -72,4 +72,9 @@ public class ScrapDao {
                 .findOpenPublicVideoScraps(member, SCRAP, Pageable.ofSize(1))
                 .getContent().isEmpty();
     }
+
+    @Transactional(readOnly = true)
+    public List<Scrap> getScraps(ScrapType type, long memberId) {
+        return repository.findByTypeAndMemberIdAndIsScrap(type, memberId, true);
+    }
 }

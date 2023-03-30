@@ -33,10 +33,11 @@ public class VodController {
                                                      @RequestParam(required = false) Long cursor,
                                                      @RequestParam(required = false, defaultValue = "CREATED_AT") VodSortField sort,
                                                      @RequestParam(required = false, defaultValue = "DESC") Direction order,
-                                                     @RequestParam(required = false, defaultValue = "5") int size) {
+                                                     @RequestParam(required = false, defaultValue = "5") int size,
+                                                     @CurrentMember MyBeautipUserDetails userDetails) {
         CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(cursor, sort.getSortField());
         Pageable pageable = PageRequest.of(0, size, sort.getSort(order));
-        List<VodResponse> responses = service.getList(categoryId, cursorPaging, pageable);
+        List<VodResponse> responses = service.getList(categoryId, cursorPaging, pageable, userDetails.getUsername());
         return new CursorResultResponse<>(responses);
     }
 
