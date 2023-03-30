@@ -28,9 +28,9 @@ public class FileService {
         return fileUrls;
     }
 
-    public String uploadWithDefault(MultipartFile file, String defaultUrl) {
+    public String uploadImageWithoutValidation(MultipartFile file, String defaultUrl) {
         try {
-            return uploadWithoutContentTypeValidation(file);
+            return uploadImageWithoutValidation(file);
         } catch (Exception e) {
             log.warn("Fail to upload file. Default Url will return.", e);
             return defaultUrl;
@@ -42,16 +42,20 @@ public class FileService {
         return upload(file, contentType);
     }
 
-    public String uploadWithoutContentTypeValidation(MultipartFile file) {
+    public String uploadImageWithoutValidation(MultipartFile file) {
         String contentType = contentTypeService.getContentTypeWithoutValid(file);
-        return upload(file, contentType);
+        return uploadImage(file, contentType);
     }
 
     private String upload(MultipartFile file, String contentType) {
         if (isImage(contentType)) {
-            return awsS3Handler.upload(file, contentType, TEMP_IMAGE.getDirectory());
+            return uploadImage(file, contentType);
         }
         return awsS3Handler.upload(file, contentType, TEMP_VIDEO.getDirectory());
+    }
+
+    private String uploadImage(MultipartFile file, String contentType) {
+        return awsS3Handler.upload(file, contentType, TEMP_IMAGE.getDirectory());
     }
 
     private boolean isImage(String contentType) {
