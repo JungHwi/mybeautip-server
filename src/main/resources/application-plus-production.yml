@@ -54,8 +54,10 @@ mybeautip:
 
 cloud:
   aws:
+    region:
+      static: ap-southeast-1
     s3:
-      bucket: mybeautip-prod
+      bucket: mbtlive-static
 
 flipflop:
   app-key: 8E88F34E90
