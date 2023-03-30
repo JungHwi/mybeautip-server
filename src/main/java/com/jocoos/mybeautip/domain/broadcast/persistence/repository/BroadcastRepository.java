@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broadcast, Long>, BroadcastCustomRepository {
@@ -24,9 +25,12 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
     @Query("select b from Broadcast b join fetch b.category join fetch b.statistics where b.id = :id")
     Optional<Broadcast> findByIdWithFetch(@Param("id") Long broadcastId);
 
+    @Query("select b.memberId from Broadcast b where b.memberId in :memberIds and b.status = :status")
+    Set<Long> getCreatorIdInAndStatus(Set<Long> memberIds, BroadcastStatus status);
+
     Optional<Broadcast> findByVideoKey(Long videoKey);
 
-    List<Broadcast> findAllByVideoKeyIn(List<Long> videoKeys);
+    List<Broadcast> findAllByIdIn(List<Long> ids);
 
     boolean existsByIdAndMemberId(long broadcastId, long memberId);
 

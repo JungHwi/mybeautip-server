@@ -6,19 +6,16 @@ import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastBatchUpdateStatusRespo
 import com.jocoos.mybeautip.domain.broadcast.event.BroadcastNotificationEvent.BroadcastBulkEditNotificationEvent;
 import com.jocoos.mybeautip.domain.broadcast.event.BroadcastViewerStatisticsEvent;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
-import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastStatusService;
-import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastBulkUpdateStatusCommand;
+import com.jocoos.mybeautip.domain.broadcast.service.batch.BroadcastBatchUseCaseFactory;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastUpdateResult;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastViewerVo;
-import com.jocoos.mybeautip.global.vo.Between;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
@@ -26,16 +23,16 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 @Service
 public class BatchBroadcastService {
 
-    private final BroadcastStatusService statusService;
+    private final BroadcastBatchUseCaseFactory batchUseCaseFactory;
     private final FlipFlopLiteService flipFlopLiteService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public BroadcastBatchUpdateStatusResponse bulkChangeStatus() {
-        BroadcastUpdateResult toReady = statusService.bulkChangeStatus(updateScheduledNearToReady());
-        BroadcastUpdateResult toCancel = statusService.bulkChangeStatus(updateNotYetStartToCancel());
-        BroadcastUpdateResult toEnd = statusService.bulkChangeStatus(updatePausedLiveToEnd());
-        sendStatusChangedNotification(toReady, toCancel);
-        return new BroadcastBatchUpdateStatusResponse(toReady.count(), toCancel.count(), toEnd.count());
+    public List<BroadcastBatchUpdateStatusResponse> bulkChangeStatus() {
+        List<BroadcastUpdateResult> results = batchUseCaseFactory.doBatches();
+        sendStatusChangedNotification(results);
+        return results.stream()
+                .map(BroadcastBatchUpdateStatusResponse::from)
+                .toList();
     }
 
     @Transactional(propagation = REQUIRES_NEW)
@@ -50,21 +47,12 @@ public class BatchBroadcastService {
         eventPublisher.publishEvent(new BroadcastViewerStatisticsEvent(broadcast.getId()));
     }
 
-    private BroadcastBulkUpdateStatusCommand updateScheduledNearToReady() {
-        Between between5MinutesFromNow = new Between(ZonedDateTime.now(), ZonedDateTime.now().plusMinutes(5));
-        return BroadcastBulkUpdateStatusCommand.updateScheduledNearToReady(between5MinutesFromNow);
-    }
-
-    private BroadcastBulkUpdateStatusCommand updateNotYetStartToCancel() {
-        return BroadcastBulkUpdateStatusCommand.updateNotYetStartToCancel(ZonedDateTime.now().minusMinutes(5));
-    }
-
-    private BroadcastBulkUpdateStatusCommand updatePausedLiveToEnd() {
-        return BroadcastBulkUpdateStatusCommand.updatePausedLiveToEnd(ZonedDateTime.now().minusMinutes(1));
-    }
-
-    private void sendStatusChangedNotification(BroadcastUpdateResult toReady, BroadcastUpdateResult toCancel) {
-        List<Long> notificationBroadcastIds = Stream.concat(toReady.videoKeys().stream(), toCancel.videoKeys().stream()).toList();
-        eventPublisher.publishEvent(new BroadcastBulkEditNotificationEvent(notificationBroadcastIds));
+    private void sendStatusChangedNotification(List<BroadcastUpdateResult> results) {
+        List<Long> ids = results
+                .stream()
+                .map(BroadcastUpdateResult::successIds)
+                .flatMap(Collection::stream)
+                .toList();
+        eventPublisher.publishEvent(new BroadcastBulkEditNotificationEvent(ids));
     }
 }

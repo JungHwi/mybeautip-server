@@ -8,6 +8,7 @@ import com.jocoos.mybeautip.domain.notification.code.NotificationArgument;
 import com.jocoos.mybeautip.domain.notification.code.TemplateType;
 import com.jocoos.mybeautip.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Map;
 import static com.jocoos.mybeautip.domain.notification.code.TemplateType.*;
 import static com.jocoos.mybeautip.global.util.EntityUtil.extractLongList;
 
+@Log4j2
 @RequiredArgsConstructor
 @Service
 public class BroadcastStatusChangeNotificationService implements NotificationService<Broadcast> {
@@ -29,7 +31,7 @@ public class BroadcastStatusChangeNotificationService implements NotificationSer
             case READY -> sendReady(broadcast);
             case LIVE -> sendLive(broadcast);
             case CANCEL -> sendCancel(broadcast);
-            default -> {}
+            case END, SCHEDULED -> {}
         }
     }
 

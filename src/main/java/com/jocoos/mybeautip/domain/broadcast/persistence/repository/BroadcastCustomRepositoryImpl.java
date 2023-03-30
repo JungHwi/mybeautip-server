@@ -18,9 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcast.broadcast;
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastCategory.broadcastCategory;
@@ -85,43 +83,36 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     @Override
-    public BroadcastUpdateResult bulkUpdateStatusAndEndedAt(BroadcastBulkUpdateStatusCommand condition) {
-        List<Long> videoKeys = getUpdateCandidateVideoKeys(condition);
-        if (!isEmpty(videoKeys)) {
+    public void bulkUpdateStatusAndEndedAt(Collection<Long> ids, BroadcastStatus status, ZonedDateTime endedAt) {
+        if (!isEmpty(ids)) {
             repository.update(query -> query
-                    .set(broadcast.status, condition.updateStatus())
-                    .set(broadcast.endedAt, condition.updateEndedAt())
-                    .where(
-                            inVideoKey(videoKeys)
-                    )
+                    .set(broadcast.status, status)
+                    .set(broadcast.endedAt, endedAt)
+                    .where(inIds(ids))
                     .execute());
         }
-        return new BroadcastUpdateResult(videoKeys.size(), videoKeys);
     }
 
     @Override
-    public BroadcastUpdateResult bulkUpdateStatus(BroadcastBulkUpdateStatusCommand command) {
-        List<Long> videoKeys = getUpdateCandidateVideoKeys(command);
-        if (!isEmpty(videoKeys)) {
+    public void bulkUpdateStatus(Collection<Long> ids, BroadcastStatus status) {
+        if (!isEmpty(ids)) {
             repository.update(query -> query
-                    .set(broadcast.status, command.updateStatus())
-                    .where(
-                            inVideoKey(videoKeys)
-                    )
+                    .set(broadcast.status, status)
+                    .where(inIds(ids))
                     .execute());
         }
-        return new BroadcastUpdateResult(videoKeys.size(), videoKeys);
     }
 
-    private List<Long> getUpdateCandidateVideoKeys(BroadcastBulkUpdateStatusCommand condition) {
+    @Override
+    public List<BroadcastUpdateCandidate> getUpdateCandidates(BroadcastUpdateCandidateCondition condition) {
         return repository.query(query -> query
-                .select(broadcast.videoKey)
+                .select(new QBroadcastUpdateCandidate(broadcast.id, broadcast.videoKey, broadcast.memberId))
                 .from(broadcast)
                 .where(
-                        inStatus(condition.currentStatuses()),
+                        inStatus(condition.statuses()),
                         startedAtBetween(condition.betweenStart(), condition.betweenEnd()),
-                        startedAtLt(condition.startedAtLt()),
-                        pausedAtLt(condition.pausedAtLt())
+                        startedAtLt(condition.startedAt()),
+                        pausedAtLt(condition.pausedAt())
                 )
                 .fetch());
     }
@@ -230,8 +221,8 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
         return isEmpty(statuses) ? null : broadcast.status.in(statuses);
     }
 
-    private BooleanExpression inVideoKey(List<Long> videoKeys) {
-        return isEmpty(videoKeys) ? null : broadcast.videoKey.in(videoKeys);
+    private BooleanExpression inIds(Collection<Long> ids) {
+        return isEmpty(ids) ? null : broadcast.id.in(ids);
     }
 
     private BooleanExpression eqId(Long id) {

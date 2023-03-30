@@ -36,8 +36,9 @@ public class BroadcastNotificationEventHandler {
     @Transactional
     @TransactionalEventListener(fallbackExecution = true)
     public void send(BroadcastBulkEditNotificationEvent event) {
-        if (!event.ids().isEmpty()) {
-            List<Broadcast> broadcasts = broadcastDao.getAllByVideoKeys(event.ids());
+        List<Long> ids = event.ids();
+        if (!ids.isEmpty()) {
+            List<Broadcast> broadcasts = broadcastDao.getAllByIdIn(ids);
             broadcasts.forEach(statusChangeNotificationService::send);
         }
     }

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Log4j2
 @RequiredArgsConstructor
 @RestController
@@ -26,8 +28,8 @@ public class BatchBroadcastController {
     }
 
     @PatchMapping("/broadcast/status")
-    public BroadcastBatchUpdateStatusResponse bulkChangeStatus() {
-        BroadcastBatchUpdateStatusResponse response = service.bulkChangeStatus();
+    public List<BroadcastBatchUpdateStatusResponse> bulkChangeStatus() {
+        List<BroadcastBatchUpdateStatusResponse> response = service.bulkChangeStatus();
         log.debug("bulk change status result : {}", response);
         return response;
     }
