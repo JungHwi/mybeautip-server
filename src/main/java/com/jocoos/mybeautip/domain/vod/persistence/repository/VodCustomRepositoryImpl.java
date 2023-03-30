@@ -80,7 +80,7 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
         return withBaseConditionAndSort(condition)
                 .select(new QVodResponse(vod, broadcastCategory, member))
                 .join(broadcastCategory).on(vod.category.eq(broadcastCategory))
-                .join(member).on(vod.memberId.eq(member.id))
+                .join(member).on(vod.memberId.eq(member.id).and(eqMemberId(condition.memberId())))
                 .where(
                         cursor(comparablePath, cursorValue, condition.cursor())
                 )
@@ -165,6 +165,10 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
 
     private BooleanExpression createdAtBefore(ZonedDateTime dateTime) {
         return dateTime == null ? null : vod.createdAt.loe(dateTime);
+    }
+
+    private BooleanExpression eqMemberId(Long memberId) {
+        return memberId == null ? null : vod.memberId.eq(memberId);
     }
 
     private BooleanExpression eqStatus(VodStatus status) {

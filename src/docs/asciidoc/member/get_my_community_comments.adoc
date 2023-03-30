@@ -1,3 +1,6 @@
-== Get My Community Comments API
+== Get My Community Comments API(deprecated)
+deprecated ::
+- Since PlanE
+- Instead use - link:get_my_activity_community_comments.html[내 활동 API - 커뮤니티 댓글,window=_blank]
 
 operation::get_my_community_comments[snippets='http-request,request-parameters,http-response,response-fields']

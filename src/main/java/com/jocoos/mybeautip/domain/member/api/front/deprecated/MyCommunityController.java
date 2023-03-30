@@ -1,4 +1,4 @@
-package com.jocoos.mybeautip.domain.member.api.front;
+package com.jocoos.mybeautip.domain.member.api.front.deprecated;
 
 import com.jocoos.mybeautip.domain.community.service.CommunityCommentService;
 import com.jocoos.mybeautip.domain.community.service.CommunityService;
@@ -19,6 +19,8 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_LONG_STRING;
 
+// Use MyActivityController Instead
+@Deprecated(since = "PlanE")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor

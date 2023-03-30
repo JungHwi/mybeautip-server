@@ -31,6 +31,7 @@ public class EnumDocs {
     Map<String, String> skinWorry;
     Map<String, String> grantType;
     Map<String, String> role;
+    Map<String, String> memberActivityType;
 
     // Broadcast
     Map<String, String> broadcastViewerType;

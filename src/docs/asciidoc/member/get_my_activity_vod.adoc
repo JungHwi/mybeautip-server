@@ -1,0 +1,3 @@
+== Get My Activity API - Vod
+
+operation::get_my_activity_vod[snippets='http-request,request-parameters,http-response,response-fields']

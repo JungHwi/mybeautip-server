@@ -4,12 +4,12 @@ import com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState;
 import com.jocoos.mybeautip.domain.broadcast.code.*;
 import com.jocoos.mybeautip.domain.community.code.CommunityCategoryType;
 import com.jocoos.mybeautip.domain.community.code.CommunityStatus;
-import com.jocoos.mybeautip.domain.event.code.*;
+import com.jocoos.mybeautip.domain.event.code.EventJoinStatus;
+import com.jocoos.mybeautip.domain.event.code.EventProductType;
+import com.jocoos.mybeautip.domain.event.code.EventStatus;
+import com.jocoos.mybeautip.domain.event.code.EventType;
 import com.jocoos.mybeautip.domain.file.code.FileType;
-import com.jocoos.mybeautip.domain.member.code.GrantType;
-import com.jocoos.mybeautip.domain.member.code.InfluencerStatus;
-import com.jocoos.mybeautip.domain.member.code.MemberStatus;
-import com.jocoos.mybeautip.domain.member.code.Role;
+import com.jocoos.mybeautip.domain.member.code.*;
 import com.jocoos.mybeautip.domain.notice.code.NoticeSort;
 import com.jocoos.mybeautip.domain.notice.code.NoticeStatus;
 import com.jocoos.mybeautip.domain.notification.code.*;
@@ -72,6 +72,7 @@ public class CommonDocController {
         Map<String, String> skinWorry = getDocs(SkinWorry.values());
         Map<String, String> grantType = getDocs(GrantType.values());
         Map<String, String> role = getDocs(Role.values());
+        Map<String, String> memberActivityType = getDocs(MemberActivityType.values());
 
         // Broadcast
         Map<String, String> broadcastViewerType = getDocs(BroadcastViewerType.values());
@@ -165,6 +166,7 @@ public class CommonDocController {
                         .skinWorry(skinWorry)
                         .grantType(grantType)
                         .role(role)
+                        .memberActivityType(memberActivityType)
                 // Broadcast
                         .broadcastViewerType(broadcastViewerType)
                         .broadcastViewerStatus(broadcastViewerStatus)

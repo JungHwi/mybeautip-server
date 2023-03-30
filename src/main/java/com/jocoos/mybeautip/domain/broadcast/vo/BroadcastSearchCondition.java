@@ -11,7 +11,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Builder
-public record BroadcastSearchCondition(List<BroadcastStatus> statuses,
+public record BroadcastSearchCondition(Long memberId,
+                                       List<BroadcastStatus> statuses,
                                        Pageable pageable,
                                        SearchOption searchOption,
                                        Between day,

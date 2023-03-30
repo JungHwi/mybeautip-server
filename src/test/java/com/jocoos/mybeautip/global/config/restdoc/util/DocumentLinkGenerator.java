@@ -54,7 +54,8 @@ public class DocumentLinkGenerator {
         BROADCAST_STATUS("broadcast_status", "방송 상태"),
         BROADCAST_REPORT_TYPE("broadcast_report_type", "방송 신고 구분"),
         VOD_SORT_FIELD("vod_sort_field", "VOD 정렬 기준"),
-        FFL_STREAM_KEY_STATE("ffl_stream_key_state", "FFL Stream Key 상태")
+        FFL_STREAM_KEY_STATE("ffl_stream_key_state", "FFL Stream Key 상태"),
+        MEMBER_ACTIVITY_TYPE("member_activity_type", "회원 - 나의 활동 타입")
         ;
 
         private final String pageId;
