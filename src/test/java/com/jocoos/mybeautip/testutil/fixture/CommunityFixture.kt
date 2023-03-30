@@ -129,5 +129,7 @@ fun makeCommunityScrap(
     memberId: Long,
     communityId: Long,
 ) : Scrap {
-    return Scrap(memberId, COMMUNITY, communityId)
+    val scrap = Scrap(memberId, COMMUNITY, communityId)
+    scrap.apply { isScrap = true }
+    return scrap
 }

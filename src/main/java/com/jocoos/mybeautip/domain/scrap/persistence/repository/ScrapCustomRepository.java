@@ -6,5 +6,5 @@ import com.jocoos.mybeautip.domain.scrap.vo.ScrapSearchCondition;
 import java.util.List;
 
 public interface ScrapCustomRepository {
-    List<Scrap> getScrapsExcludeBlockMember(ScrapSearchCondition condition);
+    List<Scrap> getScraps(ScrapSearchCondition condition);
 }

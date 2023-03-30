@@ -2,11 +2,13 @@ package com.jocoos.mybeautip.domain.vod.api.front;
 
 import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
+import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponseV2;
 import com.jocoos.mybeautip.domain.vod.code.VodSortField;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.vod.service.VodService;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.ReportCountResponse;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IntegerDto;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
@@ -53,5 +55,12 @@ public class VodController {
     @PostMapping("/1/vod/{vodId}/heart")
     public HeartCountResponse addHeartCount(@PathVariable long vodId, @RequestBody IntegerDto count) {
         return service.addHeartCount(vodId, count.getNumber());
+    }
+
+    @PatchMapping("/1/vod/{vodId}/scrap")
+    public ScrapResponseV2 scrap(@PathVariable Long vodId,
+                                 @RequestBody BooleanDto isScrap,
+                                 @CurrentMember MyBeautipUserDetails userDetails) {
+        return service.scrap(vodId, userDetails.getMember().getId(), isScrap.isBool());
     }
 }

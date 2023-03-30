@@ -584,7 +584,7 @@ class CommunityResponseDeprecatedTest(
     fun getScrap() {
 
         // given
-        val community: Community = saveCommunity()
+        val community: Community = saveCommunity(member = defaultAdmin)
         scrapRepository.save(makeCommunityScrap(requestUser.id, community.id))
 
         // when & then

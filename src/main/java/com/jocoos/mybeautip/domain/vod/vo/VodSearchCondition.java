@@ -1,7 +1,7 @@
 package com.jocoos.mybeautip.domain.vod.vo;
 
-import com.jocoos.mybeautip.global.code.SortField;
 import com.jocoos.mybeautip.domain.vod.code.VodStatus;
+import com.jocoos.mybeautip.global.code.SortField;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import lombok.Builder;
@@ -10,9 +10,11 @@ import org.springframework.data.domain.Sort;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Builder
-public record VodSearchCondition(Long memberId,
+public record VodSearchCondition(Set<Long> ids,
+                                 Long memberId,
                                  List<Long> categoryIds,
                                  SearchOption searchOption,
                                  Boolean isVisible,
@@ -60,5 +62,9 @@ public record VodSearchCondition(Long memberId,
 
     public Boolean isReported() {
         return searchOption.getIsReported();
+    }
+
+    public boolean needPagingSort() {
+        return cursorPaging != null;
     }
 }

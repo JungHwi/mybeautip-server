@@ -9,6 +9,7 @@ import lombok.Getter;
 public enum ScrapType implements CodeValue {
 
     VIDEO("동영상"),
+    VOD("VOD"),
     COMMUNITY("커뮤니티");
 
     private final String description;

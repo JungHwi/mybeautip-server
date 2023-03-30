@@ -1,27 +1,26 @@
 package com.jocoos.mybeautip.domain.scrap.service;
 
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
-import com.jocoos.mybeautip.domain.scrap.service.impl.CommunityScrapService;
-import com.jocoos.mybeautip.domain.scrap.service.impl.VideoScrapService;
-import com.jocoos.mybeautip.global.exception.BadRequestException;
-import lombok.RequiredArgsConstructor;
+import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Component
-@RequiredArgsConstructor
 public class ScrapTypeFactory {
 
-    private final CommunityScrapService communityScrapService;
-    private final VideoScrapService videoScrapService;
+    private final Map<ScrapType, ScrapTypeService<?>> scrapTypeServiceMap;
 
-    public ScrapTypeService getScrapTypeService(ScrapType type) {
-        switch (type) {
-            case COMMUNITY:
-                return communityScrapService;
-            case VIDEO:
-                return videoScrapService;
-            default:
-                throw new BadRequestException("not supported scrap type.");
-        }
+    public ScrapTypeFactory(List<ScrapTypeService<?>> scrapTypeServices) {
+        this.scrapTypeServiceMap = scrapTypeServices.stream()
+                .collect(Collectors.toMap(ScrapTypeService::getType, scrapTypeService -> scrapTypeService));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public <T extends CursorInterface> ScrapTypeService<T> get(ScrapType type) {
+        return (ScrapTypeService<T>) scrapTypeServiceMap.get(type);
     }
 }
