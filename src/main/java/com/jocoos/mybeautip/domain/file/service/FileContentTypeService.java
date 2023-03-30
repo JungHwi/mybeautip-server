@@ -30,6 +30,15 @@ public class FileContentTypeService {
         return contentType;
     }
 
+    public String getContentTypeWithoutValid(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || contentType.contains(APPLICATION_OCTET_STREAM_VALUE)) {
+            contentType = getExtension(file).orElse(getContentTypeByTika(file));
+        }
+        validSupportedContentType(contentType);
+        return contentType;
+    }
+
     private Optional<String> getExtension(MultipartFile file) {
         final String dot = ".";
         return Optional.ofNullable(file.getOriginalFilename())

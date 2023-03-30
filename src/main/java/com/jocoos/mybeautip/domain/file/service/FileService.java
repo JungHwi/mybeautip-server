@@ -30,7 +30,7 @@ public class FileService {
 
     public String uploadWithDefault(MultipartFile file, String defaultUrl) {
         try {
-            return upload(file);
+            return uploadWithoutContentTypeValidation(file);
         } catch (Exception e) {
             log.warn("Fail to upload file. Default Url will return.", e);
             return defaultUrl;
@@ -39,6 +39,11 @@ public class FileService {
 
     public String upload(MultipartFile file) {
         String contentType = contentTypeService.getContentType(file);
+        return upload(file, contentType);
+    }
+
+    public String uploadWithoutContentTypeValidation(MultipartFile file) {
+        String contentType = contentTypeService.getContentTypeWithoutValid(file);
         return upload(file, contentType);
     }
 
