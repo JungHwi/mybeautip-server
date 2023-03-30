@@ -26,6 +26,13 @@ mybeautip:
     channel: "#mybeautip-plus-dev"
     order-key: T03FMJ9ANNR/B0505822V9N/fTaHxHs2bs39lo3Yxpv7xR3g
     order-channel: "#mybeautip-plus-dev"
+  aws:
+    s3:
+      domain: 'https://mybeautip-plus-dev.s3.ap-southeast-1.amazonaws.com/'
+      bucket: 'mybeautip-plus-dev'
+      region: 'ap-southeast-1'
+    cf:
+      domain: "https://static-dev.mybeautip.me/"
 
 #redis:
 #  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
