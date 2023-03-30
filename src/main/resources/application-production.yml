@@ -70,6 +70,8 @@ ffl:
   api-key: 2Mi6Qx9YJWG1LdUd4F3VQEFOo8B
   api-secret: 2Mi6Qtwb2VsJ4lVFlMMetrjH3LW
   domain: https://api.lite.flipflop.tv
+  callback:
+    basic-auth: Basic ZmZsLWNhbGxiYWNrOmZmbC1zZWNyZXQ=
 
 #redis:
 #  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com

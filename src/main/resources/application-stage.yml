@@ -63,6 +63,13 @@ flipflop:
   video:
     thumbnail-format: https://static.flipflop.tv/${flipflop.app-key}/videos/%s/thumbnail.jpg
 
+ffl:
+  api-key: 2MibveDXdsDV9jLXuSMyUqrvn32
+  api-secret: 2MibvdaOAhoIrwA1w8EsLPoLx97
+  domain: https://api-sandbox.lite.flipflop.tv
+  callback:
+    basic-auth: Basic ZmZsLWNhbGxiYWNrOmZmbC1zZWNyZXQ=
+
 
 #redis:
 #  host: common-elasticache.ntbzpm.clustercfg.apn2.cache.amazonaws.com
