@@ -1,12 +1,14 @@
 package com.jocoos.mybeautip.domain.scrap.service;
 
 import com.jocoos.mybeautip.domain.community.converter.CommunityScrapConverter;
-import com.jocoos.mybeautip.domain.community.dto.CommunityScrapResponse;
+import com.jocoos.mybeautip.domain.member.dto.MyScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.dao.ScrapDao;
+import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.LegacyMemberService;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -34,12 +38,19 @@ public class ScrapService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommunityScrapResponse> getScrapList(ScrapType type, long cursor, Pageable pageable) {
-        long memberId = memberService.currentMemberId();
-        List<Scrap> scrapList = dao.getScrapList(type, memberId, cursor, pageable);
+    public <T extends CursorInterface> List<MyScrapResponse<T>> getScrapList(ScrapType type,
+                                                                             long cursor,
+                                                                             Pageable pageable,
+                                                                             Long memberId) {
+        if (ScrapType.VIDEO.equals(type)) {
+            throw new BadRequestException(type + " not supported yet. Use /api/1/members/me/scraps");
+        }
+        List<Scrap> scrapList = dao.getScraps(type, memberId, cursor, pageable);
 
-        ScrapTypeService scrapTypeService = scrapTypeFactory.getScrapTypeService(type);
-
+        if (isEmpty(scrapList)) {
+            return List.of();
+        }
+        ScrapTypeService<T> scrapTypeService = scrapTypeFactory.get(type);
         return scrapTypeService.getScrapInfo(scrapList);
     }
 

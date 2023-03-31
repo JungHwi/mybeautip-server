@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.community.converter;
 
-import com.jocoos.mybeautip.domain.community.dto.CommunityScrapResponse;
+import com.jocoos.mybeautip.domain.community.dto.CommunityResponse;
+import com.jocoos.mybeautip.domain.member.dto.MyScrapResponse;
 import com.jocoos.mybeautip.domain.community.persistence.domain.Community;
 import com.jocoos.mybeautip.domain.member.converter.MemberConverter;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
@@ -25,36 +26,37 @@ public abstract class CommunityScrapConverter {
     @Mappings({
             @Mapping(target = "scrapId", source = "scrap.id"),
             @Mapping(target = "type", source = "scrap.type"),
-            @Mapping(target = "communityResponse.id", source = "community.id"),
-            @Mapping(target = "communityResponse.isWin", source = "community.isWin"),
-            @Mapping(target = "communityResponse.status", source = "community.status"),
-            @Mapping(target = "communityResponse.title", source = "community.title"),
-            @Mapping(target = "communityResponse.contents", source = "community.contents"),
-            @Mapping(target = "communityResponse.files", source = "community.communityFileList"),
-            @Mapping(target = "communityResponse.viewCount", source = "community.viewCount"),
-            @Mapping(target = "communityResponse.likeCount", source = "community.likeCount"),
-            @Mapping(target = "communityResponse.reportCount", source = "community.reportCount"),
-            @Mapping(target = "communityResponse.commentCount", source = "community.commentCount"),
-            @Mapping(target = "communityResponse.createdAt", source = "community.createdAt"),
-            @Mapping(target = "communityResponse.member", source = "community.member"),
-            @Mapping(target = "communityResponse.category", source = "community.category"),
-            @Mapping(target = "communityResponse.relationInfo", ignore = true),
+            @Mapping(target = "response.id", source = "community.id"),
+            @Mapping(target = "response.isWin", source = "community.isWin"),
+            @Mapping(target = "response.status", source = "community.status"),
+            @Mapping(target = "response.title", source = "community.title"),
+            @Mapping(target = "response.contents", source = "community.contents"),
+            @Mapping(target = "response.files", source = "community.communityFileList"),
+            @Mapping(target = "response.viewCount", source = "community.viewCount"),
+            @Mapping(target = "response.likeCount", source = "community.likeCount"),
+            @Mapping(target = "response.reportCount", source = "community.reportCount"),
+            @Mapping(target = "response.commentCount", source = "community.commentCount"),
+            @Mapping(target = "response.createdAt", source = "community.createdAt"),
+            @Mapping(target = "response.member", source = "community.member"),
+            @Mapping(target = "response.category", source = "community.category"),
+            @Mapping(target = "response.relationInfo", ignore = true),
     })
-    public abstract CommunityScrapResponse convert(Scrap scrap, Community community);
+    public abstract MyScrapResponse<CommunityResponse> convert(Scrap scrap, Community community);
 
-    public List<CommunityScrapResponse> convertVideoScrap(List<Scrap> scrapList, List<Video> videoList) {
+    public List<MyScrapResponse<CommunityResponse>> convertVideoScrap(List<Scrap> scrapList, List<Video> videoList) {
 
 
         return null;
     }
 
-    public List<CommunityScrapResponse> convertCommunityScrap(List<Scrap> scrapList, List<Community> communityList) {
+    public List<MyScrapResponse<CommunityResponse>> convertCommunityScrap(List<Scrap> scrapList,
+                                                                          List<Community> communityList) {
         Map<Long, Community> communityMap = communityList.stream()
                 .collect(Collectors.toMap(Community::getId, Function.identity()));
 
-        List<CommunityScrapResponse> result = new ArrayList<>();
+        List<MyScrapResponse<CommunityResponse>> result = new ArrayList<>();
         for (Scrap scrap : scrapList) {
-            CommunityScrapResponse response = convert(scrap, communityMap.get(scrap.getRelationId()));
+            MyScrapResponse<CommunityResponse> response = convert(scrap, communityMap.get(scrap.getRelationId()));
             result.add(response);
         }
 

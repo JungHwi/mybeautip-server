@@ -2,11 +2,13 @@ package com.jocoos.mybeautip.domain.vod.api.front;
 
 import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
+import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponseV2;
 import com.jocoos.mybeautip.domain.vod.code.VodSortField;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.vod.service.VodService;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
 import com.jocoos.mybeautip.global.dto.ReportCountResponse;
+import com.jocoos.mybeautip.global.dto.single.BooleanDto;
 import com.jocoos.mybeautip.global.dto.single.IntegerDto;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
 import com.jocoos.mybeautip.global.wrapper.CursorResultResponse;
@@ -31,10 +33,11 @@ public class VodController {
                                                      @RequestParam(required = false) Long cursor,
                                                      @RequestParam(required = false, defaultValue = "CREATED_AT") VodSortField sort,
                                                      @RequestParam(required = false, defaultValue = "DESC") Direction order,
-                                                     @RequestParam(required = false, defaultValue = "5") int size) {
+                                                     @RequestParam(required = false, defaultValue = "5") int size,
+                                                     @CurrentMember MyBeautipUserDetails userDetails) {
         CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(cursor, sort.getSortField());
         Pageable pageable = PageRequest.of(0, size, sort.getSort(order));
-        List<VodResponse> responses = service.getList(categoryId, cursorPaging, pageable);
+        List<VodResponse> responses = service.getList(categoryId, cursorPaging, pageable, userDetails.getUsername());
         return new CursorResultResponse<>(responses);
     }
 
@@ -53,5 +56,12 @@ public class VodController {
     @PostMapping("/1/vod/{vodId}/heart")
     public HeartCountResponse addHeartCount(@PathVariable long vodId, @RequestBody IntegerDto count) {
         return service.addHeartCount(vodId, count.getNumber());
+    }
+
+    @PatchMapping("/1/vod/{vodId}/scrap")
+    public ScrapResponseV2 scrap(@PathVariable Long vodId,
+                                 @RequestBody BooleanDto isScrap,
+                                 @CurrentMember MyBeautipUserDetails userDetails) {
+        return service.scrap(vodId, userDetails.getMember().getId(), isScrap.isBool());
     }
 }

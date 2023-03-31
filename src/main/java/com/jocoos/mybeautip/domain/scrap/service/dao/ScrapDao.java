@@ -26,7 +26,7 @@ public class ScrapDao {
 
     @Transactional
     public Scrap scrap(ScrapRequest request) {
-        Scrap scrap = getScrap(request.getType(), request.getMemberId(), request.getRelationId());
+        Scrap scrap = getOrCreateScrap(request.getType(), request.getMemberId(), request.getRelationId());
 
         if (scrap.getIsScrap() == request.getIsScrap()) {
             return scrap;
@@ -37,31 +37,44 @@ public class ScrapDao {
         return repository.save(scrap);
     }
 
+    @Transactional
+    public Scrap scrap(Scrap scrap) {
+        return repository.save(scrap);
+    }
+
     @Transactional(readOnly = true)
-    public List<Scrap> getScrapList(ScrapType type, long memberId, long cursor, Pageable pageable) {
+    public List<Scrap> getScraps(ScrapType type, long memberId, long cursor, Pageable pageable) {
         ScrapSearchCondition condition = new ScrapSearchCondition(type, memberId, true, cursor, pageable);
-        return repository.getScrapsExcludeBlockMember(condition);
+        return repository.getScraps(condition);
     }
 
     @Transactional(readOnly = true)
-    public Scrap getScrap(ScrapType type, long memberId, long communityId) {
-        return repository.findByTypeAndMemberIdAndRelationId(type, memberId, communityId)
-                .orElse(new Scrap(memberId, type, communityId));
+    public Scrap getOrCreateScrap(ScrapType type, long memberId, long relationId) {
+        return repository.findByTypeAndMemberIdAndRelationId(type, memberId, relationId)
+                .orElse(new Scrap(memberId, type, relationId));
     }
 
+    @Transactional
     public List<Scrap> scrapCommunities(long memberId, List<Long> communityIds) {
         return repository.findByTypeAndMemberIdAndRelationIdInAndIsScrap(COMMUNITY, memberId, communityIds, true);
     }
 
-    public Boolean isScrapCommunity(Long memberId, Long communityId) {
-        return repository.existsByTypeAndMemberIdAndRelationIdAndIsScrap(COMMUNITY, memberId, communityId, true);
+    @Transactional(readOnly = true)
+    public boolean isScrap(ScrapType type, Long memberId, Long relationId) {
+        return repository.existsByTypeAndMemberIdAndRelationIdAndIsScrap(type, memberId, relationId, true);
     }
 
+    @Transactional(readOnly = true)
     public boolean isExist(Member member) {
         return repository.existsByMemberIdAndIsScrap(member.getId(), true) ||
                 // pageable for limit 1 query
                 !videoScrapRepository
                 .findOpenPublicVideoScraps(member, SCRAP, Pageable.ofSize(1))
                 .getContent().isEmpty();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Scrap> getScraps(ScrapType type, long memberId) {
+        return repository.findByTypeAndMemberIdAndIsScrap(type, memberId, true);
     }
 }

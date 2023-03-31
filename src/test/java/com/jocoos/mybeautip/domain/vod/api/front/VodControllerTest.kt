@@ -4,9 +4,12 @@ import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod
 import com.jocoos.mybeautip.domain.vod.persistence.repository.VodRepository
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getDefault
+import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.VOD_SORT_FIELD
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.global.dto.single.BooleanDto
 import com.jocoos.mybeautip.global.dto.single.IntegerDto
 import com.jocoos.mybeautip.testutil.fixture.makeVod
 import org.junit.jupiter.api.AfterAll
@@ -66,7 +69,8 @@ class VodControllerTest(
                 requestParameters(
                     parameterWithName("cursor").description("커서. Vod 아이디").optional(),
                     parameterWithName("category_id").description("카테고리 ID").optional(),
-                    parameterWithName("sort").description(generateLinkCode(VOD_SORT_FIELD)).attributes(getDefault("CREATED_AT")).optional(),
+                    parameterWithName("sort").description(generateLinkCode(VOD_SORT_FIELD))
+                        .attributes(getDefault("CREATED_AT")).optional(),
                     parameterWithName("order").description("정렬 방향. ASC, DESC").attributes(getDefault("DESC"))
                         .optional(),
                     parameterWithName("size").description("페이지 사이즈").attributes(getDefault(5)).optional()
@@ -89,6 +93,8 @@ class VodControllerTest(
                     fieldWithPath("content.[].member.email").type(STRING).description("회원 이메일").optional(),
                     fieldWithPath("content.[].member.username").type(STRING).description("회원 닉네임"),
                     fieldWithPath("content.[].member.avatar_url").type(STRING).description("회원 아바타 URL"),
+                    fieldWithPath("content.[].relation_info").type(OBJECT).description("요청자 연관 정보"),
+                    fieldWithPath("content.[].relation_info.is_scrap").type(BOOLEAN).description("요청자 연관 정보 - 스크랩 여부"),
                 )
             )
         )
@@ -122,7 +128,7 @@ class VodControllerTest(
                     fieldWithPath("member.id").type(NUMBER).description("회원 아이디"),
                     fieldWithPath("member.email").type(STRING).description("회원 이메일").optional(),
                     fieldWithPath("member.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("member.avatar_url").type(STRING).description("회원 아바타 URL"),
+                    fieldWithPath("member.avatar_url").type(STRING).description("회원 아바타 URL")
                 )
             )
         )
@@ -152,7 +158,7 @@ class VodControllerTest(
                     parameterWithName("vod_id").description("VOD ID")
                 ),
                 requestFields(
-                  fieldWithPath("description").type(STRING).description("신고 사유")
+                    fieldWithPath("description").type(STRING).description("신고 사유")
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("VOD 아이디"),
@@ -189,6 +195,40 @@ class VodControllerTest(
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("VOD 아이디"),
                     fieldWithPath("heart_count").type(NUMBER).description("하트수"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `VOD Scrap API`() {
+
+        val request = BooleanDto(true)
+
+        val result: ResultActions = mockMvc
+            .perform(
+                patch("/api/1/vod/{vod_id}/scrap", vod.id)
+                    .header(AUTHORIZATION, requestUserToken)
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isOk)
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "scrap_vod",
+                pathParameters(
+                    parameterWithName("vod_id").description("VOD ID")
+                ),
+                requestFields(
+                    fieldWithPath("bool").type(BOOLEAN).description("스크랩 여부")
+                ),
+                responseFields(
+                    fieldWithPath("id").type(NUMBER).description("스크랩 아이디"),
+                    fieldWithPath("relation_id").type(NUMBER).description("VOD ID"),
+                    fieldWithPath("is_scrap").type(BOOLEAN).description("스크랩 여부"),
+                    fieldWithPath("created_at").type(STRING).description("생성 시간").attributes(getZonedDateFormat())
                 )
             )
         )

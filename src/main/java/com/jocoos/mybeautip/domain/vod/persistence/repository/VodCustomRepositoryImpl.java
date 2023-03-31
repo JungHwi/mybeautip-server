@@ -1,12 +1,12 @@
 package com.jocoos.mybeautip.domain.vod.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
-import com.jocoos.mybeautip.global.code.SortField;
 import com.jocoos.mybeautip.domain.vod.code.VodStatus;
 import com.jocoos.mybeautip.domain.vod.dto.QVodResponse;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
+import com.jocoos.mybeautip.global.code.SortField;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.*;
@@ -19,11 +19,14 @@ import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
 import java.time.chrono.ChronoZonedDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastCategory.broadcastCategory;
 import static com.jocoos.mybeautip.domain.vod.persistence.domain.QVod.vod;
+import static com.jocoos.mybeautip.global.code.SortField.CREATED_AT;
 import static com.jocoos.mybeautip.member.QMember.member;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Repository
 public class VodCustomRepositoryImpl implements VodCustomRepository {
@@ -48,22 +51,13 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
     }
 
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
     public List<VodResponse> getVodResponses(VodSearchCondition condition) {
-        PathBuilder<Vod> path = new PathBuilder<>(Vod.class, "vod");
-        SortField nonUniqueSortField = condition.nonUniqueCursor();
-        switch (nonUniqueSortField) {
-            case TOTAL_HEART_COUNT, VIEW_COUNT -> {
-                ComparablePath<Integer> comparablePath =
-                        path.getComparable(nonUniqueSortField.getFieldName(), Integer.class);
-                return getVodList(condition, comparablePath);
-            }
-            default -> {
-                ComparablePath<ChronoZonedDateTime> comparablePath =
-                        path.getComparable(nonUniqueSortField.getFieldName(), ChronoZonedDateTime.class);
-                return getVodList(condition, comparablePath);
-            }
+        if (condition.needPagingSort()) {
+            return getVodListWithPaging(condition);
         }
+        JPAQuery<?> nonPagingSortQuery = withBaseCondition(condition);
+        return selectVodResponse(nonPagingSortQuery, condition);
+
     }
 
     @Override
@@ -74,17 +68,10 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
         return count == null ? 0 : count;
     }
 
-    private <T extends Comparable<T>> List<VodResponse> getVodList(VodSearchCondition condition,
-                                                                   ComparablePath<T> comparablePath) {
-        T cursorValue = getCursorValue(comparablePath, condition.cursor());
-        return withBaseConditionAndSort(condition)
-                .select(new QVodResponse(vod, broadcastCategory, member))
-                .join(broadcastCategory).on(vod.category.eq(broadcastCategory))
-                .join(member).on(vod.memberId.eq(member.id).and(eqMemberId(condition.memberId())))
-                .where(
-                        cursor(comparablePath, cursorValue, condition.cursor())
-                )
-                .fetch();
+    private List<VodResponse> getVodListWithPaging(VodSearchCondition condition) {
+        JPAQuery<?> query = withBaseConditionAndSort(condition);
+        JPAQuery<?> pagingQuery = withCursorPaging(query, condition);
+        return selectVodResponse(pagingQuery, condition);
     }
 
     private JPAQuery<?> withBaseConditionAndSort(VodSearchCondition condition) {
@@ -103,8 +90,43 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
                         createdAtBefore(condition.endAt()),
                         isReported(condition.isReported()),
                         isVisible(condition.isVisible()),
+                        inIds(condition.ids()),
                         eqStatus(condition.status())
                 ));
+    }
+
+    private List<VodResponse> selectVodResponse(JPAQuery<?> pagingQuery, VodSearchCondition condition) {
+        return pagingQuery
+                .select(new QVodResponse(vod, broadcastCategory, member))
+                .join(broadcastCategory).on(vod.category.eq(broadcastCategory))
+                .join(member).on(vod.memberId.eq(member.id).and(eqMemberId(condition.memberId())))
+                .fetch();
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private JPAQuery<?> withCursorPaging(JPAQuery<?> query,
+                                         VodSearchCondition condition) {
+        PathBuilder<Vod> path = new PathBuilder<>(Vod.class, "vod");
+        SortField nonUniqueSortField = condition.nonUniqueCursor();
+        switch (nonUniqueSortField) {
+            case TOTAL_HEART_COUNT, VIEW_COUNT -> {
+                ComparablePath<Integer> comparablePath =
+                        path.getComparable(nonUniqueSortField.getFieldName(), Integer.class);
+                return getCursorPagingQuery(query, condition, comparablePath);
+            }
+            default -> {
+                ComparablePath<ChronoZonedDateTime> comparablePath =
+                        path.getComparable(CREATED_AT.getFieldName(), ChronoZonedDateTime.class);
+                return getCursorPagingQuery(query, condition, comparablePath);
+            }
+        }
+    }
+
+    private <T extends Comparable<T>> JPAQuery<?> getCursorPagingQuery(JPAQuery<?> query,
+                                                                       VodSearchCondition condition,
+                                                                       ComparablePath<T> comparablePath) {
+        T cursorValue = getCursorValue(comparablePath, condition.cursor());
+        return query.where(cursor(comparablePath, cursorValue, condition.cursor()));
     }
 
     private <T extends Comparable<T>> T getCursorValue(ComparablePath<T> comparablePath, Long cursor) {
@@ -165,6 +187,10 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
 
     private BooleanExpression createdAtBefore(ZonedDateTime dateTime) {
         return dateTime == null ? null : vod.createdAt.loe(dateTime);
+    }
+
+    private BooleanExpression inIds(Collection<Long> ids) {
+        return isEmpty(ids) ? null : vod.id.in(ids);
     }
 
     private BooleanExpression eqMemberId(Long memberId) {

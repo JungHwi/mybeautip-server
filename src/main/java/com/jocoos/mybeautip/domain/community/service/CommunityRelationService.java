@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.jocoos.mybeautip.domain.scrap.code.ScrapType.COMMUNITY;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class CommunityRelationService {
                 .isLike(likeDao.isLike(member.getId(), communityResponse.getId()))
                 .isReport(reportDao.isReport(member.getId(), communityResponse.getId()))
                 .isBlock(communityResponse.getCategory().getType() != CommunityCategoryType.BLIND && blockDao.isBlock(member.getId(), communityResponse.getMember().getId()))
-                .isScrap(scrapDao.isScrapCommunity(member.getId(), communityResponse.getId()))
+                .isScrap(scrapDao.isScrap(COMMUNITY, member.getId(), communityResponse.getId()))
                 .build();
 
         return communityResponse.setRelationInfo(member, relationInfo);

@@ -20,6 +20,8 @@ import java.util.List;
 import static com.jocoos.mybeautip.domain.community.code.CommunityCategoryType.BLIND;
 import static com.jocoos.mybeautip.domain.community.persistence.domain.QCommunity.community;
 import static com.jocoos.mybeautip.domain.scrap.persistence.domain.QScrap.scrap;
+import static com.jocoos.mybeautip.domain.vod.code.VodStatus.AVAILABLE;
+import static com.jocoos.mybeautip.domain.vod.persistence.domain.QVod.vod;
 import static com.jocoos.mybeautip.member.block.QBlock.block;
 
 @Repository
@@ -33,7 +35,7 @@ public class ScrapCustomRepositoryImpl implements ScrapCustomRepository {
     }
 
     @Override
-    public List<Scrap> getScrapsExcludeBlockMember(ScrapSearchCondition condition) {
+    public List<Scrap> getScraps(ScrapSearchCondition condition) {
         JPAQuery<Scrap> baseQuery = repository.query(query -> query
                 .select(scrap)
                 .from(scrap)
@@ -46,7 +48,11 @@ public class ScrapCustomRepositoryImpl implements ScrapCustomRepository {
                 .limit(condition.limit())
                 .orderBy(getOrder(condition.sort())));
 
-        dynamicQueryForBlock(baseQuery, condition.memberId());
+        switch (condition.type()) {
+            case COMMUNITY -> dynamicQueryForBlock(baseQuery, condition.memberId());
+            case VOD -> dynamicQueryForWatchableVod(baseQuery);
+            case VIDEO -> {}
+        }
 
         return baseQuery.fetch();
     }
@@ -83,5 +89,11 @@ public class ScrapCustomRepositoryImpl implements ScrapCustomRepository {
                 .join(community).on(scrap.relationId.eq(community.id))
                 .leftJoin(block).on(community.member.id.eq(block.memberYou.id).and(block.me.eq(memberId)).and(block.status.eq(BlockStatus.BLOCK)))
                 .where(community.category.type.eq(BLIND).or(block.memberYou.id.isNull().and(community.category.type.ne(BLIND))));
+    }
+
+    private void dynamicQueryForWatchableVod(JPAQuery<Scrap> query) {
+        query
+                .join(vod).on(scrap.relationId.eq(vod.id))
+                .where(vod.isVisible.isTrue().and(vod.status.eq(AVAILABLE)));
     }
 }
