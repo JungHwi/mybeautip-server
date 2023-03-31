@@ -22,6 +22,7 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.global.code.PermissionType.INFLUENCER;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.LOCAL_DATE_FORMAT;
+import static com.jocoos.mybeautip.global.constant.MybeautipConstant.KOREA_ZONED_ID;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/")
@@ -66,7 +67,7 @@ public class BroadcastController {
 
     @GetMapping("/1/broadcast/dates")
     public BroadcastDateListResponse getDateList(@RequestParam(required = false, defaultValue = "14") int size) {
-        return service.getBroadcastDateList(Pageable.ofSize(size));
+        return service.getBroadcastDateList(KOREA_ZONED_ID, Pageable.ofSize(size));
     }
 
     @PatchMapping("/1/broadcast/{broadcastId}/status")

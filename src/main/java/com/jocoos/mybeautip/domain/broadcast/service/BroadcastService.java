@@ -113,9 +113,12 @@ public class BroadcastService {
     }
 
     @Transactional(readOnly = true)
-    public BroadcastDateListResponse getBroadcastDateList(Pageable pageable) {
-        List<ZonedDateTime> results = broadcastDao.getStartedAtList(pageable).getContent();
-        return new BroadcastDateListResponse(results);
+    public BroadcastDateListResponse getBroadcastDateList(ZoneId requestZoneId, Pageable pageable) {
+        List<ZonedDateTime> utcTimes = broadcastDao.getStartedAtList(pageable).getContent();
+        List<ZonedDateTime> requestZonedTimes = utcTimes.stream()
+                .map(time -> time.withZoneSameInstant(requestZoneId))
+                .toList();
+        return new BroadcastDateListResponse(requestZonedTimes);
     }
 
     @Transactional
