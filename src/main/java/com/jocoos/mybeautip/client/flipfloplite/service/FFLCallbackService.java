@@ -52,6 +52,7 @@ public class FFLCallbackService {
             ExternalBroadcastInfo info = flipFlopLiteService.getVideoRoom(videoRoomId);
             String liveUrl = info.liveUrl();
             if (liveUrl == null) {
+                log.info("First Request For Get Live Video URL Failed. Retry It Once. Video Key {}", videoRoomId);
                 Thread.sleep(1000);
                 ExternalBroadcastInfo retryInfo = flipFlopLiteService.getVideoRoom(videoRoomId);
                 String retryUrl = retryInfo.liveUrl();
