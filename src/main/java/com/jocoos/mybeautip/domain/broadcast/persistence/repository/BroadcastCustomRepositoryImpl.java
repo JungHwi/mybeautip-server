@@ -18,7 +18,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcast.broadcast;
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastCategory.broadcastCategory;
@@ -155,6 +158,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     }
 
     // 커서 기반 페이지네이션과 유니크하지 않은 컬럼 정렬을 동시에 하기 위해 튜플 비교를 한다
+    // FIXME: ASC 정렬일 경우에만 동작함 DESC, ASC 일 경우 나눠야함
     private BooleanExpression cursor(Long cursor) {
         if (cursor == null) {
             return null;
@@ -172,12 +176,13 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 cursorValues.get(broadcast.createdAt),
                 cursor);
 
-        BooleanExpression isBroadcastTupleLessThanCursorValuesTuple =
-                STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION.lt(cursorValuesTuple);
+        BooleanExpression isBroadcastTupleGreaterThanCursorValuesTuple =
+                STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION.gt(cursorValuesTuple);
 
         Integer sortedStatus = cursorValues.get(broadcast.sortedStatus);
-        return broadcast.sortedStatus.gt(sortedStatus)
-                .or(broadcast.sortedStatus.eq(sortedStatus).and(isBroadcastTupleLessThanCursorValuesTuple));
+
+        return broadcast.sortedStatus.lt(sortedStatus)
+                .or(broadcast.sortedStatus.eq(sortedStatus).and(isBroadcastTupleGreaterThanCursorValuesTuple));
     }
 
     private BooleanExpression searchByKeyword(SearchOption searchOption) {
