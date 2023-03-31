@@ -75,8 +75,8 @@ public class BroadcastDomainService {
 
     // if Status change to Live paused_at will be null
     @Transactional
-    public void updatePausedAt(Long videoRoomId, @Nullable ZonedDateTime pausedAt) {
-        broadcastDao.updatePausedAt(videoRoomId, pausedAt);
+    public void updatePausedAt(Long videoKey, @Nullable ZonedDateTime pausedAt) {
+        broadcastDao.updatePausedAt(videoKey, pausedAt);
     }
 
     @Transactional

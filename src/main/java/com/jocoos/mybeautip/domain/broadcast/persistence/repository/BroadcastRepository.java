@@ -48,6 +48,6 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
     void addHeartCountAndFlush(@Param("id") Long broadcastId, @Param("count") int count);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("update Broadcast b set b.pausedAt = :pausedAt where b.id = :id")
-    void updatePausedAt(@Param("id") Long broadcastId, @Param("pausedAt") ZonedDateTime pausedAt);
+    @Query("update Broadcast b set b.pausedAt = :pausedAt where b.videoKey = :videoKey")
+    void updatePausedAt(@Param("videoKey") Long videoKey, @Param("pausedAt") ZonedDateTime pausedAt);
 }

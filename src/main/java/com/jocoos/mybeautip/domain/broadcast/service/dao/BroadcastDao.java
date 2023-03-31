@@ -108,8 +108,8 @@ public class BroadcastDao {
     }
 
     @Transactional
-    public void updatePausedAt(Long broadcastId, ZonedDateTime pausedAt) {
-        repository.updatePausedAt(broadcastId, pausedAt);
+    public void updatePausedAt(Long videoKey, ZonedDateTime pausedAt) {
+        repository.updatePausedAt(videoKey, pausedAt);
     }
 
     @Transactional
