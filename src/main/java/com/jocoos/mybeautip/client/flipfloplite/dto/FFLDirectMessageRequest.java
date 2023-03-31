@@ -27,9 +27,9 @@ public record FFLDirectMessageRequest(FFLChatRoomDirectMessageType messageType,
 
     public static FFLDirectMessageRequest of(ViewerSuspendRequest request) {
         if (request.isSuspended()) {
-            return new FFLDirectMessageRequest(NO_VIEWER_CHAT, List.of(request.memberId()), null, null);
+            return new FFLDirectMessageRequest(NO_VIEWER_CHAT, List.of(request.memberId()), "라이브 운영자에 의해 채팅이 정지되었습니다.", null);
         } else {
-            return new FFLDirectMessageRequest(VIEWER_CHAT, List.of(request.memberId()), null, null);
+            return new FFLDirectMessageRequest(VIEWER_CHAT, List.of(request.memberId()), "라이브 운영자에 의해 채팅정지가 해제되었습니다.", null);
         }
     }
 
