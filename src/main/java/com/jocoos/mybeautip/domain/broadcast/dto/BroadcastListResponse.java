@@ -17,6 +17,7 @@ public record BroadcastListResponse(long id,
                                     String title,
                                     String thumbnailUrl,
                                     int viewerCount,
+                                    int heartCount,
                                     @JsonFormat(pattern = ZONE_DATE_TIME_FORMAT) ZonedDateTime startedAt,
                                     SimpleMemberInfo createdBy,
                                     BroadcastRelationInfo relationInfo)
