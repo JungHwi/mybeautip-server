@@ -14,6 +14,7 @@ import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainServic
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,13 +43,22 @@ public class FFLCallbackService {
         }
     }
 
+    @SneakyThrows
     private void updateBroadcast(FFLCallbackType type, FFLCallbackData data) {
         FFLVideoRoomState fflVideoRoomState = getVideoRoomState(type, data);
         Long videoRoomId = data.videoRoomId();
         broadcastDomainService.updatePausedAt(videoRoomId, getPausedAt(fflVideoRoomState));
         if (LIVE.equals(fflVideoRoomState)) {
             ExternalBroadcastInfo info = flipFlopLiteService.getVideoRoom(videoRoomId);
-            broadcastDomainService.updateUrl(videoRoomId, info.liveUrl());
+            String liveUrl = info.liveUrl();
+            if (liveUrl == null) {
+                Thread.sleep(1000);
+                ExternalBroadcastInfo retryInfo = flipFlopLiteService.getVideoRoom(videoRoomId);
+                String retryUrl = retryInfo.liveUrl();
+                if (retryUrl == null) throw new IllegalArgumentException("Live Callback URL Is Null");
+                liveUrl = retryUrl;
+            }
+            broadcastDomainService.updateUrl(videoRoomId, liveUrl);
         }
     }
 
