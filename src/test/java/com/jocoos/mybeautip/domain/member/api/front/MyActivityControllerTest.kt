@@ -198,6 +198,7 @@ class MyActivityControllerTest(
                     fieldWithPath("content.[].title").type(STRING).description("타이틀"),
                     fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),
                     fieldWithPath("content.[].viewer_count").type(NUMBER).description("시청자수"),
+                    fieldWithPath("content.[].heart_count").type(NUMBER).description("좋아요수"),
                     fieldWithPath("content.[].started_at").type(STRING).description("시작 시간")
                         .attributes(getZonedDateFormat()),
                     fieldWithPath("content.[].category").type(OBJECT).description("카테고리 정보"),
