@@ -52,15 +52,23 @@ public class FFLCallbackService {
             ExternalBroadcastInfo info = flipFlopLiteService.getVideoRoom(videoRoomId);
             String liveUrl = info.liveUrl();
             if (liveUrl == null) {
-                log.info("First Request For Get Live Video URL Failed. Retry It Once. Video Key {}", videoRoomId);
-                Thread.sleep(1000);
-                ExternalBroadcastInfo retryInfo = flipFlopLiteService.getVideoRoom(videoRoomId);
-                String retryUrl = retryInfo.liveUrl();
-                if (retryUrl == null) throw new IllegalArgumentException("Live Callback URL Is Null");
-                liveUrl = retryUrl;
+                liveUrl = retry(videoRoomId);
             }
             broadcastDomainService.updateUrl(videoRoomId, liveUrl);
         }
+    }
+
+    @SneakyThrows
+    private String retry(Long videoRoomId) {
+        for (int i = 0; i < 5; i++) {
+            log.info("Request For Get Live Video URL Is Null. Retry. Video Key {}", videoRoomId);
+            Thread.sleep(1000);
+            ExternalBroadcastInfo retryInfo = flipFlopLiteService.getVideoRoom(videoRoomId);
+            String retryUrl = retryInfo.liveUrl();
+            if (retryUrl != null) return retryUrl;
+        }
+        log.error("Request For Get Live Video URL Failed. Video Key {}", videoRoomId);
+        throw new IllegalArgumentException("Live Callback URL Is Null");
     }
 
     private void sendStreamKeyStateChangedMessage(FFLCallbackData data) {
