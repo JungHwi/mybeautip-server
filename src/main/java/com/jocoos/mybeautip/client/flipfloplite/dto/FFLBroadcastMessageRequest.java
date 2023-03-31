@@ -80,4 +80,12 @@ public record FFLBroadcastMessageRequest(FFLChatRoomBroadcastMessageType message
                 .data(Map.of("heart_count", heartCount))
                 .build();
     }
+
+    public static FFLBroadcastMessageRequest ofUrlChanged(String url) {
+        return FFLBroadcastMessageRequest.builder()
+                .messageType(COMMAND)
+                .customType(URL_CHANGED)
+                .data(Map.of("url", url))
+                .build();
+    }
 }

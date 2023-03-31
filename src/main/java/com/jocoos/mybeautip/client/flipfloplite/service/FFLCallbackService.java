@@ -5,6 +5,7 @@ import com.jocoos.mybeautip.client.flipfloplite.code.FFLCallbackType;
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLCallbackType.FFLCallbackRequestType;
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState;
 import com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState;
+import com.jocoos.mybeautip.client.flipfloplite.dto.ExternalBroadcastInfo;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLCallbackData;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
@@ -22,6 +23,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState.ACTIVE;
+import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,14 +37,19 @@ public class FFLCallbackService {
     @Transactional
     public void callback(FFLCallbackType type, FFLCallbackData data) {
         switch (FFLCallbackRequestType.getRequestType(type)) {
-            case VIDEO_ROOM_STATUS_CHANGE -> updatePausedAt(type, data);
+            case VIDEO_ROOM_STATUS_CHANGE -> updateBroadcast(type, data);
             case STREAM_KEY_STATUS_CHANGE -> sendStreamKeyStateChangedMessage(data);
         }
     }
 
-    private void updatePausedAt(FFLCallbackType type, FFLCallbackData data) {
+    private void updateBroadcast(FFLCallbackType type, FFLCallbackData data) {
         FFLVideoRoomState fflVideoRoomState = getVideoRoomState(type, data);
-        broadcastDomainService.updatePausedAt(data.videoRoomId(), getPausedAt(fflVideoRoomState));
+        Long videoRoomId = data.videoRoomId();
+        broadcastDomainService.updatePausedAt(videoRoomId, getPausedAt(fflVideoRoomState));
+        if (LIVE.equals(fflVideoRoomState)) {
+            ExternalBroadcastInfo info = flipFlopLiteService.getVideoRoom(videoRoomId);
+            broadcastDomainService.updateUrl(videoRoomId, info.liveUrl());
+        }
     }
 
     private void sendStreamKeyStateChangedMessage(FFLCallbackData data) {

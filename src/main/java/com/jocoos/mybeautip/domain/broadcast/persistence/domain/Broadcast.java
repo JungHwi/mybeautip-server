@@ -271,4 +271,8 @@ public class Broadcast extends CreatedAtBaseEntity {
         }
         this.startedAt = startedAt;
     }
+
+    public void urlUpdate(String liveUrl) {
+        this.url = liveUrl;
+    }
 }

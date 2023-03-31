@@ -45,6 +45,6 @@ public class FileController {
     @Deprecated(since = "PlanE")
     @PostMapping(value = "/api/1/members/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, String> uploadAvatar(@RequestBody MultipartFile avatar) {
-        return Map.of("avatar_url", service.uploadImageWithoutValidation(avatar, DEFAULT_AVATAR_URL));
+        return Map.of("avatar_url", service.forceImageUpload(avatar, DEFAULT_AVATAR_URL));
     }
 }

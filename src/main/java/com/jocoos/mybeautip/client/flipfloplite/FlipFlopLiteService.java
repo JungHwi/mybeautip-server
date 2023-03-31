@@ -31,6 +31,11 @@ public class FlipFlopLiteService {
         return converter.converts(response);
     }
 
+    public ExternalBroadcastInfo getVideoRoom(Long videoRoomId) {
+        FFLVideoRoomResponse response = client.getVideoRoom(videoRoomId);
+        return converter.converts(response);
+    }
+
     public ExternalBroadcastInfo startVideoRoom(long videoRoomId) {
         FFLVideoRoomResponse response = client.startVideoRoom(videoRoomId);
         if (response.videoRoomState() != LIVE) {

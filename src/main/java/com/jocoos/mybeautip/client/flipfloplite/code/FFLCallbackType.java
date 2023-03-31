@@ -4,7 +4,6 @@ import com.jocoos.mybeautip.global.exception.BadRequestException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 @Getter
@@ -12,8 +11,10 @@ import java.util.Set;
 public enum FFLCallbackType {
 
     // Video Room Status Change
+    VIDEO_ROOM_SCHEDULED,
     VIDEO_ROOM_LIVE,
     VIDEO_ROOM_LIVE_INACTIVE,
+    VIDEO_ROOM_ENDED,
 
     // Stream Key Status Change
     STREAM_KEY_ACTIVE_PREP,
@@ -35,7 +36,7 @@ public enum FFLCallbackType {
 
     @RequiredArgsConstructor
     public enum FFLCallbackRequestType {
-        VIDEO_ROOM_STATUS_CHANGE(Set.of(VIDEO_ROOM_LIVE, VIDEO_ROOM_LIVE_INACTIVE)),
+        VIDEO_ROOM_STATUS_CHANGE(Set.of(VIDEO_ROOM_LIVE, VIDEO_ROOM_LIVE_INACTIVE, VIDEO_ROOM_SCHEDULED, VIDEO_ROOM_ENDED)),
         STREAM_KEY_STATUS_CHANGE(Set.of(STREAM_KEY_ACTIVE_PREP, STREAM_KEY_ACTIVE_LIVE_PREP, STREAM_KEY_ACTIVE, STREAM_KEY_ACTIVE_LIVE, STREAM_KEY_INACTIVE_LIVE, STREAM_KEY_INACTIVE))
         ;
         private final Set<FFLCallbackType> types;

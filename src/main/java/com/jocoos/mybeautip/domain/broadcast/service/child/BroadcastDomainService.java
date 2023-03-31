@@ -128,6 +128,13 @@ public class BroadcastDomainService {
         return broadcast;
     }
 
+    @Transactional
+    public void updateUrl(Long videoKey, String liveUrl) {
+        Broadcast broadcast = broadcastDao.getByVideoKey(videoKey);
+        broadcast.urlUpdate(liveUrl);
+        fflService.sendUrlChangedBroadcastMessage(videoKey, liveUrl);
+    }
+
     private BroadcastEditResult edit(Broadcast broadcast, BroadcastEditCommand command) {
         OriginalInfo originalInfo = new OriginalInfo(broadcast);
         broadcast.edit(command);

@@ -28,9 +28,9 @@ public class FileService {
         return fileUrls;
     }
 
-    public String uploadImageWithoutValidation(MultipartFile file, String defaultUrl) {
+    public String forceImageUpload(MultipartFile file, String defaultUrl) {
         try {
-            return uploadImageWithoutValidation(file);
+            return forceImageUpload(file);
         } catch (Exception e) {
             log.warn("Fail to upload file. Default Url will return.", e);
             return defaultUrl;
@@ -42,7 +42,7 @@ public class FileService {
         return upload(file, contentType);
     }
 
-    public String uploadImageWithoutValidation(MultipartFile file) {
+    public String forceImageUpload(MultipartFile file) {
         String contentType = contentTypeService.getContentTypeWithoutValid(file);
         return uploadImage(file, contentType);
     }

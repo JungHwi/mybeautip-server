@@ -106,4 +106,9 @@ public class BroadcastFFLService {
         FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofHeartCount(heartCount);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
+
+    public void sendUrlChangedBroadcastMessage(Long videoRoomId, String url) {
+        FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofUrlChanged(url);
+        flipFlopLiteService.broadcastMessage(videoRoomId, request);
+    }
 }
