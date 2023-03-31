@@ -36,6 +36,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT_SEARCH_STATUSES;
@@ -115,10 +117,10 @@ public class BroadcastService {
     @Transactional(readOnly = true)
     public BroadcastDateListResponse getBroadcastDateList(ZoneId requestZoneId, Pageable pageable) {
         List<ZonedDateTime> utcTimes = broadcastDao.getStartedAtList(pageable).getContent();
-        List<ZonedDateTime> requestZonedTimes = utcTimes.stream()
-                .map(time -> time.withZoneSameInstant(requestZoneId))
-                .toList();
-        return new BroadcastDateListResponse(requestZonedTimes);
+        Set<LocalDate> requestZonedLocalDates = utcTimes.stream()
+                .map(time -> time.withZoneSameInstant(requestZoneId).toLocalDate())
+                .collect(Collectors.toSet());
+        return new BroadcastDateListResponse(requestZonedLocalDates);
     }
 
     @Transactional
