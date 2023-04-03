@@ -30,6 +30,8 @@ public enum FFLCallbackType {
         return switch (this) {
             case VIDEO_ROOM_LIVE -> FFLVideoRoomState.LIVE;
             case VIDEO_ROOM_LIVE_INACTIVE -> FFLVideoRoomState.LIVE_INACTIVE;
+            case VIDEO_ROOM_ENDED -> FFLVideoRoomState.ENDED;
+            case VIDEO_ROOM_SCHEDULED -> FFLVideoRoomState.SCHEDULED;
             default -> throw new BadRequestException("Invalid video room state");
         };
     }
