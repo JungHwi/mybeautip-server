@@ -11,9 +11,9 @@ public class FFLException extends RuntimeException {
     public FFLException(String errorCode, String errorMessage) {
         super(errorCode);
         this.errorCode = FFLErrorCode.of(errorCode);
-        String message = String.format("[FFL] %s", errorMessage);
+        String message = errorMessage;
         if (!errorCode.equals(this.errorCode.name())) {
-            message = String.format("[FFL] [%s] %s", errorCode, errorMessage);
+            message = String.format("[%s] %s", errorCode, errorMessage);
         }
         this.errorMessage = message;
     }

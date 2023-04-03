@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.admin;
 
+import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
@@ -29,7 +30,14 @@ import java.time.ZonedDateTime;
 @RequestMapping("/admin")
 public class AdminBroadcastController {
 
+    private final FlipFlopLiteService flipFlopLiteService;
     private final AdminBroadcastService service;
+
+    @PostMapping("/member/migration")
+    public ResponseEntity<Integer> migration() {
+        int response = flipFlopLiteService.migration();
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/broadcast")
     public PageResponse<AdminBroadcastResponse> getList(
