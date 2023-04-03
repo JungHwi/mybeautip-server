@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.client.flipfloplite;
 
-import com.jocoos.mybeautip.client.flipfloplite.code.FFLErrorCode;
 import com.jocoos.mybeautip.client.flipfloplite.converter.FlipFlopLiteConverter;
 import com.jocoos.mybeautip.client.flipfloplite.dto.*;
 import com.jocoos.mybeautip.client.flipfloplite.exception.FFLException;
@@ -17,7 +16,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.*;
-import static com.jocoos.mybeautip.global.constant.MybeautipConstant.MAX_RETRY_FFL;
 
 @Service
 @RequiredArgsConstructor
@@ -78,20 +76,7 @@ public class FlipFlopLiteService {
     }
 
     public FFLStreamKeyResponse getStreamKey(long memberId) {
-        return this.getStreamKey(memberId, 0);
-    }
-
-    public FFLStreamKeyResponse getStreamKey(long memberId, int count) {
-        try {
-            return client.getStreamKey(memberId);
-        } catch (FFLException ex) {
-            if (ex.getErrorCode() == FFLErrorCode.MEMBER_NOT_FOUND && count < MAX_RETRY_FFL) {
-                this.login(memberId);
-                return this.getStreamKey(memberId, ++count);
-            } else {
-                throw ex;
-            }
-        }
+        return client.getStreamKey(memberId);
     }
 
     public Long getMemberIdFrom(long streamKeyId) {
