@@ -105,6 +105,7 @@ class AdminVideoControllerTest(
                     fieldWithPath("content.[].started_at").type(STRING).description("게시일")
                         .attributes(getZonedDateFormat()),
                     fieldWithPath("content.[].duration").type(NUMBER).description("비디오 길이"),
+                    fieldWithPath("content.[].data").type(STRING).description("비디오 상품 등 부가 정보"),
                     fieldWithPath("content.[].member").type(OBJECT).description("작성자 정보."),
                     fieldWithPath("content.[].member.id").type(NUMBER).description("작성자 아이디"),
                     fieldWithPath("content.[].member.status").type(STRING).description(generateLinkCode(MEMBER_STATUS)),
@@ -157,6 +158,7 @@ class AdminVideoControllerTest(
                     fieldWithPath("created_at").type(STRING).description("작성일").attributes(getZonedDateFormat()),
                     fieldWithPath("started_at").type(STRING).description("게시일").attributes(getZonedDateFormat()),
                     fieldWithPath("duration").type(NUMBER).description("비디오 길이"),
+                    fieldWithPath("data").type(STRING).description("비디오 상품 등 부가 정보"),
                     fieldWithPath("member").type(OBJECT).description("작성자 정보."),
                     fieldWithPath("member.id").type(NUMBER).description("작성자 아이디"),
                     fieldWithPath("member.status").type(STRING).description(generateLinkCode(MEMBER_STATUS)),

@@ -34,6 +34,7 @@ public class AdminVideoResponse {
     private final int commentCount;
     private final long reportCount;
     private final int duration;
+    private final String data;
     private final List<VideoCategoryResponse> category;
     private final MemberResponse member;
 
@@ -60,6 +61,7 @@ public class AdminVideoResponse {
         this.commentCount = video.getCommentCount();
         this.reportCount = video.getReportCount();
         this.duration = video.getDuration();
+        this.data = video.getData();
         this.startedAt = video.getStartedAtZoned();
         this.createdAt = video.getCreatedAtZoned();
         this.category = setCategory(categories);
