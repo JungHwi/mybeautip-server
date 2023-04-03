@@ -25,6 +25,7 @@ import java.util.List;
 
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState.ACTIVE;
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE;
+import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE_INACTIVE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -47,9 +48,12 @@ public class FFLCallbackService {
     private void updateBroadcast(FFLCallbackType type, FFLCallbackData data) {
         log.info("updateBroadcast Callback Type {}", type);
         FFLVideoRoomState fflVideoRoomState = getVideoRoomState(type, data);
-        Long videoRoomId = data.videoRoomId();
-        broadcastDomainService.updatePausedAt(videoRoomId, getPausedAt(fflVideoRoomState));
         log.info("updateBroadcast FFLVideoRoomState {}", fflVideoRoomState);
+
+        Long videoRoomId = data.videoRoomId();
+        if (LIVE.equals(fflVideoRoomState) || LIVE_INACTIVE.equals(fflVideoRoomState)) {
+            broadcastDomainService.updatePausedAt(videoRoomId, getPausedAt(fflVideoRoomState));
+        }
         if (LIVE.equals(fflVideoRoomState)) {
             ExternalBroadcastInfo info = flipFlopLiteService.getVideoRoom(videoRoomId);
             log.info("Request Video Key : {} Video Room Info : {}", videoRoomId, info);
