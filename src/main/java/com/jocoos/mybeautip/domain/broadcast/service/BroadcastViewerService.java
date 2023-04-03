@@ -147,13 +147,13 @@ public class BroadcastViewerService {
         BroadcastViewer broadcastViewer = dao.findBroadcastViewer(broadcastId, viewer.memberId())
                 .orElseThrow(() -> new MemberNotFoundException(viewer.memberId()));
 
-        broadcastViewer.inactive();
-
         if (broadcastViewer.getType() == BroadcastViewerType.MANAGER) {
             Broadcast broadcast = broadcastDao.get(broadcastId);
             FFLDirectMessageRequest request = FFLDirectMessageRequest.ofManagerOut(broadcast.getMemberId());
             flipFlopLiteService.directMessage(broadcast.getVideoKey(), request);
         }
+
+        broadcastViewer.inactive();
 
         eventPublisher.publishEvent(new BroadcastViewerStatisticsEvent(broadcastId));
 
