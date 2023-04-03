@@ -45,11 +45,14 @@ public class FFLCallbackService {
 
     @SneakyThrows
     private void updateBroadcast(FFLCallbackType type, FFLCallbackData data) {
+        log.info("updateBroadcast Callback Type {}", type);
         FFLVideoRoomState fflVideoRoomState = getVideoRoomState(type, data);
         Long videoRoomId = data.videoRoomId();
         broadcastDomainService.updatePausedAt(videoRoomId, getPausedAt(fflVideoRoomState));
+        log.info("updateBroadcast FFLVideoRoomState {}", fflVideoRoomState);
         if (LIVE.equals(fflVideoRoomState)) {
             ExternalBroadcastInfo info = flipFlopLiteService.getVideoRoom(videoRoomId);
+            log.info("Request Video Key : {} Video Room Info : {}", videoRoomId, info);
             String liveUrl = info.liveUrl();
             if (liveUrl == null) {
                 liveUrl = retry(videoRoomId);
