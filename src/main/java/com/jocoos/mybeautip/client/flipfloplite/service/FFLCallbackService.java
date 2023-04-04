@@ -37,18 +37,18 @@ public class FFLCallbackService {
     private final BroadcastViewerDao viewerDao;
 
     @Transactional
-    public void callback(FFLCallbackType type, FFLCallbackData data) {
+    public void callback(String requestId, FFLCallbackType type, FFLCallbackData data) {
         switch (FFLCallbackRequestType.getRequestType(type)) {
-            case VIDEO_ROOM_STATUS_CHANGE -> updateBroadcast(type, data);
+            case VIDEO_ROOM_STATUS_CHANGE -> updateBroadcast(requestId, type, data);
             case STREAM_KEY_STATUS_CHANGE -> sendStreamKeyStateChangedMessage(data);
         }
     }
 
     @SneakyThrows
-    private void updateBroadcast(FFLCallbackType type, FFLCallbackData data) {
-        log.info("updateBroadcast Callback Type {}", type);
+    private void updateBroadcast(String requestId, FFLCallbackType type, FFLCallbackData data) {
+        log.info("Request Id : {} Callback Type : {}", requestId, type);
         FFLVideoRoomState fflVideoRoomState = getVideoRoomState(type, data);
-        log.info("updateBroadcast FFLVideoRoomState {}", fflVideoRoomState);
+        log.info("Request Id : {} FFLVideoRoomState : {}", requestId, fflVideoRoomState);
 
         Long videoRoomId = data.videoRoomId();
         if (LIVE.equals(fflVideoRoomState) || LIVE_INACTIVE.equals(fflVideoRoomState)) {
@@ -56,7 +56,7 @@ public class FFLCallbackService {
         }
         if (LIVE.equals(fflVideoRoomState)) {
             ExternalBroadcastInfo info = flipFlopLiteService.getVideoRoom(videoRoomId);
-            log.info("Request Video Key : {} Video Room Info : {}", videoRoomId, info);
+            log.info("Request Id : {}  Video Key : {} Video Room Info : {}", requestId, videoRoomId, info);
             String liveUrl = info.liveUrl();
             if (liveUrl == null) {
                 liveUrl = retry(videoRoomId);

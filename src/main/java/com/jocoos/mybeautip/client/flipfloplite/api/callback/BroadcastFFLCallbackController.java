@@ -19,7 +19,8 @@ public class BroadcastFFLCallbackController {
     public void callback(
             @RequestHeader(value = "X-Request-Id", required = false) String requestId,
             @RequestBody FFLCallbackRequest request) {
-        log.debug("FFL Callback Request Id : {}, Request Body : {}", requestId, request);
-        service.callback(request.type(), request.data());
+        log.debug("FFL Callback Start Request Id : {}, Request Body : {}", requestId, request);
+        service.callback(requestId, request.type(), request.data());
+        log.debug("FFL Callback End Request Id : {}", requestId);
     }
 }
