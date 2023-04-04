@@ -128,7 +128,14 @@ class VodControllerTest(
                     fieldWithPath("member.id").type(NUMBER).description("회원 아이디"),
                     fieldWithPath("member.email").type(STRING).description("회원 이메일").optional(),
                     fieldWithPath("member.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("member.avatar_url").type(STRING).description("회원 아바타 URL")
+                    fieldWithPath("member.avatar_url").type(STRING).description("회원 아바타 URL"),
+                    fieldWithPath("vod_key").type(OBJECT).description("FFL 연동키 정보"),
+                    fieldWithPath("vod_key.gossip_token").type(STRING).description("FFL 연동키 정보 - 채팅 토큰"),
+                    fieldWithPath("vod_key.channel_key").type(STRING).description("FFL 연동키 정보 - 채널키"),
+                    fieldWithPath("vod_key.app_id").type(STRING).description("FFL 연동키 정보 - 앱 아이디"),
+                    fieldWithPath("vod_key.created_live_at").type(STRING).description("FFL 연동키 정보 - 라이브 생성 시간").attributes(getZonedDateFormat()),
+                    fieldWithPath("relation_info").type(OBJECT).description("요청자 연관 정보"),
+                    fieldWithPath("relation_info.is_scrap").type(BOOLEAN).description("요청자 연관 정보 - 스크랩 여부"),
                 )
             )
         )

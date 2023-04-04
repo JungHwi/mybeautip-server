@@ -35,4 +35,14 @@ public class VodRelationService {
         Set<Long> scrapVodIdList = EntityUtil.extractLongSet(scraps, Scrap::getRelationId);
         return MapUtil.toIdentityMap(ids, id -> new VodRelationInfo(scrapVodIdList.contains(id)));
     }
+
+    @Transactional(readOnly = true)
+    public VodRelationInfo getRelationInfo(String tokenUsername, Long vodId) {
+        if (MemberUtil.isGuest(tokenUsername)) {
+            return new VodRelationInfo(false);
+        }
+
+        boolean isScrap = scrapDao.isScrap(VOD, Long.parseLong(tokenUsername), vodId);
+        return new VodRelationInfo(isScrap);
+    }
 }

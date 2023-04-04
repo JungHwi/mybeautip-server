@@ -42,8 +42,9 @@ public class VodController {
     }
 
     @GetMapping("/1/vod/{vodId}")
-    public VodResponse get(@PathVariable long vodId) {
-        return service.get(vodId);
+    public VodResponse get(@PathVariable long vodId,
+                           @CurrentMember MyBeautipUserDetails userDetails) {
+        return service.get(vodId, userDetails.getUsername());
     }
 
     @PostMapping("/1/vod/{vodId}/report")

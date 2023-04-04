@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.vod.service;
 
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastKey;
 import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastCategoryDao;
@@ -41,6 +42,7 @@ public class VodService {
     private final ScrapDao scrapDao;
     private final BroadcastCategoryDao categoryDao;
     private final VodRelationService relationService;
+    private final VodFFLService fflService;
 
     @Transactional(readOnly = true)
     public List<VodResponse> getList(long categoryId,
@@ -61,13 +63,15 @@ public class VodService {
     }
 
     @Transactional(readOnly = true)
-    public VodResponse get(long vodId) {
+    public VodResponse get(long vodId, String tokenUsername) {
         Vod vod = vodDao.get(vodId);
         if (!vod.canWatch()) {
             throw new BadRequestException(ACCESS_DENIED, "vod is not watchable");
         }
+        BroadcastKey vodKey = fflService.getVodKey(tokenUsername, vod);
         Member member = memberDao.getMember(vod.getMemberId());
-        return new VodResponse(vod, member);
+        VodRelationInfo relationInfo = relationService.getRelationInfo(tokenUsername, vodId);
+        return new VodResponse(vod, member, vodKey, relationInfo);
     }
 
     @Transactional

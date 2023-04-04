@@ -2,6 +2,7 @@ package com.jocoos.mybeautip.domain.vod.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCategoryResponse;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastKey;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory;
 import com.jocoos.mybeautip.domain.member.dto.SimpleMemberInfo;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
@@ -10,6 +11,8 @@ import com.jocoos.mybeautip.member.Member;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.annotation.Nullable;
 
 @Getter
 public class VodResponse implements CursorInterface {
@@ -21,12 +24,16 @@ public class VodResponse implements CursorInterface {
     private final int viewCount;
     private final int heartCount;
     private final SimpleMemberInfo member;
+    private final BroadcastKey vodKey;
     private BroadcastCategoryResponse category;
 
     @Setter
     private VodRelationInfo relationInfo;
 
-    public VodResponse(Vod vod, Member member) {
+    public VodResponse(Vod vod,
+                       Member member,
+                       @Nullable BroadcastKey vodKey,
+                       @Nullable VodRelationInfo relationInfo) {
         this.id = vod.getId();
         this.videoKey = vod.getVideoKey();
         this.url = vod.getUrl();
@@ -35,11 +42,13 @@ public class VodResponse implements CursorInterface {
         this.viewCount = vod.getViewCount();
         this.heartCount = vod.getTotalHeartCount();
         this.member = new SimpleMemberInfo(member);
+        this.vodKey = vodKey;
+        this.relationInfo = relationInfo;
     }
 
     @QueryProjection
     public VodResponse(Vod vod, BroadcastCategory category, Member member) {
-        this(vod, member);
+        this(vod, member, null, null);
         this.category = new BroadcastCategoryResponse(category);
     }
 
