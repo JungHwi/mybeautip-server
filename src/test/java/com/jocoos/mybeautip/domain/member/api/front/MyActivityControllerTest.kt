@@ -244,7 +244,6 @@ class MyActivityControllerTest(
                     fieldWithPath("next_cursor").type(STRING).description("커서 정보"),
                     fieldWithPath("content").type(ARRAY).description("방송 목록"),
                     fieldWithPath("content.[].id").type(NUMBER).description("VOD 아이디"),
-                    fieldWithPath("content.[].video_key").type(NUMBER).description("Flip Flop Lite 비디오 아이디"),
                     fieldWithPath("content.[].url").type(STRING).description("VOD URL"),
                     fieldWithPath("content.[].title").type(STRING).description("타이틀"),
                     fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),

@@ -333,7 +333,6 @@ class SearchControllerTest(
                     fieldWithPath("count").type(NUMBER).description("검색 결과 수"),
                     fieldWithPath("vod").type(ARRAY).description("VOD 목록"),
                     fieldWithPath("vod.[].id").type(NUMBER).description("VOD 아이디"),
-                    fieldWithPath("vod.[].video_key").type(NUMBER).description("Flip Flop Lite 비디오 아이디"),
                     fieldWithPath("vod.[].url").type(STRING).description("VOD URL"),
                     fieldWithPath("vod.[].title").type(STRING).description("타이틀"),
                     fieldWithPath("vod.[].thumbnail_url").type(STRING).description("썸네일 URL"),

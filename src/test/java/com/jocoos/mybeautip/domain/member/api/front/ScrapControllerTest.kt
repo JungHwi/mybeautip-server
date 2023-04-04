@@ -143,7 +143,6 @@ class ScrapControllerTest(
                     fieldWithPath("content.[].scrap_id").type(NUMBER).description("스크랩 ID"),
                     fieldWithPath("content.[].type").type(STRING).description(generateLinkCode(SCRAP_TYPE)),
                     fieldWithPath("content.[].id").type(NUMBER).description("VOD 아이디"),
-                    fieldWithPath("content.[].video_key").type(NUMBER).description("Flip Flop Lite 비디오 아이디"),
                     fieldWithPath("content.[].url").type(STRING).description("VOD URL"),
                     fieldWithPath("content.[].title").type(STRING).description("타이틀"),
                     fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),

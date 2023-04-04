@@ -79,7 +79,6 @@ class VodControllerTest(
                     fieldWithPath("next_cursor").type(STRING).description("다음 커서. VOD 아이디"),
                     fieldWithPath("content").type(ARRAY).description("VOD 목록"),
                     fieldWithPath("content.[].id").type(NUMBER).description("VOD 아이디"),
-                    fieldWithPath("content.[].video_key").type(NUMBER).description("Flip Flop Lite 비디오 아이디"),
                     fieldWithPath("content.[].url").type(STRING).description("VOD URL"),
                     fieldWithPath("content.[].title").type(STRING).description("타이틀"),
                     fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),
@@ -118,7 +117,6 @@ class VodControllerTest(
                 ),
                 responseFields(
                     fieldWithPath("id").type(NUMBER).description("VOD 아이디"),
-                    fieldWithPath("video_key").type(NUMBER).description("Flip Flop Lite 비디오 아이디"),
                     fieldWithPath("url").type(STRING).description("VOD URL"),
                     fieldWithPath("title").type(STRING).description("타이틀"),
                     fieldWithPath("notice").type(STRING).description("공지사항").optional(),
