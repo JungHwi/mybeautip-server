@@ -3,7 +3,7 @@ package com.jocoos.mybeautip.domain.broadcast.service;
 import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastBatchUpdateStatusResponse;
-import com.jocoos.mybeautip.domain.broadcast.event.BroadcastNotificationEvent.BroadcastBulkEditNotificationEvent;
+import com.jocoos.mybeautip.domain.broadcast.event.BroadcastEvent.BroadcastBulkEditNotificationEvent;
 import com.jocoos.mybeautip.domain.broadcast.event.BroadcastViewerStatisticsEvent;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.service.batch.BroadcastBatchUseCaseFactory;

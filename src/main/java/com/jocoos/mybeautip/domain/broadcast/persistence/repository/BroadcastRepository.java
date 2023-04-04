@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +32,8 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
     Optional<Broadcast> findByVideoKey(Long videoKey);
 
     List<Broadcast> findAllByIdIn(List<Long> ids);
+
+    List<Broadcast> findAllByMemberIdInAndStatusIn(Collection<Long> memberIds, Collection<BroadcastStatus> statuses);
 
     boolean existsByIdAndMemberId(long broadcastId, long memberId);
 

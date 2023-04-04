@@ -19,7 +19,9 @@ public enum FFLChatRoomDirectMessageCustomType {
     VIEWER_CHAT("시청자 채팅 가능"),
     NO_VIEWER_CHAT("시청자 채팅 가능"),
     EXILE("퇴장"),
-    STREAM_KEY_STATUS_CHANGED("스트림키 상태 변경")
+    STREAM_KEY_STATUS_CHANGED("스트림키 상태 변경"),
+    FORCE_END("강제 종료"),
+    FORCE_CANCEL("강제 취소")
     ;
 
     private final String description;
