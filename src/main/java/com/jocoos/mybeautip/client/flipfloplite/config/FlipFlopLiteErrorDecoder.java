@@ -5,7 +5,6 @@ import com.jocoos.mybeautip.client.flipfloplite.dto.FFLErrorResponse;
 import com.jocoos.mybeautip.client.flipfloplite.exception.FFLException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
-import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -15,7 +14,6 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Log4j2
-@NoArgsConstructor
 public class FlipFlopLiteErrorDecoder implements ErrorDecoder {
 
     @Override

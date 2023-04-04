@@ -27,4 +27,6 @@ public class MybeautipConstant {
 
     public static final ZoneId KOREA_ZONED_ID = ZoneId.of("Asia/Seoul");
 
+    public static final int RESPONSE_CODE_OK = 0;
+    public static final int MAX_RETRY_FFL = 3;
 }
