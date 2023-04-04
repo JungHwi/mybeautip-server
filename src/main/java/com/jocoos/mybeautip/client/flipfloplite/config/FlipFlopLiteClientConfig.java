@@ -10,13 +10,11 @@ import feign.Retryer;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import feign.form.spring.SpringFormEncoder;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.cloud.openfeign.FeignFormatterRegistrar;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -26,10 +24,7 @@ import java.text.SimpleDateFormat;
 import static com.jocoos.mybeautip.global.constant.LocalDateTimeConstant.FFL_ZONE_DATE_TIME_FORMAT;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
-@Configuration
-@RequiredArgsConstructor
 public class FlipFlopLiteClientConfig extends FeignClientConfig {
-
 
     @Bean
     public FeignFormatterRegistrar fflZonedDateFeignFormatterRegister() {
