@@ -4,7 +4,7 @@ import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
-import com.jocoos.mybeautip.domain.broadcast.event.BroadcastNotificationEvent.BroadcastEditNotificationEvent;
+import com.jocoos.mybeautip.domain.broadcast.event.BroadcastEvent.BroadcastEditNotificationEvent;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastNotification;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.DEFAULT_SEARCH_STATUSES;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.ACTIVE_STATUSES;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
 import static org.springframework.data.domain.Sort.Direction.ASC;
 
@@ -169,6 +169,6 @@ public class BroadcastService {
     }
 
     private List<BroadcastStatus> getStatuses(BroadcastStatus status) {
-        return status == null ? DEFAULT_SEARCH_STATUSES : getSearchStatuses(status);
+        return status == null ? ACTIVE_STATUSES : getSearchStatuses(status);
     }
 }

@@ -24,6 +24,7 @@ import java.util.function.LongConsumer;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.*;
 
+// FIXME: All Status Switch Case To Class
 @Log4j2
 @RequiredArgsConstructor
 @Service
@@ -58,6 +59,20 @@ public class BroadcastStatusService {
     @Transactional(readOnly = true)
     public List<BroadcastUpdateCandidate> getUpdateCandidates(BroadcastUpdateCandidateCondition condition) {
         return broadcastDao.getCandidates(condition);
+    }
+
+    public void forceFinishAll(List<Broadcast> broadcasts) {
+        for (Broadcast broadcast : broadcasts) {
+            switch (broadcast.getStatus()) {
+                case SCHEDULED, READY -> forceFinish(broadcast, CANCEL);
+                case LIVE -> forceFinish(broadcast, END);
+                case END,CANCEL -> {}
+            }
+        }
+    }
+
+    private void forceFinish(Broadcast broadcast, BroadcastStatus status) {
+        fflService.sendForceFinishDirectMessage(broadcast.getVideoKey(), broadcast.getMemberId(), status);
     }
 
     private BroadcastUpdateResult bulkUpdateToReady(List<BroadcastUpdateCandidate> candidates) {

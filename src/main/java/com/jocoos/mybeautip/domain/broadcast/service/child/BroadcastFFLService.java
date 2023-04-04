@@ -111,4 +111,9 @@ public class BroadcastFFLService {
         FFLBroadcastMessageRequest request = FFLBroadcastMessageRequest.ofUrlChanged(url);
         flipFlopLiteService.broadcastMessage(videoRoomId, request);
     }
+
+    public void sendForceFinishDirectMessage(Long videoRoomId, Long memberId, BroadcastStatus status) {
+        FFLDirectMessageRequest request = FFLDirectMessageRequest.ofForceFinish(memberId, status);
+        flipFlopLiteService.directMessage(videoRoomId, request);
+    }
 }
