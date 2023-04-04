@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import java.time.ZonedDateTime;
+
 import static com.jocoos.mybeautip.domain.vod.code.VodStatus.AVAILABLE;
 import static com.jocoos.mybeautip.global.code.UrlDirectory.BROADCAST;
 import static com.jocoos.mybeautip.global.util.FileUtil.getFileName;
@@ -66,6 +68,12 @@ public class Vod extends BaseEntity {
     @Column
     private boolean isVisible;
 
+    @Column
+    private String chatChannelKey;
+
+    @Column
+    private ZonedDateTime chatStartedAt;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "category_id")
     private BroadcastCategory category;
@@ -75,6 +83,7 @@ public class Vod extends BaseEntity {
 
     @Builder
     public Vod(Long videoKey,
+               String chatChannelKey,
                String title,
                String thumbnailUrl,
                BroadcastCategory category,
@@ -82,6 +91,7 @@ public class Vod extends BaseEntity {
                boolean isVisible,
                long memberId) {
         this.videoKey = videoKey;
+        this.chatChannelKey = chatChannelKey;
         this.memberId = memberId;
         this.category = category;
         this.status = status;
@@ -96,6 +106,10 @@ public class Vod extends BaseEntity {
 
     public void changeVisibility(boolean isVisible) {
         this.isVisible = isVisible;
+    }
+
+    public void integrate(ZonedDateTime startedAt) {
+        this.chatStartedAt = startedAt;
     }
 
     public boolean canWatch() {
