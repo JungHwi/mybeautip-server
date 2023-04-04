@@ -7,8 +7,10 @@ import com.jocoos.mybeautip.domain.vod.service.dao.VodDao;
 import com.jocoos.mybeautip.domain.vod.service.dao.VodReportDao;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +29,9 @@ public class AdminVodGraphqlService {
     private final MemberDao memberDao;
 
     @Transactional(readOnly = true)
-    public List<Vod> getList(VodSearchCondition condition) {
-        return vodDao.getList(condition);
+    public PageResponse<Vod> getList(VodSearchCondition condition) {
+        Page<Vod> page = vodDao.getList(condition);
+        return new PageResponse<>(page);
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +42,7 @@ public class AdminVodGraphqlService {
     @Transactional
     public Vod edit(VodInput vodInput) {
         Vod vod = vodDao.get(vodInput.id());
-        vod.edit(vodInput.title(), vodInput.thumbnail(),  vodInput.isVisible());
+        vod.edit(vodInput.title(), vodInput.thumbnailUrl(),  vodInput.isVisible());
         return vod;
     }
 

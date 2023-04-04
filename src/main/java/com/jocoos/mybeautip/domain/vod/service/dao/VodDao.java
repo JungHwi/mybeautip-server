@@ -35,8 +35,8 @@ public class VodDao {
     }
 
     @Transactional(readOnly = true)
-    public List<Vod> getList(VodSearchCondition condition) {
-        return repository.getVodList(condition);
+    public Page<Vod> getList(VodSearchCondition condition) {
+        return repository.getVodPage(condition);
     }
 
     @Transactional(readOnly = true)

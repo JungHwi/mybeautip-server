@@ -1,14 +1,18 @@
 package com.jocoos.mybeautip.domain.vod.api.admin;
 
 import com.jocoos.mybeautip.domain.vod.dto.PagingFilter;
+import com.jocoos.mybeautip.domain.vod.dto.SortFilter;
 import com.jocoos.mybeautip.domain.vod.dto.VodFilter;
 import com.jocoos.mybeautip.domain.vod.dto.VodInput;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.VodReport;
 import com.jocoos.mybeautip.domain.vod.service.AdminVodGraphqlService;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
+import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -27,10 +31,12 @@ public class AdminVodGraphQLController {
     private final AdminVodGraphqlService service;
 
     @QueryMapping
-    public List<Vod> vodList(@Argument("paging") PagingFilter pagingFilter,
-                             @Argument("filter") VodFilter vodFilter) {
+    public PageResponse<Vod> vodList(@Argument("paging") PagingFilter pagingFilter,
+                                     @Argument("sort") SortFilter sortFilter,
+                                     @Argument("filter") VodFilter vodFilter) {
+        Pageable pageable = PageRequest.of(pagingFilter.page() - 1, pagingFilter.size(), sortFilter.order(), sortFilter.sortField(), "id");
         VodSearchCondition condition = VodSearchCondition.builder()
-                .pageable(pagingFilter.pageable())
+                .pageable(pageable)
                 .status(AVAILABLE)
                 .searchOption(vodFilter == null ? null : vodFilter.searchOption())
                 .isVisible(vodFilter == null ? null : vodFilter.isVisible())

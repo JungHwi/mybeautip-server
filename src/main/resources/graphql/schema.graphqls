@@ -1,65 +1,73 @@
+type VodPagingResult {
+    total: Int
+    content: [Vod]
+}
+
 type Vod {
     id: ID!
     url: String!
     isVisible: Boolean!
-    thumbnailUrl: String
-    title: String
-    duration: Int
-    viewCount: Int
-    vodHeartCount: Int
-    liveHeartCount: Int
-    createdAt: String
-    member: Member
+    thumbnailUrl: String!
+    title: String!
+    duration: Int!
+    viewCount: Int!
+    vodHeartCount: Int!
+    liveHeartCount: Int!
+    createdAt: String!
+    member: Member!
     reports: [VodReport]
 }
 
 type VodReport {
     id: ID!
-    reporter: Member
+    reporter: Member!
     description: String
-    createdAt: String
+    createdAt: String!
 }
 
 type Member {
     id: ID!
     email: String
-    username: String
-    avatarUrl: String
+    username: String!
+    avatarUrl: String!
 }
 
 type Query {
-    vodList(paging: Paging, filter: Filter): [Vod]
-    vodById(id: ID): Vod
+    vodList(paging: Paging! = {page: 1, size: 5}, sort: Sort! = {sortField: "createdAt", order: DESC}, filter: Filter): VodPagingResult
+    vodById(id: ID!): Vod
 }
 
 type Mutation {
-    editVod(vodInput: VodInput): Vod
+    editVod(vodInput: VodInput!): Vod
 }
 
 input VodInput {
     id: ID!
     title: String
     isVisible: Boolean
-    thumbnail: String
+    thumbnailUrl: String
 }
 
 input Paging {
-    page: Int = 1
-    size: Int = 5
-    sort: String
-    order: SortOrder
+    page: Int!
+    size: Int!
+}
+
+input Sort {
+    sortField: String!
+    order: Order!
 }
 
 input Filter {
     startAt: String
-    endAt:String
+    endAt: String
     searchField: String
     searchKeyword: String
     isVisible: Boolean
     isReported: Boolean
 }
 
-enum SortOrder {
+enum Order {
     ASC
     DESC
 }

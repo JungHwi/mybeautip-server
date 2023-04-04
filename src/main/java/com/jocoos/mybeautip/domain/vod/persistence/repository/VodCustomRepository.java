@@ -10,6 +10,6 @@ import java.util.List;
 public interface VodCustomRepository {
     Page<VodResponse> getPageList(VodSearchCondition condition);
     List<VodResponse> getVodResponses(VodSearchCondition condition);
-    List<Vod> getVodList(VodSearchCondition condition);
+    Page<Vod> getVodPage(VodSearchCondition condition);
     long count(VodSearchCondition condition);
 }

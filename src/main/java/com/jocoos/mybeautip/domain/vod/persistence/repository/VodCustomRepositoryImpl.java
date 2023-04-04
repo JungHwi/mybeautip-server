@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
@@ -38,10 +39,15 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
     }
 
     @Override
-    public List<Vod> getVodList(VodSearchCondition condition) {
-        return withBaseConditionAndSort(condition)
+    public Page<Vod> getVodPage(VodSearchCondition condition) {
+        List<Vod> contents = withBaseConditionAndSort(condition)
                 .select(vod)
                 .fetch();
+
+        JPAQuery<Long> countQuery = withBaseCondition(condition)
+                .select(vod.count());
+
+        return PageableExecutionUtils.getPage(contents, condition.pageable(), countQuery::fetchOne);
     }
 
     @Override
