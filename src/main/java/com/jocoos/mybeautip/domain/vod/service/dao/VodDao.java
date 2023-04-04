@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.vod.service.dao;
 
-import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
+import com.jocoos.mybeautip.domain.vod.dto.VodListResponse;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.vod.persistence.repository.VodRepository;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
@@ -25,12 +25,12 @@ public class VodDao {
     }
 
     @Transactional(readOnly = true)
-    public Page<VodResponse> getPageList(VodSearchCondition condition) {
+    public Page<VodListResponse> getPageList(VodSearchCondition condition) {
         return repository.getPageList(condition);
     }
 
     @Transactional(readOnly = true)
-    public List<VodResponse> getListWithMember(VodSearchCondition condition) {
+    public List<VodListResponse> getListWithMember(VodSearchCondition condition) {
         return repository.getVodResponses(condition);
     }
 

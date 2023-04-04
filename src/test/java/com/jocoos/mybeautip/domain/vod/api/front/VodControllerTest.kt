@@ -121,6 +121,7 @@ class VodControllerTest(
                     fieldWithPath("video_key").type(NUMBER).description("Flip Flop Lite 비디오 아이디"),
                     fieldWithPath("url").type(STRING).description("VOD URL"),
                     fieldWithPath("title").type(STRING).description("타이틀"),
+                    fieldWithPath("notice").type(STRING).description("공지사항").optional(),
                     fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
                     fieldWithPath("view_count").type(NUMBER).description("조회수"),
                     fieldWithPath("heart_count").type(NUMBER).description("하트수"),

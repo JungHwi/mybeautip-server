@@ -28,7 +28,7 @@ fun makeVod(
         visibility,
         memberId
     )
-    vod.integrate(ZonedDateTime.now().minusDays(1))
+    vod.integrate(ZonedDateTime.now().minusDays(1), "notice")
     return vod
 }
 

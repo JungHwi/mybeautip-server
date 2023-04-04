@@ -2,8 +2,8 @@ package com.jocoos.mybeautip.domain.vod.persistence.repository;
 
 import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.vod.code.VodStatus;
-import com.jocoos.mybeautip.domain.vod.dto.QVodResponse;
-import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
+import com.jocoos.mybeautip.domain.vod.dto.QVodListResponse;
+import com.jocoos.mybeautip.domain.vod.dto.VodListResponse;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.global.code.SortField;
@@ -51,13 +51,13 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
     }
 
     @Override
-    public Page<VodResponse> getPageList(VodSearchCondition condition) {
-        List<VodResponse> contents = getVodResponses(condition);
+    public Page<VodListResponse> getPageList(VodSearchCondition condition) {
+        List<VodListResponse> contents = getVodResponses(condition);
         return new PageImpl<>(contents, condition.pageable(), count(condition));
     }
 
     @Override
-    public List<VodResponse> getVodResponses(VodSearchCondition condition) {
+    public List<VodListResponse> getVodResponses(VodSearchCondition condition) {
         if (condition.needPagingSort()) {
             return getVodListWithPaging(condition);
         }
@@ -74,7 +74,7 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
         return count == null ? 0 : count;
     }
 
-    private List<VodResponse> getVodListWithPaging(VodSearchCondition condition) {
+    private List<VodListResponse> getVodListWithPaging(VodSearchCondition condition) {
         JPAQuery<?> query = withBaseConditionAndSort(condition);
         JPAQuery<?> pagingQuery = withCursorPaging(query, condition);
         return selectVodResponse(pagingQuery, condition);
@@ -101,9 +101,9 @@ public class VodCustomRepositoryImpl implements VodCustomRepository {
                 ));
     }
 
-    private List<VodResponse> selectVodResponse(JPAQuery<?> pagingQuery, VodSearchCondition condition) {
+    private List<VodListResponse> selectVodResponse(JPAQuery<?> pagingQuery, VodSearchCondition condition) {
         return pagingQuery
-                .select(new QVodResponse(vod, broadcastCategory, member))
+                .select(new QVodListResponse(vod, broadcastCategory, member))
                 .join(broadcastCategory).on(vod.category.eq(broadcastCategory))
                 .join(member).on(vod.memberId.eq(member.id).and(eqMemberId(condition.memberId())))
                 .fetch();

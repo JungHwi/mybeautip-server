@@ -6,7 +6,7 @@ import com.jocoos.mybeautip.domain.member.code.MemberActivityType;
 import com.jocoos.mybeautip.domain.member.dto.MemberActivityRequest;
 import com.jocoos.mybeautip.domain.member.service.activity.MyActivityService;
 import com.jocoos.mybeautip.domain.vod.code.VodSortField;
-import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
+import com.jocoos.mybeautip.domain.vod.dto.VodListResponse;
 import com.jocoos.mybeautip.domain.vod.service.dao.VodDao;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
@@ -23,7 +23,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @RequiredArgsConstructor
 @Service
-public class VodActivityService implements MyActivityService<VodResponse> {
+public class VodActivityService implements MyActivityService<VodListResponse> {
 
     private final VodDao vodDao;
     private final BroadcastPermissionDao permissionDao;
@@ -34,7 +34,7 @@ public class VodActivityService implements MyActivityService<VodResponse> {
     }
 
     @Override
-    public List<VodResponse> getMyActivity(MemberActivityRequest request) {
+    public List<VodListResponse> getMyActivity(MemberActivityRequest request) {
         Long memberId = request.member().getId();
         validCanView(memberId);
 

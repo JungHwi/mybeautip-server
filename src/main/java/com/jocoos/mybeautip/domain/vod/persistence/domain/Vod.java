@@ -41,6 +41,9 @@ public class Vod extends BaseEntity {
     private String title;
 
     @Column
+    private String notice;
+
+    @Column
     private String thumbnail;
 
     @Column
@@ -108,8 +111,9 @@ public class Vod extends BaseEntity {
         this.isVisible = isVisible;
     }
 
-    public void integrate(ZonedDateTime startedAt) {
+    public void integrate(ZonedDateTime startedAt, String notice) {
         this.chatStartedAt = startedAt;
+        this.notice = notice;
     }
 
     public boolean canWatch() {

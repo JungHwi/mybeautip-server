@@ -2,8 +2,8 @@ package com.jocoos.mybeautip.domain.vod.service;
 
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.dao.ScrapDao;
+import com.jocoos.mybeautip.domain.vod.dto.VodListResponse;
 import com.jocoos.mybeautip.domain.vod.dto.VodRelationInfo;
-import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.global.util.EntityUtil;
 import com.jocoos.mybeautip.global.util.MapUtil;
 import com.jocoos.mybeautip.global.util.MemberUtil;
@@ -24,8 +24,8 @@ public class VodRelationService {
     private final ScrapDao scrapDao;
 
     @Transactional(readOnly = true)
-    public Map<Long, VodRelationInfo> getRelationInfoMap(String tokenUsername, List<VodResponse> results) {
-        Set<Long> ids = EntityUtil.extractLongSet(results, VodResponse::getId);
+    public Map<Long, VodRelationInfo> getRelationInfoMap(String tokenUsername, List<VodListResponse> results) {
+        Set<Long> ids = EntityUtil.extractLongSet(results, VodListResponse::getId);
 
         if (MemberUtil.isGuest(tokenUsername)) {
             return MapUtil.toIdentityMap(ids, id -> new VodRelationInfo(false));

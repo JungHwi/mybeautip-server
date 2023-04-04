@@ -4,6 +4,7 @@ import com.jocoos.mybeautip.domain.broadcast.dto.HeartCountResponse;
 import com.jocoos.mybeautip.domain.community.dto.ReportRequest;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponseV2;
 import com.jocoos.mybeautip.domain.vod.code.VodSortField;
+import com.jocoos.mybeautip.domain.vod.dto.VodListResponse;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.vod.service.VodService;
 import com.jocoos.mybeautip.global.annotation.CurrentMember;
@@ -29,7 +30,7 @@ public class VodController {
     private final VodService service;
 
     @GetMapping("/1/vod")
-    public CursorResultResponse<VodResponse> getList(@RequestParam(required = false, defaultValue = "1") Long categoryId,
+    public CursorResultResponse<VodListResponse> getList(@RequestParam(required = false, defaultValue = "1") Long categoryId,
                                                      @RequestParam(required = false) Long cursor,
                                                      @RequestParam(required = false, defaultValue = "CREATED_AT") VodSortField sort,
                                                      @RequestParam(required = false, defaultValue = "DESC") Direction order,
@@ -37,7 +38,7 @@ public class VodController {
                                                      @CurrentMember MyBeautipUserDetails userDetails) {
         CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(cursor, sort.getSortField());
         Pageable pageable = PageRequest.of(0, size, sort.getSort(order));
-        List<VodResponse> responses = service.getList(categoryId, cursorPaging, pageable, userDetails.getUsername());
+        List<VodListResponse> responses = service.getList(categoryId, cursorPaging, pageable, userDetails.getUsername());
         return new CursorResultResponse<>(responses);
     }
 

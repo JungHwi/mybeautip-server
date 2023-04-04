@@ -58,6 +58,7 @@ create table vod
     status            varchar(20)                                                         not null comment '상태',
     is_visible        boolean                                                             not null comment '노출여부',
     title             varchar(200)                                                        not null comment '제목',
+    notice           varchar(100) comment '공지사항',
     thumbnail         varchar(16)                                                         comment '썸네일 파일',
     view_count        int                                                                 not null comment '조회수',
     report_count      int                                                                 not null,

@@ -10,6 +10,7 @@ import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponseV2;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.dao.ScrapDao;
 import com.jocoos.mybeautip.domain.vod.code.VodStatus;
+import com.jocoos.mybeautip.domain.vod.dto.VodListResponse;
 import com.jocoos.mybeautip.domain.vod.dto.VodRelationInfo;
 import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
@@ -45,10 +46,10 @@ public class VodService {
     private final VodFFLService fflService;
 
     @Transactional(readOnly = true)
-    public List<VodResponse> getList(long categoryId,
-                                     CursorPaging<Long> cursorPaging,
-                                     Pageable pageable,
-                                     String tokenUsername) {
+    public List<VodListResponse> getList(long categoryId,
+                                         CursorPaging<Long> cursorPaging,
+                                         Pageable pageable,
+                                         String tokenUsername) {
         VodSearchCondition condition = VodSearchCondition.builder()
                 .categoryIds(getCategories(categoryId))
                 .status(VodStatus.AVAILABLE)
@@ -56,7 +57,7 @@ public class VodService {
                 .pageable(pageable)
                 .isVisible(true)
                 .build();
-        List<VodResponse> responses = vodDao.getListWithMember(condition);
+        List<VodListResponse> responses = vodDao.getListWithMember(condition);
         Map<Long, VodRelationInfo> relationInfoMap = relationService.getRelationInfoMap(tokenUsername, responses);
         responses.forEach(response -> response.setRelationInfo(relationInfoMap.get(response.getId())));
         return responses;

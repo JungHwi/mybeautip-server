@@ -5,7 +5,7 @@ import com.jocoos.mybeautip.domain.search.dto.SearchResponse;
 import com.jocoos.mybeautip.domain.search.service.DomainSearchService;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchRequest;
 import com.jocoos.mybeautip.domain.vod.code.VodSortField;
-import com.jocoos.mybeautip.domain.vod.dto.VodResponse;
+import com.jocoos.mybeautip.domain.vod.dto.VodListResponse;
 import com.jocoos.mybeautip.domain.vod.service.dao.VodDao;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
@@ -24,7 +24,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @RequiredArgsConstructor
 @Service
-public class VodSearchService implements DomainSearchService<VodResponse> {
+public class VodSearchService implements DomainSearchService<VodListResponse> {
 
     private final VodDao vodDao;
 
@@ -34,7 +34,7 @@ public class VodSearchService implements DomainSearchService<VodResponse> {
     }
 
     @Override
-    public SearchResponse<VodResponse> search(KeywordSearchRequest request) {
+    public SearchResponse<VodListResponse> search(KeywordSearchRequest request) {
         VodSortField defaultSort = VodSortField.CREATED_AT;
         CursorPaging<Long> cursorPaging = CursorPaging.idCursorWithNonUniqueSortField(request.idCursor(), defaultSort.getSortField());
         Pageable pageable = PageRequest.of(0, request.size(), defaultSort.getSort(DESC));
@@ -45,7 +45,7 @@ public class VodSearchService implements DomainSearchService<VodResponse> {
                 .cursorPaging(cursorPaging)
                 .pageable(pageable)
                 .build();
-        Page<VodResponse> page = vodDao.getPageList(condition);
+        Page<VodListResponse> page = vodDao.getPageList(condition);
         return new SearchResponse<>(page.getContent(), page.getTotalElements()).contentJsonNameTo(getType());
     }
 
