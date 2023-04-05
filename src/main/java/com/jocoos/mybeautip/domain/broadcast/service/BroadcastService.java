@@ -1,6 +1,7 @@
 package com.jocoos.mybeautip.domain.broadcast.service;
 
 import com.jocoos.mybeautip.client.aws.s3.AwsS3Handler;
+import com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.*;
@@ -37,10 +38,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
-import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.ACTIVE_STATUSES;
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.getSearchStatuses;
-import static org.springframework.data.domain.Sort.Direction.ASC;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -79,12 +78,12 @@ public class BroadcastService {
                                                Long cursor,
                                                int size,
                                                String tokenUsername) {
-        Sort defaultSort = SORTED_STATUS.getSort(ASC);
+        Sort sort = BroadcastSortField.getSortBy(status);
         BroadcastSearchCondition condition = BroadcastSearchCondition.builder()
                 .statuses(getStatuses(status))
                 .day(getDay(localDate))
                 .cursor(cursor)
-                .pageable(PageRequest.of(0, size, defaultSort))
+                .pageable(PageRequest.of(0, size, sort))
                 .build();
         List<BroadcastSearchResult> searchResults = broadcastDao.getList(condition);
         Map<Long, BroadcastRelationInfo> relationInfoMap = relationService.getRelationInfoMap(tokenUsername, searchResults);

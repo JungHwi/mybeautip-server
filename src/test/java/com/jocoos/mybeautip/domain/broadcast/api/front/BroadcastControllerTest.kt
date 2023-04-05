@@ -1,6 +1,6 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front
 
-import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
+import com.jocoos.mybeautip.domain.broadcast.*
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastReportType
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.CANCEL
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastCreateRequest
@@ -93,28 +93,7 @@ class BroadcastControllerTest(
                         .attributes(getZonedDateFormat()).optional(),
                     fieldWithPath("notice").type(STRING).description("공지사항. 최대 100자").optional()
                 ),
-                responseFields(
-                    fieldWithPath("id").type(NUMBER).description("방송 아이디"),
-                    fieldWithPath("status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("url").type(STRING).description("방송 URL").optional(),
-                    fieldWithPath("title").type(STRING).description("타이틀"),
-                    fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
-                    fieldWithPath("notice").type(STRING).description("공지사항").optional(),
-                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
-                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
-                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
-                    fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
-                    fieldWithPath("heart_count").type(NUMBER).description("하트수"),
-                    fieldWithPath("started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),
-                    fieldWithPath("category").type(OBJECT).description("카테고리 정보"),
-                    fieldWithPath("category.id").type(NUMBER).description("카테고리 아이디"),
-                    fieldWithPath("category.title").type(STRING).description("카테고리 타이틀"),
-                    fieldWithPath("created_by").type(OBJECT).description("진행자 정보"),
-                    fieldWithPath("created_by.id").type(NUMBER).description("진행자 회원 아이디"),
-                    fieldWithPath("created_by.email").type(STRING).description("진행자 회원 이메일").optional(),
-                    fieldWithPath("created_by.username").type(STRING).description("진행자 닉네임"),
-                    fieldWithPath("created_by.avatar_url").type(STRING).description("진행자 아바타 URL"),
-                )
+                responseFields(broadcastResponseWithCreatedBy())
             )
         )
     }
@@ -141,29 +120,10 @@ class BroadcastControllerTest(
                         .attributes(getLocalDateFormat()).optional(),
                     parameterWithName("size").description("페이지 사이즈").attributes(getDefault(5)).optional()
                 ),
-                responseFields(
-                    fieldWithPath("next_cursor").type(STRING).description("다음 커서. 방송 아이디"),
-                    fieldWithPath("content").type(ARRAY).description("방송 목록"),
-                    fieldWithPath("content.[].id").type(NUMBER).description("방송 아이디"),
-                    fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("content.[].url").type(STRING).description("방송 URL").optional(),
-                    fieldWithPath("content.[].title").type(STRING).description("타이틀"),
-                    fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),
-                    fieldWithPath("content.[].viewer_count").type(NUMBER).description("시청자수"),
-                    fieldWithPath("content.[].heart_count").type(NUMBER).description("좋아요수"),
-                    fieldWithPath("content.[].started_at").type(STRING).description("시작 시간")
-                        .attributes(getZonedDateFormat()),
-                    fieldWithPath("content.[].category").type(OBJECT).description("카테고리 정보"),
-                    fieldWithPath("content.[].category.id").type(NUMBER).description("카테고리 ID"),
-                    fieldWithPath("content.[].category.title").type(STRING).description("카테고리 타이틀"),
-                    fieldWithPath("content.[].created_by").type(OBJECT).description("진행자 정보"),
-                    fieldWithPath("content.[].created_by.id").type(NUMBER).description("진행자 아이디"),
-                    fieldWithPath("content.[].created_by.email").type(STRING).description("진행자 이메일").optional(),
-                    fieldWithPath("content.[].created_by.username").type(STRING).description("진행자 닉네임"),
-                    fieldWithPath("content.[].created_by.avatar_url").type(STRING).description("진행자 아바타 URL"),
-                    fieldWithPath("content.[].relation_info").type(OBJECT).description("요청자 연관 정보"),
-                    fieldWithPath("content.[].relation_info.is_notify_needed").type(BOOLEAN).description("요청자 연관 정보 - 알림 필요 여부"),
-                )
+               responseFields(
+                   fieldWithPath("next_cursor").type(STRING).description("다음 커서. 방송 아이디"),
+                   fieldWithPath("content").type(ARRAY).description("방송 목록"))
+                   .and(broadcastListResponse("content.[]."))
             )
         )
     }
@@ -184,35 +144,7 @@ class BroadcastControllerTest(
                 pathParameters(
                     parameterWithName("broadcast_id").description("방송 ID")
                 ),
-                responseFields(
-                    fieldWithPath("id").type(NUMBER).description("방송 아이디"),
-                    fieldWithPath("status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("url").type(STRING).description("방송 URL").optional(),
-                    fieldWithPath("title").type(STRING).description("타이틀"),
-                    fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
-                    fieldWithPath("notice").type(STRING).description("공지사항").optional(),
-                    fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
-                    fieldWithPath("heart_count").type(NUMBER).description("하트수"),
-                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
-                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
-                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
-                    fieldWithPath("started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),
-                    fieldWithPath("category").type(OBJECT).description("카테고리 정보"),
-                    fieldWithPath("category.id").type(NUMBER).description("카테고리 아이디"),
-                    fieldWithPath("category.title").type(STRING).description("카테고리 타이틀"),
-                    fieldWithPath("created_by").type(OBJECT).description("진행자 정보"),
-                    fieldWithPath("created_by.id").type(NUMBER).description("진행자 회원 아이디"),
-                    fieldWithPath("created_by.email").type(STRING).description("진행자 회원 이메일").optional(),
-                    fieldWithPath("created_by.username").type(STRING).description("진행자 닉네임"),
-                    fieldWithPath("created_by.avatar_url").type(STRING).description("진행자 아바타 URL"),
-                    fieldWithPath("pin_message").type(OBJECT).description("고정 메세지 정보").optional(),
-                    fieldWithPath("pin_message.message_id").type(NUMBER).description("고정 메세지 ID"),
-                    fieldWithPath("pin_message.message").type(STRING).description("고정 메세지 내용"),
-                    fieldWithPath("pin_message.created_by").type(OBJECT).description("고정 메세지 작성자 정보"),
-                    fieldWithPath("pin_message.created_by.id").type(NUMBER).description("고정 메세지 작성자 ID"),
-                    fieldWithPath("pin_message.created_by.username").type(STRING).description("고정 메세지 작성자 닉네임"),
-                    fieldWithPath("pin_message.created_by.avatar_url").type(STRING).description("고정 메세지 작성자 아바타 URL"),
-                )
+                responseFields(broadcastResponseWithCreatedByWithPinMessage())
             )
         )
     }
@@ -319,23 +251,7 @@ class BroadcastControllerTest(
                     fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
                     fieldWithPath("notice").type(STRING).description("공지사항").optional()
                 ),
-                responseFields(
-                    fieldWithPath("id").type(NUMBER).description("방송 아이디"),
-                    fieldWithPath("status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("url").type(STRING).description("방송 URL").optional(),
-                    fieldWithPath("title").type(STRING).description("타이틀"),
-                    fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
-                    fieldWithPath("notice").type(STRING).description("공지사항").optional(),
-                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
-                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
-                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
-                    fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
-                    fieldWithPath("heart_count").type(NUMBER).description("하트수"),
-                    fieldWithPath("started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),
-                    fieldWithPath("category").type(OBJECT).description("카테고리 정보"),
-                    fieldWithPath("category.id").type(NUMBER).description("카테고리 아이디"),
-                    fieldWithPath("category.title").type(STRING).description("카테고리 타이틀")
-                )
+                responseFields(broadcastResponse())
             )
         )
     }
@@ -364,23 +280,7 @@ class BroadcastControllerTest(
                 requestFields(
                     fieldWithPath("status").type(STRING).description(generateLinkCode(BROADCAST_STATUS) + " LIVE, CANCEL, END 요청 가능")
                 ),
-                responseFields(
-                    fieldWithPath("id").type(NUMBER).description("방송 아이디"),
-                    fieldWithPath("status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("url").type(STRING).description("방송 URL").optional(),
-                    fieldWithPath("title").type(STRING).description("타이틀"),
-                    fieldWithPath("thumbnail_url").type(STRING).description("썸네일 URL"),
-                    fieldWithPath("notice").type(STRING).description("공지사항").optional(),
-                    fieldWithPath("can_chat").type(BOOLEAN).description("채팅 가능 여부"),
-                    fieldWithPath("is_sound_on").type(BOOLEAN).description("사운드 여부"),
-                    fieldWithPath("is_screen_show").type(BOOLEAN).description("화면 표시 여부"),
-                    fieldWithPath("viewer_count").type(NUMBER).description("시청자수"),
-                    fieldWithPath("heart_count").type(NUMBER).description("하트수"),
-                    fieldWithPath("started_at").type(STRING).description("시작 시간").attributes(getZonedDateFormat()),
-                    fieldWithPath("category").type(OBJECT).description("카테고리 정보"),
-                    fieldWithPath("category.id").type(NUMBER).description("카테고리 아이디"),
-                    fieldWithPath("category.title").type(STRING).description("카테고리 타이틀")
-                )
+                responseFields(broadcastResponse())
             )
         )
     }

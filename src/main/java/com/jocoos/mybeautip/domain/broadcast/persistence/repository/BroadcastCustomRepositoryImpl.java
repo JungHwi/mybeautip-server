@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
@@ -28,16 +29,17 @@ import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcas
 import static com.jocoos.mybeautip.domain.broadcast.persistence.domain.QBroadcastPinMessage.broadcastPinMessage;
 import static com.jocoos.mybeautip.member.QMember.member;
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
+import static org.springframework.data.domain.Sort.Direction.ASC;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Repository
 public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository {
 
-    private static final String TUPLE_WITH_THREE_PARAMS = "({0}, {1}, {2})";
+    private static final String TUPLE_WITH_TWO_PARAMS = "({0}, {1})";
     private static final StringTemplate STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION = stringTemplate(
-            TUPLE_WITH_THREE_PARAMS,
+            TUPLE_WITH_TWO_PARAMS,
             broadcast.startedAt,
-            broadcast.createdAt,
             broadcast.id);
 
     private final ExtendedQuerydslJpaRepository<Broadcast, Long> repository;
@@ -50,7 +52,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
     public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
         return repository.query(query ->
                 getSearchResult(baseConditionQuery(query, condition))
-                        .where(cursor(condition.cursor()))
+                        .where(cursor(condition.cursor(), getStartedAtDirection(condition.sort())))
                         .orderBy(getOrders(condition.sort()))
                         .offset(condition.offset())
                         .limit(condition.size())
@@ -143,7 +145,7 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                         inStatus(condition.statuses()),
                         isReported(condition.isReported()),
                         eqMemberId(condition.memberId()),
-                        cursor(condition.cursor())
+                        cursor(condition.cursor(), getStartedAtDirection(condition.sort()))
                 );
     }
 
@@ -159,30 +161,47 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
     // 커서 기반 페이지네이션과 유니크하지 않은 컬럼 정렬을 동시에 하기 위해 튜플 비교를 한다
     // FIXME: ASC 정렬일 경우에만 동작함 DESC, ASC 일 경우 나눠야함
-    private BooleanExpression cursor(Long cursor) {
+    private BooleanExpression cursor(Long cursor, Direction startedAtDirection) {
         if (cursor == null) {
             return null;
         }
 
         Tuple cursorValues = repository.query(query -> query
-                .select(broadcast.sortedStatus, broadcast.startedAt, broadcast.createdAt)
+                .select(broadcast.sortedStatus, broadcast.startedAt, broadcast.id)
                 .from(broadcast)
                 .where(eqId(cursor))
                 .fetchOne());
 
         StringTemplate cursorValuesTuple = stringTemplate(
-                TUPLE_WITH_THREE_PARAMS,
+                TUPLE_WITH_TWO_PARAMS,
                 cursorValues.get(broadcast.startedAt),
-                cursorValues.get(broadcast.createdAt),
                 cursor);
-
-        BooleanExpression isBroadcastTupleGreaterThanCursorValuesTuple =
-                STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION.gt(cursorValuesTuple);
 
         Integer sortedStatus = cursorValues.get(broadcast.sortedStatus);
 
-        return broadcast.sortedStatus.lt(sortedStatus)
-                .or(broadcast.sortedStatus.eq(sortedStatus).and(isBroadcastTupleGreaterThanCursorValuesTuple));
+        if (startedAtDirection.isAscending()) {
+            BooleanExpression isBroadcastTupleLesserThanCursorValuesTuple =
+                    STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION.gt(cursorValuesTuple);
+
+            return broadcast.sortedStatus.gt(sortedStatus)
+                    .or(broadcast.sortedStatus.eq(sortedStatus).and(isBroadcastTupleLesserThanCursorValuesTuple));
+        }
+
+        BooleanExpression isBroadcastTupleLesserThanCursorValuesTuple =
+                STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION.lt(cursorValuesTuple);
+
+
+        return broadcast.sortedStatus.gt(sortedStatus)
+                .or(broadcast.sortedStatus.eq(sortedStatus).and(isBroadcastTupleLesserThanCursorValuesTuple));
+    }
+
+    private Direction getStartedAtDirection(Sort sort) {
+        if (sort == null) return DESC;
+        return sort.stream()
+                .filter(s -> "startedAt".equals(s.getProperty()))
+                .map(Sort.Order::getDirection)
+                .findAny()
+                .orElse(ASC);
     }
 
     private BooleanExpression searchByKeyword(SearchOption searchOption) {
