@@ -42,6 +42,7 @@ spring:
       path: /docs/graphiql
     schema:
       printer.enabled: true
+    path: /admin/graphql
   jpa:
     properties:
       hibernate:

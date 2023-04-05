@@ -1,21 +1,25 @@
 package com.jocoos.mybeautip.domain.vod.service;
 
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastKey;
+import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.domain.vod.dto.VodInput;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.Vod;
 import com.jocoos.mybeautip.domain.vod.persistence.domain.VodReport;
 import com.jocoos.mybeautip.domain.vod.service.dao.VodDao;
 import com.jocoos.mybeautip.domain.vod.service.dao.VodReportDao;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
-import com.jocoos.mybeautip.domain.member.service.dao.MemberDao;
 import com.jocoos.mybeautip.global.wrapper.PageResponse;
 import com.jocoos.mybeautip.member.Member;
+import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.jocoos.mybeautip.global.util.ParentChildMapUtil.parentChildListMapFrom;
 import static com.jocoos.mybeautip.global.util.ParentChildMapUtil.parentChildMapFrom;
@@ -25,6 +29,7 @@ import static com.jocoos.mybeautip.global.util.ParentChildMapUtil.parentChildMap
 public class AdminVodGraphqlService {
 
     private final VodDao vodDao;
+    private final VodFFLService fflService;
     private final VodReportDao reportDao;
     private final MemberDao memberDao;
 
@@ -74,5 +79,11 @@ public class AdminVodGraphqlService {
                 memberDao::getMembers,
                 Member::getId
         );
+    }
+
+    public Map<Vod, BroadcastKey> getVodVodKeyMap(List<Vod> vodList) {
+        MyBeautipUserDetails userDetails = (MyBeautipUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return vodList.stream()
+                .collect(Collectors.toMap(vod -> vod, vod -> fflService.getVodKey(userDetails.getUsername(), vod)));
     }
 }
