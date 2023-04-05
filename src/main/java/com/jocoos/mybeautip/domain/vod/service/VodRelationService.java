@@ -23,17 +23,22 @@ public class VodRelationService {
 
     private final ScrapDao scrapDao;
 
+
+    // If Need Immutable, Change This Method To Make Another List
     @Transactional(readOnly = true)
-    public Map<Long, VodRelationInfo> getRelationInfoMap(String tokenUsername, List<VodListResponse> results) {
+    public List<VodListResponse> setRelationsAndGet(List<VodListResponse> results, String tokenUsername) {
         Set<Long> ids = EntityUtil.extractLongSet(results, VodListResponse::getId);
+        Map<Long, VodRelationInfo> relationInfoMap = getRelationInfoMap(tokenUsername, ids);
+        results.forEach(response -> response.setRelationInfo(relationInfoMap.get(response.getId())));
+        return results;
+    }
 
-        if (MemberUtil.isGuest(tokenUsername)) {
-            return MapUtil.toIdentityMap(ids, id -> new VodRelationInfo(false));
-        }
-
-        List<Scrap> scraps = scrapDao.getScraps(VOD, Long.parseLong(tokenUsername));
-        Set<Long> scrapVodIdList = EntityUtil.extractLongSet(scraps, Scrap::getRelationId);
-        return MapUtil.toIdentityMap(ids, id -> new VodRelationInfo(scrapVodIdList.contains(id)));
+    @Transactional(readOnly = true)
+    public List<VodListResponse> setRelationsAndGet(List<VodListResponse> results, Long memberId) {
+        Set<Long> ids = EntityUtil.extractLongSet(results, VodListResponse::getId);
+        Map<Long, VodRelationInfo> relationInfoMap = getRelationInfoMapForMember(memberId, ids);
+        results.forEach(response -> response.setRelationInfo(relationInfoMap.get(response.getId())));
+        return results;
     }
 
     @Transactional(readOnly = true)
@@ -44,5 +49,18 @@ public class VodRelationService {
 
         boolean isScrap = scrapDao.isScrap(VOD, Long.parseLong(tokenUsername), vodId);
         return new VodRelationInfo(isScrap);
+    }
+
+    private Map<Long, VodRelationInfo> getRelationInfoMap(String tokenUsername, Set<Long> ids) {
+        if (MemberUtil.isGuest(tokenUsername)) {
+            return MapUtil.toIdentityMap(ids, id -> new VodRelationInfo(false));
+        }
+        return getRelationInfoMapForMember(Long.parseLong(tokenUsername), ids);
+    }
+
+    private Map<Long, VodRelationInfo> getRelationInfoMapForMember(Long memberId, Set<Long> ids) {
+        List<Scrap> scraps = scrapDao.getScraps(VOD, memberId);
+        Set<Long> scrapVodIdList = EntityUtil.extractLongSet(scraps, Scrap::getRelationId);
+        return MapUtil.toIdentityMap(ids, id -> new VodRelationInfo(scrapVodIdList.contains(id)));
     }
 }

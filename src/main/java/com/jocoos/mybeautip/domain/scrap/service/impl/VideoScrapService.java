@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.member.dto.MyScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.ScrapTypeService;
+import com.jocoos.mybeautip.domain.scrap.vo.ScrapTypeCondition;
 import com.jocoos.mybeautip.video.LegacyVideoService;
 import com.jocoos.mybeautip.video.Video;
 import com.jocoos.mybeautip.video.Visibility;
@@ -31,7 +32,8 @@ public class VideoScrapService implements ScrapTypeService<CommunityResponse> {
 
     // FIXME: Make Support For Current Logic
     @Transactional(readOnly = true)
-    public List<MyScrapResponse<CommunityResponse>> getScrapInfo(List<Scrap> scrapList) {
+    public List<MyScrapResponse<CommunityResponse>> getScrapInfo(ScrapTypeCondition condition) {
+        List<Scrap> scrapList = condition.scraps();
         List<Long> ids = scrapList.stream()
                 .map(Scrap::getRelationId)
                 .collect(Collectors.toList());

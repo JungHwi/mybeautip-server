@@ -6,6 +6,7 @@ import com.jocoos.mybeautip.domain.search.service.DomainSearchService;
 import com.jocoos.mybeautip.domain.search.vo.KeywordSearchRequest;
 import com.jocoos.mybeautip.domain.vod.code.VodSortField;
 import com.jocoos.mybeautip.domain.vod.dto.VodListResponse;
+import com.jocoos.mybeautip.domain.vod.service.VodRelationService;
 import com.jocoos.mybeautip.domain.vod.service.dao.VodDao;
 import com.jocoos.mybeautip.domain.vod.vo.VodSearchCondition;
 import com.jocoos.mybeautip.global.vo.CursorPaging;
@@ -27,6 +28,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 public class VodSearchService implements DomainSearchService<VodListResponse> {
 
     private final VodDao vodDao;
+    private final VodRelationService relationService;
 
     @Override
     public SearchType getType() {
@@ -46,6 +48,7 @@ public class VodSearchService implements DomainSearchService<VodListResponse> {
                 .pageable(pageable)
                 .build();
         Page<VodListResponse> page = vodDao.getPageList(condition);
+        relationService.setRelationsAndGet(page.getContent(), request.tokenUsername());
         return new SearchResponse<>(page.getContent(), page.getTotalElements()).contentJsonNameTo(getType());
     }
 

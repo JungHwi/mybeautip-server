@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.domain.scrap.dto.ScrapRequest;
 import com.jocoos.mybeautip.domain.scrap.dto.ScrapResponse;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.dao.ScrapDao;
+import com.jocoos.mybeautip.domain.scrap.vo.ScrapTypeCondition;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.wrapper.CursorInterface;
 import com.jocoos.mybeautip.member.LegacyMemberService;
@@ -51,7 +52,7 @@ public class ScrapService {
             return List.of();
         }
         ScrapTypeService<T> scrapTypeService = scrapTypeFactory.get(type);
-        return scrapTypeService.getScrapInfo(scrapList);
+        return scrapTypeService.getScrapInfo(new ScrapTypeCondition(scrapList, memberId));
     }
 
     @Transactional(readOnly = true)

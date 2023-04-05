@@ -9,6 +9,7 @@ import com.jocoos.mybeautip.domain.community.service.dao.CommunityDao;
 import com.jocoos.mybeautip.domain.scrap.code.ScrapType;
 import com.jocoos.mybeautip.domain.scrap.persistence.domain.Scrap;
 import com.jocoos.mybeautip.domain.scrap.service.ScrapTypeService;
+import com.jocoos.mybeautip.domain.scrap.vo.ScrapTypeCondition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,8 @@ public class CommunityScrapService implements ScrapTypeService<CommunityResponse
     }
 
     @Override
-    public List<MyScrapResponse<CommunityResponse>> getScrapInfo(List<Scrap> scrapList) {
+    public List<MyScrapResponse<CommunityResponse>> getScrapInfo(ScrapTypeCondition condition) {
+        List<Scrap> scrapList = condition.scraps();
         List<Long> ids = scrapList.stream()
                 .map(Scrap::getRelationId)
                 .collect(Collectors.toList());

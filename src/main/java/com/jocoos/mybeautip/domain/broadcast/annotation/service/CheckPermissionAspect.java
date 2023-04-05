@@ -7,6 +7,7 @@ import com.jocoos.mybeautip.global.code.PermissionType;
 import com.jocoos.mybeautip.global.exception.AccessDeniedException;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
 import com.jocoos.mybeautip.global.exception.InternalServerException;
+import com.jocoos.mybeautip.member.Member;
 import com.jocoos.mybeautip.security.MyBeautipUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -90,7 +91,11 @@ public class CheckPermissionAspect {
 
     private long getCurrentMemberId() {
         if (currentPrincipal() instanceof MyBeautipUserDetails userDetails) {
-            return userDetails.getMember().getId();
+            Member member = userDetails.getMember();
+            if (member == null) {
+                throw new AccessDeniedException("Guest Not Allowed");
+            }
+            return member.getId();
         }
         throw new InternalServerException(UNAUTHORIZED, "사실 이 에러는 뜨면 안됨. 고치자");
     }

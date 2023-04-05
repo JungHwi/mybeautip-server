@@ -155,7 +155,9 @@ class ScrapControllerTest(
                     fieldWithPath("content.[].member.id").type(NUMBER).description("회원 아이디"),
                     fieldWithPath("content.[].member.email").type(STRING).description("회원 이메일").optional(),
                     fieldWithPath("content.[].member.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("content.[].member.avatar_url").type(STRING).description("회원 아바타 URL")
+                    fieldWithPath("content.[].member.avatar_url").type(STRING).description("회원 아바타 URL"),
+                    fieldWithPath("content.[].relation_info").type(OBJECT).description("요청자 연관 정보"),
+                    fieldWithPath("content.[].relation_info.is_scrap").type(BOOLEAN).description("요청자 연관 정보 - 스크랩 여부"),
                 )
             )
         )
