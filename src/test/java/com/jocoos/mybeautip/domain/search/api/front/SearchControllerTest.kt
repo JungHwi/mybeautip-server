@@ -345,7 +345,9 @@ class SearchControllerTest(
                     fieldWithPath("vod.[].member.id").type(NUMBER).description("회원 아이디"),
                     fieldWithPath("vod.[].member.email").type(STRING).description("회원 이메일").optional(),
                     fieldWithPath("vod.[].member.username").type(STRING).description("회원 닉네임"),
-                    fieldWithPath("vod.[].member.avatar_url").type(STRING).description("회원 아바타 URL")
+                    fieldWithPath("vod.[].member.avatar_url").type(STRING).description("회원 아바타 URL"),
+                    fieldWithPath("vod.[].relation_info").type(OBJECT).description("요청자 연관 정보"),
+                    fieldWithPath("vod.[].relation_info.is_scrap").type(BOOLEAN).description("요청자 연관 정보 - 스크랩 여부"),
                 )
             )
         )
