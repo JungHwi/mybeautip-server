@@ -1,0 +1,5 @@
+:doctype: book
+:icons: font
+
+[[scrap_type]]
+include::{snippets}/common-doc-controller-test/enums/custom-response-fields-scrap_type.adoc[]

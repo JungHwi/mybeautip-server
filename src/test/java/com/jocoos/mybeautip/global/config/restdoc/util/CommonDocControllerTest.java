@@ -275,6 +275,11 @@ public class CommonDocControllerTest extends RestDocsIntegrationTestSupport {
                                 attributes(key("title").value("VodSortField")),
                                 enumConvertFieldDescriptor((enumDocs.getVodSortField()))
                         ),
+                        // Vod
+                        customResponseFields("custom-response", beneathPath("data.scrap_type").withSubsectionId("scrap_type"),
+                                attributes(key("title").value("ScrapType")),
+                                enumConvertFieldDescriptor((enumDocs.getScrapType()))
+                        ),
                         // FFL
                         customResponseFields("custom-response", beneathPath("data.ffl_stream_key_state").withSubsectionId("ffl_stream_key_state"),
                                 attributes(key("title").value("FFLStreamKeyState")),
