@@ -15,6 +15,7 @@ type Vod {
     liveHeartCount: Int!
     createdAt: String!
     member: Member!
+    vodKey: VodKey!
     reports: [VodReport]
 }
 
@@ -30,6 +31,13 @@ type Member {
     email: String
     username: String!
     avatarUrl: String!
+}
+
+type VodKey {
+    gossipToken: String!
+    channelKey: String!
+    appId: String!
+    createdLiveAt: String!
 }
 
 type Query {

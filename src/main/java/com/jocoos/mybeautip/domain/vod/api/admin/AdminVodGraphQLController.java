@@ -1,5 +1,6 @@
 package com.jocoos.mybeautip.domain.vod.api.admin;
 
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastKey;
 import com.jocoos.mybeautip.domain.vod.dto.PagingFilter;
 import com.jocoos.mybeautip.domain.vod.dto.SortFilter;
 import com.jocoos.mybeautip.domain.vod.dto.VodFilter;
@@ -64,9 +65,9 @@ public class AdminVodGraphQLController {
         return service.getVodReportReporterMap(reports);
     }
 
-    @BatchMapping(typeName = "Vod", field = "member")
-    public Map<Vod, Member> member(List<Vod> vodList) {
-        return service.getVodMemberMap(vodList);
+    @BatchMapping(typeName = "Vod", field = "vodKey")
+    public Map<Vod, BroadcastKey> vodKey(List<Vod> vodList) {
+        return service.getVodVodKeyMap(vodList);
     }
 }
 
