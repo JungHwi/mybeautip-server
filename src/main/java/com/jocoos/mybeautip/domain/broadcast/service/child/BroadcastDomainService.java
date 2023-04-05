@@ -43,9 +43,9 @@ public class BroadcastDomainService {
     @Transactional
     public Broadcast create(BroadcastCreateRequest request, long creatorId) {
         validIsMemberStartAnotherLiveBroadcast(creatorId, request.getIsStartNow());
+        validIsMemberHaveScheduledBroadcastAtSameDate(creatorId, request.getIsStartNow(), request.getStartedAt());
         BroadcastCategory category = categoryDao.getCategory(request.getCategoryId());
         Broadcast broadcast = converter.toEntity(request, category, creatorId);
-
         ExternalBroadcastInfo externalInfo = fflService.createVideoRoom(broadcast);
         broadcast.updateVideoAndChannelKey(externalInfo.videoKey(), externalInfo.channelKey());
         return broadcastDao.save(broadcast);
@@ -154,6 +154,14 @@ public class BroadcastDomainService {
     private void validIsMemberStartAnotherLiveBroadcast(long creatorId, boolean isStartNow) {
         if (isStartNow && broadcastDao.isCreatorLiveNow(creatorId)) {
             throw new BadRequestException("Can't Start Now If Already Live, Member Id :" + creatorId);
+        }
+    }
+
+    private void validIsMemberHaveScheduledBroadcastAtSameDate(long creatorId,
+                                                               boolean isStartNow,
+                                                               @Nullable ZonedDateTime startedAt) {
+        if (!isStartNow && broadcastDao.isCreatorHaveLiveIn(creatorId, startedAt)) {
+            throw new BadRequestException("Member Already Has Scheduled Broadcast At : " + startedAt);
         }
     }
 

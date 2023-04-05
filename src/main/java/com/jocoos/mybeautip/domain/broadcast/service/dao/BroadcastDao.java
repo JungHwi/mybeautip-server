@@ -63,6 +63,11 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
+    public boolean isCreatorHaveLiveIn(Long memberId, ZonedDateTime startedAt) {
+        return repository.existsByMemberIdAndStartedAtAndStatusIn(memberId, startedAt, ACTIVE_STATUSES);
+    }
+
+    @Transactional(readOnly = true)
     public List<BroadcastSearchResult> getList(BroadcastSearchCondition condition) {
         return repository.getList(condition);
     }
