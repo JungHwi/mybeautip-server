@@ -58,6 +58,7 @@ public class BroadcastController {
         return service.getStatistics(broadcastId);
     }
 
+    @CheckPermission({INFLUENCER})
     @PatchMapping("/1/broadcast/{broadcastId}")
     public BroadcastResponse edit(@PathVariable long broadcastId,
                                   @RequestBody @Valid BroadcastEditRequest request,
@@ -70,6 +71,7 @@ public class BroadcastController {
         return service.getBroadcastDateList(KOREA_ZONED_ID, Pageable.ofSize(size));
     }
 
+    @CheckPermission({INFLUENCER})
     @PatchMapping("/1/broadcast/{broadcastId}/status")
     public BroadcastResponse changeStatus(
             @PathVariable long broadcastId,

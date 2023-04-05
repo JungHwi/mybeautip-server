@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.scrap.code.ScrapType.VOD;
 import static com.jocoos.mybeautip.global.exception.ErrorCode.*;
@@ -57,10 +56,8 @@ public class VodService {
                 .pageable(pageable)
                 .isVisible(true)
                 .build();
-        List<VodListResponse> responses = vodDao.getListWithMember(condition);
-        Map<Long, VodRelationInfo> relationInfoMap = relationService.getRelationInfoMap(tokenUsername, responses);
-        responses.forEach(response -> response.setRelationInfo(relationInfoMap.get(response.getId())));
-        return responses;
+        List<VodListResponse> result = vodDao.getListWithMember(condition);
+        return relationService.setRelationsAndGet(result, tokenUsername);
     }
 
     @Transactional(readOnly = true)
