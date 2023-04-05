@@ -38,6 +38,7 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
     boolean existsByIdAndMemberId(long broadcastId, long memberId);
 
     boolean existsByStatusAndMemberId(BroadcastStatus status, Long memberId);
+    boolean existsByMemberIdAndStartedAtAndStatusIn(Long memberId, ZonedDateTime startedAt, Collection<BroadcastStatus> statuses);
 
     @Query("select distinct b.startedAt from Broadcast b where b.startedAt > now() order by b.startedAt asc")
     Slice<ZonedDateTime> findAllStartedAt(Pageable pageable);

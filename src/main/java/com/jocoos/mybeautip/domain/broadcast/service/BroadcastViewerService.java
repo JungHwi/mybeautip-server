@@ -115,7 +115,7 @@ public class BroadcastViewerService {
 
     @Transactional
     public void syncViewer() {
-        List<Broadcast> broadcastList = broadcastDao.findByStatusIn(BroadcastStatus.NEED_SYNC_MEMBER_STATUS);
+        List<Broadcast> broadcastList = broadcastDao.findByStatusIn(BroadcastStatus.ACTIVE_STATUSES);
 
         for (Broadcast broadcast : broadcastList) {
             batchBroadcastService.syncViewer(broadcast);

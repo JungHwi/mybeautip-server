@@ -26,7 +26,6 @@ public enum BroadcastStatus implements CodeValue {
     private final boolean canManuallyChange;
 
     public static final List<BroadcastStatus> ACTIVE_STATUSES = List.of(SCHEDULED, READY, LIVE);
-    public static final List<BroadcastStatus> NEED_SYNC_MEMBER_STATUS = List.of(SCHEDULED, READY, LIVE);
 
     private static final Map<BroadcastStatus, Set<BroadcastStatus>> CHANGE_CANDIDATE_MAP = new EnumMap<>(BroadcastStatus.class);
     static {
