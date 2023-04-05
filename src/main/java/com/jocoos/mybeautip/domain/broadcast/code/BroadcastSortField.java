@@ -24,6 +24,16 @@ public enum BroadcastSortField implements CodeValue {
     private final Sort asc;
     private final Sort desc;
 
+    public static Sort getSortBy(BroadcastStatus status) {
+        if (status == null) {
+            return SORTED_STATUS.getSort(ASC);
+        }
+        return switch (status) {
+            case LIVE -> STARTED_AT.getSort(DESC);
+            default -> STARTED_AT.getSort(ASC);
+        };
+    }
+
     public Sort getSort(Direction direction) {
         if (direction.isAscending()) return asc;
         else return desc;
@@ -39,11 +49,10 @@ public enum BroadcastSortField implements CodeValue {
         static final String ID_NAME = "id";
         static final String SORTED_STATUS_NAME = "sortedStatus";
         static final String STARTED_AT_NAME = "startedAt";
-        private static final Sort STARTED_AT_ID_ASC = Sort.by(ASC, STARTED_AT_NAME, ID_NAME);
-        static final Sort SORTED_STATUS_ASC = Sort.by(ASC, SORTED_STATUS_NAME).and(STARTED_AT_ID_ASC);
-        static final Sort SORTED_STATUS_DESC = Sort.by(DESC, SORTED_STATUS_NAME).and(STARTED_AT_ID_ASC);
         static final Sort STARTED_AT_ASC = Sort.by(ASC, STARTED_AT_NAME, ID_NAME);
         static final Sort STARTED_AT_DESC = Sort.by(DESC, STARTED_AT_NAME, ID_NAME);
+        static final Sort SORTED_STATUS_ASC = Sort.by(ASC, SORTED_STATUS_NAME).and(STARTED_AT_DESC);
+        static final Sort SORTED_STATUS_DESC = Sort.by(DESC, SORTED_STATUS_NAME).and(STARTED_AT_DESC);
     }
 }
 
