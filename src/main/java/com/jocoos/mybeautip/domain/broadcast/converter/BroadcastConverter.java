@@ -25,8 +25,6 @@ public abstract class BroadcastConverter {
                 .toList();
     }
 
-    public abstract List<BroadcastListResponse> toMyListResponse(List<BroadcastSearchResult> results);
-
     public abstract BroadcastListResponse toListResponse(BroadcastSearchResult result, BroadcastRelationInfo relationInfo);
 
     public abstract BroadcastCategoryResponse toResponse(BroadcastCategory category);

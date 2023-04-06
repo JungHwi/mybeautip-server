@@ -11,8 +11,10 @@ import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
+import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
+import com.jocoos.mybeautip.global.util.EntityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ import java.util.List;
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLStreamKeyState.ACTIVE;
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE;
 import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LIVE_INACTIVE;
+import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus.READY;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +36,7 @@ import static com.jocoos.mybeautip.client.flipfloplite.code.FFLVideoRoomState.LI
 public class FFLCallbackService {
 
     private final BroadcastDomainService broadcastDomainService;
+    private final BroadcastDao broadcastDao;
     private final FlipFlopLiteService flipFlopLiteService;
     private final BroadcastViewerDao viewerDao;
 
@@ -90,10 +94,10 @@ public class FFLCallbackService {
         FFLDirectMessageRequest request =
                 FFLDirectMessageRequest.ofStreamKeyStateChanged(memberId, currentStreamKeyState);
         List<BroadcastViewer> activeOwners = viewerDao.getActiveOwner(memberId);
-        for (BroadcastViewer owner : activeOwners) {
-            Broadcast ownerActiveBroadcast = owner.getBroadcast();
-            log.debug("broadcast will be live : {}, {}", ownerActiveBroadcast.getId(), ownerActiveBroadcast.getStatus());
-            flipFlopLiteService.directMessage(ownerActiveBroadcast.getVideoKey(), request);
+        List<Long> broadcastIds = EntityUtil.extractLongList(activeOwners, owner -> owner.getBroadcast().getId());
+        List<Broadcast> broadcasts = broadcastDao.getAllByCreatorIdIn(broadcastIds, List.of(READY));
+        for (Broadcast broadcast : broadcasts) {
+            flipFlopLiteService.directMessage(broadcast.getVideoKey(), request);
         }
     }
 

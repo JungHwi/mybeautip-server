@@ -3,6 +3,8 @@ package com.jocoos.mybeautip.domain.member.service.activity.impl;
 import com.jocoos.mybeautip.domain.broadcast.converter.BroadcastConverter;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastListResponse;
 import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastPermission;
+import com.jocoos.mybeautip.domain.broadcast.dto.BroadcastRelationInfo;
+import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastRelationService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastPermissionDao;
 import com.jocoos.mybeautip.domain.broadcast.vo.BroadcastSearchCondition;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.jocoos.mybeautip.domain.broadcast.code.BroadcastSortField.SORTED_STATUS;
 import static org.springframework.data.domain.Sort.Direction.ASC;
@@ -25,6 +28,7 @@ import static org.springframework.data.domain.Sort.Direction.ASC;
 public class BroadcastActivityService implements MyActivityService<BroadcastListResponse> {
 
     private final BroadcastDao broadcastDao;
+    private final BroadcastRelationService relationService;
     private final BroadcastPermissionDao permissionDao;
     private final BroadcastConverter converter;
 
@@ -43,7 +47,8 @@ public class BroadcastActivityService implements MyActivityService<BroadcastList
                 .cursor(request.idCursor())
                 .build();
         List<BroadcastSearchResult> results = broadcastDao.getList(condition);
-        return converter.toMyListResponse(results);
+        Map<Long, BroadcastRelationInfo> relationInfoMap = relationService.getRelationInfoMapForMember(request.member().getId(), results);
+        return converter.toListResponse(results, relationInfoMap);
     }
 
     public void validCanView(Long memberId) {

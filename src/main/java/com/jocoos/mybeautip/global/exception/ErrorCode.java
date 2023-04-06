@@ -121,8 +121,8 @@ public enum ErrorCode implements CodeValue {
     ONLY_ACTIVE_CAN_FIX("활성화된 플랜카드만 고정됨"),
 
     // Broadcast
-    ALREADY_SCHEDULED("이미 예약된 일정이 있음")
-    ;
+    ALREADY_SCHEDULED("이미 예약된 일정이 있음"),
+    ALREADY_LIVE("이미 라이브중임");
 
     private final String description;
 

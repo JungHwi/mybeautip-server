@@ -75,7 +75,7 @@ public class BroadcastViewer {
     public BroadcastViewer grantManager(boolean isManager) {
         if (isManager && type.isAvailableManager()) {
             type = MANAGER;
-        } else if(!isManager) {
+        } else if (!isManager) {
             type = BroadcastViewerType.MEMBER;
         }
 
@@ -119,5 +119,4 @@ public class BroadcastViewer {
     public boolean isManager() {
         return type == MANAGER;
     }
-
 }
