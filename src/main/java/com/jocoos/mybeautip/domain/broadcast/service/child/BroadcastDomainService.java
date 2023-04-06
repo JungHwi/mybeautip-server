@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 
 import static com.jocoos.mybeautip.global.exception.ErrorCode.ALREADY_REPORT;
+import static com.jocoos.mybeautip.global.exception.ErrorCode.ALREADY_SCHEDULED;
 
 @RequiredArgsConstructor
 @Service
@@ -161,7 +162,7 @@ public class BroadcastDomainService {
                                                                boolean isStartNow,
                                                                @Nullable ZonedDateTime startedAt) {
         if (!isStartNow && broadcastDao.isCreatorHaveLiveIn(creatorId, startedAt)) {
-            throw new BadRequestException("Member Already Has Scheduled Broadcast At : " + startedAt);
+            throw new BadRequestException(ALREADY_SCHEDULED, "Member Already Has Scheduled Broadcast At : " + startedAt);
         }
     }
 

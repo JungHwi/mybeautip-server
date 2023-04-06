@@ -73,7 +73,6 @@ fun makeFFLStreamKeyResponse(
     member: FFLMemberInfo? = null,
     videoRoom: FFLVideoRoomResponse? = null,
     liveUrl: String? = null,
-    profile: FFLProfile? = null,
     error: FFLError? = null,
     createdAt: ZonedDateTime? = null,
     lastModifiedAt: ZonedDateTime? = null
@@ -87,7 +86,6 @@ fun makeFFLStreamKeyResponse(
         videoRoom,
         streamKey,
         liveUrl,
-        profile,
         error,
         createdAt,
         lastModifiedAt
