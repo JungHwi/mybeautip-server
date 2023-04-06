@@ -13,7 +13,6 @@ public record FFLStreamKeyResponse(long id,
                                    FFLVideoRoomResponse videoRoom,
                                    String streamKey,
                                    String liveUrl,
-                                   FFLProfile profile,
                                    FFLError error,
                                    ZonedDateTime createdAt,
                                    ZonedDateTime lastModifiedAt) {
