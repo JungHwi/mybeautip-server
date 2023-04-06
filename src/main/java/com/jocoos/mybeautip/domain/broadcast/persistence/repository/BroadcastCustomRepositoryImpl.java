@@ -4,6 +4,7 @@ import com.infobip.spring.data.jpa.ExtendedQuerydslJpaRepository;
 import com.jocoos.mybeautip.domain.broadcast.code.BroadcastStatus;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
 import com.jocoos.mybeautip.domain.broadcast.vo.*;
+import com.jocoos.mybeautip.global.exception.NotFoundException;
 import com.jocoos.mybeautip.global.util.QuerydslUtil;
 import com.jocoos.mybeautip.global.vo.SearchOption;
 import com.querydsl.core.Tuple;
@@ -171,6 +172,11 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
                 .from(broadcast)
                 .where(eqId(cursor))
                 .fetchOne());
+
+        // cursorValues can be null ignore IDE
+        if (cursorValues == null) {
+            throw new NotFoundException("Broadcast Cursor Id Not Found. Id : " + cursor);
+        }
 
         StringTemplate cursorValuesTuple = stringTemplate(
                 TUPLE_WITH_TWO_PARAMS,
