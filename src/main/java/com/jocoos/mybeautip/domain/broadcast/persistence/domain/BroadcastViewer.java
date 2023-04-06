@@ -72,10 +72,14 @@ public class BroadcastViewer {
         return ViewerUsernameUtil.generateUsername(this.sortedUsername);
     }
 
+    public long getBroadcastId() {
+        return broadcast.getId();
+    }
+
     public BroadcastViewer grantManager(boolean isManager) {
         if (isManager && type.isAvailableManager()) {
             type = MANAGER;
-        } else if(!isManager) {
+        } else if (!isManager) {
             type = BroadcastViewerType.MEMBER;
         }
 
@@ -119,5 +123,4 @@ public class BroadcastViewer {
     public boolean isManager() {
         return type == MANAGER;
     }
-
 }
