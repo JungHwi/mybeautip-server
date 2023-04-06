@@ -23,14 +23,22 @@ public class BroadcastRelationService {
 
     @Transactional(readOnly = true)
     public Map<Long, BroadcastRelationInfo> getRelationInfoMap(String tokenUsername, List<BroadcastSearchResult> results) {
-        Set<Long> ids = EntityUtil.extractLongSet(results, BroadcastSearchResult::getId);
-
         if (MemberUtil.isGuest(tokenUsername)) {
-            return MapUtil.toIdentityMap(ids, id -> new BroadcastRelationInfo(false));
+            return getRelationInfoMapForGuest(results);
         }
+        return getRelationInfoMapForMember(Long.parseLong(tokenUsername), results);
+    }
 
-        List<BroadcastNotification> notifications = notificationDao.getNotificationsIn(ids, Long.parseLong(tokenUsername));
+    @Transactional(readOnly = true)
+    public Map<Long, BroadcastRelationInfo> getRelationInfoMapForMember(Long memberId, List<BroadcastSearchResult> results) {
+        Set<Long> ids = EntityUtil.extractLongSet(results, BroadcastSearchResult::getId);
+        List<BroadcastNotification> notifications = notificationDao.getNotificationsIn(ids, memberId);
         Set<Long> notifyBroadcastIds = EntityUtil.extractLongSet(notifications, BroadcastNotification::getBroadcastId);
         return MapUtil.toIdentityMap(ids, id -> new BroadcastRelationInfo(notifyBroadcastIds.contains(id)));
+    }
+
+    private Map<Long, BroadcastRelationInfo> getRelationInfoMapForGuest(List<BroadcastSearchResult> results) {
+        Set<Long> ids = EntityUtil.extractLongSet(results, BroadcastSearchResult::getId);
+        return MapUtil.toIdentityMap(ids, id -> new BroadcastRelationInfo(false));
     }
 }

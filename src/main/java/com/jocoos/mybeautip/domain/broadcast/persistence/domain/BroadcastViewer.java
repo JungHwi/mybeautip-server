@@ -72,10 +72,6 @@ public class BroadcastViewer {
         return ViewerUsernameUtil.generateUsername(this.sortedUsername);
     }
 
-    public long getBroadcastId() {
-        return broadcast.getId();
-    }
-
     public BroadcastViewer grantManager(boolean isManager) {
         if (isManager && type.isAvailableManager()) {
             type = MANAGER;

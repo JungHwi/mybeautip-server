@@ -94,7 +94,7 @@ public class FFLCallbackService {
         FFLDirectMessageRequest request =
                 FFLDirectMessageRequest.ofStreamKeyStateChanged(memberId, currentStreamKeyState);
         List<BroadcastViewer> activeOwners = viewerDao.getActiveOwner(memberId);
-        List<Long> broadcastIds = EntityUtil.extractLongList(activeOwners, BroadcastViewer::getBroadcastId);
+        List<Long> broadcastIds = EntityUtil.extractLongList(activeOwners, owner -> owner.getBroadcast().getId());
         List<Broadcast> broadcasts = broadcastDao.getAllByCreatorIdIn(broadcastIds, List.of(READY));
         for (Broadcast broadcast : broadcasts) {
             flipFlopLiteService.directMessage(broadcast.getVideoKey(), request);
