@@ -1,5 +1,7 @@
 package com.jocoos.mybeautip.domain.member.api.front
 
+import com.jocoos.mybeautip.domain.broadcast.broadcastListResponse
+import com.jocoos.mybeautip.domain.broadcast.broadcastResponseWithCreatedBy
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastCategory
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastCategoryRepository
 import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastRepository
@@ -191,25 +193,8 @@ class MyActivityControllerTest(
                 ),
                 responseFields(
                     fieldWithPath("next_cursor").type(STRING).description("커서 정보"),
-                    fieldWithPath("content").type(ARRAY).description("방송 목록"),
-                    fieldWithPath("content.[].id").type(NUMBER).description("방송 아이디"),
-                    fieldWithPath("content.[].status").type(STRING).description(generateLinkCode(BROADCAST_STATUS)),
-                    fieldWithPath("content.[].url").type(STRING).description("방송 URL").optional(),
-                    fieldWithPath("content.[].title").type(STRING).description("타이틀"),
-                    fieldWithPath("content.[].thumbnail_url").type(STRING).description("썸네일 URL"),
-                    fieldWithPath("content.[].viewer_count").type(NUMBER).description("시청자수"),
-                    fieldWithPath("content.[].heart_count").type(NUMBER).description("좋아요수"),
-                    fieldWithPath("content.[].started_at").type(STRING).description("시작 시간")
-                        .attributes(getZonedDateFormat()),
-                    fieldWithPath("content.[].category").type(OBJECT).description("카테고리 정보"),
-                    fieldWithPath("content.[].category.id").type(NUMBER).description("카테고리 ID"),
-                    fieldWithPath("content.[].category.title").type(STRING).description("카테고리 타이틀"),
-                    fieldWithPath("content.[].created_by").type(OBJECT).description("진행자 정보"),
-                    fieldWithPath("content.[].created_by.id").type(NUMBER).description("진행자 아이디"),
-                    fieldWithPath("content.[].created_by.email").type(STRING).description("진행자 이메일").optional(),
-                    fieldWithPath("content.[].created_by.username").type(STRING).description("진행자 닉네임"),
-                    fieldWithPath("content.[].created_by.avatar_url").type(STRING).description("진행자 아바타 URL"),
-                )
+                    fieldWithPath("content").type(ARRAY).description("방송 목록"))
+                    .and(broadcastListResponse("content.[]."))
             )
         )
     }
