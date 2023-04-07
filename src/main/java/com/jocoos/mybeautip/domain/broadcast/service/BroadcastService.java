@@ -113,7 +113,7 @@ public class BroadcastService {
 
     @Transactional(readOnly = true)
     public BroadcastDateListResponse getBroadcastDateList(ZoneId requestZoneId, Pageable pageable) {
-        List<ZonedDateTime> startedAtList = broadcastDao.getStartedAtList(pageable).getContent();
+        List<ZonedDateTime> startedAtList = broadcastDao.getStartedAtList(ACTIVE_STATUSES, pageable).getContent();
         List<LocalDate> requestZonedLocalDates = startedAtList.stream()
                 .map(time -> time.withZoneSameInstant(requestZoneId).toLocalDate())
                 .distinct()

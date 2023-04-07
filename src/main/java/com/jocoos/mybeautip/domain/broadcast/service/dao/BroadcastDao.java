@@ -83,8 +83,8 @@ public class BroadcastDao {
     }
 
     @Transactional(readOnly = true)
-    public Slice<ZonedDateTime> getStartedAtList(Pageable pageable) {
-        return repository.findAllStartedAt(pageable);
+    public Slice<ZonedDateTime> getStartedAtList(List<BroadcastStatus> statuses, Pageable pageable) {
+        return repository.findAllStartedAt(statuses, pageable);
     }
 
     @Transactional(readOnly = true)

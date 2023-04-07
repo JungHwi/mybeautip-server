@@ -38,7 +38,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository {
 
     private static final String TUPLE_WITH_TWO_PARAMS = "({0}, {1})";
-    private static final StringTemplate STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION = stringTemplate(
+    private static final StringTemplate STARTED_AT_ID_TUPLE_EXPRESSION = stringTemplate(
             TUPLE_WITH_TWO_PARAMS,
             broadcast.startedAt,
             broadcast.id);
@@ -187,14 +187,14 @@ public class BroadcastCustomRepositoryImpl implements BroadcastCustomRepository 
 
         if (startedAtDirection.isAscending()) {
             BooleanExpression isBroadcastTupleLesserThanCursorValuesTuple =
-                    STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION.gt(cursorValuesTuple);
+                    STARTED_AT_ID_TUPLE_EXPRESSION.gt(cursorValuesTuple);
 
             return broadcast.sortedStatus.gt(sortedStatus)
                     .or(broadcast.sortedStatus.eq(sortedStatus).and(isBroadcastTupleLesserThanCursorValuesTuple));
         }
 
         BooleanExpression isBroadcastTupleLesserThanCursorValuesTuple =
-                STARTED_AT_CREATED_AT_ID_TUPLE_EXPRESSION.lt(cursorValuesTuple);
+                STARTED_AT_ID_TUPLE_EXPRESSION.lt(cursorValuesTuple);
 
 
         return broadcast.sortedStatus.gt(sortedStatus)
