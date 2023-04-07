@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jocoos.mybeautip.domain.home.code.SummaryType.TOP_SUMMARY;
+import static com.jocoos.mybeautip.domain.home.code.SummaryType.getCountOfTopSummary;
 
 @RequiredArgsConstructor
 @Component
@@ -42,7 +42,7 @@ public class TopSummary {
     }
 
     private List<CommunityResponse> communitySummaryFrom(Long categoryId, CommunityCategoryType type, Long memberId) {
-        List<SummaryCommunityResult> summaryResult = communityDao.summary(categoryId, type, TOP_SUMMARY.getCount(), memberId);
+        List<SummaryCommunityResult> summaryResult = communityDao.summary(categoryId, type, getCountOfTopSummary(type), memberId);
         List<CommunityResponse> responses = summaryConverter.convert(summaryResult);
         return relationService.setRelationInfo(responses);
     }
