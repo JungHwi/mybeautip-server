@@ -153,7 +153,7 @@ public class BroadcastDomainService {
 
     private void validIsMemberStartAnotherLiveBroadcast(long creatorId, boolean isStartNow) {
         if (isStartNow && broadcastDao.isCreatorLiveNow(creatorId)) {
-            throw new BadRequestException(ALREADY_LIVE, "Can't Start Now If Already Live, Member Id :" + creatorId);
+            throw new BadRequestException(ALREADY_LIVE, "Can't Start Now If Already Live Or Ready, Member Id :" + creatorId);
         }
     }
 

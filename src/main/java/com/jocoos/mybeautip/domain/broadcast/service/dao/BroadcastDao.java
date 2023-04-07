@@ -59,7 +59,7 @@ public class BroadcastDao {
 
     @Transactional(readOnly = true)
     public boolean isCreatorLiveNow(Long memberId) {
-        return repository.existsByStatusAndMemberId(LIVE, memberId);
+        return repository.existsByStatusInAndMemberId(List.of(LIVE, READY), memberId);
     }
 
     @Transactional(readOnly = true)
