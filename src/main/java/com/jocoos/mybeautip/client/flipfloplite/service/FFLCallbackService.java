@@ -9,12 +9,9 @@ import com.jocoos.mybeautip.client.flipfloplite.dto.ExternalBroadcastInfo;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLCallbackData;
 import com.jocoos.mybeautip.client.flipfloplite.dto.FFLDirectMessageRequest;
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast;
-import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer;
 import com.jocoos.mybeautip.domain.broadcast.service.child.BroadcastDomainService;
 import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastDao;
-import com.jocoos.mybeautip.domain.broadcast.service.dao.BroadcastViewerDao;
 import com.jocoos.mybeautip.global.exception.BadRequestException;
-import com.jocoos.mybeautip.global.util.EntityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +35,6 @@ public class FFLCallbackService {
     private final BroadcastDomainService broadcastDomainService;
     private final BroadcastDao broadcastDao;
     private final FlipFlopLiteService flipFlopLiteService;
-    private final BroadcastViewerDao viewerDao;
 
     @Transactional
     public void callback(String requestId, FFLCallbackType type, FFLCallbackData data) {
@@ -93,12 +89,8 @@ public class FFLCallbackService {
         Long memberId = flipFlopLiteService.getMemberIdFrom(data.streamKeyId());
         FFLDirectMessageRequest request =
                 FFLDirectMessageRequest.ofStreamKeyStateChanged(memberId, currentStreamKeyState);
-        List<BroadcastViewer> activeOwners = viewerDao.getActiveOwner(memberId);
-        List<Long> broadcastIds = EntityUtil.extractLongList(activeOwners, owner -> owner.getBroadcast().getId());
-        List<Broadcast> broadcasts = broadcastDao.getAllByCreatorIdIn(broadcastIds, List.of(READY));
-        for (Broadcast broadcast : broadcasts) {
-            flipFlopLiteService.directMessage(broadcast.getVideoKey(), request);
-        }
+        List<Broadcast> readyBroadcasts = broadcastDao.getByMemberIdAndStatus(memberId, READY);
+        readyBroadcasts.forEach(broadcast -> flipFlopLiteService.directMessage(broadcast.getVideoKey(), request));
     }
 
     @Nullable

@@ -146,4 +146,9 @@ public class BroadcastDao {
     public List<Broadcast> getAllByCreatorIdIn(List<Long> memberIds, List<BroadcastStatus> statuses) {
         return repository.findAllByMemberIdInAndStatusIn(memberIds, statuses);
     }
+
+    @Transactional(readOnly = true)
+    public List<Broadcast> getByMemberIdAndStatus(Long memberId, BroadcastStatus status) {
+        return repository.findByMemberIdAndStatus(memberId, status);
+    }
 }

@@ -34,6 +34,7 @@ public interface BroadcastRepository extends ExtendedQuerydslJpaRepository<Broad
     List<Broadcast> findAllByIdIn(List<Long> ids);
 
     List<Broadcast> findAllByMemberIdInAndStatusIn(Collection<Long> memberIds, Collection<BroadcastStatus> statuses);
+    List<Broadcast> findByMemberIdAndStatus(Long memberId, BroadcastStatus status);
 
     boolean existsByIdAndMemberId(long broadcastId, long memberId);
 
