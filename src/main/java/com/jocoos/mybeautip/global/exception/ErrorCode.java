@@ -127,6 +127,10 @@ public enum ErrorCode implements CodeValue {
 
     private final String description;
 
+    public static ErrorCode of(String errorCode) {
+        return ErrorCode.valueOf(errorCode.toUpperCase());
+    }
+
     public String getKey() {
         return this.name().toLowerCase();
     }

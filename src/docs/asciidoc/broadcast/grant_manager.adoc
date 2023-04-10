@@ -1,3 +1,7 @@
 == Grant Manager API
 
 operation::grant_manager[snippets='http-request,path-parameters,request-fields,http-response,response-fields']
+
+== Exception
+include::{snippets}/grant_manager/exception_access_denied-fields.adoc[]
+include::{snippets}/grant_manager/exception_member_not_found-fields.adoc[]

@@ -1,6 +1,5 @@
 package com.jocoos.mybeautip.domain.broadcast.api.front
 
-import com.jocoos.mybeautip.client.flipfloplite.FlipFlopLiteService
 import com.jocoos.mybeautip.domain.broadcast.BroadcastTestSupport
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.Broadcast
 import com.jocoos.mybeautip.domain.broadcast.persistence.domain.BroadcastViewer
@@ -9,7 +8,10 @@ import com.jocoos.mybeautip.domain.broadcast.persistence.repository.BroadcastVie
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentAttributeGenerator.getZonedDateFormat
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.DocUrl.*
 import com.jocoos.mybeautip.global.config.restdoc.util.DocumentLinkGenerator.generateLinkCode
+import com.jocoos.mybeautip.global.config.restdoc.util.ExceptionFieldsSnippet
+import com.jocoos.mybeautip.global.config.restdoc.util.ExceptionFieldsSnippet.exceptionConvertFieldDescriptor
 import com.jocoos.mybeautip.global.dto.single.BooleanDto
+import com.jocoos.mybeautip.global.exception.ErrorCode
 import com.jocoos.mybeautip.member.Member
 import com.jocoos.mybeautip.member.MemberRepository
 import com.jocoos.mybeautip.testutil.fixture.makeBroadcast
@@ -27,8 +29,8 @@ import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
+
 class BroadcastViewerControllerTest(
-    private val flipFlopLiteService: FlipFlopLiteService,
     private val broadcastRepository: BroadcastRepository,
     private val broadcastViewerRepository: BroadcastViewerRepository,
     private val memberRepository: MemberRepository
@@ -135,6 +137,61 @@ class BroadcastViewerControllerTest(
                     fieldWithPath("status").type(JsonFieldType.STRING).description(generateLinkCode(BROADCAST_VIEWER_STATUS)),
                     fieldWithPath("joined_at").type(JsonFieldType.STRING).description("참여 일시").attributes(getZonedDateFormat())
                 ),
+            )
+        )
+    }
+
+    @Test
+    fun grantManager_access_denied() {
+        val errorCode = ErrorCode.ACCESS_DENIED
+
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        val viewer = saveViewer(broadcast = broadcast)
+        val request = BooleanDto(true)
+
+        val result: ResultActions = mockMvc.perform(
+            patch("/api/1/broadcast/{broadcast_id}/viewer/{member_id}/manager", 0, viewer.memberId)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpect(status().is4xxClientError)
+            .andExpect(isErrorCode(errorCode))
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "grant_manager",
+                ExceptionFieldsSnippet(
+                    errorCode.key,
+                    exceptionConvertFieldDescriptor(result, "요청한 유저가 해당 방송의 오너가 아닐때")
+                )
+            )
+        )
+    }
+
+    @Test
+    fun grantManager_member_not_found() {
+        val errorCode = ErrorCode.MEMBER_NOT_FOUND
+
+        val broadcast = saveBroadcast(memberId = defaultInfluencer.id)
+        val request = BooleanDto(true)
+
+        val result: ResultActions = mockMvc.perform(
+            patch("/api/1/broadcast/{broadcast_id}/viewer/{member_id}/manager", broadcast.id, 0)
+                .header(HttpHeaders.AUTHORIZATION, defaultInfluencerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpect(status().is4xxClientError)
+            .andExpect(isErrorCode(errorCode))
+            .andDo(print())
+
+        result.andDo(
+            document(
+                "grant_manager",
+                    ExceptionFieldsSnippet(
+                        "member_not_found",
+                        exceptionConvertFieldDescriptor(result, "대상 유저를 찾을 수 없을때")
+                    )
             )
         )
     }
